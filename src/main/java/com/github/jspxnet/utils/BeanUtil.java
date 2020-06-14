@@ -1,0 +1,860 @@
+/*
+ * Copyright © 2004-2014 chenYuan. All rights reserved.
+ * @Website:wwww.jspx.net
+ * @Mail:39793751@qq.com
+ * author: chenYuan , 陈原
+ * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
+ * @jvm:jdk1.6+  x86/amd64
+ *
+ */
+package com.github.jspxnet.utils;
+
+
+import com.github.jspxnet.json.GsonUtil;
+import com.github.jspxnet.json.JSONArray;
+import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.sioc.util.TypeUtil;
+import com.github.jspxnet.util.CglibProxyUtil;
+import com.github.jspxnet.util.LRUHashMap;
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
+import net.sf.cglib.beans.BeanCopier;
+import net.sf.cglib.beans.BeanMap;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.util.*;
+
+
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * @author chenYuan (mail:39793751@qq.com)
+ * date: 2007-1-7
+ * Time: 19:04:35
+ * com.jspx.jspx.test.utils.BeanUtil
+ */
+@Slf4j
+public class BeanUtil {
+    private final static LRUHashMap<String,BeanCopier> BEAN_COPIER_MAP = new LRUHashMap<>(30);
+    private BeanUtil() {
+
+    }
+
+    /**
+     * 设置属性,性能很差,但容错很好
+     *
+     * @param object     bean对象
+     * @param methodName 方法名称,如果存在set就不加set
+     * @param obj        参数
+     */
+    public static void setSimpleProperty(Object object, String methodName, Object obj) {
+        if (object == null) {
+            throw new NullPointerException(object + " is NULL");
+        }
+        if (!StringUtil.hasLength(methodName)) {
+            return;
+        }
+        //map 的
+        if (object instanceof Map) {
+            Map<String,Object> map = (Map) object;
+            map.put(methodName, obj);
+            return;
+        }
+        if ((object instanceof List) && (obj instanceof List)) {
+            List<Object> list = (List) object;
+            list.addAll((List) obj);
+            return;
+        }
+        if (methodName.contains(".")) {
+            methodName = methodName.substring(methodName.lastIndexOf("."));
+        }
+        if (methodName.startsWith("void")) {
+            methodName = methodName.substring(5).trim();
+        } else if (!methodName.startsWith(ClassUtil.METHOD_NAME_SET)) {
+            methodName = ClassUtil.METHOD_NAME_SET + StringUtil.capitalize(methodName);
+        }
+
+        Class<?> cls = object.getClass();
+        if (CglibProxyUtil.isProxy(cls))
+        {
+            String className = CglibProxyUtil.getClassName(cls);
+            try {
+                cls =  ClassUtil.loadClass(className);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Method method = ClassUtil.getDeclaredMethod(cls, methodName);
+        if (method == null && methodName.startsWith("setIs")) {
+            methodName = ClassUtil.METHOD_NAME_SET + StringUtil.capitalize(methodName.substring(5));
+            method = ClassUtil.getDeclaredMethod(cls, methodName);
+        }
+        if (method!=null)
+        {
+            Type[] types = method.getGenericParameterTypes();
+            if (types.length < 1) {
+                return;
+            }
+            Type aType = types[0];
+            Object[] pObject = new Object[1];
+            try {
+                pObject[0] = getTypeValue(obj, aType);
+                //method.invoke(object, pObject);
+                (new java.beans.Expression(object, methodName, pObject)).execute();
+                /*
+                if (SystemUtil.isAndroid()) {
+                    method.invoke(object, pObject);
+                } else
+                {
+                    (new java.beans.Expression(object, methodName, pObject)).execute();
+                }*/
+            } catch (Exception e) {
+                log.error(object.getClass().getName() + "." + methodName + " setProperty  type=" + aType + " value=" + obj, e);
+                e.printStackTrace();
+            }
+        } else
+        {
+            BeanUtil.setFieldValue(object, methodName, obj);
+        }
+
+    }
+
+    public static void setFieldValue(Object object, String fieldName, Object obj) {
+        if (object == null || !StringUtil.hasLength(fieldName)) {
+            return;
+        }
+
+        //map 的
+        if (object instanceof Map) {
+            Map map = (Map) object;
+            map.put(fieldName, obj);
+            return;
+        }
+        if ((object instanceof List) && (obj instanceof List)) {
+            List list = (List) object;
+            list.addAll((List) obj);
+            return;
+        }
+
+        Class<?> cls = CglibProxyUtil.getClass(object.getClass());
+        Field field = ClassUtil.getDeclaredField(cls, fieldName);
+        if (field == null) {
+            log.debug(object.getClass() + " set field {} not find", fieldName);
+            return;
+        }
+        if (Modifier.isFinal(field.getModifiers()) || field.getModifiers() == 26 || field.getModifiers() == 18) {
+            return;
+        }
+        Type aType = field.getType();
+
+        Object pObject;
+        try {
+            field.setAccessible(true);
+            if (obj != null && aType.getTypeName().equals(cls.getTypeName())) {
+                field.set(object, obj);
+            } else {
+                pObject = getTypeValue(obj, aType);
+                field.set(object, pObject);
+            }
+        } catch (Exception e) {
+            log.error(object.getClass().getName() + "." + fieldName + " setValue  type=" + aType + " value=" + obj, e);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * @param obj 对象
+     * @param cls 类
+     * @param <T> 返回类型
+     * @param <D> 数据
+     * @return 类型转换
+     */
+    public static <T, D> T getTypeValue(D obj, Type cls) {
+        return (T) getTypeValueObject(obj, cls);
+    }
+
+    /**
+     *
+     * @param obj 进入数据
+     * @param aType 类型
+     * @return 类型转换
+     */
+    private static Object getTypeValueObject(Object obj, Type aType) {
+
+        if (aType==null||ClassUtil.isBaseNumberType(aType)&&(obj==null||StringUtil.empty.equals(obj)))
+        {
+            return 0;
+        }
+        if (obj == null) {
+            if (aType.equals(String.class)) {
+                return StringUtil.empty;
+            }
+            if (ClassUtil.isNumberType(aType)) {
+                return 0;
+            }
+            if (aType.equals(JSONArray.class))
+            {
+                return new JSONArray();
+            }
+            if (aType.equals(JSONObject.class))
+            {
+                return new JSONObject();
+            }
+            return null;
+        }
+        if (JSONObject.NULL.equals(obj)) {
+            return null;
+        }
+
+        if (obj.getClass().equals(aType)) {
+            return obj;
+        }
+
+        //如果是泛型
+        if (aType instanceof ParameterizedType && obj instanceof JSONArray)
+        {
+            ParameterizedType ptype = (ParameterizedType)aType;
+            Type rawType = ptype.getRawType();
+            System.out.println("最外层<>前面那个类型 rawType："+rawType.getTypeName());
+            Type type = ptype.getActualTypeArguments()[0];
+            if (rawType.getTypeName().contains("java.util.List")||rawType.getTypeName().contains(".Collection"))
+            {
+                try {
+                    Class<?> cls = Class.forName(type.getTypeName());
+                    JSONArray jsonArray = (JSONArray)obj;
+                    return  GsonUtil.getList(jsonArray.toString(),cls);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (ClassUtil.isArrayType(aType)) {
+                try {
+                    Class<?> cls = Class.forName(type.getTypeName());
+                    JSONArray jsonArray = (JSONArray) obj;
+                    return GsonUtil.getList(jsonArray.toString(), cls).toArray();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+         }
+        if (aType instanceof ParameterizedType && obj instanceof JSONObject)
+        {
+            ParameterizedType ptype = (ParameterizedType)aType;
+            Type rawType = ptype.getRawType();
+            System.out.println("最外层<>前面那个类型 rawType："+rawType.getTypeName());
+            Type type = ptype.getActualTypeArguments()[0];
+            Gson gson = GsonUtil.createGson();
+            JSONObject json = (JSONObject)obj;
+            try {
+                Class<?> cls = Class.forName(type.getTypeName());
+                return gson.fromJson(json.toString(),cls);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (ClassUtil.isArrayType(aType) && obj instanceof String) {
+            String str = (String) obj;
+            obj = new JSONArray(str);
+        }
+
+        if (aType.equals(Map.class) && obj instanceof String) {
+            String str = (String) obj;
+            return StringUtil.mapStringToMap(str);
+        } else if ((aType.toString().contains(".List") || aType.toString().contains(".Collection")) && obj instanceof String) {
+            String str = (String) obj;
+            List<Object> list = new ArrayList<>();
+            String[] array = StringUtil.split(str, ",");
+            Collections.addAll(list, array);
+            return list;
+        }
+        else if (ClassUtil.isArrayType(aType) && ((obj.getClass().isArray() || obj instanceof JSONArray))) {
+            Object[] vv;
+            if (obj instanceof JSONArray) {
+                vv = ((JSONArray) obj).toArray();
+            } else {
+                vv = (Object[]) obj;
+            }
+
+            if (aType.equals(int[].class)) {
+                return ArrayUtil.getIntArray(ArrayUtil.toStringArray(vv));
+            } else if (aType.equals(Integer[].class)) {
+                return ArrayUtil.getIntegerArray(ArrayUtil.toStringArray(vv));
+            } else if (aType.equals(long[].class)) {
+                return ArrayUtil.getLongArray(ArrayUtil.toStringArray(vv));
+            } else if (aType.equals(Long[].class)) {
+                return ArrayUtil.getLongObjectArray(ArrayUtil.toStringArray(vv));
+            } else if (aType.equals(float[].class)) {
+                return ArrayUtil.getFloatArray(ArrayUtil.toStringArray(vv));
+            } else if (aType.equals(Float[].class)) {
+                return ArrayUtil.getFloatObjectArray(ArrayUtil.toStringArray(vv));
+            } else if (aType.equals(double[].class)) {
+                return ArrayUtil.getDoubleArray(ArrayUtil.toStringArray(vv));
+            } else if (aType.equals(Double[].class)) {
+                return ArrayUtil.getDoubleObjectArray(ArrayUtil.toStringArray(vv));
+            } else if (aType.equals(BigDecimal[].class)) {
+                return ArrayUtil.getBigDecimalArray(ArrayUtil.toStringArray(vv));
+            } else if (aType.equals(String[].class)) {
+                return ArrayUtil.toStringArray(vv);
+            } else {
+                return obj;
+            }
+        } else {
+            if (aType.equals(Boolean.class) || aType.equals(boolean.class)) {
+                return ObjectUtil.toBoolean(obj);
+            } else if (aType.equals(int.class) || aType.equals(Integer.class)) {
+                return ObjectUtil.toInt(obj);
+            } else if (aType.equals(long.class) || aType.equals(Long.class)) {
+                return ObjectUtil.toLong(obj);
+            } else if (aType.equals(float.class) || aType.equals(Float.class)) {
+                return ObjectUtil.toFloat(obj);
+            } else if (aType.equals(double.class) || aType.equals(Double.class)) {
+                return ObjectUtil.toDouble(obj);
+            } else if (aType.equals(BigDecimal.class))
+            {
+                return new BigDecimal(ObjectUtil.toString(obj));
+            } else if (aType.equals(BigInteger.class))
+            {
+                return new BigInteger(ObjectUtil.toString(obj));
+            } else if (aType.equals(Date.class)) {
+                return ObjectUtil.toDate(obj);
+            } else if (aType.equals(java.sql.Date.class)) {
+                return ObjectUtil.toSqlDate(obj);
+            } else if (aType.equals(Timestamp.class)) {
+                return ObjectUtil.toSqlTimestamp(obj);
+            } else if (aType.equals(String.class)) {
+                if (obj instanceof JSONObject) {
+                    JSONObject jsonObject = (JSONObject) obj;
+                    if (jsonObject.isEmpty()) {
+                        return "";
+                    }
+                }
+                return obj;
+            } else if (aType.equals(InputStream.class) && obj instanceof String) {
+                String str = (String) obj;
+                if (str.startsWith(JSONObject.BIN_DATA_START)) {
+                    String data = StringUtil.substringAfter(str, JSONObject.BIN_DATA_START);
+                    byte[] buf = EncryptUtil.getBase64Decode(data, EncryptUtil.NO_WRAP);
+                    return new ByteArrayInputStream(buf);
+                }
+                return obj;
+            } else if (obj instanceof JSONObject && !ClassUtil.isStandardType(aType)) {
+                if (ObjectUtil.isEmpty(obj)) {
+                    return  null;
+                } else
+                if (ClassUtil.isArrayType(aType)) {
+                    Gson gson = GsonUtil.createGson();
+                    JSONObject json = (JSONObject)obj;
+                    return gson.fromJson(json.toString(),aType);
+                } else {
+                    JSONObject json = (JSONObject) obj;
+                    return json.parseObject((Class) aType);
+                }
+            } else {
+                return obj;
+            }
+        }
+
+    }
+
+    public static Object getProperty(Object object, String name) {
+        return getProperty(object, name, ArrayUtil.NULL, true);
+    }
+
+
+    /**
+     * @param object    bean对象
+     * @param name      方法名称
+     * @param parameter 参数列表
+     * @param jump      跳过不满足条件的方法,并且不会报错
+     * @return 返回对象
+     */
+    public static Object getProperty(Object object, String name, Object[] parameter, boolean jump) {
+        if (!StringUtil.hasLength(name)) {
+            return null;
+        }
+        if (object == null || ClassUtil.isStandardProperty(object.getClass())) {
+            return object;
+        }
+        if (object instanceof Map && parameter == null) {
+            Map map = (Map) object;
+            return map.get(name);
+        }
+        if (CglibProxyUtil.isProxy(object.getClass())&&parameter==null)
+        {
+            BeanMap beanMap = BeanMap.create(object);
+            return beanMap.get(name);
+        }
+
+        Method[] methods = ClassUtil.getDeclaredMethods(object.getClass());
+        Method testMethod = null;
+        for (Method method : methods) {
+            if (method.getGenericReturnType().equals(Void.TYPE)) {
+                continue;
+            }
+            if (method.getName().equals(name) || method.getName().equals(ClassUtil.METHOD_NAME_GET + StringUtil.capitalize(name)) || method.getName().equals(ClassUtil.METHOD_NAME_IS + StringUtil.capitalize(name))) {
+                //如果parameter == ArrayUtil.NULL 表示只起无参数的函数
+                int iParam = method.getGenericParameterTypes().length;
+                if (parameter != ArrayUtil.NULL && parameter.length == iParam || parameter == ArrayUtil.NULL && iParam == 0) {
+                    testMethod = method;
+                    break;
+                }
+            }
+        }
+        if (testMethod == null && jump) {
+            return null;
+        }
+        if (testMethod == null) {
+            log.error(object.getClass().getName() + " method not find " + name + ",找不到方法名");
+            return null;
+        }
+        try {
+            if (parameter == null || testMethod.getParameterTypes().length == 0) {
+                return testMethod.invoke(object);
+            } else {
+                return testMethod.invoke(object, parameter);
+            }
+        } catch (Throwable e) {
+            log.error(object.getClass().getName() + " getProperty=" + testMethod.getName() + "  parameter=" + Arrays.toString(parameter) + ",检查类中方法是否正常执行", e);
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param object 对象
+     * @param name 字段名称
+     * @param <T> 类型
+     * @return 得到字段的值
+     */
+    public static <T> T getFieldValue(Object object, String name)
+    {
+        return getFieldValue(object, name,null);
+    }
+
+    /**
+     *
+     * @param object 对象
+     * @param name 字段名称
+     * @param cls 类对象
+     * @param <T> 类型
+     * @return 得到字段的值
+     */
+    public static <T> T getFieldValue(Object object, String name,Class<T> cls)
+    {
+        if (!StringUtil.hasLength(name)) {
+            return null;
+        }
+
+        if (object == null || ClassUtil.isStandardProperty(object.getClass())) {
+            if (cls==null)
+            {
+                return (T)object;
+            }
+            return getTypeValue(object,cls);
+        }
+        if (object instanceof Map) {
+            Map map = (Map) object;
+            if (cls==null)
+            {
+                return (T)map.get(name);
+            }
+            return getTypeValue(map.get(name),cls);
+
+        }
+        if (CglibProxyUtil.isProxy(object.getClass()))
+        {
+            BeanMap beanMap = BeanMap.create(object);
+
+            return (T)beanMap.get(name);
+
+/*            if (cls==null)
+            {
+                return (T)beanMap.get(name);
+            }
+
+            T result;
+            try {
+                result = cls.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return (T)beanMap.get(name);*/
+
+        }
+        Field[] fields = ClassUtil.getDeclaredFields(object.getClass());
+        if (fields == null) {
+            return null;
+        }
+        for (Field field : fields) {
+            if (field.getName().equals(name)) {
+                try {
+                    field.setAccessible(true);
+                    if (cls==null)
+                    {
+                        return (T)field.get(object);
+                    }
+                    return getTypeValue(field.get(object),cls);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * @param object 数据对象
+     * @param cls    类对象，作为模型创建新的对象
+     * @param <T>    VO 拷贝到那个对象
+     * @param <D>    数据对象，赋给新的对象
+     * @return 拷贝到新的对象
+     */
+    public static <T, D> T copy(D object, Class<T> cls) {
+        if (null == cls) {
+            return null;
+        }
+        if (cls.equals(JSONObject.class)) {
+            return (T) new JSONObject(object);
+        }
+        if (cls.equals(JSONArray.class)) {
+            return (T) new JSONArray(object);
+        }
+        T result = null;
+        try {
+            result = (T)ClassUtil.newInstance(cls.getName());
+            if (null == object) {
+                return result;
+            }
+            if (cls.equals(object.getClass()))
+            {
+                //相同类型,快速拷贝
+                BeanCopier beanCopier = BEAN_COPIER_MAP.getOrDefault(cls.getName(),BeanCopier.create(cls, cls, false));
+                beanCopier.copy(object, result, null);
+            } else
+            {
+                copyFiledValue(object, result);
+            }
+        } catch (Exception var4) {
+            log.error("对象copy失败," + cls);
+        }
+        return result;
+    }
+
+    /**
+     * 拷贝列表
+     *
+     * @param list 列表数据
+     * @param cls  列表类型
+     * @param <T>  列表类型
+     * @param <V>  列表值
+     * @return 返回新的列表
+     */
+    public static <T, V> List<T> copyList(Collection<V> list, Class<T> cls) {
+        if (null == list) {
+            return new ArrayList<>(0);
+        } else {
+            List<T> result = new ArrayList<>();
+            for (V obj : list) {
+                result.add(copy(obj, cls));
+            }
+            return result;
+        }
+    }
+
+    /**
+     * 拷贝属性,
+     *
+     * @param out 源bean
+     * @param in  得到属性的bean
+     */
+    public static void copyMethodValue(Object out, Object in) {
+        if (out instanceof JSONObject) {
+            out = ((JSONObject) out).toMap();
+        }
+        if (out instanceof Map) {
+            Map map = (Map) out;
+            Class getClass = in.getClass();
+            for (Object keyObj : map.keySet()) {
+                if (keyObj == null) {
+                    continue;
+                }
+                String key = keyObj.toString();
+                Method method = ClassUtil.getSetMethod(getClass, key);
+                if (method != null) {
+                    setSimpleProperty(in, method.getName(), map.get(key));
+                }
+            }
+            return;
+        }
+
+        Method[] methodsGet = ClassUtil.getDeclaredMethods(in.getClass());
+        Method[] methodsOut = ClassUtil.getDeclaredMethods(out.getClass());
+        for (Method outMethod : methodsOut) {
+            if (outMethod.getName().startsWith(ClassUtil.METHOD_NAME_SET)) {
+                continue;
+            }
+            if (outMethod.getGenericParameterTypes().length > 0) {
+                continue;
+            }
+            try {
+                for (Method method : methodsGet) {
+                    if (!method.getName().startsWith(ClassUtil.METHOD_NAME_SET)) {
+                        continue;
+                    }
+                    if (method.getName().substring(3).equals(outMethod.getName().substring(3))) {
+                        Object oo = outMethod.invoke(out);
+                        method.invoke(in, oo);
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                log.error("get " + in + "  copy:" + out + " set methods " + outMethod.getName(), e);
+            }
+        }
+    }
+
+
+    private final static int[] stopModifiers = {18, 25, 26, 28};
+
+    /**
+     * 拷贝属性,
+     *
+     * @param in  得到属性的bean
+     * @param out 源bean
+     */
+    public static void copyFiledValue(Object out, Object in) {
+
+        if (out instanceof JSONObject) {
+            out = ((JSONObject) out).toMap();
+        }
+
+        if (CglibProxyUtil.isProxy(out.getClass())) {
+            out = ReflectUtil.getValueMap(out);
+        }
+        if (out instanceof Map) {
+            Map map = (Map) out;
+            Class getClass = in.getClass();
+            for (Object keyObj : map.keySet()) {
+                if (keyObj == null) {
+                    continue;
+                }
+                String key = keyObj.toString();
+                Field field = ClassUtil.getDeclaredField(getClass, key);
+                if (field == null) {
+                    continue;
+                }
+                if (ArrayUtil.indexOf(stopModifiers, field.getModifiers()) != -1) {
+                    continue;
+                }
+                try {
+                    field.setAccessible(true);
+                    field.set(in, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
+                }
+            }
+            return;
+        }
+
+        Field[] fieldGet = ClassUtil.getDeclaredFields(in.getClass());
+        Field[] fieldSet = ClassUtil.getDeclaredFields(out.getClass());
+        for (Field setField : fieldSet) {
+            for (Field field : fieldGet) {
+                if (ArrayUtil.indexOf(stopModifiers, field.getModifiers()) != -1) {
+                    continue;
+                }
+                if (field.getName().equals(setField.getName())) {
+                    try {
+                        field.setAccessible(true);
+                        setField.setAccessible(true);
+                        Object o = setField.get(out);
+                        if (setField.getType().equals(field.getType())) {
+                            field.set(in, o);
+                        } else {
+                            field.set(in, copy(o, field.getType()));
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                        log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
+                    }
+                }
+            }
+        }
+    }
+    static public <T> List<T> copyFieldList(List<?> list, String field, boolean dis)
+    {
+        return copyFieldList(list,  field, null,dis);
+    }
+
+    /**
+     *
+     * @param list 列表
+     * @param field 字段
+     * @param cls 类对象
+     * @param <T> 泛型类型
+     * @return 列表
+     */
+    static public <T> List<T> copyFieldList(List<?> list, String field,  Class<T> cls)
+    {
+        return copyFieldList(list,  field, cls,false);
+    }
+    /**
+     * 拷贝字段列
+     *
+     * @param list  列表
+     * @param field 字段
+     * @param <T>   泛型类型
+     * @return 列表
+     */
+    static public <T> List<T> copyFieldList(List<?> list, String field)
+    {
+        return copyFieldList( list,  field,null,false);
+    }
+    /**
+     *
+     * @param list 列表
+     * @param field 字段
+     * @param cls 类
+     * @param dis 是否去重
+     * @param <T> 泛型类型
+     * @return 列表
+     */
+    static public <T> List<T> copyFieldList(List<?> list, String field, Class<T> cls,boolean dis)
+    {
+        if (list == null) {
+            return new ArrayList<>(0);
+        }
+        List<T> result = new ArrayList<>(list.size());
+        for (Object bean : list) {
+            T v = null;
+            if (cls!=null)
+            {
+                v = getFieldValue(bean, field,cls);
+            } else
+            {
+                v = getFieldValue(bean, field);
+            }
+            if (dis)
+            {
+                //是否去重
+                if (!result.contains(v))
+                {
+                    result.add(v);
+                }
+            } else
+            {
+                result.add(v);
+            }
+        }
+        return result;
+    }
+    /**
+     * @param f1 方法数组1
+     * @param f2 方法数组2
+     * @return 合并两个方法数组
+     */
+    public static Method[] joinMethodArray(Method[] f1, Method[] f2) {
+        if (f1 == null) {
+            return f2;
+        }
+        if (f2 == null) {
+            return f1;
+        }
+        Method[] result = new Method[f1.length + f2.length];
+        for (int i = 0; i < result.length; i++) {
+            if (i < f1.length) {
+                result[i] = f1[i];
+            } else {
+                result[i] = f2[i - f1.length];
+            }
+        }
+        return result;
+    }
+
+
+    public static Method[] appendMethodArray(Method[] f1, Method f2) {
+        if (f1 == null && f2 == null) {
+            return null;
+        }
+        if (f2 == null) {
+            return f1;
+        }
+        if (f1 == null) {
+            Method[] result = new Method[1];
+            result[0] = f2;
+            return result;
+        }
+        Method[] result = new Method[f1.length + 1];
+        System.arraycopy(f1, 0, result, 0, f1.length);
+        result[f1.length] = f2;
+        return result;
+    }
+
+
+    /**
+     * 对象转换位字符串，主要为了调试方便
+     *
+     * @param o 对象
+     * @return 对象转换位字符串
+     */
+    public static String toString(Object o) {
+        Map map = ObjectUtil.getMap(o);
+        StringBuilder sb = new StringBuilder();
+        for (Object obj : map.values()) {
+            sb.append(obj).append(" ");
+        }
+        return sb.toString();
+    }
+
+
+    /**
+     * @param object bean 对象
+     * @param string 调用一个方法
+     * @param args   参数
+     * @return 执行返回
+     * @throws Exception 运行错误
+     */
+    public static Object invoke(Object object, String string, Object... args) throws Exception {
+
+        if (object == null || string == null) {
+            return null;
+        }
+        if (args == null) {
+            Method method = object.getClass().getMethod(string);
+            if (method != null) {
+                if (Modifier.isStatic(method.getModifiers())) {
+                    method.invoke(null);
+                } else {
+                    method.invoke(object);
+                }
+            }
+        } else {
+            if (SystemUtil.isAndroid()) {
+                Class<?>[] las = ClassUtil.getClassArray(args);
+                Method method = object.getClass().getMethod(string, las);
+                if (method != null) {
+                    return method.invoke(object, args);
+                }
+            } else {
+                java.beans.Expression expr = new java.beans.Expression(object, string, args);
+                expr.execute();
+                return expr.getValue();
+            }
+        }
+        return null;
+    }
+
+
+}

@@ -1,0 +1,41 @@
+/*
+ * Copyright © 2004-2014 chenYuan. All rights reserved.
+ * @Website:wwww.jspx.net
+ * @Mail:39793751@qq.com
+  * author: chenYuan , 陈原
+ * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
+ * @jvm:jdk1.6+  x86/amd64
+ *
+ */
+package com.github.jspxnet.sioc.tag;
+
+import com.github.jspxnet.utils.XMLUtil;
+import com.github.jspxnet.scriptmark.core.TagNode;
+
+/**
+ * Created by IntelliJ IDEA.
+ * @author chenYuan (mail:39793751@qq.com)
+ * date: 2007-2-12
+ * Time: 12:20:49
+ */
+public class IncludeElement extends TagNode {
+    public final static String TAG_NAME = "include";
+
+    public IncludeElement() {
+
+    }
+
+    public String getFile() {
+        return XMLUtil.deleteQuote(getStringAttribute("file"));
+    }
+
+    public String getEncode() {
+        return XMLUtil.deleteQuote(getStringAttribute("encode"));
+    }
+
+
+    public String getId() {
+        return XMLUtil.deleteQuote(getStringAttribute("id"));
+    }
+
+}

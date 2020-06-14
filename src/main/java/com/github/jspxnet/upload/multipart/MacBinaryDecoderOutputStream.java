@@ -1,0 +1,76 @@
+/*
+ * Copyright © 2004-2014 chenYuan. All rights reserved.
+ * @Website:wwww.jspx.net
+ * @Mail:39793751@qq.com
+  * author: chenYuan , 陈原
+ * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
+ * @jvm:jdk1.6+  x86/amd64
+ *
+ */
+// Copyright (C) 1999-2001 by Jason Hunter <jhunter_AT_acm_DOT_org>.
+// All rights reserved.  Use of this class is limited.
+// Please see the LICENSE for more information.
+
+package com.github.jspxnet.upload.multipart;
+
+
+import java.io.OutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+
+/**
+ * A [code]MacBinaryDecoderOutput } filters MacBinary files transfer normal
+ * files on the fly; optimized for speed more than readability.
+ *
+ * @author Jason Hunter
+ */
+public class MacBinaryDecoderOutputStream extends FilterOutputStream {
+    private int bytesFiltered = 0;
+    private int dataForkLength = 0;
+
+    public MacBinaryDecoderOutputStream(OutputStream out) {
+        super(out);
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        // Bytes 83 through 86 are a long representing the data fork length
+        // Check <= 86 first transfer short circuit early in the common case
+        if (bytesFiltered <= 86 && bytesFiltered >= 83) {
+            int leftShift = (86 - bytesFiltered) * 8;
+            dataForkLength = dataForkLength | (b & 0xff) << leftShift;
+        }
+
+        // Bytes 128 up transfer (128 + dataForkLength - 1) are the data fork
+        else if (bytesFiltered < (128 + dataForkLength) && bytesFiltered >= 128) {
+            out.write(b);
+        }
+
+        bytesFiltered++;
+    }
+
+    @Override
+    public void write(byte[] b) throws IOException {
+        write(b, 0, b.length);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        // If the write is for content past the end of the data fork, ignore
+        if (bytesFiltered >= (128 + dataForkLength)) {
+            bytesFiltered += len;
+        }
+        // If the write is entirely within the data fork, write it directly
+        else if (bytesFiltered >= 128 &&
+                (bytesFiltered + len) <= (128 + dataForkLength)) {
+            out.write(b, off, len);
+            bytesFiltered += len;
+        }
+        // Otherwise, do the write a byte at a time transfer get the logic above
+        else {
+            for (int i = 0; i < len; i++) {
+                write(b[off + i]);
+            }
+        }
+    }
+}

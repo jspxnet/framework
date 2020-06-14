@@ -1,0 +1,288 @@
+/*
+ * Copyright © 2004-2014 chenYuan. All rights reserved.
+ * @Website:wwww.jspx.net
+ * @Mail:39793751@qq.com
+  * author: chenYuan , 陈原
+ * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
+ * @jvm:jdk1.6+  x86/amd64
+ *
+ */
+package com.github.jspxnet.sober.dialect;
+
+import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.StringUtil;
+
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.sql.*;
+import java.util.Date;
+
+/**
+ * Created by IntelliJ IDEA.
+ * @author chenYuan (mail:39793751@qq.com)
+ * date: 2007-1-10
+ * Time: 11:16:41
+ * Oracle 数据库 SQL 匹配
+ */
+public class OracleDialect extends Dialect {
+    //private EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+    //private String encode = envTemplate.getString(Environment.encode);
+
+    public OracleDialect() {                                                                              //number(1)
+        standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
+                " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
+                " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
+        standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
+        standard_SQL.put(boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
+        standard_SQL.put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        standard_SQL.put(Integer.class.getName(), "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+        standard_SQL.put("int", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>NUMBER(10)</#else></#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+
+        standard_SQL.put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        standard_SQL.put("long", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
+        standard_SQL.put(Double.class.getName(), "${" + COLUMN_NAME + "} BINARY_DOUBLE default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        standard_SQL.put("double", "${" + COLUMN_NAME + "} BINARY_DOUBLE default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
+        standard_SQL.put(Float.class.getName(), "${" + COLUMN_NAME + "} BINARY_FLOAT default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        standard_SQL.put("float", "${" + COLUMN_NAME + "} BINARY_FLOAT default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
+        standard_SQL.put(Date.class.getName(), "${" + COLUMN_NAME + "} TIMESTAMP default SYSDATE");
+        standard_SQL.put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
+        standard_SQL.put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
+        standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
+        standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE \"${" + KEY_TABLE_NAME + "}\"");
+        standard_SQL.put(FUN_TABLE_EXISTS, "SELECT count(1) FROM tab WHERE tname=upper('${" + KEY_TABLE_NAME + "}')");
+    }
+
+    @Override
+    public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
+        boolean isForUpdate = false;
+        if (sql.toLowerCase().endsWith(" for update")) {
+            sql = sql.substring(0, sql.length() - 11);
+            isForUpdate = true;
+        }
+
+        StringBuilder pagingSelect = new StringBuilder(sql.length() + 100);
+        if (begin > 0) {
+            pagingSelect.append("SELECT * from ( SELECT row_.*, rownum rownum_ FROM ( ");
+        } else {
+            pagingSelect.append("SELECT * FROM ( ");
+        }
+        pagingSelect.append(sql);
+        if (begin > 0) {
+            pagingSelect.append(" ) row_ ) WHERE rownum_ BETWEEN ").append((begin + 1)).append(" and ").append(end);
+        } else {
+            pagingSelect.append(" ) WHERE rownum <=").append(end);
+        }
+
+        if (isForUpdate) {
+            pagingSelect.append(" FOR UPDATE");
+        }
+        return pagingSelect.toString();
+    }
+
+    @Override
+    public boolean supportsConcurReadOnly() {
+        return true;
+    }
+
+    @Override
+    public void setPreparedStatementValue(PreparedStatement pstmt, int parameterIndex, Object obj) throws Exception {
+        if (obj instanceof String) {
+            pstmt.setString(parameterIndex, (String) obj);
+            return;
+        }
+        if (obj instanceof Boolean) {
+            pstmt.setInt(parameterIndex, ObjectUtil.toInt(ObjectUtil.toBoolean(obj)));
+            return;
+        }
+        if (obj instanceof Clob) {
+            pstmt.setClob(parameterIndex, (Clob) obj);
+            return;
+        }
+        if (obj instanceof java.sql.Time) {
+            pstmt.setTime(parameterIndex, (java.sql.Time) obj);
+            return;
+        }
+        if (obj instanceof java.sql.Date) {
+            pstmt.setDate(parameterIndex, (java.sql.Date) obj);
+            return;
+        }
+        if (obj instanceof java.util.Date) {
+            java.util.Date d = (java.util.Date) obj;
+            pstmt.setTimestamp(parameterIndex, new Timestamp(d.getTime()));
+            return;
+        }
+        if (obj instanceof InputStream) {
+            InputStream b = (InputStream) obj;
+            pstmt.setBinaryStream(parameterIndex, b, b.available());
+            return;
+        }
+        if (obj instanceof Blob) {
+            pstmt.setBlob(parameterIndex, (Blob) obj);
+            return;
+        }
+        if (obj instanceof Integer) {
+            pstmt.setInt(parameterIndex, (Integer) obj);
+            return;
+        }
+        if (obj instanceof Float) {
+            pstmt.setFloat(parameterIndex, (Float) obj);
+            return;
+        }
+        if (obj instanceof Double) {
+            pstmt.setDouble(parameterIndex, (Double) obj);
+            return;
+        }
+        if (obj instanceof Array) {
+            pstmt.setArray(parameterIndex, (Array) obj);
+            return;
+        }
+        if (obj instanceof Short) {
+            pstmt.setShort(parameterIndex, (Short) obj);
+            return;
+        }
+        if (obj instanceof Long) {
+            pstmt.setLong(parameterIndex, (Long) obj);
+            return;
+        }
+        if (obj instanceof Ref) {
+            pstmt.setRef(parameterIndex, (Ref) obj);
+            return;
+        }
+
+        pstmt.setObject(parameterIndex, obj);
+    }
+
+
+    /**
+     * @param rs    返回对象
+     * @param index 索引
+     * @return 返回查询结果
+     * @throws SQLException 异常
+     */
+    @Override
+    public Object getResultSetValue(ResultSet rs, int index) throws SQLException {
+        String typeName = rs.getMetaData().getColumnTypeName(index).toLowerCase();
+        int colSize = rs.getMetaData().getColumnDisplaySize(index);
+        ///////大数值
+        if ("ROWID".equals(typeName)) {
+            return rs.getString(index);
+        }
+
+        //短断整型
+        if (("int".equals(typeName) && colSize < 4) || "short".equals(typeName) || "smallint".equals(typeName) || "int2".equals(typeName) || "tinyint".equals(typeName) || ("fixed".equals(typeName) && colSize < 4)) {
+            return rs.getShort(index);
+        }
+        //////////整型
+        if ("int".equals(typeName) || "integer".equals(typeName) || "int4".equals(typeName) || ("number".equals(typeName) && colSize < 8) || ("fixed".equals(typeName) && colSize < 19)) {
+            return rs.getInt(index);
+        }
+
+        ///////长整型
+        if ("long".equals(typeName) || "bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName) && colSize > 18)) {
+            return rs.getLong(index);
+        }
+
+        ///////单精度
+        if ("money".equals(typeName) || "float".equals(typeName) || "real".equals(typeName) || "binary_float".equals(typeName)) {
+            return rs.getFloat(index);
+        }
+        ///////大数值
+        if ("decimal".equals(typeName)) {
+            return rs.getBigDecimal(index);
+        }
+        ///////双精度
+        if ("double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
+            return rs.getDouble(index);
+        }
+
+        ///////日期
+        if ("date".equals(typeName)) {
+            java.sql.Date t = rs.getDate(index);
+            if (t == null) {
+                return null;
+            }
+            return new java.util.Date(t.getTime());
+        }
+
+        ///////日期时间
+        if (typeName.contains("timestamp") || "datetime".equals(typeName)) {
+            Timestamp t = rs.getTimestamp(index);
+            if (t == null) {
+                return null;
+            }
+            return new java.util.Date(t.getTime());
+        }
+
+
+        ////////////时间
+        if ("time".equals(typeName)) {
+            return rs.getTime(index);
+        }
+
+        ///////短字符串
+        if ("char".equals(typeName) || "nvarchar".equals(typeName) || "varchar".equals(typeName) || "varchar2".equals(typeName) || "tinyblob".equals(typeName)) {
+            return rs.getString(index);
+        }
+
+        ////////////大文本类型
+        if ("CLOB".equals(typeName) || "mediumtext".equals(typeName) || " long varchar".equals(typeName)
+                || "ntext".equals(typeName) || "text".equals(typeName) || "long raw".equals(typeName)) {
+            //oracle.sql.CLOB clob = (oracle.sql.CLOB) rs.getClob(index);
+            Clob clob = rs.getClob(index);
+            if (clob == null) {
+                return StringUtil.empty;
+            }
+            Reader bodyReader = clob.getCharacterStream();
+
+            StringWriter out = new StringWriter(255);
+            try {
+                char[] buf = new char[256];
+                int i;
+                while ((i = bodyReader.read(buf)) != -1) {
+                    out.write(buf, 0, i);
+                }
+                out.close();
+                bodyReader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return out.toString();
+        }
+
+        ///////二进制类型 文件类型
+        if ("image".equals(typeName) || "blob".equals(typeName) || "mediumblob".equals(typeName)
+                || "longblob".equals(typeName) || "dbclob".equals(typeName)
+                || "long byte".equals(typeName)
+                || "varbinary".equals(typeName) || "binary".equals(typeName)) {
+            // oracle.sql.BLOB blob = (oracle.sql.BLOB) rs.getBlob(index);
+            // Clob clob = rs.getClob(index);
+            // return clob.getBinaryStream();
+
+            return rs.getAsciiStream(index);
+        }
+        return rs.getObject(index);
+    }
+
+    @Override
+    public boolean supportsSequenceName() {
+        return false;
+    }
+
+
+    @Override
+    public boolean supportsLimit() {
+        return true;
+    }
+
+    @Override
+    public boolean commentPatch() {
+        return false;
+    }
+
+}

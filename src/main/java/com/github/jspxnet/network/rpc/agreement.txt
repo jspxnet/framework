@@ -1,0 +1,13 @@
+json格式传输
+默认是用压缩加密方式,这些可以保证是公网安全使用
+格式
+action:
+register:注册集群服务器,route:请求路由表;ping:心跳, http调用,rpc:rpc对象接口调用,exit:客户端请求关闭
+requestId:请求id,应答的时候用这个ID匹配返回,确保请求对应
+type:传输的data数据类型,默认为json,特殊情况byte为base64编码
+
+data:
+
+流程说明:
+register:注册集群服务器,同时服务器返回路由表,接收到register说明对方也是服务器
+链接成功后

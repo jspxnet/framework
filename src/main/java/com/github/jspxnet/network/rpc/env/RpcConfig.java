@@ -1,0 +1,108 @@
+package com.github.jspxnet.network.rpc.env;
+
+import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.utils.IpUtil;
+import java.net.SocketAddress;
+import java.util.List;
+
+/**
+ * Created by jspx.net
+ * <p>
+ * author: chenYuan
+ * date: 2020/6/21 0:46
+ * description: rpc服务配置
+ **/
+public class RpcConfig {
+    private EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+    final static private String USE_NETTY_RPC = "useNettyRpc";
+
+    //包的最大长度
+    final static private String MAX_FRAME_LENGTH = "rpc.maxFrameLength";
+    //缓存大小
+    final static private String BUFFER_SIZE = "rpc.bufferSize";
+
+    //队列的大小
+    final static private String BACKLOG = "rpc.backlog";
+
+    //线程数,用CPU数量
+    final static private String WORK_THREAD = "rpc.workThread";
+
+    //服务器本机地址
+    final static private String LOCAL_ADDRESS = "rpc.localAddress";
+
+    //服务器本机地址
+    final static private String MASTER_GROUP = "rpc.master.group";
+
+
+    //服务器本机功能组名称
+    final static private String GROUP_NAME = "rpc.group.name";
+
+
+    //超时,单位为秒
+    final static private String TIMEOUT = "rpc.timeout";
+
+
+    final static private RpcConfig instance = new RpcConfig();
+
+    public static RpcConfig getInstance() {
+
+        return instance;
+    }
+
+
+    public boolean isUseNettyRpc() {
+        return envTemplate.getBoolean(USE_NETTY_RPC);
+    }
+
+    public int getMaxFrameLength() {
+        return envTemplate.getInt(MAX_FRAME_LENGTH, 1048576);
+    }
+
+    public int getBufferSize() {
+        return envTemplate.getInt(BUFFER_SIZE, 1024);
+    }
+
+    public int getBacklog() {
+        return envTemplate.getInt(BACKLOG, 1024);
+    }
+
+    public int getWorkThread() {
+        return envTemplate.getInt(WORK_THREAD, 1);
+    }
+
+    public int getTimeout() {
+        return envTemplate.getInt(TIMEOUT, 5);
+    }
+
+    public String getLocalAddress() {
+        return envTemplate.getString(LOCAL_ADDRESS);
+    }
+
+    public List<SocketAddress> getLocalAddressList() {
+        String localAddressStr = getLocalAddress();
+        return IpUtil.getSocketAddressList(localAddressStr);
+    }
+
+    public String getMasterGroup() {
+        return envTemplate.getString(MASTER_GROUP);
+    }
+
+    public List<SocketAddress> getMasterGroupList() {
+        String masterGroupStr = getMasterGroup();
+        return IpUtil.getSocketAddressList(masterGroupStr);
+    }
+
+    public String getSecretKey() {
+        return envTemplate.getString(Environment.secretKey, Environment.defaultDrug);
+    }
+
+    public String getCipherIv() {
+        return envTemplate.getString(Environment.cipherIv);
+    }
+
+    public String getGroupName() {
+        return envTemplate.getString(GROUP_NAME, "default");
+    }
+}
