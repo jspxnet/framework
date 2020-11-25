@@ -16,13 +16,11 @@ import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.MemberDAO;
 import com.github.jspxnet.txweb.support.ActionSupport;
-import com.github.jspxnet.txweb.table.SmsSendLog;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Date;
-
 
 @HttpMethod(caption = "阿里云短信")
 @Slf4j
@@ -213,17 +211,7 @@ public class AliySmsValidAction extends ActionSupport {
             {
                 bizId = DateUtil.toString(new Date(),"HHmmss");
             }
-            SmsSendLog smsSendLog = new SmsSendLog();
-            smsSendLog.setRegionId(regionId);
-            smsSendLog.setPhoneNumbers(phoneNumbers);
-            smsSendLog.setSignName(signName);
-            smsSendLog.setTemplateCodeId(templateCode);
-            smsSendLog.setTemplateValue(code);
-            smsSendLog.setResultCode(json.getString("Code"));
-            smsSendLog.setBizId(bizId);
-            smsSendLog.setRequestId(json.getString("RequestId"));
 
-            memberDAO.save(smsSendLog);
         } catch (Exception e) {
             e.printStackTrace();
         }
