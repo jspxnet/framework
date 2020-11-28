@@ -26,6 +26,8 @@ import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
 import com.github.jspxnet.security.symmetry.SymmetryEncryptFactory;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.result.RocResponse;
+import com.github.jspxnet.txweb.table.MemberRole;
+import com.github.jspxnet.txweb.table.TreeItem;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.upload.multipart.DateRandomNamePolicy;
@@ -2019,7 +2021,7 @@ public class UtilTestNg {
     @Test
     public void testRead3() throws Exception {
 
-        System.out.println(new JSONObject(RocResponse.success(new ArrayList())));
+        System.out.println(new JSONObject(RocResponse.success(new MemberRole())));
     }
 
     @AfterClass
