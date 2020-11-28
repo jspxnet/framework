@@ -148,10 +148,12 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
                     } else
                     if (currentPage==null&&( o instanceof Number))
                     {
+                        log.debug("分页参数,页数请是用标准名称:" + sqlMap.currentPage());
                         currentPage = ((Number)o).intValue();
                     } else
                     if (totalCount==null&&(o instanceof Number))
                     {
+                        log.debug("分页参数,返回行数请是用标准名称:" + sqlMap.count());
                         totalCount =  ((Number)o).intValue();
                     }
                     if (cls==null&&(o instanceof Class))

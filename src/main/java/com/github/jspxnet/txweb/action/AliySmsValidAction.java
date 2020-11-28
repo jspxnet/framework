@@ -145,16 +145,6 @@ public class AliySmsValidAction extends ActionSupport {
         send();
     }
 
-    @Operate(caption = "变更验证")
-    public void sendChangeValid() {
-        loadConfig();
-        //登录确认验证码, 不动
-        if (StringUtil.isNull(templateCode)) {
-            templateCode = config.getString("aliySmsChangeValidTemplateCode");
-        }
-        send();
-    }
-
     private String makeCode() {
         StringBuilder randomCode = new StringBuilder();
         for (int i = 0; i < this.codeCount; i++) {
@@ -162,8 +152,6 @@ public class AliySmsValidAction extends ActionSupport {
         }
         return randomCode.toString();
     }
-
-
     private void send() {
         if (!config.getBoolean(Environment.useSms)) {
             addFieldInfo(Environment.warningInfo, "短信功能没有开启");
