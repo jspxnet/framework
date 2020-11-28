@@ -357,7 +357,7 @@ public class JSONObject extends HashMap<String, Object> {
                     }
 
                     if (result == null) {
-                        super.put(key, NULL);
+                        super.put(key, null);
                         continue;
                     }
 
@@ -471,7 +471,7 @@ public class JSONObject extends HashMap<String, Object> {
                     Object result = method.invoke(bean, (Object[]) null);
 
                     if (result == null) {
-                        super.put(key, NULL);
+                        super.put(key, null);
                         continue;
                     }
 
@@ -1246,7 +1246,7 @@ public class JSONObject extends HashMap<String, Object> {
      */
     static String valueToString(JsonField jsonField,Object value, int indentFactor, int indent, boolean classInfo) throws JSONException {
         if (value == null||"null".equals(value)) {
-            return "null";
+            return null;
         }
 
         if (value instanceof String) {
@@ -1260,7 +1260,7 @@ public class JSONObject extends HashMap<String, Object> {
         if (value instanceof Date) {
             if (DateUtil.empty.equals(value))
             {
-                return "null";
+                return null;
             }
             if (jsonField!=null&&!StringUtil.isNull(jsonField.format()))
             {
@@ -1355,8 +1355,14 @@ public class JSONObject extends HashMap<String, Object> {
                 writer.write(StringUtil.quote(k.toString(), true));
                 writer.write(':');
                 Object v = super.get(k);
-
-                writer.write(valueToString(getJsonField(k.toString()),v));
+                if (v==null)
+                {
+                    writer.write(valueToString(getJsonField(k.toString()),NULL));
+                }
+                else
+                {
+                    writer.write(valueToString(getJsonField(k.toString()),v));
+                }
                 b = true;
             }
             writer.write('}');

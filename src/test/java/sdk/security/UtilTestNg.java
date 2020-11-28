@@ -25,6 +25,7 @@ import com.github.jspxnet.scriptmark.util.ScriptConverter;
 import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
 import com.github.jspxnet.security.symmetry.SymmetryEncryptFactory;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.upload.multipart.DateRandomNamePolicy;
@@ -1955,7 +1956,7 @@ public class UtilTestNg {
     @Test
     public void testRouteSession() {
         RouteSession routeSession = new RouteSession();
-        routeSession.setSocketAddress(new InetSocketAddress("xxx/127.0.0.3", 6775));
+        //routeSession.setSocketAddress(new InetSocketAddress("xxx/127.0.0.3", 6775));
         routeSession.setOnline(1);
         JSONObject json = new JSONObject(routeSession);
         System.out.println(json.toString());
@@ -1977,7 +1978,6 @@ public class UtilTestNg {
         List<Date> list = new ArrayList<>();
         list.add(new Date());
         list.add(new Date());
-
         System.out.println(ObjectUtil.toString(list));
 
     }
@@ -2016,7 +2016,11 @@ public class UtilTestNg {
     }
 
 
+    @Test
+    public void testRead3() throws Exception {
 
+        System.out.println(new JSONObject(RocResponse.success(new ArrayList())));
+    }
 
     @AfterClass
     public void afterExit() {
