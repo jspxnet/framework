@@ -1,5 +1,7 @@
 package com.github.jspxnet.txweb.env;
 
+import com.github.jspxnet.boot.environment.Environment;
+
 /**
  * Created by jspx.net
  *
@@ -13,7 +15,9 @@ public class ActionEnv {
 
     }
 
-    public static final String[] NO_CLEAN = new String[]{"ActionName", "ContentType", "mobile", "mobileTemplate", "Namespace", "RealPath"};
+    public static final String[] NO_CLEAN = new String[]{ActionEnv.Key_ActionName, ActionEnv.mobileTemplateSuffix,
+            ActionEnv.Key_RealPath,ActionEnv.mobileTemplateSuffix, Environment.templateSuffix,ActionEnv.KEY_MobileTemplate, ActionEnv.Key_Namespace,ActionEnv.ContentType};
+
     static public final String BrowserCache = "BrowserCache"; //是否使用浏览器缓存 默认为 true
     static public final String ContentType = "ContentType"; //请求类型
     static public final String Content_Disposition = "Content-Disposition"; //下载类型
@@ -33,7 +37,6 @@ public class ActionEnv {
     static public final String Key_Request = "request";
     static public final String Key_Response = "response";
     static public final String Key_RealPath = "RealPath";
-    static public final String Key_FormHash = "formHash";
 
     static public final String Key_ActionName = "ActionName";
     static public final String Key_This = "action";

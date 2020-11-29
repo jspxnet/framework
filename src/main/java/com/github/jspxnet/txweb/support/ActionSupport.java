@@ -81,8 +81,6 @@ public abstract class ActionSupport implements Action {
         }
     }
 
-
-
     protected OnlineManager onlineManager;
 
     @Ref
