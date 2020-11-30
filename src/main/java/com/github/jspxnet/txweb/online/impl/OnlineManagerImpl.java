@@ -498,6 +498,18 @@ public class OnlineManagerImpl implements OnlineManager {
         }
     }
 
+    @Override
+    public void exit(long uid) {
+        try {
+            UserSession userSession = memberDAO.getUserSession(uid);
+            if (userSession!=null)
+            {
+                exit(userSession.getId());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     /**
      *
      * @param token 认证Token

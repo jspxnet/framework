@@ -146,6 +146,14 @@ public class MemberVo implements Serializable {
     private Date confineDate = DateUtil.addYear(-1);
     //基本属性end
 
+    //第三方登陆标识
+    @Column(caption = "openId")
+    private String openId;
+
+    @Column(caption = "unionid")
+    private String unionid;
+
+
     @JsonIgnore
     private List<Role> roleList = new ArrayList<>();
 

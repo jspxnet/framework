@@ -5,11 +5,13 @@ import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Data;
 
 
 /**
  * 这里是一个临时到表，并不保存到数据库
  */
+@Data
 @Table(name = "weixin_user", caption = "联系方式")
 public class WeiXinUser {
 
@@ -79,175 +81,6 @@ public class WeiXinUser {
     private String qr_scene_str = StringUtil.empty;  //二维码扫码场景描述（开发者自定义）
 
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getSubscribe() {
-        return subscribe;
-    }
-
-    public void setSubscribe(String subscribe) {
-        this.subscribe = subscribe;
-    }
-
-    public String getOpenid() {
-        return openid;
-    }
-
-    public void setOpenid(String openid) {
-        this.openid = openid;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public int getSex() {
-        return sex;
-    }
-
-    public void setSex(int sex) {
-        this.sex = sex;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getProvince() {
-        return province;
-    }
-
-    public void setProvince(String province) {
-        this.province = province;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-    public String getHeadimgurl() {
-        return headimgurl;
-    }
-
-    public void setHeadimgurl(String headimgurl) {
-        this.headimgurl = headimgurl;
-    }
-
-    public int getHeadImgSize() {
-        return headImgSize;
-    }
-
-    public void setHeadImgSize(int headImgSize) {
-        this.headImgSize = headImgSize;
-    }
-
-    public long getSubscribe_time() {
-        return subscribe_time;
-    }
-
-    public void setSubscribe_time(long subscribe_time) {
-        this.subscribe_time = subscribe_time;
-    }
-
-    public String getPrivileges() {
-        return privileges;
-    }
-
-    public void setPrivileges(String privileges) {
-        this.privileges = privileges;
-    }
-
-    public String getUnionid() {
-        return unionid;
-    }
-
-    public void setUnionid(String unionid) {
-        this.unionid = unionid;
-    }
-
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-
-    public String getGroupid() {
-        return groupid;
-    }
-
-    public void setGroupid(String groupid) {
-        this.groupid = groupid;
-    }
-
-    public String getTagid_list() {
-        return tagid_list;
-    }
-
-    public void setTagid_list(String tagid_list) {
-        this.tagid_list = tagid_list;
-    }
-
-    public String getSubscribe_scene() {
-        return subscribe_scene;
-    }
-
-    public void setSubscribe_scene(String subscribe_scene) {
-        this.subscribe_scene = subscribe_scene;
-    }
-
-    public String getQr_scene() {
-        return qr_scene;
-    }
-
-    public void setQr_scene(String qr_scene) {
-        this.qr_scene = qr_scene;
-    }
-
-    public String getQr_scene_str() {
-        return qr_scene_str;
-    }
-
-    public void setQr_scene_str(String qr_scene_str) {
-        this.qr_scene_str = qr_scene_str;
-    }
-
     @Override
     public String toString() {
         JSONObject json = new JSONObject();
@@ -267,6 +100,5 @@ public class WeiXinUser {
         json.put("accessToken", accessToken);
         return json.toString();
     }
-
 
 }

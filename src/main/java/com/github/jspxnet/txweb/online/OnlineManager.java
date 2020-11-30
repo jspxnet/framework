@@ -44,6 +44,8 @@ public interface OnlineManager extends Serializable {
 
     void exit(String sessionId) throws Exception;
 
+    void exit(long uid);
+
     UserSession getUserSession(String sessionId, String ip);
 
     UserSession getUserSession(String sessionId, String ip, long uid);
