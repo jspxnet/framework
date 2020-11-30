@@ -12,6 +12,8 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 用于微信，QQ等系统登陆
+ *
+ * 下一版本删除
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -71,7 +73,6 @@ public class OAuthOpenId extends OperateTable {
     public Member createMember() {
         Member member = new Member();
         member.setName(name);
-
         member.setSex(SexEnumType.valueOf(sex).getName());
         member.setFaceImage(faceImage);
         member.setCity(city);

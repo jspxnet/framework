@@ -75,7 +75,7 @@ public interface MemberDAO extends SoberSupport {
 
     Member getParentMember(long childManId);
 
-    OAuthOpenId getOAuthOpenId(String namespace, String openId);
+    OAuthOpenId getOAuthOpenId(String enumType, String openId);
 
     OAuthOpenId getOAuthOpenId(String namespace, long uid);
 
