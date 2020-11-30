@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.utils;
 
+import java.text.DateFormat;
 import java.util.*;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
@@ -53,6 +54,11 @@ public class DateUtil {
 
     }
 
+
+    public static String getLinuxTime() {
+        DateFormat format = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        return format.format(new Date());
+    }
     public static boolean isEmpty(Date date) {
         return date == null || date.getTime() <= empty.getTime();
     }
