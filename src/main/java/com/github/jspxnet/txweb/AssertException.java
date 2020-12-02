@@ -8,7 +8,9 @@ import com.github.jspxnet.utils.ObjectUtil;
  * author: chenYuan
  * date: 2020/4/6 22:25
  * description: 通用的异常提示
- **/
+ *
+ * @author chenYuan
+ * */
 public abstract class AssertException {
 
     public static void isNull(Object object, String message) {

@@ -2024,6 +2024,13 @@ public class UtilTestNg {
         System.out.println(new JSONObject(RocResponse.success(new MemberRole())));
     }
 
+    @Test
+    public void testRead4() throws Exception {
+
+
+        System.out.println(new JSONObject(RocResponse.success(new MemberRole())));
+    }
+
     @AfterClass
     public void afterExit() {
         System.out.println("------------结束:");
