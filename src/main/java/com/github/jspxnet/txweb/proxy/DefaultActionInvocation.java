@@ -158,7 +158,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         action.getEnv().putAll(params);
         //判断是否使用手机模式切换模版
         if (actionConfig.isMobile()) {
-            params.put(ActionEnv.KEY_MobileTemplate, true);
+            action.put(ActionEnv.KEY_MobileTemplate, true);
         }
 
         //////////////载入配置参数 end

@@ -15,6 +15,7 @@ import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.boot.sign.LoginField;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.CongealEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
@@ -380,8 +381,8 @@ public class OnlineManagerImpl implements OnlineManager {
         final HttpSession session = action.getSession();
         Member member = null;
         //短信方式登录
-        if (com.github.jspxnet.boot.sign.LoginField.Sms.equalsIgnoreCase(isId)) {
-            member = memberDAO.getMember(com.github.jspxnet.boot.sign.LoginField.Phone, loginId);
+        if (LoginField.Sms.equalsIgnoreCase(isId)) {
+            member = memberDAO.getMember(LoginField.Phone, loginId);
             if (member == null) {
                 errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.noFoundUser));
                 memberDAO.evict(Member.class);
