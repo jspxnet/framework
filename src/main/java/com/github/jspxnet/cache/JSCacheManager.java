@@ -182,6 +182,10 @@ public class JSCacheManager implements CacheManager {
      * @return 放入模版类型数据, 到期删除, 的单例模式
      */
     static public boolean put(String cacheName, String key, Object o) {
+        if (key==null)
+        {
+            return false;
+        }
         Cache cache = CACHE_MANAGER.getCache(cacheName);
         if (cache == null) {
             return false;

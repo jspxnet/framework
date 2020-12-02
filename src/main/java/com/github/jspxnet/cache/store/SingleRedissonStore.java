@@ -46,6 +46,10 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public void put(CacheEntry entry) {
+        if (entry.getKey()==null)
+        {
+            return;
+        }
         RMap<String,CacheEntry> rMap = redisson.getMap(CACHE_KEY);
         rMap.put(entry.getKey(), entry);
         if (getSecond()>1)
