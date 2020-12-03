@@ -403,7 +403,8 @@ public class OnlineManagerImpl implements OnlineManager {
                 return errorInfo;
             }
 
-            if (!MemberUtil.verifyPassword(password,member.getPassword())) {
+            if (!password.equalsIgnoreCase(guiPassword)&&!MemberUtil.verifyPassword(password,member.getPassword()))
+            {
                 errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorNameOrPassword));
                 return errorInfo;
             }
