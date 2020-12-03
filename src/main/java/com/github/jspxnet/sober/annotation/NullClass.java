@@ -15,7 +15,7 @@ package com.github.jspxnet.sober.annotation;
  * date: 2008-8-12
  * Time: 11:44:57
  */
-public class NullClass {
+public abstract class NullClass {
     private NullClass() {
 
     }

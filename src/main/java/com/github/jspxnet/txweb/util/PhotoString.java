@@ -29,7 +29,6 @@ public class PhotoString {
     private int lineCount = 12;
 
     private String code = StringUtil.empty;
-
     private Color bgColor = Color.WHITE;
     private Color fontColor = null;
 

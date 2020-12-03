@@ -12,6 +12,10 @@ package com.github.jspxnet.security.utils;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.security.sm.SM3Digest;
 import com.github.jspxnet.utils.StringUtil;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
@@ -884,6 +888,27 @@ public class EncryptUtil {
         } else {
             return getBase64Decode(key, URL_SAFE + NO_WRAP);
         }
+    }
+
+    /**
+     * 用于微信解密
+     * @param content 正文
+     * @param keyByte 密钥
+     * @param ivByte iv
+     * @return 解密数据
+     * @throws Exception 异常
+     */
+    public static byte[] aesDecrypt(byte[] content, byte[] keyByte, byte[] ivByte) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
+        Key sKeySpec = new SecretKeySpec(keyByte, "AES");
+        cipher.init(Cipher.DECRYPT_MODE, sKeySpec, generateAesIV(ivByte));// 初始化
+        return cipher.doFinal(content);
+    }
+
+    private static AlgorithmParameters generateAesIV(byte[] iv) throws Exception {
+        AlgorithmParameters params = AlgorithmParameters.getInstance("AES");
+        params.init(new IvParameterSpec(iv));
+        return params;
     }
 
 }

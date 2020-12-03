@@ -41,6 +41,8 @@ import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import javax.servlet.ServletContextListener;
 import java.io.File;
 import java.security.Provider;
@@ -98,8 +100,9 @@ public class JspxCoreListener implements ServletContextListener {
         copyright = Environment.frameworkName + " " + Environment.version + " " + Environment.licenses + " Powered By chenYuan ";
         log.info("-" + copyright + " start-" + startTimes++);
         //////初始化环境变量 begin
-        log.info("载入org.bouncycastle.jce.provider.BouncyCastleProvider");
+        log.info("开始载入org.bouncycastle.jce.provider.BouncyCastleProvider");
         try {
+            Security.addProvider(new BouncyCastleProvider());
             Security.addProvider((Provider) ClassUtil.newInstance("com.sun.crypto.provider.SunJCE"));
             Security.addProvider((Provider) ClassUtil.newInstance("org.bouncycastle.jce.provider.BouncyCastleProvider"));
         } catch (Exception e) {

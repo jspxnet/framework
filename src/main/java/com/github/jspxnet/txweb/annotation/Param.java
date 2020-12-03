@@ -1,6 +1,7 @@
 package com.github.jspxnet.txweb.annotation;
 
 import com.github.jspxnet.sober.annotation.NullClass;
+import com.github.jspxnet.sober.enums.ParamModeType;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.utils.StringUtil;
 
@@ -42,8 +43,10 @@ public @interface Param {
     boolean request() default true;
 
     //参数对象,主要用于 签名参数解析,和文档生成
-    Class<?> type() default NullClass.class;
+    Class<?> type() default  NullClass.class;
 
+    //参数进入模式
+    ParamModeType modeType() default ParamModeType.RocMode;
     /**
      *  当参数中不存在或者为空的时候载入
      *

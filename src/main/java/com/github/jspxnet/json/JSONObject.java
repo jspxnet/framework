@@ -1413,10 +1413,15 @@ public class JSONObject extends HashMap<String, Object> {
 
     public static <T> T parseObject(JSONObject json, Class<T> clazz) {
 
+
         String className = null;
         //检查内部是否保存了对象名称
         if (clazz == null || ClassUtil.isStandardProperty(clazz) || Object.class.equals(clazz) || Class.class.equals(clazz)) {
             className = json.getString(CLASS_NAME);
+        }
+        if (clazz.equals(JSONObject.class))
+        {
+            return (T)json;
         }
 
         if (clazz != null && StringUtil.isEmpty(className)) {

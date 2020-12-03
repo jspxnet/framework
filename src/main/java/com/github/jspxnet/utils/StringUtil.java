@@ -1305,6 +1305,10 @@ public class StringUtil {
      * @return 安c++的方式得到字符串长度
      */
     public static int getLength(String s) {
+        if (s==null)
+        {
+            return 0;
+        }
         int len = 0;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);

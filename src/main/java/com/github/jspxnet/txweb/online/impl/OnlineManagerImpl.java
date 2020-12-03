@@ -364,13 +364,13 @@ public class OnlineManagerImpl implements OnlineManager {
             language = lang;
         }
 
-        Map<String, String> errorInfo = new HashMap<String, String>();
+        Map<String, String> errorInfo = new HashMap<>();
         if (StringUtil.getLength(loginId) < 3) {
             errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorLoginName));
             return errorInfo;
         }
         //tomcat6 bug 修复, 这里如果是中文，很可能接收到的为 编码后的字符串，需要判断解码
-        if (loginId.length() > 5 && loginId.startsWith("%") && StringUtil.countMatches(loginId, "%") > 6) {
+        if (loginId!=null&&loginId.length() > 5 && loginId.startsWith("%") && StringUtil.countMatches(loginId, "%") > 6) {
             loginId = URLUtil.getURLDecoder(loginId, Environment.defaultEncode);
         }
         if (StringUtil.isNull(password) || password.length() < 4) {

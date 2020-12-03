@@ -2,6 +2,7 @@ package com.github.jspxnet.txweb.util;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.sober.enums.ParamModeType;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.enums.TalkEnumType;
 import com.github.jspxnet.json.JSONArray;
@@ -75,8 +76,6 @@ public class ParamUtil {
         if (request == null) {
             return StringUtil.empty;
         }
-
-
         StringBuilder queryString = new StringBuilder();
         ///////////////载入所有参数 begin
         if (StringUtil.ASTERISK.equals(paras)) {
@@ -371,9 +370,48 @@ public class ParamUtil {
                     Param param = (Param) annotation;
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType)) {
                         if (paramsJson != null && paramsJson.containsKey(paramName)) {
-                            paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
+                            if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
+                            {
+                                paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
+                            }
+                            if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
+                            {
+                                JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                if (jsonObject!=null)
+                                {
+                                    paramObj[i] = jsonObject;
+                                }
+                            }
+                            if (ParamModeType.SpringMode.getValue()==param.modeType().getValue())
+                            {
+                                JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                if (jsonObject!=null)
+                                {
+                                    paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
+                                }
+                            }
+
                         } else {
-                            paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
+                            if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
+                            {
+                                paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
+                            }
+                            if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
+                            {
+                                JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                if (jsonObject!=null)
+                                {
+                                    paramObj[i] = jsonObject;
+                                }
+                            }
+                            if (ParamModeType.SpringMode.getValue()==param.modeType().getValue())
+                            {
+                                JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                if (jsonObject!=null)
+                                {
+                                    paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
+                                }
+                            }
                         }
                         //填充类内部的默认值begin
                         isNullSetDefaultValue(action, param, parameters[i].getName(), paramObj[i]);
@@ -473,7 +511,26 @@ public class ParamUtil {
                     isParam = true;
                     Param param = (Param) annotation;
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
-                        paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
+                        if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
+                        {
+                            paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
+                        }
+                        if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
+                        {
+                            JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                            if (jsonObject!=null)
+                            {
+                                paramObj[i] = jsonObject;
+                            }
+                        }
+                        if (ParamModeType.SpringMode.getValue()==param.modeType().getValue())
+                        {
+                            JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                            if (jsonObject!=null)
+                            {
+                                paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
+                            }
+                        }
                         //填充类内部的默认值begin
                         isNullSetDefaultValue(action, param, parameters[i].getName(), paramObj[i]);
                         if (action.hasFieldInfo()) {
@@ -689,7 +746,7 @@ public class ParamUtil {
      * @param theParam  参数值
      *                  返回是否安全
      */
-    private static void checkSafe(Action action, Param param, String paramName, String theParam) {
+    private static void checkSafe(Action action,Param param, String paramName, String theParam) {
         //配置不检查
 
         if (SafetyEnumType.NONE.equals(param.level()))

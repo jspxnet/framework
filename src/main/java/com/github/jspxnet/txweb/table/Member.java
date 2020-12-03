@@ -91,7 +91,7 @@ public class Member extends OperateTable implements IMember {
     private String password = StringUtil.empty;
 
     //头像
-    @Column(caption = "头像URL", length = 240)
+    @Column(caption = "头像URL", length = 500)
     private String faceImage = StringUtil.empty;
 
     @Column(caption = "性别", option = "男;女;保密", length = 4, notNull = true)
