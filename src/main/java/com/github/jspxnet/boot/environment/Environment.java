@@ -123,6 +123,8 @@ public abstract class Environment {
 
     final public static String filterSuffix = "suffix";
 
+    final public static String ApiFilterSuffix = "apiSuffix";
+
     final public static String domainName = "domainName";
 
     final public static String lessSuffix = "less";

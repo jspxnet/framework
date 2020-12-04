@@ -104,10 +104,13 @@ public class RocResult extends ResultSupport {
                 if (json.containsKey("code")&&ErrorEnumType.NEED_LOGIN.getValue()==json.getInt("code"))
                 {
                     TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_401);
-                }
+                } else
                 if (json.containsKey("code")&&ErrorEnumType.POWER.getValue()==json.getInt("code"))
                 {
                     TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_403);
+                } else
+                {
+                    TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_OK);
                 }
             } else
             {

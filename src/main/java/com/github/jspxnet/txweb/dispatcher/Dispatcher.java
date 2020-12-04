@@ -78,7 +78,9 @@ public class Dispatcher {
     private static String encode;
     private static String markdownSuffix = "md";
     private static String filterSuffix = "jhtml";
+    private static String apiFilterSuffix = "jwc";
     private static String templateSuffix = "ftl";
+
     private static boolean accessAllowOrigin = true;
 
     private Dispatcher() {
@@ -186,9 +188,11 @@ public class Dispatcher {
 
         //X-Requested-With
         //这里放宽了条件，飞加密方式可以不需要 X-Requested-With
+
+        String urlSuffixType = URLUtil.getFileType(request.getRequestURI());
         String suffix;
         //到要执行的方式begin
-        if (URLUtil.getFileType(request.getRequestURI()).equalsIgnoreCase(markdownSuffix)) {
+        if (urlSuffixType.equalsIgnoreCase(markdownSuffix)) {
             suffix = markdownSuffix;
         } else {
             String requestedWith = RequestUtil.getHeader(request, RequestUtil.REQUEST_X_REQUESTED_WITH);
@@ -199,7 +203,7 @@ public class Dispatcher {
                 suffix = RsaRocHandle.NAME;
             } else if (contentType.contains(HessianHandle.HTTP_HEAND_NAME)) {
                 suffix = HessianHandle.NAME;
-            } else if (requestedWith.contains(RocHandle.NAME) || contentType.contains(RocHandle.HTTP_HEAND_NAME)) {
+            } else if (requestedWith.contains(RocHandle.NAME) || contentType.contains(RocHandle.HTTP_HEAND_NAME) || apiFilterSuffix.equalsIgnoreCase(urlSuffixType)) {
                 suffix = RocHandle.NAME;
             } else {
                 suffix = ActionHandle.NAME;
@@ -262,6 +266,8 @@ public class Dispatcher {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         markdownSuffix = envTemplate.getString(Environment.markdownSuffix, "md");
         filterSuffix = envTemplate.getString(Environment.filterSuffix);
+        apiFilterSuffix = envTemplate.getString(Environment.ApiFilterSuffix,"jwc");
+
         templateSuffix = envTemplate.getString(Environment.templateSuffix);
         encode = envTemplate.getString(Environment.encode, Environment.defaultEncode);
         useEvasive = envTemplate.getBoolean(Environment.useEvasive);

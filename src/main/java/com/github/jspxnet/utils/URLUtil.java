@@ -120,6 +120,10 @@ public class URLUtil {
      * @return 文件名称  http://www.jspx.net/xxx/name.jsp  返回 name
      */
     static public String getFileName(String url) {
+        if (url==null)
+        {
+            return StringUtil.empty;
+        }
         int wHao = url.indexOf("?");
         if (wHao != -1) {
             url = url.substring(0, wHao);

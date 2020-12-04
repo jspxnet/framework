@@ -153,7 +153,6 @@ public class MemberVo implements Serializable {
     @Column(caption = "unionid")
     private String unionid;
 
-
     @JsonIgnore
     private List<Role> roleList = new ArrayList<>();
 
