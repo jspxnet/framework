@@ -488,7 +488,6 @@ public class DefaultActionInvocation implements ActionInvocation {
             action.addFieldInfo(Environment.warningInfo,"没有权限");
         }
         if (RequestUtil.isRocRequest(action.getRequest())) {
-
             if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode))
             {
 

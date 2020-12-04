@@ -48,6 +48,10 @@ public class RocResponse<T> implements Serializable {
     @JsonIgnore(isNull = true)
     private Integer code;  // 业务自定义状态码
 
+    @Column(caption = "http状态")
+    @JsonIgnore(isNull = true)
+    private Integer status;  // 业务自定义状态码
+
     @Column(caption = "错误信息")
     @JsonIgnore(isNull = true)
     private Map<String,String> error = null;  //错误信息

@@ -1099,7 +1099,8 @@ public class TXWebUtil {
      * @param status   状态
      */
     public static void print(JSONObject json, int type, HttpServletResponse response, int status) {
-        if (WebOutEnumType.JSON.getValue() == type) {
+        if (WebOutEnumType.JSON.getValue() == type)
+        {
             print(json.toString(4), type, response, status);
         } else if (WebOutEnumType.XML.getValue() == type) {
             try {
@@ -1115,6 +1116,8 @@ public class TXWebUtil {
             }
         }
     }
+
+
 
     /**
      * @return 创建默认环境

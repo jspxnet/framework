@@ -10,12 +10,14 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.json.XML;
 import com.github.jspxnet.json.XMLParserConfiguration;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -58,7 +60,6 @@ public class RocResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-
         ActionSupport action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
         if (response.isCommitted()) {
@@ -98,7 +99,21 @@ public class RocResult extends ResultSupport {
             TXWebUtil.print("<?xml version=\"1.0\" encoding=\"" + Dispatcher.getEncode() + "\"?>\r\n" + result,WebOutEnumType.XML.getValue(), response);
         } else {
             String result = debug ? json.toString(4) : json.toString();
-            TXWebUtil.print(result, WebOutEnumType.JSON.getValue(), response);
+            if (1!=json.getInt(ActionSupport.SUCCESS))
+            {
+                if (json.containsKey("code")&&ErrorEnumType.NEED_LOGIN.getValue()==json.getInt("code"))
+                {
+                    TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_401);
+                }
+                if (json.containsKey("code")&&ErrorEnumType.POWER.getValue()==json.getInt("code"))
+                {
+                    TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_403);
+                }
+            } else
+            {
+                TXWebUtil.print(result, WebOutEnumType.JSON.getValue(), response);
+            }
+
         }
         json.clear();
     }
