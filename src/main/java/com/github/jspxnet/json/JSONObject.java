@@ -979,7 +979,7 @@ public class JSONObject extends HashMap<String, Object> {
         return super.keySet();
     }
 
-    public Map toMap() {
+    public Map<String,Object> toMap() {
         Map<String, Object> map = new TreeMap<>();
         for (String key : keySet()) {
             if (key.equals(CLASS_NAME)) {

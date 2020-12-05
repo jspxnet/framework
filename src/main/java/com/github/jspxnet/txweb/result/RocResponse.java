@@ -7,6 +7,7 @@ import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.txweb.model.param.PageParam;
+import com.github.jspxnet.utils.ObjectUtil;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public class RocResponse<T> implements Serializable {
 
     @Column(caption = "错误信息")
     @JsonIgnore(isNull = true)
-    private Map<String,String> error = null;  //错误信息
+    private Map<String,?> error = null;  //错误信息
 
     @Column(caption = "描述")
     @JsonIgnore(isNull = true)
@@ -257,7 +258,7 @@ public class RocResponse<T> implements Serializable {
      * @param <T>   泛型
      * @return 返回对象
      */
-    public static <T> RocResponse<T> error(int code, Map<String, String> error) {
+    public static <T> RocResponse<T> error(int code, Map<String, ?> error) {
         return new RocResponse<T>(code, error);
     }
 
@@ -283,13 +284,13 @@ public class RocResponse<T> implements Serializable {
         this.success = 0;
     }
 
-    private RocResponse(int code, Map<String, String> msg) {
+    private RocResponse(int code, Map<String, ?> msg) {
         this.code = code;
         this.success = 0;
         this.error = msg;
-        if (this.error != null)
+        if (this.error != null && !this.error.isEmpty())
         {
-            this.message = this.error.values().iterator().next();
+            this.message = ObjectUtil.toString(this.error.values().iterator().next());
         }
     }
 
