@@ -47,7 +47,7 @@ public interface SqlMapClient {
      * @param <T> 返回类型
      * @return 返回列表
      */
-    <T> List<T> query(String namespace, String exeId, Object o, int currentPage, int totalCount, boolean loadChild, boolean rollRows);
+    <T> List<T> query(String namespace, String exeId, Object o, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception;
     /**
      *
      * @param namespace 命名空间
@@ -56,7 +56,7 @@ public interface SqlMapClient {
      * @param <T> 类
      * @return 返回查询列表
      */
-    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap);
+    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap) throws Exception;
     /**
      *
      * @param namespace 命名空间
@@ -67,7 +67,7 @@ public interface SqlMapClient {
      * @param <T> 类
      * @return 返回查询列表
      */
-    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount);
+    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount) throws Exception;
     /**
      *
      * @param namespace 命名空间
@@ -80,7 +80,7 @@ public interface SqlMapClient {
      * @param <T> 类
      * @return 返回查询列表
      */
-    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows);
+    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception;
     /**
      * @param namespace 命名空间
      * @param exeid     执行id
@@ -122,7 +122,7 @@ public interface SqlMapClient {
      * @param <T> 类型
      * @return 返回查询列表
      */
-    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, Class<T> cls);
+    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, Class<T> cls) throws Exception;
 
     /**
      *
@@ -136,7 +136,7 @@ public interface SqlMapClient {
      * @param <T> 类
      * @return 返回查询列表
      */
-    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount,boolean loadChild, Class<T> cls);
+    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount,boolean loadChild, Class<T> cls) throws Exception;
 
 
     /**
@@ -153,7 +153,7 @@ public interface SqlMapClient {
      * @param <T> 类型
      * @return 返回查询列表
      */
-    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls);
+    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception;
 
     /**
      * 用来避免写两次SQL 来得到翻页的总数,这里映入查询,就自动封装得到行数
@@ -163,6 +163,6 @@ public interface SqlMapClient {
      * @param valueMap  参数
      * @return 这里 exeId 是列表的id,
      */
-    long queryCount(String namespace, String exeId, Map<String, Object> valueMap);
+    long queryCount(String namespace, String exeId, Map<String, Object> valueMap) throws Exception;
 
 }

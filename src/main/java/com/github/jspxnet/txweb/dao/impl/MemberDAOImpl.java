@@ -447,7 +447,11 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
             sort = sortString;
         }
         if (!ArrayUtil.isEmpty(find) && !ArrayUtil.isEmpty(field) && ("roleId".equalsIgnoreCase(field[0]) && !StringUtil.isNull(find[0]))) {
-            return getMemberListForRole(find[0], page, count);
+            try {
+                return getMemberListForRole(find[0], page, count);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         Criteria criteria = createCriteria(Member.class);
         if (!ArrayUtil.isEmpty(find) && !ArrayUtil.isEmpty(field)) {
@@ -722,7 +726,7 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
      * @return 角色用户
      */
     @Override
-    public List<Member> getMemberListForRole(String roleId, int page, int count) {
+    public List<Member> getMemberListForRole(String roleId, int page, int count) throws Exception {
         SqlMapClient sqlMapClient = buildSqlMap();
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put("memberTable", getTableName(Member.class));
@@ -775,8 +779,8 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
             if (!FileUtil.isDirectory(role.getUploadFolder())) {
                 continue;
             }
-            List<Member> list = getMemberListForRole(role.getId(), 1, 2000);
             try {
+                List<Member> list = getMemberListForRole(role.getId(), 1, 2000);
                 for (Member member : list) {
                     StringBuilder sb = new StringBuilder();
                     sb.append(role.getPermission()).append(",");

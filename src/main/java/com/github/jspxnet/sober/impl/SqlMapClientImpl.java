@@ -118,7 +118,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 返回列表
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Object o, int currentPage, int totalCount, boolean loadChild, boolean rollRows) {
+    public <T> List<T> query(String namespace, String exeId, Object o, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception {
         Map<String, Object> valueMap = getValueMap(o);
         return query(namespace, exeId, valueMap, currentPage, totalCount, loadChild, rollRows);
     }
@@ -132,8 +132,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 返回查询列表
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap)
-    {
+    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
         return query( namespace,  exeId,valueMap, 1, jdbcOperations.getMaxRows(), false,false);
     }
 
@@ -147,8 +146,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 返回查询列表
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, Class<T> cls)
-    {
+    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, Class<T> cls) throws Exception {
         return query( namespace,  exeId,valueMap, 1, jdbcOperations.getMaxRows(), false,false,cls);
     }
 
@@ -165,8 +163,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 返回查询列表
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount,boolean loadChild, Class<T> cls)
-    {
+    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount,boolean loadChild, Class<T> cls) throws Exception {
         return query( namespace,  exeId,valueMap, currentPage, totalCount, loadChild,false,cls);
     }
 
@@ -183,8 +180,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 返回查询列表
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows)
-    {
+    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception {
         return query( namespace,  exeId,  valueMap,  currentPage,  totalCount,  loadChild,  rollRows, null);
     }
 
@@ -199,8 +195,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 返回查询列表
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount)
-    {
+    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount) throws Exception {
         return query( namespace,  exeId,valueMap, currentPage, totalCount, false,false,null);
     }
     /**
@@ -218,8 +213,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 返回查询列表
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls)
-    {
+    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception {
         if (totalCount > jdbcOperations.getMaxRows()) {
             totalCount = jdbcOperations.getMaxRows();
         }
@@ -328,6 +322,7 @@ public class SqlMapClientImpl implements SqlMapClient {
             log.error("error SQL:{},info:{}",sqlText, e.getMessage());
             e.printStackTrace();
             soberFactory.closeConnection(conn, true);
+            throw  e;
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(preparedStatement);
@@ -346,7 +341,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 这里 exeId 是列表的id,
      */
     @Override
-    public long queryCount(String namespace, String exeId, Map<String, Object> valueMap) {
+    public long queryCount(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
         if (sqlRoom == null) {
             log.error("ERROR:not get sql map namespace " + namespace + ",sql映射中不能够得到相应的命名空间");
@@ -365,20 +360,16 @@ public class SqlMapClientImpl implements SqlMapClient {
         valueMap.put("rollRows", false);
         valueMap.put("namespace", namespace);
         String sqlText = StringUtil.empty;
-        try {
-            sqlText = dialect.processSQL(mapSql.getContext(), valueMap);
-            if (StringUtil.isNull(sqlText)) {
-                throw new Exception("ERROR SQL IS NULL");
-            }
-            sqlText = StringUtil.removeOrders(sqlText);
-            sqlText = "SELECT count(1) as countNum FROM (" + sqlText + ") queryCount";
-            jdbcOperations.debugPrint(sqlText);
-            return ObjectUtil.toLong(jdbcOperations.getUniqueResult(sqlText));
-        } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
+        sqlText = dialect.processSQL(mapSql.getContext(), valueMap);
+        if (StringUtil.isNull(sqlText)) {
+            throw new Exception("ERROR SQL IS NULL");
         }
+        sqlText = StringUtil.removeOrders(sqlText);
+        sqlText = "SELECT count(1) as countNum FROM (" + sqlText + ") queryCount";
+        jdbcOperations.debugPrint(sqlText);
+        return ObjectUtil.toLong(jdbcOperations.getUniqueResult(sqlText));
         //放入cache
-        return 0;
+
     }
 
     /**
