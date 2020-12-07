@@ -12,12 +12,16 @@ public interface ValidateCodeCache {
 
     boolean validateImg(String sessionId, String code, boolean delete);
 
+
+    boolean addGeneralCode(String type, String id, String code);
+
+    boolean validateGeneralCheck(String type, String id, String code);
+
     int getTimes(String id);
 
-    void setTimes(String id, int times);
 
-    void updateTimes(String id);
 
     String querySms(String mobile);
 
+    void updateTimes(String id);
 }

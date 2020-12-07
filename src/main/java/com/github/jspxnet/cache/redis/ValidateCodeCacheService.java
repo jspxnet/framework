@@ -2,6 +2,8 @@ package com.github.jspxnet.cache.redis;
 
 import com.github.jspxnet.cache.container.StringEntry;
 import com.github.jspxnet.cache.ValidateCodeCache;
+import com.github.jspxnet.enums.ValidateCodeEnumType;
+import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 
@@ -10,21 +12,37 @@ import org.redisson.api.RBucket;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 
+import java.security.Security;
 import java.util.concurrent.TimeUnit;
 
 @Bean(singleton = true)
 public class ValidateCodeCacheService implements ValidateCodeCache {
-    final static String SMS_STORE_KEY = "jspx:validate:sms:code:map";
-    final static String IMG_STORE_KEY = "jspx:validate:img:code:map";
 
+    /**
+     * 短信验证
+     */
+    final static String SMS_STORE_KEY = "jspx:validate:sms:code:map";
+    /**
+     * 图片验证
+     */
+    final static String IMG_STORE_KEY = "jspx:validate:img:code:map";
+    /**
+     *
+     */
+    final static String GENERAL_VERIFY_KEY = "jspx:validate:general:code:map";
+    /**
+     * 验证次数记录
+     */
     final static String VALIDATE_TIMES_KEY = "jspx:validate:times:%s";
+
 
     @Ref(bind = RedissonClientConfig.class)
     static RedissonClient redissonClient;
 
     //默认为3分钟
-    private int smsTimeOutSecond = 180;
-    private int imgTimeOutSecond = 120;
+    private int smsTimeOutSecond = 900;
+    private int imgTimeOutSecond = 600;
+    private int generalTimeOutSecond = 900;
 
     public int getSmsTimeOutSecond() {
         return smsTimeOutSecond;
@@ -43,7 +61,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
     }
 
     private String getTimesKey(String id) {
-        return String.format(VALIDATE_TIMES_KEY, id);
+        return String.format(VALIDATE_TIMES_KEY,id);
     }
 
     /**
@@ -236,6 +254,48 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
     }
 
     @Override
+    public boolean addGeneralCode(String type, String id, String code) {
+        if (id==null)
+        {
+            return false;
+        }
+        String key = EncryptUtil.getMd5(type+id);
+        StringEntry entry = new StringEntry();
+        entry.setKey(key);
+        entry.setValue(code);
+        RMap<String, StringEntry> map = redissonClient.getMap(GENERAL_VERIFY_KEY);
+        map.put(entry.getKey(), entry);
+        return map.expire(generalTimeOutSecond, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public boolean validateGeneralCheck(String type, String id, String code)
+    {
+        if (StringUtil.isEmpty(code)) {
+            return false;
+        }
+        String key = EncryptUtil.getMd5(type+id);
+        RMap<String, StringEntry> map = redissonClient.getMap(GENERAL_VERIFY_KEY);
+        StringEntry entry = map.remove(key);
+        if (entry == null) {
+            return false;
+        }
+        if (entry.isExpired(generalTimeOutSecond)) {
+            return false;
+        }
+        String value = entry.getValue();
+        if (StringUtil.isNull(value))
+        {
+            return false;
+        }
+        if (value.contains("[")&&value.contains("]"))
+        {
+            return code.equalsIgnoreCase(StringUtil.substringBetween(value,"[","]"));
+        }
+        return code.equalsIgnoreCase(entry.getValue());
+    }
+
+    @Override
     public int getTimes(String id) {
         String timeKey = getTimesKey(id);
         RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
@@ -252,14 +312,14 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
      * @param id    设置次数
      * @param times 次数
      */
-    @Override
+    /*
     public void setTimes(String id, int times) {
         String timeKey = getTimesKey(id);
         RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
         bucket.set(times);
         bucket.expire(10, TimeUnit.MINUTES);
     }
-
+*/
     /**
      * @param id 更新次数
      */
@@ -274,5 +334,6 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         }
         bucket.set(value + 1,10, TimeUnit.MINUTES);
     }
+
 
 }

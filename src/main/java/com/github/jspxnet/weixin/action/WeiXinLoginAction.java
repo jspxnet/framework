@@ -69,11 +69,9 @@ public class WeiXinLoginAction extends ActionSupport {
             }
         } else {
             Weixin weinxin = WeiXinManager.getWeinXin();
-
             SnsComponent snsComponent = weinxin.sns(authorize_url);
             String state = RandomUtil.getRandomAlphanumeric(5);
             //为了防止攻击 state 为随机数，接受回来验证
-
             session.setAttribute(WeiXinEnv.weiXinState, state);
             session.setAttribute(WeiXinEnv.weiXinScope, scope);
             //以后优化用,现在先不动
