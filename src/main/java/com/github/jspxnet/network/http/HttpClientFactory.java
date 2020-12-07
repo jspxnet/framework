@@ -60,22 +60,27 @@ public abstract class HttpClientFactory {
         return client;
     }
 
-    public static String doHttp(String url, String postOrGet, String conf) throws Exception {
-        Map<String, Object> param = new HashMap<>();
-        if (StringUtil.isJsonObject(conf)) {
-            JSONObject jsonObject = new JSONObject(conf);
-            jsonObject.toMap();
-        } else {
-            StringMap map = new StringMap();
-            map.setString(conf);
-            param.putAll(map);
-        }
+    /**
+     * 简化调用
+     * @param url url地址
+     * @return 返回数据
+     * @throws Exception 异常
+     */
+    public static String getHttp(String url) throws Exception {
         HttpClient client = createHttpClient(url);
-        if (postOrGet.toLowerCase().contains("post")) {
-            return client.getString(param);
-        } else {
-            return client.post(param);
-        }
+        return client.getString();
+    }
+
+    /**
+     * 简化调用
+     * @param url url地址
+     * @return 返回数据
+     * @throws Exception 异常
+     */
+    public static String postHttp(String url) throws Exception {
+
+        HttpClient client = createHttpClient(url);
+        return client.post();
     }
 
 }
