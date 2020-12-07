@@ -286,7 +286,7 @@ public interface SoberSupport extends Serializable {
      * @param sqlText 简单的sql
      * @return 执行一个 execute
      */
-    boolean execute(String sqlText);
+    boolean execute(String sqlText) throws Exception;
     /**
      * 执行一个 execute
      * execute 方法应该仅在语句能返回多个 ResultSet 对象、多个更新计数或ResultSet 对象与更新计数的组合时使用。当执行某个已存储过程或动态执行未知 SQL 字符串（即应用程序程序员在编译时未知）时，有可能出现多个结果的情况，尽管这种情况很少见。例如，用户可能执行一个已存储过程（使用 CallableStatement 对象 - 参见第 135 页的 CallableStatement），并且该已存储过程可执行更新，然后执行选择，再进行更新，再进行选择，等等。通常使用已存储过程的人应知道它所返回的内容。
@@ -295,8 +295,9 @@ public interface SoberSupport extends Serializable {
      * @param sqlText sql
      * @param params  参数
      * @return 执行结果
+     * @throws Exception 异常
      */
-    boolean execute(String sqlText, Object[] params);
+    boolean execute(String sqlText, Object[] params) throws Exception;
     /**
      * 执行一个sql
      *
@@ -449,7 +450,7 @@ public interface SoberSupport extends Serializable {
      * @param cla 删除表
      * @return 是否成功
      */
-    boolean dropTable(Class<?> cla);
+    boolean dropTable(Class<?> cla) throws Exception;
     /**
      * @param sqlText sql
      * @param param   参数

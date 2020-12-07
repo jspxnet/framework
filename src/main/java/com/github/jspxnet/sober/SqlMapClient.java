@@ -46,6 +46,7 @@ public interface SqlMapClient {
      * @param rollRows    是否滚动
      * @param <T> 返回类型
      * @return 返回列表
+     * @throws Exception 异常
      */
     <T> List<T> query(String namespace, String exeId, Object o, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception;
     /**
@@ -55,6 +56,7 @@ public interface SqlMapClient {
      * @param valueMap 参数对象
      * @param <T> 类
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap) throws Exception;
     /**
@@ -66,6 +68,7 @@ public interface SqlMapClient {
      * @param totalCount 返回行数
      * @param <T> 类
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount) throws Exception;
     /**
@@ -79,6 +82,7 @@ public interface SqlMapClient {
      * @param rollRows 是否行滚
      * @param <T> 类
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception;
     /**
@@ -86,8 +90,9 @@ public interface SqlMapClient {
      * @param exeid     执行id
      * @param o         对象参数
      * @return 是否执行成功
+     * @throws Exception 异常
      */
-    boolean execute(String namespace, String exeid, Object o);
+    boolean execute(String namespace, String exeid, Object o) throws Exception;
     /**
      * ibatis remote execute
      *
@@ -95,8 +100,9 @@ public interface SqlMapClient {
      * @param exeId     sql  Id
      * @param valueMap  参数map
      * @return boolean
+     * @throws Exception 异常
      */
-    boolean execute(String namespace, String exeId, Map<String, Object> valueMap);
+    boolean execute(String namespace, String exeId, Map<String, Object> valueMap) throws Exception;
     /**
      * @param namespace 命名空间
      * @param exeid     执行id
@@ -121,6 +127,7 @@ public interface SqlMapClient {
      * @param cls 类
      * @param <T> 类型
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, Class<T> cls) throws Exception;
 
@@ -135,6 +142,7 @@ public interface SqlMapClient {
      * @param cls 返回类型
      * @param <T> 类
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount,boolean loadChild, Class<T> cls) throws Exception;
 
@@ -152,6 +160,7 @@ public interface SqlMapClient {
      * @param cls 类型
      * @param <T> 类型
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception;
 
@@ -162,6 +171,7 @@ public interface SqlMapClient {
      * @param exeId     查询ID,是列表的id  不用在写一边查询总数的sql
      * @param valueMap  参数
      * @return 这里 exeId 是列表的id,
+     * @throws Exception 异常
      */
     long queryCount(String namespace, String exeId, Map<String, Object> valueMap) throws Exception;
 

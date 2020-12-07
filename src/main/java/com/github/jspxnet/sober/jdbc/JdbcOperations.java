@@ -1375,7 +1375,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 执行一个 execute
      */
     @Override
-    public boolean execute(String sqlText) {
+    public boolean execute(String sqlText) throws Exception {
         return execute(sqlText, null);
     }
 
@@ -1389,7 +1389,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 执行结果
      */
     @Override
-    public boolean execute(String sqlText, Object[] params) {
+    public boolean execute(String sqlText, Object[] params) throws Exception {
         if (sqlText == null || sqlText.length() < 1) {
             return false;
         }
@@ -1413,7 +1413,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return statement.execute();
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
-            return false;
+            throw e;
         } finally {
             JdbcUtil.closeStatement(statement);
             JdbcUtil.closeConnection(conn);
@@ -2061,7 +2061,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 是否成功
      */
     @Override
-    public boolean dropTable(Class<?> cla) {
+    public boolean dropTable(Class<?> cla) throws Exception {
         if (cla == null) {
             return false;
         }

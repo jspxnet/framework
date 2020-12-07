@@ -161,6 +161,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param cls 返回类型
      * @param <T> 类
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     @Override
     public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount,boolean loadChild, Class<T> cls) throws Exception {
@@ -178,6 +179,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param rollRows 是否行滚
      * @param <T> 类
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     @Override
     public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception {
@@ -193,6 +195,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param totalCount 返回行数
      * @param <T> 类
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     @Override
     public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount) throws Exception {
@@ -211,6 +214,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param cls 类型
      * @param <T> 类型
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     @Override
     public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception {
@@ -339,6 +343,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param exeId     查询ID,是列表的id  不用在写一边查询总数的sql
      * @param valueMap  参数
      * @return 这里 exeId 是列表的id,
+     * @throws Exception 异常
      */
     @Override
     public long queryCount(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
@@ -379,7 +384,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 是否执行成功
      */
     @Override
-    public boolean execute(String namespace, String exeid, Object o)  {
+    public boolean execute(String namespace, String exeid, Object o) throws Exception {
         Map<String, Object> valueMap = getValueMap(o);
         return execute(namespace, exeid, valueMap);
     }
@@ -393,19 +398,15 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return boolean
      */
     @Override
-    public boolean execute(String namespace, String exeId, Map<String, Object> valueMap) {
+    public boolean execute(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
         Dialect dialect = soberFactory.getDialect();
         SqlMapConfig mapSql = sqlRoom.getExecuteMapSql(exeId,soberFactory.getDatabaseName());
         if (mapSql == null) {
             return false;
         }
-        try {
-            return jdbcOperations.execute(dialect.processSQL(mapSql.getContext(), valueMap));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
+        return jdbcOperations.execute(dialect.processSQL(mapSql.getContext(), valueMap));
+
     }
 
     /**
@@ -435,11 +436,7 @@ public class SqlMapClientImpl implements SqlMapClient {
             log.error("ERROR SQL map not config SQL update id :" + exeId + "  namespace:" + namespace);
             return -3;
         }
-        try {
-            return jdbcOperations.update(dialect.processSQL(mapSql.getContext(), valueMap));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -2;
+        return jdbcOperations.update(dialect.processSQL(mapSql.getContext(), valueMap));
+
     }
 }
