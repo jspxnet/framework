@@ -179,7 +179,8 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
 
     /**
      *  验证图片方式验证码,删除方式
-     * @param sessionId 用户sessionId
+     *
+     * @param sessionId 用户sessionId 默认方式 EncryptUtil.getMd5(userSession.getId())
      * @param code 验证码
      * @return 验证是否成功
      */
