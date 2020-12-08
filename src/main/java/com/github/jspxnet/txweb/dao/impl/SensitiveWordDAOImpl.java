@@ -151,7 +151,7 @@ public class SensitiveWordDAOImpl extends DFAFilterImpl implements SensitiveWord
     }
 
     @Override
-    public int updateTimes(Set<String> keys) {
+    public int updateTimes(Set<String> keys) throws Exception {
         TableModels soberTable = getSoberTable(SensitiveWord.class);
         StringBuilder sb = new StringBuilder();
         for (String key : keys) {
@@ -160,7 +160,7 @@ public class SensitiveWordDAOImpl extends DFAFilterImpl implements SensitiveWord
         if (sb.toString().endsWith(",")) {
             sb.setLength(sb.length() - 1);
         }
-        String sql = "UPDATE " + soberTable.getName() + " SET times=times+1 WHERE word IN(" + sb.toString() + ")";
+        String sql = "UPDATE " + soberTable.getName() + " SET times=times+1 WHERE word IN (" + sb.toString() + ")";
         return super.update(sql);
     }
 

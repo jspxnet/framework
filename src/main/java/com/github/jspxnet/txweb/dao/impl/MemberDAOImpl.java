@@ -73,9 +73,10 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
      *
      * @param uid 用户id
      * @return 新token 确保关键数据没有被修改
+     * @throws Exception 异常
      */
     @Override
-    public int updateToken(long uid) {
+    public int updateToken(long uid) throws Exception {
         if (uid <= 0) {
             return -2;
         }
@@ -106,7 +107,7 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
      * @return 是否成功
      */
     @Override
-    public int updateMemberDeptDefault(long uid, long id) {
+    public int updateMemberDeptDefault(long uid, long id) throws Exception {
 
         Map<String, Object> valueMap = new HashMap<>();
         TableModels soberTable = getSoberTable(MemberDept.class);
@@ -158,7 +159,7 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
      * @return 更新部门所在城市
      */
     @Override
-    public int updateMemberCourtDefault(long uid, long id) {
+    public int updateMemberCourtDefault(long uid, long id) throws Exception {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put("memberCourtTable", getTableName(MemberCourt.class));
         valueMap.put("uid", uid);
@@ -641,8 +642,12 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
     @Override
     public boolean deleteOvertimeSession(long overtime) {
         long delTime = System.currentTimeMillis() - overtime;
-        if (tableExists(UserSession.class)) {
-            return createCriteria(UserSession.class).add(Expression.lt("lastRequestTime", delTime)).delete(false) > 0;
+        try {
+            if (tableExists(UserSession.class)) {
+                return createCriteria(UserSession.class).add(Expression.lt("lastRequestTime", delTime)).delete(false) > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }

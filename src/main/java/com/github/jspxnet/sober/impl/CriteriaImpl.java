@@ -23,7 +23,6 @@ import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -327,7 +326,15 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         valueMap.put(Dialect.KEY_FIELD_NAME, soberTable.getPrimary());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         valueMap.put(Dialect.KEY_TERM, termText.toString());
-        int result = jdbcOperations.update(dialect.processTemplate(Dialect.SQL_CRITERIA_DELETE, valueMap), objectArray);
+        int result = 0;
+        String sqlText = null;
+        try {
+            sqlText = dialect.processTemplate(Dialect.SQL_CRITERIA_DELETE, valueMap);
+            result = jdbcOperations.update(sqlText, objectArray);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("查询异常SQL:" + sqlText);
+        }
         if (soberFactory.isUseCache()) {
             //同时更新缓存
             JSCacheManager.remove(criteriaClass, getDeleteListCacheKey());
@@ -380,7 +387,13 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_FIELD_LIST, fieldList);
         valueMap.put(Dialect.KEY_TERM, termText.toString());
-        int result = jdbcOperations.update(dialect.processTemplate(Dialect.SQL_CRITERIA_UPDATE, valueMap), objectArray);
+        int result = 0;
+        try {
+            result = jdbcOperations.update(dialect.processTemplate(Dialect.SQL_CRITERIA_UPDATE, valueMap), objectArray);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = -2;
+        }
         jdbcOperations.evict(criteriaClass);
         return result;
     }
@@ -579,8 +592,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
         } catch (Exception e) {
             log.info(sqlText, e);
-            soberFactory.closeConnection(conn, true);
             e.printStackTrace();
+            throw new IllegalArgumentException("查询异常SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -742,8 +755,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
         } catch (Exception e) {
             log.info(sqlText, e);
-            soberFactory.closeConnection(conn, true);
             e.printStackTrace();
+            throw new IllegalArgumentException("查询异常:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);

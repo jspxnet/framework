@@ -39,8 +39,7 @@ public class AnnotationUtil {
     }
 
 
-    public static void fixIdCacheMax(TableModels soberTable,Object object, JdbcOperations jdbcOperations)
-    {
+    public static void fixIdCacheMax(TableModels soberTable,Object object, JdbcOperations jdbcOperations) throws Exception {
         if (jdbcOperations == null|| object==null) {
             return;
         }

@@ -18,7 +18,7 @@ public interface DFAFilter {
 
     void refresh();
 
-    int updateTimes(Set<String> keys);
+    int updateTimes(Set<String> keys) throws Exception;
 
     int importWord(String txt) throws Exception;
 

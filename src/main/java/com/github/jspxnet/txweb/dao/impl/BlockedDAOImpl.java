@@ -11,7 +11,6 @@ import com.github.jspxnet.txweb.table.BlockedWord;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.*;
 
 /**
@@ -196,7 +195,7 @@ public class BlockedDAOImpl extends DFAFilterImpl implements BlockedDAO {
     }
 
     @Override
-    public int updateTimes(Set<String> keys) {
+    public int updateTimes(Set<String> keys) throws Exception {
 
         StringBuilder sb = new StringBuilder();
         for (String key : keys) {
@@ -208,7 +207,7 @@ public class BlockedDAOImpl extends DFAFilterImpl implements BlockedDAO {
 
         if (sb.toString().length() > 2) {
             TableModels blockedWordTable = getSoberTable(BlockedWord.class);
-            String sql2 = "UPDATE " + blockedWordTable.getName() + " SET times=times+1 WHERE word IN(" + sb.toString() + ")";
+            String sql2 = "UPDATE " + blockedWordTable.getName() + " SET times=times+1 WHERE word IN (" + sb.toString() + ")";
             return super.update(sql2);
         }
         return -1;

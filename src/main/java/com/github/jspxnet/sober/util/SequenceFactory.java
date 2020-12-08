@@ -62,8 +62,7 @@ public class SequenceFactory {
      * @param jdbcOperations 数据库对象
      * @return 返回key
      */
-     public String getNextKey(String keyName, Id idf, Class<?> type, JdbcOperations jdbcOperations)
-    {
+     public String getNextKey(String keyName, Id idf, Class<?> type, JdbcOperations jdbcOperations) throws Exception {
         Sequences tableSequences = (Sequences)JSCacheManager.get(Sequences.class,keyName);
         if (tableSequences==null||tableSequences.getKeyValue()==idf.min())
         {

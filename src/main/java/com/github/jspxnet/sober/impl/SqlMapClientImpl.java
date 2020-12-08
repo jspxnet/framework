@@ -96,12 +96,12 @@ public class SqlMapClientImpl implements SqlMapClient {
         String sql = StringUtil.empty;
         try {
             sql = dialect.processSQL(mapSql.getContext(), valueMap);
+            return jdbcOperations.getUniqueResult(sql);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("processSQL " + sql, e);
-            return null;
+            e.printStackTrace();
+            throw new IllegalArgumentException("查询异常sql:" + sql);
         }
-        return jdbcOperations.getUniqueResult(sql);
     }
 
 
@@ -325,7 +325,6 @@ public class SqlMapClientImpl implements SqlMapClient {
         } catch (Exception e) {
             log.error("error SQL:{},info:{}",sqlText, e.getMessage());
             e.printStackTrace();
-            soberFactory.closeConnection(conn, true);
             throw  e;
         } finally {
             JdbcUtil.closeResultSet(resultSet);
@@ -416,7 +415,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 更新是否成功
      */
     @Override
-    public int update(String namespace, String exeid, Object o) {
+    public int update(String namespace, String exeid, Object o) throws Exception {
         Map<String, Object> valueMap = getValueMap(o);
         return update(namespace, exeid, valueMap);
     }
@@ -428,7 +427,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @return 更新是否成功
      */
     @Override
-    public int update(String namespace, String exeId, Map<String, Object> valueMap) {
+    public int update(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
         Dialect dialect = soberFactory.getDialect();
         SqlMapConfig mapSql = sqlRoom.getUpdateMapSql(exeId,soberFactory.getDatabaseName());

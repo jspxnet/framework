@@ -1120,6 +1120,7 @@ public abstract class JdbcOperations implements SoberSupport {
      *
      * @param object 对象
      * @return boolean
+     * @throws Exception 异常
      */
     @Override
     public int update(Object object) throws Exception {
@@ -1291,9 +1292,10 @@ public abstract class JdbcOperations implements SoberSupport {
      * 
      * @param sql 简单sql
      * @return sql执行更新
+     * @throws Exception 异常
      */
     @Override
-    public int update(String sql) {
+    public int update(String sql) throws Exception {
         return update(sql, (Object[]) null);
     }
 
@@ -1302,9 +1304,10 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param sqlText 使用sql直接更新,参数 ？ 的jdbc原生形式
      * @param params  参数
      * @return 更新数量
+     * @throws Exception 异常
      */
     @Override
-    public int update(String sqlText, Object[] params) {
+    public int update(String sqlText, Object[] params) throws Exception {
         if (StringUtil.isEmpty(sqlText)) {
             return -2;
         }
@@ -1328,6 +1331,7 @@ public abstract class JdbcOperations implements SoberSupport {
             result = statement.executeUpdate();
         } catch (Exception e) {
             log.error("update sql:" + sqlText, e);
+            throw  e;
         } finally {
             JdbcUtil.closeStatement(statement);
             JdbcUtil.closeConnection(conn);
@@ -1343,9 +1347,10 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param sqlText sql
      * @param params  支持类型 Object[] or HashMap  String,Object,这里是留给参数对象的,所以params没有类型
      * @return 执行情况
+     * @throws Exception 异常
      */
     @Override
-    public boolean execute(Class<?> cla, String sqlText, Object params) {
+    public boolean execute(Class<?> cla, String sqlText, Object params) throws Exception {
         Object[] args = null;
         Map<String, Object> valueMap = null;
         TableModels soberTable = getSoberTable(cla);
@@ -1360,19 +1365,15 @@ public abstract class JdbcOperations implements SoberSupport {
         }
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
-        try {
-            assert params instanceof Object[];
-            return execute(dialect.processSQL(sqlText, valueMap), args);
-        } catch (Exception e) {
-            log.error("soberTable:" + soberTable.toString() + ",SQL:" + sqlText, e);
-        }
-        return false;
+        assert params instanceof Object[];
+        return execute(dialect.processSQL(sqlText, valueMap), args);
     }
 
     /**
      * 
      * @param sqlText 简单的sql
      * @return 执行一个 execute
+     * @throws Exception 异常
      */
     @Override
     public boolean execute(String sqlText) throws Exception {
@@ -1387,6 +1388,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param sqlText sql
      * @param params  参数
      * @return 执行结果
+     * @throws Exception 异常
      */
     @Override
     public boolean execute(String sqlText, Object[] params) throws Exception {
@@ -1812,7 +1814,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 返回单一对象
      */
     @Override
-    public Object getUniqueResult(Class<?> cla, String sql, Object o) {
+    public Object getUniqueResult(Class<?> cla, String sql, Object o) throws Exception {
         Map<String, Object> valueMap = ObjectUtil.getMap(o);
         TableModels soberTable = getSoberTable(cla);
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
@@ -1826,7 +1828,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 单一返回对象
      */
     @Override
-    public Object getUniqueResult(String sql, Object o) {
+    public Object getUniqueResult(String sql, Object o) throws Exception {
         Map<String, Object> valueMap = null;
         if (o != null) {
             valueMap = ObjectUtil.getMap(o);
@@ -1840,9 +1842,10 @@ public abstract class JdbcOperations implements SoberSupport {
     /**
      * @param sql sql语句
      * @return 单一返回对象
+     * @throws Exception 异常
      */
     @Override
-    public Object getUniqueResult(String sql) {
+    public Object getUniqueResult(String sql) throws Exception {
         return getUniqueResult(sql, (Object) null);
     }
 
@@ -1893,9 +1896,10 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param sql      sql
      * @param valueMap map参数
      * @return Object
+     * @throws Exception 异常
      */
     @Override
-    public Object getUniqueResult(String sql, Map<String, Object> valueMap) {
+    public Object getUniqueResult(String sql, Map<String, Object> valueMap) throws Exception {
         Connection conn = null;
         Statement statement = null;
         ResultSet resultSet = null;
@@ -1915,6 +1919,7 @@ public abstract class JdbcOperations implements SoberSupport {
             }
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
+            throw e;
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -1927,9 +1932,10 @@ public abstract class JdbcOperations implements SoberSupport {
      * 删除一堆对象
      *
      * @param collection 删除激活
+     * @throws Exception 异常
      */
     @Override
-    public boolean deleteAll(Collection<?> collection) {
+    public boolean deleteAll(Collection<?> collection) throws Exception {
         if (ObjectUtil.isEmpty(collection)) {
             return true;
         }
@@ -1977,7 +1983,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return statement.execute();
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
-            return false;
+            throw  e;
         } finally {
             valueMap.clear();
             JdbcUtil.closeResultSet(resultSet);
@@ -2080,9 +2086,10 @@ public abstract class JdbcOperations implements SoberSupport {
      *
      * @param cla bean对象是否存在表
      * @return 返回是否存在
+     * @throws Exception 异常
      */
     @Override
-    public boolean tableExists(Class<?> cla) {
+    public boolean tableExists(Class<?> cla) throws Exception {
         if (DefaultCache.class.equals(cla)) {
             return false;
         }
@@ -2090,31 +2097,22 @@ public abstract class JdbcOperations implements SoberSupport {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.COLUMN_NAME, soberTable.getPrimary());
-        try {
-            Object o = getUniqueResult(dialect.processTemplate(Dialect.FUN_TABLE_EXISTS, valueMap));
-            return o instanceof String && soberTable.getName().equalsIgnoreCase((String) o) || ObjectUtil.toBoolean(o);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        Object o = getUniqueResult(dialect.processTemplate(Dialect.FUN_TABLE_EXISTS, valueMap));
+        return o instanceof String && soberTable.getName().equalsIgnoreCase((String) o) || ObjectUtil.toBoolean(o);
     }
 
     /**
      * @param cla 得到最大ID
      * @return ID数
+     * @throws Exception 异常
      */
     @Override
-    public long getTableMaxId(Class<?> cla) {
+    public long getTableMaxId(Class<?> cla) throws Exception {
         TableModels soberTable = getSoberTable(cla);
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
-        try {
-            return ObjectUtil.toLong(getUniqueResult(dialect.processTemplate(Dialect.TABLE_MAX_ID, valueMap)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return ObjectUtil.toLong(getUniqueResult(dialect.processTemplate(Dialect.TABLE_MAX_ID, valueMap)));
     }
 
     /**
@@ -2174,9 +2172,10 @@ public abstract class JdbcOperations implements SoberSupport {
     /**
      * @param cla 类对象
      * @return 得到数据库序列名称
+     * @throws Exception 异常
      */
     @Override
-    public String getSequenceName(Class<?> cla) {
+    public String getSequenceName(Class<?> cla) throws Exception {
         if (!dialect.supportsSequenceName()) {
             return null;
         }
@@ -2184,22 +2183,18 @@ public abstract class JdbcOperations implements SoberSupport {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
-        try {
-            Object o = getUniqueResult(dialect.processTemplate(Dialect.SEQUENCE_NAME, valueMap));
-            return StringUtil.substringBetween((String) o, "'", "'");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return StringUtil.empty;
-        }
+        Object o = getUniqueResult(dialect.processTemplate(Dialect.SEQUENCE_NAME, valueMap));
+        return StringUtil.substringBetween((String) o, "'", "'");
     }
 
     /**
      * @param cla   类对象
      * @param start 序列值
      * @return 设置序列开始值
+     * @throws Exception 异常
      */
     @Override
-    public boolean alterSequenceStart(Class<?> cla, long start) {
+    public boolean alterSequenceStart(Class<?> cla, long start) throws Exception {
         if (start <= 0) {
             return false;
         }
@@ -2209,12 +2204,7 @@ public abstract class JdbcOperations implements SoberSupport {
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         valueMap.put(Dialect.SERIAL_NAME, getSequenceName(cla));
         valueMap.put(Dialect.KEY_SEQUENCE_RESTART, start);
-        try {
-            return execute(dialect.processTemplate(Dialect.ALTER_SEQUENCE_RESTART, valueMap), null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        return execute(dialect.processTemplate(Dialect.ALTER_SEQUENCE_RESTART, valueMap), null);
     }
 
     /**
@@ -2223,9 +2213,10 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param field 字段
      * @param num 加的数字
      * @return 是否成功
+     * @throws Exception 异常
      */
     @Override
-    public boolean updateFieldAddNumber(Object obj,String field, int num) {
+    public boolean updateFieldAddNumber(Object obj,String field, int num) throws Exception {
         if (obj==null)
         {
             return false;
@@ -2253,9 +2244,10 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param sqlText sql
      * @param param   参数
      * @return 执行一个存储过程
+     * @throws Exception 异常
      */
     @Override
-    public boolean prepareExecute(String sqlText, Object[] param) {
+    public boolean prepareExecute(String sqlText, Object[] param) throws Exception {
         Connection conn = null;
         CallableStatement statement = null;
         try {
@@ -2270,7 +2262,7 @@ public abstract class JdbcOperations implements SoberSupport {
         } catch (Exception e) {
             log.error("ERROR SQL:" + sqlText, e);
             e.printStackTrace();
-            return false;
+            throw  e;
         } finally {
             JdbcUtil.closeStatement(statement);
             JdbcUtil.closeConnection(conn);
@@ -2556,5 +2548,6 @@ public abstract class JdbcOperations implements SoberSupport {
             JSCacheManager.put(cla,cacheKey,data);
         }
     }
+
 
 }

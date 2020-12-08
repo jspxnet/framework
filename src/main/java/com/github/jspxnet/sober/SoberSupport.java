@@ -12,6 +12,7 @@ package com.github.jspxnet.sober;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.exception.ValidException;
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.List;
@@ -248,19 +249,33 @@ public interface SoberSupport extends Serializable {
      *  删除一堆对象
      * @param collection 删除激活
      * @return 是否成功
+     * @throws Exception 异常
      */
-    boolean deleteAll(Collection<?> collection);
+    boolean deleteAll(Collection<?> collection) throws Exception;
     /**
      * 单个对象查询返回
      *
      * @param sql      sql
      * @param valueMap map参数
      * @return Object 单个对象
+     * @throws Exception 异常
      */
-    Object getUniqueResult(String sql, Map<String, Object> valueMap);
+    Object getUniqueResult(String sql, Map<String, Object> valueMap) throws Exception;
 
+    /**
+     *
+     * @param collection 集合
+     * @return 是否成功
+     * @throws Exception 异常
+     */
     int update(Collection<Object> collection) throws Exception;
-
+    /**
+     * 更具ID更新一个对象
+     *
+     * @param object 对象
+     * @return boolean
+     * @throws Exception 异常
+     */
     int update(Object object) throws Exception;
     /**
      * @param object      查询对象
@@ -273,18 +288,21 @@ public interface SoberSupport extends Serializable {
      *
      * @param sql 简单sql
      * @return sql执行更新
+     * @throws Exception 异常
      */
-    int update(String sql);
+    int update(String sql) throws Exception;
     /**
      * @param sqlText 使用sql直接更新,参数 ？ 的jdbc原生形式
      * @param params  参数
      * @return 更新数量
+     * @throws Exception 异常
      */
-    int update(String sqlText, Object[] params);
+    int update(String sqlText, Object[] params) throws Exception;
     /**
      *
      * @param sqlText 简单的sql
      * @return 执行一个 execute
+     * @throws Exception 异常
      */
     boolean execute(String sqlText) throws Exception;
     /**
@@ -305,8 +323,9 @@ public interface SoberSupport extends Serializable {
      * @param sqlText sql
      * @param params  支持类型 Object[] or HashMap  String,Object,这里是留给参数对象的,所以params没有类型
      * @return 执行情况
+     * @throws Exception 异常
      */
-    boolean execute(Class<?> cla, String sqlText, Object params);
+    boolean execute(Class<?> cla, String sqlText, Object params) throws Exception;
 
     /**
      * 先判断是否存在,存在就使用更新,否则增加
@@ -388,8 +407,9 @@ public interface SoberSupport extends Serializable {
     /**
      * @param sql sql语句
      * @return 单一返回对象
+     * @throws Exception 异常
      */
-    Object getUniqueResult(String sql);
+    Object getUniqueResult(String sql) throws Exception;
     /**
      * @param sql sql语句
      * @param params   参数数组
@@ -401,14 +421,14 @@ public interface SoberSupport extends Serializable {
      * @param o   参数对象
      * @return 单一返回对象
      */
-    Object getUniqueResult(String sql, Object o);
+    Object getUniqueResult(String sql, Object o) throws Exception;
     /**
      * @param cla 类
      * @param sql sql
      * @param o   对象
      * @return 返回单一对象
      */
-    Object getUniqueResult(Class<?> cla, String sql, Object o);
+    Object getUniqueResult(Class<?> cla, String sql, Object o) throws Exception;
     /**
      * 计算合计,这个标签会占用大量的CPU计算资源，谨慎使用
      *
@@ -442,13 +462,14 @@ public interface SoberSupport extends Serializable {
      * @param cla bean对象是否存在表
      * @return 返回是否存在
      */
-    boolean tableExists(Class<?> cla);
+    boolean tableExists(Class<?> cla) throws Exception;
 
     /**
      * 删除表
      *
      * @param cla 删除表
      * @return 是否成功
+     * @throws Exception 异常
      */
     boolean dropTable(Class<?> cla) throws Exception;
     /**
@@ -465,15 +486,23 @@ public interface SoberSupport extends Serializable {
      * @return update 返回， jdbc
      */
     int prepareUpdate(String sqlText, Object[] param);
-
-    boolean updateFieldAddNumber(Object obj, String field, int num);
+    /**
+     *
+     * @param obj 对象
+     * @param field 字段
+     * @param num 加的数字
+     * @return 是否成功
+     * @throws Exception 异常
+     */
+    boolean updateFieldAddNumber(Object obj, String field, int num) throws Exception;
 
     /**
      * @param sqlText sql
      * @param param   参数
      * @return 执行一个存储过程
+     * @throws Exception 异常
      */
-    boolean prepareExecute(String sqlText, Object[] param);
+    boolean prepareExecute(String sqlText, Object[] param) throws Exception;
     /**
      * 简单表达式查询
      * SSqlExpression
@@ -502,8 +531,9 @@ public interface SoberSupport extends Serializable {
     /**
      * @param cla 得到最大ID
      * @return ID数
+     * @throws Exception 异常
      */
-    long getTableMaxId(Class<?> cla);
+    long getTableMaxId(Class<?> cla) throws Exception;
     /**
      * @return 返回表名称数组
      */
@@ -518,18 +548,19 @@ public interface SoberSupport extends Serializable {
      * @param start 序列值
      * @return 设置序列开始值
      */
-    boolean alterSequenceStart(Class<?> cla, long start);
+    boolean alterSequenceStart(Class<?> cla, long start) throws Exception;
     /**
      * @param cla 类对象
      * @return 得到数据库序列名称
+     * @throws Exception 异常
      */
-    String getSequenceName(Class<?> cla);
+    String getSequenceName(Class<?> cla) throws Exception;
     /**
      * 验证bean
      *
      * @param obj 验证的bean
      * @throws Exception      其他错误
-     * @throws ValidException 验证错误
+     * @throws Exception 异常
      */
     void validator(Object obj) throws Exception;
     /**

@@ -45,7 +45,7 @@ public class WordFilterView extends ActionSupport {
         this.text = text;
     }
 
-    public Set<String> getSearch( @Param(caption = "文档", max = 10000) String text) {
+    public Set<String> getSearch( @Param(caption = "文档", max = 10000) String text) throws Exception {
         Set<String> result = filter.search(text, matchType);
         if (!result.isEmpty()) {
             filter.updateTimes(result);

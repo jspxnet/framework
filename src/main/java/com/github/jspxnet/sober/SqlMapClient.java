@@ -109,7 +109,7 @@ public interface SqlMapClient {
      * @param o         对象参数
      * @return 更新是否成功
      */
-    int update(String namespace, String exeid, Object o);
+    int update(String namespace, String exeid, Object o) throws Exception;
 
     /**
      * @param namespace 命名空间
@@ -117,7 +117,7 @@ public interface SqlMapClient {
      * @param valueMap  参数msp
      * @return 更新是否成功
      */
-    int update(String namespace, String exeId, Map<String, Object> valueMap);
+    int update(String namespace, String exeId, Map<String, Object> valueMap) throws Exception;
 
     /**
      *

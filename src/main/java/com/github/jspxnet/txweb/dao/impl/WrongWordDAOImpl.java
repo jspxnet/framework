@@ -1,9 +1,7 @@
 package com.github.jspxnet.txweb.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
 import com.github.jspxnet.boot.environment.Environment;
-import org.slf4j.LoggerFactory;
 import com.github.jspxnet.sober.Criteria;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.expression.Expression;
@@ -13,7 +11,6 @@ import com.github.jspxnet.txweb.dao.WrongWordDAO;
 import com.github.jspxnet.txweb.table.WrongWord;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -115,8 +112,8 @@ public class WrongWordDAOImpl extends DFAFilterImpl implements WrongWordDAO {
     @Override
     public int importWord(String txt) throws Exception {
         int saveRow = 0;
-        List<WrongWord> saveWrongWordList = new ArrayList<WrongWord>();
-        List<String> checkList = new ArrayList<String>();
+        List<WrongWord> saveWrongWordList = new ArrayList<>();
+        List<String> checkList = new ArrayList<>();
         String[] lines = StringUtil.split(StringUtil.convertCR(txt), StringUtil.CR);
         for (String line : lines) {
             if (StringUtil.isNull(line) || checkList.contains(line)) {
@@ -191,7 +188,7 @@ public class WrongWordDAOImpl extends DFAFilterImpl implements WrongWordDAO {
     }
 
     @Override
-    public int updateTimes(Set<String> keys) {
+    public int updateTimes(Set<String> keys) throws Exception {
         TableModels soberTable = getSoberTable(WrongWord.class);
         StringBuilder sb = new StringBuilder();
         for (String key : keys) {
@@ -200,7 +197,7 @@ public class WrongWordDAOImpl extends DFAFilterImpl implements WrongWordDAO {
         if (sb.toString().endsWith(",")) {
             sb.setLength(sb.length() - 1);
         }
-        String sql = "UPDATE " + soberTable.getName() + " SET times=times+1 WHERE wrong IN(" + sb.toString() + ")";
+        String sql = "UPDATE " + soberTable.getName() + " SET times=times+1 WHERE wrong IN (" + sb.toString() + ")";
         return super.update(sql);
     }
 
@@ -219,9 +216,9 @@ public class WrongWordDAOImpl extends DFAFilterImpl implements WrongWordDAO {
             }
             super.getSoberFactory().setMaxRows(maxWord);
             List<WrongWord> list = getList(null, null, null, null, 1, maxWord);
-            Set<String> keyWordSet = new HashSet<String>();
-            for (WrongWord WrongWord : list) {
-                keyWordSet.add(WrongWord.getWrong());
+            Set<String> keyWordSet = new HashSet<>();
+            for (WrongWord wrongWord : list) {
+                keyWordSet.add(wrongWord.getWrong());
             }
             addWordToHashMap(keyWordSet);
             list.clear();

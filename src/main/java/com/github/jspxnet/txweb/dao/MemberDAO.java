@@ -26,7 +26,7 @@ import java.util.Properties;
 public interface MemberDAO extends SoberSupport {
 
 
-    int updateToken(long uid);
+    int updateToken(long uid) throws Exception;
 
     MemberDept getMemberDept(long uid);
 
