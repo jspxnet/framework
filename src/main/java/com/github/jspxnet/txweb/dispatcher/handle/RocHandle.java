@@ -153,7 +153,10 @@ public class RocHandle extends ActionHandle {
         try {
             ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
             actionInvocation.initAction();
-            actionInvocation.invoke();
+            if (ActionSupport.NONE.equalsIgnoreCase(actionInvocation.invoke()))
+            {
+                return;
+            }
             /*if (response.isCommitted())
             {
                 StringBuilder sb = new StringBuilder();

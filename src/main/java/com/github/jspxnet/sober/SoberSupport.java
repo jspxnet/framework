@@ -406,7 +406,6 @@ public interface SoberSupport extends Serializable {
     /**
      * @param sql sql语句
      * @return 单一返回对象
-     * @throws Exception 异常
      */
     Object getUniqueResult(String sql) throws Exception;
     /**
@@ -420,7 +419,7 @@ public interface SoberSupport extends Serializable {
      * @param o   参数对象
      * @return 单一返回对象
      */
-    Object getUniqueResult(String sql, Object o) throws Exception;
+    Object getUniqueResult(String sql, Object o);
     /**
      * @param cla 类
      * @param sql sql
@@ -461,7 +460,7 @@ public interface SoberSupport extends Serializable {
      * @param cla bean对象是否存在表
      * @return 返回是否存在
      */
-    boolean tableExists(Class<?> cla) throws Exception;
+    boolean tableExists(Class<?> cla);
 
     /**
      * 删除表

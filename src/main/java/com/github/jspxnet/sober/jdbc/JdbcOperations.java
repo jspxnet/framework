@@ -1844,7 +1844,6 @@ public abstract class JdbcOperations implements SoberSupport {
     /**
      * @param sql sql语句
      * @return 单一返回对象
-     * @throws Exception 异常
      */
     @Override
     public Object getUniqueResult(String sql) {

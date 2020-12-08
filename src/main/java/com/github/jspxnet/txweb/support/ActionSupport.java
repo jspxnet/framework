@@ -906,20 +906,21 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public void printError(Object out, int status) {
-
-        String info = "";
-        if (out instanceof String) {
-            info = (String) out;
-        } else if (out instanceof JSONObject) {
-            info = ((JSONObject) out).toString(4);
-        } else if (out instanceof RocResponse) {
-            info = new JSONObject(out).toString(4);
+        if (response == null) {
+            System.err.println(out);
+            return;
         }
 
-        if (response == null) {
-            System.err.println(info);
-        } else {
+        if (out instanceof JSONObject) {
+            String info = ((JSONObject) out).toString(4);
             TXWebUtil.print(info, WebOutEnumType.JSON.getValue(), response, status);
+        } else if (out instanceof RocResponse) {
+            String info = new JSONObject(out).toString(4);
+            TXWebUtil.print(info, WebOutEnumType.JSON.getValue(), response, status);
+        }
+        else
+        {
+            TXWebUtil.print(ObjectUtil.toString(out), WebOutEnumType.TEXT.getValue(), response, status);
         }
     }
 

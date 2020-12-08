@@ -148,17 +148,6 @@
             <version>1.1.1</version>
         </dependency>
         <dependency>
-            <groupId>org.weixin4j</groupId>
-            <artifactId>weixin4j</artifactId>
-            <version>0.1.6</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>servlet-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>com.googlecode.plist</groupId>
             <artifactId>dd-plist</artifactId>
             <version>1.23</version>

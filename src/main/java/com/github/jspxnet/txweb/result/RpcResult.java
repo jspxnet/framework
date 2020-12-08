@@ -49,6 +49,10 @@ public class RpcResult extends ResultSupport {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
         ActionSupport action = actionInvocation.getActionProxy().getAction();
+        if (ActionSupport.NONE.equalsIgnoreCase(action.getActionResult()))
+        {
+            return;
+        }
         //返回类型必须一致
         Method exeMethod = actionInvocation.getActionProxy().getMethod();
         if (!exeMethod.getGenericReturnType().equals(Void.TYPE))

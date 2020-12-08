@@ -72,6 +72,7 @@ public class RocResult extends ResultSupport {
             log.error("response 已经提交并且关闭,调用方法:{}",sb.toString());
             return;
         }
+
         checkCache(action, response);
         Object methodResult = getRocAutoResult(actionInvocation);
         JSONObject json;
