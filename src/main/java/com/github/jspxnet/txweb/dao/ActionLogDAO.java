@@ -28,7 +28,7 @@ public interface ActionLogDAO extends SoberSupport {
 
     String getNamespace();
 
-    Object load(String id);
+    ActionLog load(String id);
 
     boolean delete(String[] ids);
 

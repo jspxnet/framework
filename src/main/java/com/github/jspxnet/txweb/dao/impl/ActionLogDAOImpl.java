@@ -66,7 +66,7 @@ public class ActionLogDAOImpl extends JdbcOperations implements ActionLogDAO {
      * @return 载入
      */
     @Override
-    public Object load(String id) {
+    public ActionLog load(String id) {
         return super.load(ActionLog.class, id);
     }
 

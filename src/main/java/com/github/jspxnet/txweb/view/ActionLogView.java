@@ -152,7 +152,7 @@ public class ActionLogView extends ActionSupport {
      * @param param 翻页参数
      * @return 日志列表
      */
-    @Operate(caption = "日志翻页列表", method = "/list/page")
+    @Operate(caption = "日志翻页列表", method = "list/page")
     public RocResponse<List<ActionLog>> getList(@Param("翻页参数") PageParam param) {
         IRole role = getRole();
         if (role.getUserType() < UserEnumType.MANAGER.getValue()) {
