@@ -258,9 +258,8 @@ public interface SoberSupport extends Serializable {
      * @param sql      sql
      * @param valueMap map参数
      * @return Object 单个对象
-     * @throws Exception 异常
      */
-    Object getUniqueResult(String sql, Map<String, Object> valueMap) throws Exception;
+    Object getUniqueResult(String sql, Map<String, Object> valueMap);
 
     /**
      *
@@ -428,7 +427,7 @@ public interface SoberSupport extends Serializable {
      * @param o   对象
      * @return 返回单一对象
      */
-    Object getUniqueResult(Class<?> cla, String sql, Object o) throws Exception;
+    Object getUniqueResult(Class<?> cla, String sql, Object o);
     /**
      * 计算合计,这个标签会占用大量的CPU计算资源，谨慎使用
      *
@@ -531,9 +530,8 @@ public interface SoberSupport extends Serializable {
     /**
      * @param cla 得到最大ID
      * @return ID数
-     * @throws Exception 异常
      */
-    long getTableMaxId(Class<?> cla) throws Exception;
+    long getTableMaxId(Class<?> cla);
     /**
      * @return 返回表名称数组
      */
@@ -547,14 +545,14 @@ public interface SoberSupport extends Serializable {
      * @param cla   类对象
      * @param start 序列值
      * @return 设置序列开始值
+     * @throws Exception 异常
      */
     boolean alterSequenceStart(Class<?> cla, long start) throws Exception;
     /**
      * @param cla 类对象
      * @return 得到数据库序列名称
-     * @throws Exception 异常
      */
-    String getSequenceName(Class<?> cla) throws Exception;
+    String getSequenceName(Class<?> cla);
     /**
      * 验证bean
      *

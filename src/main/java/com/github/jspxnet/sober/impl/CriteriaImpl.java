@@ -280,7 +280,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         } catch (Exception e) {
             log.error("table:" + soberTable + " sql:" + sqlText, e);
             e.printStackTrace();
-            soberFactory.closeConnection(conn, true);
+            throw new IllegalArgumentException("table:" + soberTable + " sql:" + sqlText);
         } finally {
             valueMap.clear();
             JdbcUtil.closeResultSet(resultSet);
@@ -392,7 +392,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             result = jdbcOperations.update(dialect.processTemplate(Dialect.SQL_CRITERIA_UPDATE, valueMap), objectArray);
         } catch (Exception e) {
             e.printStackTrace();
-            result = -2;
+            throw new IllegalArgumentException(e.getMessage());
         }
         jdbcOperations.evict(criteriaClass);
         return result;

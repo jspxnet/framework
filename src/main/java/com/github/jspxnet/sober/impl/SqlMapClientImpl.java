@@ -94,14 +94,8 @@ public class SqlMapClientImpl implements SqlMapClient {
         }
         Dialect dialect = soberFactory.getDialect();
         String sql = StringUtil.empty;
-        try {
-            sql = dialect.processSQL(mapSql.getContext(), valueMap);
-            return jdbcOperations.getUniqueResult(sql);
-        } catch (Exception e) {
-            log.error("processSQL " + sql, e);
-            e.printStackTrace();
-            throw new IllegalArgumentException("查询异常sql:" + sql);
-        }
+        sql = dialect.processSQL(mapSql.getContext(), valueMap);
+        return jdbcOperations.getUniqueResult(sql);
     }
 
 
@@ -116,6 +110,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param rollRows    是否滚动
      * @param <T> 返回类型
      * @return 返回列表
+     * @throws Exception 异常
      */
     @Override
     public <T> List<T> query(String namespace, String exeId, Object o, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception {
@@ -130,6 +125,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param valueMap 参数对象
      * @param <T> 类
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     @Override
     public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
@@ -144,6 +140,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param cls 类
      * @param <T> 类型
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     @Override
     public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, Class<T> cls) throws Exception {
@@ -325,7 +322,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         } catch (Exception e) {
             log.error("error SQL:{},info:{}",sqlText, e.getMessage());
             e.printStackTrace();
-            throw  e;
+            throw new Exception("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(preparedStatement);
@@ -342,10 +339,9 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param exeId     查询ID,是列表的id  不用在写一边查询总数的sql
      * @param valueMap  参数
      * @return 这里 exeId 是列表的id,
-     * @throws Exception 异常
      */
     @Override
-    public long queryCount(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
+    public long queryCount(String namespace, String exeId, Map<String, Object> valueMap)  {
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
         if (sqlRoom == null) {
             log.error("ERROR:not get sql map namespace " + namespace + ",sql映射中不能够得到相应的命名空间");
@@ -366,7 +362,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         String sqlText = StringUtil.empty;
         sqlText = dialect.processSQL(mapSql.getContext(), valueMap);
         if (StringUtil.isNull(sqlText)) {
-            throw new Exception("ERROR SQL IS NULL");
+            throw new IllegalArgumentException("ERROR SQL IS NULL:" + sqlText);
         }
         sqlText = StringUtil.removeOrders(sqlText);
         sqlText = "SELECT count(1) as countNum FROM (" + sqlText + ") queryCount";

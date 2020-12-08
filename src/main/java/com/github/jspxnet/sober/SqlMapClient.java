@@ -160,7 +160,6 @@ public interface SqlMapClient {
      * @param cls 类型
      * @param <T> 类型
      * @return 返回查询列表
-     * @throws Exception 异常
      */
     <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception;
 
@@ -171,8 +170,7 @@ public interface SqlMapClient {
      * @param exeId     查询ID,是列表的id  不用在写一边查询总数的sql
      * @param valueMap  参数
      * @return 这里 exeId 是列表的id,
-     * @throws Exception 异常
      */
-    long queryCount(String namespace, String exeId, Map<String, Object> valueMap) throws Exception;
+    long queryCount(String namespace, String exeId, Map<String, Object> valueMap);
 
 }

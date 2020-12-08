@@ -1,13 +1,9 @@
 package com.github.jspxnet.network.rpc.model.transfer;
 
-import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.util.RequestUtil;
-import com.github.jspxnet.txweb.util.TXWebUtil;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
-
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;

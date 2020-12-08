@@ -629,7 +629,7 @@ public abstract class JdbcOperations implements SoberSupport {
             }
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
-            soberFactory.closeConnection(conn, true);
+            throw new IllegalArgumentException("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(preparedStatement);
@@ -720,7 +720,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return -2;
         }
         if (object instanceof Collection) {
-            return save((Collection) object);
+            return save((Collection<?>) object);
         }
         //////////配置验证才能够保存 begin
         if (soberFactory.isValid()) {
@@ -846,7 +846,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @throws ValidException 其他错误
      */
     @Override
-    public int save(Collection collection) throws Exception {
+    public int save(Collection<?> collection) throws Exception {
         if (collection == null || collection.size() < 1) {
             return -2;
         }
@@ -945,7 +945,7 @@ public abstract class JdbcOperations implements SoberSupport {
         } catch (Exception e) {
             log.error("ERROR SQL:" + sqlText, e);
             e.printStackTrace();
-            return -2;
+            throw e;
         } finally {
             conn.setAutoCommit(oldAutoCommit);
             JdbcUtil.closeStatement(statement);
@@ -999,7 +999,6 @@ public abstract class JdbcOperations implements SoberSupport {
         if (ClassUtil.isStandardProperty(o.getClass())) {
             log.debug("delete 参数错误，必须传入对象{}", o);
         }
-
         TableModels soberTable = getSoberTable(o.getClass());
         Object key = BeanUtil.getProperty(o, soberTable.getPrimary());
         return delete(o.getClass(), soberTable.getPrimary(), (Serializable) key);
@@ -1502,7 +1501,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return statement.executeUpdate();
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
-            return -2;
+           throw e;
         } finally {
             valueMap.clear();
             JdbcUtil.closeResultSet(resultSet);
@@ -1521,7 +1520,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @throws Exception                                         异常
      * @throws com.github.jspxnet.sober.exception.ValidException 验证错误
      */
-    private int saveOrUpdateAll(Collection collection) throws Exception {
+    private int saveOrUpdateAll(Collection<?> collection) throws Exception {
         if (collection == null || collection.isEmpty()) {
             return -2;
         }
@@ -1595,7 +1594,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return result;
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
-            return -2;
+            throw e;
         } finally {
             valueMap.clear();
             JdbcUtil.closeResultSet(resultSet);
@@ -1682,6 +1681,7 @@ public abstract class JdbcOperations implements SoberSupport {
             }
         } catch (Exception e) {
             log.error(soberTable.toString() + ",SQL:" + sql, e);
+            throw new IllegalArgumentException(soberTable.toString() + ",SQL:" + sql);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -1733,6 +1733,7 @@ public abstract class JdbcOperations implements SoberSupport {
             }
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
+            throw new IllegalArgumentException("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -1798,6 +1799,7 @@ public abstract class JdbcOperations implements SoberSupport {
             }
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
+            throw new IllegalArgumentException("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -1814,7 +1816,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 返回单一对象
      */
     @Override
-    public Object getUniqueResult(Class<?> cla, String sql, Object o) throws Exception {
+    public Object getUniqueResult(Class<?> cla, String sql, Object o) {
         Map<String, Object> valueMap = ObjectUtil.getMap(o);
         TableModels soberTable = getSoberTable(cla);
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
@@ -1828,7 +1830,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 单一返回对象
      */
     @Override
-    public Object getUniqueResult(String sql, Object o) throws Exception {
+    public Object getUniqueResult(String sql, Object o)  {
         Map<String, Object> valueMap = null;
         if (o != null) {
             valueMap = ObjectUtil.getMap(o);
@@ -1845,7 +1847,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @throws Exception 异常
      */
     @Override
-    public Object getUniqueResult(String sql) throws Exception {
+    public Object getUniqueResult(String sql) {
         return getUniqueResult(sql, (Object) null);
     }
 
@@ -1881,6 +1883,7 @@ public abstract class JdbcOperations implements SoberSupport {
             }
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
+            throw new IllegalArgumentException("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -1896,10 +1899,9 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param sql      sql
      * @param valueMap map参数
      * @return Object
-     * @throws Exception 异常
      */
     @Override
-    public Object getUniqueResult(String sql, Map<String, Object> valueMap) throws Exception {
+    public Object getUniqueResult(String sql, Map<String, Object> valueMap) {
         Connection conn = null;
         Statement statement = null;
         ResultSet resultSet = null;
@@ -1919,7 +1921,7 @@ public abstract class JdbcOperations implements SoberSupport {
             }
         } catch (Exception e) {
             log.error("SQL:" + sqlText, e);
-            throw e;
+            throw new IllegalArgumentException("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -2086,10 +2088,9 @@ public abstract class JdbcOperations implements SoberSupport {
      *
      * @param cla bean对象是否存在表
      * @return 返回是否存在
-     * @throws Exception 异常
      */
     @Override
-    public boolean tableExists(Class<?> cla) throws Exception {
+    public boolean tableExists(Class<?> cla) {
         if (DefaultCache.class.equals(cla)) {
             return false;
         }
@@ -2104,10 +2105,9 @@ public abstract class JdbcOperations implements SoberSupport {
     /**
      * @param cla 得到最大ID
      * @return ID数
-     * @throws Exception 异常
      */
     @Override
-    public long getTableMaxId(Class<?> cla) throws Exception {
+    public long getTableMaxId(Class<?> cla) {
         TableModels soberTable = getSoberTable(cla);
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
@@ -2123,12 +2123,7 @@ public abstract class JdbcOperations implements SoberSupport {
     public long getDataBaseSize(String databaseName) {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, databaseName);
-        try {
-            return ObjectUtil.toLong(getUniqueResult(dialect.processTemplate(Dialect.DATABASE_SIZE, valueMap)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return ObjectUtil.toLong(getUniqueResult(dialect.processTemplate(Dialect.DATABASE_SIZE, valueMap)));
     }
 
     /**
@@ -2160,6 +2155,7 @@ public abstract class JdbcOperations implements SoberSupport {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("SQL:" + sqlText, e);
+            throw new IllegalArgumentException("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -2172,10 +2168,9 @@ public abstract class JdbcOperations implements SoberSupport {
     /**
      * @param cla 类对象
      * @return 得到数据库序列名称
-     * @throws Exception 异常
      */
     @Override
-    public String getSequenceName(Class<?> cla) throws Exception {
+    public String getSequenceName(Class<?> cla) {
         if (!dialect.supportsSequenceName()) {
             return null;
         }
@@ -2331,9 +2326,9 @@ public abstract class JdbcOperations implements SoberSupport {
                 result.add(ReflectUtil.createDynamicBean(beanMap));
             }
         } catch (Exception e) {
-            log.error("ERROR SQL:" + sqlText, e);
+            log.error("SQL:" + sqlText, e);
             e.printStackTrace();
-            return result;
+            throw new IllegalArgumentException("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
