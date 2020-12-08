@@ -567,5 +567,10 @@ public interface SoberSupport extends Serializable {
      */
     void evictLoad(Class<?> cla, String field, Serializable id);
 
-
+    /**
+     *
+     * @param data 更新缓存数据
+     * @param loadChild 是否为载入子对象
+     */
+    void updateLoadCache(Object data, boolean loadChild);
 }

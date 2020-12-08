@@ -2536,4 +2536,25 @@ public abstract class JdbcOperations implements SoberSupport {
             JSCacheManager.queryRemove(cla, cacheKey);
         }
     }
+
+    /**
+     *
+     * @param data 更新缓存数据
+     * @param loadChild 是否为载入子对象
+     */
+    @Override
+    public void updateLoadCache(Object data,boolean loadChild) {
+        if (data==null)
+        {
+            return;
+        }
+        if (soberFactory.isUseCache()) {
+            Class<?> cla = data.getClass();
+            TableModels soberTable = getSoberTable(cla);
+            Object id = BeanUtil.getProperty(data,soberTable.getPrimary());
+            String cacheKey = SoberUtil.getLoadKey(cla, soberTable.getPrimary(), id, loadChild);
+            JSCacheManager.put(cla,cacheKey,data);
+        }
+    }
+
 }
