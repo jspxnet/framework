@@ -318,11 +318,11 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
         if (StringUtil.isNull(name)) {
             return null;
         }
-        int num = createCriteria(Member.class).add(Expression.eq("name", name)).setProjection(Projections.rowCount()).intUniqueResult();
+        int num = createCriteria(Member.class).add(Expression.like("name", name+"%")).setProjection(Projections.rowCount()).intUniqueResult();
         if (num == 0) {
             return name;
         }
-        return name + (num + 1);
+        return name + (num + 1) + RandomUtil.getRandomGUID(2);
     }
 
     @Override

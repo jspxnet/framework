@@ -272,6 +272,8 @@ public class Member extends OperateTable implements IMember {
     @Column(caption = "机构ID", length = 65)
     private String organizeId = StringUtil.empty;
 
+    @Column(caption = "来源分享id")
+    private long linkId = 0;
 
     @Nexus(mapping = MappingType.OneToMany, field = "id", targetField = "uid", targetEntity = MemberRole.class, chain = true, delete = false)
     private List<MemberRole> memberRoles = new ArrayList<>();
