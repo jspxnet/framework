@@ -19,6 +19,7 @@ import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
+import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -211,10 +212,9 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param cls 类型
      * @param <T> 类型
      * @return 返回查询列表
-     * @throws Exception 异常
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception {
+    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) {
         if (totalCount > jdbcOperations.getMaxRows()) {
             totalCount = jdbcOperations.getMaxRows();
         }
@@ -322,7 +322,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         } catch (Exception e) {
             log.error("error SQL:{},info:{}",sqlText, e.getMessage());
             e.printStackTrace();
-            throw new Exception("SQL:" + sqlText);
+            throw new IllegalArgumentException("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(preparedStatement);
@@ -409,6 +409,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param exeid     执行id
      * @param o         对象参数
      * @return 更新是否成功
+     * @throws Exception 异常
      */
     @Override
     public int update(String namespace, String exeid, Object o) throws Exception {

@@ -407,7 +407,7 @@ public interface SoberSupport extends Serializable {
      * @param sql sql语句
      * @return 单一返回对象
      */
-    Object getUniqueResult(String sql) throws Exception;
+    Object getUniqueResult(String sql);
     /**
      * @param sql sql语句
      * @param params   参数数组
