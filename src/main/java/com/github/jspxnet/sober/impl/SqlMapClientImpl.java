@@ -422,6 +422,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param exeId     执行id
      * @param valueMap  参数msp
      * @return 更新是否成功
+     *  @throws Exception 异常
      */
     @Override
     public int update(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {

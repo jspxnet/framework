@@ -61,6 +61,7 @@ public class SequenceFactory {
      * @param type 类型
      * @param jdbcOperations 数据库对象
      * @return 返回key
+     * @throws Exception 异常
      */
      public String getNextKey(String keyName, Id idf, Class<?> type, JdbcOperations jdbcOperations) throws Exception {
         Sequences tableSequences = (Sequences)JSCacheManager.get(Sequences.class,keyName);
