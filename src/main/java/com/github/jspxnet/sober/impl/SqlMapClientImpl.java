@@ -94,8 +94,7 @@ public class SqlMapClientImpl implements SqlMapClient {
             return null;
         }
         Dialect dialect = soberFactory.getDialect();
-        String sql = StringUtil.empty;
-        sql = dialect.processSQL(mapSql.getContext(), valueMap);
+        String sql = dialect.processSQL(mapSql.getContext(), valueMap);
         return jdbcOperations.getUniqueResult(sql);
     }
 
@@ -212,9 +211,10 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param cls 类型
      * @param <T> 类型
      * @return 返回查询列表
+     * @throws Exception 异常
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) {
+    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception {
         if (totalCount > jdbcOperations.getMaxRows()) {
             totalCount = jdbcOperations.getMaxRows();
         }
@@ -322,7 +322,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         } catch (Exception e) {
             log.error("error SQL:{},info:{}",sqlText, e.getMessage());
             e.printStackTrace();
-            throw new IllegalArgumentException("SQL:" + sqlText);
+            throw new Exception("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(preparedStatement);

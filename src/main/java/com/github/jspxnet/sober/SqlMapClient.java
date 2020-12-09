@@ -161,8 +161,9 @@ public interface SqlMapClient {
      * @param cls 类型
      * @param <T> 类型
      * @return 返回查询列表
+     * @throws Exception 异常
      */
-    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls);
+    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception;
 
     /**
      * 用来避免写两次SQL 来得到翻页的总数,这里映入查询,就自动封装得到行数
@@ -170,7 +171,7 @@ public interface SqlMapClient {
      * @param namespace 命名空间
      * @param exeId     查询ID,是列表的id  不用在写一边查询总数的sql
      * @param valueMap  参数
-     * @return 这里 exeId 是列表的id,
+     * @return 这里 exeId 是列表的id
      */
     long queryCount(String namespace, String exeId, Map<String, Object> valueMap);
 
