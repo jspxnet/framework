@@ -107,7 +107,7 @@ public class SequenceFactory {
      * @param type 类型
      * @return 对象
      */
-    private Sequences createSequences(String keyName, Id idf, Class type)
+    private Sequences createSequences(String keyName, Id idf, Class<?> type)
     {
         Sequences tableSequences = new Sequences();
         tableSequences.setName(keyName);
