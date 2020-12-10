@@ -156,7 +156,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String version = "6.24";
+    final static public String version = "6.27";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
