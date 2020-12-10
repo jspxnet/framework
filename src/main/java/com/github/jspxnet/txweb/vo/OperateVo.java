@@ -51,11 +51,11 @@ public class OperateVo implements Serializable {
 
     @JsonField(name = "actionMethodId")
     public String getActionMethodId() {
-        return TXWebUtil.getOperateMethodId(namespace, actionName, classMethod);
+        return TXWebUtil.getOperateMethodId(namespace, className, classMethod);
     }
 
     @JsonField(name = "id")
     public String getId() {
-        return EncryptUtil.getMd5(TXWebUtil.getOperateMethodId(namespace, actionName, classMethod));
+        return EncryptUtil.getMd5(TXWebUtil.getOperateMethodId(namespace, className, classMethod));
     }
 }

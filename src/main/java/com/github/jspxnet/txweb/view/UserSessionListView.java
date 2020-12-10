@@ -133,7 +133,7 @@ public class UserSessionListView extends ActionSupport {
             return RocResponse.error(ErrorEnumType.POWER);
         }
         RocResponse<List<UserSession>> rocResponse = BeanUtil.copy(param,RocResponse.class);
-        return rocResponse.setData( memberDAO.getOnlineList(param.getTerm(),param.getSort(),param.getCurrentPage(),param.getCount(), load)).setTotalCount(memberDAO.getOnlineCount(param.getTerm()));
+        return rocResponse.setData( memberDAO.getOnlineList(param.getTerm(),param.getSort(),param.getCurrentPage(),param.getCount(),load)).setTotalCount(memberDAO.getOnlineCount(param.getTerm()));
     }
 
 }

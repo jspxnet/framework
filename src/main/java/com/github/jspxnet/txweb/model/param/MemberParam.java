@@ -65,6 +65,8 @@ public class MemberParam implements Serializable {
     @Param(caption = "机构ID", max = 65)
     private String organizeId = StringUtil.empty;
 
+    @Param(caption = "分享id")
+    private long linkId = 0;
 
     @Param(caption = "验证码")
     private String validate = StringUtil.empty;

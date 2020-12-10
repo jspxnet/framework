@@ -614,7 +614,7 @@ public class TXWebConfigManager implements WebConfigManager {
                     actionBean.setClassName(className);
                 }
 
-                Class cls = ClassUtil.loadClass(className);
+                Class<?> cls = ClassUtil.loadClass(className);
                 Map<Operate, Method> operateMap = TXWebUtil.getClassOperateList(cls);
                 //手动配置部分 begin
                 if (!actionBean.isRegister()) {
@@ -740,7 +740,6 @@ public class TXWebConfigManager implements WebConfigManager {
 
         List<OperateVo> resultList = new ArrayList<>(checkMap.size());
         resultList.addAll(checkMap.values());
-
         Collections.sort(resultList, new OperateComparator());
         JSCacheManager.put(OperateVo.class, cacheKey, resultList);
         return resultList;
