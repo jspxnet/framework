@@ -10,12 +10,12 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.25</version>
+    <version>6.27</version>
 </dependency>
 ```
 
 ##6.x  
-    6.x 以替代 sping cloud 构架
+    6.x 替代 sping cloud 构架
     
 ##参考手册
     http://www.jspx.net/help
@@ -122,4 +122,5 @@
 *    2020年9月：Jspx.net Framework 6.17 规范代码
 *    2020年9月：Jspx.net Framework 6.18-22 稳定版本,调整上传支持云盘
 *    2020年10月：Jspx.net Framework 6.23 添加SqlMap注释,支持查询,调整用户支持来源
-*    2020年11月：Jspx.net Framework 6.24 微调,稳定版本
+*    2020年11月：Jspx.net Framework 6.24-26 微调
+*    2020年12月：Jspx.net Framework 6.27 稳定版本,迁移出部分功能,修复bug,做了部分调整避免事务才坑
