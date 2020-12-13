@@ -506,6 +506,11 @@
             <scope>compile</scope>
         </dependency>
         <!--maven tools end -->
+        <dependency>
+            <groupId>com.orbitz.consul</groupId>
+            <artifactId>consul-client</artifactId>
+            <version>1.5.0</version>
+        </dependency>
     </dependencies>
 
 
