@@ -25,10 +25,10 @@ public class ConsulDemo {
         AgentClient agent = consul.agentClient();
 
         //健康检测
-        ImmutableRegCheck check = ImmutableRegCheck.builder().http("http://192.168.1.200:9020/health").interval("5s").build();
+        ImmutableRegCheck check = ImmutableRegCheck.builder().http("http://127.0.0.1:9020/health").interval("5s").build();
 
         ImmutableRegistration.Builder builder = ImmutableRegistration.builder();
-        builder.id("tomcat1").name("tomcat").addTags("v1").address("192.168.1.200").port(8080).addChecks(check);
+        builder.id("tomcat1").name("tomcat").addTags("v1").address("127.0.0.1").port(8080).addChecks(check);
 
         agent.register(builder.build());
     }

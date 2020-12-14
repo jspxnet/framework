@@ -130,8 +130,6 @@ public class TXWebConfigManager implements WebConfigManager {
         }
         //1.初始化所有配置动作
 
-
-
         scanPackageList.clear();
         configuration = DefaultConfiguration.getInstance();
         try {
@@ -151,8 +149,6 @@ public class TXWebConfigManager implements WebConfigManager {
 
         defaultResultMap.clear();
         defaultResultMap.putAll(configuration.getDefaultResultMap());
-
-
 
 
         //2.生成restFull路径
@@ -273,7 +269,7 @@ public class TXWebConfigManager implements WebConfigManager {
         if (cla.isInterface() || cla.isPrimitive() || cla.isAnonymousClass() || cla.isEnum()) {
             return;
         }
-        HttpMethod httpMethod = (HttpMethod) cla.getAnnotation(HttpMethod.class);
+        HttpMethod httpMethod = cla.getAnnotation(HttpMethod.class);
         if (httpMethod == null) {
             return;
         }
@@ -312,7 +308,7 @@ public class TXWebConfigManager implements WebConfigManager {
      * @return 得到默认拦截器配置, 默认拦截器不使用继承方式
      */
     @Override
-    public List<String> getDefaultInterceptors(String namespace) throws Exception {
+    public List<String> getDefaultInterceptors(String namespace)  {
         checkLoad();
         String nameK = StringUtil.fixedNamespace(namespace);
         if (StringUtil.isNull(nameK)) {
@@ -387,7 +383,7 @@ public class TXWebConfigManager implements WebConfigManager {
      * @return 得到命名空间列表
      */
     @Override
-    public List<String> getNamespaceList() throws Exception {
+    public List<String> getNamespaceList() {
         checkLoad();
         List<String> result = new ArrayList<>();
         for (String key : extendMap.keySet()) {
@@ -422,7 +418,7 @@ public class TXWebConfigManager implements WebConfigManager {
      * @return 得到命名空间继承关系列表
      */
     @Override
-    public Map<String, String> getExtendList() throws Exception {
+    public Map<String, String> getExtendList()  {
         return extendMap;
     }
 
@@ -468,10 +464,9 @@ public class TXWebConfigManager implements WebConfigManager {
      * @param namePart  action name
      * @param namespace 命名控件
      * @return 配置
-     * @throws IOException 异常
      */
     @Override
-    public ActionConfig getActionConfig(String namePart, String namespace, boolean reload) throws Exception {
+    public ActionConfig getActionConfig(String namePart, String namespace, boolean reload)  {
 
         if (namePart == null) {
             namePart = StringUtil.ASTERISK;
@@ -560,10 +555,9 @@ public class TXWebConfigManager implements WebConfigManager {
      *
      * @param namespace 命名空间
      * @return 动作配置列表
-     * @throws Exception 异常
      */
     @Override
-    public Map<String, ActionConfigBean> getActionMap(String namespace) throws Exception {
+    public Map<String, ActionConfigBean> getActionMap(String namespace)  {
 
         String nameKey = StringUtil.isNull(namespace) ? TXWeb.global : StringUtil.fixedNamespace(namespace);
         Map<String, Map<String, ActionConfigBean>> fullConfigTable = getConfigTable();
@@ -682,7 +676,7 @@ public class TXWebConfigManager implements WebConfigManager {
 
 
                 String actionName = "*";
-                HttpMethod httpMethod = (HttpMethod) cls.getAnnotation(HttpMethod.class);
+                HttpMethod httpMethod = cls.getAnnotation(HttpMethod.class);
                 if (httpMethod != null) {
                     actionName = httpMethod.actionName();
                 }
