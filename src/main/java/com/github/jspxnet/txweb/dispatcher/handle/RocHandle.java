@@ -157,16 +157,6 @@ public class RocHandle extends ActionHandle {
             {
                 return;
             }
-            /*if (response.isCommitted())
-            {
-                StringBuilder sb = new StringBuilder();
-                for (StackTraceElement stackTraceElement:Thread.currentThread().getStackTrace())
-                {
-                    sb.append(stackTraceElement.getLineNumber()).append(StringUtil.COLON).append(stackTraceElement.getClassName()).append(".").append(stackTraceElement.getMethodName()).append(StringUtil.CRLF);
-                }
-                log.error("response 已经提交并且关闭,调用方法:{}",sb.toString());
-                return;
-            }*/
             actionInvocation.executeResult(new RocResult(dataField));
         } finally {
             LOCK.unlock();
