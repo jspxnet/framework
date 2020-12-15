@@ -153,9 +153,26 @@ public class MemberVo implements Serializable {
     @Column(caption = "unionid")
     private String unionid;
 
+    @Column(caption = "部门列表")
+    private List<MemberDeptVo> deptList = new ArrayList(0);
+
     @JsonIgnore
     private List<Role> roleList = new ArrayList<>();
 
+    public MemberDeptVo getDepartment()
+    {
+        for (MemberDeptVo memberDeptVo:deptList)
+        {
+            if (YesNoEnumType.YES.getValue()==memberDeptVo.getDefaultType())
+            {
+                return memberDeptVo;
+            }
+        }
+        MemberDeptVo memberDeptVo = new MemberDeptVo();
+        memberDeptVo.setDepartmentId(null);
+        memberDeptVo.setDepartment("无");
+        return  memberDeptVo;
+    }
 
     @JsonField(name = "roleCaption", caption = "角色列表")
     public String getRoleCaption()

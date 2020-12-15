@@ -753,14 +753,8 @@ public class RequestUtil {
                         BeanUtil.setSimpleProperty(result, method.getName(), getArray(request, propertyName, safe));
                     } else if (type[0].equals(java.util.Date.class)) {
                         BeanUtil.setSimpleProperty(result, method.getName(), getDate(request, propertyName, new Date()));
-                    } else if (type[0].equals(Long.class)) {
-                        BeanUtil.setSimpleProperty(result, method.getName(), getLong(request, propertyName));
-                    } else if (type[0].equals(Integer.class)) {
-                        BeanUtil.setSimpleProperty(result, method.getName(), getInt(request, propertyName));
-                    } else if (type[0].equals(Boolean.class)) {
-                        BeanUtil.setSimpleProperty(result, method.getName(), getBoolean(request, propertyName));
                     } else {
-                        BeanUtil.setSimpleProperty(result, method.getName(), getString(request, propertyName, safe));
+                        BeanUtil.setSimpleProperty(result, method.getName(),BeanUtil.getTypeValue( getString(request, propertyName, safe),type[0]));
                     }
                 }
             }

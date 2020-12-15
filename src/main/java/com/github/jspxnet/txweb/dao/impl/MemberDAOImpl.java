@@ -49,7 +49,7 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
 
     @Override
     public MemberDept getMemberDept(long uid) {
-        return (MemberDept) createCriteria(MemberDept.class).add(Expression.eq("uid", uid)).add(Expression.eq("def", YesNoEnumType.YES.getValue())).objectUniqueResult(false);
+        return createCriteria(MemberDept.class).add(Expression.eq("uid", uid)).add(Expression.eq("defaultType", YesNoEnumType.YES.getValue())).objectUniqueResult(false);
     }
 
     /**

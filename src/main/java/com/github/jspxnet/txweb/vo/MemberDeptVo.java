@@ -1,22 +1,17 @@
-package com.github.jspxnet.txweb.table;
+package com.github.jspxnet.txweb.vo;
 
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Table;
-import com.github.jspxnet.sober.table.OperateTable;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-/**
- * 用户部门信息表，保持用户所在岗位部门信息
- */
-@EqualsAndHashCode(callSuper = true)
+import java.io.Serializable;
+
 @Data
-@Table(name = "jspx_member_dept", caption = "用户部门信息表",cache = false)
-public class MemberDept extends OperateTable {
-    @Id
+@Table(caption = "部门信息", create = false)
+public class MemberDeptVo implements Serializable {
     @Column(caption = "ID", notNull = true)
     private long id;
 
@@ -45,16 +40,8 @@ public class MemberDept extends OperateTable {
     @Column(caption = "默认", notNull = true)
     private int defaultType = 0;
 
-
     @JsonIgnore
     @Column(caption = "机构ID", length = 32)
     private String organizeId = StringUtil.empty;
-
-    public String getDepartmentCaption() {
-        if (StringUtil.isNull(department) || !department.contains("/")) {
-            return department;
-        }
-        return StringUtil.substringAfterLast(department, "/");
-    }
 
 }

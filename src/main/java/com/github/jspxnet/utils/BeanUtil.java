@@ -304,60 +304,60 @@ public class BeanUtil {
             } else {
                 return obj;
             }
-        } else {
-            if (aType.equals(Boolean.class) || aType.equals(boolean.class)) {
-                return ObjectUtil.toBoolean(obj);
-            } else if (aType.equals(int.class) || aType.equals(Integer.class)) {
-                return ObjectUtil.toInt(obj);
-            } else if (aType.equals(long.class) || aType.equals(Long.class)) {
-                return ObjectUtil.toLong(obj);
-            } else if (aType.equals(float.class) || aType.equals(Float.class)) {
-                return ObjectUtil.toFloat(obj);
-            } else if (aType.equals(double.class) || aType.equals(Double.class)) {
-                return ObjectUtil.toDouble(obj);
-            } else if (aType.equals(BigDecimal.class))
-            {
-                return new BigDecimal(ObjectUtil.toString(obj));
-            } else if (aType.equals(BigInteger.class))
-            {
-                return new BigInteger(ObjectUtil.toString(obj));
-            } else if (aType.equals(Date.class)) {
-                return ObjectUtil.toDate(obj);
-            } else if (aType.equals(java.sql.Date.class)) {
-                return ObjectUtil.toSqlDate(obj);
-            } else if (aType.equals(Timestamp.class)) {
-                return ObjectUtil.toSqlTimestamp(obj);
-            } else if (aType.equals(String.class)) {
-                if (obj instanceof JSONObject) {
-                    JSONObject jsonObject = (JSONObject) obj;
-                    if (jsonObject.isEmpty()) {
-                        return "";
-                    }
+        }
+
+        if (aType.equals(Boolean.class) || aType.equals(boolean.class)) {
+            return ObjectUtil.toBoolean(obj);
+        } else if (aType.equals(int.class) || aType.equals(Integer.class)) {
+            return ObjectUtil.toInt(obj);
+        } else if (aType.equals(long.class) || aType.equals(Long.class)) {
+            return ObjectUtil.toLong(obj);
+        } else if (aType.equals(float.class) || aType.equals(Float.class)) {
+            return ObjectUtil.toFloat(obj);
+        } else if (aType.equals(double.class) || aType.equals(Double.class)) {
+            return ObjectUtil.toDouble(obj);
+        } else if (aType.equals(BigDecimal.class))
+        {
+            return new BigDecimal(ObjectUtil.toString(obj));
+        } else if (aType.equals(BigInteger.class))
+        {
+            return new BigInteger(ObjectUtil.toString(obj));
+        } else if (aType.equals(Date.class)) {
+            return ObjectUtil.toDate(obj);
+        } else if (aType.equals(java.sql.Date.class)) {
+            return ObjectUtil.toSqlDate(obj);
+        } else if (aType.equals(Timestamp.class)) {
+            return ObjectUtil.toSqlTimestamp(obj);
+        } else if (aType.equals(String.class)) {
+            if (obj instanceof JSONObject) {
+                JSONObject jsonObject = (JSONObject) obj;
+                if (jsonObject.isEmpty()) {
+                    return "";
                 }
-                return obj;
-            } else if (aType.equals(InputStream.class) && obj instanceof String) {
-                String str = (String) obj;
-                if (str.startsWith(JSONObject.BIN_DATA_START)) {
-                    String data = StringUtil.substringAfter(str, JSONObject.BIN_DATA_START);
-                    byte[] buf = EncryptUtil.getBase64Decode(data, EncryptUtil.NO_WRAP);
-                    return new ByteArrayInputStream(buf);
-                }
-                return obj;
-            } else if (obj instanceof JSONObject && !ClassUtil.isStandardType(aType)) {
-                if (ObjectUtil.isEmpty(obj)) {
-                    return  null;
-                } else
-                if (ClassUtil.isArrayType(aType)) {
-                    Gson gson = GsonUtil.createGson();
-                    JSONObject json = (JSONObject)obj;
-                    return gson.fromJson(json.toString(),aType);
-                } else {
-                    JSONObject json = (JSONObject) obj;
-                    return json.parseObject((Class) aType);
-                }
-            } else {
-                return obj;
             }
+            return obj;
+        } else if (aType.equals(InputStream.class) && obj instanceof String) {
+            String str = (String) obj;
+            if (str.startsWith(JSONObject.BIN_DATA_START)) {
+                String data = StringUtil.substringAfter(str, JSONObject.BIN_DATA_START);
+                byte[] buf = EncryptUtil.getBase64Decode(data, EncryptUtil.NO_WRAP);
+                return new ByteArrayInputStream(buf);
+            }
+            return obj;
+        } else if (obj instanceof JSONObject && !ClassUtil.isStandardType(aType)) {
+            if (ObjectUtil.isEmpty(obj)) {
+                return  null;
+            } else
+            if (ClassUtil.isArrayType(aType)) {
+                Gson gson = GsonUtil.createGson();
+                JSONObject json = (JSONObject)obj;
+                return gson.fromJson(json.toString(),aType);
+            } else {
+                JSONObject json = (JSONObject) obj;
+                return json.parseObject((Class) aType);
+            }
+        } else {
+            return obj;
         }
 
     }

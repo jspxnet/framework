@@ -441,7 +441,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      * @return List 返回列表
      */
     @Override
-    public List<T> list(boolean loadChild) {
+    public List<T> list(boolean loadChild)
+    {
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
         if (soberTable == null) {
             log.error("no fond sober Config :" + criteriaClass.getName());
