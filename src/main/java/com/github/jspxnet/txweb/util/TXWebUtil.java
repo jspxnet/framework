@@ -1126,6 +1126,7 @@ public class TXWebUtil {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         Map<String, Object> venParams = new HashMap<>();
         venParams.put(Environment.filterSuffix, envTemplate.getString(Environment.filterSuffix));
+        venParams.put(Environment.ApiFilterSuffix, envTemplate.getString(Environment.ApiFilterSuffix));
         venParams.put(Environment.templateSuffix, envTemplate.getString(Environment.templateSuffix));
         venParams.put(Environment.encode, Dispatcher.getEncode());
         venParams.put(Environment.remoteHostUrl, envTemplate.getString(Environment.remoteHostUrl, StringUtil.empty));

@@ -127,17 +127,9 @@ public abstract class Environment {
 
     final public static String domainName = "domainName";
 
-    final public static String lessSuffix = "less";
-
     final public static String remote = "remote";
 
-    final public static String Application = "Application";
-
     final public static String frameworkName = "jspx.net framework";
-
-    final public static String jcacheThreadName = "jspx.net-jcache";
-
-    final public static String useThreadLocal = "useThreadLocal";
 
     final public static String useEvasive = "useEvasive";
 
