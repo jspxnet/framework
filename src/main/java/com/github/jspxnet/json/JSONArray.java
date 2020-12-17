@@ -542,7 +542,13 @@ public class JSONArray extends ArrayList {
      * @return this.
      */
     public JSONArray put(Map value) {
-        super.add(new JSONObject(value));
+        if (value instanceof JSONObject)
+        {
+            super.add(value);
+        } else
+        {
+            super.add(new JSONObject(value));
+        }
         return this;
     }
 
@@ -621,7 +627,13 @@ public class JSONArray extends ArrayList {
      * @throws JSONException If the index is negative.
      */
     public JSONArray put(int index, int value) throws JSONException {
-        super.set(index, new Integer(value));
+        if (super.size()>index)
+        {
+            super.set(index, new Integer(value));
+        } else
+        {
+            super.add(index, new Integer(value));
+        }
         return this;
     }
 

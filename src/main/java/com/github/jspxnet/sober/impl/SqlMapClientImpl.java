@@ -272,7 +272,7 @@ public class SqlMapClientImpl implements SqlMapClient {
             preparedStatement.setMaxRows(endRow);
             resultSet = preparedStatement.executeQuery();
 
-            if (cls==null && !StringUtil.isNull(mapSql.getResultClass()))
+            if (cls==null && !StringUtil.isNull(mapSql.getResultClass())&&!"map".equalsIgnoreCase(mapSql.getResultType()))
             {
                 cls = (Class<T>) Class.forName(mapSql.getResultClass());
             }
@@ -283,9 +283,21 @@ public class SqlMapClientImpl implements SqlMapClient {
                 resultSet.absolute(beginRow);
             }
             while (resultSet.next()) {
-                if (cls==null)
+                if (cls==null&&"map".equalsIgnoreCase(mapSql.getResultType()))
                 {
                     Map<String, Object> map = SoberUtil.getDataHashMap(resultSetMetaData, dialect, resultSet);
+                    //名称位_转换位驼峰命名方式
+                    Map<String, Object> beanMap = new HashMap<>();
+                    for (String key : map.keySet()) {
+                        Object value = map.get(key);
+                        String field = StringUtil.underlineToCamel(key);
+                        beanMap.put(field, value);
+                    }
+                    list.add((T)beanMap);
+                } else
+                if (cls==null&&StringUtil.isEmpty(mapSql.getResultType()))
+                {
+                    Map<String, Object> map = SoberUtil.getHashMap(resultSetMetaData, dialect, resultSet);
                     //名称位_转换位驼峰命名方式
                     Map<String, Object> beanMap = new HashMap<>();
                     for (String key : map.keySet()) {

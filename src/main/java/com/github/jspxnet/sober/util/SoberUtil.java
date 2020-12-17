@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by IntelliJ IDEA.
@@ -102,9 +103,19 @@ public class SoberUtil {
      * @return 行数据
      * @throws SQLException 异常
      */
-    public static Map<String, Object> getDataHashMap(ResultSetMetaData resultSetMetaData, Dialect dialect, ResultSet resultSet) throws SQLException {
+    public static Map<String, Object> getHashMap(ResultSetMetaData resultSetMetaData, Dialect dialect, ResultSet resultSet) throws SQLException {
         int numColumns = resultSetMetaData.getColumnCount();
         Map<String, Object> resultMap = new HashMap<>();
+        for (int c = 1; c <= numColumns; c++) {
+            String colName = resultSetMetaData.getColumnLabel(c);
+            resultMap.put(colName, dialect.getResultSetValue(resultSet, c));
+        }
+        return resultMap;
+    }
+
+    public static Map<String, Object> getDataHashMap(ResultSetMetaData resultSetMetaData, Dialect dialect, ResultSet resultSet) throws SQLException {
+        int numColumns = resultSetMetaData.getColumnCount();
+        Map<String, Object> resultMap = new TreeMap<>();
         for (int c = 1; c <= numColumns; c++) {
             String colName = resultSetMetaData.getColumnLabel(c);
             resultMap.put(colName, dialect.getResultSetValue(resultSet, c));

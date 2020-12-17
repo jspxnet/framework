@@ -839,7 +839,7 @@ public class JSONObject extends HashMap<String, Object> {
      * @throws JSONException 异常
      */
     public JSONObject put(String key, Collection value) throws JSONException {
-        super.put(key, new JSONArray(value, true));
+        super.put(key, value);
         return this;
     }
 
@@ -877,11 +877,7 @@ public class JSONObject extends HashMap<String, Object> {
      * @return this.
      */
     public JSONObject put(String key, Map value) {
-        if (value instanceof JSONObject) {
-            super.put(key, value);
-        } else {
-            super.put(key, new JSONObject(value, true));
-        }
+        super.put(key, value);
         return this;
     }
 
