@@ -412,7 +412,7 @@ String.prototype.escape = function () {
     return converter.escape(this);
 };
 String.prototype.lines = function () {
-    return converter.convertNewlines(this);
+    return converter.toBrLine(this);
 };
 String.prototype.quote = function (dub) {
     if (dub)
