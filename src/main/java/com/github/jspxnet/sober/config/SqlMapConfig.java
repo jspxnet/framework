@@ -38,11 +38,7 @@ public class SqlMapConfig implements Serializable {
     public String getResultClass() {
         if ("map".equalsIgnoreCase(resultType))
         {
-            return null;
-        }
-        if ("list".equalsIgnoreCase(resultType))
-        {
-            return ArrayList.class.getName();
+            return DataMap.class.getName();
         }
         return resultType;
     }

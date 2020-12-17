@@ -29,7 +29,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Created by IntelliJ IDEA.
@@ -105,20 +104,20 @@ public class SoberUtil {
      */
     public static Map<String, Object> getHashMap(ResultSetMetaData resultSetMetaData, Dialect dialect, ResultSet resultSet) throws SQLException {
         int numColumns = resultSetMetaData.getColumnCount();
-        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>(numColumns);
         for (int c = 1; c <= numColumns; c++) {
             String colName = resultSetMetaData.getColumnLabel(c);
-            resultMap.put(colName, dialect.getResultSetValue(resultSet, c));
+            resultMap.put(StringUtil.underlineToCamel(colName), dialect.getResultSetValue(resultSet, c));
         }
         return resultMap;
     }
 
-    public static Map<String, Object> getDataHashMap(ResultSetMetaData resultSetMetaData, Dialect dialect, ResultSet resultSet) throws SQLException {
+    public static DataMap<String, Object> getDataHashMap(ResultSetMetaData resultSetMetaData, Dialect dialect, ResultSet resultSet) throws SQLException {
         int numColumns = resultSetMetaData.getColumnCount();
-        Map<String, Object> resultMap = new TreeMap<>();
+        DataMap<String, Object> resultMap = new DataMap<>();
         for (int c = 1; c <= numColumns; c++) {
             String colName = resultSetMetaData.getColumnLabel(c);
-            resultMap.put(colName, dialect.getResultSetValue(resultSet, c));
+            resultMap.put(StringUtil.underlineToCamel(colName), dialect.getResultSetValue(resultSet, c));
         }
         return resultMap;
     }

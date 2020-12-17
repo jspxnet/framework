@@ -17,6 +17,7 @@ import com.github.jspxnet.sober.config.SqlMapConfig;
 import com.github.jspxnet.sober.config.SQLRoom;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
+import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
@@ -270,40 +271,26 @@ public class SqlMapClientImpl implements SqlMapClient {
             preparedStatement.setMaxRows(endRow);
             resultSet = preparedStatement.executeQuery();
 
-            if (cls==null && !StringUtil.isNull(mapSql.getResultClass())&&!"map".equalsIgnoreCase(mapSql.getResultType()))
+            if (cls==null && !StringUtil.isNull(mapSql.getResultClass()))
             {
                 cls = (Class<T>) Class.forName(mapSql.getResultClass());
             }
 
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-
             if (rollRows && beginRow > 0) {
                 resultSet.absolute(beginRow);
             }
+
             while (resultSet.next()) {
-                if (cls==null&&"map".equalsIgnoreCase(mapSql.getResultType()))
-                {
-                    Map<String, Object> map = SoberUtil.getDataHashMap(resultSetMetaData, dialect, resultSet);
-                    //名称位_转换位驼峰命名方式
-                    Map<String, Object> beanMap = new HashMap<>();
-                    for (String key : map.keySet()) {
-                        Object value = map.get(key);
-                        String field = StringUtil.underlineToCamel(key);
-                        beanMap.put(field, value);
-                    }
-                    list.add((T)beanMap);
-                } else
                 if (cls==null&&StringUtil.isEmpty(mapSql.getResultType()))
                 {
-                    Map<String, Object> map = SoberUtil.getHashMap(resultSetMetaData, dialect, resultSet);
-                    //名称位_转换位驼峰命名方式
-                    Map<String, Object> beanMap = new HashMap<>();
-                    for (String key : map.keySet()) {
-                        Object value = map.get(key);
-                        String field = StringUtil.underlineToCamel(key);
-                        beanMap.put(field, value);
-                    }
+                    Map<String, Object> beanMap = SoberUtil.getHashMap(resultSetMetaData, dialect, resultSet);
                     list.add((T) ReflectUtil.createDynamicBean(beanMap));
+                } else
+                if (Map.class.isAssignableFrom(cls) || cls.isInstance(Map.class) )
+                {
+                    DataMap<String, Object> map = SoberUtil.getDataHashMap(resultSetMetaData, dialect, resultSet);
+                    list.add((T)map);
                 }
                 else
                 {

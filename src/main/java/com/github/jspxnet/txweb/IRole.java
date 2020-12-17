@@ -118,9 +118,9 @@ public interface IRole extends Serializable {
 
     String getOperates();
 
-    boolean checkOperate(String namespace, String actionName, String classMethod);
+    boolean checkOperate(String namespace, String className, String classMethod);
 
-    boolean isOperateConfig(String namespace, String actionName, String classMethod);
+    boolean isOperateConfig(String namespace, String className, String classMethod);
 
     boolean isOperateConfig(String actionMethodId);
 

@@ -161,7 +161,7 @@ public class Role extends OperateTable implements IRole {
      * @return 判断是否有权限执行
      */
     @Override
-    public boolean checkOperate(String namespace, String actionName, String classMethod)
+    public boolean checkOperate(String namespace, String className, String classMethod)
     {
         if (congealType == CongealEnumType.YES_CONGEAL.getValue()) {
             return false;
@@ -193,12 +193,13 @@ public class Role extends OperateTable implements IRole {
             } catch (Exception e) {
                 continue;
             }
+
             String roleNamespace = TXWebUtil.getNamespace(url);
             if (roleNamespace != null && !namespace.startsWith(roleNamespace)) {
                 continue;
             }
-            String roleActionName = StringUtil.substringAfterLast(url,StringUtil.BACKSLASH);
-            if (!StringUtil.ASTERISK.equals(roleActionName) && !actionName.matches(roleActionName)) {
+            String roleClassName = StringUtil.substringAfterLast(url,StringUtil.BACKSLASH);
+            if (!StringUtil.ASTERISK.equals(roleClassName) && !className.matches(roleClassName)) {
                 continue;
             }
             if (line.endsWith(StringUtil.COLON + classMethod)) {

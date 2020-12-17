@@ -11,10 +11,12 @@ package com.github.jspxnet.sober.util;
 
 
 import com.github.jspxnet.utils.*;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Date;
 import java.io.Serializable;
-import java.util.TreeMap;
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,7 +25,7 @@ import java.util.TreeMap;
  * Time: 0:41:16
  * DataMap特点，key不区分大小写，提供类型转换功能
  */
-public class DataMap<K extends String, V> extends TreeMap<K, V> implements Serializable {
+public class DataMap<K extends String, V> extends HashMap<K, V> implements Serializable {
     public DataMap() {
 
     }
