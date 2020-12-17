@@ -19,10 +19,8 @@ import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
-import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
