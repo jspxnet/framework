@@ -703,8 +703,7 @@ public class TXWebConfigManager implements WebConfigManager {
     }
 
     /**
-     * namespace 支持多个是用 ; 分割
-     *
+     * @param namespace 支持多个是用 ; 分割
      * @return 操作列表, 包含继承的动作 /user/xxxx  条件为user
      * @throws Exception 异常
      */

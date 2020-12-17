@@ -156,7 +156,7 @@ public class Role extends OperateTable implements IRole {
      * 这种判断方式和TXWeb的继承配置方式一样
      *
      * @param namespace   命名空间
-     * @param actionName  页面名称
+     * @param className  类名称
      * @param classMethod 执行方法
      * @return 判断是否有权限执行
      */
