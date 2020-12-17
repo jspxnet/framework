@@ -463,6 +463,7 @@ public class TXWebConfigManager implements WebConfigManager {
      *
      * @param namePart  action name
      * @param namespace 命名控件
+     * @param reload  是否重新载入
      * @return 配置
      */
     @Override

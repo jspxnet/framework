@@ -54,9 +54,10 @@ public interface WebConfigManager {
      *
      * @param namePart  action name
      * @param namespace 命名控件
+     * @param reload  是否重新载入
      * @return 配置
      */
-    ActionConfig getActionConfig(String namePart, String namespace, boolean wildcard);
+    ActionConfig getActionConfig(String namePart, String namespace, boolean reload);
     /**
      * @param namespace 命名空间列表
      * @return 得到本命名空间下的命名空间
@@ -78,7 +79,9 @@ public interface WebConfigManager {
      */
     Map<String, String> getExtendList();
     /**
-     * @return 得到命名空间继承关系列表
+     * @param namespace 命名空间
+     * @return 操作列表
+     * @throws Exception 异常
      */
     List<OperateVo> getOperateForNamespace(String namespace) throws Exception;
     /**
