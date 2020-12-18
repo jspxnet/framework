@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Bean(bind = RedisStoreQueueServer.class, singleton = true)
 public class RedisStoreQueueServer extends BaseRedisStoreQueue implements Runnable {
 
-    private final static Map<String,CmdRun> CMD_RUN_MAP = new HashMap<>();
+    private final static Map<String, CmdRun> CMD_RUN_MAP = new HashMap<>();
 
     /**
      * 保存成功日志记录，生产环境没必要保存
@@ -54,15 +54,11 @@ public class RedisStoreQueueServer extends BaseRedisStoreQueue implements Runnab
      * 避免数据库卡死，这里只是分离出了保存，不能执行更新
      */
     @Override
-    public void run() {
-        synchronized (this)
-        {
-            if (CMD_RUN_MAP.isEmpty())
-            {
-                CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_SAVE,new SaveObjectCmd());
-                CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_UPDATE,new UpdateObjectCmd());
-                CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_UPDATE_SQL,new UpdateSqlCmd());
-            }
+    synchronized public void run() {
+        if (CMD_RUN_MAP.isEmpty()) {
+            CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_SAVE, new SaveObjectCmd());
+            CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_UPDATE, new UpdateObjectCmd());
+            CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_UPDATE_SQL, new UpdateSqlCmd());
         }
         while (genericDAO != null && redissonClient != null) {
             try {
@@ -87,29 +83,33 @@ public class RedisStoreQueueServer extends BaseRedisStoreQueue implements Runnab
                 }
 
                 //锁定为单线程允许,不要并行，数据库压力太大 begin
-                RQueue<Object> queue = redissonClient.getQueue(STORE_KEY);
+                RQueue<?> queue = redissonClient.getQueue(STORE_KEY);
                 if (queue == null || queue.isEmpty()) {
                     continue;
                 }
                 //null异常情况
-                Object cmdObj = queue.poll();
-                if (cmdObj == null) {
+                Object cmdObj = null;
+                try {
+                    cmdObj = queue.poll();
+                    if (cmdObj == null) {
+                        continue;
+                    }
+                } catch (Exception e) {
                     continue;
                 }
                 log.debug("存储队列queue长度:{}", queue.size());
                 //有效性判断
 
-                if (!(cmdObj instanceof CmdContainer))
-                {
+                if (!(cmdObj instanceof CmdContainer)) {
                     continue;
                 }
+
                 CmdContainer cmdContainer = (CmdContainer) cmdObj;
                 if (!cmdContainer.isValid()) {
                     continue;
                 }
                 CmdRun cmdRun = CMD_RUN_MAP.get(cmdContainer.getCmd());
-                if (cmdRun==null)
-                {
+                if (cmdRun == null) {
                     continue;
                 }
                 cmdRun.setCmdContainer(cmdContainer);

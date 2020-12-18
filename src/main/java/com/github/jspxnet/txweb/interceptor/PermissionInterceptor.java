@@ -266,7 +266,7 @@ public class PermissionInterceptor extends InterceptorSupport {
                 }*/
 
                 //配置的权限,判断是否可执行
-                if (!role.checkOperate(pathNamespace, action.getClass().getName(), method)) {
+                if (!role.checkOperate(pathNamespace,action.getClass().getName(), method)) {
                     //会员进入后，正常模式，完全通过后台权限判断是否能够操作
                     action.addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needPermission) + ", role name :" + role.getName() + " for " + role.getNamespace());
                     return ActionSupport.UNTITLED;

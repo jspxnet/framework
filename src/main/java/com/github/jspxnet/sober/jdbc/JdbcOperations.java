@@ -67,15 +67,12 @@ public abstract class JdbcOperations implements SoberSupport {
         if (StringUtil.isEmpty(className)) {
             return null;
         }
-        if (className.contains("$$EnhancerByCGLIB$$"))
+        className = ClassUtil.getClassName(className);
+        for (StackTraceElement stackTrace :stackTraceElementArray)
         {
-            className = StringUtil.substringBefore(className,"$$EnhancerByCGLIB$$");
-            for (StackTraceElement stackTrace :stackTraceElementArray)
+            if (stackTrace.getClassName().equals(className))
             {
-                if (stackTrace.getClassName().equals(className))
-                {
-                    stackTraceElement = stackTrace;
-                }
+                stackTraceElement = stackTrace;
             }
         }
         Class<?> cls;

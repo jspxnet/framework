@@ -25,10 +25,7 @@ import com.github.jspxnet.sober.table.OperateTable;
 import com.github.jspxnet.txweb.IRole;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.DateUtil;
-import com.github.jspxnet.utils.FileSuffixUtil;
-import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.util.Date;
@@ -163,6 +160,7 @@ public class Role extends OperateTable implements IRole {
     @Override
     public boolean checkOperate(String namespace, String className, String classMethod)
     {
+        className = ClassUtil.getClassName(className);
         if (congealType == CongealEnumType.YES_CONGEAL.getValue()) {
             return false;
         }
@@ -192,6 +190,12 @@ public class Role extends OperateTable implements IRole {
                 url = EncryptUtil.getBase64DecodeString(url);
             } catch (Exception e) {
                 continue;
+            }
+            if (className.toLowerCase().contains("tree"))
+            {
+                System.out.println("-------line=" + line);
+                System.out.println("-------url=" + url);
+                System.out.println("-------namespace=" + namespace + "----" + className + "----" + classMethod);
             }
 
             String roleNamespace = TXWebUtil.getNamespace(url);

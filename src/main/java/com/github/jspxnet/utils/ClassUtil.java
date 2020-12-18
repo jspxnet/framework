@@ -985,5 +985,18 @@ public class ClassUtil {
         return null;
     }
 
+    /**
+     * 得到classname
+     * @param className 排除代理
+     * @return 返回类名称
+     */
+    public static String getClassName(String className)
+    {
+        if (className.contains("$$EnhancerByCGLIB$$"))
+        {
+            return StringUtil.substringBefore(className,"$$EnhancerByCGLIB$$");
+        }
+        return className;
+    }
 
 }
