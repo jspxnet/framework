@@ -101,7 +101,7 @@ public class ValidUtil {
      */
     public static boolean isGoodName(String str)
     {
-        return isGoodName(str,4,24);
+        return isGoodName(str,3,24);
     }
 
     public static boolean isGoodName(String str, int minLength, int maxLength) {

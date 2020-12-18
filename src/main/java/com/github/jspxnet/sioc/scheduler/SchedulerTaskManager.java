@@ -10,7 +10,6 @@ import it.sauronsoftware.cron4j.Scheduler;
 import it.sauronsoftware.cron4j.SchedulingPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
@@ -153,8 +152,12 @@ public class SchedulerTaskManager implements SchedulerManager {
     @Override
     public void shutdown() {
         for (Scheduler scheduler : schedulerMap.values()) {
-            scheduler.stop();
+            if (scheduler.isStarted())
+            {
+                scheduler.stop();
+            }
         }
+        schedulerMap.clear();
     }
 
 }

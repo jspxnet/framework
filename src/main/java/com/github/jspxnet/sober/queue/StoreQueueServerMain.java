@@ -27,15 +27,12 @@ public class StoreQueueServerMain {
     /**
      * @return jspx.net AOP容器中自动启动
      */
-    @Scheduled(once = true)
+    @Scheduled
     public String run() {
         if (redisStoreQueueServer == null) {
             return Environment.ERROR;
         }
-
-        final Thread thread = new Thread(redisStoreQueueServer);
-        thread.start();
-        log.info("存储队列启动");
+        redisStoreQueueServer.run();
         return Environment.SUCCESS;
     }
 

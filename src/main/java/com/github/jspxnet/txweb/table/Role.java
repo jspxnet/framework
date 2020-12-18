@@ -191,12 +191,6 @@ public class Role extends OperateTable implements IRole {
             } catch (Exception e) {
                 continue;
             }
-            if (className.toLowerCase().contains("tree"))
-            {
-                System.out.println("-------line=" + line);
-                System.out.println("-------url=" + url);
-                System.out.println("-------namespace=" + namespace + "----" + className + "----" + classMethod);
-            }
 
             String roleNamespace = TXWebUtil.getNamespace(url);
             if (roleNamespace != null && !namespace.startsWith(roleNamespace)) {

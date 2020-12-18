@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Bean(bind = RedisStoreQueueServer.class, singleton = true)
 public class RedisStoreQueueServer extends BaseRedisStoreQueue implements Runnable {
 
-    private final static Map<String, CmdRun> CMD_RUN_MAP = new HashMap<>();
+    private static Map<String, CmdRun> CMD_RUN_MAP = new HashMap<>();
 
     /**
      * 保存成功日志记录，生产环境没必要保存
@@ -88,26 +88,27 @@ public class RedisStoreQueueServer extends BaseRedisStoreQueue implements Runnab
                     continue;
                 }
                 //null异常情况
-                Object cmdObj = null;
+                CmdContainer cmdContainer = null;
                 try {
-                    cmdObj = queue.poll();
+                    Object cmdObj = queue.poll();
                     if (cmdObj == null) {
                         continue;
                     }
-                } catch (Exception e) {
+
+                    if (!(cmdObj instanceof CmdContainer)) {
+                        continue;
+                    }
+
+                    cmdContainer = (CmdContainer) cmdObj;
+                    if (!cmdContainer.isValid()) {
+                        continue;
+                    }
+                } catch (IllegalStateException e) {
+                    queue.clear();
                     continue;
                 }
                 log.debug("存储队列queue长度:{}", queue.size());
                 //有效性判断
-
-                if (!(cmdObj instanceof CmdContainer)) {
-                    continue;
-                }
-
-                CmdContainer cmdContainer = (CmdContainer) cmdObj;
-                if (!cmdContainer.isValid()) {
-                    continue;
-                }
                 CmdRun cmdRun = CMD_RUN_MAP.get(cmdContainer.getCmd());
                 if (cmdRun == null) {
                     continue;
