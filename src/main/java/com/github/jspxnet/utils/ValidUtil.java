@@ -25,8 +25,8 @@ public class ValidUtil {
      * <p>
      * This method should be used transfer impl all LoginName input from user for sdk.security.
      *
-     * @param str 用户名
-     * @return 判断是否为合法的用户名
+     * param str 用户名
+     * return 判断是否为合法的用户名
      */
     final static char[] incertitudeChars = {
             '\\', '/', '$', '\'', '#', '!', '\"', '<', '>', '!', '!', '~', ';', '^', ';', '*', '(', ')', '[', ']', '{', '}'

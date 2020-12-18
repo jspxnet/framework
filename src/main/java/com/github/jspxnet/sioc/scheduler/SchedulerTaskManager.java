@@ -8,20 +8,22 @@ import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import it.sauronsoftware.cron4j.Scheduler;
 import it.sauronsoftware.cron4j.SchedulingPattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Method;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
  * 如果想每分钟执行一次，那么表达式就是这样
  * // 如果想每分钟执行一次，那么表达式就是这样
  **/
+@Slf4j
 public class SchedulerTaskManager implements SchedulerManager {
-    private static final Logger log = LoggerFactory.getLogger(SchedulerTaskManager.class);
-    final private static Map<String, Scheduler> schedulerMap = new ConcurrentHashMap<>();
+
+    final private static Map<String, Scheduler> SCHEDULER_MAP = new ConcurrentHashMap<>();
     private static SchedulerTaskManager instance = new SchedulerTaskManager();
 
     private SchedulerTaskManager() {
@@ -33,7 +35,7 @@ public class SchedulerTaskManager implements SchedulerManager {
 
     @Override
     public boolean add(String id, String pattern, Runnable runnable) {
-        if (schedulerMap.containsKey(id)) {
+        if (SCHEDULER_MAP.containsKey(id)) {
             //已经有这个任务了，不重复
             return false;
         }
@@ -43,7 +45,7 @@ public class SchedulerTaskManager implements SchedulerManager {
         Scheduler scheduler = new Scheduler();
         scheduler.schedule(pattern, runnable);
         scheduler.start();
-        schedulerMap.put(id, scheduler);
+        SCHEDULER_MAP.put(id, scheduler);
         return true;
     }
 
@@ -74,7 +76,7 @@ public class SchedulerTaskManager implements SchedulerManager {
             taskProxy.setDelayed(scheduled.delayed());
             add(taskProxy);
         }
-        return schedulerMap.size();
+        return SCHEDULER_MAP.size();
     }
 
     /**
@@ -95,7 +97,7 @@ public class SchedulerTaskManager implements SchedulerManager {
         if (StringUtil.isEmpty(scheduledId)) {
             return false;
         }
-        if (schedulerMap.containsKey(scheduledId)) {
+        if (SCHEDULER_MAP.containsKey(scheduledId)) {
             //已经有这个任务了，不重复
             return false;
         }
@@ -107,7 +109,7 @@ public class SchedulerTaskManager implements SchedulerManager {
         Scheduler scheduler = new Scheduler();
         scheduler.schedule(taskProxy.getPattern(), taskProxy);
         scheduler.start();
-        schedulerMap.put(scheduledId, scheduler);
+        SCHEDULER_MAP.put(scheduledId, scheduler);
         return true;
     }
 
@@ -116,7 +118,7 @@ public class SchedulerTaskManager implements SchedulerManager {
      */
     @Override
     public int size() {
-        return schedulerMap.size();
+        return SCHEDULER_MAP.size();
     }
 
     /**
@@ -124,7 +126,7 @@ public class SchedulerTaskManager implements SchedulerManager {
      */
     @Override
     public Set<String> keySet() {
-        return schedulerMap.keySet();
+        return SCHEDULER_MAP.keySet();
     }
 
     /**
@@ -133,7 +135,7 @@ public class SchedulerTaskManager implements SchedulerManager {
      */
     @Override
     public Scheduler get(String id) {
-        return schedulerMap.get(id);
+        return SCHEDULER_MAP.get(id);
     }
 
 
@@ -143,7 +145,7 @@ public class SchedulerTaskManager implements SchedulerManager {
      */
     @Override
     public Scheduler remove(String id) {
-        return schedulerMap.remove(id);
+        return SCHEDULER_MAP.remove(id);
     }
 
     /**
@@ -151,13 +153,16 @@ public class SchedulerTaskManager implements SchedulerManager {
      */
     @Override
     public void shutdown() {
-        for (Scheduler scheduler : schedulerMap.values()) {
+        for (Scheduler scheduler : SCHEDULER_MAP.values()) {
+            if (scheduler==null)
+            {
+                continue;
+            }
             if (scheduler.isStarted())
             {
                 scheduler.stop();
             }
         }
-        schedulerMap.clear();
     }
 
 }

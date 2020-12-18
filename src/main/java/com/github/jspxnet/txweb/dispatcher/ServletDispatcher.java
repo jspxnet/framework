@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
  * tomcat get 方法需要设置编码修复
  */
 public class ServletDispatcher extends HttpServlet implements javax.servlet.Servlet {
-
     public ServletDispatcher() {
 
     }
@@ -57,5 +56,6 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
     @Override
     public void destroy() {
         JspxNetApplication.destroy();
+        super.destroy();
     }
 }

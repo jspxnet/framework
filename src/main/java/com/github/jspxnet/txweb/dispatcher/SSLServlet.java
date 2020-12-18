@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class SSLServlet extends HttpServlet {
 
-
     private static final String ATTR_CER = "javax.servlet.request.X509Certificate";
     private static final String CONTENT_TYPE = "text/plain;charset=UTF-8";
     private static final String DEFAULT_ENCODING = Environment.defaultEncode;

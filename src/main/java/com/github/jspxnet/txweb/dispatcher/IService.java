@@ -2,9 +2,6 @@ package com.github.jspxnet.txweb.dispatcher;
 
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.TXWebConfigManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

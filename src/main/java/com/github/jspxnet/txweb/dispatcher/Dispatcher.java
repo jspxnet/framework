@@ -103,22 +103,13 @@ public class Dispatcher {
         }
         return instance;
     }
-/*
-    public static Dispatcher getInstance() {
-        Dispatcher du = Dispatcher.INSTANCE.get();
-        if (du == null) {
-            Dispatcher.INSTANCE.set(new Dispatcher());
-        }
-        return Dispatcher.INSTANCE.get();
-    }*/
+
 
     /**
      * 主要是防止关闭异常
      */
     static public void shutdown() {
-        //   INSTANCE.set(null);
-        //   INSTANCE.remove();
-        HANDLE_LIST.clear();
+
     }
 
     public static String getRealPath() {

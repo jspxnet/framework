@@ -64,7 +64,7 @@ public class PlaceholderImpl implements Placeholder {
      */
     @Override
     public String processTemplate(Map<String, Object> valueMap, String templateString) {
-        if (templateString == null) {
+        if (templateString == null || valueMap==null) {
             return StringUtil.empty;
         }
         try (Writer writer = new StringWriter()) {

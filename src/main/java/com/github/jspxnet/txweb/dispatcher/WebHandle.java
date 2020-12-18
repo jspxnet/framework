@@ -17,7 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
- * Created by ChenYuan on 2017/6/17.
+ *
+ * author ChenYuan
+ * date 2017/6/17
  */
 @Slf4j
 public abstract class WebHandle {

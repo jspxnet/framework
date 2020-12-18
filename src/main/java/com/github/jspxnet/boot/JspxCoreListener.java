@@ -24,16 +24,13 @@ import com.github.jspxnet.network.vcs.VcsClient;
 import com.github.jspxnet.network.vcs.VcsFactory;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.BeanFactory;
-import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.factory.EntryFactory;
 import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
-import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.DefaultConfiguration;
 import com.github.jspxnet.txweb.config.TXWebConfigManager;
-import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.ClassUtil;
@@ -42,7 +39,6 @@ import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import javax.servlet.ServletContextListener;
 import java.io.File;
 import java.security.Provider;
@@ -59,6 +55,7 @@ import java.util.Map;
  * User: 陈原
  * date: 2007-12-1
  * Time: 17:51:48
+ * author chenyuan
  */
 @Slf4j
 public class JspxCoreListener implements ServletContextListener {
@@ -264,15 +261,11 @@ public class JspxCoreListener implements ServletContextListener {
     public void contextDestroyed(javax.servlet.ServletContextEvent servletContextEvent) {
         log.info(Environment.frameworkName + " " + copyright + " shutdown start");
 
-        //关闭访问页面begin
-        Dispatcher.shutdown();
-        log.info("close dispatcher");
-        //关闭访问页面end
-
-        //定时任务
+ /*       //定时任务
         SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
         schedulerManager.shutdown();
-
+        log.info("scheduler shutdown");
+*/
         BeanFactory beanFactory = EnvFactory.getBeanFactory();
         beanFactory.shutdown();
         log.info("bean factory shutdown");
@@ -296,6 +289,7 @@ public class JspxCoreListener implements ServletContextListener {
         EvasiveConfiguration.getInstance().shutdown();
         log.info("Evasive config clean");
         //Evasive配置卸载begin
+
 
 
         //卸载jdbc驱动begin

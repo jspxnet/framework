@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 
 public class RandomGenerator {
-    private static final List<Integer> cacheInt = new ArrayList<Integer>(16);
+    private static final List<Integer> CACHE_INT = new ArrayList<Integer>(16);
 
     public int getLow() {
         return low;
@@ -57,13 +57,13 @@ public class RandomGenerator {
         if (r > high) {
             r = high;
         }
-        if (cacheInt.contains(r)) {
+        if (CACHE_INT.contains(r)) {
             return getRandomInt();
 
         }
-        cacheInt.add(r);
-        if (cacheInt.size() > 16) {
-            cacheInt.clear();
+        CACHE_INT.add(r);
+        if (CACHE_INT.size() > 16) {
+            CACHE_INT.clear();
         }
         return r;
     }
@@ -112,8 +112,6 @@ public class RandomGenerator {
         RandomGenerator randomGenerator = new RandomGenerator();
         randomGenerator.setLow(1);
         randomGenerator.setHigh(999999);
-
-
         int i;
         for (i = 1; i <= 10; i++) {
             if (i > 4) {

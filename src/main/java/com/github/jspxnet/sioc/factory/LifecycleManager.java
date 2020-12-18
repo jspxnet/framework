@@ -12,6 +12,7 @@ package com.github.jspxnet.sioc.factory;
 import com.github.jspxnet.sioc.util.AnnotationUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -73,7 +74,6 @@ public class LifecycleManager implements Lifecycle {
                         log.error(key, e);
                     }
                 }
-                CACHE.remove(key);
             }
             CACHE.clear();
         }
