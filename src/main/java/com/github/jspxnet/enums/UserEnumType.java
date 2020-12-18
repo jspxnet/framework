@@ -16,7 +16,9 @@ public enum UserEnumType implements EnumType {
     //普通管理员
     MANAGER(6, "普通管理员"),
     INTENDANT(4, "操作人员"),
-    USER(2, "普通用户"),
+
+    VIP(2, "VIP用户"),
+    USER(1, "普通用户"),
     NONE(0, "游客");
 
 
