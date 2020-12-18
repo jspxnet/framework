@@ -6,6 +6,7 @@ import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
@@ -77,7 +78,7 @@ public class RoleParam  implements Serializable {
     private String permission = "rw-d-";
 
     @JsonIgnore
-    @Param(caption = "动作列表", max = 3000)
+    @Param(caption = "动作列表", max = 3000,level = SafetyEnumType.NONE)
     private String operates = StringUtil.empty;
     //数据保存格式，一行一个，开始第一个参数为命名空间，然后文件名称部分为文件名称(包含通配).采用base64加密后作为id使用分割符号：后边为执行方法
     //例如： 命名空间/base64:method   注意，这里并不保存程序的class信息，采用文件名称来识别class信息

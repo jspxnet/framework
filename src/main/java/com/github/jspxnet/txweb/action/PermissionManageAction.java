@@ -108,7 +108,7 @@ public class PermissionManageAction extends PermissionView {
     }
 
     @Operate(caption = "编辑角色")
-    public void editRole(@Param(caption="角色") RoleParam param) throws Exception {
+    public void editRole(@Param(caption="角色",required = true,message = "参数不允许为空") RoleParam param) throws Exception {
 
         if (isGuest()) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needLogin));
