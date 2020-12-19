@@ -3,6 +3,7 @@ package com.github.jspxnet.txweb.model.param;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 
@@ -106,17 +107,17 @@ public class TreeItemParam implements Serializable {
     @Param(caption = "图片URL", max = 200)
     private String showImage = StringUtil.empty;
 
-    @Param(caption = "正文连接地址", max = 200)
+    @Param(caption = "正文连接地址", max = 200,level = SafetyEnumType.NONE)
     private String linkPage = StringUtil.empty;
 
-    @Param(caption = "显示模版", max = 200)
+    @Param(caption = "显示模版", max = 200,level = SafetyEnumType.NONE)
     private String templatePage = StringUtil.empty;
 
 
-    @Param(caption = "栏目连接地址", max = 200)
+    @Param(caption = "栏目连接地址", max = 200,level = SafetyEnumType.NONE)
     private String nodeLinkPage = StringUtil.empty;
 
-    @Param(caption = "列表模版", max = 200)
+    @Param(caption = "列表模版", max = 200,level = SafetyEnumType.NONE)
     private String templateListPage = StringUtil.empty;
 
     //CMS里边判断是否静态化，各个软件作用不同
