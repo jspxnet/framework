@@ -142,7 +142,7 @@ public class UserSession implements IUserSession {
         {
             if (roleTmp.getNamespace().equals(role.getNamespace())&&roleTmp.getOrganizeId()!=null&&roleTmp.getOrganizeId().equals(role.getOrganizeId()))
             {
-                BeanUtil.copyFiledValue(role,roleTmp);
+                BeanUtil.copyFiledValue(roleTmp,role);
                 return;
             }
         }

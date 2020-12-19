@@ -628,23 +628,23 @@ public class BeanUtil {
     private final static int[] stopModifiers = {18, 25, 26, 28};
 
     /**
-     * 拷贝属性,
+     * 拷贝属性, 后边的数据拷贝到前边
      *
-     * @param out 源bean
-     * @param in  得到属性的bean
+     * @param getData  得到属性的bean
+     * @param oldData 源bean
      */
-    public static void copyFiledValue(Object out, Object in) {
+    public static void copyFiledValue(Object getData,Object oldData) {
 
-        if (out instanceof JSONObject) {
-            out = ((JSONObject) out).toMap();
+        if (getData instanceof JSONObject) {
+            getData = ((JSONObject) getData).toMap();
         }
 
-        if (CglibProxyUtil.isProxy(out.getClass())) {
-            out = ReflectUtil.getValueMap(out);
+        if (CglibProxyUtil.isProxy(getData.getClass())) {
+            getData = ReflectUtil.getValueMap(getData);
         }
-        if (out instanceof Map) {
-            Map map = (Map) out;
-            Class getClass = in.getClass();
+        if (getData instanceof Map) {
+            Map map = (Map) getData;
+            Class getClass = oldData.getClass();
             for (Object keyObj : map.keySet()) {
                 if (keyObj == null) {
                     continue;
@@ -659,7 +659,7 @@ public class BeanUtil {
                 }
                 try {
                     field.setAccessible(true);
-                    field.set(in, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
+                    field.set(oldData, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                     log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
@@ -668,8 +668,8 @@ public class BeanUtil {
             return;
         }
 
-        Field[] fieldGet = ClassUtil.getDeclaredFields(in.getClass());
-        Field[] fieldSet = ClassUtil.getDeclaredFields(out.getClass());
+        Field[] fieldGet = ClassUtil.getDeclaredFields(oldData.getClass());
+        Field[] fieldSet = ClassUtil.getDeclaredFields(getData.getClass());
         for (Field setField : fieldSet) {
             for (Field field : fieldGet) {
                 if (ArrayUtil.indexOf(stopModifiers, field.getModifiers()) != -1) {
@@ -679,11 +679,11 @@ public class BeanUtil {
                     try {
                         field.setAccessible(true);
                         setField.setAccessible(true);
-                        Object o = setField.get(out);
+                        Object o = setField.get(getData);
                         if (setField.getType().equals(field.getType())) {
-                            field.set(in, o);
+                            field.set(oldData, o);
                         } else {
-                            field.set(in, copy(o, field.getType()));
+                            field.set(oldData, copy(o, field.getType()));
                         }
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
