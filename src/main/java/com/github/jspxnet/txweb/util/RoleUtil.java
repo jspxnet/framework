@@ -33,6 +33,15 @@ public  class RoleUtil {
      */
     static public Role mergeRole(List<Role> roleList)
     {
+        if (ObjectUtil.isEmpty(roleList))
+        {
+            return null;
+        }
+        if (roleList.size()==1)
+        {
+            //只有一个角色直接返回
+            return roleList.get(0);
+        }
         Role role = new Role();
         StringBuilder names = new StringBuilder();
         StringBuilder operateList = new StringBuilder();
