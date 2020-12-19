@@ -630,8 +630,8 @@ public class BeanUtil {
     /**
      * 拷贝属性,
      *
-     * @param in  得到属性的bean
      * @param out 源bean
+     * @param in  得到属性的bean
      */
     public static void copyFiledValue(Object out, Object in) {
 

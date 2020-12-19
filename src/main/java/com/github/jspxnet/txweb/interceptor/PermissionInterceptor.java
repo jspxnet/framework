@@ -146,7 +146,7 @@ public class PermissionInterceptor extends InterceptorSupport {
 
         String method = actionProxy.getMethod().getName();
         String pathNamespace = action.getEnv(ActionEnv.Key_Namespace);
-        String actionName = actionInvocation.getActionName();
+        //String actionName = actionInvocation.getActionName();
         String organizeId = action.getString("organizeId", true);
         if (autoOrganizeId && !StringUtil.isEmpty(organizeId)) {
             permissionDAO.setOrganizeId(organizeId);
