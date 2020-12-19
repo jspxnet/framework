@@ -73,6 +73,9 @@ public class MemberVo implements Serializable {
 
     @Column(caption = "信誉值")
     private int credit = 0;
+
+    @Column(caption = "扩展1")
+    private int extcredits1 = 0;
     //积分属性 end
 
     //用做shop 返点,是虚拟的积分,就用这个作为积分
