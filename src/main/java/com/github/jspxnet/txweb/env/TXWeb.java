@@ -108,6 +108,8 @@ public abstract class TXWeb {
     static public String publicKey = StringUtil.empty;
     static public long publicKeyCreateTimeMillis = 0;
     //全局高速唯一变量  end
+    //-----------------------------
+
 
 
 }

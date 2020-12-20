@@ -1,19 +1,10 @@
-/*
- * Copyright © 2004-2014 chenYuan. All rights reserved.
- * @Website:wwww.jspx.net
- * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
- * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
- * @jvm:jdk1.6+  x86/amd64
- *
- */
 package com.github.jspxnet.txweb.interceptor;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.sober.queue.RedisStoreQueueClient;
-import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.online.OnlineManager;
@@ -23,30 +14,54 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.remoting.common.RemotingHelper;
 
 /**
- * Created by IntelliJ IDEA.
- * User: chenYuan
- * date: 11-8-21
- * Time: 下午9:51
- */
+ * Created by jspx.net
+ * <p>
+ * author: chenYuan
+ * date: 2020/12/20 21:58
+ * description: 消息服务器方式发送保存日志
+ **/
 @Slf4j
 @Bean
-public class ActionLogInterceptor extends InterceptorSupport {
+public class ActionLogRocketInterceptor extends InterceptorSupport {
+    private DefaultMQProducer producer;
     /**
      * 载入在线管理
      */
     @Ref
     private OnlineManager onlineManager;
 
-    @Ref
-    private RedisStoreQueueClient redisStoreQueueClient;
 
+    private String groupName;
+
+    private String topic;
+
+    private String tags;
+
+    private String namesrvAddr;
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
 
     private boolean guestLog = false;
 
     /**
-     *
      * @param guestLog 是否记录游客日志
      */
     public void setGuestLog(boolean guestLog) {
@@ -55,12 +70,19 @@ public class ActionLogInterceptor extends InterceptorSupport {
 
     @Override
     public void init() {
-
+        producer = new DefaultMQProducer(groupName);
+        producer.setNamesrvAddr(namesrvAddr);
+        try {
+            producer.start();
+        } catch (MQClientException e) {
+            e.printStackTrace();
+            log.error("RocketMq 客户端启动失败", e);
+        }
     }
 
     @Override
     public void destroy() {
-
+        producer.shutdown();
     }
 
     @Override
@@ -116,9 +138,22 @@ public class ActionLogInterceptor extends InterceptorSupport {
                 organizeId = ObjectUtil.toString(action.getSession().getAttribute(ActionEnv.KEY_organizeId));
             }
             actionLog.setOrganizeId(organizeId);
-            if (redisStoreQueueClient!=null&&!redisStoreQueueClient.save(actionLog))
-            {
-                log.error("日志记录保存发生错误");
+
+            if (producer != null) {
+                JSONObject json = new JSONObject(actionLog);
+                Message message = new Message(topic, tags, json.toString().getBytes(RemotingHelper.DEFAULT_CHARSET));
+                producer.send(message, new SendCallback() {
+                    @Override
+                    public void onSuccess(SendResult sendResult) {
+                        log.debug("日志保存成功,{}", sendResult.getMsgId());
+                    }
+
+                    @Override
+                    public void onException(Throwable e) {
+                        e.printStackTrace();
+                        log.error("日志记录保存发生错误", e);
+                    }
+                });
             }
             //删除3年前的记录数据
         }

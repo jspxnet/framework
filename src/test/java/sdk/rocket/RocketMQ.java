@@ -15,8 +15,8 @@ public class RocketMQ {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("my-group-name-A");
 //NameServer地址
 
-        consumer.setNamesrvAddr("localhost:9876");
-//1：topic名字 2：tag名字
+        consumer.setNamesrvAddr("192.168.0.200:9876");
+        //1：topic名字 2：tag名字
         consumer.subscribe("topic-name-A", "tag-name-A");
         consumer.registerMessageListener(new MessageListenerConcurrently() {
             @Override

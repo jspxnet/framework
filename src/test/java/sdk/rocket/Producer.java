@@ -10,7 +10,7 @@ public class Producer {
     //http://www.tianshouzhi.com/api/tutorials/rocketmq/414
     public static void main(String[] args) throws MQClientException, RemotingException, InterruptedException, MQBrokerException {
         DefaultMQProducer producer = new DefaultMQProducer("my-group-name-A");
-        producer.setNamesrvAddr("localhost:9876");
+        producer.setNamesrvAddr("192.168.0.200:9876");
         producer.start();
         Message message = new Message("topic-name-A","tag-name-A","Message : My blog address guozh.net".getBytes());
         producer.send(message);

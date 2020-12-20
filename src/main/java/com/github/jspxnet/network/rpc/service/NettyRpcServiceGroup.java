@@ -51,9 +51,7 @@ public class NettyRpcServiceGroup {
         {
             start(socketAddress);
         }
-
         routeService.start();
-
     }
 
     public  void stop() {
