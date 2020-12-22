@@ -1,6 +1,8 @@
 package com.github.jspxnet.txweb.interceptor;
 
 import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.mq.RocketMqProducer;
+import com.github.jspxnet.mq.env.MqIoc;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.ActionInvocation;
@@ -14,8 +16,6 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
@@ -31,25 +31,20 @@ import org.apache.rocketmq.remoting.common.RemotingHelper;
 @Slf4j
 @Bean
 public class ActionLogRocketInterceptor extends InterceptorSupport {
-    private DefaultMQProducer producer;
+
     /**
      * 载入在线管理
      */
     @Ref
     private OnlineManager onlineManager;
 
-
-    private String groupName;
+    @Ref(name = MqIoc.actionLogMqProducer)
+    private RocketMqProducer rocketMqProducer;
 
     private String topic;
 
     private String tags;
 
-    private String namesrvAddr;
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
 
     public void setTopic(String topic) {
         this.topic = topic;
@@ -70,19 +65,12 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
 
     @Override
     public void init() {
-        producer = new DefaultMQProducer(groupName);
-        producer.setNamesrvAddr(namesrvAddr);
-        try {
-            producer.start();
-        } catch (MQClientException e) {
-            e.printStackTrace();
-            log.error("RocketMq 客户端启动失败", e);
-        }
+
     }
 
     @Override
     public void destroy() {
-        producer.shutdown();
+
     }
 
     @Override
@@ -139,11 +127,10 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
             }
             actionLog.setOrganizeId(organizeId);
 
-            if (producer != null) {
+            if (rocketMqProducer != null) {
                 JSONObject json = new JSONObject(actionLog);
                 Message message = new Message(topic, tags, json.toString().getBytes(RemotingHelper.DEFAULT_CHARSET));
-
-                producer.send(message, new SendCallback() {
+                rocketMqProducer.send(message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         log.debug("日志保存成功,{}", sendResult.getMsgId());

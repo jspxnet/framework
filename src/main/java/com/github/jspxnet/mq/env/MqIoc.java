@@ -8,7 +8,7 @@ package com.github.jspxnet.mq.env;
  * description: jspbox
  **/
 public class MqIoc {
-    final public String actionLogMqProducer = "actionLogMqProducer";
+    final public static String actionLogMqProducer = "actionLogMqProducer";
 
-    final public String talkMqProducer = "talkMqProducer";
+    final public static String talkMqProducer = "talkMqProducer";
 }
