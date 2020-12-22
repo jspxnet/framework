@@ -139,9 +139,16 @@ public class PermissionInterceptor extends InterceptorSupport {
 
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {
+
         //这里是不需要验证的action
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         ActionSupport action = actionProxy.getAction();
+        if (onlineManager==null)
+        {
+            action.addFieldInfo(Environment.warningInfo,"onlineManager 为空,检查ioc配置是否正确");
+            log.error("onlineManager 为空,检查ioc配置是否正确");
+            return ActionSupport.ERROR;
+        }
         UserSession userSession = onlineManager.getUserSession(action);
 
         String method = actionProxy.getMethod().getName();

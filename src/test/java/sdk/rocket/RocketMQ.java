@@ -1,5 +1,6 @@
 package sdk.rocket;
 
+import com.github.jspxnet.txweb.util.RequestUtil;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -12,7 +13,7 @@ public class RocketMQ {
 
     public static void main(String[] args) throws MQClientException {
 //这里填写group名字
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("my-group-name-A");
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("jspx-net","my-group-name-A");
 //NameServer地址
 
         consumer.setNamesrvAddr("192.168.0.200:9876");

@@ -30,6 +30,7 @@ import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
+import com.github.jspxnet.txweb.table.TreeItem;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
@@ -821,7 +822,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return result;
         } catch (Exception e) {
             String msg = e.getMessage();
-            if (soberTable.isAutoId()&&soberTable.isAutoId()&&msg.contains("Duplicate")&&msg.contains("PRIMARY"))
+            if (msg!=null&&soberTable.isAutoId()&&soberTable.isAutoId()&&msg.contains("Duplicate")&&msg.contains("PRIMARY"))
             {
                 //关键字重复了,这些去修复一下
                 AnnotationUtil.fixIdCacheMax(soberTable,object,this);
@@ -833,6 +834,7 @@ public abstract class JdbcOperations implements SoberSupport {
             JdbcUtil.closeStatement(statement);
             JdbcUtil.closeConnection(conn);
             valueMap.clear();
+
         }
     }
 

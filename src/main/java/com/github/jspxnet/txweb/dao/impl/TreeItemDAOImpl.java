@@ -661,7 +661,6 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
         node.setCaption(node.getCaption());
         node.setParentNodeId(treeItem.getParentNodeId());
         save(node, false);
-        evict(TreeItem.class);
         return true;
     }
 

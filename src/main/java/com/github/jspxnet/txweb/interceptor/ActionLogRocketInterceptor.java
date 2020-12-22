@@ -142,6 +142,7 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
             if (producer != null) {
                 JSONObject json = new JSONObject(actionLog);
                 Message message = new Message(topic, tags, json.toString().getBytes(RemotingHelper.DEFAULT_CHARSET));
+
                 producer.send(message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
