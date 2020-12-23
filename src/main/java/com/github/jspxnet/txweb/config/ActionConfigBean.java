@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.config;
 
+import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.utils.StringUtil;
@@ -39,6 +40,10 @@ public class ActionConfigBean implements ActionConfig, Serializable {
     private String method = "";
     @Column(caption = "手机支持", notNull = true)
     private boolean mobile = false;
+    @Column(caption = "页面缓存", notNull = true)
+    private boolean cache = false;
+    @Column(caption = "页面缓存名称", notNull = true)
+    private String cacheName = DefaultCache.class.getName();
     @Column(caption = "所在命名空间", length = 250)
     private String namespace =  StringUtil.empty;
     //判断是否为加密传输
@@ -130,6 +135,15 @@ public class ActionConfigBean implements ActionConfig, Serializable {
         return interceptors;
     }
 
+    @Override
+    public void setCache(boolean cache) {
+        this.cache = cache;
+    }
+    @Override
+    public boolean isCache() {
+        return cache;
+    }
+
     void addInterceptors(String interceptorName) {
         interceptors.add(interceptorName);
     }
@@ -172,6 +186,14 @@ public class ActionConfigBean implements ActionConfig, Serializable {
 
     public void setMobile(boolean mobile) {
         this.mobile = mobile;
+    }
+    @Override
+    public String getCacheName() {
+        return cacheName;
+    }
+    @Override
+    public void setCacheName(String cacheName) {
+        this.cacheName = cacheName;
     }
 
     @Override
@@ -216,6 +238,9 @@ public class ActionConfigBean implements ActionConfig, Serializable {
         }
         if (mobile) {
             sb.append("mobile=\"").append(mobile).append("\" ");
+        }
+        if (cache) {
+            sb.append("cache=\"").append(cache).append("\" ");
         }
         if (!StringUtil.isEmpty(namespace)) {
             sb.append("namespace=\"").append(namespace).append("\" ");

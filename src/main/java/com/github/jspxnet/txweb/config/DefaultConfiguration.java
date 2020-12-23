@@ -47,7 +47,6 @@ public class DefaultConfiguration implements Configuration {
     private Map<String, String> extendMap = new Hashtable<String, String>();
     //每个命名空间里边的默认拦截器列表
     private Map<String, List<DefaultInterceptorBean>> defaultInterceptorMap = new Hashtable<>();
-    private Map<String, List<DefaultUrlInterceptorBean>> defaultUrlInterceptorMap = new Hashtable<>();
     private Map<String, List<ResultConfigBean>> defaultResultMap = new HashMap<>();
 
     //文件配置中要扫描的目录
@@ -78,11 +77,6 @@ public class DefaultConfiguration implements Configuration {
     @Override
     public Map<String, List<DefaultInterceptorBean>> getDefaultInterceptorMap() {
         return defaultInterceptorMap;
-    }
-
-    @Override
-    public Map<String, List<DefaultUrlInterceptorBean>> getDefaultUrlInterceptorMap() {
-        return defaultUrlInterceptorMap;
     }
 
     @Override
@@ -236,7 +230,7 @@ public class DefaultConfiguration implements Configuration {
 
             }
 
-            ReadConfig readConfig = new ReadConfig(actionConfigMap, extendMap, defaultInterceptorMap, defaultUrlInterceptorMap, defaultResultMap);
+            ReadConfig readConfig = new ReadConfig(actionConfigMap, extendMap, defaultInterceptorMap, defaultResultMap);
             if (XMLUtil.parseXmlString(readConfig, configString)) {
                 String[] includeFixedFiles = null;
                 String[] iFiles = readConfig.getInclude();

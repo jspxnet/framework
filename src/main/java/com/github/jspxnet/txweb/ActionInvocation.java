@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.txweb;
 
+import com.github.jspxnet.txweb.config.ActionConfig;
+
 import java.io.Serializable;
 
 
@@ -35,6 +37,8 @@ public interface ActionInvocation extends Serializable {
     String getNamespace();
 
     void executeResult(Result result) throws Exception;
+
+    ActionConfig getActionConfig();
 
     void initAction() throws Exception;
 

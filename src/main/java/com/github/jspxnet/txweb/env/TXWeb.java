@@ -58,6 +58,7 @@ public abstract class TXWeb {
     final public static String CONFIG_SCAN = "scan";
     final public static String CONFIG_SECRET = "secret";
     final public static String CONFIG_MOBILE = "mobile";
+    final public static String CONFIG_CACHE = "cache";
 
 
     final public static String CONFIG_INTERCEPTOR_REF = "interceptor-ref";

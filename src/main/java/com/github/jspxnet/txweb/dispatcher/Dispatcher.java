@@ -16,7 +16,6 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.BeanFactory;
-import com.github.jspxnet.txweb.InterceptorUrl;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.TXWebConfigManager;
 import com.github.jspxnet.txweb.dispatcher.handle.*;
@@ -32,13 +31,11 @@ import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ThrowableUtil;
 import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -165,17 +162,6 @@ public class Dispatcher {
         String urlName = URLUtil.getFileName(request.getRequestURI());
         String namespace = TXWebUtil.getNamespace(request.getServletPath());
         WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
-        List<String> pageInterceptors = webConfigManager.getPageDefaultInterceptors(namespace);
-        if (pageInterceptors != null) {
-            for (String name : pageInterceptors) {
-                InterceptorUrl dispatcherSupport = (InterceptorUrl) beanFactory.getBean(name, namespace);
-                if (dispatcherSupport != null) {
-                    if (!dispatcherSupport.dispatcherBefore(request, response)) {
-                        return;
-                    }
-                }
-            }
-        }
 
         //X-Requested-With
         //这里放宽了条件，飞加密方式可以不需要 X-Requested-With
@@ -213,15 +199,6 @@ public class Dispatcher {
             printException(e, response, WebOutEnumType.HTML.getValue());
         }
 
-        //执行end
-        if (pageInterceptors != null) {
-            for (String pageName : pageInterceptors) {
-                InterceptorUrl dispatcherSupport = (InterceptorUrl) beanFactory.getBean(pageName, namespace);
-                if (dispatcherSupport != null) {
-                    dispatcherSupport.dispatcherAfter(request, response);
-                }
-            }
-        }
     }
 
     private static void printException(Exception e, HttpServletResponse response, int type) {

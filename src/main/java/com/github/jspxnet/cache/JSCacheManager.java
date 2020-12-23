@@ -153,9 +153,8 @@ public class JSCacheManager implements CacheManager {
         return caches;
     }
 
-
-    static public Object get(Class<?> tClass, String key) {
-        Cache cache = CACHE_MANAGER.getCache(tClass.getName());
+    static public Object get(String cacheName, String key) {
+        Cache cache = CACHE_MANAGER.getCache(cacheName);
         if (cache == null) {
             return null;
         }
@@ -164,6 +163,10 @@ public class JSCacheManager implements CacheManager {
             return null;
         }
         return cacheEntry.getValue();
+    }
+
+    static public Object get(Class<?> tClass, String key) {
+        return get(tClass.getName(), key);
     }
 
     static public boolean put(Class<?> cls, String key, Object o) {

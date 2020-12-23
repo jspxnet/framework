@@ -120,6 +120,12 @@ public class DefaultActionInvocation implements ActionInvocation {
         return actionProxy;
     }
 
+    @Override
+    public ActionConfig getActionConfig() {
+        return actionConfig;
+    }
+
+
     public DefaultActionInvocation(ActionConfig actionConfig, Map<String, Object> params, String exeType, JSONObject jsonData, HttpServletRequest request, HttpServletResponse response) throws Exception {
         this.actionProxy = new DefaultActionProxy();
         this.namespace = (StringUtil.isNull(actionConfig.getNamespace()) || Sioc.global.equals(actionConfig.getNamespace())) ? (String) params.get(ActionEnv.Key_Namespace) : actionConfig.getNamespace();

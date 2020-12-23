@@ -115,6 +115,7 @@ public class PermissionInterceptor extends InterceptorSupport {
                     log.error(guestUrlFile + "没有找到");
                 }
             }
+            log.info("载入guestUrlFile:{}",guestUrlFile);
             AbstractRead read = new AutoReadTextFile();
             read.setFile(guestUrlFile);
             read.setEncode(Environment.defaultEncode);

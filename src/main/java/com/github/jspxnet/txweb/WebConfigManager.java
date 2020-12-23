@@ -32,11 +32,6 @@ public interface WebConfigManager {
     List<String> getDefaultInterceptors(String namespace) ;
     /**
      * @param namespace 命名空间
-     * @return 得到页面拦截配置
-     */
-    List<String> getPageDefaultInterceptors(String namespace);
-    /**
-     * @param namespace 命名空间
      * @return 得到默认返回配置
      */
     List<ResultConfigBean> getDefaultResults(String namespace);

@@ -10,9 +10,11 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
+import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.scriptmark.load.AbstractSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -25,7 +27,6 @@ import com.github.jspxnet.scriptmark.ScriptMark;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.scriptmark.load.FileSource;
-import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.EnvFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class TemplateResult extends ResultSupport {
 
     private final static String DEFAULT_ENCODE = envTemplate.getString(Environment.encode, Environment.defaultEncode);
     private final static String TEMPLATE_PATH = envTemplate.getString(Environment.templatePath);
-    private static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
+    private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
 
     static {
         CONFIGURABLE.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
@@ -153,18 +154,24 @@ public class TemplateResult extends ResultSupport {
         //输出模板数据
         Map<String, Object> valueMap = action.getEnv();
         initPageEnvironment(action, valueMap);
-        if (debug) {
-            StringWriter out = new StringWriter();
-            scriptMark.process(out, valueMap);
-            PrintWriter writer = response.getWriter();
-            writer.print(out.toString());
-            writer.flush();
-            writer.close();
-            out.close();
-        } else {
-            PrintWriter writer = response.getWriter();
-            scriptMark.process(writer, valueMap);
-            writer.close();
+
+        StringWriter out = new StringWriter();
+        scriptMark.process(out, valueMap);
+        PrintWriter writer = response.getWriter();
+        writer.print(out.toString());
+        writer.flush();
+        writer.close();
+
+        ActionConfig actionConfig = actionInvocation.getActionConfig();
+        if (actionConfig!=null&&actionConfig.isCache())
+        {
+            String key = action.getRequest().getRequestURI();
+            log.debug("put page cache url:{}",key );
+            if (!StringUtil.isEmpty(out.toString()))
+            {
+                JSCacheManager.put(actionConfig.getClassName(),key,out.toString());
+            }
         }
+        out.close();
     }
 }

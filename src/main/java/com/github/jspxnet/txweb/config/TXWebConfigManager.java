@@ -27,7 +27,6 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.txweb.view.OperateComparator;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -47,7 +46,7 @@ public class TXWebConfigManager implements WebConfigManager {
     static private Map<String, Map<String, ActionConfigBean>> configTable;
     static private Map<String, String> extendMap;
     static private Map<String, List<DefaultInterceptorBean>> defaultInterceptorMap;
-    static private Map<String, List<DefaultUrlInterceptorBean>> defaultUrlInterceptorMap;
+    //static private Map<String, List<DefaultUrlInterceptorBean>> defaultUrlInterceptorMap;
     static private Map<String, List<ResultConfigBean>> defaultResultMap;
 
     static final private ActionConfigBean DEFAULT_ACTION_CONFIG = new ActionConfigBean();
@@ -82,7 +81,7 @@ public class TXWebConfigManager implements WebConfigManager {
         configTable = new HashMap<>();
         extendMap = new HashMap<>();
         defaultInterceptorMap = new HashMap<>();
-        defaultUrlInterceptorMap = new HashMap<>();
+
         defaultResultMap = new HashMap<>();
         scanPackageList = new ArrayList<>();
     }
@@ -97,7 +96,6 @@ public class TXWebConfigManager implements WebConfigManager {
         }
         configTable.clear();
         defaultInterceptorMap.clear();
-        defaultUrlInterceptorMap.clear();
         defaultResultMap.clear();
         scanPackageList.clear();
 
@@ -143,9 +141,6 @@ public class TXWebConfigManager implements WebConfigManager {
 
         defaultInterceptorMap.clear();
         defaultInterceptorMap.putAll(configuration.getDefaultInterceptorMap());
-
-        defaultUrlInterceptorMap.clear();
-        defaultUrlInterceptorMap.putAll(configuration.getDefaultUrlInterceptorMap());
 
         defaultResultMap.clear();
         defaultResultMap.putAll(configuration.getDefaultResultMap());
@@ -347,37 +342,6 @@ public class TXWebConfigManager implements WebConfigManager {
         return result;
     }
 
-    /**
-     * @param namespace 命名空间
-     * @return 得到页面拦截配置
-     */
-    @Override
-    public List<String> getPageDefaultInterceptors(String namespace) {
-        String nameKey = StringUtil.isNull(namespace) ? TXWeb.global : namespace;
-        List<DefaultUrlInterceptorBean> list = defaultUrlInterceptorMap.get(nameKey);
-        if (list == null || list.isEmpty()) {
-            return null;
-        }
-
-        List<String> result = new LinkedList<>();
-        for (DefaultUrlInterceptorBean defaultInterceptorBean : list) {
-            result.add(defaultInterceptorBean.getName());
-        }
-        int x = nameKey.lastIndexOf(StringUtil.BACKSLASH);
-        if (x > 1) {
-            //子扩展
-            nameKey = nameKey.substring(0, x);
-            list = defaultUrlInterceptorMap.get(nameKey);
-            if (list != null && !list.isEmpty()) {
-                for (DefaultUrlInterceptorBean defaultInterceptorBean : list) {
-                    if (defaultInterceptorBean.isExtend()) {
-                        result.add(defaultInterceptorBean.getName());
-                    }
-                }
-            }
-        }
-        return result;
-    }
 
     /**
      * @return 得到命名空间列表

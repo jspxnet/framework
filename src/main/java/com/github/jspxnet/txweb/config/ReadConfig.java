@@ -37,7 +37,6 @@ public class ReadConfig extends DefaultHandler {
     private Map<String, String> extendMap = null;
     //拦截器列表,
     private Map<String, List<DefaultInterceptorBean>> defaultInterceptorMap = null;
-    private Map<String, List<DefaultUrlInterceptorBean>> defaultUrlInterceptorMap = null;
     private Map<String, List<ResultConfigBean>> defaultResultMap = null;
     private List<ScanConfig> scanConfigList = new ArrayList<>();
     private Map<String, ActionConfigBean> groupMap;
@@ -58,14 +57,11 @@ public class ReadConfig extends DefaultHandler {
 
     public ReadConfig(final Map<String, Map<String, ActionConfigBean>> actionMap, final Map<String, String> extendMap,
                       final Map<String, List<DefaultInterceptorBean>> defaultInterceptorMap,
-                      final Map<String, List<DefaultUrlInterceptorBean>> defaultUrlInterceptorMap,
                       final Map<String, List<ResultConfigBean>> defaultResultMap) {
         this.allMap = actionMap;
         this.extendMap = extendMap;
         this.defaultResultMap = defaultResultMap;
         this.defaultInterceptorMap = defaultInterceptorMap;
-        this.defaultUrlInterceptorMap = defaultUrlInterceptorMap;
-
     }
 
     @Override
@@ -134,18 +130,6 @@ public class ReadConfig extends DefaultHandler {
             defaultResultBean.setType(type.trim());
             defaultResults.add(defaultResultBean);
         }
-        if (isDefault && localName.equalsIgnoreCase(TXWeb.CONFIG_INTERCEPT_URL)) {
-            List<DefaultUrlInterceptorBean> urlInterceptors = defaultUrlInterceptorMap.get(namespace);
-            if (urlInterceptors == null) {
-                urlInterceptors = new LinkedList<DefaultUrlInterceptorBean>();
-                defaultUrlInterceptorMap.put(namespace, urlInterceptors);
-            }
-            DefaultUrlInterceptorBean defaultUrlInterceptorBean = new DefaultUrlInterceptorBean();
-            defaultUrlInterceptorBean.setName(attr.getValue(TXWeb.CONFIG_NAME));
-            defaultUrlInterceptorBean.setCaption(attr.getValue(TXWeb.CONFIG_CAPTION));
-            defaultUrlInterceptorBean.setExtend(ObjectUtil.toBoolean(attr.getValue(TXWeb.CONFIG_EXTENDS)));
-            urlInterceptors.add(defaultUrlInterceptorBean);
-        }
         if (localName.equalsIgnoreCase(TXWeb.CONFIG_SCAN)) {
             ScanConfig scanConfig = new ScanConfig();
             scanConfig.setPackageName(attr.getValue(TXWeb.CONFIG_PACKAGE));
@@ -172,7 +156,7 @@ public class ReadConfig extends DefaultHandler {
             actionConfigBean.setPassInterceptor(StringUtil.split(StringUtil.replace(attr.getValue(TAG_pass), StringUtil.SEMICOLON, ","), ","));
             actionConfigBean.setSecret(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_SECRET)));
             actionConfigBean.setMobile(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_MOBILE)));
-
+            actionConfigBean.setCache(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_CACHE)));
             groupMap.put(actionName, actionConfigBean);
             ///////////别名支持begin
             String alias = attr.getValue(TAG_alias);

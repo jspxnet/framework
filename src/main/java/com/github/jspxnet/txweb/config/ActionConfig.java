@@ -72,6 +72,15 @@ public interface ActionConfig {
 
     List<String> getInterceptors();
 
+    void setCache(boolean cache);
+
+    boolean isCache();
+
+
+    String getCacheName();
+
+    void setCacheName(String cacheName);
+
     List<ResultConfigBean> getResultConfigs();
 
     String[] getPassInterceptor();

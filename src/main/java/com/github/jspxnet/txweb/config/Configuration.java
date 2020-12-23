@@ -24,8 +24,6 @@ public interface Configuration {
 
     Map<String, List<DefaultInterceptorBean>> getDefaultInterceptorMap();
 
-    Map<String, List<DefaultUrlInterceptorBean>> getDefaultUrlInterceptorMap();
-
     Map<String, String> getExtendMap();
 
     Map<String, Map<String, ActionConfigBean>> loadConfigMap() throws Exception;
