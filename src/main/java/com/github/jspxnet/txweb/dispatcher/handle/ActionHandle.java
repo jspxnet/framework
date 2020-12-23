@@ -2,6 +2,7 @@ package com.github.jspxnet.txweb.dispatcher.handle;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.JSCacheManager;
+import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.config.ActionConfig;
@@ -28,6 +29,8 @@ import java.util.Map;
 public class ActionHandle extends WebHandle {
     final public static String NAME = "action";
 
+    final public static String PAGE_KEY = ":page:";
+
 
     @Override
     public void doing(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -43,9 +46,9 @@ public class ActionHandle extends WebHandle {
         if (actionConfig.isCache())
         {
             //缓存中有数据就直接执行返回
-            String key = request.getRequestURI();
-            log.debug("get page cache url:{}",key );
-            String out = (String)JSCacheManager.get(actionConfig.getClassName(),key);
+            String key = actionConfig.getCacheName() + PAGE_KEY + EncryptUtil.getMd5(request.getRequestURL().toString()+ "?"+request.getQueryString());
+            log.debug("get page cache url:{}",request.getRequestURL().toString()+ "?"+request.getQueryString() );
+            String out = (String)JSCacheManager.get(actionConfig.getCacheName(),key);
             if (!StringUtil.isEmpty(out))
             {
                 TXWebUtil.print(out, WebOutEnumType.HTML.getValue(),response);

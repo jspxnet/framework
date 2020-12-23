@@ -16,6 +16,7 @@ import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
+import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -165,11 +166,12 @@ public class TemplateResult extends ResultSupport {
         ActionConfig actionConfig = actionInvocation.getActionConfig();
         if (actionConfig!=null&&actionConfig.isCache())
         {
-            String key = action.getRequest().getRequestURI();
-            log.debug("put page cache url:{}",key );
+
+            String key = actionConfig.getCacheName() + ActionHandle.PAGE_KEY + EncryptUtil.getMd5(action.getRequest().getRequestURL().toString()+ "?"+action.getRequest().getQueryString());
+            log.debug("put page cache url:{}",action.getRequest().getRequestURL().toString()+ "?"+action.getRequest().getQueryString() );
             if (!StringUtil.isEmpty(out.toString()))
             {
-                JSCacheManager.put(actionConfig.getClassName(),key,out.toString());
+                JSCacheManager.put(actionConfig.getCacheName(),key,out.toString());
             }
         }
         out.close();

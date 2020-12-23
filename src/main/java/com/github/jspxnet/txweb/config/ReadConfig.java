@@ -157,6 +157,8 @@ public class ReadConfig extends DefaultHandler {
             actionConfigBean.setSecret(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_SECRET)));
             actionConfigBean.setMobile(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_MOBILE)));
             actionConfigBean.setCache(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_CACHE)));
+            actionConfigBean.setCacheName(StringUtil.trim(attr.getValue(TXWeb.CONFIG_CACHE_NAME)));
+
             groupMap.put(actionName, actionConfigBean);
             ///////////别名支持begin
             String alias = attr.getValue(TAG_alias);
