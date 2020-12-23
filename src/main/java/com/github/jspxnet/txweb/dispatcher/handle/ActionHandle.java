@@ -11,7 +11,9 @@ import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ParamUtil;
+import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +48,8 @@ public class ActionHandle extends WebHandle {
         if (actionConfig.isCache())
         {
             //缓存中有数据就直接执行返回
-            String key = actionConfig.getCacheName() + PAGE_KEY + EncryptUtil.getMd5(request.getRequestURL().toString()+ "?"+request.getQueryString());
+
+            String key = actionConfig.getCacheName() + PAGE_KEY + EncryptUtil.getMd5(request.getRequestURL().toString()+ "?"+request.getQueryString() + ObjectUtil.toString(RequestUtil.getSortMap(request)));
             log.debug("get page cache url:{}",request.getRequestURL().toString()+ "?"+request.getQueryString() );
             String out = (String)JSCacheManager.get(actionConfig.getCacheName(),key);
             if (!StringUtil.isEmpty(out))

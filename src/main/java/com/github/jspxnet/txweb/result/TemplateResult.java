@@ -19,8 +19,10 @@ import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
+import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.scriptmark.core.ScriptMarkEngine;
 import com.github.jspxnet.scriptmark.ScriptMark;
@@ -30,6 +32,7 @@ import com.github.jspxnet.scriptmark.load.FileSource;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.EnvFactory;
 import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Map;
@@ -165,8 +168,8 @@ public class TemplateResult extends ResultSupport {
         ActionConfig actionConfig = actionInvocation.getActionConfig();
         if (actionConfig!=null&&actionConfig.isCache())
         {
-
-            String key = actionConfig.getCacheName() + ActionHandle.PAGE_KEY + EncryptUtil.getMd5(action.getRequest().getRequestURL().toString()+ "?"+action.getRequest().getQueryString());
+            HttpServletRequest request = action.getRequest();
+            String key = actionConfig.getCacheName() + ActionHandle.PAGE_KEY + EncryptUtil.getMd5(request.getRequestURL().toString()+ "?"+request.getQueryString() + ObjectUtil.toString(RequestUtil.getSortMap(request)));
             log.debug("put page cache url:{}",action.getRequest().getRequestURL().toString()+ "?"+action.getRequest().getQueryString() );
             if (!StringUtil.isEmpty(out.toString()))
             {
