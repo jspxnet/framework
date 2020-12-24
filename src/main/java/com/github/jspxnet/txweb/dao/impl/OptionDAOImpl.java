@@ -89,23 +89,6 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         return spaceMap;
     }
 
-    private String namespace = StringUtil.empty;
-
-    @Override
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    @Override
-    public String getNamespace() {
-        return namespace;
-    }
-
-    @Override
-    public String getCaption() {
-        return spaceMap.get(namespace);
-    }
-
     @Override
     public int storeDatabase() throws Exception {
         int i = 0;
@@ -160,7 +143,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         }
         for (Long id : ids) {
             OptionBundle optionBundle = super.get(OptionBundle.class, id);
-            if (optionBundle != null && optionBundle.getNamespace().equalsIgnoreCase(namespace)) {
+            if (optionBundle != null) {
                 super.delete(optionBundle);
             }
         }
@@ -181,13 +164,11 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         if (optionBundle == null) {
             return false;
         }
-        if (optionBundle.getNamespace().equalsIgnoreCase(namespace)) {
-            Map<String, Object> valueMap = new LinkedHashMap<String, Object>();
-            valueMap.put("selected", 0);
-            if (super.createCriteria(OptionBundle.class).add(Expression.eq("namespace", optionBundle.getNamespace())).update(valueMap) > 0) {
-                optionBundle.setSelected(1);
-                super.update(optionBundle, new String[]{"selected"});
-            }
+        Map<String, Object> valueMap = new LinkedHashMap<String, Object>();
+        valueMap.put("selected", 0);
+        if (super.createCriteria(OptionBundle.class).add(Expression.eq("namespace", optionBundle.getNamespace())).update(valueMap) > 0) {
+            optionBundle.setSelected(1);
+            super.update(optionBundle, new String[]{"selected"});
         }
         return true;
     }
@@ -205,7 +186,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         try {
             for (Long id : ids) {
                 OptionBundle optionBundle = get(OptionBundle.class, id);
-                if (optionBundle != null && optionBundle.getNamespace().equalsIgnoreCase(namespace)) {
+                if (optionBundle != null) {
                     optionBundle.setSortType(sortType);
                     super.update(optionBundle, new String[]{"sortType"});
                 }
@@ -229,7 +210,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         try {
             for (Long id : ids) {
                 OptionBundle optionBundle = get(OptionBundle.class, id);
-                if (optionBundle != null && optionBundle.getNamespace().equalsIgnoreCase(namespace)) {
+                if (optionBundle != null) {
                     optionBundle.setSortDate(new Date());
                     super.update(optionBundle, new String[]{"sortDate"});
                 }
@@ -245,15 +226,17 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
      * @param field      字段
      * @param find       查询条件
      * @param term       条件
+     * @param namespace  命名空间
      * @param sortString 排序
      * @param page       页数
      * @param count      返回数量
      * @return 返回列表
      */
+
     @Override
-    public List<OptionBundle> getList(String[] field, String[] find, String term, String sortString, int page, int count){
+    public List<OptionBundle> getList(String[] field, String[] find, String term,String namespace, String sortString, int page, int count){
         if (StringUtil.isNull(sortString)) {
-            sortString = "createDate:D";
+            sortString = "sortType:A;sortDate:D";
         }
         Criteria criteria = createCriteria(OptionBundle.class);
         if (!ArrayUtil.isEmpty(find) && !ArrayUtil.isEmpty(field)) {
@@ -271,10 +254,11 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
      * @param field 字段
      * @param find  查询条件
      * @param term  条件
+     * @param namespace  命名空间
      * @return 得到记录条数
      */
     @Override
-    public int getCount(String[] field, String[] find, String term) {
+    public int getCount(String[] field, String[] find, String term, String namespace) {
         Criteria criteria = createCriteria(OptionBundle.class);
         if (!ArrayUtil.isEmpty(find) && !ArrayUtil.isEmpty(field)) {
             criteria = criteria.add(Expression.find(field, find));
@@ -288,7 +272,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
 
 
     @Override
-    public OptionBundle getSelected() {
+    public OptionBundle getSelected(String namespace) {
         Criteria criteria = createCriteria(OptionBundle.class).add(Expression.eq("selected", 1));
         if (!StringUtil.isNull(namespace)) {
             criteria = criteria.add(Expression.eq("namespace", namespace));
@@ -299,7 +283,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
     }
 
     @Override
-    public OptionBundle getOptionValue(String key) {
+    public OptionBundle getOptionValue(String key, String namespace) {
         Criteria criteria = createCriteria(OptionBundle.class).add(Expression.eq("code", key));
         if (!StringUtil.isNull(namespace)) {
             criteria = criteria.add(Expression.eq("namespace", namespace));

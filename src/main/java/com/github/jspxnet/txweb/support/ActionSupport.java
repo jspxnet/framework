@@ -98,7 +98,6 @@ public abstract class ActionSupport implements Action {
     }
 
     protected Bundle config;
-
     @Ref(name = Environment.config, test = true)
     public void setConfig(Bundle config) {
         this.config = config;

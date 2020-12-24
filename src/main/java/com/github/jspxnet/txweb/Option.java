@@ -8,28 +8,33 @@
 
 package com.github.jspxnet.txweb;
 
-import java.util.Set;
+import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.table.OptionBundle;
+import java.util.List;
+
 
 /**
  * Created by yuan on 14-3-12.
  * 字典库，提供调用接口
  */
 public interface Option {
-    String getOptions(int mode);
-
-    String getSelected(int mode, String namespace) throws Exception;
-
-    String getOptions(int mode, String namespace);
-
-    String getCaption(String key);
-
-    Set<String> getSpaceSet();
-
-    String getOptions(String namespace) ;
-
-    String getSelected(String namespace) throws Exception;
-
-    String getOptionValue(String key, String namespace) throws Exception;
-
-
+    /**
+     *
+     * @param namespace 命名空间
+     * @return 得到字典表列表
+     */
+    List<OptionBundle> getList(String namespace);
+    /**
+     * 字典表中得到key数据
+     * @param key code
+     * @param namespace 命名空间
+     * @return 字典表数据
+     */
+    OptionBundle getBundle(@Param(caption = "关键字") String key, @Param(caption = "命名空间") String namespace);
+    /**
+     *
+     * @param namespace 命名空间
+     * @return 得到当前默认
+     */
+    OptionBundle getBundleSelected(@Param(caption = "命名空间") String namespace);
 }
