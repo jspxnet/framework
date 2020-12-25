@@ -33,8 +33,8 @@ import com.github.jspxnet.utils.StringUtil;
 @Bean(singleton = true)
 public class OptionAction extends OptionView {
     @Operate(caption = "保存",method = "save")
-    public RocResponse<Integer> save(@Param("参数对象") OptionBundleParam param) throws Exception {
-        OptionBundle optionBundle = BeanUtil.copy(param,OptionBundle.class);
+    public RocResponse<Integer> save(@Param("参数对象") OptionBundleParam params) throws Exception {
+        OptionBundle optionBundle = BeanUtil.copy(params,OptionBundle.class);
         IUserSession userSession = getUserSession();
         if (userSession != null) {
             optionBundle.setPutName(userSession.getName());
@@ -45,19 +45,19 @@ public class OptionAction extends OptionView {
         }
 
         optionBundle.setIp(getRemoteAddr());
-        optionBundle.setNamespace(param.getNamespace());
+        optionBundle.setNamespace(params.getNamespace());
         optionBundle.setSpelling(ChineseUtil.getFullSpell(optionBundle.getName(), ""));
         optionBundle.setId(0);
         if (optionDAO.save(optionBundle) > 0) {
-            return RocResponse.success();
+            return RocResponse.success(1,language.getLang(LanguageRes.saveSuccess));
         } else {
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),language.getLang(LanguageRes.saveFailure));
         }
     }
 
     @Operate(caption = "编辑",method = "edit")
-    public RocResponse<Integer> edit(@Param("参数对象") OptionBundleParam param) throws Exception {
-        OptionBundle optionBundle = BeanUtil.copy(param,OptionBundle.class);
+    public RocResponse<Integer> edit(@Param("参数对象") OptionBundleParam params) throws Exception {
+        OptionBundle optionBundle = BeanUtil.copy(params,OptionBundle.class);
         IUserSession userSession = getUserSession();
         if (userSession != null) {
             optionBundle.setPutName(userSession.getName());
@@ -65,13 +65,13 @@ public class OptionAction extends OptionView {
 
         }
         optionBundle.setIp(getRemoteAddr());
-        optionBundle.setNamespace(param.getNamespace());
+        optionBundle.setNamespace(params.getNamespace());
         optionBundle.setSpelling(ChineseUtil.getFullSpell(optionBundle.getName(), ""));
         if (StringUtil.isNull(optionBundle.getNamespace())) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(),language.getLang(LanguageRes.namespaceError));
         }
         if (optionDAO.update(optionBundle) > 0) {
-            return RocResponse.success();
+            return RocResponse.success(1,language.getLang(LanguageRes.updateSuccess));
         } else {
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),language.getLang(LanguageRes.saveFailure));
         }
@@ -80,7 +80,7 @@ public class OptionAction extends OptionView {
     @Operate(caption = "默选",method = "selected")
     public RocResponse<Integer> selected(@Param(caption = "ID", min = 1,required = true,message = "不允许为空") Long id) throws Exception {
         if (optionDAO.updateSelected(id)) {
-            return RocResponse.success();
+            return RocResponse.success(1,language.getLang(LanguageRes.updateSuccess));
         } else {
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),language.getLang(LanguageRes.saveFailure));
         }
@@ -138,9 +138,8 @@ public class OptionAction extends OptionView {
     }
 
     @Operate(caption = "导入数据库",method = "load/store")
-    public void loadStore() throws Exception {
-
-        addActionMessage(language.getLang(LanguageRes.importData) + "," + optionDAO.storeDatabase());
+    public RocResponse<Integer> loadStore() throws Exception {
+        return RocResponse.success(optionDAO.storeDatabase(),language.getLang(LanguageRes.importData));
     }
 
     @Override

@@ -11,6 +11,7 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.JSCacheManager;
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.scriptmark.load.AbstractSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
@@ -69,6 +70,21 @@ public class TemplateResult extends ResultSupport {
         checkCache(action, response);
         //浏览器缓存控制end
 
+        //兼容Roc返回提示方式begin
+        Object result = action.getResult();
+        if (result!=null&&!action.hasFieldInfo()&&!action.hasActionMessage() && result instanceof RocResponse)
+        {
+            RocResponse<?> rocResponse = (RocResponse<?>)result;
+            if (YesNoEnumType.YES.getValue()==rocResponse.getSuccess())
+            {
+                action.addActionMessage(rocResponse.getMessage());
+            } else
+            {
+                action.addFieldInfo(Environment.warningInfo,rocResponse.getMessage());
+            }
+        }
+        //兼容Roc返回提示方式end
+
         String contentType = action.getEnv(ActionEnv.ContentType);
         if (!StringUtil.isNull(contentType)) {
             response.setContentType(contentType);
@@ -80,6 +96,7 @@ public class TemplateResult extends ResultSupport {
             String actionName = action.getEnv(ActionEnv.Key_ActionName);
             String fileType = StringUtil.substringAfterLast(actionName, ".");
             if (StringUtil.hasLength(fileType)) {
+                
                 if ("js".equalsIgnoreCase(fileType)) {
                     response.setContentType("text/javascript; charset=" + Dispatcher.getEncode());
                 }
@@ -165,6 +182,7 @@ public class TemplateResult extends ResultSupport {
         writer.flush();
         writer.close();
 
+        //页面缓存支持begin
         ActionConfig actionConfig = actionInvocation.getActionConfig();
         if (actionConfig!=null&&actionConfig.isCache())
         {
@@ -176,6 +194,7 @@ public class TemplateResult extends ResultSupport {
                 JSCacheManager.put(actionConfig.getCacheName(),key,out.toString());
             }
         }
+        //页面缓存支持end
         out.close();
     }
 }
