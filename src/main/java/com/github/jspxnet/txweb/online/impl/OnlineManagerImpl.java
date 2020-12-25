@@ -24,7 +24,6 @@ import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.sober.queue.RedisStoreQueueClient;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.annotation.Param;
@@ -81,9 +80,6 @@ public class OnlineManagerImpl implements OnlineManager {
      * 设置一个通用密码，动态的，提供sms等方式，无密码登陆
      */
     private String guiPassword = RandomUtil.getRandomGUID(16);
-
-    @Ref
-    private RedisStoreQueueClient redisStoreQueueClient;
 
     public OnlineManagerImpl() {
 
@@ -172,9 +168,10 @@ public class OnlineManagerImpl implements OnlineManager {
     }
 
     @Override
-    public boolean isOnline(String sessionId) {
-        return sessionId != null && memberDAO.isOnline(sessionId);
+    public boolean isOnline(String token) {
+        return token != null && memberDAO.isOnline(token);
     }
+
 
     /**
      * 创建游客用户session
@@ -282,7 +279,7 @@ public class OnlineManagerImpl implements OnlineManager {
 
         String token = null;
         if (session != null) {
-            token =  JWTUtil.createToken(ip,member.getId()+"",session.getId());
+            token =  JWTUtil.createToken(ip,member.getId()+"",SessionUtil.getSessionId(session));
         } else {
             token =  JWTUtil.createToken(ip,member.getId()+"",EncryptUtil.getHashEncode(member.getId() + member.getName() + client + EnvFactory.getHashAlgorithmKey(), EnvFactory.getHashAlgorithm()));
         }
@@ -324,7 +321,7 @@ public class OnlineManagerImpl implements OnlineManager {
         }
         if (session!=null)
         {
-            loginLog.setSessionId(session.getId());
+            loginLog.setSessionId(SessionUtil.getSessionId(session));
         }
         loginLog.setToken(token);
         loginLog.setLoginTimes(member.getLoginTimes());
@@ -422,7 +419,7 @@ public class OnlineManagerImpl implements OnlineManager {
 
         //信息检查完成
         HttpServletRequest request = action.getRequest();
-        String token = JWTUtil.createToken(action.getRemoteAddr(),member.getId()+"", session.getId());
+        String token = JWTUtil.createToken(action.getRemoteAddr(),member.getId()+"", SessionUtil.getSessionId(session));
         //创建session信息更新 begin
         UserSession userSession = BeanUtil.copy(member,UserSession.class);
         userSession.setId(token);
@@ -456,7 +453,7 @@ public class OnlineManagerImpl implements OnlineManager {
         loginLog.setToken(token);
         loginLog.setClient("web");
         loginLog.setLoginTimes(member.getLoginTimes());
-        loginLog.setSessionId(session.getId());
+        loginLog.setSessionId(SessionUtil.getSessionId(session));
         loginLog.setUrl(request.getRequestURL().toString());
         loginLog.setSystem(RequestUtil.getSystem(request));
         loginLog.setBrowser(RequestUtil.getBrowser(request));
@@ -576,7 +573,6 @@ public class OnlineManagerImpl implements OnlineManager {
             if (System.currentTimeMillis() - userSession.getLastRequestTime() > UPDATE_SESSION_MINUTE * DateUtil.MINUTE) {
                 userSession.setLastRequestTime(System.currentTimeMillis());
                 updateUserSessionCache(userSession);
-                redisStoreQueueClient.update(userSession);
             }
         }
 
@@ -635,7 +631,7 @@ public class OnlineManagerImpl implements OnlineManager {
         //如果是二级域名共享登陆
         if (session != null && StringUtil.isNull(token)) {
             UserSession userSession = createGuestUserSession();
-            userSession.setId(JWTUtil.createToken(action.getRemoteAddr(),"0", session.getId()));
+            userSession.setId(JWTUtil.createToken(action.getRemoteAddr(),"0", SessionUtil.getSessionId(session)));
             updateUserSessionCache(userSession);
             return userSession;
         }
