@@ -22,7 +22,7 @@ import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.util.MimeTypesUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.scriptmark.core.ScriptMarkEngine;
@@ -96,31 +96,7 @@ public class TemplateResult extends ResultSupport {
             String actionName = action.getEnv(ActionEnv.Key_ActionName);
             String fileType = StringUtil.substringAfterLast(actionName, ".");
             if (StringUtil.hasLength(fileType)) {
-                
-                if ("js".equalsIgnoreCase(fileType)) {
-                    response.setContentType("text/javascript; charset=" + Dispatcher.getEncode());
-                }
-                if (ArrayUtil.inArray(new String[]{"mp4", "flv", "avi", "mp3", "rmvb"}, fileType, true)) {
-                    response.setContentType("video/" + fileType);
-                }
-                if ("bt".equalsIgnoreCase(fileType)) {
-                    response.setContentType("application/x-bittorrent");
-                }
-                if (ArrayUtil.inArray(new String[]{"xls", "xlsx"}, fileType, true)) {
-                    response.setContentType("application/vnd.ms-excel");
-                }
-                if (ArrayUtil.inArray(new String[]{"doc", "docx"}, fileType, true)) {
-                    response.setContentType("application/msword");
-                }
-                if (ArrayUtil.inArray(new String[]{"mdb", "mdbx"}, fileType, true)) {
-                    response.setContentType("application/msword");
-                }
-                if (ArrayUtil.inArray(new String[]{"xml", "vml"}, fileType, true)) {
-                    response.setContentType("application/xml");
-                }
-                if (ArrayUtil.inArray(new String[]{"bmp", "jpg", "gif", "jpg", "png"}, fileType, true)) {
-                    response.setContentType("image/" + fileType);
-                }
+                response.setContentType( MimeTypesUtil.getContentType(fileType,Dispatcher.getEncode()));
             } else {
                 response.setContentType("text/html; charset=" + Dispatcher.getEncode());
             }

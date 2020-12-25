@@ -14,7 +14,6 @@ import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.scriptmark.util.ScriptConverter;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.IRole;
@@ -30,6 +29,7 @@ import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.txweb.table.UserSession;
+import com.github.jspxnet.txweb.util.ActionLogUtil;
 import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -780,27 +780,7 @@ public abstract class ActionSupport implements Action {
         if (hasFieldInfo()) {
             return null;
         }
-        ActionLog actionLog = new ActionLog();
-        String id = getString("id");
-        if (StringUtil.isEmpty(id) && ClassUtil.isDeclaredMethod(getClass(), "getId")) {
-            id = "" + BeanUtil.getProperty(this, "getId");
-        }
-        actionLog.setObjectId(id);
-        actionLog.setClassName(getClass().getName());
-        actionLog.setObjectType(StringUtil.substringBefore(getClass().getName(), "Action"));
-        actionLog.setTitle(getActionLogTitle());
-        Object logObject = getActionLogContent();
-        if (logObject instanceof String) {
-            actionLog.setContent((String) logObject);
-        } else if (logObject instanceof Boolean || logObject instanceof StringBuilder || logObject instanceof StringBuffer || logObject instanceof Long || logObject instanceof Integer) {
-            actionLog.setContent(logObject.toString());
-        } else {
-            actionLog.setContent(ScriptConverter.toXml(logObject));
-        }
-        actionLog.setActionResult(getActionResult());
-        actionLog.setIp(getRemoteAddr());
-        return actionLog;
-
+        return ActionLogUtil.createActionLog(this);
     }
 
     /**

@@ -109,12 +109,12 @@ public class OptionView extends ActionSupport {
         this.count = count;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
     @Param(caption = "ID")
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
