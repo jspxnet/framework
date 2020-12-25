@@ -37,4 +37,12 @@ public interface Option {
      * @return 得到当前默认
      */
     OptionBundle getBundleSelected(@Param(caption = "命名空间") String namespace);
+
+    String getOptions(int mode, String namespace);
+
+    String getSelected(@Param(caption = "模式") int mode, @Param(caption = "命名空间") String namespace);
+
+    List<String> getSpaceSet();
+
+    String getCaption(String key);
 }

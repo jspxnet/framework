@@ -12,10 +12,14 @@ import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Option;
+import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.OptionDAO;
 import com.github.jspxnet.txweb.table.OptionBundle;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -81,5 +85,73 @@ public class OptionProvider implements Option {
         return null;
     }
 
+    /**
+     *
+     * @param mode 兼容老版本
+     * @param namespace 命名空间
+     * @return 字符串方式
+     */
+    @Override
+    public String getOptions(int mode,String namespace)  {
+        List<OptionBundle> optionBundleList = getList(namespace);
+        StringBuilder sb = new StringBuilder();
+        for (OptionBundle optionBundle : optionBundleList) {
+            if (mode == 0) {
+                sb.append(optionBundle.getName()).append(StringUtil.SEMICOLON);
+            } else {
+                sb.append(optionBundle.getCode()).append(":").append(optionBundle.getName()).append(StringUtil.SEMICOLON);
+            }
+        }
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 1);
+        }
+        return sb.toString();
+    }
 
+    /**
+     * @param mode      显示模式 0:得到名称 1:得到代码
+     * @param namespace 命名空间
+     * @return 得到选项
+     */
+    @Override
+    public String getSelected(@Param(caption = "模式") int mode, @Param(caption = "命名空间") String namespace) {
+        OptionBundle optionBundle = getBundleSelected(namespace);
+        if (optionBundle == null) {
+            return StringUtil.empty;
+        }
+        return mode == 0 ? optionBundle.getName() : optionBundle.getCode();
+    }
+    /**
+     *
+     * @return 得到所有key列表
+     */
+    @Override
+    public List<String> getSpaceSet() {
+        List<String> result = new ArrayList<>();
+        List<OptionBundle> list = getList(ALL_NAMESPACE);
+        for (OptionBundle optionBundle:list)
+        {
+            result.add(optionBundle.getName());
+        }
+        if (!ObjectUtil.isEmpty(result))
+        {
+            return result;
+        }
+        return new ArrayList<>(optionDAO.getSpaceMap().keySet());
+    }
+
+
+    @Override
+    public String getCaption(String key) {
+
+        List<OptionBundle> list = getList(ALL_NAMESPACE);
+        for (OptionBundle optionBundle:list)
+        {
+            if (key!=null&&key.equalsIgnoreCase(optionBundle.getCode()))
+            {
+                return optionBundle.getName();
+            }
+        }
+        return optionDAO.getSpaceMap().get(key);
+    }
 }

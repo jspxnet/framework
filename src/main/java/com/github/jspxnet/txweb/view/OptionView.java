@@ -34,26 +34,28 @@ public class OptionView extends ActionSupport {
 
     }
 
+    //-------------------
+
     @Operate(caption = "命名空间名称列表", method = "all/list/page")
-    public RocResponse<List<OptionBundle>> getNamespaceList(@Param(caption = "查询关键字", required = true) PageParam pageParam) {
-        RocResponse<List<OptionBundle>> response = RocResponse.success(optionDAO.getList(pageParam.getField(), pageParam.getFind(),
-                pageParam.getTerm(), ALL_NAMESPACE, pageParam.getSort(), pageParam.getCurrentPage(), pageParam.getCount()));
-        response.setTotalCount(optionDAO.getCount(pageParam.getField(), pageParam.getFind(), pageParam.getTerm(), ALL_NAMESPACE));
-        return response.setCount(pageParam.getCount()).setCurrentPage(pageParam.getCurrentPage());
+    public RocResponse<List<OptionBundle>> getNamespaceList(@Param(caption = "查询关键字", required = true) PageParam params) {
+        RocResponse<List<OptionBundle>> response = RocResponse.success(optionDAO.getList(params.getField(), params.getFind(),
+                params.getTerm(), ALL_NAMESPACE, params.getSort(), params.getCurrentPage(), params.getCount()));
+        response.setTotalCount(optionDAO.getCount(params.getField(), params.getFind(), params.getTerm(), ALL_NAMESPACE));
+        return response.setCount(params.getCount()).setCurrentPage(params.getCurrentPage());
     }
 
 
     @Operate(caption = "翻页列表", method = "list/page")
-    public RocResponse<List<OptionBundle>> getListPage(@Param(caption = "查询关键字", required = true) PageParam pageParam) {
-        RocResponse<List<OptionBundle>> response = RocResponse.success(optionDAO.getList(pageParam.getField(), pageParam.getFind(),
-                pageParam.getTerm(), pageParam.getNamespace(), pageParam.getSort(), pageParam.getCurrentPage(), pageParam.getCount()));
-        response.setTotalCount(optionDAO.getCount(pageParam.getField(), pageParam.getFind(), pageParam.getTerm(), pageParam.getNamespace()));
-        return response.setCount(pageParam.getCount()).setCurrentPage(pageParam.getCurrentPage());
+    public RocResponse<List<OptionBundle>> getListPage(@Param(caption = "查询关键字", required = true) PageParam params) {
+        RocResponse<List<OptionBundle>> response = RocResponse.success(optionDAO.getList(params.getField(), params.getFind(),
+                params.getTerm(), params.getNamespace(), params.getSort(), params.getCurrentPage(), params.getCount()));
+        response.setTotalCount(optionDAO.getCount(params.getField(), params.getFind(), params.getTerm(), params.getNamespace()));
+        return response.setCount(params.getCount()).setCurrentPage(params.getCurrentPage());
     }
 
     @Operate(caption = "列表", method = "list")
-    public RocResponse<List<OptionBundle>> getLis(@Param(caption = "查询关键字", required = true) PageParam pageParam) {
-        return RocResponse.success(optionDAO.getList(pageParam.getField(), pageParam.getFind(), pageParam.getTerm(), pageParam.getNamespace(), pageParam.getSort(), 1, 50000));
+    public RocResponse<List<OptionBundle>> getList(@Param(caption = "查询关键字", required = true) PageParam params) {
+        return RocResponse.success(optionDAO.getList(params.getField(), params.getFind(), params.getTerm(), params.getNamespace(), params.getSort(), 1, 50000));
     }
 
     @Operate(caption = "详细", method = "detail")
