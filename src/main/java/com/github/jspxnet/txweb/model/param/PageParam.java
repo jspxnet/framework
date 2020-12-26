@@ -1,5 +1,7 @@
 package com.github.jspxnet.txweb.model.param;
 
+import com.github.jspxnet.enums.AuditEnumType;
+import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
@@ -42,4 +44,5 @@ public class PageParam implements Serializable  {
 
     @Param(caption = "条件",max = 100)
     private String term = StringUtil.empty;
+
 }

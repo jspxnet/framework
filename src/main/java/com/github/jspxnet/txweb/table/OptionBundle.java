@@ -8,6 +8,7 @@
 
 package com.github.jspxnet.txweb.table;
 
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
@@ -47,8 +48,8 @@ public class OptionBundle extends OperateTable {
     @Column(caption = "描述", length = 200)
     private String description = StringUtil.empty;
 
-    @Column(caption = "默认选择", length = 2, notNull = true)
-    private int selected = 0;
+    @Column(caption = "默认选择", enumType = YesNoEnumType.class)
+    private int selected = YesNoEnumType.NO.getValue();
 
     @Column(caption = "排序", notNull = true)
     private int sortType = 0;
