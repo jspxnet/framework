@@ -26,7 +26,7 @@ import java.util.Date;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "jspx_option_bundle", caption = "备选表", cache = true)
+@Table(name = "jspx_option_bundle", caption = "备选表")
 public class OptionBundle extends OperateTable {
 
     @Id
@@ -56,7 +56,12 @@ public class OptionBundle extends OperateTable {
     @Column(caption = "排序时间", notNull = true)
     private Date sortDate = new Date();
 
+    @Column(caption = "父编码", length = 50, dataType = "isLengthBetween(0,50)", notNull = false)
+    private String parentCode = StringUtil.empty;
+
+    @Column(caption = "分组编码", length = 50, dataType = "isLengthBetween(0,50)", notNull = false)
+     private String groupCode;
+
     @Column(caption = "命名空间", length = 50, notNull = true)
     private String namespace = StringUtil.empty;
-
 }
