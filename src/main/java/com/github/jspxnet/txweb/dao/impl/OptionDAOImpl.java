@@ -31,10 +31,7 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by yuan on 14-2-16.
@@ -44,8 +41,6 @@ import java.util.Map;
 @Bean
 @Slf4j
 public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
-
-    private static Map<String, String> spaceMap = new LinkedHashMap<>();
 
     public OptionDAOImpl() {
 
@@ -57,59 +52,50 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         return folder;
     }
 
-    public void setFolder(String folder) throws Exception {
+    public void setFolder(String folder) {
         this.folder = folder;
-        //载入目录索引
-        if (!spaceMap.isEmpty()) {
-            return;
-        }
-        File file = new File(this.folder, "index.xml");
-        if (!file.isFile()) {
-            return;
-        }
+    }
 
+    @Override
+    public int storeDatabase() throws Exception {
+        //载入目录索引
+        Map<String, String> spaceMap = new HashMap<>();
+        File indexFile = new File(this.folder, "index.xml");
+        if (!indexFile.isFile()) {
+            return 0;
+        }
         AbstractRead read = new AutoReadTextFile();
         read.setEncode(Environment.defaultEncode);
-        read.setFile(file);
+        read.setFile(indexFile);
 
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag("map", MapElement.class.getName());
         MapElement mapElement = (MapElement) xmlEngine.createTagNode(read.getContent());
         List<TagNode> valueList = mapElement.getValueList();
-        spaceMap.clear();
         for (TagNode aList : valueList) {
             ValueElement valueElement = (ValueElement) aList;
             spaceMap.put(valueElement.getKey(), valueElement.getValue());
+            createCriteria(OptionBundle.class).add(Expression.eq("namespace",valueElement.getKey())).delete(false);
         }
         valueList.clear();
-    }
 
-    @Override
-    public Map<String, String> getSpaceMap() {
-        return spaceMap;
-    }
-
-    @Override
-    public int storeDatabase() throws Exception {
         int i = 0;
-        createCriteria(OptionBundle.class).delete(false);
         for (String key : spaceMap.keySet()) {
             File file = new File(this.folder, key + ".xml");
             if (!file.isFile()) {
                 continue;
             }
-
-            AbstractRead read = new AutoReadTextFile();
+            read = new AutoReadTextFile();
             read.setEncode(Environment.defaultEncode);
             read.setFile(file);
             String xml = read.getContent();
             if (StringUtil.isNull(xml)) {
                 continue;
             }
-            XmlEngine xmlEngine = new XmlEngineImpl();
+            xmlEngine = new XmlEngineImpl();
             xmlEngine.putTag("map", MapElement.class.getName());
-            MapElement mapElement = (MapElement) xmlEngine.createTagNode(xml);
-            List<TagNode> valueList = mapElement.getValueList();
+            mapElement = (MapElement) xmlEngine.createTagNode(xml);
+            valueList = mapElement.getValueList();
             for (TagNode aList : valueList) {
                 ValueElement valueElement = (ValueElement) aList;
                 OptionBundle optionBundle = new OptionBundle();
@@ -129,7 +115,6 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
             valueList.clear();
         }
         return i;
-
     }
 
     /**
@@ -271,6 +256,11 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
     }
 
 
+    /**
+     *
+     * @param namespace 命名空间
+     * @return 得到默认选项
+     */
     @Override
     public OptionBundle getSelected(String namespace) {
         Criteria criteria = createCriteria(OptionBundle.class).add(Expression.eq("selected", 1));
@@ -282,9 +272,15 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         return (OptionBundle) criteria.objectUniqueResult(false);
     }
 
+    /**
+     *
+     * @param code 得到选项
+     * @param namespace 命名空间
+     * @return 得到字典数据
+     */
     @Override
-    public OptionBundle getOptionValue(String key, String namespace) {
-        Criteria criteria = createCriteria(OptionBundle.class).add(Expression.eq("code", key));
+    public OptionBundle getOptionValue(String code, String namespace) {
+        Criteria criteria = createCriteria(OptionBundle.class).add(Expression.eq("code", code));
         if (!StringUtil.isNull(namespace)) {
             criteria = criteria.add(Expression.eq("namespace", namespace));
         } else {
@@ -293,5 +289,57 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         return (OptionBundle) criteria.objectUniqueResult(false);
     }
 
+
+    /**
+     * 得到子列表
+     * @param field 字段
+     * @param find 查询
+     * @param parentCode 父编码
+     * @param namespace 命名空间
+     * @param sortString 排序
+     * @param page 页数
+     * @param count 行数
+     * @return 得到子列表
+     */
+    @Override
+    public List<OptionBundle> getChildList(String[] field, String[] find, String parentCode, String namespace, String sortString, int page, int count){
+        if (StringUtil.isNull(sortString)) {
+            sortString = "sortType:A;sortDate:D";
+        }
+        Criteria criteria = createCriteria(OptionBundle.class);
+        if (!ArrayUtil.isEmpty(find) && !ArrayUtil.isEmpty(field)) {
+            criteria = criteria.add(Expression.find(field, find));
+        }
+        if (!StringUtil.isNull(parentCode)) {
+            criteria = criteria.add(Expression.eq("parentCode", parentCode));
+        }
+        if (!StringUtil.isNull(namespace)) {
+            criteria = criteria.add(Expression.eq("namespace", namespace));
+        }
+        return SSqlExpression.getSortOrder(criteria, sortString).setCurrentPage(page).setTotalCount(count).list(false);
+    }
+
+    /**
+     *
+     * @param field 字段
+     * @param find 查询
+     * @param parentCode 父编码
+     * @param namespace 命名空间
+     * @return 得到子列表数量
+     */
+    @Override
+    public int getChildCount(String[] field, String[] find, String parentCode, String namespace) {
+        Criteria criteria = createCriteria(OptionBundle.class);
+        if (!ArrayUtil.isEmpty(find) && !ArrayUtil.isEmpty(field)) {
+            criteria = criteria.add(Expression.find(field, find));
+        }
+        if (!StringUtil.isNull(parentCode)) {
+            criteria = criteria.add(Expression.eq("parentCode", parentCode));
+        }
+        if (!StringUtil.isNull(namespace)) {
+            criteria = criteria.add(Expression.eq("namespace", namespace));
+        }
+        return criteria.setProjection(Projections.rowCount()).intUniqueResult();
+    }
 
 }

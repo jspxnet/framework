@@ -18,7 +18,7 @@ import java.util.Map;
  * Created by yuan on 14-2-16.
  */
 public interface OptionDAO extends SoberSupport {
-    Map<String, String> getSpaceMap();
+
 
     int storeDatabase() throws Exception;
 
@@ -37,4 +37,8 @@ public interface OptionDAO extends SoberSupport {
     OptionBundle getSelected(String namespace);
 
     OptionBundle getOptionValue(String key, String namespace);
+
+    List<OptionBundle> getChildList(String[] field, String[] find, String parentCode, String namespace, String sortString, int page, int count);
+
+    int getChildCount(String[] field, String[] find, String parentCode, String namespace);
 }

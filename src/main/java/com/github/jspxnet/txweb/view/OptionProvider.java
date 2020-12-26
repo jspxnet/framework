@@ -135,7 +135,7 @@ public class OptionProvider implements Option {
         {
             return result;
         }
-        return new ArrayList<>(optionDAO.getSpaceMap().keySet());
+        return new ArrayList<>();
     }
 
 
@@ -150,6 +150,6 @@ public class OptionProvider implements Option {
                 return optionBundle.getName();
             }
         }
-        return optionDAO.getSpaceMap().get(key);
+        return StringUtil.empty;
     }
 }
