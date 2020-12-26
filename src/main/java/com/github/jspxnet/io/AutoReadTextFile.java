@@ -15,9 +15,6 @@ import com.github.jspxnet.network.http.HttpClientFactory;
 import com.github.jspxnet.utils.CharacterUtil;
 import com.github.jspxnet.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.util.jar.JarInputStream;
 import java.util.zip.Adler32;

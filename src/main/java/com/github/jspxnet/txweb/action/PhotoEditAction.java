@@ -650,7 +650,7 @@ public class PhotoEditAction extends UploadFileView {
         uploadFile.setHistory(StringUtil.empty);
         uploadFile.setAttributes("width=" + image.getWidth() + "\r\nheight=" + image.getHeight());
         uploadFile.setFileSize(file.length());
-        uploadFile.setHash(FileUtil.getFastHash(file, UploadFileAction.hashType));
+        uploadFile.setHash(FileUtil.getHash(file, UploadFileAction.hashType));
 
         if (uploadFileDAO.update(uploadFileObject, new String[]{"attributes", "fileSize", "hash", "history"}) > 0) {
             setActionLogContent(file.getAbsolutePath());

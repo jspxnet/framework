@@ -389,7 +389,7 @@ public class FileUtil {
      * @return 得到哈希值
      * @throws Exception 异常
      */
-    public static String getFastHash(File fileName, String hashType) throws
+/*    public static String getFastHash(File fileName, String hashType) throws
             Exception {
         if (StringUtil.isNull(hashType) || "AUTO".equalsIgnoreCase(hashType)) {
             hashType = "MD5";
@@ -422,7 +422,7 @@ public class FileUtil {
             return StringUtil.toHexString(md5.digest());
         }
         return StringUtil.empty;
-    }
+    }*/
 
 
     /**
@@ -1616,9 +1616,9 @@ public class FileUtil {
      */
     public static List<File> getFolderList(File folder) throws IllegalArgumentException {
         if (folder == null || !folder.isDirectory()) {
-            throw new IllegalArgumentException("Invalid   folder");
+            return new ArrayList<>(0);
         }
-        List<File> result = new LinkedList<File>();
+        List<File> result = new LinkedList<>();
         result.add(folder);
         File[] list = folder.listFiles();
         if (list != null) {
@@ -1631,6 +1631,26 @@ public class FileUtil {
         return result;
     }
 
+    /**
+     * @param folder 目录
+     * @return 返回子目录列表,只返回一级
+     * @throws IllegalArgumentException 异常
+     */
+    public static List<File> getFirstChildFolder(File folder) throws IllegalArgumentException {
+        if (folder == null || !folder.isDirectory()) {
+           return new ArrayList<>(0);
+        }
+        List<File> result = new LinkedList<>();
+        File[] list = folder.listFiles();
+        if (list != null) {
+            for (File f : list) {
+                if (f.isDirectory()) {
+                    result.add(f);
+                }
+            }
+        }
+        return result;
+    }
 
     /**
      * @param name 文件名称
