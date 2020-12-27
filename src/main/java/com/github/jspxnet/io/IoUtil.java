@@ -3,7 +3,6 @@ package com.github.jspxnet.io;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.FileUtil;
-
 import java.io.IOException;
 
 /**
@@ -40,11 +39,11 @@ public class IoUtil {
     {
         String fileType = FileUtil.getTypePart(file);
         AbstractRead abstractRead;
-        if (ArrayUtil.inArray(ReadWordTextFile.fileType,fileType,true))
+        if (ArrayUtil.inArray(ReadWordTextFile.FILE_TYPE,fileType,true))
         {
             abstractRead = new ReadWordTextFile();
         } else
-        if ("pdf".equalsIgnoreCase(fileType))
+        if (ArrayUtil.inArray(ReadPdfTextFile.FILE_TYPE,fileType,true))
         {
             abstractRead = new ReadPdfTextFile();
 

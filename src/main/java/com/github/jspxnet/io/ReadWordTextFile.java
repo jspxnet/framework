@@ -19,7 +19,7 @@ import java.io.FileInputStream;
  **/
 @Slf4j
 public class ReadWordTextFile extends AbstractRead {
-    public final static String[] fileType =  new String[]{"doc","docx"};
+    public final static String[] FILE_TYPE =  new String[]{"doc","docx"};
     public ReadWordTextFile() {
         encode = Environment.defaultEncode;
     }

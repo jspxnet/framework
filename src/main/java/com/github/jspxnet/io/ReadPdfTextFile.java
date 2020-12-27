@@ -15,6 +15,7 @@ import java.io.IOException;
  * description: jspbox
  **/
 public class ReadPdfTextFile extends AbstractRead {
+    public final static String[] FILE_TYPE =  new String[]{"pdf"};
     public ReadPdfTextFile() {
         encode = Environment.defaultEncode;
     }
