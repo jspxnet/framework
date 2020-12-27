@@ -3,6 +3,8 @@ package com.github.jspxnet.io;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.FileUtil;
+
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -28,6 +30,15 @@ public class IoUtil {
         return autoReadText( file, Environment.defaultEncode);
     }
 
+    /**
+     *
+     * @param file 文件
+     * @return 读取文件信息
+     * @throws IOException 异常
+     */
+    public static String autoReadText(File file) throws IOException {
+        return autoReadText( file.getAbsolutePath(), Environment.defaultEncode);
+    }
     /**
      *
      * @param file 文件

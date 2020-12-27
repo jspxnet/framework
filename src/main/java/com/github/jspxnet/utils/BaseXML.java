@@ -35,8 +35,7 @@ public class BaseXML extends DefaultHandler {
     }
 
     @Override
-    public void startElement(String uri, String localName, String qName, org.xml.sax.Attributes attributes)
-            throws SAXException {
+    public void startElement(String uri, String localName, String qName, org.xml.sax.Attributes attributes) {
         contents.reset();
         if (Key != null && Key.equalsIgnoreCase(localName)) {
             attributesResult = attributes.getValue(Att);

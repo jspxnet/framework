@@ -283,9 +283,9 @@ public class XMLUtil {
      */
     static public String getKeyValue(String key, String xml) {
         try {
-            BaseXML baseXML = new BaseXML(key, "");
-            parseXmlString(baseXML, xml);
-            return baseXML.getValue();
+            BaseXML baseXml = new BaseXML(key, "");
+            parseXmlString(baseXml, xml);
+            return baseXml.getValue();
         } catch (Exception e) {
             log.error(xml, e);
         }
@@ -300,9 +300,9 @@ public class XMLUtil {
      */
     static public boolean getInKey(String key, String value, String xmlstr) {
         try {
-            ReadXML readXML = new ReadXML(key, value);
-            parseXmlString(readXML, xmlstr);
-            return readXML.getValue();
+            ReadXML readXml = new ReadXML(key, value);
+            parseXmlString(readXml, xmlstr);
+            return readXml.getValue();
         } catch (Exception e) {
             log.error("parse Xml String:" + xmlstr + "  key=" + key + " value=" + value, e);
             return false;
@@ -572,7 +572,7 @@ public class XMLUtil {
      */
     public static Map<String, Object> getMap(String resData, String xpath)
     {
-        Map<String, Object> resultMap = new TreeMap();
+        Map<String, Object> resultMap = new TreeMap<>();
         Document doc;
         try {
             doc = DocumentHelper.parseText(resData);
@@ -580,9 +580,8 @@ public class XMLUtil {
             log.error("xml 转换异常",e);
             return resultMap;
         }
-        List selectNodes = doc.selectNodes(xpath);
-        for (Object object : selectNodes) {
-            Node node = (Node) object;
+        List<Node> selectNodes = doc.selectNodes(xpath);
+        for (Node node : selectNodes) {
             resultMap.put(node.getName(), node.getText());
         }
 
