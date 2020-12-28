@@ -239,7 +239,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         createInterceptorList();
     }
 
-    private void createInterceptorList() throws Exception {
+    private void createInterceptorList() {
 
         LinkedList<String> interceptNameList = new LinkedList<>();
         List<String> tmpList = WEB_CONFIG_MANAGER.getDefaultInterceptors(namespace);

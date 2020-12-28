@@ -14,7 +14,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.io.AbstractRead;
 import com.github.jspxnet.io.AutoReadTextFile;
-import com.github.jspxnet.io.ReadHtml;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.RpcClient;
@@ -330,16 +330,11 @@ public class ConfigureContext implements IocContext {
         if (StringUtil.isNull(fileName)) {
             return StringUtil.empty;
         }
-        AbstractRead abstractRead = new ReadHtml();
+        String encode = Environment.defaultEncode;
         if (fileName.toLowerCase().contains("gb")) {
-            abstractRead.setEncode("GBK");
-        } else if (fileName.toLowerCase().contains("utf-8")) {
-            abstractRead.setEncode(Environment.defaultEncode);
-        } else {
-            envTemplate.getString(Environment.encode, Environment.defaultEncode);
+            encode = "GBK";
         }
-        abstractRead.setFile(fileName);
-        return abstractRead.getContent();
+        return IoUtil.autoReadText(fileName,encode);
     }
 
     /**

@@ -282,7 +282,7 @@ public class PermissionInterceptor extends InterceptorSupport {
             }
 
             //角色权限表判断
-            if (role.getUserType() >= UserEnumType.INTENDANT.getValue() && StringUtil.hasLength(method) && role.getUserType() < UserEnumType.ChenYuan.getValue()
+            if (role.getUserType() >= UserEnumType.INTENDANT.getValue() && StringUtil.hasLength(method) && role.getUserType() < UserEnumType.ADMINISTRATOR.getValue()
                     && !role.checkOperate(pathNamespace, action.getClass().getName(), method)) {
                 action.addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needPermission));
                 return ActionSupport.UNTITLED;

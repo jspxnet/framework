@@ -9,12 +9,9 @@
  */
 package com.github.jspxnet.txweb.view;
 
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.AutoReadTextFile;
-import com.github.jspxnet.io.ReadHtml;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.io.StringInputStream;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
-
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -26,7 +23,6 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndEntry;
 
 import java.util.List;
-import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,7 +37,7 @@ public class RRSReadView extends ActionSupport {
     private SyndFeedInput syndFeedInput = new SyndFeedInput();
     private SyndFeed syndFeed = null;
     private String url = StringUtil.empty;
-    private AbstractRead read;
+
 
     public String getUrl() {
         return url;
@@ -51,17 +47,11 @@ public class RRSReadView extends ActionSupport {
     public void setUrl(String url) {
         this.url = url;
 
-        if (url.toLowerCase().startsWith("http")) {
-            read = new ReadHtml();
-            read.setFile(url);
-        } else {
-            read = new AutoReadTextFile();
-            read.setFile(new File(url));
-        }
+
     }
 
     public SyndFeed getSyndFeed() throws Exception {
-        String cont = read.getContent();
+        String cont = IoUtil.autoReadText(url);
         String encode = XMLUtil.getHeadEncode(cont);
         StringInputStream inputStream = new StringInputStream(cont, encode);
         XmlReader reader = new XmlReader(inputStream);

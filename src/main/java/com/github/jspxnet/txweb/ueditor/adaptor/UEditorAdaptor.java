@@ -295,7 +295,7 @@ public class UEditorAdaptor extends ActionSupport {
             upFile.setPutUid(userSession.getUid());
             upFile.setIp(getRemoteAddr());
         }
-        upFile.setHash(FileUtil.getFastHash(file, UploadFileAction.hashType));
+        upFile.setHash(FileUtil.getHash(file, UploadFileAction.hashType));
 
         Object alreadyUploadFile = uploadFileDAO.getForHash(upFile.getHash());
         IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;

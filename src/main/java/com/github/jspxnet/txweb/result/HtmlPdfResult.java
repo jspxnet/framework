@@ -53,7 +53,7 @@ import java.util.*;
 public class HtmlPdfResult extends ResultSupport {
     private static final Logger log = LoggerFactory.getLogger(HtmlPdfResult.class);
     private final static TemplateConfigurable configurable = new TemplateConfigurable();
-    private static final String defaultEncode = envTemplate.getString(Environment.encode, Environment.defaultEncode);
+
     private static String templatePath = envTemplate.getString(Environment.templatePath);
     private static String fontsPath = envTemplate.getString(Environment.fontsPath);
 
@@ -72,7 +72,7 @@ public class HtmlPdfResult extends ResultSupport {
         //浏览器缓存控制end
 
         File f = new File(action.getTemplatePath(), action.getTemplateFile());
-        FileSource fileSource = new FileSource(f, action.getTemplateFile(), defaultEncode);
+        FileSource fileSource = new FileSource(f, action.getTemplateFile(), Dispatcher.getEncode());
         //如果使用cache 就使用uri
 
         String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式

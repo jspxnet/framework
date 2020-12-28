@@ -41,7 +41,7 @@ import java.util.Map;
 public class MarkdownResult extends ResultSupport {
     private static final Logger log = LoggerFactory.getLogger(MarkdownResult.class);
     private static final TemplateConfigurable configurable = new TemplateConfigurable();
-    private static final String defaultEncode = envTemplate.getString(Environment.encode, Environment.defaultEncode);
+
     private static final String markdownTemplate = envTemplate.getString(Environment.markdownTemplate);
     private static final String templatePath = envTemplate.getString(Environment.templatePath);
 
@@ -88,7 +88,7 @@ public class MarkdownResult extends ResultSupport {
         if (!f.exists()) {
             f = new File(templatePath, markdownTemplate);
         }
-        FileSource fileSource = new FileSource(f, markdownTemplate, defaultEncode);
+        FileSource fileSource = new FileSource(f, markdownTemplate, Dispatcher.getEncode());
         //如果使用cache 就使用uri
         String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
         configurable.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), templatePath});
@@ -110,7 +110,7 @@ public class MarkdownResult extends ResultSupport {
         //载入md文件begin
         action.put(Environment.templateSuffix, Dispatcher.getMarkdownSuffix());
         File mdFile = new File(action.getTemplatePath(), action.getTemplateFile());
-        FileSource mdFileSource = new FileSource(mdFile, action.getTemplateFile(), defaultEncode);
+        FileSource mdFileSource = new FileSource(mdFile, action.getTemplateFile(), Dispatcher.getEncode());
         //载入md文件end
 
         //输出模板数据

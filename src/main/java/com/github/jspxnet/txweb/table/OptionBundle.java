@@ -8,6 +8,7 @@
 
 package com.github.jspxnet.txweb.table;
 
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
@@ -26,7 +27,7 @@ import java.util.Date;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "jspx_option_bundle", caption = "备选表", cache = true)
+@Table(name = "jspx_option_bundle", caption = "备选表")
 public class OptionBundle extends OperateTable {
 
     @Id
@@ -47,8 +48,8 @@ public class OptionBundle extends OperateTable {
     @Column(caption = "描述", length = 200)
     private String description = StringUtil.empty;
 
-    @Column(caption = "默认选择", length = 2, notNull = true)
-    private int selected = 0;
+    @Column(caption = "默认选择", enumType = YesNoEnumType.class)
+    private int selected = YesNoEnumType.NO.getValue();
 
     @Column(caption = "排序", notNull = true)
     private int sortType = 0;
@@ -56,7 +57,12 @@ public class OptionBundle extends OperateTable {
     @Column(caption = "排序时间", notNull = true)
     private Date sortDate = new Date();
 
+    @Column(caption = "父编码", length = 50, dataType = "isLengthBetween(0,50)", notNull = false)
+    private String parentCode = StringUtil.empty;
+
+    @Column(caption = "分组编码", length = 50, dataType = "isLengthBetween(0,50)", notNull = false)
+     private String groupCode;
+
     @Column(caption = "命名空间", length = 50, notNull = true)
     private String namespace = StringUtil.empty;
-
 }

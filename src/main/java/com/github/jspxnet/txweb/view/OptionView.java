@@ -9,7 +9,6 @@
 package com.github.jspxnet.txweb.view;
 
 import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.OptionDAO;
@@ -23,40 +22,34 @@ import com.github.jspxnet.utils.StringUtil;
 import java.util.List;
 
 /**
- *
  * author: yuan
  * date: 14-2-16
  * 所有数据都放在这个表里边 字典表
  */
-@HttpMethod(caption = "字典表")
-public class OptionListView extends ActionSupport {
 
+public class OptionView extends ActionSupport {
+    private static final String ALL_NAMESPACE = "all";
     @Ref
     protected OptionDAO optionDAO;
 
+    public OptionView() {
+
+    }
     private int count = 0;
     private int currentPage = 0;
     private String term = StringUtil.empty;
-    private String sort = "sortType:A";
+    private String sort = null;
+    private String namespace;
     private String[] field = ArrayUtil.emptyString;
     private String[] find = ArrayUtil.emptyString;
-    private long id;
-
-    public OptionListView() {
-
-    }
+    private Long id;
 
     public String getNamespace() {
-        return optionDAO.getNamespace();
+        return namespace;
     }
-
-    @Param(caption = "命名空间")
+    @Param(caption = "命名空间", max = 20)
     public void setNamespace(String namespace) {
-        optionDAO.setNamespace(namespace);
-    }
-
-    public String getCaption() {
-        return optionDAO.getCaption();
+        this.namespace = namespace;
     }
 
     public String[] getField() {
@@ -116,49 +109,60 @@ public class OptionListView extends ActionSupport {
         this.count = count;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
     @Param(caption = "ID")
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
 
     @Operate(caption = "列表")
     public List<OptionBundle> getList() {
-        return optionDAO.getList(field, find, getTerm(), sort, currentPage, getCount());
+        return optionDAO.getList(field, find, getTerm(), namespace,sort, currentPage, getCount());
     }
 
     @Operate(caption = "列表总数")
     public int getTotalCount()  {
-        return optionDAO.getCount(field, find, term);
+        return optionDAO.getCount(field, find, term,namespace);
+    }
+    //------上边为老接口-------------下边为新接口
+
+    @Operate(caption = "命名空间名称列表", method = "all/list/page")
+    public RocResponse<List<OptionBundle>> getNamespaceList(@Param(caption = "查询关键字", required = true) PageParam params) {
+        RocResponse<List<OptionBundle>> response = RocResponse.success(optionDAO.getList(params.getField(), params.getFind(),
+                params.getTerm(), ALL_NAMESPACE, params.getSort(), params.getCurrentPage(), params.getCount()));
+        response.setTotalCount(optionDAO.getCount(params.getField(), params.getFind(), params.getTerm(), ALL_NAMESPACE));
+        return response.setCount(params.getCount()).setCurrentPage(params.getCurrentPage());
     }
 
-    @Operate(caption = "标题")
-    public String getCaption(String key) {
-        return optionDAO.getSpaceMap().get(key);
+
+    @Operate(caption = "翻页列表", method = "list/page")
+    public RocResponse<List<OptionBundle>> getListPage(@Param(caption = "查询关键字", required = true) PageParam params) {
+        RocResponse<List<OptionBundle>> response = RocResponse.success(optionDAO.getList(params.getField(), params.getFind(),
+                params.getTerm(), params.getNamespace(), params.getSort(), params.getCurrentPage(), params.getCount()));
+        response.setTotalCount(optionDAO.getCount(params.getField(), params.getFind(), params.getTerm(), params.getNamespace()));
+        return response.setCount(params.getCount()).setCurrentPage(params.getCurrentPage());
     }
 
-    @Operate(caption = "翻页列表",method = "list/page")
-    public RocResponse<List<OptionBundle>> getListPage(@Param(caption = "查询关键字",required = true) PageParam pageParam) {
-        optionDAO.setNamespace(pageParam.getNamespace());
-        RocResponse<List<OptionBundle>> response = RocResponse.success(optionDAO.getList(pageParam.getField(),pageParam.getFind(),
-                null,pageParam.getSort(),pageParam.getCurrentPage(),pageParam.getCount()));
-        response.setTotalCount(optionDAO.getCount(pageParam.getField(),pageParam.getFind(),null));
-        return response.setCount(count).setCurrentPage(currentPage);
+    @Operate(caption = "列表", method = "list")
+    public RocResponse<List<OptionBundle>> getList(@Param(caption = "查询关键字", required = true) PageParam params) {
+        return RocResponse.success(optionDAO.getList(params.getField(), params.getFind(), params.getTerm(), params.getNamespace(), params.getSort(), 1, 50000));
     }
 
-    @Operate(caption = "列表",method = "list")
-    public RocResponse<List<OptionBundle>> getLis(@Param(caption = "查询关键字",required = true) PageParam pageParam) {
-        optionDAO.setNamespace(pageParam.getNamespace());
-        return RocResponse.success(optionDAO.getList(pageParam.getField(),pageParam.getFind(),null,pageParam.getSort(),1,50000));
+    @Operate(caption = "详细", method = "detail")
+    public RocResponse<OptionBundle> detail(@Param(caption = "id", required = true, message = "id不允许为空") long id) {
+        return RocResponse.success(optionDAO.load(OptionBundle.class, id));
     }
 
     @Override
-    public String execute() {
-        put("option", optionDAO.load(OptionBundle.class,id));
-        return getActionResult();
+    public String execute() throws Exception {
+        if (id!=null&&id>0)
+        {
+            put("option",optionDAO.load(OptionBundle.class, id));
+        }
+        return super.execute();
     }
 }

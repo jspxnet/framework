@@ -46,6 +46,9 @@ public abstract class IUploadFile extends OperateTable {
     @Column(caption = "标题", length = 250, notNull = true)
     private String title = StringUtil.empty;
 
+    @Column(caption = "分组名称", length = 60)
+    private String groupName = StringUtil.empty;
+
     @Column(caption = "关键字", length = 240)
     private String tags = StringUtil.empty;
 
@@ -64,6 +67,9 @@ public abstract class IUploadFile extends OperateTable {
 
     @Column(caption = "大小", notNull = true)
     private long fileSize = 0;
+
+    @Column(caption = "系统分组", notNull = true)
+    private int sysType = 0;
 
     //作为手机图片和缩图的标识, 缩图1,手机2
     @Column(caption = "排序", notNull = true)

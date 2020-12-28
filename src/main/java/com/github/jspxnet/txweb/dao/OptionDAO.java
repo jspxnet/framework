@@ -18,14 +18,9 @@ import java.util.Map;
  * Created by yuan on 14-2-16.
  */
 public interface OptionDAO extends SoberSupport {
-    Map<String, String> getSpaceMap();
 
-    void setNamespace(String namespace);
-
-    String getNamespace();
 
     int storeDatabase() throws Exception;
-
 
     boolean delete(Long[] ids);
 
@@ -33,15 +28,17 @@ public interface OptionDAO extends SoberSupport {
 
     boolean updateSortDate(Long[] ids);
 
-    List<OptionBundle> getList(String[] field, String[] find, String term, String sortString, int page, int count);
-
-    int getCount(String[] field, String[] find, String term) ;
-
-    String getCaption();
+    List<OptionBundle> getList(String[] field, String[] find, String term, String namespace, String sortString, int page, int count);
 
     boolean updateSelected(Long id) throws Exception;
 
-    OptionBundle getSelected();
+    int getCount(String[] field, String[] find, String term, String namespace);
 
-    OptionBundle getOptionValue(String key) throws Exception;
+    OptionBundle getSelected(String namespace);
+
+    OptionBundle getOptionValue(String key, String namespace);
+
+    List<OptionBundle> getChildList(String[] field, String[] find, String parentCode, String namespace, String sortString, int page, int count);
+
+    int getChildCount(String[] field, String[] find, String parentCode, String namespace);
 }

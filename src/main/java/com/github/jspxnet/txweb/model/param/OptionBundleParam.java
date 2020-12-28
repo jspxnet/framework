@@ -1,6 +1,7 @@
 package com.github.jspxnet.txweb.model.param;
 
 import com.github.jspxnet.enums.YesNoEnumType;
+import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
@@ -38,4 +39,10 @@ public class OptionBundleParam implements Serializable {
 
     @Param(caption = "命名空间", max = 50)
     private String namespace = StringUtil.empty;
+
+    @Param(caption = "父编码")
+    private String parentCode = StringUtil.empty;
+
+    @Param(caption = "分组编码")
+    private String groupCode;
 }

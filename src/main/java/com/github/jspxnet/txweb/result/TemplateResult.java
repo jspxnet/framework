@@ -9,8 +9,10 @@
  */
 package com.github.jspxnet.txweb.result;
 
+import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.JSCacheManager;
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.scriptmark.load.AbstractSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
@@ -21,7 +23,7 @@ import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.util.MimeTypesUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.scriptmark.core.ScriptMarkEngine;
@@ -69,6 +71,25 @@ public class TemplateResult extends ResultSupport {
         checkCache(action, response);
         //浏览器缓存控制end
 
+        //兼容Roc返回提示方式begin
+        Object result = action.getResult();
+        if (result!=null&&!action.hasFieldInfo()&&!action.hasActionMessage() && result instanceof RocResponse)
+        {
+            RocResponse<?> rocResponse = (RocResponse<?>)result;
+            if (YesNoEnumType.YES.getValue()==rocResponse.getSuccess())
+            {
+                if (StringUtil.isEmpty(rocResponse.getMessage()))
+                {
+                    rocResponse.setMessage(action.getLanguage().getString(LanguageRes.success));
+                }
+                action.addActionMessage(rocResponse.getMessage());
+            } else
+            {
+                action.addFieldInfo(Environment.warningInfo,rocResponse.getMessage());
+            }
+        }
+        //兼容Roc返回提示方式end
+
         String contentType = action.getEnv(ActionEnv.ContentType);
         if (!StringUtil.isNull(contentType)) {
             response.setContentType(contentType);
@@ -80,30 +101,7 @@ public class TemplateResult extends ResultSupport {
             String actionName = action.getEnv(ActionEnv.Key_ActionName);
             String fileType = StringUtil.substringAfterLast(actionName, ".");
             if (StringUtil.hasLength(fileType)) {
-                if ("js".equalsIgnoreCase(fileType)) {
-                    response.setContentType("text/javascript; charset=" + Dispatcher.getEncode());
-                }
-                if (ArrayUtil.inArray(new String[]{"mp4", "flv", "avi", "mp3", "rmvb"}, fileType, true)) {
-                    response.setContentType("video/" + fileType);
-                }
-                if ("bt".equalsIgnoreCase(fileType)) {
-                    response.setContentType("application/x-bittorrent");
-                }
-                if (ArrayUtil.inArray(new String[]{"xls", "xlsx"}, fileType, true)) {
-                    response.setContentType("application/vnd.ms-excel");
-                }
-                if (ArrayUtil.inArray(new String[]{"doc", "docx"}, fileType, true)) {
-                    response.setContentType("application/msword");
-                }
-                if (ArrayUtil.inArray(new String[]{"mdb", "mdbx"}, fileType, true)) {
-                    response.setContentType("application/msword");
-                }
-                if (ArrayUtil.inArray(new String[]{"xml", "vml"}, fileType, true)) {
-                    response.setContentType("application/xml");
-                }
-                if (ArrayUtil.inArray(new String[]{"bmp", "jpg", "gif", "jpg", "png"}, fileType, true)) {
-                    response.setContentType("image/" + fileType);
-                }
+                response.setContentType( MimeTypesUtil.getContentType(fileType,Dispatcher.getEncode()));
             } else {
                 response.setContentType("text/html; charset=" + Dispatcher.getEncode());
             }
@@ -165,6 +163,7 @@ public class TemplateResult extends ResultSupport {
         writer.flush();
         writer.close();
 
+        //页面缓存支持begin
         ActionConfig actionConfig = actionInvocation.getActionConfig();
         if (actionConfig!=null&&actionConfig.isCache())
         {
@@ -176,6 +175,7 @@ public class TemplateResult extends ResultSupport {
                 JSCacheManager.put(actionConfig.getCacheName(),key,out.toString());
             }
         }
+        //页面缓存支持end
         out.close();
     }
 }

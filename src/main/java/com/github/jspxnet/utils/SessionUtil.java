@@ -40,4 +40,15 @@ public class SessionUtil {
         }
         session.setMaxInactiveInterval(0);
     }
+
+
+    public static String getSessionId(HttpSession session) {
+        String str = session.getId();
+        if (str!=null&&str.contains(StringUtil.DOT))
+        {
+            return StringUtil.substringBefore(str,".");
+        }
+        return str;
+    }
+
 }

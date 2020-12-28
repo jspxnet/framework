@@ -11,14 +11,11 @@ package com.github.jspxnet.scriptmark.util;
 
 
 import com.github.jspxnet.component.zhex.spell.ChineseUtil;
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.ReadHtml;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.util.StringMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.scriptmark.ListIterator;
 import com.github.jspxnet.scriptmark.core.script.ScriptTypeConverter;
 import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
@@ -48,7 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * extends ScriptableObject
  * extends ScriptableObject
  */
-
+@Slf4j
 public class ScriptConverter {
 
 
@@ -56,7 +53,7 @@ public class ScriptConverter {
             '\\', '/', '\r', '\n', '$', '&', '\'', '(', ')', '&', '#', '!', '=', '\"', '<', '>', '.'
     };
 
-    private static final Logger log = LoggerFactory.getLogger(ScriptConverter.class);
+
     final static public String var_converter = "converter";
     static private ScriptConverter instance = new ScriptConverter();
     private static final String[] imgTypes = new String[]{"jpg", "png", "gif", "bmp"};
@@ -602,9 +599,7 @@ public class ScriptConverter {
             return http;
         }
         try {
-            AbstractRead read = new ReadHtml();
-            read.setFile(http);
-            return read.getContent();
+            return IoUtil.autoReadText(http,encode);
         } catch (Exception e) {
             e.printStackTrace();
             return "ERROR";

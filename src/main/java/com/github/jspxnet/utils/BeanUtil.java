@@ -186,24 +186,15 @@ public class BeanUtil {
      */
     private static Object getTypeValueObject(Object obj, Type aType) {
 
-        if (aType==null||ClassUtil.isBaseNumberType(aType)&&(obj==null||StringUtil.empty.equals(obj)))
+        if (aType==null||ClassUtil.isBaseNumberType(aType)&&(obj==null))
         {
             return 0;
         }
+
+
         if (obj == null) {
-            if (aType.equals(String.class)) {
-                return StringUtil.empty;
-            }
             if (ClassUtil.isNumberType(aType)) {
                 return 0;
-            }
-            if (aType.equals(JSONArray.class))
-            {
-                return new JSONArray();
-            }
-            if (aType.equals(JSONObject.class))
-            {
-                return new JSONObject();
             }
             return null;
         }
@@ -263,6 +254,7 @@ public class BeanUtil {
             obj = new JSONArray(str);
         }
 
+
         if (aType.equals(Map.class) && obj instanceof String) {
             String str = (String) obj;
             return StringUtil.mapStringToMap(str);
@@ -305,7 +297,50 @@ public class BeanUtil {
                 return obj;
             }
         }
+        else if (ClassUtil.isArrayType(aType) && (ClassUtil.isStandardType(obj.getClass()))) {
 
+            if (aType.equals(int[].class)||aType.equals(Integer[].class)) {
+                int[] vv = new int[1];
+                vv[0] = ObjectUtil.toInt(obj);
+                return vv;
+            } else if (aType.equals(long[].class)||aType.equals(Long[].class))
+            {
+                long[] vv = new long[1];
+                vv[0] = ObjectUtil.toLong(obj);
+                return vv;
+            }  else if (aType.equals(float[].class)) {
+                float[] vv = new float[1];
+                vv[0] = ObjectUtil.toFloat(obj);
+                return vv;
+
+            } else if (aType.equals(Float[].class)) {
+                Float[] vv = new Float[1];
+                vv[0] = ObjectUtil.toFloat(obj);
+                return vv;
+            } else if (aType.equals(double[].class)) {
+                double[] vv = new double[1];
+                vv[0] = ObjectUtil.toDouble(obj);
+                return vv;
+
+            } else if (aType.equals(Double[].class)) {
+                Double[] vv = new Double[1];
+                vv[0] = ObjectUtil.toDouble(obj);
+                return vv;
+            } else if (aType.equals(BigDecimal[].class)) {
+                BigDecimal[] vv = new BigDecimal[1];
+                vv[0] = BigDecimal.valueOf(ObjectUtil.toDouble(obj));
+                return vv;
+
+            } else if (aType.equals(String[].class)) {
+                String[] vv = new String[1];
+                vv[0] = obj+"";
+                return vv;
+            } else {
+                Object[] vv = new Object[1];
+                vv[0] = obj;
+                return vv;
+            }
+        }
         if (aType.equals(Boolean.class) || aType.equals(boolean.class)) {
             return ObjectUtil.toBoolean(obj);
         } else if (aType.equals(int.class) || aType.equals(Integer.class)) {
