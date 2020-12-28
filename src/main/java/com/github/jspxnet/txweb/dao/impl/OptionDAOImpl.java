@@ -111,7 +111,6 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
                 optionBundle.setPutUid(Environment.SYSTEM_ID);
                 optionBundle.setIp("127.0.0.1");
                 i = i + super.save(optionBundle);
-
             }
             valueList.clear();
         }
