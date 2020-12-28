@@ -30,6 +30,7 @@ import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
+import com.github.jspxnet.txweb.enums.ImageSysEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.support.MultipartSupport;
 import com.github.jspxnet.txweb.table.CloudFileConfig;
@@ -70,6 +71,9 @@ import java.util.List;
 public class UploadFileAction extends MultipartSupport {
     final static public String[] officeFileTypes = FileSuffixUtil.officeTypes;
     final static public String[] stopExs = new String[]{"php", "jsp", "ftl", "html", "htm", "exe", "com", "bat", "asp", "aspx", "sh", "jar", "js", "dll"};
+
+    //分组变量名称
+    final public static String GROUP_VAR_NAME = "groupName";
 
     // 状态
     public static String hashType = "MD5";
@@ -395,6 +399,7 @@ public class UploadFileAction extends MultipartSupport {
 
         printUploadFileInfo(objects,chunkJson, thumbnail,mobile,  uploadFileDAO.getNamespace(),  language.getLang(LanguageRes.success),response);
         uploadFileDAO.evict(uploadFileDAO.getClassType());
+
         return NONE;
     }
     protected JSONObject chunkJson;
@@ -448,6 +453,7 @@ public class UploadFileAction extends MultipartSupport {
             upFile.setFileType(uf.getFileType());
             upFile.setContent(FileUtil.getNamePart(uf.getOriginal()));
             upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
+            upFile.setGroupName(getString(GROUP_VAR_NAME));
             upFile.setPutName(userSession.getName());
             upFile.setPutUid(userSession.getUid());
             upFile.setIp(getRemoteAddr());
@@ -537,7 +543,6 @@ public class UploadFileAction extends MultipartSupport {
      * @throws Exception 异常
      */
     protected Object[] newUpload(UploadedFile uf, Object saveUploadFile, IUserSession userSession) throws Exception {
-    //        boolean useUploadConverter = config.getBoolean(Environment.useUploadConverterTxt);
         IUploadFile upFile = (IUploadFile) saveUploadFile;
         int maxImageWidth = config.getInt(Environment.maxImageWidth, 1280);
         String setupPath = FileUtil.mendPath(config.getString(Environment.setupPath));
@@ -604,7 +609,7 @@ public class UploadFileAction extends MultipartSupport {
                 thumbnailUploadFile.setSortType(0);
                 thumbnailUploadFile.setSortDate(new Date());
                 thumbnailUploadFile.setCreateDate(new Date());
-                thumbnailUploadFile.setTags("thumbnail");
+                thumbnailUploadFile.setSysType(ImageSysEnumType.THUMBNAIL.getValue());
                 thumbnailUploadFile.setTempFilePath(thumbnailFile.getAbsolutePath());
                 thumbnailUploadFile.setOrganizeId(getOrganizeId());
                 result[1] = thumbnailUploadFile;
@@ -636,7 +641,7 @@ public class UploadFileAction extends MultipartSupport {
                 mobileUploadFile.setSortType(0);
                 mobileUploadFile.setSortDate(new Date());
                 mobileUploadFile.setCreateDate(new Date());
-                mobileUploadFile.setTags("mobile");
+                mobileUploadFile.setSysType(ImageSysEnumType.MOBILE.getValue());
                 mobileUploadFile.setOrganizeId(getOrganizeId());
                 mobileUploadFile.setTempFilePath(mobileFile.getAbsolutePath());
                 result[2] = mobileUploadFile;
@@ -702,6 +707,7 @@ public class UploadFileAction extends MultipartSupport {
         copySaveUploadFile.setPutUid(userSession.getUid());
         copySaveUploadFile.setSortDate(new Date());
         copySaveUploadFile.setCreateDate(new Date());
+        copySaveUploadFile.setGroupName(getString(GROUP_VAR_NAME));
         copySaveUploadFile.setSortType(0);
         copySaveUploadFile.setId(0);
         uploadFileDAO.save(copyUploadFile);
@@ -725,6 +731,7 @@ public class UploadFileAction extends MultipartSupport {
             childUploadFile.setPutUid(userSession.getUid());
             childUploadFile.setSortDate(new Date());
             childUploadFile.setCreateDate(new Date());
+            childUploadFile.setGroupName(getString(GROUP_VAR_NAME));
             childUploadFile.setSortType(0);
             childUploadFile.setPid(newPid);
             childUploadFile.setId(0);
@@ -920,6 +927,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("success", false);
         json.put("fileName", uploadFile.getFileName());
         json.put("name", uploadFile.getTitle());
+        json.put("groupName", uploadFile.getGroupName());
         json.put("uploadType", "file");
         if (URLUtil.isUrl(uploadFile.getFileName())) {
             json.put("url", uploadFile.getFileName());

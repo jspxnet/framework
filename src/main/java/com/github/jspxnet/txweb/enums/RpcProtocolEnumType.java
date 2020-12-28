@@ -16,8 +16,8 @@ public enum RpcProtocolEnumType  implements EnumType {
     //netty rpc 方式
     TCP(2, "tcp");
 
-    private int value;
-    private String name;
+    final private int value;
+    final private String name;
 
     RpcProtocolEnumType(int value, String name) {
         this.value = value;

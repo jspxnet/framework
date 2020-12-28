@@ -31,8 +31,8 @@ public enum  WebOutEnumType implements EnumType {
      * 10:超级管理员
      */
 
-    private int value;
-    private String name;
+    final  private int value;
+    final  private String name;
 
     WebOutEnumType(int value, String name) {
         this.value = value;

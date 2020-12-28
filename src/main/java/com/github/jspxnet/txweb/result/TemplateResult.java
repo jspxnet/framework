@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.result;
 
+import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.YesNoEnumType;
@@ -77,6 +78,10 @@ public class TemplateResult extends ResultSupport {
             RocResponse<?> rocResponse = (RocResponse<?>)result;
             if (YesNoEnumType.YES.getValue()==rocResponse.getSuccess())
             {
+                if (StringUtil.isEmpty(rocResponse.getMessage()))
+                {
+                    rocResponse.setMessage(action.getLanguage().getString(LanguageRes.success));
+                }
                 action.addActionMessage(rocResponse.getMessage());
             } else
             {

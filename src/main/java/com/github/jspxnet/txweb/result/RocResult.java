@@ -10,11 +10,14 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.enums.ErrorEnumType;
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.XML;
 import com.github.jspxnet.json.XMLParserConfiguration;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -72,6 +75,7 @@ public class RocResult extends ResultSupport {
         }
 
         checkCache(action, response);
+        Bundle language = action.getLanguage();
         Object methodResult = getRocAutoResult(actionInvocation);
         JSONObject json;
         if (methodResult == null) {
@@ -79,14 +83,20 @@ public class RocResult extends ResultSupport {
         } else if (methodResult instanceof JSONObject) {
             json = (JSONObject) methodResult;
         } else if (methodResult instanceof RocResponse) {
-            json = new JSONObject(methodResult,dataField);
+            RocResponse<?> rocResponse = (RocResponse<?>)methodResult;
+            if (language!=null&&YesNoEnumType.YES.getValue()==rocResponse.getSuccess() && StringUtil.isEmpty(rocResponse.getMessage()))
+            {
+                rocResponse.setMessage(language.getLang(LanguageRes.success));
+            }
+            json = new JSONObject(rocResponse,dataField);
         } else if (methodResult instanceof RocException) {
             json = new JSONObject(((RocException)methodResult).getResponse(),dataField);
         } else if (methodResult instanceof Exception) {
             json = new JSONObject(RocResponse.error(ErrorEnumType.WARN.getValue(),ThrowableUtil.getThrowableMessage((Exception)methodResult)));
         }
-        else {
-            json = new JSONObject(RocResponse.success(methodResult),dataField);
+        else
+        {
+            json = new JSONObject(RocResponse.success(methodResult,language==null?"success":language.getLang(LanguageRes.success)),dataField);
         }
         //如果头部设置为javascript mootools IE下会自动执行
         JSONObject callJson = actionInvocation.getActionProxy().getCallJson();
