@@ -125,31 +125,8 @@ public class OptionProvider implements Option {
      * @return 得到所有key列表
      */
     @Override
-    public List<String> getSpaceSet() {
-        List<String> result = new ArrayList<>();
-        List<OptionBundle> list = getList(ALL_NAMESPACE);
-        for (OptionBundle optionBundle:list)
-        {
-            result.add(optionBundle.getName());
-        }
-        if (!ObjectUtil.isEmpty(result))
-        {
-            return result;
-        }
-        return new ArrayList<>();
-    }
+    public List<OptionBundle> getAllList() {
+        return getList(ALL_NAMESPACE);
 
-
-    @Override
-    public String getCaption(String key) {
-        List<OptionBundle> list = getList(ALL_NAMESPACE);
-        for (OptionBundle optionBundle:list)
-        {
-            if (key!=null&&key.equalsIgnoreCase(optionBundle.getCode()))
-            {
-                return optionBundle.getName();
-            }
-        }
-        return StringUtil.empty;
     }
 }

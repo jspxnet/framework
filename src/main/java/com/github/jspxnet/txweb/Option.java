@@ -42,7 +42,6 @@ public interface Option {
 
     String getSelected(@Param(caption = "模式") int mode, @Param(caption = "命名空间") String namespace);
 
-    List<String> getSpaceSet();
+    List<OptionBundle> getAllList();
 
-    String getCaption(String key);
 }
