@@ -300,11 +300,11 @@ public class ApiDocView extends ActionSupport {
                             {
                                 max = Integer.MAX_VALUE;
                             }
-                            methodParam.setSafety(param.min() + "-" + Long.min(max,param.max()));
+                            methodParam.setSafety(param.min() + "-" + (Long.MAX_VALUE==Long.min(max,param.max())?"...":Long.min(max,param.max())));
                             methodParam.setFiledType(parameters[i].getType().getSimpleName());
 
                         } else if (parameters[i].getType().equals(String.class)) {
-                            methodParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-"+param.max() + ",安全[" + param.level() + "]");
+                            methodParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-"+ (Long.MAX_VALUE==param.max()?"...":param.max()) + ",安全[" + param.level() + "]");
                             methodParam.setFiledType(parameters[i].getType().getSimpleName());
                         }
 
@@ -383,7 +383,7 @@ public class ApiDocView extends ActionSupport {
                         }
                         objParam.setSafety(param.min() + "-" + Long.min(max,param.max()));
                     } else if (field.getType().equals(String.class)) {
-                        objParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-"+param.max() + ",安全[" + param.level() + "]");
+                        objParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-"+ (Long.MAX_VALUE==param.max()?"...":param.max()) + ",安全[" + param.level() + "]");
                     }
                 }
                 children.add(objParam);
@@ -432,7 +432,7 @@ public class ApiDocView extends ActionSupport {
                 if (ClassUtil.isNumberType(parameter.getType())) {
                     methodParam.setSafety(param.min() + "-" + param.max());
                 } else if (parameter.getType().equals(String.class)) {
-                    methodParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-"+param.max() + ",安全[" + param.level() + "]");
+                    methodParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-"+ (Long.MAX_VALUE==param.max()?"...":param.max()) + ",安全[" + param.level() + "]");
                 }
                 classParamList.put(methodParam.getName(), methodParam);
             }
