@@ -125,10 +125,7 @@ public class RocResult extends ResultSupport {
             {
                 TXWebUtil.print(result, WebOutEnumType.JSON.getValue(), response);
             }
-
         }
         json.clear();
     }
-
-
 }
