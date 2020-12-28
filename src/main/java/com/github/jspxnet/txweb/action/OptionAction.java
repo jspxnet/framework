@@ -32,6 +32,7 @@ import com.github.jspxnet.utils.StringUtil;
 @HttpMethod(caption = "字典管理", actionName = "*", namespace = "/option/bundle")
 @Bean(singleton = true)
 public class OptionAction extends OptionView {
+
     @Operate(caption = "保存",method = "save")
     public RocResponse<Integer> save(@Param("参数对象") OptionBundleParam params) throws Exception {
         OptionBundle optionBundle = BeanUtil.copy(params,OptionBundle.class);

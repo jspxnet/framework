@@ -90,7 +90,7 @@ public class OptionProvider implements Option {
      * @return 字符串方式
      */
     @Override
-    public String getOptions(int mode,String namespace)  {
+    public String getOptions(int mode,@Param(caption = "命名空间") String namespace)  {
         List<OptionBundle> optionBundleList = getList(namespace);
         StringBuilder sb = new StringBuilder();
         for (OptionBundle optionBundle : optionBundleList) {
@@ -119,6 +119,7 @@ public class OptionProvider implements Option {
         }
         return mode == 0 ? optionBundle.getName() : optionBundle.getCode();
     }
+
     /**
      *
      * @return 得到所有key列表
@@ -141,7 +142,6 @@ public class OptionProvider implements Option {
 
     @Override
     public String getCaption(String key) {
-
         List<OptionBundle> list = getList(ALL_NAMESPACE);
         for (OptionBundle optionBundle:list)
         {

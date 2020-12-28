@@ -26,6 +26,7 @@ import com.github.jspxnet.sober.ssql.SSqlExpression;
 
 import com.github.jspxnet.txweb.dao.OptionDAO;
 import com.github.jspxnet.txweb.table.OptionBundle;
+import com.github.jspxnet.txweb.view.OptionProvider;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -113,6 +114,33 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
 
             }
             valueList.clear();
+        }
+
+        List<OptionBundle> list = getList(null,null, null, OptionProvider.ALL_NAMESPACE,null,1,50000);
+        List<String> checkList = new ArrayList<>();
+        for (OptionBundle optionBundle:list)
+        {
+            checkList.add(optionBundle.getCode());
+        }
+        for (String code:spaceMap.keySet())
+        {
+            if (checkList.contains(code))
+            {
+                continue;
+            }
+            String caption = spaceMap.get(code);
+            OptionBundle optionBundle = new OptionBundle();
+            optionBundle.setCode(code);
+            optionBundle.setName(caption);
+            optionBundle.setSelected(0);
+            optionBundle.setDescription(code + " " + caption);
+            optionBundle.setNamespace(OptionProvider.ALL_NAMESPACE);
+            optionBundle.setSpelling(ChineseUtil.getFullSpell(caption, ""));
+            optionBundle.setSortType(0);
+            optionBundle.setPutName(Environment.SYSTEM_NAME);
+            optionBundle.setPutUid(Environment.SYSTEM_ID);
+            optionBundle.setIp("127.0.0.1");
+            i = i + super.save(optionBundle);
         }
         return i;
     }
