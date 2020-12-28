@@ -121,7 +121,7 @@ public class HtmlImgResult extends ResultSupport {
 
             Graphics2DRenderer g2r = new Graphics2DRenderer();
             InputSource is = new InputSource(new BufferedReader(new StringReader(out.toString())));
-            Document dom = XMLResource.load(is).getDocument();
+            Document dom =  XMLResource.load(is).getDocument();
             g2r.setDocument(dom, action.getTemplatePath());
             Dimension dim = new Dimension(width, 1000);
 

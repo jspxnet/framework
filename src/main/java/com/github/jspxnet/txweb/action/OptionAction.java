@@ -140,7 +140,6 @@ public class OptionAction extends OptionView {
 
     @Operate(caption = "导入数据库",method = "load/store")
     public RocResponse<Integer> loadStore() throws Exception {
-        
         return RocResponse.success(optionDAO.storeDatabase(),language.getLang(LanguageRes.importData));
     }
 

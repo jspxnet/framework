@@ -10,8 +10,7 @@ package com.github.jspxnet.txweb.dao.impl;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.component.zhex.spell.ChineseUtil;
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.AutoReadTextFile;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
@@ -23,14 +22,12 @@ import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.ssql.SSqlExpression;
-
 import com.github.jspxnet.txweb.dao.OptionDAO;
 import com.github.jspxnet.txweb.table.OptionBundle;
 import com.github.jspxnet.txweb.view.OptionProvider;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.util.*;
 
@@ -65,13 +62,10 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         if (!indexFile.isFile()) {
             return 0;
         }
-        AbstractRead read = new AutoReadTextFile();
-        read.setEncode(Environment.defaultEncode);
-        read.setFile(indexFile);
 
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag("map", MapElement.class.getName());
-        MapElement mapElement = (MapElement) xmlEngine.createTagNode(read.getContent());
+        MapElement mapElement = (MapElement) xmlEngine.createTagNode(IoUtil.autoReadText(indexFile));
         List<TagNode> valueList = mapElement.getValueList();
         for (TagNode aList : valueList) {
             ValueElement valueElement = (ValueElement) aList;
@@ -86,10 +80,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
             if (!file.isFile()) {
                 continue;
             }
-            read = new AutoReadTextFile();
-            read.setEncode(Environment.defaultEncode);
-            read.setFile(file);
-            String xml = read.getContent();
+            String xml = IoUtil.autoReadText(file);
             if (StringUtil.isNull(xml)) {
                 continue;
             }
@@ -161,7 +152,6 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         }
         return true;
     }
-
 
     /**
      * @param id id
