@@ -27,7 +27,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -403,15 +402,15 @@ public class SqlMapClientImpl implements SqlMapClient {
 
     /**
      * @param namespace 命名空间
-     * @param exeid     执行id
+     * @param exeId     执行id
      * @param o         对象参数
      * @return 更新是否成功
      * @throws Exception 异常
      */
     @Override
-    public int update(String namespace, String exeid, Object o) throws Exception {
+    public int update(String namespace, String exeId, Object o) throws Exception {
         Map<String, Object> valueMap = getValueMap(o);
-        return update(namespace, exeid, valueMap);
+        return update(namespace, exeId, valueMap);
     }
 
     /**

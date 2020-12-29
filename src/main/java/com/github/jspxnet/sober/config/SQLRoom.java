@@ -11,7 +11,7 @@ package com.github.jspxnet.sober.config;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.utils.StringUtil;
-
+import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.Serializable;
@@ -22,8 +22,10 @@ import java.io.Serializable;
  * date: 2007-2-6
  * Time: 18:24:23
  */
+@Slf4j
 public class SQLRoom implements Serializable {
     private String namespace;
+
     //查询SQL表
     private final Map<String,Map<String, SqlMapConfig>> queryMap = new HashMap<>();
     //更新SQL表
@@ -49,12 +51,6 @@ public class SQLRoom implements Serializable {
         this.namespace = namespace;
     }
 
-    /**
-     *
-     * @param id id
-     * @param db 数据库名称
-     * @return 得到查询的sql
-     */
     public SqlMapConfig getQueryMapSql(String id, String db)
     {
         return getMapSql( queryMap, id,  fixDbName(db));
@@ -79,6 +75,8 @@ public class SQLRoom implements Serializable {
         Map<String, SqlMapConfig> configMap = queryMap.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
         configMap.put(sqlMapConfig.getDatabase(),sqlMapConfig);
     }
+
+
 
     /**
      *  添加跟新配置

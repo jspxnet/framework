@@ -61,6 +61,7 @@ public class MemberVo implements Serializable {
 
     //通过生日计数年龄
     @Column(caption = "生日")
+    @JsonField(format = DateUtil.DAY_FORMAT)
     private Date birthday = DateUtil.empty;
 
     //积分属性 begin

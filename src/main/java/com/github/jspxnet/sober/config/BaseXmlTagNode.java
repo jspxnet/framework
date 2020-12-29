@@ -28,6 +28,15 @@ public abstract class BaseXmlTagNode extends TagNode {
         }
         return XMLUtil.deleteQuote(getStringAttribute("resultType"));
     }
+    public String getIndex()
+    {
+        String result = XMLUtil.deleteQuote(getStringAttribute("index"));
+        if (!StringUtil.isNull(result))
+        {
+            return result;
+        }
+        return null;
+    }
 
     public String getDatabase()
     {
@@ -38,6 +47,7 @@ public abstract class BaseXmlTagNode extends TagNode {
         }
         return XMLUtil.deleteQuote(getStringAttribute("database"));
     }
+
 
     public String getQuote()
     {

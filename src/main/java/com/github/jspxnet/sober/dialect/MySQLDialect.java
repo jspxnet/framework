@@ -75,8 +75,8 @@ public class MySQLDialect extends Dialect {
 
         standard_SQL.put(SEQUENCE_NAME, "SHOW TABLE STATUS LIKE '${" + KEY_TABLE_NAME + "}'");
 
-        //查询表状态信息, 包括自增量
-        //SHOW TABLE STATUS LIKE 'jq_question'
+        //创建索引,一个一个
+        standard_SQL.put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` ADD INDEX `${"+KEY_INDEX_NAME+"}`(${"+KEY_INDEX_FIELD+"})");
     }
 
     @Override

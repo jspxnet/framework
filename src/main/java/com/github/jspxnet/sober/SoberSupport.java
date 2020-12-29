@@ -170,6 +170,8 @@ public interface SoberSupport extends Serializable {
      */
     int save(Collection<?> collection) throws Exception;
 
+    int save(Collection<?> collection, boolean child) throws Exception;
+
     /**
      *
      * @param collection 批量快速保持
@@ -441,6 +443,10 @@ public interface SoberSupport extends Serializable {
      * @return Criteria 查询器
      */
     Criteria createCriteria(Class<?> cla);
+
+    //-----------------------------------------------------------------
+    boolean createIndex(String tableName, String name, String field) throws Exception;
+
     /**
      * sql map 查询器
      *

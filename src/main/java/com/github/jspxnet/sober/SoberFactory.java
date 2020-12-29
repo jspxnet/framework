@@ -11,6 +11,7 @@ package com.github.jspxnet.sober;
 
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.config.SQLRoom;
+import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
 
 import javax.sql.DataSource;
@@ -65,8 +66,6 @@ public interface SoberFactory extends Serializable {
 
     void setTransactionIsolation(int transactionIsolation);
 
-    SQLRoom getSqlRoom(Class<?> cla);
-
     SQLRoom getSqlRoom(String namespace);
 
     void setMappingResources(String[] strings) throws Exception;
@@ -76,8 +75,6 @@ public interface SoberFactory extends Serializable {
     void setValid(boolean valid);
 
     void clear();
-
-
 
     /**
      * @return 事务超时

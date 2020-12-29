@@ -13,11 +13,15 @@ import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.sober.SoberSupport;
+import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.config.BaseXmlTagNode;
 import com.github.jspxnet.sober.config.SQLRoom;
 import com.github.jspxnet.sober.config.SqlMapConfig;
 import com.github.jspxnet.sober.config.xml.*;
 import com.github.jspxnet.sober.dialect.Dialect;
+import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.sober.TableModels;
@@ -138,7 +142,7 @@ public class SoberUtil {
      * @param allSqlMap  总配置表
      * @throws Exception 异常
      */
-    public static void readSqlMap(String xmlString,final Map<String, SQLRoom> allSqlMap) throws Exception
+    public static void readSqlMap(String xmlString,final Map<String, SQLRoom> allSqlMap,Map<Class<?>,SqlMapConfig> tableListMap) throws Exception
     {
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag(SqlMapXml.TAG_NAME, SqlMapXml.class.getName());
@@ -147,7 +151,7 @@ public class SoberUtil {
             SqlMapXml sqlMapXmlEl = (SqlMapXml) node;
             String namespace = sqlMapXmlEl.getNamespace().toLowerCase();
             //读取数据
-            readSqlRoom(sqlMapXmlEl.getBody(),namespace,allSqlMap);
+            readSqlRoom(sqlMapXmlEl.getBody(),namespace,allSqlMap,tableListMap);
             //处理include标签
 
         }
@@ -162,8 +166,9 @@ public class SoberUtil {
      * @param allSqlMap 总配置表
      * @throws Exception 异常
      */
-    public static void readSqlRoom(String xmlString,String namespace,final Map<String, SQLRoom> allSqlMap) throws Exception {
+    public static void readSqlRoom(String xmlString,String namespace,final Map<String, SQLRoom> allSqlMap,Map<Class<?>,SqlMapConfig> tableListMap) throws Exception {
         XmlEngine xmlEngine = new XmlEngineImpl();
+        xmlEngine.putTag(TableXml.TAG_NAME, TableXml.class.getName());
         xmlEngine.putTag(ExecuteXml.TAG_NAME, ExecuteXml.class.getName());
         xmlEngine.putTag(QueryXml.TAG_NAME, QueryXml.class.getName());
         xmlEngine.putTag(UpdateXml.TAG_NAME, UpdateXml.class.getName());
@@ -182,6 +187,15 @@ public class SoberUtil {
             config.setResultType(beanEl.getResultType());
             config.setContext(StringUtil.trim(XMLUtil.xmlCdataDecrypt(beanEl.getBody())));
             config.setQuote(beanEl.getQuote());
+            if (TableXml.TAG_NAME.equalsIgnoreCase(node.getTagName()))
+            {
+                config.setIndex(beanEl.getIndex());
+                if (StringUtil.isEmpty(config.getContext()))
+                {
+                    config.setContext(beanEl.getResultType());
+                }
+                addTable(tableListMap,config,namespace);
+            }
             if (ExecuteXml.TAG_NAME.equalsIgnoreCase(node.getTagName()))
             {
                 sqlRoom.addExecute(config);
@@ -197,5 +211,138 @@ public class SoberUtil {
         }
     }
 
+
+    /**
+     *  单独放在这里主要是方便提示错误
+     * @param tableListMap 表配置映射
+     * @param sqlMapConfig  配置
+     * @param namespace 命名空间
+     */
+    static public void addTable(Map<Class<?>,SqlMapConfig> tableListMap,SqlMapConfig sqlMapConfig,String namespace)
+    {
+        if (StringUtil.isEmpty(sqlMapConfig.getContext()))
+        {
+            return;
+        }
+
+        Class<?> cls = null;
+        try {
+            cls = ClassUtil.loadClass(sqlMapConfig.getContext());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            log.error("检查sqlMap配置文件:" + namespace + "中初始化配置init中的table对象不能找到:{},错误:{}",sqlMapConfig.getContext(),e.getMessage());
+            return;
+        }
+        Table table = AnnotationUtil.getTable(cls);
+        if (table==null || !table.create())
+        {
+            log.info( "检查sqlMap配置文件:" + namespace + "中初始化配置init中的:{},它不是一个合规的数据库表对象必须开启@Table创建属性",cls.getName());
+            return;
+        }
+        if (tableListMap.containsKey(cls))
+        {
+            return;
+        }
+        tableListMap.put(cls,sqlMapConfig);
+    }
+
+    public static void initTable(List<SqlMapConfig> tableList, SoberSupport soberSupport)
+    {
+        if (!ObjectUtil.isEmpty(tableList))
+        {
+            for (SqlMapConfig sqlMapConfig:tableList)
+            {
+                if (StringUtil.isEmpty(sqlMapConfig.getContext()))
+                {
+                    continue;
+                }
+
+                Class<?> cls = null;
+                try {
+                    cls = ClassUtil.loadClass(sqlMapConfig.getContext());
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                    log.error("检查sqlMap配置,中初始化配置init中的table对象不能找到:{},错误:{}",sqlMapConfig.getContext(),e.getMessage());
+                    continue;
+                }
+                Table table = AnnotationUtil.getTable(cls);
+                if (table==null || !table.create())
+                {
+                    log.info( "检查sqlMap配置,中初始化配置init中的:{},它不是一个合规的数据库表对象必须开启@Table创建属性",cls.getName());
+                    continue;
+                }
+                createTableAndIndex(cls,sqlMapConfig,soberSupport);
+
+            }
+        }
+    }
+
+    /**
+     * 创建索引
+     * @param sqlMapConfig 索引配置
+     * @param soberSupport 数据连接
+     */
+    public static void createTableIndex(String tableName,SqlMapConfig sqlMapConfig, SoberSupport soberSupport)
+    {
+        //创建索引
+        String indexList = sqlMapConfig.getIndex();
+        String[] indexLine = StringUtil.split(indexList,StringUtil.SEMICOLON);
+        for (String line:indexLine)
+        {
+            if (StringUtil.isEmpty(line))
+            {
+                continue;
+            }
+            String name = null;
+            String field = null;
+            if (line.contains("(")&&line.contains(")"))
+            {
+                name = StringUtil.substringBefore(line,"(");
+                field = StringUtil.substringBetween(line,"(",")");
+            } else
+            {
+                name = line;
+                field = line;
+            }
+            if (name==null&&field==null)
+            {
+                continue;
+            }
+            try {
+                soberSupport.createIndex(tableName,name,field);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.info( "检查sqlMap配置,中初始化配置init中索引配置错误:table={},index={},创建索引异常",tableName,line);
+            }
+        }
+    }
+
+
+    /**
+     * 创建表结构
+     * @param cla 类对象
+     * @param sqlMapConfig 配置
+     * @param soberSupport 数据对象
+     */
+    public static TableModels createTableAndIndex(Class<?> cla,SqlMapConfig sqlMapConfig, SoberSupport soberSupport)
+    {
+        TableModels soberTable = AnnotationUtil.getSoberTable(cla);
+        String sql = null;
+        try {
+            if (soberTable!=null&&soberTable.isCreate() && !soberSupport.tableExists(cla)) {
+                sql = soberSupport.getCreateTableSql(cla);
+                soberSupport.execute(sql);
+                if (sqlMapConfig!=null)
+                {
+                    createTableIndex(soberTable.getName(), sqlMapConfig,  soberSupport);
+                }
+            }
+        } catch (Exception e) {
+            log.error("ERROR:auto create table 自动创建表错误:" + sql + " table:" + soberTable.toString() + " 原因:没有得到连接或者和数据库不兼容", e);
+            e.printStackTrace();
+            return null;
+        }
+        return soberTable;
+    }
 
 }

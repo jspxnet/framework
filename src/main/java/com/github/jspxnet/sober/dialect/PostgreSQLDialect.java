@@ -79,6 +79,7 @@ public class PostgreSQLDialect extends Dialect {
 
         standard_SQL.put(SEQUENCE_NAME, "SELECT adsrc FROM pg_attrdef WHERE adsrc like 'nextval(_${" + KEY_TABLE_NAME + "}_${" + KEY_PRIMARY_KEY + "}_seq%::regclass)'");
 
+        standard_SQL.put(SQL_CREATE_TABLE_INDEX, "CREATE INDEX ${"+KEY_INDEX_NAME+"} ON ${" + KEY_TABLE_NAME + "} (${" + KEY_INDEX_FIELD +"})");
     }
 
     @Override
