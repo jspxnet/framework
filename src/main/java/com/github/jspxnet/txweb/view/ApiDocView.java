@@ -351,7 +351,7 @@ public class ApiDocView extends ActionSupport {
      * @param children 包含参数列表
      * @param type cls类型
      */
-    static public void addMethodParam(List<ApiParam> children,Class type)
+    static public void addMethodParam(List<ApiParam> children,Class<?> type)
     {
           try {
             Field[] fields = ClassUtil.getDeclaredFields(type);
@@ -397,7 +397,7 @@ public class ApiDocView extends ActionSupport {
     /*
         这里得到Class中所有set方法的参数
      */
-    private static Map<String, ApiParam> getSetMethodApiOperate(Class cla) {
+    private static Map<String, ApiParam> getSetMethodApiOperate(Class<?> cla) {
         Method[] methods = ClassUtil.getDeclaredSetMethods(cla);
         Map<String, ApiParam> classParamList = new LinkedHashMap<>();
         for (Method method : methods) {
@@ -533,7 +533,7 @@ public class ApiDocView extends ActionSupport {
             return null;//RocResponse.error(-1,"不存在的表结构");
         }
 
-        Class builderClass = ClassUtil.loadClass(apiAction.getClassName());
+        Class<?> builderClass = ClassUtil.loadClass(apiAction.getClassName());
         if (builderClass == null) {
             addFieldInfo(Environment.ERROR, "不存在的表结构");
             return null;//
