@@ -38,7 +38,7 @@ import java.util.*;
 
 @HttpMethod(caption = "API文档")
 public class ApiDocView extends ActionSupport {
-    final private static String[] noViewClass = new String[]{
+    final private static String[] NO_VIEW_CLASS = new String[]{
             com.github.jspxnet.txweb.support.DefaultTemplateAction.class.getName(),
             com.github.jspxnet.txweb.view.HelperView.class.getName(),
             com.github.jspxnet.txweb.view.DownloadFileView.class.getName(),
@@ -86,7 +86,7 @@ public class ApiDocView extends ActionSupport {
                 for (String namespace : map.keySet()) {
                     ActionConfigBean configBean = map.get(namespace);
                     BeanElement beanElement = iocContext.getBeanElement(configBean.getIocBean(), name);
-                    if (beanElement==null||ArrayUtil.inArray(noViewClass, beanElement.getClassName(), true)) {
+                    if (beanElement==null||ArrayUtil.inArray(NO_VIEW_CLASS, beanElement.getClassName(), true)) {
                         continue;
                     }
 
