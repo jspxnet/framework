@@ -2479,7 +2479,6 @@ public abstract class JdbcOperations implements SoberSupport {
 
     /**
      * 创建标准查询
-     *
      * @param cla 类对象
      * @return Criteria 查询器
      */
