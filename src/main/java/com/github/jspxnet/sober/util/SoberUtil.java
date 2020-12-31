@@ -60,7 +60,7 @@ public class SoberUtil {
      */
     public static boolean containsFields(TableModels soberTable, String[] fields) {
         if (fields == null || soberTable == null) {
-            return true;
+            return false;
         }
         for (String field : fields) {
             if (!soberTable.containsField(field)) {
@@ -72,7 +72,7 @@ public class SoberUtil {
     }
 
     public static String getLoadKey(Class<?> aClass, Serializable field, Object find, boolean loadChild) {
-        StringBuilder sb = new StringBuilder(aClass.getName());
+        StringBuffer sb = new StringBuffer(aClass.getName());
         sb.append(CACHE_TREM_LOAD);
         //满足redis 规范
         sb.append(field).append(CACHE_TREM_EQUALS).append(find).append(CACHE_TREM_CHILD).append(loadChild);
@@ -225,7 +225,7 @@ public class SoberUtil {
             return;
         }
 
-        Class<?> cls = null;
+        Class<?> cls;
         try {
             cls = ClassUtil.loadClass(sqlMapConfig.getContext());
         } catch (ClassNotFoundException e) {
@@ -257,7 +257,7 @@ public class SoberUtil {
                     continue;
                 }
 
-                Class<?> cls = null;
+                Class<?> cls;
                 try {
                     cls = ClassUtil.loadClass(sqlMapConfig.getContext());
                 } catch (ClassNotFoundException e) {
@@ -282,9 +282,15 @@ public class SoberUtil {
      * @param sqlMapConfig 索引配置
      * @param soberSupport 数据连接
      */
-    public static void createTableIndex(String tableName,SqlMapConfig sqlMapConfig, SoberSupport soberSupport)
+    public static void createTableIndex(Class<?> cls,SqlMapConfig sqlMapConfig, SoberSupport soberSupport)
     {
         //创建索引
+
+        TableModels tableModels = AnnotationUtil.getSoberTable(cls);
+        if (tableModels==null)
+        {
+            return;
+        }
         String indexList = sqlMapConfig.getIndex();
         String[] indexLine = StringUtil.split(indexList,StringUtil.SEMICOLON);
         for (String line:indexLine)
@@ -293,15 +299,20 @@ public class SoberUtil {
             {
                 continue;
             }
-            String name = null;
-            String field = null;
+            String name;
+            String field;
             if (line.contains("(")&&line.contains(")"))
             {
                 name = StringUtil.substringBefore(line,"(");
+                if (tableModels.containsField(name))
+                {
+                    //postgresql 不能直接是用字段名称,不然会相互影响冲突,需要带上表明
+                    name = StringUtil.camelToUnderline(tableModels.getName()) + "_" + name +"_idx";
+                }
                 field = StringUtil.substringBetween(line,"(",")");
             } else
             {
-                name = line;
+                name = StringUtil.camelToUnderline(tableModels.getName())+ "_" + line +"_idx";
                 field = line;
             }
             if (name==null&&field==null)
@@ -309,10 +320,10 @@ public class SoberUtil {
                 continue;
             }
             try {
-                soberSupport.createIndex(tableName,name,field);
+                soberSupport.createIndex(tableModels.getName(),name,field);
             } catch (Exception e) {
                 e.printStackTrace();
-                log.info( "检查sqlMap配置,中初始化配置init中索引配置错误:table={},index={},创建索引异常",tableName,line);
+                log.info( "检查sqlMap配置,中初始化配置init中索引配置错误:table={},index={},创建索引异常",tableModels.getName(),line);
             }
         }
     }
@@ -334,7 +345,7 @@ public class SoberUtil {
                 soberSupport.execute(sql);
                 if (sqlMapConfig!=null)
                 {
-                    createTableIndex(soberTable.getName(), sqlMapConfig,  soberSupport);
+                    createTableIndex(cla, sqlMapConfig,  soberSupport);
                 }
             }
         } catch (Exception e) {

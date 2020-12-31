@@ -1430,12 +1430,7 @@ public abstract class JdbcOperations implements SoberSupport {
         try {
             conn = getConnection(SoberEnv.READ_WRITE);
             debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            }
-
+            statement = conn.prepareStatement(sqlText);
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
                     debugPrint("prepared[" + (i + 1) + "]=" + params[i]);
@@ -2074,6 +2069,10 @@ public abstract class JdbcOperations implements SoberSupport {
                 commentPatchSql.append(dialect.processTemplate(Dialect.SQL_COMMENT, valueMap)).append(StringUtil.SEMICOLON).append(StringUtil.CRLF);
                 valueMap.clear();
             }
+            valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+            valueMap.put(Dialect.SQL_TABLE_COMMENT, soberTable.getCaption());
+            valueMap.put(Dialect.KEY_TABLE_CAPTION, soberTable.getCaption());
+
             commentPatchSql.append(dialect.processTemplate(Dialect.SQL_TABLE_COMMENT, valueMap)).append(StringUtil.SEMICOLON);
         }
         ///修补建表注释主要是pgsql   end
@@ -2490,33 +2489,12 @@ public abstract class JdbcOperations implements SoberSupport {
     //-----------------------------------------------------------------
     @Override
     public boolean createIndex(String tableName, String name, String field) throws Exception {
-        Connection conn = null;
-        PreparedStatement statement = null;
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, tableName);
         valueMap.put(Dialect.KEY_INDEX_NAME, name);
         valueMap.put(Dialect.KEY_INDEX_FIELD, field);
-        String sqlText = StringUtil.empty;
-        try {
-            conn = getConnection(SoberEnv.READ_WRITE);
-            sqlText = dialect.processTemplate(Dialect.SQL_CREATE_TABLE_INDEX, valueMap);
-            debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.CONCUR_UPDATABLE);
-            }
-            return statement.execute(sqlText);
-            ///////////////////处理关联对象end
-        } catch (Exception e) {
-            log.error(sqlText, e);
-            e.printStackTrace();
-            throw e;
-        } finally {
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-            valueMap.clear();
-        }
+        String sqlText = dialect.processTemplate(Dialect.SQL_CREATE_TABLE_INDEX, valueMap);
+        return execute(sqlText);
     }
     //-----------------------------------------------------------------
     /**

@@ -12,7 +12,6 @@ package com.github.jspxnet.sober;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.exception.ValidException;
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.List;
