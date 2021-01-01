@@ -372,6 +372,7 @@ public class ParamUtil {
                         if (paramsJson != null && paramsJson.containsKey(paramName)) {
                             if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
                             {
+                               // paramsJson.containsKey(Environment.rocParams)
                                 paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
                             }
                             if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
@@ -513,7 +514,26 @@ public class ParamUtil {
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
                         if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
                         {
-                            paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
+                            JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                            boolean isRoc = false;
+                            if (jsonObject!=null&&jsonObject.containsKey(Environment.Protocol))
+                            {
+                                String protocol = jsonObject.getString(Environment.Protocol);
+                                if (protocol!=null&&protocol.contains("roc"))
+                                {
+                                    isRoc = true;
+                                }
+                            }
+                            if (isRoc)
+                            {
+                                paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
+                            } else
+                            {
+                                if (jsonObject!=null)
+                                {
+                                    paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
+                                }
+                            }
                         }
                         if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
                         {

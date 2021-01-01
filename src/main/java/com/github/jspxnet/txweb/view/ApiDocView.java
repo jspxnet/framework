@@ -66,14 +66,14 @@ public class ApiDocView extends ActionSupport {
     }
 
     @Operate(caption = "文档索引", method = "indexing", post = false)
-    public Collection<ApiAction> index() throws Exception {
+    public Collection<ApiAction> index()  {
         Map<String, ApiAction> indexCache = (Map<String, ApiAction>) JSCacheManager.get(DefaultCache.class, String.format(API_INDEX_CACHE, getRootNamespace()));
         if (indexCache != null && !indexCache.isEmpty()) {
             return indexCache.values();
         }
         indexCache = new HashMap<>();
         String softName = getRootNamespace();
-        Map<String, ApiAction> resultMap = new HashMap<>();
+        Map<String, ApiAction> resultMap = new TreeMap<>();
         IocContext iocContext = beanFactory.getIocContext();
         Map<String, String> extendList = webConfigManager.getExtendList();
         for (String name : extendList.keySet()) {
@@ -81,12 +81,11 @@ public class ApiDocView extends ActionSupport {
                 continue;
             }
             Map<String, ActionConfigBean> map = webConfigManager.getActionMap(name);
-            if (map!=null)
-            {
+            if (map != null) {
                 for (String namespace : map.keySet()) {
                     ActionConfigBean configBean = map.get(namespace);
                     BeanElement beanElement = iocContext.getBeanElement(configBean.getIocBean(), name);
-                    if (beanElement==null||ArrayUtil.inArray(NO_VIEW_CLASS, beanElement.getClassName(), true)) {
+                    if (beanElement == null || ArrayUtil.inArray(NO_VIEW_CLASS, beanElement.getClassName(), true)) {
                         continue;
                     }
 
@@ -122,13 +121,11 @@ public class ApiDocView extends ActionSupport {
                 continue;
             }
             Map<String, ActionConfigBean> map = webConfigManager.getActionMap(name);
-            if (map!=null)
-            {
+            if (map != null) {
                 for (String namespace : map.keySet()) {
                     ActionConfigBean configBean = map.get(namespace);
                     BeanElement beanElement = iocContext.getBeanElement(configBean.getIocBean(), name);
-                    if (beanElement==null)
-                    {
+                    if (beanElement == null) {
                         continue;
                     }
                     String className = StringUtil.substringBeforeLast(beanElement.getClassName(), ".");
@@ -208,12 +205,10 @@ public class ApiDocView extends ActionSupport {
                 continue;
             }
             apiParam.setFiled(key);
-            if (jsonField!=null)
-            {
+            if (jsonField != null) {
                 apiParam.setCaption(jsonField.caption());
                 apiParam.setFormat(jsonField.format());
-            } else
-            {
+            } else {
                 apiParam.setCaption(field.getName());
                 apiParam.setFormat(StringUtil.empty);
             }
@@ -262,9 +257,8 @@ public class ApiDocView extends ActionSupport {
         apiOperate.setMethod(apiMethod);
 
         Describe describe = exeMethod.getAnnotation(Describe.class);
-        if (describe!=null&&!ArrayUtil.isEmpty(describe.value()))
-        {
-            String cont = ArrayUtil.toString(describe.value(),"<br />");
+        if (describe != null && !ArrayUtil.isEmpty(describe.value())) {
+            String cont = ArrayUtil.toString(describe.value(), "<br />");
             apiOperate.setDescribe(ScriptMarkUtil.getMarkdownHtml(cont));
         }
         //方法参数-------------------------------------------------------------------------------------------
@@ -284,41 +278,37 @@ public class ApiDocView extends ActionSupport {
                     methodParam.setCaption(param.caption());
                     methodParam.setFiled(parameters[i].getName());
                     methodParamList.put(methodParam.getName(), methodParam);
-                    if (ClassUtil.isStandardProperty(parameters[i].getType())&&param.request()) {
-                        if (!param.enumType().equals(NullClass.class))
-                        {
+                    if (ClassUtil.isStandardProperty(parameters[i].getType()) && param.request()) {
+                        if (!param.enumType().equals(NullClass.class)) {
                             methodParam.setFiledType("enum");
-                            Map<Object,Object> enumMap = ClassUtil.getEnumMap(param.enumType(),"value","name");
-                            if (enumMap!=null)
-                            {
+                            Map<Object, Object> enumMap = ClassUtil.getEnumMap(param.enumType(), "value", "name");
+                            if (enumMap != null) {
                                 methodParam.setFormat(enumMap.toString());
                             }
                         } else if (ClassUtil.isNumberProperty(parameters[i].getType())) {
 
                             long max = Long.MAX_VALUE;
-                            if (param.max() == Long.MAX_VALUE &&parameters[i].getType().equals(Integer.class))
-                            {
+                            if (param.max() == Long.MAX_VALUE && parameters[i].getType().equals(Integer.class)) {
                                 max = Integer.MAX_VALUE;
                             }
-                            methodParam.setSafety(param.min() + "-" + (Long.MAX_VALUE==Long.min(max,param.max())?"...":Long.min(max,param.max())));
+                            methodParam.setSafety(param.min() + "-" + (Long.MAX_VALUE == Long.min(max, param.max()) ? "..." : Long.min(max, param.max())));
                             methodParam.setFiledType(parameters[i].getType().getSimpleName());
 
                         } else if (parameters[i].getType().equals(String.class)) {
-                            methodParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-"+ (Long.MAX_VALUE==param.max()?"...":param.max()) + ",安全[" + param.level() + "]");
+                            methodParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-" + (Long.MAX_VALUE == param.max() ? "..." : param.max()) + ",安全[" + param.level() + "]");
                             methodParam.setFiledType(parameters[i].getType().getSimpleName());
                         }
 
                     } else if (!param.type().equals(NullClass.class)) {
                         methodParam.setFiledType(param.type().getSimpleName());
-                        addMethodParam(methodParam.getChildren() ,param.type());
-                    } else if (param.type().equals(NullClass.class)&&!ClassUtil.isStandardProperty(parameters[i].getType())) {
+                        addMethodParam(methodParam.getChildren(), param.type());
+                    } else if (param.type().equals(NullClass.class) && !ClassUtil.isStandardProperty(parameters[i].getType())) {
                         methodParam.setFiledType(parameters[i].getType().getSimpleName());
                         methodParam.setClassParam(true);
-                        addMethodParam(methodParam.getChildren() ,parameters[i].getType());
-                    }
-                    else  if (!ClassUtil.isIocInterfaces(parameters[i].getType())) {
+                        addMethodParam(methodParam.getChildren(), parameters[i].getType());
+                    } else if (!ClassUtil.isIocInterfaces(parameters[i].getType())) {
                         methodParam.setFiledType(parameters[i].getType().getSimpleName());
-                        addMethodParam(methodParam.getChildren(),parameters[i].getType());
+                        addMethodParam(methodParam.getChildren(), parameters[i].getType());
                     }
                 }
                 if (annotation instanceof Validate) {
@@ -348,12 +338,16 @@ public class ApiDocView extends ActionSupport {
 
     /**
      * 添加方法参数
+     *
      * @param children 包含参数列表
-     * @param type cls类型
+     * @param type     cls类型
      */
-    static public void addMethodParam(List<ApiParam> children,Class<?> type)
-    {
-          try {
+    static public void addMethodParam(List<ApiParam> children, Class<?> type) {
+        if (JSONObject.class.equals(type))
+        {
+            return;
+        }
+        try {
             Field[] fields = ClassUtil.getDeclaredFields(type);
             for (Field field : fields) {
                 Param param = field.getAnnotation(Param.class);
@@ -361,29 +355,24 @@ public class ApiDocView extends ActionSupport {
                 objParam.setFiled(field.getName());
                 objParam.setFiledType(field.getType().getSimpleName());
 
-                if (param!=null)
-                {
+                if (param != null) {
                     objParam.setSafety("安全级别[" + param.level() + "]");
                     objParam.setRequired(param.required());
                     objParam.setName(field.getName());
                     objParam.setCaption(param.caption());
-                    if (!param.enumType().equals(NullClass.class))
-                    {
-                        Map<Object,Object> enumMap = ClassUtil.getEnumMap(param.enumType(),"value","name");
-                        if (enumMap!=null)
-                        {
+                    if (!param.enumType().equals(NullClass.class)) {
+                        Map<Object, Object> enumMap = ClassUtil.getEnumMap(param.enumType(), "value", "name");
+                        if (enumMap != null) {
                             objParam.setFormat(enumMap.toString());
                         }
-                    } else
-                    if (ClassUtil.isNumberProperty(field.getType())) {
+                    } else if (ClassUtil.isNumberProperty(field.getType())) {
                         long max = Long.MAX_VALUE;
-                        if (param.max() == Long.MAX_VALUE &&field.getType().equals(Integer.class))
-                        {
+                        if (param.max() == Long.MAX_VALUE && field.getType().equals(Integer.class)) {
                             max = Integer.MAX_VALUE;
                         }
-                        objParam.setSafety(param.min() + "-" + (Long.MAX_VALUE==Long.min(max,param.max())?"...": Long.min(max,param.max())));
+                        objParam.setSafety(param.min() + "-" + (Long.MAX_VALUE == Long.min(max, param.max()) ? "..." : Long.min(max, param.max())));
                     } else if (field.getType().equals(String.class)) {
-                        objParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-"+ (Long.MAX_VALUE==param.max()?"...":param.max()) + ",安全[" + param.level() + "]");
+                        objParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-" + (Long.MAX_VALUE == param.max() ? "..." : param.max()) + ",安全[" + param.level() + "]");
                     }
                 }
                 children.add(objParam);
@@ -430,9 +419,9 @@ public class ApiDocView extends ActionSupport {
                 methodParam.setCaption(param.caption());
 
                 if (ClassUtil.isNumberType(parameter.getType())) {
-                    methodParam.setSafety(param.min() + "-" + (Long.MAX_VALUE==param.max()?"...":param.max()));
+                    methodParam.setSafety(param.min() + "-" + (Long.MAX_VALUE == param.max() ? "..." : param.max()));
                 } else if (parameter.getType().equals(String.class)) {
-                    methodParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-"+ (Long.MAX_VALUE==param.max()?"...":param.max()) + ",安全[" + param.level() + "]");
+                    methodParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-" + (Long.MAX_VALUE == param.max() ? "..." : param.max()) + ",安全[" + param.level() + "]");
                 }
                 classParamList.put(methodParam.getName(), methodParam);
             }
@@ -448,10 +437,10 @@ public class ApiDocView extends ActionSupport {
             index();
             indexCache = (Map<String, ApiAction>) JSCacheManager.get(DefaultCache.class, String.format(API_INDEX_CACHE, getRootNamespace()));
         }
-        AssertException.isNull(indexCache,"不存在的文档索引");
+        AssertException.isNull(indexCache, "不存在的文档索引");
 
         ApiAction apiAction = indexCache.get(id);
-        AssertException.isNull(indexCache,"不存在的文档id");
+        AssertException.isNull(indexCache, "不存在的文档id");
 
         ApiDocument apiDocument = BeanUtil.copy(apiAction, ApiDocument.class);
         Class<?> cla = ClassUtil.loadClass(apiDocument.getClassName());
@@ -482,8 +471,7 @@ public class ApiDocView extends ActionSupport {
                 Class<?> aClass = exeMethod.getReturnType();
                 apiOperate.setResultType(aClass.getSimpleName());
                 Object obj = null;
-                if (ClassUtil.isCollection(aClass) || aClass.isAssignableFrom(List.class))
-                {
+                if (ClassUtil.isCollection(aClass) || aClass.isAssignableFrom(List.class)) {
                     Type type = ((ParameterizedType) aClass.getGenericSuperclass()).getActualTypeArguments()[0];
                     if (ClassUtil.isStandardType(type)) {
                         apiOperate.setResult(new ArrayList<>());
@@ -573,11 +561,9 @@ public class ApiDocView extends ActionSupport {
                 Column column = field.getAnnotation(Column.class);
                 if (column != null) {
                     apiField.setCaption(column.caption());
-                    if (!column.enumType().equals(NullClass.class))
-                    {
-                        Map<Object,Object> enumMap = ClassUtil.getEnumMap(column.enumType(),"value","name");
-                        if (enumMap!=null)
-                        {
+                    if (!column.enumType().equals(NullClass.class)) {
+                        Map<Object, Object> enumMap = ClassUtil.getEnumMap(column.enumType(), "value", "name");
+                        if (enumMap != null) {
                             apiField.setCaption(column.caption() + ":" + enumMap.toString());
                         }
                     }
@@ -590,11 +576,9 @@ public class ApiDocView extends ActionSupport {
                 Column column = field.getAnnotation(Column.class);
                 if (column != null) {
                     apiField.setCaption(column.caption());
-                    if (!column.enumType().equals(NullClass.class))
-                    {
-                        Map<Object,Object> enumMap = ClassUtil.getEnumMap(column.enumType(),"value","name");
-                        if (enumMap!=null)
-                        {
+                    if (!column.enumType().equals(NullClass.class)) {
+                        Map<Object, Object> enumMap = ClassUtil.getEnumMap(column.enumType(), "value", "name");
+                        if (enumMap != null) {
                             apiField.setCaption(column.caption() + ":" + enumMap.toString());
                         }
                     }
