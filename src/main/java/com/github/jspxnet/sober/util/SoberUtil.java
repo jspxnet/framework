@@ -72,10 +72,9 @@ public class SoberUtil {
     }
 
     public static String getLoadKey(Class<?> aClass, Serializable field, Object find, boolean loadChild) {
-        String sb = aClass.getName() + CACHE_TREM_LOAD +
+        return aClass.getName() + CACHE_TREM_LOAD +
                 //满足redis 规范
                 field + CACHE_TREM_EQUALS + find + CACHE_TREM_CHILD + loadChild;
-        return sb;
     }
 
 
