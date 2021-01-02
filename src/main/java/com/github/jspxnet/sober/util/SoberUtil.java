@@ -72,20 +72,18 @@ public class SoberUtil {
     }
 
     public static String getLoadKey(Class<?> aClass, Serializable field, Object find, boolean loadChild) {
-        StringBuffer sb = new StringBuffer(aClass.getName());
-        sb.append(CACHE_TREM_LOAD);
-        //满足redis 规范
-        sb.append(field).append(CACHE_TREM_EQUALS).append(find).append(CACHE_TREM_CHILD).append(loadChild);
-        return sb.toString();
+        String sb = aClass.getName() + CACHE_TREM_LOAD +
+                //满足redis 规范
+                field + CACHE_TREM_EQUALS + find + CACHE_TREM_CHILD + loadChild;
+        return sb;
     }
 
 
     public static String getListKey(Class<?> aClass, String term,String sort,int begin,int end, boolean loadChild) {
         //满足redis 规范
-        StringBuilder sb = new StringBuilder(aClass.getName());
-        sb.append(CACHE_TREM_LIST);
-        sb.append(EncryptUtil.getMd5(term)).append("_T_").append(sort).append(CACHE_TREM_CHILD).append("_L").append(begin).append("_").append(end).append(loadChild);
-        return StringUtil.replace(sb.toString()," ","");
+        String sb = aClass.getName() + CACHE_TREM_LIST +
+                EncryptUtil.getMd5(term) + "_T_" + sort + CACHE_TREM_CHILD + "_L" + begin + "_" + end + loadChild;
+        return StringUtil.replace(sb," ","");
     }
 
     public static String toTypeString(Object obj) {
