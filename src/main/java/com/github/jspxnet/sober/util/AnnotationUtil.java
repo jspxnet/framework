@@ -245,7 +245,6 @@ public class AnnotationUtil {
         }
         return soberCalcUniques;
     }
-
     /**
      * 得到映射关系中的表名
      *
