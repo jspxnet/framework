@@ -41,12 +41,10 @@ import org.slf4j.helpers.MessageFormatter;
 @Slf4j
 public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItemDAO {
 
-    final static public String BEHAVIOR_EXPLORER = "explorer";
+
     final static public String BEHAVIOR_CLASSIC = "classic";
     final static public String TYPE_CHECKBOX = "checkbox";
     final static public String TYPE_RADIO = "radio";
-    final static public String TYPE_TEXT = "text";
-
     public static final String Type_json = "json";
     public static final String Type_roleJson = "roleJson";
     public static final String Type_jsonTree = "jsonTree";
@@ -278,23 +276,23 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
         if (ArrayUtil.isEmpty(checkbox)) {
             return true;
         }
+        List<TreeItem>  list = getList();
         try {
-            for (String aCheckbox : checkbox) {
-                if (StringUtil.isNull(aCheckbox)) {
+            for (TreeItem treeItem : list)
+            {
+                if (!ArrayUtil.inArray(checkbox,treeItem.getNodeId(),true)) {
                     continue;
                 }
-                TreeItem treeItem = get(TreeItem.class, aCheckbox);
-                if (treeItem != null) {
-                    treeItem.setSortType(sortType);
-                    super.update(treeItem);
-                }
+                treeItem.setSortType(sortType);
+                super.update(treeItem, new String[]{"sortType"});
             }
         } catch (Exception e) {
-            log.error(MessageFormatter.format("editShowSortType checkbox {} sortType {}",
-                    ArrayUtil.toString(checkbox, StringUtil.COMMAS), sortType).getMessage(), e);
+            log.error(MessageFormatter.format("editSortDate checkbox {}",
+                    ArrayUtil.toString(checkbox, StringUtil.COMMAS)).getMessage(), e);
 
             return false;
         }
+
         return true;
     }
 
@@ -309,20 +307,20 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
         if (ArrayUtil.isEmpty(checkbox)) {
             return true;
         }
+        List<TreeItem>  list = getList();
         try {
-            for (String aCheckbox : checkbox) {
-                if (!StringUtil.hasLength(aCheckbox)) {
+            for (TreeItem treeItem : list)
+            {
+                if (!ArrayUtil.inArray(checkbox,treeItem.getNodeId(),true)) {
                     continue;
                 }
-                TreeItem treeItem = get(TreeItem.class, aCheckbox);
-                if (treeItem != null) {
-                    treeItem.setSortDate(new Date());
-                    super.update(treeItem);
-                }
+                treeItem.setSortDate(new Date());
+                super.update(treeItem, new String[]{"sortDate"});
             }
         } catch (Exception e) {
             log.error(MessageFormatter.format("editSortDate checkbox {}",
                     ArrayUtil.toString(checkbox, StringUtil.COMMAS)).getMessage(), e);
+
             return false;
         }
         return true;
@@ -351,7 +349,6 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
 
     /**
      * 为了方便ManTree 保持权限的时候加入中间节点
-     *
      * @param nodeId id
      * @return String[]
      */
@@ -572,9 +569,9 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      */
     private Map<String, String> getTreeItemMap(TreeItem node, String fen) {
         if (!show && node.getHide() == 1) {
-            return new LinkedHashMap<String, String>();
+            return new LinkedHashMap<>();
         }
-        Map<String, String> result = new LinkedHashMap<String, String>();
+        Map<String, String> result = new LinkedHashMap<>();
         if (StringUtil.isNull(node.getParentNodeId())) {
             //result.put("", "ALL");
             for (TreeItem nNode : getChildTreeItem(node.getNodeId())) {
@@ -788,7 +785,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      */
     @Override
     public Map<String, String> getTreeItemMap() {
-        Map<String, String> result = new LinkedHashMap<String, String>();
+        Map<String, String> result = new LinkedHashMap<>();
         List<TreeItem> list = getList();
         for (TreeItem treeItem : list) {
             result.put(treeItem.getNodeId(), treeItem.getCaption());
@@ -801,7 +798,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      */
     @Override
     public Map<String, String> getDrumbeatingTreeItemMap() {
-        Map<String, String> result = new LinkedHashMap<String, String>();
+        Map<String, String> result = new LinkedHashMap<>();
         List<TreeItem> list = getList();
         for (TreeItem treeItem : list) {
             result.put(treeItem.getNodeId(), treeItem.getDrumbeating());

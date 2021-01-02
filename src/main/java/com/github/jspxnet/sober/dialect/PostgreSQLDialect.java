@@ -9,13 +9,10 @@
  */
 package com.github.jspxnet.sober.dialect;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.io.*;
 import java.util.Date;
 import java.sql.*;
@@ -27,11 +24,12 @@ import java.sql.*;
  * Time: 11:21:54
  * Postgre数据库 SQL匹配
  */
+@Slf4j
 public class PostgreSQLDialect extends Dialect {
-    private Logger log = LoggerFactory.getLogger(PostgreSQLDialect.class.getName());
+
 
     public PostgreSQLDialect() {
-        standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
+        standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE IF NOT EXISTS ${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (\"${" + KEY_PRIMARY_KEY + "}\")\n)");
 
@@ -68,6 +66,7 @@ public class PostgreSQLDialect extends Dialect {
         standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
 
         standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
+
         standard_SQL.put(FUN_TABLE_EXISTS, "SELECT (count(*)>0) FROM pg_class WHERE relname ILIKE '${" + KEY_TABLE_NAME + "}'");
 
         //修改系列开始
@@ -79,6 +78,7 @@ public class PostgreSQLDialect extends Dialect {
 
         standard_SQL.put(SEQUENCE_NAME, "SELECT adsrc FROM pg_attrdef WHERE adsrc like 'nextval(_${" + KEY_TABLE_NAME + "}_${" + KEY_PRIMARY_KEY + "}_seq%::regclass)'");
 
+        standard_SQL.put(SQL_CREATE_TABLE_INDEX, "CREATE INDEX IF NOT EXISTS ${"+KEY_INDEX_NAME+"} ON ${" + KEY_TABLE_NAME + "} (${" + KEY_INDEX_FIELD +"})");
     }
 
     @Override

@@ -20,7 +20,7 @@ import com.github.jspxnet.sober.criteria.projection.Criterion;
  */
 public class NotExpression implements Criterion {
 
-    private Criterion criterion;
+    private final Criterion criterion;
 
     public NotExpression(Criterion criterion) {
         this.criterion = criterion;
@@ -28,9 +28,7 @@ public class NotExpression implements Criterion {
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Restrictions.key_not).append("(").append(criterion.toSqlString(soberTable, databaseName)).append(")");
-        return sb.toString();
+        return Restrictions.KEY_NOT + "(" + criterion.toSqlString(soberTable, databaseName) + ")";
     }
 
     @Override
@@ -40,9 +38,7 @@ public class NotExpression implements Criterion {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Restrictions.key_not).append("(").append(criterion.toString()).append(")");
-        return sb.toString();
+        return Restrictions.KEY_NOT + "(" + criterion.toString() + ")";
     }
 
     @Override

@@ -372,6 +372,7 @@ public class ParamUtil {
                         if (paramsJson != null && paramsJson.containsKey(paramName)) {
                             if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
                             {
+                               // paramsJson.containsKey(Environment.rocParams)
                                 paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
                             }
                             if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
@@ -513,7 +514,26 @@ public class ParamUtil {
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
                         if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
                         {
-                            paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
+                            JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                            boolean isRoc = false;
+                            if (jsonObject!=null&&jsonObject.containsKey(Environment.Protocol))
+                            {
+                                String protocol = jsonObject.getString(Environment.Protocol);
+                                if (protocol!=null&&protocol.contains("roc"))
+                                {
+                                    isRoc = true;
+                                }
+                            }
+                            if (isRoc)
+                            {
+                                paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
+                            } else
+                            {
+                                if (jsonObject!=null)
+                                {
+                                    paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
+                                }
+                            }
                         }
                         if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
                         {
@@ -608,11 +628,10 @@ public class ParamUtil {
                 paramObj[i] = BeanUtil.getTypeValue(action.getArray(paramName, false), pType);
             }
         }
-        if (!isMethodParamSafe(action, exeMethod, paramObj)) {
-            //参数非法
-            return new Object[pTypes.length];
+        if (isMethodParamSafe(action, exeMethod, paramObj)) {
+            return paramObj;
         }
-        return paramObj;
+        return new Object[pTypes.length];
     }
     //-----------------------------------------------------------------------------------------------------
 
@@ -622,14 +641,14 @@ public class ParamUtil {
      * @param action    action
      * @param exeMethod 执行方法
      * @param value     参数
-     * @return false 表示不安全
+     * @return  表示不安全
      */
     public static boolean isMethodParamSafe(Action action, Method exeMethod, Object[] value) {
-        Type[] pTypes = exeMethod.getGenericParameterTypes();
         if (value == null) {
             return true;
         }
-        //i 表示第几个参数，下边完成参数组装
+        Type[] pTypes = exeMethod.getGenericParameterTypes();
+             //i 表示第几个参数，下边完成参数组装
         Parameter[] parameters = exeMethod.getParameters();
         for (int i = 0; i < parameters.length; i++) {
             Annotation[] annotations = parameters[i].getDeclaredAnnotations();
@@ -644,7 +663,6 @@ public class ParamUtil {
                         if (action.hasFieldInfo()) {
                             return false;
                         }
-
                     } else {
                         //验证参数空
                         isRequired(action, param, paramName, value[i]);
@@ -702,19 +720,19 @@ public class ParamUtil {
     //------------------------------------------------------------------------------------------------------------------
 
     /**
-     * 判断方法参数是否为空
+     * 判断是否必填
      *
      * @param action    action
      * @param param     参数
      * @param paramName  参数名称
      * @param theParam  当前参数
-     *  false, 为不安全
+     *  判断是否必填 false, 为不安全
      */
     public static void isRequired(Action action, Param param, String paramName, Object theParam) {
-        if (!param.required()&&theParam==null) {
+        if (!param.required()) {
             return;
         }
-        if (param.required()&&theParam==null)
+        if (param.required()&&StringUtil.isEmpty(param.value())&&theParam==null)
         {
             if (StringUtil.isNull(param.message())) {
                 action.addFieldInfo(Environment.warningInfo, paramName + "参数不允许空");
@@ -725,7 +743,15 @@ public class ParamUtil {
     }
 
     //------------------------------------------------------------------------------------------------
-    public static void isSafeParam(Action action,  Param param, String paramName, Object theParam) {
+
+    /**
+     *  判断是否安全
+     * @param action action
+     * @param param 参数
+     * @param paramName 参数名称
+     * @param theParam 当前参数
+     */
+    public static void isSafeParam(Action action,Param param, String paramName, Object theParam) {
         if (theParam == null) {
             return;
         }
@@ -914,12 +940,12 @@ public class ParamUtil {
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
-            if (classParam.required() && value == null) {
-                String message = StringUtil.isEmpty(classParam.message()) ? (field.getName() + "不允许为空") : classParam.message();
-                action.addFieldInfo(Environment.warningInfo, message);
-                return;
-            }
             Class<?> pType = field.getType();
+            if (!StringUtil.isEmpty(classParam.value()) && (value == null || ClassUtil.isBaseNumberType(pType)&&0==((Number)value).intValue())) {
+                value = BeanUtil.getTypeValue(classParam.value(),pType);
+                BeanUtil.setFieldValue(obj, field.getName(), value);
+            }
+
             if (value!=null)
             {
                 if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType))
@@ -957,18 +983,15 @@ public class ParamUtil {
                 }
                 else
                 {
-
                     isSafeParam(action,classParam,field.getName(),value);
                     if (action.hasFieldInfo()) {
                         return;
                     }
                 }
-            }
-            if (value==null)
+            } else
             {
-                value = BeanUtil.getTypeValue(classParam.value(),pType);
+                isRequired(action,classParam,field.getName(),value);
             }
-            BeanUtil.setFieldValue(obj, field.getName(), value);
         }
     }
     //-----------------------------------------------------------------------------------------------------------

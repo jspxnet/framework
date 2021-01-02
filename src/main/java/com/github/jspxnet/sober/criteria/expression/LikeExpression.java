@@ -20,8 +20,8 @@ import com.github.jspxnet.sober.util.JdbcUtil;
  * Time: 11:10:16
  */
 public class LikeExpression implements Criterion {
-    private String propertyName;
-    private Object value;
+    private final String propertyName;
+    private final Object value;
 
     public LikeExpression(String propertyName,
                           Object value) {
@@ -31,9 +31,7 @@ public class LikeExpression implements Criterion {
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(propertyName).append(" ").append(Restrictions.key_like).append(" ?");
-        return sb.toString();
+        return propertyName + " " + Restrictions.KEY_LIKE + " ?";
     }
 
     @Override
@@ -43,9 +41,7 @@ public class LikeExpression implements Criterion {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(propertyName).append(" ").append(Restrictions.key_like).append(" ").append(value);
-        return sb.toString();
+        return propertyName + " " + Restrictions.KEY_LIKE + " " + value;
     }
 
     @Override

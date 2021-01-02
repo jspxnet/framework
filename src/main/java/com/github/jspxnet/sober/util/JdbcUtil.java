@@ -17,9 +17,7 @@ import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.GeneralDialect;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -27,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.System.arraycopy;
 
 /**
  * Created by IntelliJ IDEA.
@@ -36,8 +33,8 @@ import static java.lang.System.arraycopy;
  * date: 2007-1-6
  * Time: 18:09:10
  */
+@Slf4j
 public abstract class JdbcUtil {
-    final static private Logger log = LoggerFactory.getLogger(JdbcUtil.class);
 
     public static Object[] appendArray(Object[] array, Object append) {
         if (array == null) {
@@ -46,7 +43,7 @@ public abstract class JdbcUtil {
             return array;
         }
         Object[] result = new Object[array.length + 1];
-        arraycopy(array, 0, result, 0, array.length);
+        System.arraycopy(array, 0, result, 0, array.length);
         result[array.length] = append;
         return result;
     }
@@ -60,8 +57,8 @@ public abstract class JdbcUtil {
         }
         int length = array.length + append.length;
         Object[] result = new Object[length];
-        arraycopy(array, 0, result, 0, array.length);
-        arraycopy(append, 0, result, array.length, length - array.length);
+        System.arraycopy(array, 0, result, 0, array.length);
+        System.arraycopy(append, 0, result, array.length, length - array.length);
         return result;
     }
 

@@ -39,7 +39,7 @@ public class AnnotationUtil {
     }
 
 
-    public static void fixIdCacheMax(TableModels soberTable,Object object, JdbcOperations jdbcOperations) throws Exception {
+    public static void fixIdCacheMax(TableModels soberTable,Object object, JdbcOperations jdbcOperations) {
         if (jdbcOperations == null|| object==null) {
             return;
         }
@@ -167,7 +167,7 @@ public class AnnotationUtil {
      * @return 得到数据库字段关系
      */
     public static List<SoberColumn> getColumnList(Class<?> cls) {
-        List<SoberColumn> soberColumns = new LinkedList<SoberColumn>();
+        List<SoberColumn> soberColumns = new LinkedList<>();
         Field[] fields = ClassUtil.getDeclaredFields(cls);//字段
         for (Field field : fields) {
             Column column = field.getAnnotation(Column.class);
@@ -200,7 +200,7 @@ public class AnnotationUtil {
      * @return 得到映射关系
      */
     public static Map<String, SoberNexus> getSoberNexus(Class<?> cls) {
-        Map<String, SoberNexus> soberColumns = new LinkedHashMap<String, SoberNexus>();
+        Map<String, SoberNexus> soberColumns = new LinkedHashMap<>();
         Field[] fields = ClassUtil.getDeclaredFields(cls);//字段
         for (Field field : fields) {
             Nexus nexus = field.getAnnotation(Nexus.class);
@@ -229,7 +229,7 @@ public class AnnotationUtil {
      * @return 得到映射关系
      */
     public static Map<String, SoberCalcUnique> getSoberCalcUnique(Class<?> cls) {
-        Map<String, SoberCalcUnique> soberCalcUniques = new LinkedHashMap<String, SoberCalcUnique>();
+        Map<String, SoberCalcUnique> soberCalcUniques = new LinkedHashMap<>();
         Field[] fields = ClassUtil.getDeclaredFields(cls);//字段
         for (Field field : fields) {
             CalcUnique calcUnique = field.getAnnotation(CalcUnique.class);
@@ -245,7 +245,6 @@ public class AnnotationUtil {
         }
         return soberCalcUniques;
     }
-
     /**
      * 得到映射关系中的表名
      *
@@ -253,7 +252,15 @@ public class AnnotationUtil {
      * @return 表名
      */
     public static Table getTable(Class<?> cls) {
+        if (cls==null)
+        {
+            return null;
+        }
         Annotation[] annotation = cls.getAnnotations();
+        if (ObjectUtil.isEmpty(annotation))
+        {
+            return null;
+        }
         for (Annotation a : annotation) {
             if (a instanceof Table) {
                 return (Table) a;
@@ -267,7 +274,15 @@ public class AnnotationUtil {
      * @return 得到的显示名称
      */
     public static String getTableCaption(Class<?> cls) {
+        if (cls==null)
+        {
+            return null;
+        }
         Annotation[] annotation = cls.getAnnotations();
+        if (ObjectUtil.isEmpty(annotation))
+        {
+            return null;
+        }
         for (Annotation anAnnotation : annotation) {
             if (anAnnotation instanceof Table) {
                 return ((Table) anAnnotation).caption();
@@ -281,7 +296,15 @@ public class AnnotationUtil {
      * @return 得到数据库的名
      */
     public static String getTableName(Class<?> cls) {
+        if (cls==null)
+        {
+            return null;
+        }
         Annotation[] annotation = cls.getAnnotations();
+        if (ObjectUtil.isEmpty(annotation))
+        {
+            return null;
+        }
         for (Annotation anAnnotation : annotation) {
             if (anAnnotation instanceof Table) {
                 return ((Table) anAnnotation).name();
@@ -297,6 +320,10 @@ public class AnnotationUtil {
      * @return SoberTable
      */
     public static TableModels getSoberTable(Class<?> cls) {
+        if (cls==null)
+        {
+            return null;
+        }
         SoberTable soberTable = new SoberTable();
         soberTable.setEntity(cls);
         Table table = getTable(cls);
@@ -330,7 +357,7 @@ public class AnnotationUtil {
         }
         String[] orderByVar = StringUtil.getFreeMarkerVar(orderBy);
         if (!ArrayUtil.isEmpty(orderByVar)) {
-            Map<String, Object> valueMap = new HashMap<String, Object>();
+            Map<String, Object> valueMap = new HashMap<>();
             for (String varName : orderByVar) {
                 valueMap.put(varName, BeanUtil.getProperty(obj, varName));
             }
@@ -360,7 +387,7 @@ public class AnnotationUtil {
         }
         String[] lengthVar = StringUtil.getFreeMarkerVar(length);
         if (!ArrayUtil.isEmpty(lengthVar)) {
-            Map<String, Object> valueMap = new HashMap<String, Object>();
+            Map<String, Object> valueMap = new HashMap<>();
             for (String varName : lengthVar) {
                 valueMap.put(varName, BeanUtil.getProperty(obj, varName));
             }
@@ -369,7 +396,6 @@ public class AnnotationUtil {
         int len = StringUtil.toInt(length);
         return len <= 0 ? defaultLength : len;
     }
-
     /**
      * 得到有Table的class列表
      *

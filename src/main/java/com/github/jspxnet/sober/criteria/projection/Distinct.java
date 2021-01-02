@@ -19,7 +19,7 @@ import com.github.jspxnet.sober.criteria.expression.Restrictions;
  */
 public class Distinct implements Projection {
 
-    private Projection projection;
+    private final Projection projection;
 
     public Distinct(Projection proj) {
         this.projection = proj;
@@ -28,11 +28,11 @@ public class Distinct implements Projection {
     @Override
     public String toSqlString(String databaseName) {
 
-        return Restrictions.key_distinct + " " + projection.toSqlString(databaseName);
+        return Restrictions.KEY_DISTINCT + " " + projection.toSqlString(databaseName);
     }
 
     @Override
     public String toString() {
-        return Restrictions.key_distinct + " " + projection.toString();
+        return Restrictions.KEY_DISTINCT + " " + projection.toString();
     }
 }

@@ -30,7 +30,6 @@ import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
-import com.github.jspxnet.txweb.table.TreeItem;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
@@ -731,6 +730,7 @@ public abstract class JdbcOperations implements SoberSupport {
             log.error("@Table 标签没有配置:{}",object.getClass());
             throw  new Exception("@Table 标签没有配置");
         }
+
         Object idValue = BeanUtil.getFieldValue(object, soberTable.getPrimary());
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
@@ -782,37 +782,51 @@ public abstract class JdbcOperations implements SoberSupport {
                 JdbcUtil.closeResultSet(rs);
             }
             if (child) {
-                Object keyObj = BeanUtil.getProperty(object, soberTable.getPrimary());
-                /////////////////////////////保存关联对象begin
-                Map<String, SoberNexus> nexus = soberTable.getNexusMap();
-                for (String colName : nexus.keySet()) {
-
-                    SoberNexus soberNexus = nexus.get(colName);
-                    if (!soberNexus.isSave()) {
-                        continue;
-                    }
-                    if (MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping())) {
-                        Object oneToOneObject = BeanUtil.getProperty(object, colName);
-                        if (oneToOneObject == null) {
+                Map<String, SoberNexus>  nexusMap = soberTable.getNexusMap();
+                if (!ObjectUtil.isEmpty(nexusMap))
+                {
+                   // Object keyObj = BeanUtil.getProperty(object, soberTable.getPrimary());
+                    /////////////////////////////保存关联对象begin
+                    Map<String, SoberNexus> nexus = soberTable.getNexusMap();
+                    for (String colName : nexus.keySet()) {
+                        SoberNexus soberNexus = nexus.get(colName);
+                        if (!soberNexus.isSave()) {
                             continue;
                         }
-                        BeanUtil.setSimpleProperty(oneToOneObject, soberNexus.getTargetField(), keyObj);
-                        result = result + save(oneToOneObject, false);
-                    }
-                    if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
-                        Collection<?> oneToMayObjects = (Collection<?>) BeanUtil.getProperty(object, colName);
-                        if (oneToMayObjects == null || oneToMayObjects.isEmpty()) {
-                            continue;
+                        //Object keyObj = BeanUtil.getProperty(object, soberTable.getPrimary());
+                        if (MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping())) {
+                            Object oneToOneObject = BeanUtil.getProperty(object, colName);
+                            if (oneToOneObject == null) {
+                                continue;
+                            }
+                            Object oneToOneValue = BeanUtil.getProperty(object, soberNexus.getField());
+                            Object v = BeanUtil.getFieldValue(oneToOneObject,soberNexus.getTargetField());
+                            if (ObjectUtil.isEmpty(v))
+                            {
+                                BeanUtil.setSimpleProperty(oneToOneObject, soberNexus.getTargetField(), oneToOneValue);
+                            }
+                            result = result + save(oneToOneObject);
                         }
-                        for (Object o : oneToMayObjects) {
-                            BeanUtil.setSimpleProperty(o, soberNexus.getTargetField(), keyObj);
+                        if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
+                            Collection<?> oneToMayObjects = (Collection<?>) BeanUtil.getProperty(object, colName);
+                            if (oneToMayObjects == null || oneToMayObjects.isEmpty()) {
+                                continue;
+                            }
+                            Object oneToManyValue = BeanUtil.getProperty(object, soberNexus.getField());
+                            for (Object o : oneToMayObjects) {
+                                Object v = BeanUtil.getFieldValue(o,soberNexus.getTargetField());
+                                if (ObjectUtil.isEmpty(v))
+                                {
+                                    BeanUtil.setSimpleProperty(o, soberNexus.getTargetField(), oneToManyValue);
+                                }
+                            }
+                            int s = save(oneToMayObjects);
+                            if (s != oneToMayObjects.size()) {
+                                return -2;
+                            }
+                            result = result + oneToMayObjects.size();
+                            oneToMayObjects.clear();
                         }
-                        int s = save(oneToMayObjects);
-                        if (s != oneToMayObjects.size()) {
-                            return -2;
-                        }
-                        result = result + oneToMayObjects.size();
-                        oneToMayObjects.clear();
                     }
                 }
                 //save
@@ -845,7 +859,21 @@ public abstract class JdbcOperations implements SoberSupport {
      * @throws ValidException 其他错误
      */
     @Override
-    public int save(Collection<?> collection) throws Exception {
+    public int save(Collection<?> collection) throws Exception
+    {
+        return save(collection,false);
+    }
+
+    /**
+     *
+     * @param collection 保持一个列表
+     * @param child 子对象
+     * @return  返回保持数量
+     * @throws Exception 验证错误
+     */
+    @Override
+    public int save(Collection<?> collection, boolean child) throws Exception
+    {
         if (collection == null || collection.size() < 1) {
             return -2;
         }
@@ -860,7 +888,7 @@ public abstract class JdbcOperations implements SoberSupport {
                 validator(obj);
             }
             //////////配置验证才能够保存 end
-            result = result + save(obj);
+            result = result + save(obj, child);
         }
         return result;
     }
@@ -1240,6 +1268,10 @@ public abstract class JdbcOperations implements SoberSupport {
         if (object == null) {
             return -2;
         }
+        if (ArrayUtil.isEmpty(updateFiled))
+        {
+            return update(object);
+        }
         TableModels soberTable = getSoberTable(object.getClass());
         Connection conn = null;
         PreparedStatement statement = null;
@@ -1398,12 +1430,7 @@ public abstract class JdbcOperations implements SoberSupport {
         try {
             conn = getConnection(SoberEnv.READ_WRITE);
             debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            }
-
+            statement = conn.prepareStatement(sqlText);
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
                     debugPrint("prepared[" + (i + 1) + "]=" + params[i]);
@@ -1999,7 +2026,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public String getCreateTableSql(Class<?> createClass) {
-        TableModels soberTable = getSoberTable(createClass);
+        TableModels soberTable = AnnotationUtil.getSoberTable(createClass);
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(),"'",""));
@@ -2042,6 +2069,10 @@ public abstract class JdbcOperations implements SoberSupport {
                 commentPatchSql.append(dialect.processTemplate(Dialect.SQL_COMMENT, valueMap)).append(StringUtil.SEMICOLON).append(StringUtil.CRLF);
                 valueMap.clear();
             }
+            valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+            valueMap.put(Dialect.SQL_TABLE_COMMENT, soberTable.getCaption());
+            valueMap.put(Dialect.KEY_TABLE_CAPTION, soberTable.getCaption());
+
             commentPatchSql.append(dialect.processTemplate(Dialect.SQL_TABLE_COMMENT, valueMap)).append(StringUtil.SEMICOLON);
         }
         ///修补建表注释主要是pgsql   end
@@ -2092,7 +2123,11 @@ public abstract class JdbcOperations implements SoberSupport {
         if (DefaultCache.class.equals(cla)) {
             return false;
         }
-        TableModels soberTable = getSoberTable(cla);
+        TableModels soberTable = AnnotationUtil.getSoberTable(cla);
+        if (soberTable==null)
+        {
+            return false;
+        }
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.COLUMN_NAME, soberTable.getPrimary());
@@ -2443,7 +2478,6 @@ public abstract class JdbcOperations implements SoberSupport {
 
     /**
      * 创建标准查询
-     *
      * @param cla 类对象
      * @return Criteria 查询器
      */
@@ -2452,6 +2486,17 @@ public abstract class JdbcOperations implements SoberSupport {
         return new CriteriaImpl(cla, this);
     }
 
+    //-----------------------------------------------------------------
+    @Override
+    public boolean createIndex(String tableName, String name, String field) throws Exception {
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_TABLE_NAME, tableName);
+        valueMap.put(Dialect.KEY_INDEX_NAME, name);
+        valueMap.put(Dialect.KEY_INDEX_FIELD, field);
+        String sqlText = dialect.processTemplate(Dialect.SQL_CREATE_TABLE_INDEX, valueMap);
+        return execute(sqlText);
+    }
+    //-----------------------------------------------------------------
     /**
      * sql map 查询器
      *

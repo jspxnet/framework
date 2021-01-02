@@ -22,13 +22,13 @@ public class CountProjection extends AggregateProjection {
     private boolean distinct;
 
     protected CountProjection(String prop) {
-        super(Restrictions.key_count, prop);
+        super(Restrictions.KEY_COUNT, prop);
     }
 
     @Override
     public String toString() {
         if (distinct) {
-            return Restrictions.key_distinct + super.toString();
+            return Restrictions.KEY_DISTINCT + super.toString();
         } else {
             return super.toString();
         }
@@ -38,7 +38,7 @@ public class CountProjection extends AggregateProjection {
     @Override
     public String toSqlString(String databaseName) {
         if (distinct) {
-            return Restrictions.key_distinct + super.toString();
+            return Restrictions.KEY_DISTINCT + super.toString();
         } else {
             return super.toString();
         }

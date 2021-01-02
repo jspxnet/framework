@@ -31,9 +31,11 @@ public class SqlMapConfig implements Serializable {
 
     private String resultType = DataMap.class.getName();
 
-    private String context = StringUtil.empty;
+    private String context = null;
 
-    private String quote = StringUtil.empty;
+    private String quote = null;
+
+    private String index = null;
 
     public String getResultClass() {
         if ("map".equalsIgnoreCase(resultType))

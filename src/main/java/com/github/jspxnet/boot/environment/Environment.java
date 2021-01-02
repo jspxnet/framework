@@ -523,7 +523,7 @@ public abstract class Environment {
     //remote begin
     final public static String jspxNetRoc = "jspx.net-roc";
     final public static String jspxNetRocVersion = "3.0";
-    final public static String rocProtocol = "protocol";
+    final public static String Protocol = "protocol";
     final public static String rocFormat = "format";
     final public static String rocMethodCall = "methodCall";
 

@@ -42,6 +42,8 @@ public abstract class Dialect {
 
     public static final String KEY_SEQUENCE_RESTART = "field_sequence_restart";
 
+    public static final String KEY_INDEX_NAME = "index_name";
+    public static final String KEY_INDEX_FIELD = "index_field";
 
     public static final String FIELD_QUOTE = "_quote";
     public static final String KEY_FIELD_VALUE = "field_value";
@@ -74,6 +76,7 @@ public abstract class Dialect {
     public static final String SQL_CRITERIA_DELETE = "sql_criteria_delete";
     public static final String SQL_CRITERIA_UPDATE = "sql_criteria_updata";
     public static final String SQL_CREATE_TABLE = "sql_create_table";
+    public static final String SQL_CREATE_TABLE_INDEX = "sql_create_table_index";
     public static final String SQL_DROP_TABLE = "sql_drop_table";
     public static final String SQL_COMMENT = "sql_comment";
     public static final String SQL_TABLE_COMMENT = "sql_table_comment";
@@ -93,7 +96,6 @@ public abstract class Dialect {
     public static final String DATABASE_SIZE = "database_size";
 
     public static final String SEQUENCE_NAME = "sequence_name";
-
 
     //得到表的名称
     public static final String SQL_TABLE_NAMES = "sql_table_names";
@@ -138,6 +140,8 @@ public abstract class Dialect {
         standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
         standard_SQL.put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE serial RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
         standard_SQL.put(TABLE_MAX_ID, "SELECT max(${" + KEY_PRIMARY_KEY + "}) AS maxId FROM ${" + KEY_TABLE_NAME + "}");
+
+        standard_SQL.put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD INDEX ${"+KEY_INDEX_NAME+"}(${"+KEY_INDEX_FIELD+"})");
     }
 
     public String getSQLText(String keys) {

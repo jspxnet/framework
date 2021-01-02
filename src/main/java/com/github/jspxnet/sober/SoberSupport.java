@@ -12,7 +12,6 @@ package com.github.jspxnet.sober;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.exception.ValidException;
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.List;
@@ -169,6 +168,8 @@ public interface SoberSupport extends Serializable {
      * @throws ValidException 其他错误
      */
     int save(Collection<?> collection) throws Exception;
+
+    int save(Collection<?> collection, boolean child) throws Exception;
 
     /**
      *
@@ -441,6 +442,10 @@ public interface SoberSupport extends Serializable {
      * @return Criteria 查询器
      */
     Criteria createCriteria(Class<?> cla);
+
+    //-----------------------------------------------------------------
+    boolean createIndex(String tableName, String name, String field) throws Exception;
+
     /**
      * sql map 查询器
      *

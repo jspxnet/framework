@@ -14,8 +14,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.datasource.JRWPoolDataSource;
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.AutoReadTextFile;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sober.SoberEnv;
 import com.github.jspxnet.sober.SoberFactory;
@@ -23,6 +22,7 @@ import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.DialectFactory;
+
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
 import com.github.jspxnet.sober.transaction.JDBCTransaction;
 import com.github.jspxnet.sober.transaction.JTATransaction;
@@ -64,11 +64,12 @@ import java.util.Map;
 public class SoberMappingBean implements SoberFactory {
     //事务管理器
     private static final TransactionManager TRANSACTION_MANAGER = TransactionManager.getInstance();
-
+    //初始化表 用于比较是否重复
+    private final static Map<Class<?>,SqlMapConfig> INIT_TABLE_MAP = new HashMap<>();
     //sql映射表
     private static final  Map<String, SQLRoom> SQL_MAP = new HashMap<>();
     //表结果映射
-    private static final Map<String, TableModels> TABLE_MAP = new HashMap<>();
+    private static final Map<Class<?>, TableModels> TABLE_MAP = new HashMap<>();
     //整合服务器JNDI接口
     private Context context = null;
     //一次最多查询行数，避免out memory 
@@ -424,23 +425,21 @@ public class SoberMappingBean implements SoberFactory {
     }
 
     /**
-     * @param cla SQL房间
-     * @return sql 空间
-     */
-    @Override
-    public SQLRoom getSqlRoom(Class<?> cla) {
-        return SQL_MAP.get(cla.getName().toLowerCase());
-    }
-
-    /**
+     * 同时这里将初始化并创建索引
      * @param namespace 得到命名空间的SQL
      * @return sql空间
      */
     @Override
-    public SQLRoom getSqlRoom(String namespace) {
+    public SQLRoom getSqlRoom(String namespace)
+    {
         return SQL_MAP.get(namespace.toLowerCase());
     }
 
+    /**
+     * 读取sql配置
+     * @param strings 配置路径
+     * @throws Exception 异常
+     */
     @Override
     public void setMappingResources(String[] strings) throws Exception {
         if (!SQL_MAP.isEmpty()) {
@@ -493,14 +492,11 @@ public class SoberMappingBean implements SoberFactory {
                     continue;
                 }
                 fileList.add(fileName);
-                AbstractRead abstractRead = new AutoReadTextFile();
-                abstractRead.setEncode(envTemplate.getString(Environment.encode, Environment.defaultEncode));
-                abstractRead.setFile(fileName);
-                String xmlString = abstractRead.getContent();
+                String xmlString = IoUtil.autoReadText(fileName,envTemplate.getString(Environment.encode, Environment.defaultEncode));
                 xmlString = StringUtil.trim(xmlString);
                 if (!StringUtil.isNull(xmlString))
                 {
-                    SoberUtil.readSqlMap(xmlString,SQL_MAP);
+                    SoberUtil.readSqlMap(xmlString,SQL_MAP,INIT_TABLE_MAP);
                 }
             }
             fileList.clear();
@@ -516,27 +512,28 @@ public class SoberMappingBean implements SoberFactory {
      */
     @Override
     public TableModels getTableModels(Class<?> cla, final SoberSupport soberSupport) {
-        TableModels soberTable = TABLE_MAP.get(cla.getName());
+        if (!INIT_TABLE_MAP.isEmpty())
+        {
+            SoberUtil.initTable(new ArrayList<>(INIT_TABLE_MAP.values()),soberSupport);
+            INIT_TABLE_MAP.clear();
+        }
+        TableModels soberTable = TABLE_MAP.get(cla);
         if (soberTable != null) {
             return soberTable;
         }
-        soberTable = AnnotationUtil.getSoberTable(cla);
-        if (soberTable == null) {
-            return null;
+        soberTable = SoberUtil.createTableAndIndex(cla,null,soberSupport);
+        if (soberTable!=null)
+        {
+            TABLE_MAP.put(cla, soberTable);
+        } else
+        {
+            log.error("严重异常,必须尽快排除:{} 表创建失败",cla);
         }
-        TABLE_MAP.put(cla.getName(), soberTable);
-        String sql = null;
-        try {
-            if (soberTable.isCreate() && !soberSupport.tableExists(cla)) {
-                sql = soberSupport.getCreateTableSql(cla);
-                soberSupport.execute(sql);
-            }
-        } catch (Exception e) {
-            log.error("ERROR:auto create table 自动创建表错误:" + sql + " table:" + soberTable.toString() + " 原因:没有得到连接或者和数据库不兼容", e);
-            e.printStackTrace();
-        }
+
         return soberTable;
     }
+
+
 
     @Override
     public void clear() {

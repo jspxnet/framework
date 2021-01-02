@@ -25,14 +25,14 @@ import java.util.List;
  * Time: 23:25:44
  */
 public class Restrictions {
-    public static final String key_not = "NOT";
-    public static final String key_and = "AND";
-    public static final String key_or = "OR";
-    public static final String key_between = "BETWEEN";
-    public static final String key_like = "LIKE";
-    public static final String key_in = "IN";
-    public static final String key_count = "count";
-    public static final String key_distinct = "distinct";
+    public static final String KEY_NOT = "NOT";
+    public static final String KEY_AND = "AND";
+    public static final String KEY_OR = "OR";
+    public static final String KEY_BETWEEN = "BETWEEN";
+    public static final String KEY_LIKE = "LIKE";
+    public static final String KEY_IN = "IN";
+    public static final String KEY_COUNT = "count";
+    public static final String KEY_DISTINCT = "distinct";
     public static final String GT = ">";
     public static final String GE = ">=";
     public static final String LE = "<=";
@@ -231,7 +231,7 @@ public class Restrictions {
         List<Criterion> list = new LinkedList<Criterion>();
         list.add(lhs);
         list.add(rhs);
-        return new LogicalExpression(list, key_and);
+        return new LogicalExpression(list, KEY_AND);
     }
 
     /**
@@ -245,12 +245,12 @@ public class Restrictions {
         List<Criterion> list = new LinkedList<Criterion>();
         list.add(lhs);
         list.add(rhs);
-        return new LogicalExpression(list, key_or);
+        return new LogicalExpression(list, KEY_OR);
     }
 
 
     public static LogicalExpression or(List<Criterion> list) {
-        return new LogicalExpression(list, key_or);
+        return new LogicalExpression(list, KEY_OR);
     }
 
     /**
