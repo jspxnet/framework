@@ -397,7 +397,6 @@ public class AnnotationUtil {
         int len = StringUtil.toInt(length);
         return len <= 0 ? defaultLength : len;
     }
-
     /**
      * 得到有Table的class列表
      *
