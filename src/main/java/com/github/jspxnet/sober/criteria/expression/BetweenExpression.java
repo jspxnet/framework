@@ -20,9 +20,9 @@ import com.github.jspxnet.sober.util.JdbcUtil;
  * Time: 11:06:21
  */
 public class BetweenExpression implements Criterion {
-    private String propertyName;
-    private Object lo;
-    private Object hi;
+    private final String propertyName;
+    private final Object lo;
+    private final Object hi;
 
     public BetweenExpression(String propertyName, Object lo, Object hi) {
         this.propertyName = propertyName;
@@ -32,9 +32,7 @@ public class BetweenExpression implements Criterion {
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(propertyName).append(" ").append(Restrictions.key_between).append(" ? ").append(Restrictions.key_and).append(" ? ");
-        return sb.toString();
+        return propertyName + " " + Restrictions.KEY_BETWEEN + " ? " + Restrictions.KEY_AND + " ? ";
     }
 
     @Override
@@ -45,9 +43,7 @@ public class BetweenExpression implements Criterion {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(propertyName).append(" ").append(Restrictions.key_between).append(" ").append(lo).append(" ").append(Restrictions.key_and).append(" ").append(hi);
-        return sb.toString();
+        return propertyName + " " + Restrictions.KEY_BETWEEN + " " + lo + " " + Restrictions.KEY_AND + " " + hi;
     }
 
     @Override

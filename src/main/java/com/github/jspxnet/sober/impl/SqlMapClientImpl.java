@@ -9,14 +9,17 @@
  */
 package com.github.jspxnet.sober.impl;
 
+import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.sober.SoberEnv;
 import com.github.jspxnet.sober.SoberFactory;
 import com.github.jspxnet.sober.SqlMapClient;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.config.SqlMapConfig;
 import com.github.jspxnet.sober.config.SQLRoom;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
+import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
@@ -229,6 +232,8 @@ public class SqlMapClientImpl implements SqlMapClient {
         }
         int endRow = beginRow + totalCount;
 
+
+
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
         if (sqlRoom == null) {
             log.error("ERROR:not get sql map namespace " + namespace + ",sql映射中不能够得到相应的命名空间,检查你的sql配置");
@@ -247,16 +252,27 @@ public class SqlMapClientImpl implements SqlMapClient {
         valueMap.put("beginRow", beginRow);
         valueMap.put("endRow", endRow);
         valueMap.put("namespace", namespace);
-        String sqlText = StringUtil.empty;
+        String sqlText  = dialect.processSQL(mapSql.getContext(), valueMap);
+        if (StringUtil.isNull(sqlText)) {
+            throw new Exception("ERROR SQL IS NULL");
+        }
+
+        //判断是否是用缓存
+        Table table = AnnotationUtil.getTable(cls);
+        String cacheKey = null;
+        if (table!=null&&soberFactory.isUseCache() && table.cache()) {
+            cacheKey = SoberUtil.getListKey(cls, sqlText,"",beginRow,endRow, loadChild);
+            List<T> resultList = (List<T>) JSCacheManager.get(cls, cacheKey);
+            if (!ObjectUtil.isEmpty(resultList)) {
+                return resultList;
+            }
+        }
+
         Connection conn = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         List<T> list = new ArrayList<>();
         try {
-            sqlText = dialect.processSQL(mapSql.getContext(), valueMap);
-            if (StringUtil.isNull(sqlText)) {
-                throw new Exception("ERROR SQL IS NULL");
-            }
 
             jdbcOperations.debugPrint(sqlText);
             conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
@@ -325,6 +341,10 @@ public class SqlMapClientImpl implements SqlMapClient {
             JdbcUtil.closeConnection(conn);
         }
         //放入cache
+
+        if (table!=null&&soberFactory.isUseCache() && table.cache()) {
+            JSCacheManager.put(cls, cacheKey,list);
+        }
         return list;
     }
 

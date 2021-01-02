@@ -136,10 +136,12 @@ public class SoberUtil {
         return resultMap;
     }
 
+
     /**
-     *  读取xml sql
+     * 读取xml sql
      * @param xmlString xml配置
-     * @param allSqlMap  总配置表
+     * @param allSqlMap 总配置表
+     * @param tableListMap 初始化表
      * @throws Exception 异常
      */
     public static void readSqlMap(String xmlString,final Map<String, SQLRoom> allSqlMap,Map<Class<?>,SqlMapConfig> tableListMap) throws Exception
@@ -164,6 +166,7 @@ public class SoberUtil {
      * @param xmlString xml配置
      * @param namespace 命名空间
      * @param allSqlMap 总配置表
+     * @param tableListMap 初始化表
      * @throws Exception 异常
      */
     public static void readSqlRoom(String xmlString,String namespace,final Map<String, SQLRoom> allSqlMap,Map<Class<?>,SqlMapConfig> tableListMap) throws Exception {
@@ -246,6 +249,11 @@ public class SoberUtil {
         tableListMap.put(cls,sqlMapConfig);
     }
 
+    /**
+     *
+     * @param tableList 初始化表列表
+     * @param soberSupport 数据对象
+     */
     public static void initTable(List<SqlMapConfig> tableList, SoberSupport soberSupport)
     {
         if (!ObjectUtil.isEmpty(tableList))
@@ -279,6 +287,7 @@ public class SoberUtil {
 
     /**
      * 创建索引
+     * @param cls 类对象
      * @param sqlMapConfig 索引配置
      * @param soberSupport 数据连接
      */
@@ -334,6 +343,7 @@ public class SoberUtil {
      * @param cla 类对象
      * @param sqlMapConfig 配置
      * @param soberSupport 数据对象
+     * @return 表模型对象
      */
     public static TableModels createTableAndIndex(Class<?> cla,SqlMapConfig sqlMapConfig, SoberSupport soberSupport)
     {

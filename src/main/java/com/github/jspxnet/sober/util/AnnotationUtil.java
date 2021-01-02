@@ -253,7 +253,15 @@ public class AnnotationUtil {
      * @return 表名
      */
     public static Table getTable(Class<?> cls) {
+        if (cls==null)
+        {
+            return null;
+        }
         Annotation[] annotation = cls.getAnnotations();
+        if (ObjectUtil.isEmpty(annotation))
+        {
+            return null;
+        }
         for (Annotation a : annotation) {
             if (a instanceof Table) {
                 return (Table) a;
@@ -267,7 +275,15 @@ public class AnnotationUtil {
      * @return 得到的显示名称
      */
     public static String getTableCaption(Class<?> cls) {
+        if (cls==null)
+        {
+            return null;
+        }
         Annotation[] annotation = cls.getAnnotations();
+        if (ObjectUtil.isEmpty(annotation))
+        {
+            return null;
+        }
         for (Annotation anAnnotation : annotation) {
             if (anAnnotation instanceof Table) {
                 return ((Table) anAnnotation).caption();
@@ -281,7 +297,15 @@ public class AnnotationUtil {
      * @return 得到数据库的名
      */
     public static String getTableName(Class<?> cls) {
+        if (cls==null)
+        {
+            return null;
+        }
         Annotation[] annotation = cls.getAnnotations();
+        if (ObjectUtil.isEmpty(annotation))
+        {
+            return null;
+        }
         for (Annotation anAnnotation : annotation) {
             if (anAnnotation instanceof Table) {
                 return ((Table) anAnnotation).name();
@@ -297,6 +321,10 @@ public class AnnotationUtil {
      * @return SoberTable
      */
     public static TableModels getSoberTable(Class<?> cls) {
+        if (cls==null)
+        {
+            return null;
+        }
         SoberTable soberTable = new SoberTable();
         soberTable.setEntity(cls);
         Table table = getTable(cls);
