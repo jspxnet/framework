@@ -1052,5 +1052,22 @@ public class ParamUtil {
         return false;
     }
 
-
+    /**
+     * 判断是否为Roc请求方式
+     * @param json json
+     * @return  判断是否为Roc请求方式
+     */
+    public static boolean isRocRequest(JSONObject json)
+    {
+        if (ObjectUtil.isEmpty(json))
+        {
+            return false;
+        }
+        if (json.containsKey(Environment.Protocol))
+        {
+            String protocol = json.getString(Environment.Protocol);
+            return protocol != null && protocol.contains("roc");
+        }
+        return false;
+    }
 }

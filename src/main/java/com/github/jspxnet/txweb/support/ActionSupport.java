@@ -427,6 +427,11 @@ public abstract class ActionSupport implements Action {
         {
             return null;
         }
+        boolean isRoc = ParamUtil.isRocRequest(json);
+        if (!isRoc)
+        {
+            return json;
+        }
         JSONObject methodJson = json.getJSONObject(Environment.rocMethod);
         if (methodJson!=null&&methodJson.containsKey(Environment.rocParams))
         {
@@ -464,7 +469,7 @@ public abstract class ActionSupport implements Action {
             JSONObject params = getJsonParams();
             if (params != null) {
                 if (checkSql) {
-                    return ParamUtil.getSafeFilter(params.getString(name), RequestUtil.paramMaxLength, SafetyEnumType.MIDDLE);
+                    return ParamUtil.getSafeFilter(params.getString(name), RequestUtil.paramMaxLength, SafetyEnumType.LOW);
                 }
                 return params.getString(name);
             }
