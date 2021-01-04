@@ -132,7 +132,10 @@ public class RouteService extends Thread implements Runnable {
                     continue;
                 } else {
                     //如果路由表里边只有自己,配置里边还有其他的,要让其他的注册过来
-                    init();
+                    if (RouteChannelManage.getInstance().getRouteSessionList().size()<=1)
+                    {
+                        init();
+                    }
                 }
 
                 if (ReplyCmdFactory.isSysCmd(reply.getAction())) {
