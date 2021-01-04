@@ -130,7 +130,11 @@ public class RouteService extends Thread implements Runnable {
 
                     ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
                     continue;
+                } else {
+                    //如果路由表里边只有自己,配置里边还有其他的
+                    init();
                 }
+
                 if (ReplyCmdFactory.isSysCmd(reply.getAction())) {
                     continue;
                 }
