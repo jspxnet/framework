@@ -12,6 +12,9 @@ import com.github.jspxnet.utils.StringUtil;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by jspx.net
  *
@@ -39,23 +42,25 @@ public class RegisterCmd extends INetCommand {
         {
             //注册上来的是一个地址列表,还没有路由表,将路由表给对方
             String str = command.getData();
-            if (StringUtil.isJsonObject(str))
+            if (!StringUtil.isJsonObject(str))
             {
                 RouteSession routeSession = new RouteSession();
                 routeSession.setSocketAddress(channel.remoteAddress());
                 routeSession.setOnline(YesNoEnumType.NO.getValue());
                 routeSession.setHeartbeatTimes(0);
                 routeSession.setGroupName(str);
-                routeChannelManage.addCheckRouteSocket(routeSession);
+                List<RouteSession> list =  new ArrayList<>();
+                list.add(routeSession);
+                routeChannelManage.join(list);
             }
         }
 
         //注册上来的同时将最新的路由表发给对方
         SendCmd replyCmd = BeanUtil.copy(command, SendCmd.class);
-        replyCmd.setAction(INetCommand.OK);
+        replyCmd.setAction(INetCommand.ROUTE);
         replyCmd.setType(INetCommand.TYPE_JSON);
         replyCmd.setData(routeChannelManage.getSendRouteTable());
-        //log.debug("当前路由表-----------------\r\n{}",routeChannelManage.getSendRouteTable());
+        log.debug("当前路由表-----------------\r\n{}",routeChannelManage.getSendRouteTable());
         return replyCmd;
     }
 }

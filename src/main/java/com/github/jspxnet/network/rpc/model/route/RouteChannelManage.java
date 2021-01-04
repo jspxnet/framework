@@ -147,33 +147,6 @@ public class RouteChannelManage {
     }
 
     /**
-     * 添加路由表
-     * @param routeSession 地址
-     */
-    public void addCheckRouteSocket(RouteSession routeSession)
-    {
-        //路由表里边已经有了
-        if (routeSocketMap.containsKey(routeSession.getSocketAddress()))
-        {
-            return;
-        }
-        routeSession.setOnline(YesNoEnumType.NO.getValue());
-        routeSocketMap.put(routeSession.getSocketAddress(),routeSession);
-    }
-
-    /**
-     *
-     * @param address 标记下线
-     */
-    public void routeOn(SocketAddress address)
-    {
-        RouteSession routeSession = routeSocketMap.get(address);
-        if (routeSession!=null)
-        {
-            routeSession.setOnline(YesNoEnumType.YES.getValue());
-        }
-    }
-    /**
      *
      * @param address 标记下线
      */
