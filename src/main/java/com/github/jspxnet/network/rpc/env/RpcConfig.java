@@ -76,7 +76,7 @@ public class RpcConfig {
     }
 
     public int getTimeout() {
-        return ENV_TEMPLATE.getInt(TIMEOUT, 5);
+        return ENV_TEMPLATE.getInt(TIMEOUT, 3);
     }
 
     public String getLocalAddress() {

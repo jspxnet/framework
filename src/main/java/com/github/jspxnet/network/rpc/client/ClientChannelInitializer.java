@@ -12,6 +12,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jspx.net
@@ -44,7 +45,7 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> 
         pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));
 
         //心跳促发
-        pipeline.addLast(new IdleStateHandler(0, 0, 5));
+        pipeline.addLast(new IdleStateHandler(0,4,0, TimeUnit.SECONDS));
 
         //逻辑处理
         pipeline.addLast(new ClientHandlerAdapter());

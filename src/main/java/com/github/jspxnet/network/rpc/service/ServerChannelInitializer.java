@@ -22,6 +22,7 @@ import io.netty.util.internal.logging.InternalLogLevel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> {
@@ -44,7 +45,7 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
         pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));
 
         //心跳促发,5秒不连接断开
-        pipeline.addLast(new IdleStateHandler(5, 0, 0));
+        pipeline.addLast(new IdleStateHandler(5, 0, 0, TimeUnit.SECONDS));
 
         //逻辑处理
         pipeline.addLast(new ServerHandlerAdapter());
