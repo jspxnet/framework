@@ -30,7 +30,7 @@ public class MasterSocketAddress {
     private static final String ADDRESS_LIST_KEY = "rpc:master:group:list";
     private static final Map<String,List<SocketAddress>> groupListMap = new HashMap<>();
     private static int current = 0;
-    private static MasterSocketAddress INSTANCE = new  MasterSocketAddress();
+    final private static MasterSocketAddress INSTANCE = new  MasterSocketAddress();
     public static MasterSocketAddress getInstance()
     {
         return INSTANCE;
@@ -73,7 +73,6 @@ public class MasterSocketAddress {
             log.error("RPC服务调用,没有配置服务器地址列表");
             return null;
         }
-        System.out.println(defaultSocketAddressList.size() + "----------------current=" + current);
         //这里要判断地址的有效性
         if (current>=defaultSocketAddressList.size())
         {

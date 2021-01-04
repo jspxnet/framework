@@ -17,7 +17,7 @@ import java.util.List;
  * description: rpc服务配置
  **/
 public class RpcConfig {
-    private EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+    private EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     final static private String USE_NETTY_RPC = "useNettyRpc";
 
     //包的最大长度
@@ -56,31 +56,31 @@ public class RpcConfig {
 
 
     public boolean isUseNettyRpc() {
-        return envTemplate.getBoolean(USE_NETTY_RPC);
+        return ENV_TEMPLATE.getBoolean(USE_NETTY_RPC);
     }
 
     public int getMaxFrameLength() {
-        return envTemplate.getInt(MAX_FRAME_LENGTH, 1048576);
+        return ENV_TEMPLATE.getInt(MAX_FRAME_LENGTH, 1048576);
     }
 
     public int getBufferSize() {
-        return envTemplate.getInt(BUFFER_SIZE, 1024);
+        return ENV_TEMPLATE.getInt(BUFFER_SIZE, 1024);
     }
 
     public int getBacklog() {
-        return envTemplate.getInt(BACKLOG, 1024);
+        return ENV_TEMPLATE.getInt(BACKLOG, 1024);
     }
 
     public int getWorkThread() {
-        return envTemplate.getInt(WORK_THREAD, 1);
+        return ENV_TEMPLATE.getInt(WORK_THREAD, 1);
     }
 
     public int getTimeout() {
-        return envTemplate.getInt(TIMEOUT, 5);
+        return ENV_TEMPLATE.getInt(TIMEOUT, 5);
     }
 
     public String getLocalAddress() {
-        return envTemplate.getString(LOCAL_ADDRESS);
+        return ENV_TEMPLATE.getString(LOCAL_ADDRESS);
     }
 
     public List<SocketAddress> getLocalAddressList() {
@@ -89,12 +89,11 @@ public class RpcConfig {
     }
 
     public String[] getLocalGroupList() {
-        return StringUtil.split(envTemplate.getString(LOCAL_GROUP_NAME),StringUtil.SEMICOLON);
+        return StringUtil.split(ENV_TEMPLATE.getString(LOCAL_GROUP_NAME),StringUtil.SEMICOLON);
     }
 
-
     public String getMasterGroup(String groupName) {
-        return envTemplate.getString(MASTER_GROUP + StringUtil.DOT + groupName);
+        return ENV_TEMPLATE.getString(MASTER_GROUP + StringUtil.DOT + groupName);
     }
 
     public List<SocketAddress> getMasterGroupList(String groupName) {
@@ -104,14 +103,14 @@ public class RpcConfig {
 
 
     public String getSecretKey() {
-        return envTemplate.getString(Environment.secretKey, Environment.defaultDrug);
+        return ENV_TEMPLATE.getString(Environment.secretKey, Environment.defaultDrug);
     }
 
     public String getCipherIv() {
-        return envTemplate.getString(Environment.cipherIv);
+        return ENV_TEMPLATE.getString(Environment.cipherIv);
     }
 
     public String[] getGroupNames() {
-        return StringUtil.split(envTemplate.getString(GROUP_NAMES, "default"),StringUtil.SEMICOLON);
+        return StringUtil.split(ENV_TEMPLATE.getString(GROUP_NAMES, "default"),StringUtil.SEMICOLON);
     }
 }
