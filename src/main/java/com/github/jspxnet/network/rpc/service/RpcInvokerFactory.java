@@ -42,7 +42,7 @@ public class RpcInvokerFactory {
         //注册进来作为服务器
         CMD_ACTION_MAP.put(RegisterCmd.NAME,RegisterCmd.class.getName());
         //请求得到路由
-        //CMD_ACTION_MAP.put(GetRouteCmd.NAME,GetRouteCmd.class.getName());
+        CMD_ACTION_MAP.put(GetRouteCmd.NAME,GetRouteCmd.class.getName());
     }
 
 
