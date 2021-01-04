@@ -4,6 +4,8 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.utils.IpUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.net.SocketAddress;
 import java.util.List;
 
@@ -32,13 +34,14 @@ public class RpcConfig {
     //服务器本机地址
     final static private String LOCAL_ADDRESS = "rpc.localAddress";
 
+    final static private String LOCAL_GROUP_NAME = "rpc.localGroupName";
+
     //服务器本机地址
     final static private String MASTER_GROUP = "rpc.master.group";
 
 
     //服务器本机功能组名称
-    final static private String GROUP_NAME = "rpc.group.name";
-
+    final static private String GROUP_NAMES = "rpc.group.names";
 
     //超时,单位为秒
     final static private String TIMEOUT = "rpc.timeout";
@@ -85,14 +88,20 @@ public class RpcConfig {
         return IpUtil.getSocketAddressList(localAddressStr);
     }
 
-    public String getMasterGroup() {
-        return envTemplate.getString(MASTER_GROUP);
+    public String[] getLocalGroupList() {
+        return StringUtil.split(envTemplate.getString(LOCAL_GROUP_NAME),StringUtil.SEMICOLON);
     }
 
-    public List<SocketAddress> getMasterGroupList() {
-        String masterGroupStr = getMasterGroup();
+
+    public String getMasterGroup(String groupName) {
+        return envTemplate.getString(MASTER_GROUP + StringUtil.DOT + groupName);
+    }
+
+    public List<SocketAddress> getMasterGroupList(String groupName) {
+        String masterGroupStr = getMasterGroup(groupName);
         return IpUtil.getSocketAddressList(masterGroupStr);
     }
+
 
     public String getSecretKey() {
         return envTemplate.getString(Environment.secretKey, Environment.defaultDrug);
@@ -102,7 +111,7 @@ public class RpcConfig {
         return envTemplate.getString(Environment.cipherIv);
     }
 
-    public String getGroupName() {
-        return envTemplate.getString(GROUP_NAME, "default");
+    public String[] getGroupNames() {
+        return StringUtil.split(envTemplate.getString(GROUP_NAMES, "default"),StringUtil.SEMICOLON);
     }
 }

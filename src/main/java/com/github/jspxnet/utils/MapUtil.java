@@ -75,7 +75,7 @@ public class MapUtil {
         StringBuilder result = new StringBuilder();
         for (Object key : map.keySet()) {
             String value = (String) map.get(key);
-            result.append(key).append("=").append(URLUtil.getURLEncoder(value, Environment.defaultEncode)).append("&");
+            result.append(key).append("=").append(URLUtil.getUrlEncoder(value, Environment.defaultEncode)).append("&");
         }
         if (result.toString().endsWith("&")) {
             result.setLength(result.length() - 1);

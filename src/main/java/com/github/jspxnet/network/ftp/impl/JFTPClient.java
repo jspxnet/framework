@@ -446,7 +446,7 @@ public class JFTPClient extends FTPClient implements IFTPClient {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat(DateUtil.UTC_FTP_FORMAT, Locale.ENGLISH);
         String dateStr = dateFormat.format(date);
-        return (200 == sendCommand("SITE UTIME", URLUtil.getURLEncoder(remoteFile, Environment.defaultEncode) + " " + dateStr + " UTC"));
+        return (200 == sendCommand("SITE UTIME", URLUtil.getUrlEncoder(remoteFile, Environment.defaultEncode) + " " + dateStr + " UTC"));
     }
 
 

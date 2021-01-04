@@ -311,7 +311,7 @@ public class JSONObject extends HashMap<String, Object> {
                 Object v = map.get(key);
                 if (v==null)
                 {
-                    super.put((String) key, NULL);
+                    super.put((String) key, null);
                 } else
                 if (!ClassUtil.isStandardProperty(v.getClass())) {
                     super.put((String) key, new JSONObject(v, includeSuperClass,dataField));
@@ -784,11 +784,11 @@ public class JSONObject extends HashMap<String, Object> {
      * the value is the JSONObject.NULL object.
      */
     public boolean isNull(String key) {
-        return JSONObject.NULL.equals(get(key));
+        return JSONObject.NULL.equals(get(key)) || get(key)==null;
     }
 
     public boolean isNull(Object bean) {
-        return JSONObject.NULL.equals(bean);
+        return JSONObject.NULL.equals(bean) || bean==null;
     }
 
     /**
@@ -802,7 +802,7 @@ public class JSONObject extends HashMap<String, Object> {
         JSONArray ja = new JSONArray();
         Set<String> keys = this.keys();
         for (String key : keys) {
-            ja.put(keys);
+            ja.put(key);
         }
         return ja.size() == 0 ? null : ja;
     }
@@ -1158,7 +1158,6 @@ public class JSONObject extends HashMap<String, Object> {
             } else {
                 int newIndent = indent + indentFactor;
                 while (keys.hasNext()) {
-
                     o = keys.next();
                     v = super.get(o);
                     if (!needClass && CLASS_NAME.equals(o)) {
@@ -1177,7 +1176,13 @@ public class JSONObject extends HashMap<String, Object> {
                     for (j = 0; j < newIndent; j += 1) {
                         sb.append(' ');
                     }
-                    sb.append(StringUtil.quote(o.toString(), true));
+                    if (isNull(o))
+                    {
+                        sb.append(o.toString());
+                    } else
+                    {
+                        sb.append(StringUtil.quote(o.toString(), true));
+                    }
                     sb.append(": ");
                     sb.append(valueToString(getJsonField(o.toString()),v, indentFactor, newIndent, needClass));
                 }
@@ -1241,7 +1246,7 @@ public class JSONObject extends HashMap<String, Object> {
      * @throws JSONException If the object contains an invalid number.
      */
     static String valueToString(JsonField jsonField,Object value, int indentFactor, int indent, boolean classInfo) throws JSONException {
-        if (value == null||"null".equals(value)) {
+        if (value == null || JSONObject.NULL.equals(value)) {
             return null;
         }
 

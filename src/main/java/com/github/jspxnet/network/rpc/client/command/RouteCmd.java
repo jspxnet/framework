@@ -2,8 +2,6 @@ package com.github.jspxnet.network.rpc.client.command;
 
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
-import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
@@ -34,16 +32,10 @@ public class RouteCmd extends INetCommand {
             if (StringUtil.isJsonObject(str))
             {
                 JSONObject json = new JSONObject(str);
-
-                String groupName = json.getString(RouteChannelManage.KEY_GROUP_NAME);
-                if (!StringUtil.isNull(groupName)&& RpcConfig.getInstance().getGroupName().equalsIgnoreCase(groupName))
-                {
-                    //只有同一个功能组的才加入进来
-                    JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
-                    List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                    routeChannelManage.join(list);
-                }
-                
+                //只有同一个功能组的才加入进来
+                JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
+                List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
+                routeChannelManage.join(list);
             }
         }
 

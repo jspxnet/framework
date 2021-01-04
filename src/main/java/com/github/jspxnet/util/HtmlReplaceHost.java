@@ -66,7 +66,7 @@ public class HtmlReplaceHost {
 
         this.oldUrl = oldUrl;
         this.urlName = URLUtil.getFileName(oldUrl);
-        oldHost = URLUtil.getHostURL(oldUrl);
+        oldHost = URLUtil.getHostUrl(oldUrl);
         oldUrlPath = URLUtil.getURLPath(oldUrl);
         if ("http://".equalsIgnoreCase(oldUrlPath)) {
             oldUrlPath = oldHost;

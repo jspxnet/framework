@@ -54,7 +54,7 @@ public class RequestMap extends HashMap<String,Object> implements Map<String,Obj
             return URLUtil.getURLPath(request.getRequestURI());
         }
         if ("hostURL".equals(key)) {
-            return URLUtil.getHostURL(request.getRequestURL().toString());
+            return URLUtil.getHostUrl(request.getRequestURL().toString());
         }
         if ("URLPath".equals(key)) {
             return FileUtil.mendPath(URLUtil.getURLPath(request.getRequestURL().toString()));

@@ -38,7 +38,7 @@ import java.util.Map;
  * description: IOC执行容器
  **/
 public class RpcCmd extends INetCommand {
-    static final private BeanFactory BEAN_FACTORY = EnvFactory.getBeanFactory();
+
     static final public String NAME = INetCommand.RPC;
 
     /**
@@ -50,6 +50,7 @@ public class RpcCmd extends INetCommand {
      */
     @Override
     public SendCmd execute(Channel channel, SendCmd command) {
+
         SendCmd reply = BeanUtil.copy(command, SendCmd.class);
         IocRequest iocRequest = null;
 
@@ -93,58 +94,10 @@ public class RpcCmd extends INetCommand {
             return reply;
         }
 
-        if (iocRequest.getClassName().contains(".")) {
-            exeIoc(iocRequest, reply);
-        } else {
-            exeAction(iocRequest, reply);
-        }
+        exeAction(iocRequest, reply);
         return reply;
     }
 
-    public void exeIoc(IocRequest iocRequest, SendCmd reply) {
-
-        //得到请求对象
-        Object serviceBean = BEAN_FACTORY.getBean(iocRequest.getClassName(), iocRequest.getNamespace());
-        if (serviceBean == null) {
-
-            IocResponse rpcResponse = new IocResponse();
-            rpcResponse.setError(new Exception("不存在的ioc对象," + ObjectUtil.toString(iocRequest)));
-            try {
-                reply.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(rpcResponse)));
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-            return;
-        }
-
-        //放入web请求
-        //如果是ActionSupport 引入 Action 执行器
-        if (serviceBean instanceof ActionSupport) {
-            ActionSupport actionSupport = (ActionSupport) serviceBean;
-            actionSupport.setRequest(new RequestTo((Map) iocRequest.getRequest()));
-            actionSupport.setResponse(new ResponseTo((Map) iocRequest.getResponse()));
-        }
-
-        IocResponse response = new IocResponse();
-        try {
-            String methodName = iocRequest.getMethodName();
-            Class<?>[] parameterTypes = iocRequest.getParameterTypes();
-            Object[] parameters = iocRequest.getParameters();
-            Method method = serviceBean.getClass().getMethod(methodName, parameterTypes);
-            method.setAccessible(true);
-            Object result = method.invoke(serviceBean, parameters);
-            response.setResult(result);
-        } catch (Throwable t) {
-            response.setError(t);
-            t.printStackTrace();
-        }
-
-        try {
-            reply.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(response)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 
     public void exeAction(IocRequest iocRequest, SendCmd reply) {
@@ -152,8 +105,11 @@ public class RpcCmd extends INetCommand {
         //得到请求对象
         WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
         ActionConfig actionConfig = null;
+        String namespace = TXWebUtil.getNamespace(iocRequest.getUrl());
+
+
         try {
-            actionConfig = webConfigManager.getActionConfig(iocRequest.getClassName(), iocRequest.getNamespace(), true);
+            actionConfig = webConfigManager.getActionConfig(iocRequest.getUrl(), namespace, true);
         } catch (Exception e) {
             e.printStackTrace();
         }

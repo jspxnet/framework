@@ -381,7 +381,7 @@ public class EvasiveManager {
         if (!ArrayUtil.isEmpty(insecureQueryStringKeys)) {
             String queryString = request.getQueryString(); //只是参数部分
             if (queryString != null) {
-                queryString = URLUtil.getURLDecoder(queryString, Dispatcher.getEncode());
+                queryString = URLUtil.getUrlDecoder(queryString, Dispatcher.getEncode());
                 queryString = queryString.toLowerCase();
                 for (String key : insecureQueryStringKeys) {
                     if (queryString.contains(key)) {

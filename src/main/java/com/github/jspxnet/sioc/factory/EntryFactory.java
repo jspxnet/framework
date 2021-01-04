@@ -38,7 +38,6 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,35 +135,12 @@ public final class EntryFactory implements BeanFactory {
             }
             Class<?> classObj = rpcClient.bind().equals(Empty.class) ? cla : rpcClient.bind();
             if (RpcProtocolEnumType.TCP.equals(rpcClient.protocol())) {
-                String ips = rpcClient.value();
-                SocketAddress address = null;
-                if (!StringUtil.isNull(ips)) {
-                    if (ips.contains(":")) {
-                        address = IpUtil.getSocketAddress(ips);
-                    } else {
-                        String beanName = StringUtil.substringBeforeLast(ips, StringUtil.DOT);
-                        String beanField = StringUtil.substringAfterLast(ips, StringUtil.DOT);
-                        Object urlConfigObj = getBean(beanName);
-                        if (urlConfigObj == null) {
-                            throw new Exception(cla.getName() + " RpcClient address not found,不能得到配置," + ips);
-                        }
-                        if (ClassUtil.isDeclaredField(urlConfigObj.getClass(), beanField)) {
-                            ips = (String) BeanUtil.getFieldValue(urlConfigObj, beanField);
-                        } else {
-                            ips = (String) BeanUtil.getProperty(urlConfigObj, beanField);
-                        }
-                        if (ips == null || !ips.contains(":")) {
-                            throw new Exception(cla.getName() + " RpcClient address not found,不能得到配置,检查配置对象值" + ips);
-                        }
-                        address = IpUtil.getSocketAddress(ips);
-                    }
-                }
-                result = NettyRpcProxy.create(classObj, rpcClient.namespace(), address);
+                result = NettyRpcProxy.create(classObj, rpcClient.url(), rpcClient.groupName());
             }
             if (RpcProtocolEnumType.HTTP.equals(rpcClient.protocol())) {
                 HessianClient hessianClient = HessianClientFactory.getInstance();
                 //读取本地配置
-                String hessianUrl = rpcClient.value();
+                String hessianUrl = rpcClient.url();
                 if (StringUtil.isNull(hessianUrl)) {
                     throw new Exception(cla.getName() + " RpcClient url is null,不允许为空");
                 }
@@ -176,7 +152,7 @@ public final class EntryFactory implements BeanFactory {
                         throw new Exception(cla.getName() + " RpcClient url not found,不能得到配置," + hessianUrl);
                     }
                     if (ClassUtil.isDeclaredField(urlConfigObj.getClass(), beanField)) {
-                        hessianUrl = (String) BeanUtil.getFieldValue(urlConfigObj, beanField);
+                        hessianUrl = BeanUtil.getFieldValue(urlConfigObj, beanField);
                     } else {
                         hessianUrl = (String) BeanUtil.getProperty(urlConfigObj, beanField);
                     }

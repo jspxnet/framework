@@ -36,7 +36,7 @@ public class URLUtil {
      * @param encode 编码
      * @return 转换编码
      */
-    public static String getURLEncoder(String text, String encode) {
+    public static String getUrlEncoder(String text, String encode) {
         if (text == null) {
             return StringUtil.empty;
         }
@@ -74,7 +74,7 @@ public class URLUtil {
         return text;
     }
 
-    public static String getURLDecoder(String text, String encode) {
+    public static String getUrlDecoder(String text, String encode) {
         if (text == null) {
             return StringUtil.empty;
         }
@@ -103,7 +103,7 @@ public class URLUtil {
      * @param newType 新的类型
      * @return 替换URL的文件类型
      */
-    static public String replaceURLFileType(String url, String newType) {
+    static public String replaceUrlFileType(String url, String newType) {
         if (url == null) {
             return StringUtil.empty;
         }
@@ -185,7 +185,7 @@ public class URLUtil {
      * @param str 完整的域名地址
      * @return 返回域名名称部分代http的 例如:http://www.jspx.net
      */
-    static public String getHostURL(String str) {
+    static public String getHostUrl(String str) {
         if (StringUtil.isNull(str)) {
             return StringUtil.empty;
         }
@@ -273,7 +273,7 @@ public class URLUtil {
      * @param file 路径
      * @return 以 file://d:/sss/xxx.html 的方式返回路径
      */
-    static public String getFileURL(String file) {
+    static public String getFileUrl(String file) {
         if (StringUtil.isNull(file)) {
             return "file:///";
         }
@@ -349,5 +349,20 @@ public class URLUtil {
             return false;
         }
         return str.startsWith("http://") || str.startsWith("https://") || str.startsWith("ftp://") || str.startsWith("ftps://") || str.startsWith("file://");
+    }
+
+
+    public static String getRootNamespace(String namespace) {
+        if (namespace == null) {
+            return StringUtil.empty;
+        }
+        if (namespace.startsWith("/"))
+        {
+            namespace = namespace.substring(1);
+        }
+        if (namespace.contains("/")) {
+            return StringUtil.substringBefore(namespace, "/");
+        }
+        return namespace;
     }
 }

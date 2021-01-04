@@ -15,6 +15,8 @@ import java.net.SocketAddress;
 @Data
 public class RouteSession implements Serializable {
 
+    private String groupName;
+
     private SocketAddress socketAddress;
 
     @Column(caption="最后请求时间",notNull = true)

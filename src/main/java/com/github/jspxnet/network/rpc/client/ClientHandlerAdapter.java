@@ -1,6 +1,6 @@
 package com.github.jspxnet.network.rpc.client;
 
-import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.json.GsonUtil;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.utils.ObjectUtil;
@@ -9,7 +9,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.concurrent.*;
 
 /**
@@ -51,8 +50,7 @@ public class ClientHandlerAdapter extends ChannelInboundHandlerAdapter {
             log.error("接收到非法数据,解密不能识别");
             return;
         }
-        JSONObject json = new JSONObject(jsonStr);
-        SendCmd reply = json.parseObject(SendCmd.class);
+        SendCmd reply = GsonUtil.createGson().fromJson(jsonStr,SendCmd.class);
         if (reply == null || StringUtil.isNull(reply.getId())) {
             log.debug("无调用ID");
             return;

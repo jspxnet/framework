@@ -1,13 +1,6 @@
 package com.github.jspxnet.network.rpc.model.transfer;
 
-import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.json.JSONArray;
-import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.txweb.enums.WebOutEnumType;
-import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.URLUtil;
 import lombok.Data;
-
 import java.io.Serializable;
 
 /**
@@ -21,9 +14,7 @@ import java.io.Serializable;
 public class IocRequest implements Serializable {
 
     //ioc 名称,类名
-    private String className;
-    //调用的命名空间
-    private String namespace;
+    private String url;
 
     //识别用户信息
     private String token;

@@ -223,7 +223,6 @@ public class ConfigureContext implements IocContext {
             if (iocBean == null) {
                 return;
             }
-            
             BeanModel beanModel = new BeanModel();
             beanModel.setId(cla.getName());
             beanModel.setSingleton(true);

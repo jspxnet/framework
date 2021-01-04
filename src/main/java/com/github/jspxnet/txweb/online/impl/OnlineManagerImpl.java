@@ -368,7 +368,7 @@ public class OnlineManagerImpl implements OnlineManager {
         }
         //tomcat6 bug 修复, 这里如果是中文，很可能接收到的为 编码后的字符串，需要判断解码
         if (loginId!=null&&loginId.length() > 5 && loginId.startsWith("%") && StringUtil.countMatches(loginId, "%") > 6) {
-            loginId = URLUtil.getURLDecoder(loginId, Environment.defaultEncode);
+            loginId = URLUtil.getUrlDecoder(loginId, Environment.defaultEncode);
         }
         if (StringUtil.isNull(password) || password.length() < 4) {
             errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorPassword));

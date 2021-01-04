@@ -61,7 +61,7 @@ public class NettyClient {
         }
         channelFuture = bootstrap.connect(this.address);
         //这里添加短线重连
-/*        channelFuture.addListener(new ChannelFutureListener() {
+        channelFuture.addListener(new ChannelFutureListener() {
             Channel channel;
             @Override
             public void operationComplete(ChannelFuture futureListener) {
@@ -78,15 +78,11 @@ public class NettyClient {
                     }, 10, TimeUnit.SECONDS);
                 }
             }
-        });*/
+        });
         return channelFuture.channel();
     }
 
 
-/*     public SendCmd send(Channel channel, SendCmd command) throws Exception
-    {
-
-    }*/
     /**
      *
      * @param address  发送地址

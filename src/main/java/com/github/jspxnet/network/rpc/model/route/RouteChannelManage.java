@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class RouteChannelManage {
     final public static String KEY_ROUTE = "route";
-    final public static String KEY_GROUP_NAME = "name";
     final private static RouteChannelManage INSTANCE = new RouteChannelManage();
 
     private RouteChannelManage()
@@ -31,14 +30,24 @@ public class RouteChannelManage {
 
     public void initConfigRoute()
     {
+        RpcConfig rpcConfig = RpcConfig.getInstance();
         //初始化默认的路由表,就是自己的IP地址
-        List<SocketAddress> list = RpcConfig.getInstance().getLocalAddressList();
+        String[] groupNames = rpcConfig.getLocalGroupList();
+        List<SocketAddress> list = rpcConfig.getLocalAddressList();
+        int i = 0;
         for (SocketAddress socketAddress:list)
         {
             RouteSession routeSession = new RouteSession();
             routeSession.setSocketAddress(socketAddress);
             routeSession.setOnline(YesNoEnumType.YES.getValue());
             routeSession.setHeartbeatTimes(0);
+            if (groupNames.length>=list.size())
+            {
+                routeSession.setGroupName(groupNames[i]);
+            } else
+            {
+                routeSession.setGroupName(groupNames[0]);
+            }
             routeSocketMap.put(socketAddress,routeSession);
         }
     }
@@ -76,7 +85,6 @@ public class RouteChannelManage {
             }
         }
         json.put(KEY_ROUTE,list);
-        json.put(KEY_GROUP_NAME,RpcConfig.getInstance().getGroupName());
         return json.toString(4);
     }
 
@@ -85,31 +93,26 @@ public class RouteChannelManage {
      * 放入请求得到的路由表
      * @param list 路由表
      */
-    public void join(List<RouteSession> list)
+    public List<String> join(List<RouteSession> list)
     {
+        List<String> result = new ArrayList<>();
         if (ObjectUtil.isEmpty(list))
         {
-            return;
+            return result;
         }
+
         for (RouteSession routeSession:list)
         {
             if (!routeSocketMap.containsKey(routeSession.getSocketAddress()))
             {
                 routeSocketMap.put(routeSession.getSocketAddress(),routeSession);
+                if (!result.contains(routeSession.getGroupName()))
+                {
+                    result.add(routeSession.getGroupName());
+                }
             }
         }
-        /*
-        Enumeration<String> keys = routeSocketMap.keys();
-        while (keys.hasMoreElements())
-        {
-            String key=keys.nextElement();
-            RouteSession session = routeSocketMap.get(key);
-            if (YesNoEnumType.NO.getValue()==session.getOnline())
-            {
-                routeSocketMap.remove(key);
-            }
-        }
-        */
+        return result;
     }
 
 

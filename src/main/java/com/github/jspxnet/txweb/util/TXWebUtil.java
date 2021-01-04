@@ -1008,7 +1008,7 @@ public class TXWebUtil {
             return servletPath;
         }
         if (servletPath.startsWith("http")) {
-            servletPath = StringUtil.substringAfter(servletPath, URLUtil.getHostURL(servletPath));
+            servletPath = StringUtil.substringAfter(servletPath, URLUtil.getHostUrl(servletPath));
         }
         String namespace = URLUtil.getURLPath(servletPath);
         if (namespace.startsWith("/")) {

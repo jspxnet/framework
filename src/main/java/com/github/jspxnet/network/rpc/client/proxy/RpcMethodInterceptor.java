@@ -10,6 +10,7 @@ import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
@@ -23,16 +24,15 @@ import java.net.SocketAddress;
  * date: 2020/7/10 21:22
  * description: Rpc代理,是用cglib
  **/
+@Slf4j
 public class RpcMethodInterceptor implements MethodInterceptor {
     private RequestTo request;
     private ResponseTo response;
     private SocketAddress address;
 
-
     //ioc 名称,类名
-    private String className;
-    //调用的命名空间
-    private String namespace;
+    private String url;
+
 
     public RequestTo getRequest() {
         return request;
@@ -58,20 +58,12 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         this.address = address;
     }
 
-    public String getClassName() {
-        return className;
+    public String getUrl() {
+        return url;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     @Override
@@ -86,8 +78,10 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         iocRequest.setParameterTypes(method.getParameterTypes());
         iocRequest.setRequest(request);
         iocRequest.setResponse(response);
-        iocRequest.setClassName(className);
-        iocRequest.setNamespace(namespace);
+        iocRequest.setUrl(url);
+
+
+        log.debug("iocRequest={}",ObjectUtil.toString(iocRequest));
 
         command.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(iocRequest)));
         SendCmd reply = NettyClientPool.getInstance().send(address, command);

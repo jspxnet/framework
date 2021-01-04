@@ -515,15 +515,7 @@ public class ParamUtil {
                         if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
                         {
                             JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
-                            boolean isRoc = false;
-                            if (jsonObject!=null&&jsonObject.containsKey(Environment.Protocol))
-                            {
-                                String protocol = jsonObject.getString(Environment.Protocol);
-                                if (protocol!=null&&protocol.contains("roc"))
-                                {
-                                    isRoc = true;
-                                }
-                            }
+                            boolean isRoc = isRocRequest(jsonObject);
                             if (isRoc)
                             {
                                 paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
@@ -559,12 +551,10 @@ public class ParamUtil {
                         //填充类内部的默认值end
                     } else {
                         //验证参数
-                        if (RequestUtil.isParameter(action.getRequest(), paramName)) {
-                            if (ClassUtil.isArrayType(pType) || ClassUtil.isCollection(pType)) {
-                                paramObj[i] = BeanUtil.getTypeValue(action.getArray(paramName, false), pType);
-                            } else {
-                                paramObj[i] = BeanUtil.getTypeValue(action.getString(paramName, false), pType);
-                            }
+                        if (ClassUtil.isArrayType(pType) || ClassUtil.isCollection(pType)) {
+                            paramObj[i] = BeanUtil.getTypeValue(action.getArray(paramName, false), pType);
+                        } else {
+                            paramObj[i] = BeanUtil.getTypeValue(action.getString(paramName, false), pType);
                         }
                         //放入默认参数
                         isRequired( action,  param,  paramName, paramObj[i]);

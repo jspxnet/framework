@@ -2,6 +2,7 @@ package com.github.jspxnet.network.rpc.service.route;
 
 
 import com.github.jspxnet.enums.YesNoEnumType;
+import com.github.jspxnet.json.GsonUtil;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClient;
@@ -13,12 +14,14 @@ import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
+import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,27 +41,28 @@ public class RouteService extends Thread implements Runnable {
 
     private void init() throws Exception {
         //初始化数据 begin
-        List<SocketAddress> defaultSocketAddressList = MasterSocketAddress.getInstance().getDefaultSocketAddressList();
-        for (SocketAddress socketAddress : defaultSocketAddressList) {
-            SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
-            cmd.setType(INetCommand.TYPE_JSON);
-            SendCmd reply = NETTY_CLIENT.send(socketAddress, cmd);
-            if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
-                String str = reply.getData();
-                if (StringUtil.isJsonObject(str)) {
+        List<String> nameList = MasterSocketAddress.getInstance().getDefaultSocketAddressGroupNames();
+        for (String name:nameList)
+        {
+            List<SocketAddress> defaultSocketAddressList = MasterSocketAddress.getInstance().getDefaultSocketAddressList(name);
+            for (SocketAddress socketAddress : defaultSocketAddressList) {
+                SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
+                cmd.setType(INetCommand.TYPE_JSON);
+                SendCmd reply = NETTY_CLIENT.send(socketAddress, cmd);
+                if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
+                    String str = reply.getData();
+                    if (StringUtil.isJsonObject(str)) {
 
-                    JSONObject json = new JSONObject(str);
-                    String groupName = json.getString(RouteChannelManage.KEY_GROUP_NAME);
-                    if (!StringUtil.isNull(groupName)&&RpcConfig.getInstance().getGroupName().equalsIgnoreCase(groupName))
-                    {
+                        JSONObject json = new JSONObject(str);
                         //只有同一个功能组的才加入进来
                         JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                         List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
                         ROUTE_CHANNEL_MANAGE.join(list);
                     }
                 }
+                //把路由表自己保管起来
             }
-            //把路由表自己保管起来
+
         }
         //初始化数据 end
     }
@@ -72,10 +76,10 @@ public class RouteService extends Thread implements Runnable {
             while (true) {
                 checkSocketAddressRoute();
                 Thread.sleep(DateUtil.SECOND);
-                linkRoute();
+                List<String> groupNameList =  linkRoute();
                 Thread.sleep(DateUtil.SECOND);
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
-                MasterSocketAddress.getInstance().flushAddress();
+                MasterSocketAddress.getInstance().flushAddress(groupNameList);
             }
         } catch (Throwable e) {
             e.printStackTrace();
@@ -85,11 +89,12 @@ public class RouteService extends Thread implements Runnable {
 
     }
 
-    private void linkRoute() {
+    private List<String> linkRoute() {
         List<RouteSession> routeSessionList = ROUTE_CHANNEL_MANAGE.getRouteSessionList();
         if (routeSessionList == null || routeSessionList.isEmpty()) {
-            return;
+            return null;
         }
+        List<String> result = new ArrayList<>();
         for (RouteSession routeSession : routeSessionList) {
             if (YesNoEnumType.NO.getValue() == routeSession.getOnline()) {
                 continue;
@@ -119,14 +124,10 @@ public class RouteService extends Thread implements Runnable {
                     String str = reply.getData();
                     if (StringUtil.isJsonObject(str)) {
                         JSONObject json = new JSONObject(str);
-                        String groupName = json.getString(RouteChannelManage.KEY_GROUP_NAME);
-                        if (!StringUtil.isNull(groupName)&&RpcConfig.getInstance().getGroupName().equalsIgnoreCase(groupName))
-                        {
-                            //只有同一个功能组的才加入进来
-                            JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
-                            List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                            ROUTE_CHANNEL_MANAGE.join(list);
-                        }
+                        //只有同一个功能组的才加入进来
+                        JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
+                        List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
+                        result.addAll(ROUTE_CHANNEL_MANAGE.join(list));
                     }
                 }
                 //把路由表自己保管起来
@@ -136,6 +137,7 @@ public class RouteService extends Thread implements Runnable {
                 log.error("RPC路由网络中存在异常服务器:{},错误:{}", ObjectUtil.toString(routeSession), e.getMessage());
             }
         }
+        return result;
     }
 
     /**
@@ -156,15 +158,11 @@ public class RouteService extends Thread implements Runnable {
                     String str = reply.getData();
                     if (StringUtil.isJsonObject(str)) {
                         JSONObject json = new JSONObject(str);
+                        //只有同一个功能组的才加入进来
 
-                        String groupName = json.getString(RouteChannelManage.KEY_GROUP_NAME);
-                        if (!StringUtil.isNull(groupName)&&RpcConfig.getInstance().getGroupName().equalsIgnoreCase(groupName))
-                        {
-                            //只有同一个功能组的才加入进来
-                            JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
-                            List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                            ROUTE_CHANNEL_MANAGE.join(list);
-                        }
+                        JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
+                        List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
+                        ROUTE_CHANNEL_MANAGE.join(list);
                     }
                 }
                 //把路由表自己保管起来

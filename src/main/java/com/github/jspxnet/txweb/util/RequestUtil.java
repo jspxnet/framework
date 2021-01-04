@@ -677,7 +677,7 @@ public class RequestUtil {
         }
         StringBuilder result = new StringBuilder();
         for (String key : param.keySet()) {
-            result.append(key).append("=").append(URLUtil.getURLEncoder(param.get(key), Environment.defaultEncode)).append("&");
+            result.append(key).append("=").append(URLUtil.getUrlEncoder(param.get(key), Environment.defaultEncode)).append("&");
         }
         if (result.toString().endsWith("&")) {
             result.setLength(result.length() - 1);
@@ -991,11 +991,11 @@ public class RequestUtil {
      * @param request 请求
      * @return 返回域名名称部分代http的 例如:http://www.jspx.net
      */
-    static public String getHostURL(HttpServletRequest request) {
+    static public String getHostUrl(HttpServletRequest request) {
         if (request == null) {
             return StringUtil.empty;
         }
-        return URLUtil.getHostURL(request.getRequestURL().toString());
+        return URLUtil.getHostUrl(request.getRequestURL().toString());
     }
 
     static public String getHeader(HttpServletRequest request, String key) {

@@ -22,16 +22,18 @@ public @interface RpcClient {
     //默认为类名,  这里为ioc方式调用,属于直接连接调用,不会有拦截器,权限相关控制
     Class<?> bind() default Empty.class;
 
-    //HTTP 方式必须有远程URL地址,TCP方式可以指定服务器
-    String value() default StringUtil.empty;
+    //命名空间,ioc 注入是用
+    String namespace() default Sioc.global;
 
-    //tcp方式更好,但需要单独的端口,在低配置环境，和端口限制的地方是用http方式
+   //tcp方式更好,但需要单独的端口,在低配置环境，和端口限制的地方是用http方式
     RpcProtocolEnumType protocol() default RpcProtocolEnumType.HTTP;
 
-    //action名称, 指定了这个参数标识为逻辑接口调用,会有拦截器,权限相关控制,是模拟http调用
-    //主要是根据逻辑场景界定是用那种方式
-    String action() default StringUtil.empty;
+    //HTTP 方式必须有远程URL地址
+    //TCP方式这里是对方的ioc命名空间
+    String url() default StringUtil.empty;
 
-    //命名空间
-    String namespace() default Sioc.global;
+    //服务名称.TCP分组服务
+    String groupName() default StringUtil.empty;
+
+
 }

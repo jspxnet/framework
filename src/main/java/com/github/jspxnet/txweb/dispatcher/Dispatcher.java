@@ -16,8 +16,6 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.BeanFactory;
-import com.github.jspxnet.txweb.WebConfigManager;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
 import com.github.jspxnet.txweb.dispatcher.handle.*;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.evasive.Configuration;
@@ -161,7 +159,7 @@ public class Dispatcher {
         // 正常到执行
         String urlName = URLUtil.getFileName(request.getRequestURI());
         String namespace = TXWebUtil.getNamespace(request.getServletPath());
-        WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
+
 
         //X-Requested-With
         //这里放宽了条件，飞加密方式可以不需要 X-Requested-With

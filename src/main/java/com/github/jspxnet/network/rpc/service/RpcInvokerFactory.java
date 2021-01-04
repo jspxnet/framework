@@ -1,6 +1,6 @@
 package com.github.jspxnet.network.rpc.service;
 
-import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.json.GsonUtil;
 import com.github.jspxnet.network.rpc.model.transfer.IocResponse;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.cmd.ICmd;
@@ -53,9 +53,7 @@ public class RpcInvokerFactory {
         {
             return;
         }
-
-        JSONObject json = new JSONObject(jsonStr);
-        SendCmd command = json.parseObject(SendCmd.class);
+        SendCmd command = GsonUtil.createGson().fromJson(jsonStr,SendCmd.class);
         String actionCmdName =  CMD_ACTION_MAP.get(command.getAction());
         if (StringUtil.isNull(actionCmdName))
         {

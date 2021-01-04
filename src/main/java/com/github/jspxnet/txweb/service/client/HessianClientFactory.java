@@ -16,7 +16,6 @@ import com.github.jspxnet.txweb.service.HessianClient;
 import com.github.jspxnet.util.CglibProxyUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -84,12 +83,17 @@ public class HessianClientFactory extends HessianProxyFactory implements Hessian
             cls = api;
         }
         RpcClient remoteApi = cls.getAnnotation(RpcClient.class);
-        if (remoteApi==null || StringUtil.isNull(remoteApi.value()))
+        if (remoteApi==null)
         {
-            throw  new MalformedURLException(api + "没有配置 RpcClient 标签,不能 识别URL地址 ");
+            throw  new MalformedURLException(api + "没有配置 RpcClient 标签");
         }
+        if (StringUtil.isEmpty(remoteApi.url()))
+        {
+            throw  new MalformedURLException(api + "没有配置 RpcClient 标签  协议中 url不允许为空");
+        }
+
         Class<?> target = ClassUtil.getImplements(api);
-        return (T) create(target,Thread.currentThread().getContextClassLoader(), remoteApi.value());
+        return (T) create(target,Thread.currentThread().getContextClassLoader(), remoteApi.url());
     }
 
     /**

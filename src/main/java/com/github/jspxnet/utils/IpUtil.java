@@ -453,7 +453,6 @@ public class IpUtil {
     public static List<SocketAddress> getSocketAddressList(String str)
     {
         List<SocketAddress> result = new ArrayList<>();
-
         String[] ips = StringUtil.split(StringUtil.replace(str,StringUtil.COMMAS,StringUtil.SEMICOLON),StringUtil.SEMICOLON);
         for (String ip:ips)
         {
