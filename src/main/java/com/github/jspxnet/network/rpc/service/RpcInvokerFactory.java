@@ -74,7 +74,7 @@ public class RpcInvokerFactory {
             log.debug("<---{}接收到:{},cmd:{}",ctx.channel().localAddress(),ctx.channel().remoteAddress(),command.getAction());
         }
         SendCmd reply =  cmd.execute(ctx,command);
-        //log.debug("--->回复到:{},cmd:{}",ctx.channel().remoteAddress(),ObjectUtil.toString(reply));
+        log.debug("--->回复到:{},cmd:{}",ctx.channel().remoteAddress(),ObjectUtil.toString(reply));
         if (reply!=null)
         {
             INetCommand.sendEncodePacket(ctx.channel(),reply);

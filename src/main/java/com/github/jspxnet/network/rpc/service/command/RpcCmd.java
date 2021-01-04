@@ -24,8 +24,11 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.URLUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -37,6 +40,7 @@ import java.util.Map;
  * date: 2020/6/21 16:36
  * description: IOC执行容器
  **/
+@Slf4j
 public class RpcCmd extends INetCommand {
 
     static final public String NAME = INetCommand.RPC;
@@ -106,10 +110,10 @@ public class RpcCmd extends INetCommand {
         WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
         ActionConfig actionConfig = null;
         String namespace = TXWebUtil.getNamespace(iocRequest.getUrl());
-
-
+        String urlName = URLUtil.getFileName(iocRequest.getUrl());
+        log.info("-----------namespace:{} urlName:{}",namespace,urlName);
         try {
-            actionConfig = webConfigManager.getActionConfig(iocRequest.getUrl(), namespace, true);
+            actionConfig = webConfigManager.getActionConfig(urlName, namespace, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -126,12 +130,12 @@ public class RpcCmd extends INetCommand {
         }
 
         JSONObject json = new JSONObject();
+        json.put(Environment.Protocol, Environment.jspxNetRoc);
         json.put(Environment.rocFormat, WebOutEnumType.JSON.getName());
         JSONObject methodJson = new JSONObject();
         methodJson.put(Environment.rocName, iocRequest.getMethodName());
         methodJson.put(Environment.rocParams, new JSONArray(iocRequest.getParameters()));
         json.put(Environment.rocMethod, methodJson);
-
         IocResponse response = new IocResponse();
         try {
             ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, TXWebUtil.createEnvironment(), "roc", json, new RequestTo((Map) iocRequest.getRequest()), new ResponseTo((Map) iocRequest.getResponse()));

@@ -7,6 +7,7 @@ import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.util.CglibProxyUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.SocketAddress;
 
@@ -17,6 +18,7 @@ import java.net.SocketAddress;
  * date: 2020/6/10 22:13
  * description: jspbox
  **/
+@Slf4j
 public class NettyRpcProxy {
 
     static  public <T>T  create(Class<T> target)
@@ -44,7 +46,6 @@ public class NettyRpcProxy {
      */
     static  public <T>T create(Class<T>  target,String url, RequestTo requestTo, ResponseTo responseTo, String serviceName)
     {
-
         if (StringUtil.isEmpty(serviceName))
         {
             serviceName = URLUtil.getRootNamespace(url);
@@ -53,6 +54,7 @@ public class NettyRpcProxy {
         {
             serviceName = "default";
         }
+
         SocketAddress address = MasterSocketAddress.getInstance().getSocketAddress(serviceName);
         AssertException.isNull(address,"TCP调用没有配置服务器地址");
         RpcMethodInterceptor clientInvocationHandler = new RpcMethodInterceptor();

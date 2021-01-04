@@ -20,13 +20,13 @@ import java.util.Map;
  * description: gson单元
  */
 public class GsonUtil {
+    private static Gson gson;
     private GsonUtil()
     {
 
     }
     public static Gson createGson(String dataFormat)
     {
-
         return new GsonBuilder()
                 //序列化null
                 .serializeNulls()
@@ -58,7 +58,11 @@ public class GsonUtil {
     }
     public static Gson createGson()
     {
-        return createGson(JSONObject.FULL_ST_FORMAT);
+        if (gson!=null)
+        {
+            return gson;
+        }
+        return gson = createGson(JSONObject.FULL_ST_FORMAT);
     }
 
 

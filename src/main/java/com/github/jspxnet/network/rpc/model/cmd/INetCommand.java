@@ -33,8 +33,8 @@ public abstract class INetCommand implements ICmd {
 
     static public final String RPC = "rpc";
 
-    static public final String TXWEB = "txweb";
     static public final String HTTP = "http";
+
     static public final String EXCEPTION = "exception";
     //得到路由表
     static public final String ROUTE = "route";

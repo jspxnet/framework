@@ -101,6 +101,7 @@ public class RouteChannelManage {
             return result;
         }
 
+        log.info("json RouteSession :{}",ObjectUtil.toString(list));
         for (RouteSession routeSession:list)
         {
             if (!routeSocketMap.containsKey(routeSession.getSocketAddress()))

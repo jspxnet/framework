@@ -126,7 +126,7 @@ public abstract class ResultSupport implements Result {
      * @param actionInvocation ActionInvocation
      * @return JSONObject
      */
-    Object getRocAutoResult(ActionInvocation actionInvocation) {
+    public static Object getRocAutoResult(ActionInvocation actionInvocation) {
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         ActionSupport action = actionProxy.getAction();
         String resultMethods = action.getEnv(ActionEnv.Key_ResultMethods);
