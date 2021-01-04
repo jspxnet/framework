@@ -69,6 +69,7 @@ public class MasterSocketAddress {
             log.error("RPC服务调用,没有配置服务器地址列表");
             return null;
         }
+        System.out.println(defaultSocketAddressList.size() + "----------------current=" + current);
         //这里要判断地址的有效性
         if (current>=defaultSocketAddressList.size())
         {

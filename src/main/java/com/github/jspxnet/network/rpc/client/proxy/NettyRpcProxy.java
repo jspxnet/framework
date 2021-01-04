@@ -1,15 +1,9 @@
 package com.github.jspxnet.network.rpc.client.proxy;
 
-import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
-import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.util.CglibProxyUtil;
-import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
-
-import java.net.SocketAddress;
 
 /**
  * Created by jspx.net
@@ -46,22 +40,11 @@ public class NettyRpcProxy {
      */
     static  public <T>T create(Class<T>  target,String url, RequestTo requestTo, ResponseTo responseTo, String serviceName)
     {
-        if (StringUtil.isEmpty(serviceName))
-        {
-            serviceName = URLUtil.getRootNamespace(url);
-        }
-        if (StringUtil.isEmpty(serviceName))
-        {
-            serviceName = "default";
-        }
-
-        SocketAddress address = MasterSocketAddress.getInstance().getSocketAddress(serviceName);
-        AssertException.isNull(address,"TCP调用没有配置服务器地址");
         RpcMethodInterceptor clientInvocationHandler = new RpcMethodInterceptor();
         clientInvocationHandler.setUrl(url);
         clientInvocationHandler.setRequest(requestTo);
         clientInvocationHandler.setResponse(responseTo);
-        clientInvocationHandler.setAddress(address);
+        clientInvocationHandler.setServiceName(serviceName);
         return CglibProxyUtil.getProxyInstance(target,clientInvocationHandler);
     }
 

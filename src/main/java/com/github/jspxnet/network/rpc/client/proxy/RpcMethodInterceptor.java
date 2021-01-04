@@ -1,6 +1,7 @@
 package com.github.jspxnet.network.rpc.client.proxy;
 
 import com.github.jspxnet.network.rpc.client.NettyClientPool;
+import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
@@ -9,7 +10,10 @@ import com.github.jspxnet.network.rpc.model.transfer.IocResponse;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -28,7 +32,7 @@ import java.net.SocketAddress;
 public class RpcMethodInterceptor implements MethodInterceptor {
     private RequestTo request;
     private ResponseTo response;
-    private SocketAddress address;
+    private String serviceName;
 
     //ioc 名称,类名
     private String url;
@@ -50,12 +54,12 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         this.response = response;
     }
 
-    public SocketAddress getAddress() {
-        return address;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setAddress(SocketAddress address) {
-        this.address = address;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public String getUrl() {
@@ -85,6 +89,18 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         log.debug("iocRequest={}",ObjectUtil.toString(iocRequest));
 
         command.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(iocRequest)));
+
+        if (StringUtil.isEmpty(serviceName))
+        {
+            serviceName = URLUtil.getRootNamespace(url);
+        }
+        if (StringUtil.isEmpty(serviceName))
+        {
+            serviceName = "default";
+        }
+        SocketAddress address = MasterSocketAddress.getInstance().getSocketAddress(serviceName);
+        AssertException.isNull(address,"TCP调用没有配置服务器地址");
+
         SendCmd reply = NettyClientPool.getInstance().send(address, command);
         if (null == reply) {
             return null;
