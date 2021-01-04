@@ -46,6 +46,7 @@ public class RouteService extends Thread implements Runnable {
             for (SocketAddress socketAddress : defaultSocketAddressList) {
                 SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
                 cmd.setType(INetCommand.TYPE_JSON);
+                cmd.setData(name);
                 SendCmd reply = NETTY_CLIENT.send(socketAddress, cmd);
                 if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
                     String str = reply.getData();
