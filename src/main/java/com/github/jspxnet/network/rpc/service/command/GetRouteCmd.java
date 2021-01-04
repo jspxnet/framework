@@ -24,7 +24,7 @@ public class GetRouteCmd extends INetCommand {
     public SendCmd execute(Channel channel, SendCmd command)
     {
         SendCmd reply = BeanUtil.copy(command, SendCmd.class);
-        reply.setAction(INetCommand.ROUTE);
+        reply.setAction(INetCommand.GET_ROUTE);
         reply.setType(INetCommand.TYPE_JSON);
         reply.setData(routeChannelManage.getSendRouteTable());
         return reply;

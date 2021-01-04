@@ -96,7 +96,6 @@ public class MasterSocketAddress {
             return;
         }
         List<SocketAddress> saveList = new ArrayList<>();
-
         for (String groupName:GROUP_LIST_MAP.keySet())
         {
             List<RouteSession> list = routeChannelManage.getRouteSessionList();
@@ -113,11 +112,7 @@ public class MasterSocketAddress {
             }
             if (!ObjectUtil.isEmpty(list))
             {
-                List<SocketAddress> defaultSocketAddressList = GROUP_LIST_MAP.get(groupName);
-                if (defaultSocketAddressList==null)
-                {
-                    defaultSocketAddressList = new ArrayList<>();
-                }
+                List<SocketAddress> defaultSocketAddressList = GROUP_LIST_MAP.computeIfAbsent(groupName, k -> new ArrayList<>());
                 defaultSocketAddressList.clear();
                 defaultSocketAddressList.addAll(saveList);
             }

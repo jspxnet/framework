@@ -93,6 +93,7 @@ public class RouteService extends Thread implements Runnable {
                 linkRoute();
                 Thread.sleep(DateUtil.SECOND);
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
+                Thread.sleep(DateUtil.SECOND);
                 MasterSocketAddress.getInstance().flushAddress();
                 log.debug("当前路由表-----------------\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
             }
@@ -104,12 +105,12 @@ public class RouteService extends Thread implements Runnable {
 
     }
 
-    private List<String> linkRoute() {
+    private void linkRoute() {
         List<RouteSession> routeSessionList = ROUTE_CHANNEL_MANAGE.getRouteSessionList();
         if (routeSessionList == null || routeSessionList.isEmpty()) {
-            return null;
+            return ;
         }
-        List<String> result = new ArrayList<>();
+
         for (RouteSession routeSession : routeSessionList) {
             if (YesNoEnumType.NO.getValue() == routeSession.getOnline()) {
                 continue;
@@ -121,21 +122,19 @@ public class RouteService extends Thread implements Runnable {
                 Channel channel = NETTY_CLIENT.connect(routeSession.getSocketAddress());
                 if (!INetCommand.isConnect(channel))
                 {
-
                     ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
                     continue;
                 }
                 SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), getRoute);
                 if (reply == null || reply.getAction().equalsIgnoreCase(INetCommand.EXCEPTION)) {
-
                     ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
                     continue;
-                } else {
-                    //如果路由表里边只有自己,配置里边还有其他的,要让其他的注册过来
-                    if (RouteChannelManage.getInstance().getRouteSessionList().size()<=1)
-                    {
-                        init();
-                    }
+                }
+
+                //如果路由表里边只有自己,配置里边还有其他的,要让其他的注册过来
+                if (ROUTE_CHANNEL_MANAGE.getRouteSessionList().size()<=1)
+                {
+                    init();
                 }
 
                 if (ReplyCmdFactory.isSysCmd(reply.getAction())) {
@@ -149,7 +148,7 @@ public class RouteService extends Thread implements Runnable {
                         //只有同一个功能组的才加入进来
                         JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                         List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                        result.addAll(ROUTE_CHANNEL_MANAGE.join(list));
+                        ROUTE_CHANNEL_MANAGE.join(list);
                     }
                 }
                 //把路由表自己保管起来
@@ -159,7 +158,7 @@ public class RouteService extends Thread implements Runnable {
                 log.error("RPC路由网络中存在异常服务器:{},错误:{}", ObjectUtil.toString(routeSession), e.getMessage());
             }
         }
-        return result;
+
     }
 
     /**

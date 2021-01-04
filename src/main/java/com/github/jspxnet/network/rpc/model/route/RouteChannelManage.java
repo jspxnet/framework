@@ -89,33 +89,29 @@ public class RouteChannelManage {
      * 放入请求得到的路由表
      * @param list 路由表
      */
-    public List<String> join(List<RouteSession> list)
+    public void join(List<RouteSession> list)
     {
         if (ObjectUtil.isEmpty(list))
         {
-            return null;
+            return;
         }
-        List<String> result = new ArrayList<>();
+
         log.info("json RouteSession :{}",ObjectUtil.toString(list));
         for (RouteSession routeSession:list)
         {
             if (!routeSocketMap.containsKey(routeSession.getSocketAddress()))
             {
                 routeSocketMap.put(routeSession.getSocketAddress(),routeSession);
-                if (!result.contains(routeSession.getGroupName()))
-                {
-                    result.add(routeSession.getGroupName());
-                }
             } else
             {
                 RouteSession routeSessionTmp = routeSocketMap.get(routeSession.getSocketAddress());
-                if (routeSessionTmp!=null)
+                if (routeSessionTmp!=null&&YesNoEnumType.NO.getValue()==routeSessionTmp.getOnline())
                 {
                     routeSessionTmp.setOnline(YesNoEnumType.YES.getValue());
                 }
             }
         }
-        return result;
+
     }
 
 
