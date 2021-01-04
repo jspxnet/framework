@@ -90,10 +90,10 @@ public class RouteService extends Thread implements Runnable {
             while (true) {
                 checkSocketAddressRoute();
                 Thread.sleep(DateUtil.SECOND);
-                List<String> groupNameList =  linkRoute();
+                linkRoute();
                 Thread.sleep(DateUtil.SECOND);
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
-                MasterSocketAddress.getInstance().flushAddress(groupNameList);
+                MasterSocketAddress.getInstance().flushAddress();
                 log.debug("当前路由表-----------------\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
             }
         } catch (Throwable e) {

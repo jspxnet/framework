@@ -88,15 +88,16 @@ public class MasterSocketAddress {
     /**
      * 将路由表放入请求缓存中
      */
-    synchronized public void flushAddress(List<String> serviceNames)
+    synchronized public void flushAddress()
     {
         RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
-        if (ObjectUtil.isEmpty(serviceNames)|| routeChannelManage==null||routeChannelManage.getRouteSessionCount()<1)
+        if (routeChannelManage==null||routeChannelManage.getRouteSessionCount()<1)
         {
             return;
         }
         List<SocketAddress> saveList = new ArrayList<>();
-        for (String groupName:serviceNames)
+
+        for (String groupName:GROUP_LIST_MAP.keySet())
         {
             List<RouteSession> list = routeChannelManage.getRouteSessionList();
             for (RouteSession session:list)
@@ -105,7 +106,10 @@ public class MasterSocketAddress {
                 {
                     continue;
                 }
-                saveList.add(session.getSocketAddress());
+                if (groupName.equals(session.getGroupName()))
+                {
+                    saveList.add(session.getSocketAddress());
+                }
             }
             if (!ObjectUtil.isEmpty(list))
             {
