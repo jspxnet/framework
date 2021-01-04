@@ -2,6 +2,7 @@ package com.github.jspxnet.network.rpc.service.route;
 
 
 import com.github.jspxnet.enums.YesNoEnumType;
+import com.github.jspxnet.json.GsonUtil;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClient;
@@ -43,18 +44,32 @@ public class RouteService extends Thread implements Runnable {
         for (String name:nameList)
         {
             List<SocketAddress> defaultSocketAddressList = MasterSocketAddress.getInstance().getDefaultSocketAddressList(name);
+            List<RouteSession> routeSessionList = new ArrayList<>();
+            for (SocketAddress socketAddress : defaultSocketAddressList)
+            {
+                RouteSession routeSession = new RouteSession();
+                routeSession.setSocketAddress(socketAddress);
+                routeSession.setGroupName(name);
+                routeSession.setCreateTimeMillis(System.currentTimeMillis());
+                routeSession.setLastRequestTime(System.currentTimeMillis());
+                routeSessionList.add(routeSession);
+            }
+
+            JSONObject json = new JSONObject();
+            json.put(RouteChannelManage.KEY_ROUTE,routeSessionList);
+
+
             for (SocketAddress socketAddress : defaultSocketAddressList) {
                 SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
                 cmd.setType(INetCommand.TYPE_JSON);
-                cmd.setData(name);
+                cmd.setData(json.toString());
                 SendCmd reply = NETTY_CLIENT.send(socketAddress, cmd);
                 if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
                     String str = reply.getData();
                     if (StringUtil.isJsonObject(str)) {
-
-                        JSONObject json = new JSONObject(str);
+                        JSONObject jsonTmp = new JSONObject(str);
                         //只有同一个功能组的才加入进来
-                        JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
+                        JSONArray jsonArray = jsonTmp.getJSONArray(RouteChannelManage.KEY_ROUTE);
                         List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
                         ROUTE_CHANNEL_MANAGE.join(list);
                     }
