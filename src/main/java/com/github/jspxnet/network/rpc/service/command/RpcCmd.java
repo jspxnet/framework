@@ -111,7 +111,6 @@ public class RpcCmd extends INetCommand {
         ActionConfig actionConfig = null;
         String namespace = TXWebUtil.getNamespace(iocRequest.getUrl());
         String urlName = URLUtil.getFileName(iocRequest.getUrl());
-        log.info("-----------namespace:{} urlName:{}",namespace,urlName);
         try {
             actionConfig = webConfigManager.getActionConfig(urlName, namespace, true);
         } catch (Exception e) {

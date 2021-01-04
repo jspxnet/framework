@@ -31,12 +31,12 @@ public class NettyClientPool {
     volatile private static NettyClientPool nettyClientPool;
     volatile private static ChannelPoolMap<SocketAddress,FixedChannelPool> pools = null;
     private final Bootstrap bootstrap = new Bootstrap();
-    private NioEventLoopGroup workersGroup = null;
+
     private RpcConfig rpcConfig = RpcConfig.getInstance();
 
     private NettyClientPool(){
 
-        workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread());
+        NioEventLoopGroup workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread());
         bootstrap.group(workersGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new ClientChannelInitializer())

@@ -54,13 +54,15 @@ public class RpcResult extends ResultSupport {
             return;
         }
         //返回类型必须一致
+        result = getRocAutoResult(actionInvocation);
+/*
         Method exeMethod = actionInvocation.getActionProxy().getMethod();
         if (!exeMethod.getGenericReturnType().equals(Void.TYPE))
         {
             result = BeanUtil.getTypeValue(action.getResult(),exeMethod.getGenericReturnType());
         } else {
             result = Boolean.TRUE;
-        }
+        }*/
     }
 
 }

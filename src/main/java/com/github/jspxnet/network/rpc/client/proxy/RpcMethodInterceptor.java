@@ -84,8 +84,6 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         iocRequest.setResponse(response);
         iocRequest.setUrl(url);
 
-
-
         log.debug("iocRequest={}",ObjectUtil.toString(iocRequest));
 
         command.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(iocRequest)));
