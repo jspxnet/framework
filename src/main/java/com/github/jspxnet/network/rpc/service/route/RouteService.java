@@ -57,7 +57,6 @@ public class RouteService extends Thread implements Runnable {
                         //只有同一个功能组的才加入进来
                         JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                         List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-
                         ROUTE_CHANNEL_MANAGE.join(list);
                     }
                 }
@@ -160,7 +159,6 @@ public class RouteService extends Thread implements Runnable {
                     if (StringUtil.isJsonObject(str)) {
                         JSONObject json = new JSONObject(str);
                         //只有同一个功能组的才加入进来
-
                         JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                         List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
                         ROUTE_CHANNEL_MANAGE.join(list);

@@ -95,12 +95,11 @@ public class RouteChannelManage {
      */
     public List<String> join(List<RouteSession> list)
     {
-        List<String> result = new ArrayList<>();
         if (ObjectUtil.isEmpty(list))
         {
-            return result;
+            return null;
         }
-
+        List<String> result = new ArrayList<>();
         log.info("json RouteSession :{}",ObjectUtil.toString(list));
         for (RouteSession routeSession:list)
         {
