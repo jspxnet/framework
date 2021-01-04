@@ -152,6 +152,10 @@ public class RocResponse<T> implements Serializable {
         this.data = data;
         return this;
     }
+    public RocResponse<T> setStatus(Integer status) {
+        this.status = status;
+        return this;
+    }
 
     public RocResponse<T> setProperty(String key,Object value)
     {
