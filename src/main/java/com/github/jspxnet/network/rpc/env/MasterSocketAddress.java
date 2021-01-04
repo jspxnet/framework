@@ -66,6 +66,10 @@ public class MasterSocketAddress {
         List<SocketAddress> defaultSocketAddressList = groupListMap.get(serviceName);
         if (ObjectUtil.isEmpty(defaultSocketAddressList))
         {
+            defaultSocketAddressList = groupListMap.get("default");
+        }
+        if (ObjectUtil.isEmpty(defaultSocketAddressList))
+        {
             log.error("RPC服务调用,没有配置服务器地址列表");
             return null;
         }

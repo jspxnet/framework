@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 
-import java.util.HashMap;
-
 /**
  * Created by jspx.net
  *

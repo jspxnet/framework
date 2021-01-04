@@ -92,7 +92,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         {
             serviceName = URLUtil.getRootNamespace(url);
         }
-        if (StringUtil.isEmpty(serviceName))
+        if (StringUtil.isEmpty(serviceName)||StringUtil.ASTERISK.equals(serviceName))
         {
             serviceName = "default";
         }

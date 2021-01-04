@@ -39,7 +39,6 @@ public class NettyRpcServiceGroup {
         }
     }
 
-
     /**
      * 启动所有配置的服务器
      */
