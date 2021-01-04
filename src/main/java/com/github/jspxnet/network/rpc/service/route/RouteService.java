@@ -2,7 +2,6 @@ package com.github.jspxnet.network.rpc.service.route;
 
 
 import com.github.jspxnet.enums.YesNoEnumType;
-import com.github.jspxnet.json.GsonUtil;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClient;
@@ -40,11 +39,13 @@ public class RouteService extends Thread implements Runnable {
 
     private void init() throws Exception {
         //初始化数据 begin
-        List<String> nameList = MasterSocketAddress.getInstance().getDefaultSocketAddressGroupNames();
+        MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
+        List<RouteSession> routeSessionList = new ArrayList<>();
+        List<String> nameList = masterSocketAddress.getDefaultSocketAddressGroupNames();
         for (String name:nameList)
         {
-            List<SocketAddress> defaultSocketAddressList = MasterSocketAddress.getInstance().getDefaultSocketAddressList(name);
-            List<RouteSession> routeSessionList = new ArrayList<>();
+            List<SocketAddress> defaultSocketAddressList = masterSocketAddress.getDefaultSocketAddressList(name);
+
             for (SocketAddress socketAddress : defaultSocketAddressList)
             {
                 RouteSession routeSession = new RouteSession();
@@ -54,30 +55,29 @@ public class RouteService extends Thread implements Runnable {
                 routeSession.setLastRequestTime(System.currentTimeMillis());
                 routeSessionList.add(routeSession);
             }
-
-            JSONObject json = new JSONObject();
-            json.put(RouteChannelManage.KEY_ROUTE,routeSessionList);
-
-
-            for (SocketAddress socketAddress : defaultSocketAddressList) {
-                SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
-                cmd.setType(INetCommand.TYPE_JSON);
-                cmd.setData(json.toString());
-                SendCmd reply = NETTY_CLIENT.send(socketAddress, cmd);
-                if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
-                    String str = reply.getData();
-                    if (StringUtil.isJsonObject(str)) {
-                        JSONObject jsonTmp = new JSONObject(str);
-                        //只有同一个功能组的才加入进来
-                        JSONArray jsonArray = jsonTmp.getJSONArray(RouteChannelManage.KEY_ROUTE);
-                        List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                        ROUTE_CHANNEL_MANAGE.join(list);
-                    }
-                }
-                //把路由表自己保管起来
-            }
-
         }
+
+        JSONObject json = new JSONObject();
+        json.put(RouteChannelManage.KEY_ROUTE,routeSessionList);
+
+        for (RouteSession routeSession:routeSessionList)
+        {
+            SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
+            cmd.setType(INetCommand.TYPE_JSON);
+            cmd.setData(json.toString());
+            SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
+            if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
+                String str = reply.getData();
+                if (StringUtil.isJsonObject(str)) {
+                    JSONObject jsonTmp = new JSONObject(str);
+                    //只有同一个功能组的才加入进来
+                    JSONArray jsonArray = jsonTmp.getJSONArray(RouteChannelManage.KEY_ROUTE);
+                    List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
+                    ROUTE_CHANNEL_MANAGE.join(list);
+                }
+            }
+        }
+
         //初始化数据 end
     }
 

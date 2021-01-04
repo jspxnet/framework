@@ -2,6 +2,7 @@ package com.github.jspxnet.network.rpc.service.command;
 
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONArray;
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
@@ -42,17 +43,15 @@ public class RegisterCmd extends INetCommand {
         {
             //注册上来的是一个地址列表,还没有路由表,将路由表给对方
             String str = command.getData();
-            if (!StringUtil.isJsonObject(str))
-            {
-                RouteSession routeSession = new RouteSession();
-                routeSession.setSocketAddress(channel.remoteAddress());
-                routeSession.setOnline(YesNoEnumType.NO.getValue());
-                routeSession.setHeartbeatTimes(0);
-                routeSession.setGroupName(str);
-                List<RouteSession> list =  new ArrayList<>();
-                list.add(routeSession);
+
+            if (StringUtil.isJsonObject(str)) {
+                JSONObject json = new JSONObject(str);
+                //只有同一个功能组的才加入进来
+                JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
+                List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
                 routeChannelManage.join(list);
             }
+
         }
 
         //注册上来的同时将最新的路由表发给对方
