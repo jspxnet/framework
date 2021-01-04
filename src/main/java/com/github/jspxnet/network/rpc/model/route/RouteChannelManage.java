@@ -64,10 +64,6 @@ public class RouteChannelManage {
      */
     private ConcurrentHashMap<SocketAddress, RouteSession> routeSocketMap = new ConcurrentHashMap<>();
 
-    /**
-     * 等待检测可加入路由表的地址
-     */
-    private final List<SocketAddress> checkRouteSocketList = Collections.synchronizedList(new ArrayList<>());
 
     /**
      *
@@ -110,6 +106,13 @@ public class RouteChannelManage {
                 {
                     result.add(routeSession.getGroupName());
                 }
+            } else
+            {
+                RouteSession routeSessionTmp = routeSocketMap.get(routeSession.getSocketAddress());
+                if (routeSessionTmp!=null)
+                {
+                    routeSessionTmp.setOnline(YesNoEnumType.YES.getValue());
+                }
             }
         }
         return result;
@@ -145,31 +148,31 @@ public class RouteChannelManage {
 
     /**
      * 添加路由表
-     * @param address 地址
+     * @param routeSession 地址
      */
-    public void addCheckRouteSocket(SocketAddress address)
+    public void addCheckRouteSocket(RouteSession routeSession)
     {
         //路由表里边已经有了
-        if (routeSocketMap.containsKey(address))
+        if (routeSocketMap.containsKey(routeSession.getSocketAddress()))
         {
             return;
         }
-        if (!checkRouteSocketList.contains(address))
-        {
-            checkRouteSocketList.add(address);
-        }
+        routeSession.setOnline(YesNoEnumType.NO.getValue());
+        routeSocketMap.put(routeSession.getSocketAddress(),routeSession);
     }
 
     /**
      *
-     * @return 地址列表
+     * @param address 标记下线
      */
-    public List<SocketAddress> getCheckRouteSocketList()
+    public void routeOn(SocketAddress address)
     {
-        return checkRouteSocketList;
+        RouteSession routeSession = routeSocketMap.get(address);
+        if (routeSession!=null)
+        {
+            routeSession.setOnline(YesNoEnumType.YES.getValue());
+        }
     }
-
-
     /**
      *
      * @param address 标记下线

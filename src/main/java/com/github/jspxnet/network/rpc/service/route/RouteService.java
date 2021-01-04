@@ -2,7 +2,6 @@ package com.github.jspxnet.network.rpc.service.route;
 
 
 import com.github.jspxnet.enums.YesNoEnumType;
-import com.github.jspxnet.json.GsonUtil;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClient;
@@ -14,7 +13,6 @@ import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
-import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -141,19 +139,19 @@ public class RouteService extends Thread implements Runnable {
     }
 
     /**
-     * 原则注册的地址是否正确
+     * 验证注册的地址是否正确
      */
     private void checkSocketAddressRoute() {
-        List<SocketAddress> checkRouteSocketList = ROUTE_CHANNEL_MANAGE.getCheckRouteSocketList();
+        List<RouteSession> checkRouteSocketList = ROUTE_CHANNEL_MANAGE.getRouteSessionList();
         if (checkRouteSocketList.isEmpty()) {
             return;
         }
         SendCmd cmd = new SendCmd();
         cmd.setAction(INetCommand.GET_ROUTE);
         cmd.setType(INetCommand.TYPE_JSON);
-        for (SocketAddress socketAddress : checkRouteSocketList) {
+        for (RouteSession routeSession : checkRouteSocketList) {
             try {
-                SendCmd reply = NETTY_CLIENT.send(socketAddress, cmd);
+                SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
                 if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
                     String str = reply.getData();
                     if (StringUtil.isJsonObject(str)) {
@@ -168,7 +166,7 @@ public class RouteService extends Thread implements Runnable {
                 Thread.sleep(RpcConfig.getInstance().getTimeout() * DateUtil.SECOND);
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("RPC路由网络中存在异常服务器:{},错误:{}", ObjectUtil.toString(socketAddress), e.getMessage());
+                log.error("RPC路由网络中存在异常服务器:{},错误:{}", ObjectUtil.toString(routeSession), e.getMessage());
             }
         }
         checkRouteSocketList.clear();

@@ -45,16 +45,8 @@ public class RegisterCmd extends INetCommand {
                 routeSession.setSocketAddress(channel.remoteAddress());
                 routeSession.setOnline(YesNoEnumType.NO.getValue());
                 routeSession.setHeartbeatTimes(0);
-                JSONArray jsonArray = new JSONArray(str);
-                for (int i=0;i<jsonArray.size();i++)
-                {
-                    String ipStr = jsonArray.getString(i);
-                    if (StringUtil.isNull(ipStr))
-                    {
-                        continue;
-                    }
-                    routeChannelManage.addCheckRouteSocket(IpUtil.getSocketAddress(ipStr));
-                }
+                routeSession.setGroupName(str);
+                routeChannelManage.addCheckRouteSocket(routeSession);
             }
         }
 
