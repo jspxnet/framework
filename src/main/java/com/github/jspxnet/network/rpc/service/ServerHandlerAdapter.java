@@ -158,7 +158,7 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
             {
                 netSession.setOnline(YesNoEnumType.NO.getValue());
             }
-            if (netSession.getHeartbeatTimes() > 4 && System.currentTimeMillis() - netSession.getLastRequestTime() > DateUtil.SECOND * RpcConfig.getInstance().getTimeout())
+            if (netSession.getHeartbeatTimes() > 3 && System.currentTimeMillis() - netSession.getLastRequestTime() > DateUtil.SECOND * RpcConfig.getInstance().getTimeout())
             {
                 cleanSession(ctx.channel());
             }
@@ -167,6 +167,5 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
             cleanSession(ctx.channel());
          }
     }
-
 
 }

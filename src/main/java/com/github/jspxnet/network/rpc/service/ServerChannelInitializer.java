@@ -31,7 +31,6 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
 
     @Override
     protected void initChannel(SocketChannel ch)  {
-        //log.debug("initChannel--------------------" + ch);
         RpcConfig rpcConfig = RpcConfig.getInstance();
         ch.config().setSendBufferSize(rpcConfig.getBufferSize());
         ch.config().setReceiveBufferSize(rpcConfig.getBufferSize());
@@ -44,7 +43,7 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
         pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));
         pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));
 
-        //心跳促发
+        //心跳促发,5秒不连接断开
         pipeline.addLast(new IdleStateHandler(5, 0, 0));
 
         //逻辑处理
