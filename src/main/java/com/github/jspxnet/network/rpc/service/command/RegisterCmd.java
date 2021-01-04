@@ -59,7 +59,6 @@ public class RegisterCmd extends INetCommand {
         replyCmd.setAction(INetCommand.ROUTE);
         replyCmd.setType(INetCommand.TYPE_JSON);
         replyCmd.setData(routeChannelManage.getSendRouteTable());
-        log.debug("当前路由表-----------------\r\n{}",routeChannelManage.getSendRouteTable());
         return replyCmd;
     }
 }
