@@ -28,7 +28,7 @@ import java.util.List;
 public class RegisterCmd extends INetCommand {
 
     static final public String NAME = INetCommand.REGISTER;
-    private static final RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
+
     /**
      * 执行方法
      * @param channel 连接
@@ -38,6 +38,7 @@ public class RegisterCmd extends INetCommand {
     @Override
     public SendCmd execute(Channel channel, SendCmd command)
     {
+        RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
         //有服务器注册上来
         if (INetCommand.TYPE_JSON.equals(command.getType()))
         {

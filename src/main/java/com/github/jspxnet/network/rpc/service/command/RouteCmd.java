@@ -7,7 +7,6 @@ import com.github.jspxnet.utils.BeanUtil;
 import io.netty.channel.Channel;
 
 public class RouteCmd extends INetCommand {
-    private static final RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
 
     static final public String NAME = INetCommand.ROUTE;
     /**
@@ -19,6 +18,7 @@ public class RouteCmd extends INetCommand {
     @Override
     public SendCmd execute(Channel channel, SendCmd command)
     {
+        RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
         SendCmd replyCmd = BeanUtil.copy(command, SendCmd.class);
         replyCmd.setAction(INetCommand.ROUTE);
         replyCmd.setType(INetCommand.TYPE_JSON);
