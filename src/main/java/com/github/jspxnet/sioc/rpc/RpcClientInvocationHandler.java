@@ -6,8 +6,14 @@ import com.github.jspxnet.network.rpc.client.proxy.RpcMethodInterceptor;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.sioc.annotation.RpcClient;
+import com.github.jspxnet.txweb.enums.RpcProtocolEnumType;
+import com.github.jspxnet.txweb.service.HessianClient;
+import com.github.jspxnet.txweb.service.client.HessianClientFactory;
 import com.github.jspxnet.util.CglibProxyUtil;
+import com.github.jspxnet.utils.BeanUtil;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,13 +66,26 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         }
 
         RpcClient rpcClient = target.getAnnotation(RpcClient.class);
-        if (request!=null&&response!=null)
+        if (RpcProtocolEnumType.TCP.equals(rpcClient.protocol()))
         {
-            targetObject = NettyRpcProxy.create(target,rpcClient.url(),new RequestTo(request),new ResponseTo(response),rpcClient.groupName());
-        } else
-        {
-            targetObject = NettyRpcProxy.create(target,rpcClient.url(),rpcClient.groupName());
+            if (request!=null&&response!=null)
+            {
+                targetObject = NettyRpcProxy.create(target,rpcClient.url(),new RequestTo(request),new ResponseTo(response),rpcClient.groupName());
+            } else
+            {
+                targetObject = NettyRpcProxy.create(target,rpcClient.url(),rpcClient.groupName());
+            }
+            return method.invoke(targetObject, args);
         }
-        return method.invoke(targetObject, args);
+        if (RpcProtocolEnumType.HTTP.equals(rpcClient.protocol())) {
+            HessianClient hessianClient = HessianClientFactory.getInstance();
+            //读取本地配置
+            String hessianUrl = rpcClient.url();
+            if (StringUtil.isNull(hessianUrl)) {
+                throw new Exception(target.getName() + " RpcClient url is null,不允许为空");
+            }
+            return hessianClient.getInterface(target, hessianUrl);
+        }
+        return method.invoke(target, args);
     }
 }

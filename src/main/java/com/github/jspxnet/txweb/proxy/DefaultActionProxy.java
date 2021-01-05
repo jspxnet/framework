@@ -19,6 +19,7 @@ import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ValidUtil;
 import java.lang.reflect.Method;
@@ -92,17 +93,26 @@ public class DefaultActionProxy implements ActionProxy {
 
     @Override
     public void setMethod(String method) {
+        Class<?> cls = action.getClass();
+        if (ClassUtil.isProxy(cls))
+        {
+            try {
+                cls = ClassUtil.loadClass(ClassUtil.getClassName(cls.getName()));
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
         if (StringUtil.hasLength(method) && !HessianHandle.NAME.equalsIgnoreCase(exeType)) {
-            this.method = TXWebUtil.getExeMethod(this, method);
+            this.method = TXWebUtil.getExeMethod(this,cls, method);
         }
         //添加模版为空的时候能执行方法
         if (this.method ==null)
         {
             String actionName = getActionName();
-            HttpMethod httpMethod = action.getClass().getAnnotation(HttpMethod.class);
+            HttpMethod httpMethod = cls.getAnnotation(HttpMethod.class);
             if (httpMethod!=null&&StringUtil.ASTERISK.equals(httpMethod.actionName())&&ActionHandle.NAME.equalsIgnoreCase(exeType)&&ValidUtil.isGoodName(actionName,1,30))
             {
-                Method methodTmp = TXWebUtil.getExeMethod(this, actionName);
+                Method methodTmp = TXWebUtil.getExeMethod(this,cls, actionName);
                 if (methodTmp!=null&&methodTmp.getGenericReturnType().equals(Void.TYPE))
                 {
                     this.method  = methodTmp;

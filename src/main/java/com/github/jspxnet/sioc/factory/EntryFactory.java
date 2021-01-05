@@ -127,6 +127,11 @@ public final class EntryFactory implements BeanFactory {
 
         Object result = null;
         Class<?> cla = ClassUtil.loadClass(lifecycleObject.getClassName());
+        if (lifecycleObject.getClassName().contains("MenuItemAction"))
+        {
+            System.out.println("-----------cla=" + cla);
+        }
+
         if (Sioc.KEY_RPC_CLIENT.equalsIgnoreCase(lifecycleObject.getCreate())) {
             RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
             if (rpcClient == null) {

@@ -55,7 +55,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -712,7 +711,7 @@ public class TXWebUtil {
      * @param method      方法名称
      * @return 返回方法
      */
-    static public Method getExeMethod(ActionProxy actionProxy, String method) {
+    static public Method getExeMethod(ActionProxy actionProxy,Class<?> cls, String method) {
         if (actionProxy == null) {
             return null;
         }
@@ -728,7 +727,6 @@ public class TXWebUtil {
         //method 有可能是action名称，而这个方法是使用路径方式
         //默认能直接得到的
         Method exeMethod = null;
-
         if (method.startsWith(TXWebUtil.AT) && method.length() > 1) {
             try {
                 method = action.getString(method.substring(1), true);
@@ -766,7 +764,7 @@ public class TXWebUtil {
         //配置了Operate
 
         //这里只用判断存在于方法命名空间之后就可以了
-        Map<Operate, Method> operateMap = getClassOperateList(action.getClass());
+        Map<Operate, Method> operateMap = getClassOperateList(cls);
         for (Operate operate : operateMap.keySet()) {
             //处理通配符情况
             if (TXWebUtil.AT.equals(operate.method())) {
@@ -809,7 +807,7 @@ public class TXWebUtil {
         //这里要添加路径方式
         //先判断映射，在判断方法
         if (exeMethod == null) {
-            final Class<?> actionClass = action.getClass();
+            final Class<?> actionClass = cls;
             Method[] methodList = ClassUtil.getDeclaredMethodList(actionClass, method);
 
 
@@ -843,6 +841,17 @@ public class TXWebUtil {
                     }
                 }
             }
+            if (exeMethod == null && methodList != null && ClassUtil.isProxy(action.getClass())) {
+                for (Method met : methodList) {
+                    if (met.getName().equals(method))
+                    {
+                        exeMethod = met;
+                        break;
+                    }
+                }
+            }
+
+            /*
             if (exeMethod == null && methodList != null) {
                 //找不到就是用带 Param 注释的
                 for (Method met : methodList) {
@@ -856,8 +865,9 @@ public class TXWebUtil {
                         }
                     }
                 }
-            }
+            }*/
         }
+
         return exeMethod;
     }
 

@@ -57,6 +57,14 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] arg,MethodProxy proxy) throws Throwable {
+        if ("toString".equals(method.getName()))
+        {
+            return targetClass.toString();
+        }
+        if ("getClass".equals(method.getName()))
+        {
+            return targetClass;
+        }
         Method exeMethod = targetClass.getMethod(method.getName(),method.getParameterTypes());
         Transaction transaction = exeMethod.getAnnotation(Transaction.class);
         Object result;
