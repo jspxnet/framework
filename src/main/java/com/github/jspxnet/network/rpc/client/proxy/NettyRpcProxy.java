@@ -14,6 +14,10 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 public class NettyRpcProxy {
+    private NettyRpcProxy()
+    {
+
+    }
 
 
     static  public <T>T create(Class<T>  target,String url, String serviceName)

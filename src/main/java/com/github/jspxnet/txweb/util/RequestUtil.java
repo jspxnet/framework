@@ -17,12 +17,10 @@ import com.github.jspxnet.sioc.annotation.RpcClient;
 import com.github.jspxnet.sioc.rpc.RpcClientProxy;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
-import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -912,14 +910,6 @@ public class RequestUtil {
         return false;
     }
 
-/*    static public boolean checkBrowser(String agent, String browser) {
-        if (!StringUtil.hasLength(agent)) {
-            return false;
-        }
-        String agentCheck = agent.trim().toLowerCase();
-        return agentCheck.contains(browser);
-    }*/
-
 
     static public String getNetType(HttpServletRequest request) {
         String agent = request.getHeader(requestUserAgent);
@@ -1010,7 +1000,7 @@ public class RequestUtil {
         }
         if (request instanceof  Map)
         {
-            return (String)((Map)request).get(HEADER + StringUtil.DOT + key);
+            return (String)((Map)request).get((HEADER + StringUtil.DOT + key).toLowerCase());
         }
         String value = request.getHeader(key);
         if (value == null) {
@@ -1045,7 +1035,7 @@ public class RequestUtil {
      * @return 得到Map方式的参数表
      */
     public static StringMap<String, String> getSignSortMap(HttpServletRequest request) {
-        StringMap valueMap = new StringMap();
+        StringMap<String,String> valueMap = new StringMap<>();
         valueMap.setKeySplit(StringUtil.EQUAL);
         valueMap.setLineSplit(StringUtil.CRLF);
         Enumeration<String> env = request.getParameterNames();
@@ -1109,11 +1099,15 @@ public class RequestUtil {
         resultMap.put(HEADER+".remoteaddr",request.getRemoteAddr());
         resultMap.put(HEADER+".remotehost",request.getRemoteHost());
         resultMap.put(SESSION+".id",request.getSession().getId());
-        resultMap.put(SESSION+"."+TXWeb.token,token);
         return resultMap;
     }
 
 
+    /**
+     *
+     * @param o rpc 调用放入token信息
+     * @throws Exception 异常
+     */
     public static void initRpcRequest(Object o) throws Exception {
         if (o == null) {
             return;
@@ -1142,9 +1136,7 @@ public class RequestUtil {
                     ActionSupport action = (ActionSupport)o;
                     rpcClientProxy.setRequest(action.getRequest());
                     rpcClientProxy.setResponse(action.getResponse());
-                    log.debug("--------RpcClientProxy--------rpcClient obj=" + obj + action.getRequest());
                 }
-
             }
         }
 
