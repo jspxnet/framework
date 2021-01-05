@@ -139,7 +139,6 @@ public class DefaultActionInvocation implements ActionInvocation {
         }
         /////////创建bean对象 end
 
-
         //设置请求参数 begin
         action.setRequest(request);
         action.setResponse(response);

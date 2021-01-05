@@ -945,10 +945,10 @@ public class TXWebUtil {
      * @throws Exception 异常
      */
     public static boolean checkOperate(Action action, Method exeMethod) throws Exception {
-        //验证 begin
+         //验证 begin
         Operate operate = exeMethod.getAnnotation(Operate.class);
         if (operate == null) {
-            log.debug("action:{},exeMethod:{}", action, exeMethod);
+            log.debug("action:{},exeMethod:{}", action.getClass(), exeMethod);
             throw new Exception("不允许执行的操作," + exeMethod.getName());
         }
         //没有Operate标记的不允许对外访问

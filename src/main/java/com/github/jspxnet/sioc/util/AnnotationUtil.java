@@ -133,10 +133,6 @@ public final class AnnotationUtil {
         {
             return false;
         }
-        if (cls.getAnnotation(RpcClient.class)!=null)
-        {
-            return true;
-        }
         for (Method method:cls.getDeclaredMethods())
         {
             if (method.getAnnotation(Transaction.class)!=null)

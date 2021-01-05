@@ -513,7 +513,7 @@ public abstract class JdbcOperations implements SoberSupport {
         if (useCache) {
             cacheKey = SoberUtil.getLoadKey(aClass, field, serializable, loadChild);
             result = (T) JSCacheManager.get(aClass, cacheKey);
-            if (!ObjectUtil.isEmpty(result)) {
+            if (!ObjectUtil.isEmpty(result) && aClass.equals(result.getClass())) {
                 return result;
             }
         }
