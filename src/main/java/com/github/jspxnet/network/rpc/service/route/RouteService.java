@@ -95,7 +95,7 @@ public class RouteService extends Thread implements Runnable {
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
                 Thread.sleep(DateUtil.SECOND);
                 MasterSocketAddress.getInstance().flushAddress();
-                log.debug("当前路由表-----------------\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
+                //log.debug("当前路由表-----------------\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
             }
         } catch (Throwable e) {
             e.printStackTrace();
