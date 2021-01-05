@@ -252,6 +252,8 @@ public class JspxCoreListener implements ServletContextListener {
         }
         //rpc服务器,提供外部rpctcp调用 end
 
+
+
         log.info("-" + copyright + " start completed " + (isAndroid ? "for Android" : " J2SDK"));
         isRun = true;
 
