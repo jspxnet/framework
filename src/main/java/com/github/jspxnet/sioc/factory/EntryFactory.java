@@ -13,18 +13,17 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
-import com.github.jspxnet.network.rpc.client.proxy.NettyRpcProxy;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.annotation.*;
 import com.github.jspxnet.sioc.interceptor.GlobalMethodInterceptor;
+import com.github.jspxnet.sioc.rpc.RpcClientProxy;
+import com.github.jspxnet.sioc.rpc.RpcClientProxyFactory;
 import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.sioc.util.Empty;
-import com.github.jspxnet.txweb.enums.RpcProtocolEnumType;
-import com.github.jspxnet.txweb.service.HessianClient;
-import com.github.jspxnet.txweb.service.client.HessianClientFactory;
+import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,6 @@ import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.util.TypeUtil;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -126,6 +124,7 @@ public final class EntryFactory implements BeanFactory {
         if (lifecycleObject.isSingleton() && lifecycleObject.getObject() != null) {
             return lifecycleObject.getObject();
         }
+
         Object result = null;
         Class<?> cla = ClassUtil.loadClass(lifecycleObject.getClassName());
         if (Sioc.KEY_RPC_CLIENT.equalsIgnoreCase(lifecycleObject.getCreate())) {
@@ -134,7 +133,8 @@ public final class EntryFactory implements BeanFactory {
                 throw new Exception(lifecycleObject.getClassName() + "没有定义@RpcClient");
             }
             Class<?> classObj = rpcClient.bind().equals(Empty.class) ? cla : rpcClient.bind();
-            if (RpcProtocolEnumType.TCP.equals(rpcClient.protocol())) {
+            return RpcClientProxyFactory.createRpcClientProxy(classObj);
+           /* if (RpcProtocolEnumType.TCP.equals(rpcClient.protocol())) {
                 result = NettyRpcProxy.create(classObj, rpcClient.url(), rpcClient.groupName());
             }
             if (RpcProtocolEnumType.HTTP.equals(rpcClient.protocol())) {
@@ -158,7 +158,7 @@ public final class EntryFactory implements BeanFactory {
                     }
                 }
                 result = hessianClient.getInterface(classObj, hessianUrl);
-            }
+            }*/
         } else {
             result = ClassUtil.newInstance(lifecycleObject.getClassName());
             if (AnnotationUtil.hasProxyMethod(cla)) {
@@ -243,11 +243,10 @@ public final class EntryFactory implements BeanFactory {
         AnnotationUtil.invokeInit(result);
 
         ////////代理创建对象 begin
-        if (!StringUtil.isNull(lifecycleObject.getCreate()) && !Sioc.KEY_RPC_CLIENT.equalsIgnoreCase(lifecycleObject.getCreate())) {
+        if (!StringUtil.isNull(lifecycleObject.getCreate())) {
             result = BeanUtil.getProperty(result, lifecycleObject.getCreate());
         }
         ////////代理创建对象 end
-
         return result;
     }
 
@@ -262,7 +261,8 @@ public final class EntryFactory implements BeanFactory {
         if (o == null) {
             return null;
         }
-        String[] setRefField = null;
+
+       String[] setRefField = null;
         // Ref 支持字段方式，和设置方法两种
         Field[] fields = ClassUtil.getDeclaredFields(superclass);
         if (fields != null) {
@@ -288,6 +288,7 @@ public final class EntryFactory implements BeanFactory {
                 }
                 String mNamespace = (StringUtil.isNull(ref.namespace()) || Sioc.global.equalsIgnoreCase(ref.namespace())) ? namespace : ref.namespace();
                 Object obj = getBean(beanId, mNamespace);
+
 
                 if (ref.test()) {
                     if (!containsBean(beanId, mNamespace)) {

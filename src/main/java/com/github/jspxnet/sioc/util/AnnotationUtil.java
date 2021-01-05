@@ -1,10 +1,7 @@
 package com.github.jspxnet.sioc.util;
 
 import com.github.jspxnet.security.utils.EncryptUtil;
-import com.github.jspxnet.sioc.annotation.Bean;
-import com.github.jspxnet.sioc.annotation.Destroy;
-import com.github.jspxnet.sioc.annotation.Init;
-import com.github.jspxnet.sioc.annotation.Scheduled;
+import com.github.jspxnet.sioc.annotation.*;
 import com.github.jspxnet.sioc.scheduler.TaskProxy;
 import com.github.jspxnet.sober.annotation.SqlMap;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
@@ -34,8 +31,9 @@ public final class AnnotationUtil {
         Method[] methods = ClassUtil.getDeclaredMethods(bean.getClass());
         for (Method method : methods) {
             Init init = method.getAnnotation(Init.class);
-            if (init != null) {
-                BeanUtil.invoke(bean, method.getName());
+            if (init != null && method.getParameterTypes().length==0) {
+                method.setAccessible(true);
+                method.invoke(bean);
             }
         }
     }
@@ -135,6 +133,10 @@ public final class AnnotationUtil {
         {
             return false;
         }
+        if (cls.getAnnotation(RpcClient.class)!=null)
+        {
+            return true;
+        }
         for (Method method:cls.getDeclaredMethods())
         {
             if (method.getAnnotation(Transaction.class)!=null)
@@ -145,6 +147,7 @@ public final class AnnotationUtil {
             {
                 return true;
             }
+
         }
         return false;
     }

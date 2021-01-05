@@ -276,7 +276,7 @@ public class JspxDataSource extends DriverManagerDataSource implements Runnable 
         try {
             ConnectionProxy connectionProxy = (ConnectionProxy) Proxy.newProxyInstance(ConnectionProxy.class.getClassLoader(),
                     new Class[]{ConnectionProxy.class}, new ConnectionInvocationHandler(getConnectionFromDriverManager()));
-            connectionProxy.setCheckSQL(checkSql);
+            connectionProxy.setCheckSql(checkSql);
             connectionProxy.setMaxConnectionTime(maxConnectionTime);
             return connectionProxy;
         } catch (SQLException e) {

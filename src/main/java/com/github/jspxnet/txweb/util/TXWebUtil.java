@@ -552,27 +552,33 @@ public class TXWebUtil {
 
         //ROC roc Json 根据指定调用返回
         Object[] paramObj = null;
-        JSONObject methodJson = callJson.getJSONObject(Environment.rocMethod);
         Object rocParams = null;
-        if (methodJson!=null&&methodJson.containsKey(Environment.rocParams))
+        if (ParamUtil.isRocRequest(callJson))
         {
-            rocParams = methodJson.get(Environment.rocParams);
-        } else
-        {
-            rocParams = callJson.get(Environment.rocParams);
-        }
-        if (methodJson != null &&  (rocParams instanceof JSONObject)) {
-            //参数有三种方式  1:采用数组方式对于进入 2:采用方面名称对应json参数名称
-            //3.路径名称作为参数
-            //采用数组方式对于进入
-            //自动前后
-            JSONObject paramsJson = (JSONObject)rocParams;
-            paramObj = ParamUtil.getMethodParameter(action, exeMethod, paramsJson);
+            JSONObject methodJson = callJson.getJSONObject(Environment.rocMethod);
+            if (methodJson!=null&&methodJson.containsKey(Environment.rocParams))
+            {
+                rocParams = methodJson.get(Environment.rocParams);
+            } else
+            {
+                rocParams = callJson.get(Environment.rocParams);
+            }
+            if (methodJson != null &&  (rocParams instanceof JSONObject)) {
+                //参数有三种方式  1:采用数组方式对于进入 2:采用方面名称对应json参数名称
+                //3.路径名称作为参数
+                //采用数组方式对于进入
+                //自动前后
+                JSONObject paramsJson = (JSONObject)rocParams;
+                paramObj = ParamUtil.getMethodParameter(action, exeMethod, paramsJson);
 
-        }  else if (rocParams instanceof JSONArray) {
-            //采用数组方式对于进入
-            JSONArray paramsArray = (JSONArray)rocParams;
-            paramObj = ParamUtil.getMethodParameter(action, exeMethod, paramsArray);
+            }  else if (rocParams instanceof JSONArray) {
+                //采用数组方式对于进入
+                JSONArray paramsArray = (JSONArray)rocParams;
+
+                paramObj = ParamUtil.getMethodParameter(action, exeMethod, paramsArray);
+            }
+        } else {
+            paramObj = ParamUtil.getMethodParameter(action, exeMethod, callJson);
         }
 
         //路径方式载入参数

@@ -52,7 +52,7 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public String getHeader(String s) {
-        Object value = super.get(RequestUtil.HEADER+"."+s.toLowerCase());
+        Object value = super.get(RequestUtil.HEADER + "."+s.toLowerCase());
         if (value==null)
         {
             return null;

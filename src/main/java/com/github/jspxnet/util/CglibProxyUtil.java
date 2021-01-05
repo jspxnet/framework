@@ -27,23 +27,7 @@ public class CglibProxyUtil {
         return (T) Enhancer.create(cls, callback);
     }
 
-    /**
-     *
-     * @param type 对象的类型
-     * @return 判断是否为代理对象
-     */
-    public static boolean isProxy(Class<?> type) {
-        if (type == null) {
-            return false;
-        }
-        try {
-            return type.getName().contains("CGLIB$$") || Enhancer.isEnhanced(type);
-        } catch (Exception e)
-        {
-            log.info(type.getName(),e);
-        }
-        return false;
-    }
+
 
     /**
      *
@@ -52,21 +36,12 @@ public class CglibProxyUtil {
      */
     public static String getClassName(Object object)
     {
-        if (isProxy(object.getClass()))
+        if (ClassUtil.isProxy(object.getClass()))
         {
             return StringUtil.substringBefore(object.getClass().getName(),"$$");
         }
 
         return object.getClass().getName();
-    }
-
-    public static String getClassName(Class<?> cls)
-    {
-        if (isProxy(cls))
-        {
-            return StringUtil.substringBefore(cls.getName(),"$$");
-        }
-        return cls.getName();
     }
 
 
@@ -77,13 +52,9 @@ public class CglibProxyUtil {
      */
     public static Class<?> getClass(Class<?> cls)
     {
-        if (isProxy(cls))
+        if (ClassUtil.isProxy(cls))
         {
             String className = getClassName(cls);
-            if ("net.sf.cglib.empty.Object".equals(className))
-            {
-                return null;
-            }
             if (!StringUtil.isNull(className))
             {
                 try {

@@ -1,5 +1,6 @@
 package com.github.jspxnet.network.rpc.client.proxy;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClientPool;
 import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
@@ -17,8 +18,8 @@ import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
-
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.SocketAddress;
 
 /**
@@ -76,16 +77,24 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         //封装ClassInfo
         SendCmd command = SendCommandFactory.createCommand(INetCommand.RPC);
         command.setType(INetCommand.TYPE_BASE64);
+
+        JSONObject parameterJson = new JSONObject();
+        int i=0;
+        Parameter[] parameters = method.getParameters();
+        for (Parameter parameter:parameters)
+        {
+            if (i<args.length)
+            {
+                parameterJson.put(parameter.getName(),args[i]);
+            }
+            i++;
+        }
         IocRequest iocRequest = new IocRequest();
         iocRequest.setMethodName(method.getName());
-        iocRequest.setParameters(args);
-        iocRequest.setParameterTypes(method.getParameterTypes());
+        iocRequest.setParameters(parameterJson.toString());
         iocRequest.setRequest(request);
         iocRequest.setResponse(response);
         iocRequest.setUrl(url);
-
-        log.debug("iocRequest={}",ObjectUtil.toString(iocRequest));
-
         command.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(iocRequest)));
 
         if (StringUtil.isEmpty(serviceName))
@@ -109,6 +118,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             try {
                 iocResponse = ObjectUtil.getUnSerializable(EncryptUtil.getBase64Decode(reply.getData()));
             } catch (Throwable e) {
+                log.debug("iocRequest={},error:{}",ObjectUtil.toString(iocRequest),e.getMessage());
                 e.printStackTrace();
                 iocResponse = new IocResponse();
                 iocResponse.setError(e);

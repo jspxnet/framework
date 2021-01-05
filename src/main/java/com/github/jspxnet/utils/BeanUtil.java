@@ -80,7 +80,7 @@ public class BeanUtil {
         }
 
         Class<?> cls = object.getClass();
-        if (CglibProxyUtil.isProxy(cls))
+        if (ClassUtil.isProxy(cls))
         {
             String className = CglibProxyUtil.getClassName(cls);
             try {
@@ -420,7 +420,7 @@ public class BeanUtil {
             Map map = (Map) object;
             return map.get(name);
         }
-        if (CglibProxyUtil.isProxy(object.getClass())&&parameter==null)
+        if (ClassUtil.isProxy(object.getClass())&&parameter==null)
         {
             BeanMap beanMap = BeanMap.create(object);
             return beanMap.get(name);
@@ -504,7 +504,7 @@ public class BeanUtil {
             return getTypeValue(map.get(name),cls);
 
         }
-        if (CglibProxyUtil.isProxy(object.getClass()))
+        if (ClassUtil.isProxy(object.getClass()))
         {
             BeanMap beanMap = BeanMap.create(object);
 
@@ -674,7 +674,7 @@ public class BeanUtil {
             getData = ((JSONObject) getData).toMap();
         }
 
-        if (CglibProxyUtil.isProxy(getData.getClass())) {
+        if (ClassUtil.isProxy(getData.getClass())) {
             getData = ReflectUtil.getValueMap(getData);
         }
         if (getData instanceof Map) {

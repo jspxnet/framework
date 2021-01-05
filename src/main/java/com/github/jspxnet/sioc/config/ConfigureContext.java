@@ -225,7 +225,7 @@ public class ConfigureContext implements IocContext {
             }
             BeanModel beanModel = new BeanModel();
             beanModel.setId(cla.getName());
-            beanModel.setSingleton(true);
+            beanModel.setSingleton(false);
             beanModel.setNamespace(iocBean.namespace());
             beanModel.setClassName(cla.getName());
             beanModel.setCreate(Sioc.KEY_RPC_CLIENT);

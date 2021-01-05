@@ -36,7 +36,7 @@ public class ConnectionInvocationHandler implements InvocationHandler {
     private final static String methodHashCode = "hashCode";
     private final static String methodRelease = "release";
     private final static String methodIsClosed = "isClosed";
-    private final static String methodSetCheckSQL = "setCheckSQL";
+    private final static String methodSetCheckSql = "setCheckSql";
     private final static String methodSetMaxConnectionTime = "setMaxConnectionTime";
     private final static String methodIsOvertime = "isOvertime"; //超出最大链接时间2倍就强制关闭
 
@@ -80,7 +80,7 @@ public class ConnectionInvocationHandler implements InvocationHandler {
             return true;
         }
         //--------------------------------------------------------------------------------------------------------------
-        if (methodSetCheckSQL.equals(method.getName())) {
+        if (methodSetCheckSql.equals(method.getName())) {
             checkSql = (String) args[0];
             return null;
         }

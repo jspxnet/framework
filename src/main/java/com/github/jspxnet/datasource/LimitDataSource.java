@@ -193,7 +193,7 @@ public class LimitDataSource extends DriverManagerDataSource {
         try {
             com.github.jspxnet.datasource.ConnectionProxy connectionProxy = (com.github.jspxnet.datasource.ConnectionProxy) Proxy.newProxyInstance(com.github.jspxnet.datasource.ConnectionProxy.class.getClassLoader(),
                     new Class[]{ConnectionProxy.class}, new ConnectionInvocationHandler(getConnectionFromDriverManager()));
-            connectionProxy.setCheckSQL(checkSql);
+            connectionProxy.setCheckSql(checkSql);
             connectionProxy.setMaxConnectionTime(maxConnectionTime);
             return connectionProxy;
         } catch (SQLException e) {

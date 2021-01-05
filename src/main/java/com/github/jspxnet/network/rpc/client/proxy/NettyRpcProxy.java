@@ -15,16 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NettyRpcProxy {
 
-    static  public <T>T  create(Class<T> target)
-    {
-        return create(target,null,null,null, null);
-    }
 
-    static  public <T>T create(Class<T> target, String url,String serviceName )
+    static  public <T>T create(Class<T>  target,String url, String serviceName)
     {
         return create(target,url,null,null,serviceName);
     }
-    static  public <T>T create(Class<T> target, String url, RequestTo requestTo, ResponseTo responseTo)
+    static  public <T>T create(Class<T>  target,String url, RequestTo requestTo, ResponseTo responseTo)
     {
         return create(target,url,requestTo,responseTo,null);
     }

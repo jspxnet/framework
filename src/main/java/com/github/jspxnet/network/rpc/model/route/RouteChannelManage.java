@@ -152,7 +152,7 @@ public class RouteChannelManage {
         if (routeSession!=null)
         {
             routeSession.setHeartbeatTimes(routeSession.getHeartbeatTimes()+1);
-            if (routeSession.getHeartbeatTimes()>2)
+            if (routeSession.getHeartbeatTimes()>3)
             {
                 routeSession.setOnline(YesNoEnumType.NO.getValue());
             }
@@ -169,7 +169,7 @@ public class RouteChannelManage {
         {
             SocketAddress key=keys.nextElement();
             RouteSession routeSession = routeSocketMap.get(key);
-            if (YesNoEnumType.NO.getValue()==routeSession.getOnline()&&routeSession.getHeartbeatTimes()>2)
+            if (YesNoEnumType.NO.getValue()==routeSession.getOnline()&&routeSession.getHeartbeatTimes()>3)
             {
                 log.debug("路由表清除下线服务器:{}",IpUtil.getIp(routeSession.getSocketAddress()));
                 routeSocketMap.remove(key);
@@ -180,5 +180,4 @@ public class RouteChannelManage {
             initConfigRoute();
         }
     }
-
 }

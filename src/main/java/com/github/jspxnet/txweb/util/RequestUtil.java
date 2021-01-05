@@ -12,9 +12,13 @@ package com.github.jspxnet.txweb.util;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.sioc.annotation.RpcClient;
+import com.github.jspxnet.sioc.rpc.RpcClientProxy;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.env.TXWeb;
+import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -962,8 +964,12 @@ public class RequestUtil {
         if (StringUtil.isNull(clientIp) || "unknown".equalsIgnoreCase(clientIp)) {
             clientIp = request.getRemoteAddr();
         }
-        if (clientIp.contains(",")) {
+        if (clientIp!=null&&clientIp.contains(",")) {
             clientIp = StringUtil.substringBefore(clientIp, ",");
+        }
+        if (clientIp==null)
+        {
+            return "127.0.0.1";
         }
         return clientIp;
     }
@@ -1004,7 +1010,7 @@ public class RequestUtil {
         }
         if (request instanceof  Map)
         {
-            return (String)((Map)request).get(key);
+            return (String)((Map)request).get(HEADER + StringUtil.DOT + key);
         }
         String value = request.getHeader(key);
         if (value == null) {
@@ -1097,7 +1103,6 @@ public class RequestUtil {
         //header 中key 全部小写
         String token = getToken(request);
         resultMap.put(HEADER+".authorization", token);
-
         resultMap.put(HEADER+".contentlength",request.getContentLength());
         resultMap.put(HEADER+".contenttype",request.getContentType());
         resultMap.put(HEADER+".protocol",request.getProtocol());
@@ -1107,4 +1112,42 @@ public class RequestUtil {
         resultMap.put(SESSION+"."+TXWeb.token,token);
         return resultMap;
     }
+
+
+    public static void initRpcRequest(Object o) throws Exception {
+        if (o == null) {
+            return;
+        }
+        // Ref 支持字段方式，和设置方法两种
+        Field[] fields = ClassUtil.getDeclaredFields(o.getClass());
+        if (fields != null) {
+            for (Field field : fields) {
+                if (Modifier.isFinal(field.getModifiers()))
+                {
+                    continue;
+                }
+                Ref ref = field.getAnnotation(Ref.class);
+                if (ref == null) {
+                    continue;
+                }
+                if (field.getType().getAnnotation(RpcClient.class)==null)
+                {
+                    continue;
+                }
+                field.setAccessible(true);
+                Object obj = field.get(o);
+                if (obj instanceof RpcClientProxy && o instanceof ActionSupport)
+                {
+                    RpcClientProxy rpcClientProxy = (RpcClientProxy)obj;
+                    ActionSupport action = (ActionSupport)o;
+                    rpcClientProxy.setRequest(action.getRequest());
+                    rpcClientProxy.setResponse(action.getResponse());
+                    log.debug("--------RpcClientProxy--------rpcClient obj=" + obj + action.getRequest());
+                }
+
+            }
+        }
+
+    }
+
 }

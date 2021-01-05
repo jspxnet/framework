@@ -128,8 +128,9 @@ public class RpcCmd extends INetCommand {
         json.put(Environment.rocFormat, WebOutEnumType.JSON.getName());
         JSONObject methodJson = new JSONObject();
         methodJson.put(Environment.rocName, iocRequest.getMethodName());
-        methodJson.put(Environment.rocParams, new JSONArray(iocRequest.getParameters()));
+        methodJson.put(Environment.rocParams, new JSONObject(iocRequest.getParameters()));
         json.put(Environment.rocMethod, methodJson);
+
         IocResponse response = new IocResponse();
         try {
             ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, TXWebUtil.createEnvironment(), "roc", json, new RequestTo((Map) iocRequest.getRequest()), new ResponseTo((Map) iocRequest.getResponse()));

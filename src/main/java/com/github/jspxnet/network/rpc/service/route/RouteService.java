@@ -45,7 +45,6 @@ public class RouteService extends Thread implements Runnable {
         for (String name:nameList)
         {
             List<SocketAddress> defaultSocketAddressList = masterSocketAddress.getDefaultSocketAddressList(name);
-
             for (SocketAddress socketAddress : defaultSocketAddressList)
             {
                 RouteSession routeSession = new RouteSession();
@@ -77,7 +76,6 @@ public class RouteService extends Thread implements Runnable {
                 }
             }
         }
-
         //初始化数据 end
     }
 
@@ -100,7 +98,6 @@ public class RouteService extends Thread implements Runnable {
         } catch (Throwable e) {
             e.printStackTrace();
         }
-
         NETTY_CLIENT.shutdown();
 
     }

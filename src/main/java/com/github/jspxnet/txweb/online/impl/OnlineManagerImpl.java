@@ -597,7 +597,7 @@ public class OnlineManagerImpl implements OnlineManager {
 
         HttpServletRequest request = action.getRequest();
         //外挂接收登陆信息有一定风险性
-        if (request != null && allowServerName != null && !StringUtil.ASTERISK.equals(allowServerName)) {
+        if (!ObjectUtil.isEmpty(request) && allowServerName != null && !StringUtil.ASTERISK.equals(allowServerName)) {
             if (!request.getServerName().matches(allowServerName)) {
                 UserSession userSession = createGuestUserSession();
                 userSession.setIp(RequestUtil.getRemoteAddr(request));

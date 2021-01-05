@@ -11,14 +11,11 @@ package com.github.jspxnet.txweb.support;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.HttpStatusType;
+import com.github.jspxnet.txweb.*;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.txweb.Action;
-import com.github.jspxnet.txweb.IRole;
-import com.github.jspxnet.txweb.IUserSession;
-import com.github.jspxnet.txweb.Option;
 import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
@@ -65,7 +62,11 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public void initialize() {
-
+        try {
+            RequestUtil.initRpcRequest(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -212,6 +213,7 @@ public abstract class ActionSupport implements Action {
     @Override
     public UserSession getUserSession() {
         //调整到cahce里边保存，不保存在session里边了，session里边只保存关联ID
+        AssertException.isNull(onlineManager,"配置不完整,onlineManager在容器中没有找到");
         return onlineManager.getUserSession(this);
     }
 

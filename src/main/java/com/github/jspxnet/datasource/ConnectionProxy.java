@@ -20,7 +20,7 @@ import java.io.Serializable;
  */
 public interface ConnectionProxy extends Connection, Serializable {
     //采用那条sql 检查 链接
-    void setCheckSQL(String testSql);
+    void setCheckSql(String testSql);
 
     //最大链接保留时间
     void setMaxConnectionTime(int maxConnectionTime);

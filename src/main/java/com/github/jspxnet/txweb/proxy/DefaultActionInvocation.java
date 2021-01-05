@@ -146,6 +146,9 @@ public class DefaultActionInvocation implements ActionInvocation {
         //设置请求参数 end
 
 
+
+
+
         //////////////载入配置参数 begin
         Placeholder placeholder = EnvFactory.getPlaceholder();
         Map<String, Object> paraMap = actionConfig.getParam();
@@ -178,7 +181,6 @@ public class DefaultActionInvocation implements ActionInvocation {
 
         //放入action
         actionProxy.setAction(action);
-
         //设置执行方法 begin
         //这里可能会存在安全问题
 

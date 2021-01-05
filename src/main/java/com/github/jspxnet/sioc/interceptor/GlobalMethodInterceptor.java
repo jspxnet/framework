@@ -59,8 +59,8 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
     public Object intercept(Object obj, Method method, Object[] arg,MethodProxy proxy) throws Throwable {
         Method exeMethod = targetClass.getMethod(method.getName(),method.getParameterTypes());
         Transaction transaction = exeMethod.getAnnotation(Transaction.class);
-        SqlMap sqlMap = exeMethod.getAnnotation(SqlMap.class);
         Object result;
+        SqlMap sqlMap = exeMethod.getAnnotation(SqlMap.class);
         com.github.jspxnet.sober.Transaction invokeTransaction = null;
         if (transaction!=null)
         {

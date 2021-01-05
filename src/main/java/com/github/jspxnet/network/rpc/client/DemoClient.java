@@ -15,17 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DemoClient {
 
-    static void testPools()
-    {
-        long startTimes = System.currentTimeMillis();
-        for (int i=1;i<Integer.MAX_VALUE;i++)
-        {
-            HelloService helloService = NettyRpcProxy.create(HelloService.class);
-            System.out.println(helloService.hello("call " +i));
-        }
-        System.out.println("testPools-------------:" + (System.currentTimeMillis()-startTimes));
-
-    }
 
     static void testClient()
     {
@@ -39,7 +28,7 @@ public class DemoClient {
 
     public static void main(String[] args) throws Exception {
         JspxNetApplication.autoRun();
-        testPools();
+
 
 /*
         List<InetSocketAddress> inetSocketAddress = MasterSocketAddress.getInstance().getDefaultSocketAddressList();

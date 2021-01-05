@@ -17,6 +17,8 @@ import com.github.jspxnet.txweb.interceptor.InterceptorSupport;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.CglibProxyUtil;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.cglib.proxy.Enhancer;
+
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -992,11 +994,36 @@ public class ClassUtil {
      */
     public static String getClassName(String className)
     {
-        if (className.contains("$$EnhancerByCGLIB$$"))
+        if ("net.sf.cglib.empty.Object".equals(className))
         {
-            return StringUtil.substringBefore(className,"$$EnhancerByCGLIB$$");
+            return null;
+        }
+        if (className.contains("$$"))
+        {
+            return StringUtil.substringBefore(className,"$$");
         }
         return className;
+    }
+
+
+
+    /**
+     *
+     * @param type 对象的类型
+     * @return 判断是否为代理对象
+     */
+    public static boolean isProxy(Class<?> type) {
+
+        if (type == null) {
+            return false;
+        }
+        try {
+            return type.getName().contains("CGLIB$$") || Enhancer.isEnhanced(type);
+        } catch (Exception e)
+        {
+            log.info(type.getName(),e);
+        }
+        return false;
     }
 
 }

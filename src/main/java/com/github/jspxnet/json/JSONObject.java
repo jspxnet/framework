@@ -3,7 +3,6 @@ package com.github.jspxnet.json;
 
 import com.alibaba.fastjson.JSON;
 import com.github.jspxnet.security.utils.EncryptUtil;
-import com.github.jspxnet.util.CglibProxyUtil;
 import com.github.jspxnet.util.TypeReference;
 import com.github.jspxnet.utils.*;
 import com.google.gson.Gson;
@@ -296,7 +295,7 @@ public class JSONObject extends HashMap<String, Object> {
             return;
         }
 
-        if (CglibProxyUtil.isProxy(bean.getClass())) {
+        if (ClassUtil.isProxy(bean.getClass())) {
             bean = ReflectUtil.getValueMap(bean);
         }
 
@@ -1441,7 +1440,7 @@ public class JSONObject extends HashMap<String, Object> {
                 return (T)json.toMap();
             }
         }
-        if (StringUtil.isEmpty(className) || CglibProxyUtil.isProxy(clazz)) {
+        if (StringUtil.isEmpty(className) || ClassUtil.isProxy(clazz)) {
             //动态创建返回
             Map<String, Object> valueMap = json.toMap();
             return (T) ReflectUtil.createDynamicBean(valueMap);
