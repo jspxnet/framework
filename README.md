@@ -119,4 +119,4 @@
 *    2020年10月：Jspx.net Framework 6.23 添加SqlMap注释,支持查询,调整用户支持来源
 *    2020年11月：Jspx.net Framework 6.24-26 微调
 *    2020年12月：Jspx.net Framework 6.27 稳定版本,迁移出部分功能,修复bug,做了部分调整避免事务才坑
-*    2020年12月：Jspx.net Framework 6.30 分布式通讯支持完善,RpcClient标签,支持Http和TCP方式,TCP方式可以实现gossip整合集群
+*    2021年01月：Jspx.net Framework 6.30 分布式通讯支持完善,RpcClient标签,支持Http和TCP方式,TCP方式可以实现gossip整合集群
