@@ -25,7 +25,6 @@ import java.util.List;
  * author: chenYuan
  * date: 2021/1/5 12:37
  * description: Ecwid Consul 客户端,支持ssl证书
- *
  **/
 @Slf4j
 public class EcwidConsulServiceImpl implements ConsulService {
@@ -90,16 +89,6 @@ public class EcwidConsulServiceImpl implements ConsulService {
      */
     @Override
     public void register(NewService newService) {
-        // register new service
-        /*  NewService newService = new NewService();
-        newService.setId(serviceId);
-        newService.setName(serviceName);
-        newService.setTags(Arrays.asList("EU-West", "EU-East"));
-        newService.setPort(8080);
-        NewService.Check serviceCheck = new NewService.Check();
-        serviceCheck.setHttp("http://127.0.0.1:8080/health");
-        serviceCheck.setInterval("10s");
-        newService.setCheck(serviceCheck);*/
         client.agentServiceRegister(newService);
     }
 

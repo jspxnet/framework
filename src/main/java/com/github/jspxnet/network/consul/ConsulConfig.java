@@ -9,7 +9,7 @@ import java.io.Serializable;
  *
  * author: chenYuan
  * date: 2021/1/5 13:07
- * description: jspbox
+ * description: Consul配置
  **/
 @Data
 public class ConsulConfig implements Serializable {
@@ -32,6 +32,4 @@ public class ConsulConfig implements Serializable {
     private String keyStorePath;
     @Column(caption = "证书key容器密码")
     private String keyStorePassword;
-
-
 }

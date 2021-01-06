@@ -9,7 +9,7 @@ import java.util.List;
  *
  * author: chenYuan
  * date: 2021/1/5 12:37
- * description: jspbox
+ * description: Consul接口
  **/
 public interface ConsulService {
     /**
