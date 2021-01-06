@@ -105,7 +105,6 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
         }
         log.debug("异常并关闭,用户主动退出:" + channel.remoteAddress());
         cleanSession(ctx.channel());
-        RouteChannelManage.getInstance().routeOff(channel.remoteAddress());
         ctx.disconnect(ctx.newPromise());
         ctx.close();
     }
