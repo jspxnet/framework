@@ -30,9 +30,7 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx)  {
-//        log.debug("有连接上来 localAddress:{},remoteAddress:{}", ctx.channel().localAddress(), ctx.channel().remoteAddress());
         Channel channel = ctx.channel();
-
         ChannelSession channelSession = new ChannelSession();
         channelSession.setChannelId(channel.id());
         channelSession.setHeartbeatTimes(0);
@@ -146,7 +144,6 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
     }
 
     private void handleAllIdle(ChannelHandlerContext ctx) {
-        log.debug("---ALL_IDLE---主动发出心跳请求:" + ctx.channel().remoteAddress());
         //主动发出心跳请求
         ChannelSession netSession = sessionChannelManage.getSession(ctx.channel().id());
         if (netSession != null) {
