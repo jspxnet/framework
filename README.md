@@ -10,12 +10,10 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.27</version>
+    <version>6.30</version>
 </dependency>
 ```
 
-##6.x  
-    6.x 替代 sping cloud 构架
     
 ##参考手册
     http://www.jspx.net/help
@@ -75,11 +73,11 @@
    
 ##主要特点
 
-*    快速：配置灵魂,高可伸缩性
+*    快速：配置灵活,高可伸缩性
 *    开源：开放源代码，高质量，高品质
-*    底层：使用jdk1.8原生库，最小依赖第三方基础库。
+*    底层：使用jdk1.8原生库。
 *    扩展：基于插件的设计，所有功能都是插件，可根据需求增减功能,多应用可同服务.
-*    文档：文档自动生成API,运行时,不需要可以配置去掉
+*    文档：文档自动生成API.
 *    系统: 支持window，linux， unix等多种平台，支持32位,64位系统
 
 ##适合群体
@@ -124,3 +122,4 @@
 *    2020年10月：Jspx.net Framework 6.23 添加SqlMap注释,支持查询,调整用户支持来源
 *    2020年11月：Jspx.net Framework 6.24-26 微调
 *    2020年12月：Jspx.net Framework 6.27 稳定版本,迁移出部分功能,修复bug,做了部分调整避免事务才坑
+*    2020年12月：Jspx.net Framework 6.30 分布式通讯支持完善,RpcClient标签,支持Http和TCP方式,TCP方式可以实现gossip整合集群

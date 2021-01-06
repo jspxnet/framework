@@ -7,6 +7,7 @@ import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClient;
 import com.github.jspxnet.network.rpc.client.ReplyCmdFactory;
 import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
+import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
@@ -35,7 +36,8 @@ public class RouteService extends Thread implements Runnable {
 
     //第一次使用配置服务器地址,以后将切换到路由表
     private static final NettyClient NETTY_CLIENT = new NettyClient();
-
+    private static int configCount = 1;
+    private static long lastTimeMillis = System.currentTimeMillis();
     private void init() throws Exception {
 
         //初始化数据 begin
@@ -58,7 +60,7 @@ public class RouteService extends Thread implements Runnable {
 
         JSONObject json = new JSONObject();
         json.put(RouteChannelManage.KEY_ROUTE,routeSessionList);
-
+        configCount = routeSessionList.size();
         for (RouteSession routeSession:routeSessionList)
         {
             SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
@@ -81,7 +83,7 @@ public class RouteService extends Thread implements Runnable {
 
     @Override
     public void run() {
-        long lastTimeMillis = System.currentTimeMillis();
+
         try {
             init();
             Thread.sleep(DateUtil.SECOND);
@@ -149,9 +151,10 @@ public class RouteService extends Thread implements Runnable {
                 }
 
                 //如果路由表里边只有自己,配置里边还有其他的,要让其他的注册过来
-                if (ROUTE_CHANNEL_MANAGE.getRouteSessionList().size()<=1)
+                if (ROUTE_CHANNEL_MANAGE.getRouteSessionList().size()<=configCount && System.currentTimeMillis()-lastTimeMillis>DateUtil.MINUTE)
                 {
                     init();
+                    lastTimeMillis = System.currentTimeMillis();
                 }
                 //把路由表自己保管起来
             } catch (Exception e) {
