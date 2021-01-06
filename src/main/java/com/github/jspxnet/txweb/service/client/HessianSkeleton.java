@@ -231,7 +231,7 @@ public class HessianSkeleton extends AbstractSkeleton {
         }
 
 
-        Method exeMethod = ClassUtil.getDeclaredMethod(CglibProxyUtil.getClass(service.getClass()), method.getName(), argLength);
+        Method exeMethod = ClassUtil.getDeclaredMethod(ClassUtil.getClass(service.getClass()), method.getName(), argLength);
         if (exeMethod == null) {
             log.error("hessian not find method " + method.getName() + " argLength=" + argLength);
             out.writeReply("hessian not find method " + method.getName() + " argLength=" + argLength);
@@ -241,7 +241,7 @@ public class HessianSkeleton extends AbstractSkeleton {
         //------------------------------------------------------------------------------------------------
         //参数类型验证
         Type[] pTypes = exeMethod.getGenericParameterTypes();
-        if ((service instanceof Action) && argLength > 0 && pTypes != null && pTypes.length > 0) {
+        if ((service instanceof Action) && argLength > 0 && pTypes.length > 0) {
             Action action = (Action) service;
             if (!ParamUtil.isMethodParamSafe(action, exeMethod, values)) {
                 String message = exeMethod + " " + action.getFailureMessage();

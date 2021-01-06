@@ -15,10 +15,8 @@ import com.github.jspxnet.sober.annotation.NullClass;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.interceptor.InterceptorSupport;
 import com.github.jspxnet.txweb.support.ActionSupport;
-import com.github.jspxnet.util.CglibProxyUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;
-
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -395,7 +393,7 @@ public class ClassUtil {
      * @return cls的所有字段
      */
     public static Field[] getDeclaredFields(Class<?> cls) {
-        Class<?> superclass =  CglibProxyUtil.getClass(cls);
+        Class<?> superclass =  ClassUtil.getClass(cls);
         Field[] result = null;
         while (!(superclass == null || superclass.equals(Object.class) || superclass.equals(Serializable.class)  || superclass.isInterface()
                 || superclass.getName().contains("net.sf.cglib.empty.Object"))) {
@@ -460,7 +458,7 @@ public class ClassUtil {
      */
     public static Method[] getDeclaredMethods(Class<?> cls) {
 
-        Class<?> childClass = CglibProxyUtil.getClass(cls);
+        Class<?> childClass = ClassUtil.getClass(cls);
         Method[] result = null;
         while (childClass != null) {
             if (childClass.equals(Object.class) || childClass.equals(Serializable.class)) {
@@ -782,7 +780,7 @@ public class ClassUtil {
         }
         Class<?>[] argClasses = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
-            argClasses[i] = CglibProxyUtil.getClass(args[i].getClass());
+            argClasses[i] = ClassUtil.getClass(args[i].getClass());
         }
 
         return argClasses;
@@ -797,7 +795,7 @@ public class ClassUtil {
         {
             return implClass;
         }
-        implClass = CglibProxyUtil.getClass(implClass);
+        implClass = ClassUtil.getClass(implClass);
         if (implClass == null || implClass.equals(com.caucho.services.server.GenericService.class)) {
             return null;
         }

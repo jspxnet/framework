@@ -30,6 +30,7 @@ public class RouteChannelManage {
 
     public void initConfigRoute()
     {
+        log.debug("路由表空了============---------------------");
         RpcConfig rpcConfig = RpcConfig.getInstance();
         //初始化默认的路由表,就是自己的IP地址
         String[] groupNames = rpcConfig.getLocalGroupList();
@@ -95,8 +96,6 @@ public class RouteChannelManage {
         {
             return;
         }
-
-        log.info("json RouteSession :{}",ObjectUtil.toString(list));
         for (RouteSession routeSession:list)
         {
             if (!routeSocketMap.containsKey(routeSession.getSocketAddress()))
@@ -148,12 +147,18 @@ public class RouteChannelManage {
      */
     public void routeOff(SocketAddress address)
     {
+        List<SocketAddress>  localList = RpcConfig.getInstance().getLocalAddressList();
+        if (localList.contains(address))
+        {
+            return;
+        }
         RouteSession routeSession = routeSocketMap.get(address);
         if (routeSession!=null)
         {
             routeSession.setHeartbeatTimes(routeSession.getHeartbeatTimes()+1);
             if (routeSession.getHeartbeatTimes()>3)
             {
+
                 routeSession.setOnline(YesNoEnumType.NO.getValue());
             }
         }
@@ -164,10 +169,16 @@ public class RouteChannelManage {
      */
     public void cleanOffRoute()
     {
+        List<SocketAddress>  localList = RpcConfig.getInstance().getLocalAddressList();
         Enumeration<SocketAddress> keys = routeSocketMap.keys();
         while (keys.hasMoreElements())
         {
             SocketAddress key=keys.nextElement();
+            if (localList.contains(key))
+            {
+                //本地的不删除
+                continue;
+            }
             RouteSession routeSession = routeSocketMap.get(key);
             if (YesNoEnumType.NO.getValue()==routeSession.getOnline()&&routeSession.getHeartbeatTimes()>3)
             {

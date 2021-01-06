@@ -7,7 +7,6 @@ import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClient;
 import com.github.jspxnet.network.rpc.client.ReplyCmdFactory;
 import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
-import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
@@ -38,6 +37,7 @@ public class RouteService extends Thread implements Runnable {
     private static final NettyClient NETTY_CLIENT = new NettyClient();
 
     private void init() throws Exception {
+        log.debug("路由表初始化数据---------------------");
         //初始化数据 begin
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
         List<RouteSession> routeSessionList = new ArrayList<>();
@@ -81,7 +81,7 @@ public class RouteService extends Thread implements Runnable {
 
     @Override
     public void run() {
-
+        long lastTimeMillis = System.currentTimeMillis();
         try {
             init();
             Thread.sleep(DateUtil.SECOND);
@@ -93,7 +93,12 @@ public class RouteService extends Thread implements Runnable {
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
                 Thread.sleep(DateUtil.SECOND);
                 MasterSocketAddress.getInstance().flushAddress();
-                //log.debug("当前路由表-----------------\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
+
+                if (System.currentTimeMillis()-lastTimeMillis>DateUtil.MINUTE)
+                {
+                    log.debug("当前路由表:\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
+                    lastTimeMillis = System.currentTimeMillis();
+                }
             }
         } catch (Throwable e) {
             e.printStackTrace();
@@ -128,12 +133,6 @@ public class RouteService extends Thread implements Runnable {
                     continue;
                 }
 
-                //如果路由表里边只有自己,配置里边还有其他的,要让其他的注册过来
-                if (ROUTE_CHANNEL_MANAGE.getRouteSessionList().size()<=1)
-                {
-                    init();
-                }
-
                 if (ReplyCmdFactory.isSysCmd(reply.getAction())) {
                     continue;
                 }
@@ -148,6 +147,12 @@ public class RouteService extends Thread implements Runnable {
                         ROUTE_CHANNEL_MANAGE.join(list);
                     }
                 }
+
+                //如果路由表里边只有自己,配置里边还有其他的,要让其他的注册过来
+                if (ROUTE_CHANNEL_MANAGE.getRouteSessionList().size()<=1)
+                {
+                    init();
+                }
                 //把路由表自己保管起来
             } catch (Exception e) {
                 ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
@@ -155,7 +160,6 @@ public class RouteService extends Thread implements Runnable {
                 log.error("RPC路由网络中存在异常服务器:{},错误:{}", ObjectUtil.toString(routeSession), e.getMessage());
             }
         }
-
     }
 
     /**
@@ -179,11 +183,10 @@ public class RouteService extends Thread implements Runnable {
                         //只有同一个功能组的才加入进来
                         JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                         List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
+                        //把路由表自己保管起来
                         ROUTE_CHANNEL_MANAGE.join(list);
                     }
                 }
-                //把路由表自己保管起来
-                Thread.sleep(RpcConfig.getInstance().getTimeout() * DateUtil.SECOND);
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("RPC路由网络中存在异常服务器:{},错误:{}", ObjectUtil.toString(routeSession), e.getMessage());

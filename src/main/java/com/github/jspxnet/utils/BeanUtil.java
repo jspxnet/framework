@@ -15,7 +15,6 @@ import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
-import com.github.jspxnet.util.CglibProxyUtil;
 import com.github.jspxnet.util.LRUHashMap;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -79,16 +78,7 @@ public class BeanUtil {
             methodName = ClassUtil.METHOD_NAME_SET + StringUtil.capitalize(methodName);
         }
 
-        Class<?> cls = object.getClass();
-        if (ClassUtil.isProxy(cls))
-        {
-            String className = CglibProxyUtil.getClassName(cls);
-            try {
-                cls =  ClassUtil.loadClass(className);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        Class<?> cls = ClassUtil.getClass(object.getClass());
         Method method = ClassUtil.getDeclaredMethod(cls, methodName);
         if (method == null && methodName.startsWith("setIs")) {
             methodName = ClassUtil.METHOD_NAME_SET + StringUtil.capitalize(methodName.substring(5));
@@ -141,7 +131,7 @@ public class BeanUtil {
             return;
         }
 
-        Class<?> cls = CglibProxyUtil.getClass(object.getClass());
+        Class<?> cls = ClassUtil.getClass(object.getClass());
         Field field = ClassUtil.getDeclaredField(cls, fieldName);
         if (field == null) {
             log.debug(object.getClass() + " set field {} not find", fieldName);

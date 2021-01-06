@@ -365,4 +365,58 @@ public class URLUtil {
         }
         return namespace;
     }
+
+
+
+    /**
+     *  没有后缀加后缀
+     * @param hessianUrl rpc调用路径
+     * @param suffix 调用路径
+     * @return 返回
+     */
+    public static String getFixSuffix(String hessianUrl,String suffix)
+    {
+        if (!hessianUrl.toLowerCase().endsWith(StringUtil.DOT + suffix.toLowerCase()))
+        {
+            return hessianUrl + StringUtil.DOT + suffix;
+        }
+        return hessianUrl;
+    }
+
+    /**
+     * 得到Hessian url的路由地址
+     * @param hessianUrl rpc调用路径
+     * @param domain  默认域名
+     * @param namespace 默认路由网关
+     * @param routesUrl  路由路径
+     * @return 得到Hessian url的路由地址
+     */
+    public static String getFixHessianUrl(String hessianUrl,String domain,String namespace,String routesUrl)
+    {
+        String result;
+        if (StringUtil.isEmpty(routesUrl))
+        {
+            if (domain.endsWith("/"))
+            {
+                return domain + StringUtil.replace(hessianUrl,"//","/");
+            }
+            return domain + StringUtil.replace( "/" + hessianUrl,"//","/");
+        }
+
+        if (hessianUrl.startsWith("/"))
+        {
+            result =  StringUtil.replaceOnce(hessianUrl,"/" + namespace,routesUrl);
+        } else
+        {
+            result = StringUtil.replaceOnce(hessianUrl,namespace,routesUrl);
+        }
+        if (!result.startsWith("http"))
+        {
+            result = domain + StringUtil.replace("/" +  result,"//","/");
+        }
+        return result;
+    }
+/*    public static void main(String[] args) {
+        System.out.println(getFixHessianUrl("/jcompany/menu/tree","http://www.jspxn.net","jcompany","http://127.0.0.1/xxx/222"));
+    }*/
 }

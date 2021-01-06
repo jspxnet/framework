@@ -65,6 +65,7 @@ public class OnlineManagerImpl implements OnlineManager {
 
     final private static int DEFAULT_COOKIE_SECOND = 60 * 60 * 24;
     static private final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
+    final private static String GUI_PASSWORD_KEY = "gui:password";
     //上一次清空超时时间，清空超时是全局性的，放这里比较合适
     //domain 设置你的域名不要www开始为'.',不设置将自动
     private String domain = StringUtil.empty;
@@ -76,17 +77,24 @@ public class OnlineManagerImpl implements OnlineManager {
     private String allowServerName = StringUtil.ASTERISK;
 
     final private int UPDATE_SESSION_MINUTE = 20;
-    /**
-     * 设置一个通用密码，动态的，提供sms等方式，无密码登陆
-     */
-    private String guiPassword = RandomUtil.getRandomGUID(16);
 
     public OnlineManagerImpl() {
 
+
     }
 
+    /**
+     * 设置一个通用密码，动态的，提供sms等方式，无密码登陆
+     * 保存在缓存中,适配分布式
+     */
     @Override
     public String getGuiPassword() {
+        String cacheKey = SoberUtil.getLoadKey(UserSession.class, GUI_PASSWORD_KEY,"",false);
+        String guiPassword = (String)JSCacheManager.get(UserSession.class, cacheKey);
+        if (StringUtil.isEmpty(guiPassword))
+        {
+            JSCacheManager.put(UserSession.class, cacheKey,guiPassword);
+        }
         return guiPassword;
     }
 
@@ -385,7 +393,7 @@ public class OnlineManagerImpl implements OnlineManager {
                 memberDAO.evict(Member.class);
                 return errorInfo;
             }
-            if (!password.equalsIgnoreCase(guiPassword)) {
+            if (!password.equalsIgnoreCase(getGuiPassword())) {
                 errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorSmsValid));
                 return errorInfo;
             }
@@ -400,7 +408,7 @@ public class OnlineManagerImpl implements OnlineManager {
                 return errorInfo;
             }
 
-            if (!password.equalsIgnoreCase(guiPassword)&&!MemberUtil.verifyPassword(password,member.getPassword()))
+            if (!password.equalsIgnoreCase(getGuiPassword())&&!MemberUtil.verifyPassword(password,member.getPassword()))
             {
                 errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorNameOrPassword));
                 return errorInfo;

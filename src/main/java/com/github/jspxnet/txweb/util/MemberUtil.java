@@ -15,20 +15,6 @@ public class MemberUtil {
 
     }
 
-
-    /**
-     * @param appId      ConnectApp中的ID
-     * @param publicKey  共密
-     * @param privateKey 私密
-     * @param timeMillis 时间
-     * @return appId方式登录验证, 得到 jsessionId
-     */
- /*   public static String getAppHashVerify(long appId, String publicKey, String privateKey, long timeMillis) {
-        return EncryptUtil.getMd5(appId + StringUtil.SEMICOLON + publicKey + privateKey + StringUtil.SEMICOLON + StringUtil.SEMICOLON + timeMillis);
-    }
-*/
-
-
     /**
      *
      * @param password 密码

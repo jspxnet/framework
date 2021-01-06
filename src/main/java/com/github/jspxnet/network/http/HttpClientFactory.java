@@ -1,12 +1,8 @@
 package com.github.jspxnet.network.http;
 
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.http.adapter.HttpClientAdapter;
 import com.github.jspxnet.network.http.adapter.HttpsClientAdapter;
-import com.github.jspxnet.util.StringMap;
-import com.github.jspxnet.utils.StringUtil;
-
 import java.util.HashMap;
 import java.util.Map;
 

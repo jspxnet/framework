@@ -9,10 +9,16 @@
  */
 package com.github.jspxnet.txweb.service.client;
 
-import com.caucho.hessian.client.HessianProxy;
-import com.caucho.hessian.client.HessianProxyFactory;
+import com.caucho.hessian.client.*;
+import com.caucho.hessian.io.AbstractHessianOutput;
+import com.caucho.hessian.io.HessianDebugOutputStream;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-
+import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
@@ -24,13 +30,14 @@ import java.util.List;
  * Time: 上午9:45
  * 这里主要为了不破坏Hessian 添加认证功能
  */
+@Slf4j
 public class JspxHessianProxy extends HessianProxy {
     private static final String AUTHORIZATION = "Authorization";
     /**
      * Variable for saving cookie list
      */
     private List<String> cookies = null;
-    private String token = StringUtil.empty;
+    private String token = null;
 
     /**
      * @param url       url
@@ -38,7 +45,6 @@ public class JspxHessianProxy extends HessianProxy {
      * @param token 用户token
      */
     public JspxHessianProxy(URL url, HessianProxyFactory factory, String token) {
-
         super(url, factory);
         super._factory.getConnectionFactory().setHessianProxyFactory(factory);
         this.token = token;
@@ -50,22 +56,19 @@ public class JspxHessianProxy extends HessianProxy {
         if (setCookies != null) {
             cookies = setCookies;
         }
-
         super.parseResponseHeaders(conn);
     }
 
     @Override
     protected void addRequestHeaders(com.caucho.hessian.client.HessianConnection conn) {
-        if (conn != null) {
+        if (conn != null && token!=null) {
             conn.addHeader(AUTHORIZATION, "Bearer " + token);
         }
-        if (cookies != null) {
+        if (conn != null && cookies != null) {
             for (String cookieString : cookies) {
                 conn.addHeader("Cookie", cookieString);
             }
         }
         super.addRequestHeaders(conn);
     }
-
-
 }

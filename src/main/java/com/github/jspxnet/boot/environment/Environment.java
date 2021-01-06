@@ -610,40 +610,7 @@ public abstract class Environment {
     static public final String VCS_USER_PASSWORD = "password";
 
 
-   /* //jedis default config  begin
-    static public final String JEDIS_maxtotal = "jedis.maxTotal";
-    static public final int JEDIS_maxtotal_value = 24;
-
-    static public final String JEDIS_maxidle = "jedis.maxIdle";
-    static public final int JEDIS_maxidle_value = 8;
-
-    static public final String JEDIS_minIdle = "jedis.minIdle";
-    static public final int JEDIS_minIdle_value = 5;
-
-    static public final String JEDIS_maxWaitMillis = "jedis.maxWaitMillis";
-    static public final int JEDIS_maxWaitMillis_value = 3000;
-
-    static public final String JEDIS_testOnBorrow = "jedis.testOnBorrow";
-    static public final boolean JEDIS_testOnBorrow_value = true;
-
-    static public final String JEDIS_testOnReturn = "jedis.testOnReturn";
-    static public final boolean JEDIS_testOnReturn_value = true;
-
-
-    static public final String JEDIS_testWhileIdle = "jedis.testWhileIdle";
-    static public final boolean JEDIS_testWhileIdle_value = true;
-
-    static public final String JEDIS_minEvictableIdleTimeMillis = "jedis.minEvictableIdleTimeMillis";
-    static public final int JEDIS_minEvictableIdleTimeMillis_value = 500;
-
-    static public final String JEDIS_softMinEvictableIdleTimeMillis = "jedis.softMinEvictableIdleTimeMillis";
-    static public final int JEDIS_softMinEvictableIdleTimeMillis_value = 500;
-
-    static public final String JEDIS_timeBetweenEvictionRunsMillis = "jedis.timeBetweenEvictionRunsMillis";
-    static public final int JEDIS_timeBetweenEvictionRunsMillis_value = 1000;
-
-    static public final String JEDIS_numTestsPerEvictionRun = "jedis.numTestsPerEvictionRun";
-    static public final int JEDIS_numTestsPerEvictionRun_value = 100;
-    //jedis default config  end*/
+    static public final String HTTP_RPC_DOMAIN = "http.rpc.domain";
+    static public final String HTTP_RPC_ROUTES = "http.rpc.routes.";
 
 }
