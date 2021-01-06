@@ -64,7 +64,6 @@ public class DefaultActionProxy implements ActionProxy {
 
     @Override
     public void destroy() {
-
         action.destroy();
     }
 
@@ -82,7 +81,7 @@ public class DefaultActionProxy implements ActionProxy {
     public Method getMethod() {
         if (method == null) {
             try {
-                return action.getClass().getMethod(TXWebUtil.defaultExecute);
+                return ClassUtil.getClass(action.getClass()).getMethod(TXWebUtil.defaultExecute);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
                 return null;
@@ -93,15 +92,7 @@ public class DefaultActionProxy implements ActionProxy {
 
     @Override
     public void setMethod(String method) {
-        Class<?> cls = action.getClass();
-        if (ClassUtil.isProxy(cls))
-        {
-            try {
-                cls = ClassUtil.loadClass(ClassUtil.getClassName(cls.getName()));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
+        Class<?> cls = ClassUtil.getClass(action.getClass());
         if (StringUtil.hasLength(method) && !HessianHandle.NAME.equalsIgnoreCase(exeType)) {
             this.method = TXWebUtil.getExeMethod(this,cls, method);
         }
@@ -191,7 +182,7 @@ public class DefaultActionProxy implements ActionProxy {
 
         //下边是roc，和传统方式调用
         if (method == null) {
-            method = action.getClass().getMethod(TXWebUtil.defaultExecute);
+            method = ClassUtil.getClass(action.getClass()).getMethod(TXWebUtil.defaultExecute);
         }
 
         TXWebUtil.setTurnPage(action);

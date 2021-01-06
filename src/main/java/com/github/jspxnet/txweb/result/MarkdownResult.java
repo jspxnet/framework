@@ -96,7 +96,7 @@ public class MarkdownResult extends ResultSupport {
         try {
             scriptMark = new ScriptMarkEngine(cacheKey, fileSource, configurable);
         } catch (Exception e) {
-            if (debug) {
+            if (DEBUG) {
                 log.info("TemplateResult file not found:" + f.getAbsolutePath(), e);
                 TXWebUtil.errorPrint("TemplateResult file not found:" + f.getAbsolutePath() + "," + e.getMessage(), null,response, HttpStatusType.HTTP_status_404);
             } else {
@@ -123,7 +123,7 @@ public class MarkdownResult extends ResultSupport {
         try {
             scriptMark.process(out, valueMap);
         } catch (Exception e) {
-            if (debug) {
+            if (DEBUG) {
                 log.info("TemplateResult file not found:" + mdFile.getAbsolutePath(), e);
                 TXWebUtil.errorPrint("TemplateResult file not found:" + mdFile.getAbsolutePath() + "\r\n" + StringUtil.toBrLine(e.getMessage()), null,response, HttpStatusType.HTTP_status_404);
             } else {

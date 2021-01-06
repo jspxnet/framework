@@ -61,8 +61,10 @@ public class HessianHandle extends ActionHandle {
     static public void execute(ActionProxy actionProxy) {
 
         ActionSupport action = actionProxy.getAction();
+        Class<?> actionClass = ClassUtil.getClass(action.getClass());
         //Hessian远程接口方式调用 begin
-        String serviceId = action.getClass().getName();
+        String serviceId = actionClass.getName();
+
         String objectId = action.getString("id");
         if (objectId == null) {
             objectId = action.getString("ejbid");
@@ -71,7 +73,7 @@ public class HessianHandle extends ActionHandle {
         final HttpServletRequest request = action.getRequest();
 
         //替代原版HessianSkeleton  实现事务标签功能
-        HessianSkeleton objectSkeleton = new HessianSkeleton(action, Objects.requireNonNull(ClassUtil.findRemoteAPI(action.getClass())));
+        HessianSkeleton objectSkeleton = new HessianSkeleton(action, Objects.requireNonNull(ClassUtil.findRemoteAPI(actionClass)));
         boolean debug = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.logJspxDebug);
         objectSkeleton.setDebug(debug);
         try {

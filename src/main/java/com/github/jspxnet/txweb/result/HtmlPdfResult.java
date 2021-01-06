@@ -81,7 +81,7 @@ public class HtmlPdfResult extends ResultSupport {
         try {
             scriptMark = new ScriptMarkEngine(cacheKey, fileSource, configurable);
         } catch (Exception e) {
-            if (debug) {
+            if (DEBUG) {
                 log.debug("file not found:" + f.getAbsolutePath(), e);
                 TXWebUtil.errorPrint("file not found:" + f.getAbsolutePath() + "\r\n" + e.getMessage(), null,response, HttpStatusType.HTTP_status_404);
             } else {
@@ -119,7 +119,7 @@ public class HtmlPdfResult extends ResultSupport {
             renderer.layout();
             renderer.createPDF(response.getOutputStream());
         } catch (Exception e) {
-            if (debug) {
+            if (DEBUG) {
                 log.debug("pdf create out", e);
                 TXWebUtil.errorPrint(StringUtil.toBrLine(e.getMessage()),null, response, HttpStatusType.HTTP_status_404);
             } else {

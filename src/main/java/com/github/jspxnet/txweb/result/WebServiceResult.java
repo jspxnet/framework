@@ -21,12 +21,12 @@ public class WebServiceResult extends ResultSupport {
         //如果头部设置为javascript mootools IE下会自动执行
         if (outXml) {
             try {
-                return "<?xml version=\"1.0\" encoding=\"" + Dispatcher.getEncode() + "\"?>\r\n" + (debug ? XMLUtil.format(XML.toString(json, Environment.rocResult)) : XML.toString(json, Environment.rocResult));
+                return "<?xml version=\"1.0\" encoding=\"" + Dispatcher.getEncode() + "\"?>\r\n" + (DEBUG ? XMLUtil.format(XML.toString(json, Environment.rocResult)) : XML.toString(json, Environment.rocResult));
             } catch (JSONException e) {
                 return new JSONObject(RocResponse.error(-32700, " xml 格式解析异常")).toString(4);
             }
         } else {
-            return debug ? json.toString(4) : json.toString();
+            return DEBUG ? json.toString(4) : json.toString();
         }
     }
 

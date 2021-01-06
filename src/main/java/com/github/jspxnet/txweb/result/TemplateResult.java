@@ -142,7 +142,7 @@ public class TemplateResult extends ResultSupport {
             scriptMark = new ScriptMarkEngine(cacheKey, fileSource, CONFIGURABLE);
         } catch (Exception e) {
             log.debug("template file not found:" + f.getAbsolutePath(), e);
-            if (debug) {
+            if (DEBUG) {
                 TXWebUtil.errorPrint("template file not found:" + action.getTemplateFile() + "\r\n" + e.getLocalizedMessage() + "\r\n提示:ROC API调用请使用ROC协议",
                         null,response, HttpStatusType.HTTP_status_404);
             } else {

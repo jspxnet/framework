@@ -119,7 +119,8 @@ public class TXWebUtil {
         if (!RequestUtil.isMultipart(action.getRequest())) {
             return;
         }
-        Method[] methods = ClassUtil.getDeclaredMethods(action.getClass());//字段
+        Class<?> cls = ClassUtil.getClass(action.getClass());
+        Method[] methods = ClassUtil.getDeclaredMethods(cls);//字段
         for (Method method : methods) {
             MulRequest mulRequest = method.getAnnotation(MulRequest.class);
             if (mulRequest == null) {
@@ -172,7 +173,8 @@ public class TXWebUtil {
         if (request == null) {
             return;
         }
-        Field[] fields = ClassUtil.getDeclaredFields(action.getClass());//字段
+        Class<?> cls = ClassUtil.getClass(action.getClass());
+        Field[] fields = ClassUtil.getDeclaredFields(cls);//字段
         for (Field field : fields) {
             TurnPage turnPage = field.getAnnotation(TurnPage.class);
             if (turnPage != null) {
@@ -273,7 +275,7 @@ public class TXWebUtil {
      *
      * @param action action
      */
-    public static void copyRequestProperty(Action action) {
+    public static void copyRequestProperty(Action action) throws ClassNotFoundException {
         if (action == null) {
             return;
         }
@@ -285,8 +287,11 @@ public class TXWebUtil {
             copyRequestProperty((MultipartSupport) action);
             return;
         }
+
+        Class<?> cls = ClassUtil.getClass(action.getClass());
+
         String[] requestNames = RequestUtil.getParameterNames(request);
-        Method[] methods = ClassUtil.getDeclaredSetMethods(action.getClass());
+        Method[] methods = ClassUtil.getDeclaredSetMethods(cls);
         for (Method method : methods) {
             String propertyName = method.getName();
             if (StringUtil.isNull(propertyName) || propertyName.startsWith(ClassUtil.METHOD_NAME_GET) || propertyName.startsWith(ClassUtil.METHOD_NAME_IS) || ArrayUtil.inArray(ACTION_SAFE_METHOD, propertyName, true)) {
@@ -357,10 +362,11 @@ public class TXWebUtil {
      *
      * @param action action bean
      */
-    private static void copyRequestProperty(MultipartSupport action) {
+    private static void copyRequestProperty(MultipartSupport action) throws ClassNotFoundException {
         MultipartRequest multipartRequest = action.getMultipartRequest();
         String[] requestNames = action.getParameterNames();
-        Method[] methods = ClassUtil.getDeclaredSetMethods(action.getClass());
+        Class<?> cls = ClassUtil.getClass(action.getClass());
+        Method[] methods = ClassUtil.getDeclaredSetMethods(cls);
         for (Method method : methods) {
             String propertyName = method.getName();
             if (StringUtil.isNull(propertyName) || propertyName.startsWith(ClassUtil.METHOD_NAME_GET) || propertyName.startsWith(ClassUtil.METHOD_NAME_IS)) {
@@ -441,11 +447,12 @@ public class TXWebUtil {
      * @param action   action对象
      * @param valueMap ROC请求参数
      */
-    private static void putJsonProperty(Action action, Map<String, Object> valueMap) {
+    private static void putJsonProperty(Action action, Map<String, Object> valueMap) throws ClassNotFoundException {
         if (action == null) {
             return;
         }
-        Method[] methods = ClassUtil.getDeclaredSetMethods(action.getClass());
+        Class<?> cls = ClassUtil.getClass(action.getClass());
+        Method[] methods = ClassUtil.getDeclaredSetMethods(cls);
         for (Method method : methods) {
 
             String propertyName = method.getName();
@@ -626,6 +633,8 @@ public class TXWebUtil {
             return methodResult;
         }
         //多个数据的返回方式
+
+        Class<?> actionClass = ClassUtil.getClass(action.getClass());
         Map<String, Object> resultMap = new HashMap<>();
         //这里目的是放入 多个数据对象
         for (Object v : resultJson.toArray()) {
@@ -634,7 +643,7 @@ public class TXWebUtil {
             if (TXWebUtil.defaultExecute.equals(methodName) || methodName.equals(exeMethod.getName()) || resultMap.containsKey(exeMethod.getName())) {
                 continue;
             }
-            Method method = ClassUtil.getDeclaredMethod(action.getClass(), methodName);
+            Method method = ClassUtil.getDeclaredMethod(actionClass, methodName);
             if (method == null) {
                 action.addFieldInfo(Environment.warningInfo, methodName + "不存在的方法");
                 continue;
@@ -682,7 +691,7 @@ public class TXWebUtil {
      *
      * @param actionProxy action对象
      */
-    public static void putJsonParams(ActionProxy actionProxy) {
+    public static void putJsonParams(ActionProxy actionProxy) throws ClassNotFoundException {
         //放入请求参数 begin
         Map<String, Object> actionParams = new HashMap<>();
         JSONObject callJson = actionProxy.getCallJson();
@@ -711,7 +720,7 @@ public class TXWebUtil {
      * @param method      方法名称
      * @return 返回方法
      */
-    static public Method getExeMethod(ActionProxy actionProxy,Class<?> cls, String method) {
+    static public Method getExeMethod(ActionProxy actionProxy,Class<?> actionClass, String method) {
         if (actionProxy == null) {
             return null;
         }
@@ -764,7 +773,7 @@ public class TXWebUtil {
         //配置了Operate
 
         //这里只用判断存在于方法命名空间之后就可以了
-        Map<Operate, Method> operateMap = getClassOperateList(cls);
+        Map<Operate, Method> operateMap = getClassOperateList(actionClass);
         for (Operate operate : operateMap.keySet()) {
             //处理通配符情况
             if (TXWebUtil.AT.equals(operate.method())) {
@@ -807,9 +816,7 @@ public class TXWebUtil {
         //这里要添加路径方式
         //先判断映射，在判断方法
         if (exeMethod == null) {
-            final Class<?> actionClass = cls;
             Method[] methodList = ClassUtil.getDeclaredMethodList(actionClass, method);
-
 
             if (methodList != null && methodList.length == 1) {
                 //只有一个方法匹配
@@ -850,22 +857,6 @@ public class TXWebUtil {
                     }
                 }
             }
-
-            /*
-            if (exeMethod == null && methodList != null) {
-                //找不到就是用带 Param 注释的
-                for (Method met : methodList) {
-                    Annotation[][] parameterAnnotations = met.getParameterAnnotations();
-                    for (Annotation[] pa1 : parameterAnnotations) {
-                        for (Annotation pa2 : pa1) {
-                            if (pa2 instanceof Param) {
-                                exeMethod = met;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }*/
         }
 
         return exeMethod;
@@ -970,7 +961,7 @@ public class TXWebUtil {
 
         //验证防止重复提交 begin
         if (operate.repeat() > 0) {
-            String keyValue = action.getClass().getName() + "." + exeMethod.getName() + "." + action.getUserSession().getId();
+            String keyValue = ClassUtil.getClass(action.getClass()).getName() + "." + exeMethod.getName() + "." + action.getUserSession().getId();
             keyValue = EncryptUtil.getMd5(keyValue);
             String key = String.format(REPEAT_VERIFY_KEY, keyValue);
             RedissonClient redissonClient = (RedissonClient) beanFactory.getBean(RedissonClientConfig.class);

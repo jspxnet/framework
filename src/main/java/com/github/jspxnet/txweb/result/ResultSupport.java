@@ -45,10 +45,10 @@ import java.util.Map;
 @Slf4j
 public abstract class ResultSupport implements Result {
     final static protected EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-    final static protected boolean debug = envTemplate.getBoolean(Environment.logJspxDebug);
+    final static protected boolean DEBUG = envTemplate.getBoolean(Environment.logJspxDebug);
     //json 无对应返回标识
-    private static final String KEY_grid = "grid";
-    static final String KEY_RocFormatXML = "xml"; //xml 需要设置 json 为默认
+    private static final String KEY_GRID = "grid";
+    static final String KEY_ROC_XML = "xml"; //xml 需要设置 json 为默认
 
 
     private static final String[] gridMethods = new String[]{"currentPage", "count", "totalCount", "sort", "list"};
@@ -138,14 +138,14 @@ public abstract class ResultSupport implements Result {
         if (action.hasFieldInfo()) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), action.getFieldInfo());
         }
-        if (KEY_grid.equalsIgnoreCase(resultMethods)) {
+        if (KEY_GRID.equalsIgnoreCase(resultMethods)) {
             //默认的表格调用方式
             JSONObject json = new JSONObject();
             for (String callMethod : gridMethods) {
                 if (StringUtil.isNull(callMethod)) {
                     continue;
                 }
-                if (ClassUtil.isDeclaredMethod(action.getClass(), ClassUtil.METHOD_NAME_GET + StringUtil.capitalize(callMethod))) {
+                if (ClassUtil.isDeclaredMethod(ClassUtil.getClass(action.getClass()), ClassUtil.METHOD_NAME_GET + StringUtil.capitalize(callMethod))) {
                     json.put(callMethod, BeanUtil.getProperty(action, callMethod));
                 }
             }

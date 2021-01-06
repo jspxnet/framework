@@ -100,14 +100,14 @@ public class RocResult extends ResultSupport {
         }
         //如果头部设置为javascript mootools IE下会自动执行
         JSONObject callJson = actionInvocation.getActionProxy().getCallJson();
-        if (callJson != null && KEY_RocFormatXML.equalsIgnoreCase(callJson.getString(Environment.rocFormat))) {
+        if (callJson != null && KEY_ROC_XML.equalsIgnoreCase(callJson.getString(Environment.rocFormat))) {
             String result = XML.toString(json, Environment.rocResult, new XMLParserConfiguration());
-            if (debug) {
+            if (DEBUG) {
                 result = XMLUtil.format(result);
             }
             TXWebUtil.print("<?xml version=\"1.0\" encoding=\"" + Dispatcher.getEncode() + "\"?>\r\n" + result,WebOutEnumType.XML.getValue(), response);
         } else {
-            String result = debug ? json.toString(4) : json.toString();
+            String result = DEBUG ? json.toString(4) : json.toString();
             if (1!=json.getInt(ActionSupport.SUCCESS))
             {
                 if (json.containsKey("code")&&ErrorEnumType.NEED_LOGIN.getValue()==json.getInt("code"))

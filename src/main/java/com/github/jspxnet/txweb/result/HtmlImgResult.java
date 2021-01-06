@@ -73,7 +73,7 @@ public class HtmlImgResult extends ResultSupport {
         try {
             scriptMark = new ScriptMarkEngine(cacheKey, fileSource, configurable);
         } catch (Exception e) {
-            if (debug) {
+            if (DEBUG) {
                 log.debug("file not found:" + f.getAbsolutePath(), e);
                 TXWebUtil.errorPrint("file not found:" + f.getAbsolutePath() + "," + e.getMessage(),null, response, HttpStatusType.HTTP_status_404);
             } else {
@@ -140,7 +140,7 @@ public class HtmlImgResult extends ResultSupport {
 
             ImageIO.write(buff, imgType, outputStream);
         } catch (Exception e) {
-            if (debug) {
+            if (DEBUG) {
                 log.info("file not found:" + f.getAbsolutePath(), e);
                 TXWebUtil.errorPrint("file not found:" + f.getAbsolutePath() + "," + StringUtil.toBrLine(e.getMessage()),null, response, HttpStatusType.HTTP_status_404);
             } else {

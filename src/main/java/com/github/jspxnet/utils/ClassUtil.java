@@ -1026,4 +1026,20 @@ public class ClassUtil {
         return false;
     }
 
+    public static Class<?> getClass(Class<?> type)  {
+        Class<?> cls = type;
+        if (ClassUtil.isProxy(type))
+        {
+            try {
+                cls = ClassUtil.loadClass(ClassUtil.getClassName(type.getName()));
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return cls;
+    }
+
+
+
+
 }

@@ -71,7 +71,7 @@ public class FileSaveResult extends ResultSupport {
         try {
             scriptMark = new ScriptMarkEngine(ScriptmarkEnv.noCache, fileSource, CONFIGURABLE);
         } catch (Exception e) {
-            if (debug) {
+            if (DEBUG) {
                 log.info("TemplateResult file not found:" + f.getAbsolutePath(), e);
                 TXWebUtil.errorPrint("TemplateResult file not found:" + f.getAbsolutePath() + "\r\n" + e.getMessage(),null, response, HttpStatusType.HTTP_status_404);
             } else {
