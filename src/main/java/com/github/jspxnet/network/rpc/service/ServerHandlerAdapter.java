@@ -11,6 +11,7 @@ import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
+import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.transfer.ChannelSession;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.utils.DateUtil;
@@ -57,6 +58,7 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
         if (channel == null) {
             return;
         }
+
         ChannelSession netSession = sessionChannelManage.getSession(channel.id());
         if (netSession == null) {
             return;
@@ -64,6 +66,8 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
         sessionChannelManage.removeSession(channel.id());
         sessionChannelManage.remove(channel);
         channel.close();
+
+
     }
 
     @Override
@@ -103,7 +107,7 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
         cleanSession(ctx.channel());
         ctx.disconnect(ctx.newPromise());
         ctx.close();
-
+        RouteChannelManage.getInstance().routeOff(channel.remoteAddress());
     }
 
     @Override

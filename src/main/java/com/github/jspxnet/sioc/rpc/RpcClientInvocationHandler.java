@@ -59,44 +59,45 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         }
 
         RpcClient rpcClient = target.getAnnotation(RpcClient.class);
-        if (RpcProtocolEnumType.TCP.equals(rpcClient.protocol()))
+        if (rpcClient!=null)
         {
-            Object targetObject;
-            if (request!=null&&response!=null)
+            if (RpcProtocolEnumType.TCP.equals(rpcClient.protocol()))
             {
-                targetObject = NettyRpcProxy.create(target,rpcClient.url(),new RequestTo(request),new ResponseTo(response),rpcClient.groupName());
-            } else
-            {
-                targetObject = NettyRpcProxy.create(target,rpcClient.url(),rpcClient.groupName());
-            }
-            return method.invoke(targetObject, args);
-        }
-        if (RpcProtocolEnumType.HTTP.equals(rpcClient.protocol())) {
-
-
-            //读取本地配置
-            String hessianUrl = rpcClient.url();
-            if (StringUtil.isNull(hessianUrl)) {
-                throw new Exception(target.getName() + " RpcClient url is null,不允许为空");
-            }
-            EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-            if (!hessianUrl.startsWith("http"))
-            {
-                String domain = envTemplate.getString(Environment.HTTP_RPC_DOMAIN,"http://127.0.0.1");
-                String namespace = URLUtil.getRootNamespace(hessianUrl);
-                String routesUrl = envTemplate.getString(Environment.HTTP_RPC_ROUTES + namespace);
-                hessianUrl = URLUtil.getFixHessianUrl( hessianUrl, domain, namespace, routesUrl);
-            }
-            String apiFilterSuffix = envTemplate.getString(Environment.ApiFilterSuffix,"jwc");
-            hessianUrl = URLUtil.getFixSuffix(hessianUrl,apiFilterSuffix);
-            try {
-                HessianClient hessianClient = HessianClientFactory.getInstance();
-                Object targetObject = hessianClient.create(target,hessianUrl,RequestUtil.getToken(request));
+                Object targetObject;
+                if (request!=null&&response!=null)
+                {
+                    targetObject = NettyRpcProxy.create(target,rpcClient.url(),new RequestTo(request),new ResponseTo(response),rpcClient.groupName());
+                } else
+                {
+                    targetObject = NettyRpcProxy.create(target,rpcClient.url(),rpcClient.groupName());
+                }
                 return method.invoke(targetObject, args);
-            } catch (Exception e)
-            {
-                log.error("检查http rpc 调用路径是否正确:{},error:{}",hessianUrl,e.getLocalizedMessage());
-                e.printStackTrace();
+            }
+            if (RpcProtocolEnumType.HTTP.equals(rpcClient.protocol())) {
+                //读取本地配置
+                String hessianUrl = rpcClient.url();
+                if (StringUtil.isNull(hessianUrl)) {
+                    throw new Exception(target.getName() + " RpcClient url is null,不允许为空");
+                }
+                EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+                if (!hessianUrl.startsWith("http"))
+                {
+                    String domain = envTemplate.getString(Environment.HTTP_RPC_DOMAIN,"http://127.0.0.1");
+                    String namespace = URLUtil.getRootNamespace(hessianUrl);
+                    String routesUrl = envTemplate.getString(Environment.HTTP_RPC_ROUTES + namespace);
+                    hessianUrl = URLUtil.getFixHessianUrl( hessianUrl, domain, namespace, routesUrl);
+                }
+                String apiFilterSuffix = envTemplate.getString(Environment.ApiFilterSuffix,"jwc");
+                hessianUrl = URLUtil.getFixSuffix(hessianUrl,apiFilterSuffix);
+                try {
+                    HessianClient hessianClient = HessianClientFactory.getInstance();
+                    Object targetObject = hessianClient.create(target,hessianUrl,RequestUtil.getToken(request));
+                    return method.invoke(targetObject, args);
+                } catch (Exception e)
+                {
+                    log.error("检查http rpc 调用路径是否正确:{},error:{}",hessianUrl,e.getLocalizedMessage());
+                    e.printStackTrace();
+                }
             }
         }
         return method.invoke(target, args);

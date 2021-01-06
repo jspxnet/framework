@@ -37,7 +37,7 @@ public class RouteService extends Thread implements Runnable {
     private static final NettyClient NETTY_CLIENT = new NettyClient();
 
     private void init() throws Exception {
-        log.debug("路由表初始化数据---------------------");
+
         //初始化数据 begin
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
         List<RouteSession> routeSessionList = new ArrayList<>();
