@@ -36,7 +36,7 @@ public class RouteService extends Thread implements Runnable {
     //第一次使用配置服务器地址,以后将切换到路由表
     private static final NettyClient NETTY_CLIENT = new NettyClient();
     private static int configCount = 1;
-    private static long lastTimeMillis = System.currentTimeMillis();
+    private static long lastInitTimeMillis = System.currentTimeMillis();
     private void init() throws Exception {
 
         //初始化数据 begin
@@ -82,7 +82,7 @@ public class RouteService extends Thread implements Runnable {
 
     @Override
     public void run() {
-
+        long lastTimeMillis = System.currentTimeMillis();
         try {
             init();
             Thread.sleep(DateUtil.SECOND);
@@ -94,7 +94,6 @@ public class RouteService extends Thread implements Runnable {
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
                 Thread.sleep(DateUtil.SECOND);
                 MasterSocketAddress.getInstance().flushAddress();
-                log.debug("当前路由表:\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
                 if (System.currentTimeMillis()-lastTimeMillis>DateUtil.MINUTE)
                 {
                     log.debug("当前路由表:\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
@@ -150,10 +149,10 @@ public class RouteService extends Thread implements Runnable {
                 }
 
                 //如果路由表里边只有自己,配置里边还有其他的,要让其他的注册过来
-                if (ROUTE_CHANNEL_MANAGE.getRouteSessionList().size()<=configCount && System.currentTimeMillis()-lastTimeMillis>DateUtil.MINUTE)
+                if (ROUTE_CHANNEL_MANAGE.getRouteSessionList().size()<=configCount && System.currentTimeMillis()-lastInitTimeMillis>DateUtil.MINUTE)
                 {
                     init();
-                    lastTimeMillis = System.currentTimeMillis();
+                    lastInitTimeMillis = System.currentTimeMillis();
                 }
                 //把路由表自己保管起来
             } catch (Exception e) {
