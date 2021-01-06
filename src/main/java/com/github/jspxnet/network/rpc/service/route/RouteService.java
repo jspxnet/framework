@@ -7,7 +7,6 @@ import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClient;
 import com.github.jspxnet.network.rpc.client.ReplyCmdFactory;
 import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
-import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
