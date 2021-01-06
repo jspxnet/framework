@@ -275,7 +275,7 @@ public class TXWebUtil {
      *
      * @param action action
      */
-    public static void copyRequestProperty(Action action) throws ClassNotFoundException {
+    public static void copyRequestProperty(Action action)  {
         if (action == null) {
             return;
         }
@@ -362,7 +362,7 @@ public class TXWebUtil {
      *
      * @param action action bean
      */
-    private static void copyRequestProperty(MultipartSupport action) throws ClassNotFoundException {
+    private static void copyRequestProperty(MultipartSupport action) {
         MultipartRequest multipartRequest = action.getMultipartRequest();
         String[] requestNames = action.getParameterNames();
         Class<?> cls = ClassUtil.getClass(action.getClass());
@@ -447,7 +447,7 @@ public class TXWebUtil {
      * @param action   action对象
      * @param valueMap ROC请求参数
      */
-    private static void putJsonProperty(Action action, Map<String, Object> valueMap) throws ClassNotFoundException {
+    private static void putJsonProperty(Action action, Map<String, Object> valueMap)  {
         if (action == null) {
             return;
         }
@@ -691,7 +691,8 @@ public class TXWebUtil {
      *
      * @param actionProxy action对象
      */
-    public static void putJsonParams(ActionProxy actionProxy) throws ClassNotFoundException {
+
+    public static void putJsonParams(ActionProxy actionProxy)  {
         //放入请求参数 begin
         Map<String, Object> actionParams = new HashMap<>();
         JSONObject callJson = actionProxy.getCallJson();
@@ -717,6 +718,7 @@ public class TXWebUtil {
      * 得到要执行的方法，多种匹配方式
      *
      * @param actionProxy action代理
+     * @param actionClass 类对象,方便识别
      * @param method      方法名称
      * @return 返回方法
      */
