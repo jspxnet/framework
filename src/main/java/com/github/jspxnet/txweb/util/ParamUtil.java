@@ -1058,6 +1058,12 @@ public class ParamUtil {
             String protocol = json.getString(Environment.Protocol);
             return protocol != null && protocol.contains("roc");
         }
+        if (json.containsKey(Environment.rocVersion)&&json.containsKey(Environment.rocMethod))
+        {
+            String varsion = json.getString(Environment.rocVersion);
+            return varsion != null && varsion.equals(Environment.jspxNetRocVersion);
+        }
+
         return false;
     }
 }
