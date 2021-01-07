@@ -174,7 +174,6 @@ public class MemberVo implements Serializable {
         }
         MemberDeptVo memberDeptVo = new MemberDeptVo();
         memberDeptVo.setDepartmentId(null);
-        memberDeptVo.setDepartment("无");
         return  memberDeptVo;
     }
 
@@ -182,7 +181,7 @@ public class MemberVo implements Serializable {
     public String getRoleCaption()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append(":").append("无").append(StringUtil.SEMICOLON);
+    //    sb.append(":").append("无").append(StringUtil.SEMICOLON);
         if (roleList != null) {
             for (Role role : roleList)
             {

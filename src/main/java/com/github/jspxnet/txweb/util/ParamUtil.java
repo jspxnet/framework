@@ -56,6 +56,7 @@ public class ParamUtil {
     // javascript:替换字符串（全角中文字符）
     private final static String[] DANGEROUS_TOKEN_REPLACEMENTS = new String[]{"ＪＡＶＡＳＣＲＩＰＴ："};
 
+
     final static public String variableBegin = "${";
     final static public  String variableEnd = "}";
 
@@ -298,11 +299,11 @@ public class ParamUtil {
                         }
                         String[] values = StringUtil.split(checkPath, StringUtil.BACKSLASH);
                         String[] paths = StringUtil.split(operatePath, StringUtil.BACKSLASH);
-                        if (values.length != paths.length || ArrayUtil.isEmpty(values) || ArrayUtil.isEmpty(paths)) {
+                        if (ArrayUtil.isEmpty(values) || ArrayUtil.isEmpty(paths)) {
                             action.addFieldInfo(Environment.warningInfo, "错误的访问路径");
                             return null;
                         }
-                        for (int p = 0; p < values.length; p++) {
+                        for (int p = 0; p < values.length&&p<paths.length; p++) {
                             if (paths[i].contains("{" + varName + "}")) {
                                 if (ClassUtil.isNumberType(pType) && StringUtil.isStandardNumber(values[i])) {
                                     if (isSafe(ObjectUtil.toLong(values[i]), pathVar.min(), pathVar.max())) {
@@ -458,13 +459,13 @@ public class ParamUtil {
                         }
                         String[] values = StringUtil.split(checkPath, StringUtil.BACKSLASH);
                         String[] paths = StringUtil.split(operatePath, StringUtil.BACKSLASH);
-                        if (values.length != paths.length || ArrayUtil.isEmpty(values) || ArrayUtil.isEmpty(paths))
+                        if (ArrayUtil.isEmpty(values) || ArrayUtil.isEmpty(paths))
                         {
                             String message = StringUtil.isEmpty(pathVar.message())?("错误的访问路径"):pathVar.message();
                             action.addFieldInfo(Environment.errorInfo, message);
                             return null;
                         }
-                        for (int p = 0; p < values.length; p++) {
+                        for (int p = 0; p < values.length&&p<paths.length; p++) {
                             if (paths[i].contains("{" + pathVar.name() + "}")) {
                                 paramObj[i] = BeanUtil.getTypeValue(values[i], pType);
                             }
@@ -597,7 +598,7 @@ public class ParamUtil {
                         }
                         String[] values = StringUtil.split(checkPath, StringUtil.BACKSLASH);
                         String[] paths = StringUtil.split(operatePath, StringUtil.BACKSLASH);
-                        if (values.length != paths.length || ArrayUtil.isEmpty(values) || ArrayUtil.isEmpty(paths)) {
+                        if (ArrayUtil.isEmpty(values) || ArrayUtil.isEmpty(paths)) {
                             String message = StringUtil.isEmpty(pathVar.message())?("错误的访问路径"):pathVar.message();
                             action.addFieldInfo(Environment.errorInfo, message);
                             return null;

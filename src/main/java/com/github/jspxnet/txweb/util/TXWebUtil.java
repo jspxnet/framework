@@ -800,7 +800,7 @@ public class TXWebUtil {
                 //当前允许执行的方法
                 String operateUrl = urlNamespace + (operate.method().startsWith(StringUtil.BACKSLASH) ? operate.method() : (StringUtil.BACKSLASH + operate.method()));
                 if (url.startsWith(urlNamespace) && operate.method().contains(ParamUtil.variableBegin)) {
-                    //方法配置的路径
+                    //方法配置的路径 路径参数方式${} {}
                     String methodUrl = StringUtil.substringBefore(operate.method(), ParamUtil.variableBegin);
                     if (url.toLowerCase().contains(methodUrl.toLowerCase())) {
                         return operateMap.get(operate);
@@ -810,6 +810,7 @@ public class TXWebUtil {
                     //最直接的比对
                     return operateMap.get(operate);
                 } else if (url.startsWith(urlNamespace) && StringUtil.getPatternFind(StringUtil.substringAfter(url, urlNamespace), operate.method())) {
+                    //通配符方式
                     return operateMap.get(operate);
                 }
             }

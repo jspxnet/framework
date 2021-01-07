@@ -188,7 +188,7 @@ public class ApiDocView extends ActionSupport {
      * @param lass 类对象
      * @return 得到参数对象的文档
      */
-    private static ApiParam getApiParam(Class lass) {
+    private static ApiParam getApiParam(Class<?> lass) {
         ApiParam apiParam = new ApiParam();
         Field[] fields = ClassUtil.getDeclaredFields(lass);
         for (Field field : fields) {
@@ -430,7 +430,7 @@ public class ApiDocView extends ActionSupport {
     }
 
 
-    @Operate(caption = "文档", method = "/document/${id}", post = false)
+    @Operate(caption = "文档", method = "document/${id}", post = false)
     public ApiDocument getDocument(@PathVar String id) throws Exception {
         Map<String, ApiAction> indexCache = (Map<String, ApiAction>) JSCacheManager.get(DefaultCache.class, String.format(API_INDEX_CACHE, getRootNamespace()));
         if (indexCache == null || indexCache.isEmpty()) {
