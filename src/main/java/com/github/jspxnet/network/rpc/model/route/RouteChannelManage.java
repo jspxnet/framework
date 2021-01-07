@@ -30,7 +30,7 @@ public class RouteChannelManage {
 
     public void initConfigRoute()
     {
-        log.debug("路由表空了============---------------------");
+
         RpcConfig rpcConfig = RpcConfig.getInstance();
         //初始化默认的路由表,就是自己的IP地址
         String[] groupNames = rpcConfig.getLocalGroupList();
@@ -51,6 +51,7 @@ public class RouteChannelManage {
             }
             routeSocketMap.put(socketAddress,routeSession);
         }
+        log.debug("初始化路由表:{}",ObjectUtil.toString(list));
     }
     /**
      *
