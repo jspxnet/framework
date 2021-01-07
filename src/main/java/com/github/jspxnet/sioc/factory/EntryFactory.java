@@ -127,11 +127,6 @@ public final class EntryFactory implements BeanFactory {
 
         Object result = null;
         Class<?> cla = ClassUtil.loadClass(lifecycleObject.getClassName());
-        if (lifecycleObject.getClassName().contains("MenuItemAction"))
-        {
-            System.out.println("-----------cla=" + cla);
-        }
-
         if (Sioc.KEY_RPC_CLIENT.equalsIgnoreCase(lifecycleObject.getCreate())) {
             RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
             if (rpcClient == null) {
@@ -139,38 +134,12 @@ public final class EntryFactory implements BeanFactory {
             }
             Class<?> classObj = rpcClient.bind().equals(Empty.class) ? cla : rpcClient.bind();
             return RpcClientProxyFactory.createRpcClientProxy(classObj);
-           /* if (RpcProtocolEnumType.TCP.equals(rpcClient.protocol())) {
-                result = NettyRpcProxy.create(classObj, rpcClient.url(), rpcClient.groupName());
-            }
-            if (RpcProtocolEnumType.HTTP.equals(rpcClient.protocol())) {
-                HessianClient hessianClient = HessianClientFactory.getInstance();
-                //读取本地配置
-                String hessianUrl = rpcClient.url();
-                if (StringUtil.isNull(hessianUrl)) {
-                    throw new Exception(cla.getName() + " RpcClient url is null,不允许为空");
-                }
-                if (!hessianUrl.startsWith("http") && hessianUrl.contains(StringUtil.DOT)) {
-                    String beanName = StringUtil.substringBeforeLast(hessianUrl, StringUtil.DOT);
-                    String beanField = StringUtil.substringAfterLast(hessianUrl, StringUtil.DOT);
-                    Object urlConfigObj = getBean(beanName);
-                    if (urlConfigObj == null) {
-                        throw new Exception(cla.getName() + " RpcClient url not found,不能得到配置," + hessianUrl);
-                    }
-                    if (ClassUtil.isDeclaredField(urlConfigObj.getClass(), beanField)) {
-                        hessianUrl = BeanUtil.getFieldValue(urlConfigObj, beanField);
-                    } else {
-                        hessianUrl = (String) BeanUtil.getProperty(urlConfigObj, beanField);
-                    }
-                }
-                result = hessianClient.getInterface(classObj, hessianUrl);
-            }*/
         } else {
             result = ClassUtil.newInstance(lifecycleObject.getClassName());
             if (AnnotationUtil.hasProxyMethod(cla)) {
                 GlobalMethodInterceptor methodInterceptor = new GlobalMethodInterceptor();
                 result = methodInterceptor.getProxyInstance(result);
             }
-
         }
 
         //载入要注册的bean   begin
