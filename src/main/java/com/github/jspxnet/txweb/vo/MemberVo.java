@@ -158,7 +158,7 @@ public class MemberVo implements Serializable {
     private String unionid;
 
     @Column(caption = "部门列表")
-    private List<MemberDeptVo> deptList = new ArrayList(0);
+    private List<MemberDeptVo> deptList = new ArrayList<>(0);
 
     @JsonIgnore
     private List<Role> roleList = new ArrayList<>();
