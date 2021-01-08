@@ -24,7 +24,7 @@ import java.util.Map;
  * Map封装
  */
 public class MapIterator extends ScriptableObject implements ListIterator {
-    private Iterator array;
+    private Iterator<Object> array;
 
     private int length;
 
