@@ -27,7 +27,7 @@ import java.util.Date;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "jspx_option_bundle", caption = "备选表")
+@Table(name = "jspx_option_bundle", caption = "字典表")
 public class OptionBundle extends OperateTable {
 
     @Id
