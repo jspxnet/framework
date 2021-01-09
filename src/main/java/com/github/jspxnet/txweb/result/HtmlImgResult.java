@@ -117,7 +117,6 @@ public class HtmlImgResult extends ResultSupport {
         }
         ServletOutputStream outputStream = response.getOutputStream();
         try {
-
             Graphics2DRenderer g2r = new Graphics2DRenderer();
             InputSource is = new InputSource(new BufferedReader(new StringReader(out.toString())));
             Document dom =  XMLResource.load(is).getDocument();
