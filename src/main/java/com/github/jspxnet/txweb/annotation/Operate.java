@@ -9,7 +9,12 @@
  */
 package com.github.jspxnet.txweb.annotation;
 
+import com.github.jspxnet.sioc.util.Empty;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.lang.annotation.*;
+
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,8 +36,11 @@ public @interface Operate {
     boolean post() default true;
 
     //动作名称描述
-    String caption() default "";
+    String caption() default StringUtil.empty;
 
     //重复提交验证,0 表示不验证, 数字标识间隔时间,单位为秒
     int repeat() default 0;
+
+    //返回类型秒杀,用于生成文档
+    //String type() default StringUtil.empty;
 }

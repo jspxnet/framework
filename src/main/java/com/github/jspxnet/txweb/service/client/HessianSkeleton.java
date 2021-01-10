@@ -6,7 +6,6 @@ import com.caucho.services.server.AbstractSkeleton;
 import com.caucho.services.server.ServiceContext;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.util.ParamUtil;
-import com.github.jspxnet.util.CglibProxyUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;

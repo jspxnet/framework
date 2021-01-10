@@ -11,12 +11,8 @@ package com.github.jspxnet.txweb.service.client;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.io.HessianRemoteObject;
-import com.github.jspxnet.sioc.annotation.RpcClient;
 import com.github.jspxnet.txweb.service.HessianClient;
-import com.github.jspxnet.util.CglibProxyUtil;
 import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.StringUtil;
-
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;

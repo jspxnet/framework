@@ -2,8 +2,9 @@ package com.github.jspxnet.network.rpc.client.proxy;
 
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
-import com.github.jspxnet.util.CglibProxyUtil;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.cglib.proxy.Callback;
+import net.sf.cglib.proxy.Enhancer;
 
 /**
  * Created by jspx.net
@@ -45,7 +46,17 @@ public class NettyRpcProxy {
         clientInvocationHandler.setRequest(requestTo);
         clientInvocationHandler.setResponse(responseTo);
         clientInvocationHandler.setServiceName(serviceName);
-        return CglibProxyUtil.getProxyInstance(target,clientInvocationHandler);
+        //目前还没有继承接口,后边看是否需要
+        return createProxyInstance(target,clientInvocationHandler);
     }
-
+    /**
+     *
+     * @param cls 类型
+     * @param callback 拦截器
+     * @param <T> 类型
+     * @return 对象
+     */
+    public static <T> T createProxyInstance(Class<T> cls, Callback callback){
+        return (T) Enhancer.create(cls, callback);
+    }
 }

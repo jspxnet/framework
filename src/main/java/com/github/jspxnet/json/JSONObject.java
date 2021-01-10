@@ -1,7 +1,6 @@
 package com.github.jspxnet.json;
 
 
-import com.alibaba.fastjson.JSON;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.util.TypeReference;
 import com.github.jspxnet.utils.*;
@@ -1467,10 +1466,11 @@ public class JSONObject extends HashMap<String, Object> {
      * @param json          json
      * @param typeReference 资源方式
      * @param <T>           泛型
-     * @return 泛型装置，这里使用了fastjson
+     * @return 泛型装置，这里使用了
      */
     public static <T> T parseObject(JSONObject json, TypeReference<T> typeReference) {
-        return JSON.parseObject(json.toString(), (com.alibaba.fastjson.TypeReference<T>) typeReference);
+        Gson gson = GsonUtil.createGson();
+        return gson.fromJson(json.toString(),typeReference.getType());
     }
 
     /**
