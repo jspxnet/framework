@@ -2493,6 +2493,14 @@ public abstract class JdbcOperations implements SoberSupport {
         valueMap.put(Dialect.KEY_TABLE_NAME, tableName);
         valueMap.put(Dialect.KEY_INDEX_NAME, name);
         valueMap.put(Dialect.KEY_INDEX_FIELD, field);
+        if (name!=null)
+        {
+            valueMap.put(Dialect.KEY_IS_UNIQUE, name.toLowerCase().contains("_unique_"));
+        } else
+        {
+            valueMap.put(Dialect.KEY_IS_UNIQUE, false);
+        }
+
         String sqlText = dialect.processTemplate(Dialect.SQL_CREATE_TABLE_INDEX, valueMap);
         return execute(sqlText);
     }

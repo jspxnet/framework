@@ -44,6 +44,9 @@ public abstract class Dialect {
 
     public static final String KEY_INDEX_NAME = "index_name";
     public static final String KEY_INDEX_FIELD = "index_field";
+    //是否为唯一索引
+    public static final String KEY_IS_UNIQUE = "isUnique";
+
 
     public static final String FIELD_QUOTE = "_quote";
     public static final String KEY_FIELD_VALUE = "field_value";
@@ -140,8 +143,7 @@ public abstract class Dialect {
         standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
         standard_SQL.put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE serial RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
         standard_SQL.put(TABLE_MAX_ID, "SELECT max(${" + KEY_PRIMARY_KEY + "}) AS maxId FROM ${" + KEY_TABLE_NAME + "}");
-
-        standard_SQL.put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD INDEX ${"+KEY_INDEX_NAME+"}(${"+KEY_INDEX_FIELD+"})");
+        standard_SQL.put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX ${"+KEY_INDEX_NAME+"}(${"+KEY_INDEX_FIELD+"})");
     }
 
     public String getSQLText(String keys) {

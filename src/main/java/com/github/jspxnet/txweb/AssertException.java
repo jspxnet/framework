@@ -13,6 +13,12 @@ import com.github.jspxnet.utils.ObjectUtil;
  * */
 public abstract class AssertException {
 
+    public static void notNull(Object object, String message) {
+        if (object != null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
     public static void isNull(Object object, String message) {
         if (object == null) {
             throw new IllegalArgumentException(message);
