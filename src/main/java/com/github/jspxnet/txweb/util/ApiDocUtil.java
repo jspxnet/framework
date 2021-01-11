@@ -17,12 +17,10 @@ import com.github.jspxnet.txweb.apidoc.ApiParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.xmlbeans.impl.values.XmlUnionImpl;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -536,7 +534,7 @@ public class ApiDocUtil {
                 putChildApiFieldForReturnTypeModel(apiField, classList, returnTypeModel);
             }
         } else
-        if ("map".equalsIgnoreCase(className))
+        if ("map".equalsIgnoreCase(className)||Map.class.getName().equalsIgnoreCase(className))
         {
             apiField.setType("map");
             returnTypeModel = StringUtil.substringOutBetween(returnTypeModel,"<",">");
@@ -580,9 +578,6 @@ public class ApiDocUtil {
 
             }
         }
-
-    }
-    public static void main(String[] arg) throws Exception {
 
     }
     /**
