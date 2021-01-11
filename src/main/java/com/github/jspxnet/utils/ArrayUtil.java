@@ -572,6 +572,23 @@ public class ArrayUtil {
     }
 
     /**
+     *
+     * @param array 数组
+     * @param element 类型
+     * @return 类型
+     */
+    public static Class<?>[] add(Class<?>[] array, Class<?> element) {
+        if (array == null) {
+            array = new Class[1];
+            array[0] = element;
+            return array;
+        }
+        Class<?>[] newArray = (Class<?>[]) copyArrayGrow1(array, Class.class);
+        newArray[newArray.length - 1] = element;
+        return newArray;
+    }
+
+    /**
      * Copies the given array and adds the given element at the end of the new array.
      * <p>
      * The new array contains the same elements of the input
@@ -2928,7 +2945,26 @@ public class ArrayUtil {
         return list.toArray(result);
     }
 
-
+    /**
+     * @param a 数组a
+     * @param b 数组b
+     * @return 集合相减  a-b
+     */
+    public static Class<?>[] subtract(Class<?>[] a, Class<?>[] b) {
+        if (a == null) {
+            return null;
+        }
+        if (b == null) {
+            return null;
+        }
+        List<Class<?>> list = new ArrayList<>();
+        Collections.addAll(list, a);
+        for (Class<?> x : b) {
+            list.remove(x);
+        }
+        Class<?>[] result = new Class[list.size()];
+        return list.toArray(result);
+    }
     /**
      * @param array      数组
      * @param find       查找字符串
@@ -4169,7 +4205,7 @@ public class ArrayUtil {
      * @return 字符串返回
      */
     public static Collection<Object> toCollection(Object[] array) {
-        Collection<Object> list = new ArrayList<Object>();
+        Collection<Object> list = new ArrayList<>();
         if (array == null) {
             return list;
         }
@@ -4178,5 +4214,18 @@ public class ArrayUtil {
         }
         return list;
     }
+
+
+
+
+    public static List<Object> toList(Object[] array) {
+        List<Object> list = new ArrayList<>();
+        if (array == null) {
+            return list;
+        }
+        Collections.addAll(list, array);
+        return list;
+    }
+
 
 }

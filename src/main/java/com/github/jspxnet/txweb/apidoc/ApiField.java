@@ -1,6 +1,7 @@
 package com.github.jspxnet.txweb.apidoc;
 
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.JsonIgnore;
 import lombok.Data;
 
@@ -18,5 +19,8 @@ public class ApiField implements Serializable {
     //子对象
     @JsonIgnore(isNull = true)
     private List<ApiField> child;
+
+    @JsonIgnore(isNull = true)
+    private JSONObject childJson;
 }
 

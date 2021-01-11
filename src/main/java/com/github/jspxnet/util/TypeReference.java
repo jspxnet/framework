@@ -11,6 +11,6 @@ import java.lang.reflect.Type;
  *    typeReference.getType()
  * @param <T>
  */
-public class TypeReference<T> extends TypeToken<T>  {
+public class TypeReference<T> extends TypeToken<T> implements Type  {
 
 }

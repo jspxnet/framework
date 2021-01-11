@@ -9,6 +9,7 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -38,8 +39,20 @@ public class ApiOperate implements Serializable {
     @JsonIgnore
     private Map<String, ApiParam> params;
 
-    @JsonIgnore(isNull = true)
+
     private String resultType;
+    //自动得到的返回类型名称
+    //private Class<?> resultType;
+
+    //注释手工写入的返回类型列表,这里是所有涉及到的类型
+    @JsonIgnore
+    private Class<?>[] returnTypeClass;
+
+    /**
+     *  返回是类型模型
+     */
+    @JsonIgnore
+    private String returnTypeModel;
 
     @JsonIgnore(isNull = true)
     private List<ApiField> result;
@@ -107,9 +120,7 @@ public class ApiOperate implements Serializable {
                     callDemo.put(Environment.Protocol, Environment.jspxNetRoc);
                     callDemo.put(Environment.rocMethod, rocMethod);
                 }
-
             }
-
         }
 
         if (params != null) {

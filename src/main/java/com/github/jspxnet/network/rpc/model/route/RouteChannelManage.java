@@ -64,7 +64,7 @@ public class RouteChannelManage {
     /**
      * 路由表
      */
-    private ConcurrentHashMap<SocketAddress, RouteSession> routeSocketMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<SocketAddress, RouteSession> routeSocketMap = new ConcurrentHashMap<>();
 
 
     /**

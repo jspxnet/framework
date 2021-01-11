@@ -9,9 +9,8 @@
  */
 package com.github.jspxnet.txweb.annotation;
 
-import com.github.jspxnet.sioc.util.Empty;
+import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.lang.annotation.*;
 
 
@@ -42,5 +41,9 @@ public @interface Operate {
     int repeat() default 0;
 
     //返回类型,用于生成文档
-    Class<?> returnType() default Empty.class;
+    Class<?>[] returnType() default {RocResponse.class};
+
+    //返回类型,用于泛型
+    String returnTypeModel() default StringUtil.empty;
+
 }
