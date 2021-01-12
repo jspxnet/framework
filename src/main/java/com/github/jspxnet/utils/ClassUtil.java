@@ -457,7 +457,6 @@ public class ClassUtil {
      * @return cls 类的所有方法
      */
     public static Method[] getDeclaredMethods(Class<?> cls) {
-
         Class<?> childClass = ClassUtil.getClass(cls);
         Method[] result = null;
         while (childClass != null) {
@@ -1043,27 +1042,77 @@ public class ClassUtil {
      * @param typeModel 泛型模版 com.github.jspxnet.txweb.result.RocResponse<java.util.List<jspx.jcommon.model.dto.FrameworkTemplateDto>>
      * @return 类列表
      */
-/*    public static List<Class<?>> getClassForTypeModel(String typeModel)  {
-
-        String className = StringUtil.substringBefore(typeModel,"<");
-        typeModel = StringUtil.substringOutBetween(typeModel,"<",">");
-        while (!StringUtil.isEmpty(className)&&!StringUtil.isEmpty(typeModel))
-        {
-
-
-        }
-
-        return cls;
-    }*/
-
-/*
     public static List<Class<?>> getClassForTypeModel(String typeModel)  {
 
-        String className = StringUtil.substringBefore(typeModel,"<");
+        List<String> classNameList = new ArrayList<>();
+        String className = StringUtil.trim(StringUtil.substringBefore(typeModel,"<"));
         typeModel = StringUtil.substringOutBetween(typeModel,"<",">");
+        if (!StringUtil.isEmpty(className))
+        {
+            classNameList.add(className);
+        }
+        while (!StringUtil.isEmpty(className)&&!StringUtil.isEmpty(typeModel))
+        {
+            className = StringUtil.trim(StringUtil.substringBefore(typeModel,"<"));
+            typeModel = StringUtil.substringOutBetween(typeModel,"<",">");
+            if (className.contains(StringUtil.COMMAS))
+            {
+                String[] classNames = StringUtil.split(className,StringUtil.COMMAS);
+                for (String name:classNames)
+                {
+                    if (!StringUtil.isEmpty(name)&&!classNameList.contains(name))
+                    {
+                        classNameList.add(name);
+                    }
+                }
+            } else
+            if (!StringUtil.isEmpty(className)&&!classNameList.contains(className))
+            {
+                classNameList.add(className);
+            }
+        }
 
-        return cls;
-    }*/
+        System.out.println(ObjectUtil.toString(classNameList));
+        List<Class<?>> resultList = new ArrayList<>();
+        for (String name:classNameList)
+        {
+            if (name==null)
+            {
+                continue;
+            }
+            try {
+                if ("string".equalsIgnoreCase(name))
+                {
+                    resultList.add(String.class);
+                } else
+                if ("int".equalsIgnoreCase(name))
+                {
+                    resultList.add(Integer.class);
+                } else
+                if ("list".equalsIgnoreCase(name))
+                {
+                    resultList.add(List.class);
+                } else
+                if ("map".equalsIgnoreCase(name))
+                {
+                    resultList.add(Map.class);
+                }
+                else
+                {
+                    if (name.contains(StringUtil.DOT))
+                    {
+                        resultList.add(ClassUtil.loadClass(name));
+                    }
+                }
+            } catch (ClassNotFoundException e) {
+                log.error("错误的类名:{}",name);
+                e.printStackTrace();
+
+            }
+        }
+        return resultList;
+    }
+
 
 
 

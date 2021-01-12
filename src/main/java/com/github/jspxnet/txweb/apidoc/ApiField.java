@@ -18,7 +18,7 @@ public class ApiField implements Serializable {
     private String caption;
     //子对象
     @JsonIgnore(isNull = true)
-    private List<ApiField> child;
+    private List<ApiField> children;
 
     @JsonIgnore(isNull = true)
     private JSONObject childJson;

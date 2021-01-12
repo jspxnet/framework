@@ -161,7 +161,7 @@ public class ApiDocView extends ActionSupport {
             }
         }
         //过滤重复的类对象end
-        Map<String, ApiAction> resultMap = new HashMap();
+        Map<String, ApiAction> resultMap = new HashMap<>();
         for (Class<?> cls : classList) {
             ApiAction vo = new ApiAction();
             vo.setUrl("/" + softName + "/" + cls.getName());
@@ -176,10 +176,6 @@ public class ApiDocView extends ActionSupport {
         JSCacheManager.put(DefaultCache.class, String.format(API_FIELD_CACHE, getRootNamespace()), fieldCache);
         return fieldCache.values();
     }
-
-
-
-
 
     @Operate(caption = "文档", method = "document/${id}", post = false)
     public ApiDocument getDocument(@PathVar String id) throws Exception {

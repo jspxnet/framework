@@ -44,15 +44,6 @@ public class ApiOperate implements Serializable {
     //自动得到的返回类型名称
     //private Class<?> resultType;
 
-    //注释手工写入的返回类型列表,这里是所有涉及到的类型
-    @JsonIgnore
-    private Class<?>[] returnTypeClass;
-
-    /**
-     *  返回是类型模型
-     */
-    @JsonIgnore
-    private String returnTypeModel;
 
     @JsonIgnore(isNull = true)
     private List<ApiField> result;

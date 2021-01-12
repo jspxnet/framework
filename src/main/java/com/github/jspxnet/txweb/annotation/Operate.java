@@ -39,11 +39,11 @@ public @interface Operate {
 
     //重复提交验证,0 表示不验证, 数字标识间隔时间,单位为秒
     int repeat() default 0;
-
+/*
     //返回类型,用于生成文档
     Class<?>[] returnType() default {RocResponse.class};
 
     //返回类型,用于泛型
-    String returnTypeModel() default StringUtil.empty;
+    String returnTypeModel() default StringUtil.empty*/;
 
 }

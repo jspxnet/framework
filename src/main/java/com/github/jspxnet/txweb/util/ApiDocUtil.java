@@ -179,6 +179,10 @@ public class ApiDocUtil {
      * @return json描述
      */
     public static List<ApiField> getApiFieldList(Class<?> cla) {
+        if (ClassUtil.isStandardType(cla)||Class.class.equals(cla))
+        {
+            return null;
+        }
         Field[] fields = ClassUtil.getDeclaredFields(cla);
         if (fields == null) {
             return null;
@@ -192,10 +196,9 @@ public class ApiDocUtil {
                 continue;
             }
             JsonIgnore jsonIgnore = field.getAnnotation(JsonIgnore.class);
-            if (jsonIgnore != null) {
+            if (jsonIgnore != null&&!jsonIgnore.isNull()) {
                 continue;
             }
-
 
             if (ClassUtil.isStandardProperty(field.getType()) || field.getType().equals(JSONObject.class)) {
 
@@ -231,13 +234,17 @@ public class ApiDocUtil {
                 Class<?> childObj = null;
                 try {
                     childObj =  field.getType();
+                    if (Class.class.equals(childObj)||ClassUtil.isStandardType(childObj))
+                    {
+                        break;
+                    }
                 } catch (Exception e) {
                     //...
                 }
                 if (childObj != null) {
                     List<ApiField> childFieldList = getApiFieldList(childObj);
                     if (childFieldList != null && !childFieldList.isEmpty()) {
-                        apiField.setChild(childFieldList);
+                        apiField.setChildren(childFieldList);
 
                     }
                 }
@@ -273,10 +280,6 @@ public class ApiDocUtil {
         ApiOperate apiOperate = new ApiOperate();
         apiOperate.setCaption(operate.caption());
         apiOperate.setAction(operate.post() ? "POST" : "GET;POST");
-        apiOperate.setReturnTypeClass(operate.returnType());
-        apiOperate.setReturnTypeModel(operate.returnTypeModel());
-
-        apiOperate.setResultType(!StringUtil.isEmpty(operate.returnTypeModel())?operate.returnTypeModel():exeMethod.getReturnType().getSimpleName());
 
         ApiMethod apiMethod = new ApiMethod();
 
@@ -312,8 +315,8 @@ public class ApiDocUtil {
                 cont = ArrayUtil.toString(describe.value(), "<br />");
             } else {
                 cont = findDescribe(cla.getName() + StringUtil.DOT + exeMethod.getName(),describe.namespace());
-                System.out.println(cont);
             }
+
             apiOperate.setDescribe(ScriptMarkUtil.getMarkdownHtml(cont));
         }
 
@@ -395,76 +398,15 @@ public class ApiDocUtil {
 
     public static void putReturnApiField(Method exeMethod,ApiOperate apiOperate)
     {
-
-        String returnTypeModel = apiOperate.getReturnTypeModel();
-        Class<?>[] returnTypeClass = apiOperate.getReturnTypeClass();
-        Class<?> aClass = exeMethod.getReturnType();
-        if (aClass.equals(void.class))
+        if (exeMethod.getReturnType().equals(void.class))
         {
             //无返回,无容器
             apiOperate.setResult(getApiFieldList(RocResponse.class));
             return;
         }
-
-
-
-        if (!aClass.equals(RocResponse.class)&&!aClass.equals(List.class)&&!aClass.equals(Map.class)&&StringUtil.isEmpty(returnTypeModel)&&ObjectUtil.isEmpty(returnTypeClass))
-        {
-            //无容器,无配置,返回为对象直接返回
-            apiOperate.setResult(getApiFieldList(aClass));
-            return;
-        }
-
-        if (!ArrayUtil.contains(returnTypeClass,aClass))
-        {
-            returnTypeClass = ArrayUtil.add(returnTypeClass,aClass);
-        }
-
-        //有配置类,但无数据模型,默认拼装模型
-        if (StringUtil.isEmpty(returnTypeModel)&&ArrayUtil.contains(returnTypeClass,RocResponse.class)&&!ObjectUtil.isEmpty(returnTypeClass))
-        {
-            //RocResponse<ElementPageDto>
-            if (returnTypeClass.length<=1)
-            {
-                Class<?> rqCla = findNotEqDtoClass(returnTypeClass,new Class<?>[]{RocResponse.class,List.class,Collection.class,Map.class});
-                if (rqCla!=null)
-                {
-                    returnTypeModel = "RocResponse<" + rqCla.getSimpleName() + ">";
-                }
-            }
-            //RocResponse<List<ElementPageDto>>
-            if (ArrayUtil.contains(returnTypeClass,List.class))
-            {
-                Class<?> rqCla = findNotEqDtoClass(returnTypeClass,new Class<?>[]{RocResponse.class,List.class,Collection.class,Map.class});
-                if (rqCla!=null)
-                {
-
-                    returnTypeModel = "RocResponse<List<"+rqCla.getSimpleName()+">>";
-                }
-            }
-        } else
-        if (StringUtil.isEmpty(returnTypeModel)&&ArrayUtil.contains(returnTypeClass,List.class)&&!ObjectUtil.isEmpty(returnTypeClass))
-        {
-            //List<ElementPageDto>
-            Class<?> rqCla = findNotEqDtoClass(returnTypeClass,new Class<?>[]{RocResponse.class,List.class,Collection.class,Map.class});
-            if (rqCla!=null)
-            {
-                returnTypeModel = "List<" + rqCla.getSimpleName() + ">";
-            }
-        }
-
-        /*else
-        if (StringUtil.isEmpty(returnTypeModel))
-        {
-           // exeMethod.toGenericString()
-        }
-*/
-        if (StringUtil.isEmpty(returnTypeModel))
-        {
-            log.debug("动作的返回类型配置不完整:{}",exeMethod.toString());
-            return;
-        }
-
+        String returnTypeModel = exeMethod.getGenericReturnType().getTypeName();
+        apiOperate.setResultType(returnTypeModel);
+        Class<?>[] returnTypeClass  = ClassUtil.getClassForTypeModel(exeMethod.getGenericReturnType().getTypeName()).toArray(new Class<?>[0]);
         List<Class<Object>> classList =  toList(returnTypeClass);
         apiOperate.setResult(getApiFieldForReturnTypeModel(classList,returnTypeModel));
     }
@@ -574,7 +516,7 @@ public class ApiDocUtil {
             Class<?> theClass = findDtoClass(className,classList);
             if (theClass!=null)
             {
-                apiField.setChild(getApiFieldList(theClass));
+                apiField.setChildren(getApiFieldList(theClass));
 
             }
         }
@@ -646,6 +588,12 @@ public class ApiDocUtil {
         return null;
     }
 
+    /**
+     * 查找注释文档
+     * @param name 方法名称
+     * @param namespace 命名空间
+     * @return 内容
+     */
     public static String findDescribe(String name,String namespace)
     {
         if (StringUtil.isEmpty(name))

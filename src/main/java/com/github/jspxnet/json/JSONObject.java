@@ -293,6 +293,10 @@ public class JSONObject extends HashMap<String, Object> {
         if (bean == null) {
             return;
         }
+        if (bean instanceof Class) {
+            super.put("class", ((Class) bean).getName());
+            return;
+        }
 
         if (ClassUtil.isProxy(bean.getClass())) {
             bean = ReflectUtil.getValueMap(bean);
