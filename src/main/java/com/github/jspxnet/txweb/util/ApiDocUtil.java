@@ -215,6 +215,10 @@ public class ApiDocUtil {
                         }
                     }
                 }
+                if (jsonIgnore!=null)
+                {
+                    apiField.setCaption(apiField.getCaption()+ ",非空显示");
+                }
                 fieldList.add(apiField);
             } else {
                 ApiField apiField = new ApiField();
@@ -229,6 +233,10 @@ public class ApiDocUtil {
                             apiField.setCaption(column.caption() + ":" + enumMap.toString());
                         }
                     }
+                }
+                if (jsonIgnore!=null)
+                {
+                    apiField.setCaption(apiField.getCaption()+ ",非空显示");
                 }
                 fieldList.add(apiField);
                 Class<?> childObj = null;
@@ -442,14 +450,19 @@ public class ApiDocUtil {
             classList.remove(firstClass);
         }
         List<ApiField> apiFieldList = getApiFieldList(firstClass);
+
         if (!ObjectUtil.isEmpty(apiFieldList))
         {
             if (firstClass.equals(RocResponse.class))
             {
-                ApiField apiField = new ApiField();
-                apiFieldList.add(apiField);
-                apiField.setCaption("数据");
-                apiField.setName("data");
+                ApiField apiField = findApiFieldForName("data",apiFieldList);
+                if (apiField==null)
+                {
+                    apiField = new ApiField();
+                    apiFieldList.add(apiField);
+                    apiField.setCaption("数据");
+                    apiField.setName("data");
+                }
                 returnTypeModel = StringUtil.substringOutBetween(returnTypeModel,"<",">");
                 if (!StringUtil.isEmpty(returnTypeModel))
                 {
@@ -458,6 +471,23 @@ public class ApiDocUtil {
             }
         }
         return apiFieldList;
+    }
+
+    public static ApiField findApiFieldForName(String name,List<ApiField> apiFieldList)
+    {
+        if (name==null||ObjectUtil.isEmpty(apiFieldList))
+        {
+            return null;
+        }
+        for (ApiField apiField:apiFieldList)
+        {
+            if (name.equalsIgnoreCase(apiField.getName()))
+            {
+                return apiField;
+            }
+        }
+        return null;
+
     }
 
     public static void putChildApiFieldForReturnTypeModel(ApiField apiField,List<Class<Object>> classList,String returnTypeModel) {

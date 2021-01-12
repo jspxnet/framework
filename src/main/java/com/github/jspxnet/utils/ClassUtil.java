@@ -1060,13 +1060,13 @@ public class ClassUtil {
                 String[] classNames = StringUtil.split(className,StringUtil.COMMAS);
                 for (String name:classNames)
                 {
-                    if (!StringUtil.isEmpty(name)&&!classNameList.contains(name))
+                    if (!StringUtil.isEmpty(name)&&!name.contains("[")&&!classNameList.contains(name))
                     {
                         classNameList.add(name);
                     }
                 }
             } else
-            if (!StringUtil.isEmpty(className)&&!classNameList.contains(className))
+            if (!StringUtil.isEmpty(className)&&!className.contains("[")&&!classNameList.contains(className))
             {
                 classNameList.add(className);
             }
