@@ -23,7 +23,6 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -178,7 +177,7 @@ public class ApiDocUtil {
      * @param cla bean对象
      * @return json描述
      */
-    public static List<ApiField> getApiFieldList(Class<?> cla) {
+    public static List<ApiField> getApiFieldList(Class<?> cla,boolean jsonIgnoreShow) {
         if (ClassUtil.isStandardType(cla)||Class.class.equals(cla))
         {
             return null;
@@ -196,7 +195,7 @@ public class ApiDocUtil {
                 continue;
             }
             JsonIgnore jsonIgnore = field.getAnnotation(JsonIgnore.class);
-            if (jsonIgnore != null&&!jsonIgnore.isNull()) {
+            if (jsonIgnoreShow&&jsonIgnore != null&&!jsonIgnore.isNull()) {
                 continue;
             }
 
@@ -250,7 +249,7 @@ public class ApiDocUtil {
                     //...
                 }
                 if (childObj != null) {
-                    List<ApiField> childFieldList = getApiFieldList(childObj);
+                    List<ApiField> childFieldList = getApiFieldList(childObj,jsonIgnoreShow);
                     if (childFieldList != null && !childFieldList.isEmpty()) {
                         apiField.setChildren(childFieldList);
 
@@ -406,15 +405,16 @@ public class ApiDocUtil {
 
     public static void putReturnApiField(Method exeMethod,ApiOperate apiOperate)
     {
+
         if (exeMethod.getReturnType().equals(void.class))
         {
             //无返回,无容器
-            apiOperate.setResult(getApiFieldList(RocResponse.class));
+            apiOperate.setResult(getApiFieldList(RocResponse.class,false));
             return;
         }
         String returnTypeModel = exeMethod.getGenericReturnType().getTypeName();
-        apiOperate.setResultType(returnTypeModel);
         Class<?>[] returnTypeClass  = ClassUtil.getClassForTypeModel(exeMethod.getGenericReturnType().getTypeName()).toArray(new Class<?>[0]);
+        apiOperate.setResultType(returnTypeModel);
         List<Class<Object>> classList =  toList(returnTypeClass);
         apiOperate.setResult(getApiFieldForReturnTypeModel(classList,returnTypeModel));
     }
@@ -449,7 +449,7 @@ public class ApiDocUtil {
         {
             classList.remove(firstClass);
         }
-        List<ApiField> apiFieldList = getApiFieldList(firstClass);
+        List<ApiField> apiFieldList = getApiFieldList(firstClass,classList.contains(List.class));
 
         if (!ObjectUtil.isEmpty(apiFieldList))
         {
@@ -546,7 +546,7 @@ public class ApiDocUtil {
             Class<?> theClass = findDtoClass(className,classList);
             if (theClass!=null)
             {
-                apiField.setChildren(getApiFieldList(theClass));
+                apiField.setChildren(getApiFieldList(theClass,false));
 
             }
         }
@@ -558,7 +558,7 @@ public class ApiDocUtil {
      * @param clsArray  不等于列表
      * @return  过滤不等于的,剩余的返回, 差集计算
      */
-    public static Class<?> findNotEqDtoClass(Class<?>[] returnTypeClass,Class<?>[] clsArray)
+/*    public static Class<?> findNotEqDtoClass(Class<?>[] returnTypeClass,Class<?>[] clsArray)
     {
         if (ObjectUtil.isEmpty(returnTypeClass))
         {
@@ -577,8 +577,7 @@ public class ApiDocUtil {
             }
         }
         return null;
-
-    }
+    }*/
 
     /**
      * 根据模型名称查询类
