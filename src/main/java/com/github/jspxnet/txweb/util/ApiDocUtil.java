@@ -31,9 +31,9 @@ import java.util.*;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/1/11 11:44
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/1/11 11:44
+ * description: API 文档工具
  **/
 @Slf4j
 public class ApiDocUtil {

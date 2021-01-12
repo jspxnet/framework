@@ -1038,6 +1038,34 @@ public class ClassUtil {
     }
 
 
+    /**
+     * 通过泛型模版得到类
+     * @param typeModel 泛型模版 com.github.jspxnet.txweb.result.RocResponse<java.util.List<jspx.jcommon.model.dto.FrameworkTemplateDto>>
+     * @return 类列表
+     */
+/*    public static List<Class<?>> getClassForTypeModel(String typeModel)  {
+
+        String className = StringUtil.substringBefore(typeModel,"<");
+        typeModel = StringUtil.substringOutBetween(typeModel,"<",">");
+        while (!StringUtil.isEmpty(className)&&!StringUtil.isEmpty(typeModel))
+        {
+
+
+        }
+
+        return cls;
+    }*/
+
+/*
+    public static List<Class<?>> getClassForTypeModel(String typeModel)  {
+
+        String className = StringUtil.substringBefore(typeModel,"<");
+        typeModel = StringUtil.substringOutBetween(typeModel,"<",">");
+
+        return cls;
+    }*/
+
+
 
 
 }
