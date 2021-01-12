@@ -1039,7 +1039,10 @@ public class ClassUtil {
 
     /**
      * 通过泛型模版得到类
-     * @param typeModel 泛型模版 com.github.jspxnet.txweb.result.RocResponse<java.util.List<jspx.jcommon.model.dto.FrameworkTemplateDto>>
+     * @param typeModel 泛型模版
+     *  <pre>{@code
+     *      com.github.jspxnet.txweb.result.RocResponse<java.util.List<jspx.jcommon.model.dto.FrameworkTemplateDto>>
+     *  }</pre>
      * @return 类列表
      */
     public static List<Class<?>> getClassForTypeModel(String typeModel)  {
@@ -1072,7 +1075,6 @@ public class ClassUtil {
             }
         }
 
-        System.out.println(ObjectUtil.toString(classNameList));
         List<Class<?>> resultList = new ArrayList<>();
         for (String name:classNameList)
         {
@@ -1082,6 +1084,13 @@ public class ClassUtil {
             }
             try {
                 if ("string".equalsIgnoreCase(name))
+                {
+                    resultList.add(String.class);
+                } else
+                if ("float".equalsIgnoreCase(name))
+                {
+                    resultList.add(String.class);
+                }else if ("double".equalsIgnoreCase(name))
                 {
                     resultList.add(String.class);
                 } else
@@ -1107,7 +1116,6 @@ public class ClassUtil {
             } catch (ClassNotFoundException e) {
                 log.error("错误的类名:{}",name);
                 e.printStackTrace();
-
             }
         }
         return resultList;

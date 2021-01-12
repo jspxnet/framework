@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
  *    typeReference.getType()
  *    }
  * </pre>
- * @param <T>
+ * @param <T> 泛型
  */
 public class TypeReference<T> extends TypeToken<T> implements Type  {
 

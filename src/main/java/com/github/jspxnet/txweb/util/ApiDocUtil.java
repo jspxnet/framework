@@ -175,6 +175,7 @@ public class ApiDocUtil {
      * 类对象转json描述
      *
      * @param cla bean对象
+     * @param jsonIgnoreShow 是否显示 非空才显示的相
      * @return json描述
      */
     public static List<ApiField> getApiFieldList(Class<?> cla,boolean jsonIgnoreShow) {
@@ -195,10 +196,13 @@ public class ApiDocUtil {
                 continue;
             }
             JsonIgnore jsonIgnore = field.getAnnotation(JsonIgnore.class);
-            if (jsonIgnoreShow&&jsonIgnore != null&&!jsonIgnore.isNull()) {
+            if (jsonIgnore!=null&&!jsonIgnoreShow)
+            {
                 continue;
             }
-
+            if (jsonIgnore != null&&!jsonIgnore.isNull()) {
+                continue;
+            }
             if (ClassUtil.isStandardProperty(field.getType()) || field.getType().equals(JSONObject.class)) {
 
                 ApiField apiField = new ApiField();
@@ -277,7 +281,7 @@ public class ApiDocUtil {
 
     /**
      * 这里只得到方法的参数说明
-     *
+     * @param cla 类型
      * @param exeMethod 方法
      * @param url       路径
      * @return 文档操作对象
