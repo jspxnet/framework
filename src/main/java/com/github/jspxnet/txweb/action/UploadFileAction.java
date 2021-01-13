@@ -75,6 +75,9 @@ public class UploadFileAction extends MultipartSupport {
 
     //分组变量名称
     final public static String GROUP_VAR_NAME = "groupName";
+    final public static String THUMBNAIL_VAR_NAME = "thumbnail";
+    final public static String MOBILE_VAR_NAME = "mobile";
+    final public static String CONTENT_TYPE_VAR_NAME = "contentType";
 
     // 状态
     public static String hashType = "MD5";
@@ -308,7 +311,7 @@ public class UploadFileAction extends MultipartSupport {
             return;
         }
         IUserSession userSession = getUserSession();
-        int contentType = getInt("contentType",WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
         Object alreadyUploadFile = uploadFileDAO.getForHash(hash);
         IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;
         if (checkUploadFile != null && !StringUtil.isNull(hash) && checkUploadFile.getHash().equals(hash)) {
@@ -318,8 +321,7 @@ public class UploadFileAction extends MultipartSupport {
                 TXWebUtil.print(json.toString(), contentType, response);
                 return;
             }
-
-            printUploadFileInfo(copyUploadFile,chunkJson, getBoolean("thumbnail"),getBoolean("mobile"),contentType, uploadFileDAO.getNamespace(),
+            printUploadFileInfo(copyUploadFile,chunkJson, getBoolean(THUMBNAIL_VAR_NAME),getBoolean(MOBILE_VAR_NAME),contentType, uploadFileDAO.getNamespace(),
                     language.getLang(LanguageRes.success),response);
             return;
         }
@@ -397,9 +399,9 @@ public class UploadFileAction extends MultipartSupport {
             printErrorInfo("上传失败");
             return NONE;
         }
-        boolean thumbnail = getBoolean("thumbnail");
-        boolean mobile = getBoolean("mobile");
-        int contentType = getInt("contentType",WebOutEnumType.JSON.getValue());
+        boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
+        boolean mobile = getBoolean(MOBILE_VAR_NAME);
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
 
         printUploadFileInfo(objects,chunkJson, thumbnail,mobile,contentType, uploadFileDAO.getNamespace(),   language.getLang(LanguageRes.success),response);
         uploadFileDAO.evict(uploadFileDAO.getClassType());
@@ -477,7 +479,7 @@ public class UploadFileAction extends MultipartSupport {
                 //已经上传过的,拷贝一份
                 return copyUploadToUser(alreadyUploadFile, userSession);
             } else {
-                //boolean thumbnail = getBoolean("thumbnail");
+                //boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
                 //还没有保存到数据库
                 Object[] uploadObjArray = newUpload(uf, upFile, userSession);
                 if (ObjectUtil.isEmpty(uploadObjArray))
@@ -840,7 +842,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("original", StringUtil.empty);
         json.put("namespace", uploadFileDAO.getNamespace());
         json.put(Environment.message, info);
-        int contentType = getInt("contentType",WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
         TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response);
     }
 
@@ -861,7 +863,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("thumbnail", 0);
         json.put(Environment.message, "need login");
         json.put("namespace", getRootNamespace());
-        int contentType = getInt("contentType",WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
         TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response, ErrorEnumType.NEED_LOGIN.getValue());
     }
 
@@ -882,7 +884,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("thumbnail", 0);
         json.put(Environment.message, "not config uploadFileDAO");
         json.put("namespace", getRootNamespace());
-        int contentType = getInt("contentType",WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
         TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response);
     }
 
@@ -903,7 +905,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("thumbnail", 0);
         json.put("namespace", uploadFileDAO.getNamespace());
         json.put(Environment.message, language.getLang(LanguageRes.uploadRequestError));
-        int contentType = getInt("contentType",WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
         TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response);
     }
 
