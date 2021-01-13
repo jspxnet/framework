@@ -25,6 +25,7 @@ import java.util.Properties;
  */
 public interface MemberDAO extends SoberSupport {
 
+    List<Member> getMemberForExpression(String select, TreeItemDAO treeItemDAO, long uid);
 
     int updateToken(long uid) throws Exception;
 

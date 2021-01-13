@@ -11,11 +11,11 @@ import com.github.jspxnet.enums.EnumType;
  **/
 public enum  WebOutEnumType implements EnumType {
 
-    //作者
+    //头类型
     XML(1, "XML"),
-    //超级管理员
+
     JSON(2, "JSON"),
-    //普通管理员
+
     JAVASCRIPT(3, "javascript"),
 
     HTML(4, "html"),

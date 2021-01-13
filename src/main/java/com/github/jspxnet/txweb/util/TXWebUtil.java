@@ -1080,6 +1080,9 @@ public class TXWebUtil {
         if (WebOutEnumType.TEXT.getValue() == type) {
             contentType = "text/plain";
         }
+        if (WebOutEnumType.HTML.getValue() == type) {
+            contentType = "text/html";
+        }
         AtomicReference<StringBuilder> sb = new AtomicReference<>(new StringBuilder());
         sb.get().append(contentType).append(";charset=").append(response.getCharacterEncoding());
         response.setContentType(sb.toString());

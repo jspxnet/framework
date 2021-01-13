@@ -927,4 +927,52 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
         return criteria.delete(false) >= 0;
     }
 
+    //----------------------
+
+    @Override
+    public List<Member> getMemberForExpression(String select, TreeItemDAO treeItemDAO, long uid) {
+        String[] lines = StringUtil.split(select, Environment.marker_split);
+        List<Member> members = new ArrayList<>();
+        if (ArrayUtil.isEmpty(lines)) {
+            return members;
+        }
+        for (String line : lines) {
+            if (isUser(line)) {
+                long id = StringUtil.toLong(StringUtil.trim(StringUtil.substringBetween(line, Environment.marker_user_startTag, Environment.marker_user_centerTag)));
+                if (id <= 0) {
+                    continue;
+                }
+                Member member = get(Member.class, id);
+                if (member == null) {
+                    continue;
+                }
+                members.add(member);
+            }
+            if (isGroup(line)) {
+                String department = StringUtil.trim(StringUtil.substringBetween(line, Environment.marker_group_startTag, Environment.marker_group_centerTag));
+                if (StringUtil.isNull(department)) {
+                    continue;
+                }
+                members.addAll(getDepartmentMember(treeItemDAO, department));
+            }
+        }
+        return members;
+    }
+
+
+    public static boolean isUser(String data) {
+        return !StringUtil.isNull(data) && data.startsWith(Environment.marker_user_startTag) && data.contains(Environment.marker_user_centerTag) && data.endsWith(Environment.marker_user_endTag);
+    }
+
+    public static  boolean isGroup(String data) {
+        return !StringUtil.isNull(data) && data.startsWith(Environment.marker_group_startTag) && data.contains(Environment.marker_group_centerTag) && data.endsWith(Environment.marker_group_endTag);
+    }
+
+    public static  boolean isContacts(String data) {
+        return !StringUtil.isNull(data) && data.startsWith(Environment.marker_contacts_startTag) && data.contains(Environment.marker_contacts_centerTag) && data.endsWith(Environment.marker_contacts_endTag);
+    }
+
+    public static  boolean isFollow(String data) {
+        return !StringUtil.isNull(data) && data.startsWith(Environment.marker_follow_startTag) && data.contains(Environment.marker_follow_centerTag) && data.endsWith(Environment.marker_follow_endTag);
+    }
 }
