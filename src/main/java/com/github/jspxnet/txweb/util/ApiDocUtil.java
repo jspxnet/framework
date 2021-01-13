@@ -401,7 +401,6 @@ public class ApiDocUtil {
 
     public static void putReturnApiField(Method exeMethod,ApiOperate apiOperate)
     {
-
         if (exeMethod.getReturnType().equals(void.class))
         {
             //无返回,无容器
@@ -469,6 +468,12 @@ public class ApiDocUtil {
         return apiFieldList;
     }
 
+    /**
+     * 查询返回
+     * @param name 字段名称
+     * @param apiFieldList 字段列表
+     * @return 返回字段信息
+     */
     public static ApiField findApiFieldForName(String name,List<ApiField> apiFieldList)
     {
         if (name==null||ObjectUtil.isEmpty(apiFieldList))
@@ -486,6 +491,12 @@ public class ApiDocUtil {
 
     }
 
+    /**
+     * 更具泛型模型和类生成返回数据结构
+     * @param apiField api字段容器
+     * @param classList 类列表
+     * @param returnTypeModel  泛型模型
+     */
     public static void putChildApiFieldForReturnTypeModel(ApiField apiField,List<Class<Object>> classList,String returnTypeModel) {
         if (returnTypeModel.startsWith("<")&&returnTypeModel.endsWith(">"))
         {
