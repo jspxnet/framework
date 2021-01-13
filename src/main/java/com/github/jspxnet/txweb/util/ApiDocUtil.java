@@ -319,16 +319,8 @@ public class ApiDocUtil {
 
         Describe describe = exeMethod.getAnnotation(Describe.class);
         if (describe != null) {
-
-            String cont;
-            if ( !ObjectUtil.isEmpty(describe.value())&&!"[\"\"]".equalsIgnoreCase(ObjectUtil.toString(describe.value())))
-            {
-                cont = ArrayUtil.toString(describe.value(), "<br />");
-            } else {
-                cont = findDescribe(cla.getName() + StringUtil.DOT + exeMethod.getName(),describe.namespace());
-            }
-
-            apiOperate.setDescribe(ScriptMarkUtil.getMarkdownHtml(cont));
+            String cont = getDescribeValue(cla.getName() + StringUtil.DOT + exeMethod.getName(),describe);
+            apiOperate.setDescribe(cont);
         }
 
         //方法参数-------------------------------------------------------------------------------------------
@@ -627,7 +619,7 @@ public class ApiDocUtil {
      * @param namespace 命名空间
      * @return 内容
      */
-    public static String findDescribe(String name,String namespace)
+    public static String findDescribe(String name, String flag,String namespace)
     {
         if (StringUtil.isEmpty(name))
         {
@@ -672,12 +664,39 @@ public class ApiDocUtil {
         while (elementList.hasNext())
         {
             Element el = (Element)elementList.next();
-            if (name.equalsIgnoreCase(StringUtil.trim(el.attributeValue("id"))))
+            if (StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(StringUtil.trim(el.attributeValue("id"))))
+            {
+                return XMLUtil.escapeDecrypt(el.getStringValue());
+            }
+            if (!StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(StringUtil.trim(el.attributeValue("id")))&&flag.equalsIgnoreCase(StringUtil.trim(el.attributeValue("flag"))))
             {
                 return XMLUtil.escapeDecrypt(el.getStringValue());
             }
         }
-
         return null;
     }
+
+    /**
+     *
+     * @param id 文档id
+     * @param describe 注释
+     * @return 得到描述
+     */
+    public static String getDescribeValue(String id,Describe describe)
+    {
+        if (describe == null)
+        {
+            return null;
+
+        }
+        String cont;
+        if (!ObjectUtil.isEmpty(describe.value()) && !"[\"\"]".equalsIgnoreCase(ObjectUtil.toString(describe.value()))) {
+            cont = ArrayUtil.toString(describe.value(), "<br />");
+        } else {
+            cont = findDescribe(id,describe.flag(),describe.namespace());
+        }
+        return ScriptMarkUtil.getMarkdownHtml(cont);
+    }
+
+
 }

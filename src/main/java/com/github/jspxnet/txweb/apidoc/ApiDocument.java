@@ -1,6 +1,7 @@
 package com.github.jspxnet.txweb.apidoc;
 
 import com.github.jspxnet.json.JsonIgnore;
+import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,5 +20,8 @@ public class ApiDocument extends ApiAction {
     //全局参数
     @JsonIgnore(isNull = true)
     private Map<String, ApiParam> params = new LinkedHashMap<>();
+
+    @Column(caption = "描述")
+    private String describe;
 
 }

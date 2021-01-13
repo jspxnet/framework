@@ -83,7 +83,6 @@ public final class AnnotationUtil {
         if (methods == null) {
             return false;
         }
-
         for (Method method : methods) {
             Scheduled scheduled = method.getAnnotation(Scheduled.class);
             if (scheduled != null) {
@@ -101,12 +100,16 @@ public final class AnnotationUtil {
         if (cls == null) {
             return "";
         }
-        Bean bean = (Bean) cls.getAnnotation(Bean.class);
+        RpcClient rpcClient = cls.getAnnotation(RpcClient.class);
+        if (rpcClient != null && !Empty.class.equals(rpcClient.bind())) {
+            return rpcClient.bind().getName();
+        }
+        Bean bean =  cls.getAnnotation(Bean.class);
         if (bean != null && !Empty.class.equals(bean.bind())) {
             return bean.bind().getName();
         }
         Class<?> ices = null;
-        HttpMethod httpMethod = (HttpMethod) cls.getAnnotation(HttpMethod.class);
+        HttpMethod httpMethod = cls.getAnnotation(HttpMethod.class);
         if (httpMethod != null)
         {
             ices = ClassUtil.getImplements(cls);

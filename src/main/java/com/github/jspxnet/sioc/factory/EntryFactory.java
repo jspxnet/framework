@@ -127,11 +127,8 @@ public final class EntryFactory implements BeanFactory {
 
         Object result = null;
         Class<?> cla = ClassUtil.loadClass(lifecycleObject.getClassName());
-        if (Sioc.KEY_RPC_CLIENT.equalsIgnoreCase(lifecycleObject.getCreate())) {
-            RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
-            if (rpcClient == null) {
-                throw new Exception(lifecycleObject.getClassName() + "没有定义@RpcClient");
-            }
+        RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
+        if (rpcClient!=null) {
             Class<?> classObj = rpcClient.bind().equals(Empty.class) ? cla : rpcClient.bind();
             return RpcClientProxyFactory.createRpcClientProxy(classObj);
         } else {

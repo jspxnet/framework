@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.sioc;
 
-import com.github.jspxnet.sioc.annotation.RpcClient;
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,7 +25,7 @@ public class Sioc {
     final public static String global = "global";
     final public static String IocLoad = "siocLoad:";
 
-    final public static String KEY_RPC_CLIENT = "rpcClient";
+    //final public static String KEY_RPC_CLIENT = "rpcClient";
 
     final public static String IocFen = "$";
     final public static String IocRef = "ref";

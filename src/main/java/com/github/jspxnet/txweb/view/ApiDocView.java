@@ -22,10 +22,8 @@ import com.github.jspxnet.txweb.config.TXWebConfigManager;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ApiDocUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.*;
+
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -218,6 +216,13 @@ public class ApiDocView extends ActionSupport {
             ApiDocUtil.putReturnApiField(exeMethod,apiOperate);
         }
         apiDocument.setOperateList(operateList);
+
+        Describe describe = cla.getAnnotation(Describe.class);
+        if (describe != null) {
+            String cont = ApiDocUtil.getDescribeValue(cla.getName(),describe);
+            apiDocument.setDescribe(cont);
+        }
+
         return apiDocument;
     }
 

@@ -167,7 +167,7 @@ public class ConfigureContext implements IocContext {
             }
             try {
                 registryIocBean(cls);
-                registryRpcClientBean(cls);
+                //registryRpcClientBean(cls);
             } catch (Exception e) {
                 log.error("ioc scan load class dir error" + cls, e);
             }
@@ -184,25 +184,40 @@ public class ConfigureContext implements IocContext {
         //注册bean标签
         try {
             Bean iocBean = cla.getAnnotation(Bean.class);
-            if (iocBean == null) {
+            RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
+            if (iocBean == null&&rpcClient==null) {
                 return;
             }
+            String id;
+            String namespace;
             BeanModel beanModel = new BeanModel();
-            String id = iocBean.id();
-            if (StringUtil.isNull(id) && !iocBean.bind().equals(Empty.class)) {
-                id = iocBean.bind().getName();
+            if (rpcClient!=null)
+            {
+                id = rpcClient.bind().getName();
+                namespace = rpcClient.namespace();
+
+            } else
+            {
+                id = iocBean.id();
+                if (StringUtil.isNull(id) && !iocBean.bind().equals(Empty.class)) {
+                    id = iocBean.bind().getName();
+                }
+                if (StringUtil.isNull(id)) {
+                    id = AnnotationUtil.getBeanId(cla);
+                }
+                namespace = iocBean.namespace();
+                beanModel.setCreate(iocBean.create());
             }
-            
-            if (StringUtil.isNull(id)) {
-                id = AnnotationUtil.getBeanId(cla);
-            }
-            
             beanModel.setId(id);
-            beanModel.setSingleton(iocBean.singleton());
-            beanModel.setNamespace(iocBean.namespace());
+            if (rpcClient!= null) {
+                beanModel.setSingleton(true);
+            } else
+            {
+                beanModel.setSingleton(iocBean.singleton());
+            }
+            beanModel.setNamespace(namespace);
             beanModel.setClassName(cla.getName());
-            beanModel.setCreate(iocBean.create());
-            log.info("registry Ioc Bean class=" + cla + " id=" + id + " namespace=" + iocBean.namespace());
+            log.info("registry Ioc Bean class=" + cla + " id=" + id + " namespace=" + namespace);
             registerBean(beanModel);
         } catch (Exception e) {
             log.error("ioc load error" + cla, e);
@@ -212,9 +227,9 @@ public class ConfigureContext implements IocContext {
     /**
      * 注册class
      *
-     * @param cla 类对象
+     *
      */
-    @Override
+  /*  @Override
     public void registryRpcClientBean(Class<?> cla) {
 
         //注册bean标签
@@ -235,7 +250,7 @@ public class ConfigureContext implements IocContext {
             log.error("ioc load error" + cla, e);
         }
     }
-
+*/
     @Override
     public void setConfigFile(String file) {
         String[] configFile = new String[]{file};

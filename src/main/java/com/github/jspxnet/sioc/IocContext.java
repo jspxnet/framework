@@ -32,7 +32,7 @@ public interface IocContext {
 
     void reload() throws Exception;
 
-    void registryRpcClientBean(Class<?> cla);
+    //void registryRpcClientBean(Class<?> cla);
 
     void setConfigFile(String file);
 
