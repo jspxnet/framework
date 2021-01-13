@@ -790,7 +790,7 @@ public class ParamUtil {
             return;
         }
 
-        if (!isSafe(theParam, param.min(), param.max(), param.level())) {
+        if (theParam!=null&&!isSafe(theParam, param.min(), param.max(), param.level())) {
              String message = StringUtil.isEmpty(param.message()) ? (param.caption() + " " + paramName + " parameter is unsafe,参数不合规," + param.caption()) : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
         }
