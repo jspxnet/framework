@@ -616,6 +616,7 @@ public class ApiDocUtil {
     /**
      * 查找注释文档
      * @param name 方法名称
+     * @param flag 方法名称重复加标识识别
      * @param namespace 命名空间
      * @return 内容
      */

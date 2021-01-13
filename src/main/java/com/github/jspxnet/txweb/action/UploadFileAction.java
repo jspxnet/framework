@@ -65,6 +65,7 @@ import java.util.List;
  * 1.参数thumbnail  成立，生成_s缩图
  * 2.所有图都生成_m手机图片
  * 3.如果已经存在的图片，将已经存在的图片返回，如果已经在的图片，就将现有图片拷贝覆盖到原图片
+ * </p>
  */
 @Slf4j
 @HttpMethod(caption = "上传文件")
@@ -912,6 +913,7 @@ public class UploadFileAction extends MultipartSupport {
      * @param objects 上次的对象
      * @param chunkJson 分片上传信息
      * @param thumbnail 是否有缩图
+     * @param contentType 输出头信息控制 ie9 等浏览器不能是用json,需要设置为html方式输出
      * @param mobile 是否有手机
      * @param namespace 命名空间
      * @param message 消息
@@ -919,7 +921,6 @@ public class UploadFileAction extends MultipartSupport {
      */
     public static void printUploadFileInfo(Object[]  objects, JSONObject chunkJson, boolean thumbnail, boolean mobile, int contentType,String namespace, String message, HttpServletResponse response)
     {
-
         IUploadFile uploadFile = (IUploadFile)objects[0];
         JSONObject json;
         if (chunkJson==null)
