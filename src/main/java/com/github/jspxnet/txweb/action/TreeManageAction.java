@@ -13,6 +13,7 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.component.zhex.spell.ChineseUtil;
+import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
@@ -25,6 +26,7 @@ import com.github.jspxnet.txweb.dao.PermissionDAO;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.txweb.model.param.TreeItemParam;
 import com.github.jspxnet.txweb.model.param.TreeParam;
+import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.txweb.table.TreeItem;
 import com.github.jspxnet.txweb.table.TreeRole;
@@ -50,14 +52,6 @@ public class TreeManageAction extends TreeView {
 
     }
 
-    private boolean checkNodeId() {
-        if (StringUtil.isNull(nodeId)) {
-            addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.invalidParameter));
-            return false;
-        }
-        return true;
-    }
-
     private boolean checkCaption() {
         if (StringUtil.isNull(getString("caption", true))) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.nodeNameNeedInput));
@@ -74,7 +68,7 @@ public class TreeManageAction extends TreeView {
     }
 
     @Operate(caption = "添加节点")
-    public void addTreeItem(@Param TreeItemParam param) throws Exception {
+    public RocResponse<Integer> addTreeItem(@Param TreeItemParam param) throws Exception {
         TreeItem treeItem =BeanUtil.copy(param,TreeItem.class);
         IUserSession userSession = getUserSession();
         treeItem.setPutUid(userSession.getUid());
@@ -85,18 +79,15 @@ public class TreeManageAction extends TreeView {
         //得到简拼end
 
         if (treeItemDAO.addTreeItem(getFirstNodeId(), treeItem)) {
-            addActionMessage(language.getLang(LanguageRes.saveSuccess));
-            setActionResult(SUCCESS);
+            return RocResponse.success(1,language.getLang(LanguageRes.saveSuccess));
         }
+        return RocResponse.error(1,language.getLang(LanguageRes.saveFailure));
     }
 
     @Operate(caption = "添加子节点")
-    public void addChildTreeItem(@Param TreeItemParam param) throws Exception {
-        if (!checkNodeId()) {
-            return;
-        }
-        if (!checkCaption()) {
-            return;
+    public RocResponse<Integer> addChildTreeItem(@Param(caption = "参数") TreeItemParam param) throws Exception {
+        if (StringUtil.isEmpty(param.getCaption())) {
+            return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(),language.getLang(LanguageRes.nodeNameNeedInput));
         }
         TreeItem treeItem =BeanUtil.copy(param,TreeItem.class);
         IUserSession userSession = getUserSession();
@@ -106,40 +97,37 @@ public class TreeManageAction extends TreeView {
         treeItem.setSpelling(ChineseUtil.getFullSpell(treeItem.getCaption(), ""));
         //得到简拼end
         if (treeItemDAO.addChildTreeItem(getFirstNodeId(), treeItem)) {
-            addActionMessage(language.getLang(LanguageRes.addChildNodeSuccess));
-        } else {
-            addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.deleteFailure));
+            return RocResponse.success(1,language.getLang(LanguageRes.addChildNodeSuccess));
+
         }
+        return RocResponse.error(1,language.getLang(LanguageRes.saveFailure));
     }
 
 
     @Operate(caption = "删除节点")
-    public void deleteTreeItem(@Param(caption = "nodeId") String nodeId)  {
-        if (!checkNodeId()) {
-            return;
-        }
+    public RocResponse<Integer> deleteTreeItem(@Param(caption = "nodeId",required = true,min = 1,max = 64,message = "节点ID不能为空") String nodeId)  {
         if (treeItemDAO.deleteTreeItem(nodeId)) {
-            addActionMessage(language.getLang(LanguageRes.deleteSuccess));
-            setActionResult(SUCCESS);
-        } else {
-            addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.deleteFailure));
+            return RocResponse.success(1,language.getLang(LanguageRes.deleteSuccess));
+
         }
+        return RocResponse.error(1,language.getLang(LanguageRes.deleteFailure));
     }
 
-    @Describe("兼容老版本")
-    @Operate(caption = "删除节点")
-    public void deleteTreeItem() {
-        if (!checkNodeId()) {
-            return;
+    @Operate(caption = "上移节点",method = "top")
+    public RocResponse<Integer> top(@Param(caption = "nodeId",required = true,min = 1,max = 64,message = "节点ID不能为空") String nodeId) throws Exception {
+        if (treeItemDAO.nodeTop(nodeId)) {
+            return RocResponse.success(1,language.getLang(LanguageRes.success));
         }
-        if (treeItemDAO.deleteTreeItem(getFirstNodeId())) {
-            addActionMessage(language.getLang(LanguageRes.deleteSuccess));
-            setActionResult(SUCCESS);
-        } else {
-            addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.deleteFailure));
-        }
+        return RocResponse.error(1,language.getLang(LanguageRes.operationFailure));
     }
 
+    @Operate(caption = "下移节点",method = "down")
+    public RocResponse<Integer> down(@Param(caption = "nodeId",required = true,min = 1,max = 64,message = "节点ID不能为空") String nodeId) throws Exception {
+        if (treeItemDAO.nodeDown(nodeId)) {
+            return RocResponse.success(1,language.getLang(LanguageRes.success));
+        }
+        return RocResponse.error(1,language.getLang(LanguageRes.operationFailure));
+    }
 
     @Operate(caption = "编辑节点")
     public void editTreeItem(@Param TreeItemParam param) throws Exception
@@ -179,6 +167,25 @@ public class TreeManageAction extends TreeView {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.updateFailure));
         }
     }
+
+    @Describe("兼容老版本")
+    @Deprecated
+    @Operate(caption = "删除节点")
+    public void deleteTreeItem() {
+        if (StringUtil.isEmpty(getFirstNodeId())) {
+            addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.nodeNameNeedInput));
+            return;
+        }
+        if (treeItemDAO.deleteTreeItem(getFirstNodeId())) {
+            addActionMessage(language.getLang(LanguageRes.deleteSuccess));
+            setActionResult(SUCCESS);
+        } else {
+            addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.deleteFailure));
+        }
+    }
+
+
+
     private long id = 0;
     public long getId() {
         return id;
@@ -187,6 +194,7 @@ public class TreeManageAction extends TreeView {
         this.id = id;
     }
     @Describe("兼容老版本")
+    @Deprecated
     @Operate(caption = "编辑节点")
     public void editTreeItem() throws Exception
     {

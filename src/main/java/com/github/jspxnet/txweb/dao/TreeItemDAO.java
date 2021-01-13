@@ -81,6 +81,10 @@ public interface TreeItemDAO extends SoberSupport {
 
     List getTreeItemPath(TreeItem treeItem);
 
+    boolean nodeTop(String nodeId) throws Exception;
+
+    boolean nodeDown(String nodeId) throws Exception;
+
     boolean deleteTree() throws Exception;
 
     List<TreeItem> getListForType(int nodeType);

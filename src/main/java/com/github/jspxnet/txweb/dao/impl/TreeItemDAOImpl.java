@@ -12,8 +12,6 @@ package com.github.jspxnet.txweb.dao.impl;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.txweb.annotation.Operate;
-import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.TreeItemDAO;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.txweb.table.TreeItem;
@@ -212,7 +210,6 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
     /**
      * @return 得到首页的排序
      */
-
     @Override
     public List<TreeItem> getListForType(int nodeType) {
         List<TreeItem> result = new ArrayList<>();
@@ -603,7 +600,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      * @param fen 分隔号
      * @return Map 选择框
      */
-    @Operate(caption = "选择框")
+    //(caption = "选择框")
     @Override
     public Map<String, String> getSelectTreeItemMap(String fen) {
         TreeItem rootNode = getRootTreeItem();
@@ -631,7 +628,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      * @param node   要添加的节点
      * @return boolean 是否添加成功
      */
-    @Operate(caption = "添加的节点")
+    //(caption = "添加的节点")
     @Override
     public boolean addTreeItem(String nodeId, TreeItem node) throws Exception {
         if (node == null) {
@@ -666,7 +663,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      * @param node   节点
      * @return boolean  增加到子节点 是否成功
      */
-    @Operate(caption = "添加相对节点")
+    //(caption = "添加相对节点")
     @Override
     public boolean addChildTreeItem(String nodeId, TreeItem node) throws Exception {
         if (node == null) {
@@ -700,9 +697,9 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      * @param nodeId 删除的节点id
      * @return boolean  删除节点 是否成功
      */
-    @Operate(caption = "删除的节点")
+    //(caption = "删除的节点")
     @Override
-    public boolean deleteTreeItem(@Param(caption = "删除的节点id") String nodeId) {
+    public boolean deleteTreeItem(String nodeId) {
         Criteria criteria = createCriteria(TreeItem.class).add(Expression.eq("namespace", namespace));
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.eq("organizeId", organizeId));
@@ -711,9 +708,82 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
     }
 
     /**
+     * 节点上移
+     * @param nodeId 节点id
+     * @return 是否成功
+     * @throws Exception 异常
+     */
+    @Override
+    public boolean nodeTop(String nodeId) throws Exception
+    {
+        TreeItem treeItem = getTreeItem(nodeId);
+        List<TreeItem> list = getChildTreeItem(treeItem.getParentNodeId());
+        Integer current = getNodeSortIndex(nodeId,list);
+        if (current==null)
+        {
+            return false;
+        }
+        int topCurrent = current-1;
+        if (topCurrent<0||topCurrent>=list.size())
+        {
+            return false;
+        }
+        TreeItem treeItemTop = list.get(current);
+        int sort = treeItemTop.getSortType();
+        treeItemTop.setSortType(treeItem.getSortType());
+        int x = super.update(treeItemTop,new String[]{"sortType"});
+        treeItem.setSortType(sort);
+        x = x + super.update(treeItem,new String[]{"sortType"});
+        return x>0;
+    }
+
+    /**
+     *  节点下移
+     * @param nodeId 节点id
+     * @return 是否成功
+     * @throws Exception 异常
+     */
+    @Override
+    public boolean nodeDown(String nodeId) throws Exception
+    {
+        TreeItem treeItem = getTreeItem(nodeId);
+        List<TreeItem> list = getChildTreeItem(treeItem.getParentNodeId());
+        Integer current = getNodeSortIndex(nodeId,list);
+        if (current==null)
+        {
+            return false;
+        }
+        int topCurrent = current+1;
+        if (topCurrent<0||topCurrent>=list.size())
+        {
+            return false;
+        }
+        TreeItem treeItemTop = list.get(current);
+        int sort = treeItemTop.getSortType();
+        treeItemTop.setSortType(treeItem.getSortType());
+        int x = super.update(treeItemTop,new String[]{"sortType"});
+        treeItem.setSortType(sort);
+        x = x + super.update(treeItem,new String[]{"sortType"});
+        return x>0;
+    }
+
+    private static Integer getNodeSortIndex(String nodeId,List<TreeItem> list)
+    {
+        for (int i=0;i<list.size();i++)
+        {
+            TreeItem item =  list.get(i);
+            if (nodeId.equalsIgnoreCase(item.getNodeId()))
+            {
+                return i;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return boolean 删除树
      */
-    @Operate(caption = "删除树")
+    //(caption = "删除树")
     @Override
     public boolean deleteTree() {
         Criteria criteria = createCriteria(TreeItem.class).add(Expression.eq("namespace", namespace));
@@ -727,13 +797,15 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      * @param node 编辑节点
      * @return boolean  编辑节点 是否成功
      */
-    @Operate(caption = "编辑节点")
+    //(caption = "编辑节点")
     @Override
-    public boolean editTreeItem(@Param(caption = "编辑的节点") TreeItem node) throws Exception {
+    public boolean editTreeItem(TreeItem node) throws Exception {
         node.setNamespace(namespace);
         node.setOrganizeId(organizeId);
         return !StringUtil.isEmpty(node.getNodeId()) && super.update(node) > 0;
     }
+
+
 
 
     //------------------------------------------------------------------------------------------------------------------
@@ -741,7 +813,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
     /**
      * @return 删除所有树角色树节点
      */
-    @Operate(caption = "删除所有树角色树节点")
+    //(caption = "删除所有树角色树节点")
     @Override
     public boolean deleteTreeRole() {
         Criteria criteria = createCriteria(TreeRole.class).add(Expression.eq("namespace", namespace));
@@ -757,7 +829,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      * @param nodeId 树节点
      * @return 树列表
      */
-    @Operate(caption = "得到路径ID")
+    //(caption = "得到路径ID")
     @Override
     public List<TreeItem> getTreeItemPath(String nodeId) {
         TreeItem treeItem = getTreeItem(nodeId);
@@ -768,7 +840,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
      * @param treeItem 节点
      * @return 路径
      */
-    @Operate(caption = "路径节点列表")
+    //(caption = "路径节点列表")
     @Override
     public List<TreeItem> getTreeItemPath(TreeItem treeItem) {
         List<TreeItem> list = new LinkedList<TreeItem>();
