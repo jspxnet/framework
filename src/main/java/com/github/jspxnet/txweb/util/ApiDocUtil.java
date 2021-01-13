@@ -666,11 +666,11 @@ public class ApiDocUtil {
             Element el = (Element)elementList.next();
             if (StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(StringUtil.trim(el.attributeValue("id"))))
             {
-                return XMLUtil.escapeDecrypt(el.getStringValue());
+                return el.getStringValue();
             }
             if (!StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(StringUtil.trim(el.attributeValue("id")))&&flag.equalsIgnoreCase(StringUtil.trim(el.attributeValue("flag"))))
             {
-                return XMLUtil.escapeDecrypt(el.getStringValue());
+                return el.getStringValue();// XMLUtil.escapeDecrypt();
             }
         }
         return null;
@@ -695,7 +695,7 @@ public class ApiDocUtil {
         } else {
             cont = findDescribe(id,describe.flag(),describe.namespace());
         }
-        return ScriptMarkUtil.getMarkdownHtml(cont);
+        return ScriptMarkUtil.getMarkdownHtml(StringUtil.trim(cont));
     }
 
 
