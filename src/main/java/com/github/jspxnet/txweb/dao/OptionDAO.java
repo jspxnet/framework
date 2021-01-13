@@ -41,4 +41,8 @@ public interface OptionDAO extends SoberSupport {
     List<OptionBundle> getChildList(String[] field, String[] find, String parentCode, String namespace, String sortString, int page, int count);
 
     int getChildCount(String[] field, String[] find, String parentCode, String namespace);
+
+    boolean top(long id) throws Exception;
+
+    boolean dwon(long id) throws Exception;
 }

@@ -359,4 +359,75 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         return criteria.setProjection(Projections.rowCount()).intUniqueResult();
     }
 
+    @Override
+    public boolean top(long id) throws Exception {
+
+        OptionBundle optionBundle = get(OptionBundle.class,id);
+        if (optionBundle==null)
+        {
+            return false;
+        }
+        List<OptionBundle> list = getList(null,null,null,optionBundle.getNamespace(),null,1, 10000);
+        Integer current = getNodeSortIndex( id,list);
+        if (current==null)
+        {
+            return false;
+        }
+        int topCurrent = current+1;
+        if (topCurrent<0||topCurrent>=list.size())
+        {
+            return false;
+        }
+        OptionBundle itemTop = list.get(current);
+        int sort = itemTop.getSortType();
+        itemTop.setSortType(optionBundle.getSortType());
+        int x = super.update(itemTop,new String[]{"sortType"});
+
+        optionBundle.setSortType(sort);
+        x = x + super.update(optionBundle,new String[]{"sortType"});
+        return x>0;
+    }
+
+    @Override
+    public boolean dwon(long id) throws Exception {
+
+        OptionBundle optionBundle = get(OptionBundle.class,id);
+        if (optionBundle==null)
+        {
+            return false;
+        }
+        List<OptionBundle> list = getList(null,null,null,optionBundle.getNamespace(),null,1, 10000);
+        Integer current = getNodeSortIndex( id,list);
+        if (current==null)
+        {
+            return false;
+        }
+        int topCurrent = current-1;
+        if (topCurrent<0||topCurrent>=list.size())
+        {
+            return false;
+        }
+        OptionBundle itemTop = list.get(current);
+        int sort = itemTop.getSortType();
+        itemTop.setSortType(optionBundle.getSortType());
+        int x = super.update(itemTop,new String[]{"sortType"});
+        optionBundle.setSortType(sort);
+        x = x + super.update(optionBundle,new String[]{"sortType"});
+        return x>0;
+    }
+
+    private static Integer getNodeSortIndex(long id,List<OptionBundle> list)
+    {
+        for (int i=0;i<list.size();i++)
+        {
+            OptionBundle item =  list.get(i);
+            if (id==item.getId())
+            {
+                return i;
+            }
+        }
+        return null;
+    }
+
+
 }

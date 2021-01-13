@@ -29,6 +29,4 @@ public class ApiAction implements Serializable {
     @Column(caption = "类对象")
     private String className = "";
 
-
-
 }

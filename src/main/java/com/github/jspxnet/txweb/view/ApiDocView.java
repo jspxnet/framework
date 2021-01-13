@@ -61,9 +61,9 @@ public class ApiDocView extends ActionSupport {
         if (indexCache != null && !indexCache.isEmpty()) {
             return indexCache.values();
         }
-        indexCache = new HashMap<>();
+
         String softName = getRootNamespace();
-        Map<String, ApiAction> resultMap = new TreeMap<>();
+        Map<String, ApiAction> resultMap = new HashMap<>();
         IocContext iocContext = beanFactory.getIocContext();
         Map<String, String> extendList = webConfigManager.getExtendList();
         for (String name : extendList.keySet()) {
@@ -90,7 +90,27 @@ public class ApiDocView extends ActionSupport {
                 }
             }
         }
-        indexCache.putAll(resultMap);
+
+        List<Map.Entry<String, ApiAction>> list = new ArrayList<>(resultMap.entrySet());
+        //然后通过比较器来实现排序
+        Collections.sort(list,new Comparator<Map.Entry<String, ApiAction>>() {
+            //升序排序
+            @Override
+            public int compare(Map.Entry<String, ApiAction> o1,
+                               Map.Entry<String, ApiAction> o2) {
+                if (o1==null || o2==null || o1.getValue()==null || o2.getValue()==null || o1.getValue().getTitle()==null)
+                {
+                    return 0;
+                }
+                return o1.getValue().getTitle().compareTo(o2.getValue().getTitle());
+            }
+        });
+
+        Map<String, ApiAction> sortMap = new LinkedHashMap<>();
+        for(Map.Entry<String, ApiAction> mapping:list){
+            sortMap.put(mapping.getKey(),mapping.getValue());
+        }
+        indexCache = sortMap;
         JSCacheManager.put(DefaultCache.class, String.format(API_INDEX_CACHE, getRootNamespace()), indexCache);
         return indexCache.values();
     }
