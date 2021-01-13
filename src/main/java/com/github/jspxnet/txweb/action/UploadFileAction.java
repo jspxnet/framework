@@ -70,8 +70,8 @@ import java.util.List;
 @Slf4j
 @HttpMethod(caption = "上传文件")
 public class UploadFileAction extends MultipartSupport {
-    final static public String[] officeFileTypes = FileSuffixUtil.officeTypes;
-    final static public String[] stopExs = new String[]{"php", "jsp", "ftl", "html", "htm", "exe", "com", "bat", "asp", "aspx", "sh", "jar", "js", "dll"};
+    final static public String[] OFFICE_FILE_TYPES = FileSuffixUtil.officeTypes;
+    final static public String[] STOP_EXS = new String[]{"php", "jsp", "ftl", "html", "htm", "exe", "com", "bat", "asp", "aspx", "sh", "jar", "js", "dll"};
 
     //分组变量名称
     final public static String GROUP_VAR_NAME = "groupName";
@@ -419,9 +419,9 @@ public class UploadFileAction extends MultipartSupport {
         String setupPath = getSetupPath();
 
         for (UploadedFile uf : multipartRequest.getFiles()) {
-            if (ArrayUtil.inArray(stopExs, uf.getFileType(), true)) {
+            if (ArrayUtil.inArray(STOP_EXS, uf.getFileType(), true)) {
                 FileUtil.delete(uf.getFile());
-                printErrorInfo(language.getLang(LanguageRes.notAllowedFileType) + ":" + uf.getFileType());
+                printErrorInfo(language.getLang(LanguageRes.notAllowedFileType) + StringUtil.COLON + uf.getFileType());
                 return null;
             }
             if (!uf.isUpload()) {
@@ -654,7 +654,7 @@ public class UploadFileAction extends MultipartSupport {
             }
         }
         boolean useUploadConverter = config.getBoolean(Environment.useUploadConverterTxt);
-        if (useUploadConverter && ArrayUtil.inArray(officeFileTypes, uf.getFileType(), true))
+        if (useUploadConverter && ArrayUtil.inArray(OFFICE_FILE_TYPES, uf.getFileType(), true))
         {
             //文档转换,为了方便安卓下编译
             String content = "";
