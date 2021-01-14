@@ -50,7 +50,7 @@ public class PermissionManageAction extends PermissionView {
     }
 
     @Operate(caption = "添加角色")
-    public void addRole(@Param(caption="角色",required = true) RoleParam param) throws Exception {
+    public void addRole(@Param(caption="角色",required = true) RoleParam params) throws Exception {
         if (isGuest()) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needLogin));
             return;
@@ -63,7 +63,7 @@ public class PermissionManageAction extends PermissionView {
             return;
         }
 
-        Role role = BeanUtil.copy(param,Role.class);
+        Role role = BeanUtil.copy(params,Role.class);
         role.setPutUid(userSession.getUid());
         role.setPutName(userSession.getName());
         role.setNamespace(permissionDAO.getNamespace());
@@ -108,7 +108,7 @@ public class PermissionManageAction extends PermissionView {
     }
 
     @Operate(caption = "编辑角色")
-    public void editRole(@Param(caption="角色",required = true,message = "参数不允许为空") RoleParam param) throws Exception {
+    public void editRole(@Param(caption="角色",required = true,message = "参数不允许为空") RoleParam params) throws Exception {
 
         if (isGuest()) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needLogin));
@@ -122,7 +122,7 @@ public class PermissionManageAction extends PermissionView {
             return;
         }
         IUserSession userSession = getUserSession();
-        Role role = BeanUtil.copy(param,Role.class);
+        Role role = BeanUtil.copy(params,Role.class);
         role.setPutUid(userSession.getUid());
         role.setPutName(userSession.getName());
         role.setNamespace(permissionDAO.getNamespace());

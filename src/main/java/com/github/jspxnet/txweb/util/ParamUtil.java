@@ -495,7 +495,7 @@ public class ParamUtil {
      * @return 参数对象
      * @throws Exception 异常
      */
-    public static Object[] getMethodParameter(Action action, Method exeMethod) throws Exception {
+    public static Object[] getMethodParameter(Action action, Method exeMethod,String exeType) throws Exception {
         Type[] pTypes = exeMethod.getGenericParameterTypes();
         if (ObjectUtil.isEmpty(pTypes)) {
             return null;
@@ -513,6 +513,7 @@ public class ParamUtil {
                     isParam = true;
                     Param param = (Param) annotation;
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
+
                         if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
                         {
                             JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
@@ -525,6 +526,9 @@ public class ParamUtil {
                                 if (jsonObject!=null)
                                 {
                                     paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
+                                } else
+                                {
+                                    paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
                                 }
                             }
                         }
@@ -544,6 +548,11 @@ public class ParamUtil {
                                 paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
                             }
                         }
+             /*           if (ActionHandle.NAME.equalsIgnoreCase(exeType))
+                        {
+
+                        }*/
+
                         //填充类内部的默认值begin
                         isNullSetDefaultValue(action, param, parameters[i].getName(), paramObj[i]);
                         if (action.hasFieldInfo()) {
@@ -912,7 +921,7 @@ public class ParamUtil {
      *                  是否继续执行  用错误信息判断
      */
     public static void isNullSetDefaultValue(Action action, Param param, String paramName, Object obj) {
-        if (param.required() && (obj == null||obj.getClass().equals(NullClass.class))) {
+        if (param.required() && (obj == null)) {
             String message = StringUtil.isEmpty(param.message()) ? (paramName + "不允许为空") : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
             return;

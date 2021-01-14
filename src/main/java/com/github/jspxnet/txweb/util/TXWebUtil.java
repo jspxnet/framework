@@ -590,7 +590,7 @@ public class TXWebUtil {
         //路径方式载入参数
         Operate operate = exeMethod.getAnnotation(Operate.class);
         if (operate != null && operate.method().contains(ParamUtil.variableBegin) && operate.method().contains(ParamUtil.variableEnd)) {
-            paramObj = ParamUtil.getMethodParameter(action, exeMethod);
+            paramObj = ParamUtil.getMethodParameter(action, exeMethod,actionProxy.getExeType());
             if (action.hasFieldInfo())
             {
                 return null;
@@ -600,11 +600,10 @@ public class TXWebUtil {
         boolean isVoid = false;
         Object methodResult = null;
         if (!TXWebUtil.defaultExecute.equals(exeMethod.getName())) {
-
             //载入默认参数,修复方法参数匹配
             if (paramObj == null && exeMethod.getParameterCount() != 0 || (paramObj != null && paramObj.length != exeMethod.getParameterCount())) {
                 //一个参数都没有的情况
-                paramObj = ParamUtil.getMethodParameter(action, exeMethod);
+                paramObj = ParamUtil.getMethodParameter(action, exeMethod ,actionProxy.getExeType());
                 if (action.hasFieldInfo())
                 {
                     return null;
