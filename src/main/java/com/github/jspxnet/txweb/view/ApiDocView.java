@@ -23,10 +23,13 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ApiDocUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.reflect.*;
 import java.util.*;
 
 @HttpMethod(caption = "API文档")
+@Slf4j
 public class ApiDocView extends ActionSupport {
     final private static String[] NO_VIEW_CLASS = new String[]{
             com.github.jspxnet.txweb.support.DefaultTemplateAction.class.getName(),
@@ -225,6 +228,7 @@ public class ApiDocView extends ActionSupport {
                         theParams.put(apiParam.getName(), apiParam);
                         apiDocument.setParams(theParams);
                     } catch (ClassNotFoundException e) {
+                        log.error(exeMethod.toString(),e);
                         //...
                     }
                 }

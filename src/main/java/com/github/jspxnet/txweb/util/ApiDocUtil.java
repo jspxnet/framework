@@ -2,6 +2,7 @@ package com.github.jspxnet.txweb.util;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.io.IoUtil;
+import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
@@ -23,6 +24,7 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -176,17 +178,32 @@ public class ApiDocUtil {
      *
      * @param cla bean对象
      * @param jsonIgnoreShow 是否显示 非空才显示的相
+     * @param checkList 递归判断,防止死循环
      * @return json描述
      */
-    public static List<ApiField> getApiFieldList(Class<?> cla,boolean jsonIgnoreShow) {
-        if (ClassUtil.isStandardType(cla)||Class.class.equals(cla))
+    public static List<ApiField> getApiFieldList(Class<?> cla,boolean jsonIgnoreShow,List<Class<?>> checkList) {
+        if (ClassUtil.isStandardType(cla)||Class.class.equals(cla) || Object.class.equals(cla) ||
+                 cla.equals(List.class) || cla.equals(Map.class)|| cla.equals(Set.class)
+        )
         {
             return null;
+        }
+        if (cla.equals(JSONObject.class) || cla.equals(JSONArray.class)  || cla.isInterface())
+        {
+            List<ApiField> fieldList = new ArrayList<>();
+            ApiField apiField = new ApiField();
+            apiField.setName(cla.getName());
+            apiField.setType(cla.getSimpleName());
+            apiField.setCaption("复杂格式,不推荐是用");
+            fieldList.add(apiField);
+            return fieldList;
         }
         Field[] fields = ClassUtil.getDeclaredFields(cla);
         if (fields == null) {
             return null;
         }
+
+        checkList.add(cla);
         List<ApiField> fieldList = new ArrayList<>();
         for (Field field : fields) {
             if ("serialVersionUID".equalsIgnoreCase(field.getName())) {
@@ -202,6 +219,19 @@ public class ApiDocUtil {
             }
             if (jsonIgnore != null&&!jsonIgnore.isNull()) {
                 continue;
+            }
+            if (checkList.contains(field.getType()))
+            {
+                ApiField apiField = new ApiField();
+                apiField.setName(field.getName());
+                apiField.setType(field.getType().getSimpleName());
+                apiField.setCaption("设计存在循环嵌套,需要修正返回对象");
+                fieldList.add(apiField);
+                break;
+            }
+            if (Serializable.class.isAssignableFrom(field.getType())&&!ClassUtil.isStandardType(field.getType()))
+            {
+                checkList.add(field.getType());
             }
             if (ClassUtil.isStandardProperty(field.getType()) || field.getType().equals(JSONObject.class)) {
 
@@ -245,18 +275,21 @@ public class ApiDocUtil {
                 Class<?> childObj = null;
                 try {
                     childObj =  field.getType();
-                    if (Class.class.equals(childObj)||ClassUtil.isStandardType(childObj))
+                    if (cla.equals(childObj)||Class.class.equals(childObj)||ClassUtil.isStandardType(childObj))
                     {
                         break;
                     }
+
                 } catch (Exception e) {
                     //...
+                    log.error("childObj:{},error:{}",childObj,e);
                 }
+
                 if (childObj != null) {
-                    List<ApiField> childFieldList = getApiFieldList(childObj,jsonIgnoreShow);
+
+                    List<ApiField> childFieldList = getApiFieldList(childObj,jsonIgnoreShow,checkList);
                     if (childFieldList != null && !childFieldList.isEmpty()) {
                         apiField.setChildren(childFieldList);
-
                     }
                 }
             }
@@ -404,7 +437,8 @@ public class ApiDocUtil {
         if (exeMethod.getReturnType().equals(void.class))
         {
             //无返回,无容器
-            apiOperate.setResult(getApiFieldList(RocResponse.class,false));
+            List<Class<?>> checkList = new ArrayList<>();
+            apiOperate.setResult(getApiFieldList(RocResponse.class,false,checkList));
             return;
         }
         String returnTypeModel = exeMethod.getGenericReturnType().getTypeName();
@@ -444,7 +478,8 @@ public class ApiDocUtil {
         {
             classList.remove(firstClass);
         }
-        List<ApiField> apiFieldList = getApiFieldList(firstClass,classList.contains(List.class));
+        List<Class<?>> checkList = new ArrayList<>();
+        List<ApiField> apiFieldList = getApiFieldList(firstClass,classList.contains(List.class),checkList);
 
         if (!ObjectUtil.isEmpty(apiFieldList))
         {
@@ -553,38 +588,14 @@ public class ApiDocUtil {
             Class<?> theClass = findDtoClass(className,classList);
             if (theClass!=null)
             {
-                apiField.setChildren(getApiFieldList(theClass,false));
+                List<Class<?>> checkList = new ArrayList<>();
+                apiField.setChildren(getApiFieldList(theClass,false,checkList));
 
             }
         }
 
     }
-    /**
-     *
-     * @param returnTypeClass 原类列表
-     * @param clsArray  不等于列表
-     * @return  过滤不等于的,剩余的返回, 差集计算
-     */
-/*    public static Class<?> findNotEqDtoClass(Class<?>[] returnTypeClass,Class<?>[] clsArray)
-    {
-        if (ObjectUtil.isEmpty(returnTypeClass))
-        {
-            return null;
-        }
-        Class<?>[] result = ArrayUtil.subtract(returnTypeClass,clsArray);
-        if (ObjectUtil.isEmpty(result))
-        {
-            return null;
-        }
-        for (Class<?> a:result)
-        {
-            if (a.isInstance(Serializable.class))
-            {
-                return a;
-            }
-        }
-        return null;
-    }*/
+
 
     /**
      * 根据模型名称查询类

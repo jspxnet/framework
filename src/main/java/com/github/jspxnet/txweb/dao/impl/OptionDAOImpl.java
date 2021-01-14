@@ -54,6 +54,11 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         this.folder = folder;
     }
 
+    /**
+     *
+     * @return 导入
+     * @throws Exception 异常
+     */
     @Override
     public int storeDatabase() throws Exception {
         //载入目录索引
@@ -62,10 +67,14 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         if (!indexFile.isFile()) {
             return 0;
         }
-
+        String text = IoUtil.autoReadText(indexFile);
+        if (StringUtil.isNull(text))
+        {
+            return 0;
+        }
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag("map", MapElement.class.getName());
-        MapElement mapElement = (MapElement) xmlEngine.createTagNode(IoUtil.autoReadText(indexFile));
+        MapElement mapElement = (MapElement) xmlEngine.createTagNode(text);
         List<TagNode> valueList = mapElement.getValueList();
         for (TagNode aList : valueList) {
             ValueElement valueElement = (ValueElement) aList;
@@ -234,7 +243,6 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
      * @param count      返回数量
      * @return 返回列表
      */
-
     @Override
     public List<OptionBundle> getList(String[] field, String[] find, String term,String namespace, String sortString, int page, int count){
         if (StringUtil.isNull(sortString)) {
@@ -359,6 +367,12 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         return criteria.setProjection(Projections.rowCount()).intUniqueResult();
     }
 
+    /**
+     *
+     * @param id id
+     * @return 上移
+     * @throws Exception 异常
+     */
     @Override
     public boolean top(long id) throws Exception {
 
@@ -378,7 +392,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         {
             return false;
         }
-        OptionBundle itemTop = list.get(current);
+        OptionBundle itemTop = list.get(topCurrent);
         int sort = itemTop.getSortType();
         itemTop.setSortType(optionBundle.getSortType());
         int x = super.update(itemTop,new String[]{"sortType"});
@@ -387,7 +401,12 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         x = x + super.update(optionBundle,new String[]{"sortType"});
         return x>0;
     }
-
+    /**
+     *
+     * @param id id
+     * @return 下移
+     * @throws Exception 异常
+     */
     @Override
     public boolean dwon(long id) throws Exception {
 
@@ -402,12 +421,12 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         {
             return false;
         }
-        int topCurrent = current-1;
-        if (topCurrent<0||topCurrent>=list.size())
+        int downCurrent = current-1;
+        if (downCurrent<0||downCurrent>=list.size())
         {
             return false;
         }
-        OptionBundle itemTop = list.get(current);
+        OptionBundle itemTop = list.get(downCurrent);
         int sort = itemTop.getSortType();
         itemTop.setSortType(optionBundle.getSortType());
         int x = super.update(itemTop,new String[]{"sortType"});

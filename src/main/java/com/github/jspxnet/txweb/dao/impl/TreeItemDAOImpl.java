@@ -727,7 +727,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
         {
             return false;
         }
-        TreeItem treeItemTop = list.get(current);
+        TreeItem treeItemTop = list.get(topCurrent);
         int sort = treeItemTop.getSortType();
         treeItemTop.setSortType(treeItem.getSortType());
         int x = super.update(treeItemTop,new String[]{"sortType"});
@@ -752,12 +752,12 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
         {
             return false;
         }
-        int topCurrent = current+1;
-        if (topCurrent<0||topCurrent>=list.size())
+        int downCurrent = current+1;
+        if (downCurrent<0||downCurrent>=list.size())
         {
             return false;
         }
-        TreeItem treeItemTop = list.get(current);
+        TreeItem treeItemTop = list.get(downCurrent);
         int sort = treeItemTop.getSortType();
         treeItemTop.setSortType(treeItem.getSortType());
         int x = super.update(treeItemTop,new String[]{"sortType"});
