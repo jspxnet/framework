@@ -92,8 +92,14 @@ public class VoteDAOImpl extends JdbcOperations implements VoteDAO {
         if (StringUtil.isEmpty(topicId) || uid <= 0) {
             return true;
         }
-        Criteria criteria = createCriteria(VoteMember.class).add(Expression.eq("topicId", topicId))
-        .add(Expression.or(Expression.eq("putUid", uid), Expression.eq("unionid", unionid)));
+        Criteria criteria = createCriteria(VoteMember.class).add(Expression.eq("topicId", topicId));
+        if (StringUtil.isEmpty(unionid))
+        {
+            criteria = criteria.add(Expression.eq("putUid", uid));
+        } else
+        {
+            criteria = criteria.add(Expression.or(Expression.eq("putUid", uid), Expression.eq("unionid", unionid)));
+        }
         return criteria.setProjection(Projections.rowCount()).intUniqueResult() > 0;
     }
 

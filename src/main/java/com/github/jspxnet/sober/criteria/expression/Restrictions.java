@@ -189,7 +189,7 @@ public class Restrictions {
      * @param values       变量
      * @return Criterion
      */
-    public static Criterion in(String propertyName, Collection values) {
+    public static Criterion in(String propertyName, Collection<?> values) {
         return new InExpression(propertyName, values.toArray());
     }
 
