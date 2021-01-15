@@ -55,10 +55,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
@@ -293,6 +290,11 @@ public class TXWebUtil {
         String[] requestNames = RequestUtil.getParameterNames(request);
         Method[] methods = ClassUtil.getDeclaredSetMethods(cls);
         for (Method method : methods) {
+            if (!Modifier.isPublic(method.getModifiers()))
+            {
+                //非公有的不设置
+                continue;
+            }
             String propertyName = method.getName();
             if (StringUtil.isNull(propertyName) || propertyName.startsWith(ClassUtil.METHOD_NAME_GET) || propertyName.startsWith(ClassUtil.METHOD_NAME_IS) || ArrayUtil.inArray(ACTION_SAFE_METHOD, propertyName, true)) {
                 continue;

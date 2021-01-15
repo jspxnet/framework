@@ -93,7 +93,9 @@ public class BeanUtil {
             Type aType = types[0];
             Object[] pObject = new Object[1];
             try {
+                log.debug(obj + "-------1类型------" + aType);
                 pObject[0] = getTypeValue(obj, aType);
+                log.debug(ObjectUtil.toString(pObject[0]) + "-------2类型------" + aType);
                 //method.invoke(object, pObject);
                 (new java.beans.Expression(object, methodName, pObject)).execute();
                 /*
@@ -196,6 +198,16 @@ public class BeanUtil {
             return obj;
         }
 
+        if (obj  instanceof JSONArray && aType.equals(String.class))
+        {
+            JSONArray array = (JSONArray)obj;
+            return ObjectUtil.toString(array.get(0));
+        }
+        if (obj  instanceof JSONArray && aType.equals(Number.class))
+        {
+            JSONArray array = (JSONArray)obj;
+            return ObjectUtil.toInt(array.get(0));
+        }
         //如果是泛型
         if (aType instanceof ParameterizedType && obj instanceof JSONArray)
         {
@@ -239,12 +251,6 @@ public class BeanUtil {
             }
         }
 
-        if (ClassUtil.isArrayType(aType) && obj instanceof String) {
-            String str = (String) obj;
-            obj = new JSONArray(str);
-        }
-
-
         if (aType.equals(Map.class) && obj instanceof String) {
             String str = (String) obj;
             return StringUtil.mapStringToMap(str);
@@ -260,7 +266,19 @@ public class BeanUtil {
             if (obj instanceof JSONArray) {
                 vv = ((JSONArray) obj).toArray();
             } else {
-                vv = (Object[]) obj;
+                if (aType.equals(String[].class))
+                {
+                    vv = (String[]) obj;
+                }
+                else
+                if (aType.equals(Integer[].class))
+                {
+                    vv = (Integer[]) obj;
+                }
+                else
+                {
+                    vv = (Object[]) obj;
+                }
             }
 
             if (aType.equals(int[].class)) {

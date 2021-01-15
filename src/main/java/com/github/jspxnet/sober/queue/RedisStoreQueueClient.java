@@ -33,7 +33,7 @@ public class RedisStoreQueueClient extends BaseRedisStoreQueue {
 
 
     public boolean updateSql(String sql) {
-        log.debug("updateSQL:{}", sql);
+        log.debug("update sql:{}", sql);
         RQueue<CmdContainer> queue = redissonClient.getQueue(STORE_KEY);
         return queue.add(new CmdContainer(CMD_UPDATE_SQL, sql,String.class.getName()));
     }

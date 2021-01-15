@@ -44,17 +44,17 @@ import java.util.Map;
 public class CriteriaImpl<T> implements Criteria, Serializable {
 
     //当前处理类
-    private Class<T> criteriaClass;
+    final private Class<T> criteriaClass;
     //数据源工厂
-    private SoberFactory soberFactory;
+    final private SoberFactory soberFactory;
     //表达式列表
-    private List<CriterionEntry> criterionEntries = new ArrayList<>();
+    final private List<CriterionEntry> criterionEntries = new ArrayList<>();
     //排序列表
-    private List<OrderEntry> orderEntries = new ArrayList<>();
+    final private List<OrderEntry> orderEntries = new ArrayList<>();
     //分组列表
-    private List<String> groupList = new ArrayList<>();
+    final private List<String> groupList = new ArrayList<>();
     //基本的JDBC操作类
-    private JdbcOperations jdbcOperations;
+    final private JdbcOperations jdbcOperations;
     //页数
     private Integer currentPage = 1;
     //行数

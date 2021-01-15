@@ -219,20 +219,21 @@ public class SqlMapClientImpl implements SqlMapClient {
         if (totalCount > jdbcOperations.getMaxRows()) {
             totalCount = jdbcOperations.getMaxRows();
         }
+
         if (totalCount<1)
         {
             totalCount = 1;
         }
+
         if (currentPage <= 0) {
             currentPage = 1;
         }
+
         int beginRow = currentPage * totalCount - totalCount;
         if (beginRow < 0) {
             beginRow = 0;
         }
         int endRow = beginRow + totalCount;
-
-
 
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
         if (sqlRoom == null) {

@@ -889,9 +889,8 @@ public class ClassUtil {
             return new Object[0];
         }
         Object[] result = null;
-        Field field = null;
         try {
-            field = cla.getDeclaredField(fieldName);
+            Field field = cla.getDeclaredField(fieldName);
             if (cla.isEnum()) {
                 Object[] objects = cla.getEnumConstants();
                 for (Object enu : objects) {
@@ -918,9 +917,8 @@ public class ClassUtil {
             return new Object[0];
         }
         Object[] result = null;
-        Method method = null;
         try {
-            method = cla.getDeclaredMethod(methodName);
+            Method method = cla.getDeclaredMethod(methodName);
             if (cla.isEnum()) {
                 Object[] objects = cla.getEnumConstants();
                 for (Object enu : objects) {
@@ -940,11 +938,9 @@ public class ClassUtil {
             return new HashMap<>();
         }
         Map<Object,Object> result = new HashMap<>();
-        Field field = null;
-        Field fieldDes = null;
         try {
-            field = cla.getDeclaredField(fieldName);
-            fieldDes = cla.getDeclaredField(name);
+            Field field = cla.getDeclaredField(fieldName);
+            Field fieldDes = cla.getDeclaredField(name);
             if (cla.isEnum()) {
                 Object[] objects = cla.getEnumConstants();
                 for (Object enu : objects) {
