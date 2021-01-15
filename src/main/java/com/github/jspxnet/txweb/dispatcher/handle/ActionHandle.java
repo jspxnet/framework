@@ -76,7 +76,7 @@ public class ActionHandle extends WebHandle {
             result = TXWebUtil.invokeFun(action, exeMethod, null);
         } else {
             //jdk 8 需要添加编译参数 javac -parameters
-            Object[] params = ParamUtil.getMethodParameter(action, exeMethod,actionProxy.getExeType());
+            Object[] params = ParamUtil.getMethodParameter(action, exeMethod);
             result = TXWebUtil.invokeFun(action, exeMethod, params);
         }
         //默认模版方式调用

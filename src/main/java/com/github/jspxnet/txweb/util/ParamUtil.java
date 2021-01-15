@@ -492,7 +492,6 @@ public class ParamUtil {
      *
      * @param action    动作
      * @param exeMethod 方法
-     * @param exeType 执行方式
      * @return 参数对象
      * @throws Exception 异常
      */
