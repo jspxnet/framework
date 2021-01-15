@@ -54,6 +54,7 @@ public interface OptionDAO extends SoberSupport {
     /**
      * @param id id
      * @return 设置默认选项
+     * @throws Exception 异常
      */
     boolean updateSelected(Long id) throws Exception;
     /**

@@ -3645,6 +3645,38 @@ public class ArrayUtil {
         return doubleArray;
     }
 
+    public static Integer[] toIntegerArray(Object[] array) {
+        if (array == null) {
+            return null;
+        }
+        Integer[] doubleArray = new Integer[array.length];
+        for (int i = 0; i < array.length; i++) {
+            doubleArray[i] =  ObjectUtil.toInt(array[i]) ;
+        }
+        return doubleArray;
+    }
+
+    public static Float[] toFloatArray(Object[] array) {
+        if (array == null) {
+            return null;
+        }
+        Float[] doubleArray = new Float[array.length];
+        for (int i = 0; i < array.length; i++) {
+            doubleArray[i] =  ObjectUtil.toFloat(array[i]) ;
+        }
+        return doubleArray;
+    }
+
+    public static Double[] toDoubleArray(Object[] array) {
+        if (array == null) {
+            return null;
+        }
+        Double[] doubleArray = new Double[array.length];
+        for (int i = 0; i < array.length; i++) {
+            doubleArray[i] =  ObjectUtil.toDouble(array[i]) ;
+        }
+        return doubleArray;
+    }
     public static Object[] toArray(int[] array) {
         if (array == null) {
             return new Object[0];

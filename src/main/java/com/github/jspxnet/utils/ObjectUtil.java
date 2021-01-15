@@ -139,7 +139,7 @@ public class ObjectUtil {
      * @param o 对像
      * @return boolean 逻辑类型
      */
-    public static boolean toBoolean(Object o) {
+    public static Boolean toBoolean(Object o) {
         if (o == null) {
             return false;
         }

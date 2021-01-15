@@ -696,7 +696,6 @@ public class ClassUtil {
         return method.getName();
     }
 
-
     public static boolean isArrayType(Type type) {
         if (type==null)
         {

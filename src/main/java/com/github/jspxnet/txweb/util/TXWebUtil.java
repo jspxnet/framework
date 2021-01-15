@@ -290,7 +290,7 @@ public class TXWebUtil {
         String[] requestNames = RequestUtil.getParameterNames(request);
         Method[] methods = ClassUtil.getDeclaredSetMethods(cls);
         for (Method method : methods) {
-            if (!Modifier.isPublic(method.getModifiers()))
+            if (!Modifier.isPublic(method.getModifiers())&&!Modifier.isProtected(method.getModifiers()))
             {
                 //非公有的不设置
                 continue;
@@ -312,6 +312,15 @@ public class TXWebUtil {
             }
             Type aType = types[0];
             Object propertyValue;
+            if (aType.equals(JSONArray.class)) {
+                String[] reqArray = action.getArray(propertyName,false);
+                JSONArray array = new JSONArray();
+                if (reqArray!=null)
+                {
+                    Collections.addAll(array, reqArray);
+                }
+                propertyValue = array;
+            } else
             if (ClassUtil.isArrayType(aType)) {
                 if (aType.equals(int[].class)) {
                     propertyValue = action.getIntArray(propertyName);
@@ -331,7 +340,7 @@ public class TXWebUtil {
                     propertyValue = action.getDoubleObjectArray(propertyName);
                 } else if (aType.equals(BigDecimal[].class)) {
                     propertyValue = action.getDoubleObjectArray(propertyName);
-                } else {
+                }  else {
                     propertyValue = action.getArray(propertyName, false);
                 }
             } else {

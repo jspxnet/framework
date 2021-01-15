@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * @author chenyuan
+ * author chenyuan
  */
 @Slf4j
 public class ParamUtil {
@@ -492,10 +492,11 @@ public class ParamUtil {
      *
      * @param action    动作
      * @param exeMethod 方法
+     * @param exeType 执行方式
      * @return 参数对象
      * @throws Exception 异常
      */
-    public static Object[] getMethodParameter(Action action, Method exeMethod,String exeType) throws Exception {
+    public static Object[] getMethodParameter(Action action, Method exeMethod) throws Exception {
         Type[] pTypes = exeMethod.getGenericParameterTypes();
         if (ObjectUtil.isEmpty(pTypes)) {
             return null;
@@ -546,13 +547,11 @@ public class ParamUtil {
                             if (jsonObject!=null)
                             {
                                 paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
+                            } else
+                            {
+                                paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
                             }
                         }
-             /*           if (ActionHandle.NAME.equalsIgnoreCase(exeType))
-                        {
-
-                        }*/
-
                         //填充类内部的默认值begin
                         isNullSetDefaultValue(action, param, parameters[i].getName(), paramObj[i]);
                         if (action.hasFieldInfo()) {
@@ -971,7 +970,7 @@ public class ParamUtil {
                 } else
                 if (ClassUtil.isCollection(pType))
                 {
-                    Collection collection = (Collection)value;
+                    Collection<?> collection = (Collection<?>)value;
                     for (Object v:collection)
                     {
                         isNullSetDefaultValue( action,  classParam,  paramName, v);

@@ -53,7 +53,7 @@ public class BeanUtil {
      */
     public static void setSimpleProperty(Object object, String methodName, Object obj) {
         if (object == null) {
-            throw new NullPointerException(object + " is NULL");
+            throw new NullPointerException(object + methodName + " is NULL");
         }
         if (!StringUtil.hasLength(methodName)) {
             return;
@@ -93,9 +93,7 @@ public class BeanUtil {
             Type aType = types[0];
             Object[] pObject = new Object[1];
             try {
-                log.debug(obj + "-------1类型------" + aType);
                 pObject[0] = getTypeValue(obj, aType);
-                log.debug(ObjectUtil.toString(pObject[0]) + "-------2类型------" + aType);
                 //method.invoke(object, pObject);
                 (new java.beans.Expression(object, methodName, pObject)).execute();
                 /*
@@ -182,8 +180,6 @@ public class BeanUtil {
         {
             return 0;
         }
-
-
         if (obj == null) {
             if (ClassUtil.isNumberType(aType)) {
                 return 0;
@@ -268,19 +264,27 @@ public class BeanUtil {
             } else {
                 if (aType.equals(String[].class))
                 {
-                    vv = (String[]) obj;
+                    vv = ArrayUtil.toStringArray((Object[])obj);
                 }
                 else
                 if (aType.equals(Integer[].class))
                 {
-                    vv = (Integer[]) obj;
+                    vv = ArrayUtil.toIntegerArray((Object[])obj);
+                }
+                else
+                if (aType.equals(Float[].class))
+                {
+                    vv = ArrayUtil.toFloatArray((Object[])obj);
+                } else
+                if (aType.equals(Double[].class))
+                {
+                    vv = ArrayUtil.toDoubleArray((Object[])obj);
                 }
                 else
                 {
                     vv = (Object[]) obj;
                 }
             }
-
             if (aType.equals(int[].class)) {
                 return ArrayUtil.getIntArray(ArrayUtil.toStringArray(vv));
             } else if (aType.equals(Integer[].class)) {
