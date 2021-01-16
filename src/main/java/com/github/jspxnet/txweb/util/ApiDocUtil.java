@@ -325,8 +325,10 @@ public class ApiDocUtil {
         apiOperate.setCaption(operate.caption());
         apiOperate.setAction(operate.post() ? "POST" : "GET;POST");
 
-        ApiMethod apiMethod = new ApiMethod();
+        Deprecated deprecated = exeMethod.getAnnotation(Deprecated.class);
+        apiOperate.setDeprecated(deprecated!=null);
 
+        ApiMethod apiMethod = new ApiMethod();
         String callMethod = operate.method();
         if (TXWebUtil.AT.equals(callMethod)) {
             apiMethod.setName(exeMethod.getName());

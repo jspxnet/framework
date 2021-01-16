@@ -7,9 +7,7 @@ import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
-
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +23,7 @@ public class ApiOperate implements Serializable {
     //请求方法
     private String action = "GET";
 
+    private boolean deprecated = false;
 
     @JsonIgnore(isNull = true)
     private ApiMethod method = null;
