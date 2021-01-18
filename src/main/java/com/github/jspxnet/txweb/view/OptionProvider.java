@@ -15,9 +15,7 @@ import com.github.jspxnet.txweb.Option;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.OptionDAO;
 import com.github.jspxnet.txweb.table.OptionBundle;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -30,6 +28,7 @@ public class OptionProvider implements Option {
     @Ref
     protected OptionDAO optionDAO;
     public static final String ALL_NAMESPACE = "all";
+    public static final String ALL_GROUP = "group";
 
     /**
      *

@@ -112,5 +112,5 @@ public interface OptionDAO extends SoberSupport {
      * @return 下移
      * @throws Exception 异常
      */
-    boolean dwon(long id) throws Exception;
+    boolean down(long id) throws Exception;
 }

@@ -18,6 +18,7 @@ import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.tag.MapElement;
 import com.github.jspxnet.sioc.tag.ValueElement;
 import com.github.jspxnet.sober.Criteria;
+import com.github.jspxnet.sober.annotation.SqlMap;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
@@ -35,6 +36,7 @@ import java.util.*;
  * Created by yuan on 14-2-16.
  * <p>
  * com.github.jspxnet.txweb.dao.impl.OptionDAOImpl
+ *
  */
 @Bean
 @Slf4j
@@ -367,6 +369,8 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         return criteria.setProjection(Projections.rowCount()).intUniqueResult();
     }
 
+
+
     /**
      *
      * @param id id
@@ -408,7 +412,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
      * @throws Exception 异常
      */
     @Override
-    public boolean dwon(long id) throws Exception {
+    public boolean down(long id) throws Exception {
 
         OptionBundle optionBundle = get(OptionBundle.class,id);
         if (optionBundle==null)
@@ -434,6 +438,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         x = x + super.update(optionBundle,new String[]{"sortType"});
         return x>0;
     }
+
 
     private static Integer getNodeSortIndex(long id,List<OptionBundle> list)
     {
