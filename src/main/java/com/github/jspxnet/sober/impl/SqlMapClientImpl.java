@@ -451,6 +451,5 @@ public class SqlMapClientImpl implements SqlMapClient {
             return -3;
         }
         return jdbcOperations.update(dialect.processSQL(mapSql.getContext(), valueMap));
-
     }
 }
