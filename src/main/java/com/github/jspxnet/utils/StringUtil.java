@@ -1104,7 +1104,7 @@ public class StringUtil {
         if (StringUtil.isNull(value)) {
             return empty;
         } else {
-            return replace(value.trim(), "\t", "");
+            return replaceOnce(value.trim(), "\t", StringUtil.empty);
         }
     }
 
