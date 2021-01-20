@@ -2,9 +2,7 @@ package com.github.jspxnet.txweb.apidoc;
 
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
-import com.github.jspxnet.txweb.annotation.Describe;
 import lombok.Data;
-
 import java.io.Serializable;
 
 @Data
