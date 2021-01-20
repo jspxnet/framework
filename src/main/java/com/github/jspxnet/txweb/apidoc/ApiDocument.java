@@ -23,5 +23,4 @@ public class ApiDocument extends ApiAction {
 
     @Column(caption = "描述")
     private String describe;
-
 }
