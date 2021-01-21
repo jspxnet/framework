@@ -15,6 +15,7 @@ import com.github.jspxnet.sober.SoberEnv;
 import com.github.jspxnet.sober.SoberFactory;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.Order;
+import com.github.jspxnet.sober.criteria.expression.LogicalExpression;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.criteria.projection.Projection;
 import com.github.jspxnet.sober.dialect.Dialect;
@@ -454,7 +455,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
-            if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
+
+            if (!(criterionEntry.getCriterion() instanceof LogicalExpression)&& !SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
