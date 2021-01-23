@@ -288,17 +288,6 @@ public class JspxCoreListener implements ServletContextListener {
                 log.error(String.format("Error deregistering driver %s", d));
             }
         }
-        //卸载jdbc驱动end
-        try {
-            Class<?> mysqlClass = ClassUtil.loadClass("com.mysql.jdbc.AbandonedConnectionCleanupThread");
-            if (mysqlClass!=null)
-            {
-                ClassUtil.invokeStaticMethod("com.mysql.jdbc.AbandonedConnectionCleanupThread","shutdown",null);
-            }
-        } catch (Exception e) {
-            //e.printStackTrace();
-            log.error("AbandonedConnectionCleanupThread线程关闭失败。这种情况通常出现在MySQL上。");
-        }
 
         //关闭定时器和其他线程begin
         //安卓系统跳过这里，否则会有错误
