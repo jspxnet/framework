@@ -331,8 +331,5 @@ public class JspxDataSource extends DriverManagerDataSource {
         } catch (Exception e) {
             log.error("连接池线程异常", e);
         }
-
-        System.out.println(getPoolSize() + "--------连接池 scheduleWithFixedDelay执行完成时间："+ DateFormat.getTimeInstance().format(new Date()));
-
     }
 }
