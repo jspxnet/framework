@@ -289,7 +289,6 @@ public class JspxCoreListener implements ServletContextListener {
             }
         }
         //卸载jdbc驱动end
-        com.mysql.jdbc.AbandonedConnectionCleanupThread.getThread().setDaemon(true);
         try {
             Class<?> mysqlClass = ClassUtil.loadClass("com.mysql.jdbc.AbandonedConnectionCleanupThread");
             if (mysqlClass!=null)
