@@ -759,6 +759,11 @@ public class ClassUtil {
         {
             return null;
         }
+        if (args==null)
+        {
+            return ownerClass.getMethod(methodName).invoke(null);
+        }
+
         Class<?>[] argsClass = new Class[args.length];
         for (int i = 0, j = args.length; i < j; i++) {
             argsClass[i] = args[i].getClass();
