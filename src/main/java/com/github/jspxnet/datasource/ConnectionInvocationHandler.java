@@ -11,6 +11,7 @@ package com.github.jspxnet.datasource;
 
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -23,6 +24,7 @@ import java.sql.Connection;
  * Time: 14:33:39
  * 连接池的链接句柄，封装链接
  */
+@Slf4j
 public class ConnectionInvocationHandler implements InvocationHandler {
 
     private String checkSql = "SELECT 1";
@@ -71,6 +73,7 @@ public class ConnectionInvocationHandler implements InvocationHandler {
             }
             try {
                 if (!StringUtil.isNull(checkSql)) {
+                    log.debug("checkSql:{}",checkSql);
                     target.prepareStatement(checkSql).executeQuery().close();
                 }
             } catch (Exception e) {

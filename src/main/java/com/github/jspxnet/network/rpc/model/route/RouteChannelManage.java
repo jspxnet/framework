@@ -30,7 +30,6 @@ public class RouteChannelManage {
 
     public void initConfigRoute()
     {
-
         RpcConfig rpcConfig = RpcConfig.getInstance();
         //初始化默认的路由表,就是自己的IP地址
         String[] groupNames = rpcConfig.getLocalGroupList();
@@ -121,7 +120,7 @@ public class RouteChannelManage {
      */
     public List<RouteSession> getRouteSessionList()
     {
-        return BeanUtil.copyList(routeSocketMap.values(),RouteSession.class);
+        return new ArrayList<>(routeSocketMap.values());
     }
 
 
@@ -129,7 +128,7 @@ public class RouteChannelManage {
      *
      * @return 当前实际可用的节点数量
      */
-    synchronized public int getRouteSessionCount()
+    public int getRouteSessionCount()
     {
         int result = 0;
         for (RouteSession session:routeSocketMap.values())

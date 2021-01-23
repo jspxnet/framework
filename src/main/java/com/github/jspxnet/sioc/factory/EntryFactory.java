@@ -680,10 +680,6 @@ public final class EntryFactory implements BeanFactory {
      */
     public void initScheduler() {
 
-        //全局开关
-        if (!ObjectUtil.toBoolean(EnvFactory.getEnvironmentTemplate().getString(Environment.USE_SCHEDULE, "true"))) {
-            return;
-        }
 
         SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
         //扫描得到的 begin

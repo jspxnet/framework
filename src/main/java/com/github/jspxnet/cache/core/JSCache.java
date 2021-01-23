@@ -364,6 +364,7 @@ public class JSCache implements Runnable, Cache {
         if (!store.isUseTimer()) {
             return;
         }
+
         try {
             for (String keys : store.getKeys()) {
                 CacheEntry entry = store.get(keys);

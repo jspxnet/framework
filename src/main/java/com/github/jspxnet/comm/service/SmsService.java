@@ -36,6 +36,7 @@ public class SmsService extends Thread {
     }
 
     public void startService() {
+        super.setDaemon(true);
         super.start();
         ShutDownHook hook = new ShutDownHook();
         hook.doShutDownWork();
@@ -79,8 +80,8 @@ public class SmsService extends Thread {
         return router.getRouter();
     }
 
-    public List<SerialStatus> getSerialStatus() throws IOException, InterruptedException {
-        List<SerialStatus> list = new ArrayList<SerialStatus>();
+    public List<SerialStatus> getSerialStatus()  {
+        List<SerialStatus> list = new ArrayList<>();
         for (SerialComm serialComm : gatewayList.values()) {
             list.add(serialComm.getStatus());
         }

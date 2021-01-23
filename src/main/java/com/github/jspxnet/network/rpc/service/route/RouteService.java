@@ -4,18 +4,19 @@ package com.github.jspxnet.network.rpc.service.route;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.network.rpc.client.NettyClient;
+import com.github.jspxnet.network.rpc.client.NettyClientPool;
 import com.github.jspxnet.network.rpc.client.ReplyCmdFactory;
 import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
+import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
+import com.github.jspxnet.sioc.annotation.Scheduled;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import java.net.SocketAddress;
 import java.util.ArrayList;
@@ -29,22 +30,28 @@ import java.util.List;
  * description: 是服务器之间发送路由
  **/
 @Slf4j
-public class RouteService extends Thread implements Runnable {
-
+public class RouteService  {
     private static final RouteChannelManage ROUTE_CHANNEL_MANAGE = RouteChannelManage.getInstance();
 
     //第一次使用配置服务器地址,以后将切换到路由表
-    private static final NettyClient NETTY_CLIENT = new NettyClient();
+    //有被误判拦截ip的可能
+    //private static final NettyClient NETTY_CLIENT = new NettyClient();
+
+    private static final NettyClientPool NETTY_CLIENT = NettyClientPool.getInstance();
     private static int configCount = 1;
     private static long lastInitTimeMillis = System.currentTimeMillis();
-    private void init() throws Exception {
-
+    private void init() throws Exception
+    {
         //初始化数据 begin
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
         List<RouteSession> routeSessionList = new ArrayList<>();
         List<String> nameList = masterSocketAddress.getDefaultSocketAddressGroupNames();
         for (String name:nameList)
         {
+            if (StringUtil.isNull(name))
+            {
+                continue;
+            }
             List<SocketAddress> defaultSocketAddressList = masterSocketAddress.getDefaultSocketAddressList(name);
             for (SocketAddress socketAddress : defaultSocketAddressList)
             {
@@ -80,7 +87,7 @@ public class RouteService extends Thread implements Runnable {
         //初始化数据 end
     }
 
-    @Override
+    @Scheduled(force = true)
     public void run() {
         long lastTimeMillis = System.currentTimeMillis();
         try {
@@ -92,35 +99,39 @@ public class RouteService extends Thread implements Runnable {
                 linkRoute();
                 Thread.sleep(DateUtil.SECOND);
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
-                Thread.sleep(DateUtil.SECOND);
+
                 MasterSocketAddress.getInstance().flushAddress();
-                if (System.currentTimeMillis()-lastTimeMillis>DateUtil.MINUTE)
+                //if (System.currentTimeMillis()-lastTimeMillis>DateUtil.MINUTE)
                 {
                     log.debug("当前路由表:\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
-                    lastTimeMillis = System.currentTimeMillis();
+                  //  lastTimeMillis = System.currentTimeMillis();
                 }
+                RpcConfig rpcConfig = RpcConfig.getInstance();
+                Thread.sleep(rpcConfig.getRoutesSecond()*DateUtil.SECOND);
             }
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        NETTY_CLIENT.shutdown();
+        //NETTY_CLIENT.shutdown();
 
     }
 
     private void linkRoute() {
         List<RouteSession> routeSessionList = ROUTE_CHANNEL_MANAGE.getRouteSessionList();
-        if (routeSessionList == null || routeSessionList.isEmpty()) {
+        if (ObjectUtil.isEmpty(routeSessionList)) {
             return ;
         }
-
+        //交换路由表
         for (RouteSession routeSession : routeSessionList) {
             if (YesNoEnumType.NO.getValue() == routeSession.getOnline()) {
                 continue;
             }
-            try {
-                Thread.sleep(DateUtil.SECOND);
+            try
+            {
                 SendCmd getRoute = SendCommandFactory.createCommand(INetCommand.GET_ROUTE);
                 getRoute.setType(INetCommand.TYPE_JSON);
+
+                /*
                 Channel channel = NETTY_CLIENT.connect(routeSession.getSocketAddress());
                 if (!INetCommand.isConnect(channel))
                 {
@@ -128,15 +139,15 @@ public class RouteService extends Thread implements Runnable {
                     continue;
                 }
                 SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), getRoute);
+                */
+                SendCmd reply =NETTY_CLIENT.send(routeSession.getSocketAddress(), getRoute);
                 if (reply == null || reply.getAction().equalsIgnoreCase(INetCommand.EXCEPTION)) {
                     ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
                     continue;
                 }
-
                 if (ReplyCmdFactory.isSysCmd(reply.getAction())) {
                     continue;
                 }
-
                 if (INetCommand.TYPE_JSON.equals(reply.getType())) {
                     String str = reply.getData();
                     if (StringUtil.isJsonObject(str)) {

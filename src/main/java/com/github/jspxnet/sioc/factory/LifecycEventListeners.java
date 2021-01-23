@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class LifecycEventListeners implements CacheEventListener {
-    //private static final Logger log = LoggerFactory.getLogger(LifecycEventListeners.class);
+
 
     /**
      * 删除后

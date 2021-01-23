@@ -1,8 +1,6 @@
 package com.github.jspxnet.boot;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import lombok.extern.slf4j.Slf4j;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -15,9 +13,10 @@ import java.lang.reflect.Method;
  * google-gson issue # 402: Memory Leak in web application; comment # 25
  * https://code.google.com/p/google-gson/issues/detail?id=402
  */
+@Slf4j
 class ThreadLocalImmolate {
 
-    private final static Logger log = LoggerFactory.getLogger(ThreadLocalImmolate.class);
+
     private Boolean debug = false;
 
     ThreadLocalImmolate(boolean debug) {
@@ -27,9 +26,9 @@ class ThreadLocalImmolate {
     Integer immolate() {
         int count = 0;
         try {
-            final Field threadLocalsField = Thread.class.getDeclaredField("threadLocals");
+            Field threadLocalsField = Thread.class.getDeclaredField("threadLocals");
             threadLocalsField.setAccessible(true);
-            final Field inheritableThreadLocalsField = Thread.class.getDeclaredField("inheritableThreadLocals");
+            Field inheritableThreadLocalsField = Thread.class.getDeclaredField("inheritableThreadLocals");
             inheritableThreadLocalsField.setAccessible(true);
             for (final Thread thread : Thread.getAllStackTraces().keySet()) {
                 if (thread == null || thread.getName().toLowerCase().contains("gc")) {
@@ -61,7 +60,7 @@ class ThreadLocalImmolate {
         tableField.setAccessible(true);
         Object table = tableField.get(threadLocalMap);
         for (int i = 0, length = Array.getLength(table); i < length; ++i) {
-            final Object entry = Array.get(table, i);
+            Object entry = Array.get(table, i);
             if (entry != null) {
                 final Object threadLocal = ((WeakReference) entry).get();
                 if (threadLocal != null) {
@@ -84,17 +83,16 @@ class ThreadLocalImmolate {
                 Object queue = queueField.get(thread);
                 Method clearMethod = queue.getClass().getDeclaredMethod("clear");
                 clearMethod.setAccessible(true);
-                synchronized (queue) {
-                    newTasksMayBeScheduledField.setBoolean(thread, false);
-                    clearMethod.invoke(queue);
-                    queue.notify();
-                }
+
+                newTasksMayBeScheduledField.setBoolean(thread, false);
+                clearMethod.invoke(queue);
+                queue.notify();
+
             } catch (NoSuchFieldException var11) {
                 Method cancelMethod = thread.getClass().getDeclaredMethod("cancel");
-                synchronized (thread) {
-                    cancelMethod.setAccessible(true);
-                    cancelMethod.invoke(thread);
-                }
+
+                cancelMethod.setAccessible(true);
+                cancelMethod.invoke(thread);
             }
         } catch (Exception e) {
             log.info(thread.getName() + " " + thread.getClass().getName() + " " + e.getLocalizedMessage());

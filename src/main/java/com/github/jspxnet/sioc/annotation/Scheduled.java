@@ -34,4 +34,7 @@ public @interface Scheduled {
     //延时多少秒执行
     int delayed() default 0;
 
+    //不受外部配置控制,一定会启动
+    boolean force() default false;
+
 }

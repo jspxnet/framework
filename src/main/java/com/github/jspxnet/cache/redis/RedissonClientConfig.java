@@ -35,6 +35,7 @@ public class RedissonClientConfig {
     {
 
     }
+
     @Init
      public void init() {
         if (redisson == null) {
@@ -75,6 +76,7 @@ public class RedissonClientConfig {
                 }
 
                 redisson = Redisson.create(config);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

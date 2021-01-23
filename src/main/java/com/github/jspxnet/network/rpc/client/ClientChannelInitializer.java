@@ -22,8 +22,6 @@ import java.util.concurrent.TimeUnit;
  * description: jspbox
  **/
 public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> {
-
-
     public ClientChannelInitializer()
     {
 
@@ -32,6 +30,8 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> 
 
     @Override
     public void initChannel(SocketChannel ch)  {
+
+
         RpcConfig rpcConfig = RpcConfig.getInstance();;
         ch.config().setSendBufferSize(rpcConfig.getBufferSize());
         ch.config().setReceiveBufferSize(rpcConfig.getBufferSize());

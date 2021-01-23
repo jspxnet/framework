@@ -56,7 +56,7 @@ public class JShell {
 
         final InputStream errorStream = child.getErrorStream();
         final BufferedReader brErr = new BufferedReader(new InputStreamReader(errorStream, encode == null ? SystemUtil.encode : encode));
-        new Thread() {
+        Thread thread = new Thread() {
             @Override
             public void run() {
                 try {
@@ -70,7 +70,9 @@ public class JShell {
                     interrupt();
                 }
             }
-        }.start();
+        };
+        thread.setDaemon(true);
+        thread.start();
 
         try {
             Thread.sleep(sleep);

@@ -255,12 +255,6 @@ public class ClassUtil {
      * @throws ClassNotFoundException If a loading error occurs
      */
     public static Class<?> loadClass(String className) throws ClassNotFoundException {
-/*
-        if ("net.sf.cglib.empty.Object".equals(className))
-        {
-            return null;
-        }
-*/
         return Class.forName(StringUtil.trim(className), true, getClassLoader());
     }
 
@@ -761,6 +755,10 @@ public class ClassUtil {
      */
     public static Object invokeStaticMethod(String className, String methodName, Object[] args) throws Exception {
         Class<?> ownerClass = loadClass(className);
+        if (ownerClass==null)
+        {
+            return null;
+        }
         Class<?>[] argsClass = new Class[args.length];
         for (int i = 0, j = args.length; i < j; i++) {
             argsClass[i] = args[i].getClass();

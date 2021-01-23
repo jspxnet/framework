@@ -5,7 +5,6 @@ import com.github.jspxnet.cache.CacheException;
 import com.github.jspxnet.cache.IStore;
 import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.cache.redis.RedissonClientConfig;
-import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +41,7 @@ public class SingleRedissonStore extends Store implements IStore {
         return false;
     }
 
-    private String CACHE_KEY = StringUtil.empty;
+    private String cacheKey;
 
     @Override
     public void put(CacheEntry entry) {
@@ -50,7 +49,7 @@ public class SingleRedissonStore extends Store implements IStore {
         {
             return;
         }
-        RMap<String,CacheEntry> rMap = redisson.getMap(CACHE_KEY);
+        RMap<String,CacheEntry> rMap = redisson.getMap(cacheKey);
         rMap.put(entry.getKey(), entry);
         if (getSecond()>1)
         {
@@ -61,7 +60,7 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public long size() {
-        return redisson.getMap(CACHE_KEY).size();
+        return redisson.getMap(cacheKey).size();
     }
 
     /**
@@ -72,7 +71,7 @@ public class SingleRedissonStore extends Store implements IStore {
      */
     @Override
     public CacheEntry get(String key) {
-        RMap<String, CacheEntry> rMap = redisson.getMap(CACHE_KEY);
+        RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         if (rMap==null)
         {
             return null;
@@ -118,7 +117,7 @@ public class SingleRedissonStore extends Store implements IStore {
      */
     @Override
     public CacheEntry remove(String key) {
-        RMap<String, CacheEntry> rMap = redisson.getMap(CACHE_KEY);
+        RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         if (rMap==null)
         {
             return null;
@@ -136,52 +135,29 @@ public class SingleRedissonStore extends Store implements IStore {
      */
     @Override
     public void removeAll() {
-        if (redisson!=null&&redisson.isShutdown()) {
+        if (redisson==null||redisson.isShutdown()) {
             return;
         }
-        RMap<String, CacheEntry> rMap = redisson.getMap(CACHE_KEY);
+        RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         if (rMap!=null)
         {
             rMap.delete();
         }
     }
 
-  /*  private RedisClient redisClient = null;
-
-    private org.redisson.client.RedisClient getRedisClient() {
-        if (redisClient == null) {
-            RedisClientConfig redisConfig = new RedisClientConfig();
-            SingleServerConfig singleServerConfig = config.useSingleServer();
-            redisConfig.setAddress(singleServerConfig.getAddress());
-            if (!StringUtil.isEmpty(singleServerConfig.getPassword())) {
-                redisConfig.setPassword(singleServerConfig.getPassword());
-            }
-            redisConfig.setDatabase(singleServerConfig.getDatabase())
-                    .setClientName(singleServerConfig.getClientName())
-                    .setGroup(config.getEventLoopGroup());
-
-            redisClient = RedisClient.create(redisConfig);
-        }
-        return redisClient;
-    }
-*/
+    /**
+     *
+     * @return redis默认一直保存
+     * @throws CacheException 异常
+     */
     @Override
     public long getSizeInBytes() throws CacheException {
-       /*
-        try {
-            RedisConnection conn = getRedisClient().connect();
-            Map<String, String> memoryInfo = conn.sync(StringCodec.INSTANCE, RedisCommands.INFO_MEMORY);
-            conn.closeAsync();
-            return memoryInfo.size();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return 0;
     }
 
     @Override
     public Set<String> getKeys() {
-        RMap<String, CacheEntry> rMap = redisson.getMap(CACHE_KEY);
+        RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         if (rMap==null)
         {
             return new HashSet<>(0);
@@ -191,22 +167,21 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public boolean containsKey(String key) {
-        RMap<String, CacheEntry> rMap = redisson.getMap(CACHE_KEY);
+        RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         return rMap.containsKey(key);
     }
 
     @Override
     public void setName(String name) {
-        CACHE_KEY = StringUtil.replace(name, ".", ":");
+        cacheKey = StringUtil.replace(name, ".", ":");
         super.setName(name);
     }
 
     @Override
     public void dispose() {
-/*
-        if (!redisson.isShutdown()) {
+        log.debug("关闭redisson");
+      /*  if (!redisson.isShutdown()) {
             redisson.shutdown();
-        }
-*/
+        }*/
     }
 }

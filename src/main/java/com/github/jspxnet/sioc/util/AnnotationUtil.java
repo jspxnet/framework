@@ -1,5 +1,7 @@
 package com.github.jspxnet.sioc.util;
 
+import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.*;
 import com.github.jspxnet.sioc.scheduler.TaskProxy;
@@ -79,13 +81,26 @@ public final class AnnotationUtil {
      * @return 判断是否存在定时任务标签
      */
     public static boolean hasScheduled(Class<?> cls) {
+
+        //全局开关
+        boolean sysUseSchedule = ObjectUtil.toBoolean(EnvFactory.getEnvironmentTemplate().getString(Environment.USE_SCHEDULE, "true"));
         Method[] methods = ClassUtil.getDeclaredMethods(cls);
         if (methods == null) {
             return false;
         }
         for (Method method : methods) {
             Scheduled scheduled = method.getAnnotation(Scheduled.class);
-            if (scheduled != null) {
+            if (scheduled==null)
+            {
+                return false;
+            }
+            if (scheduled.force()) {
+                //强制开启
+                return true;
+            }
+            else if (sysUseSchedule)
+            {
+                //通过系统开关控制
                 return true;
             }
         }

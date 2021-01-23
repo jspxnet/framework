@@ -11,13 +11,16 @@ package com.github.jspxnet.datasource;
 
 
 import com.github.jspxnet.network.mail.core.SendEmailAdapter;
+import com.github.jspxnet.sioc.annotation.Destroy;
+import com.github.jspxnet.sioc.annotation.Scheduled;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.logging.Logger;
 
 /**
@@ -62,8 +65,8 @@ import java.util.logging.Logger;
  * 最后一个作为备用
  */
 @Slf4j
-public class JspxDataSource extends DriverManagerDataSource implements Runnable {
-    private final Thread thread = new Thread(this);
+public class JspxDataSource extends DriverManagerDataSource {
+
     private int maxPoolSize = 5;
     private transient ConnectionProxy[] connectionPool = new ConnectionProxy[(maxPoolSize)];
     private int maxConnectionTime = DateUtil.HOUR;  //1小时 超时关闭
@@ -71,18 +74,15 @@ public class JspxDataSource extends DriverManagerDataSource implements Runnable 
     private boolean mailTips = false;
     private int mailSendTimes = 0;
     private int minPoolSize = 4;
-    private int sleepSecond = 300;  //5分钟检测一次是否还有使用的
     private String smtp = ""; //mail.gzec.com.cn
     private String mailFrom = ""; //public@gzec.com.cn
     private String mailUser = "";
     private String mailPassword = ""; //111111
     private String mailSendTo = ""; //39793751@qq.com
-    final static private String jspxDataBaseThreadName = "jspxDataBaseThread";
 
     public JspxDataSource() {
-        thread.setName(jspxDataBaseThreadName);
-        thread.start();
     }
+
 
     public boolean isMailTips() {
         return mailTips;
@@ -147,14 +147,6 @@ public class JspxDataSource extends DriverManagerDataSource implements Runnable 
         return maxPoolSize + 1;
     }
 
-    public int getSleepSecond() {
-        return sleepSecond;
-    }
-
-    public void setSleepSecond(int sleepSecond) {
-        this.sleepSecond = sleepSecond;
-    }
-
     public void setMaxPoolSize(int maxPoolSize) {
         if (this.maxPoolSize == maxPoolSize) {
             return;
@@ -192,11 +184,7 @@ public class JspxDataSource extends DriverManagerDataSource implements Runnable 
     }
 
     public void setMaxConnectionTime(int maxConnectionTime) {
-        if (maxConnectionTime < 1000) {
-            this.maxConnectionTime = 1000;
-        } else {
-            this.maxConnectionTime = maxConnectionTime;
-        }
+        this.maxConnectionTime = Math.max(maxConnectionTime, 1000);
     }
 
     @Override
@@ -259,6 +247,7 @@ public class JspxDataSource extends DriverManagerDataSource implements Runnable 
     /**
      * 关闭连接
      */
+
     public void close() {
         for (int i = 0; i < connectionPool.length; i++) {
             if (connectionPool[i] != null) {
@@ -268,7 +257,11 @@ public class JspxDataSource extends DriverManagerDataSource implements Runnable 
         }
     }
 
-
+    @Destroy
+    public void shutdown() throws SQLException {
+        close();
+        super.getConnectionFromDriverManager().close();
+    }
     /**
      * @return ConnectionProxy  创建代理链接
      */
@@ -317,34 +310,29 @@ public class JspxDataSource extends DriverManagerDataSource implements Runnable 
         return Logger.getLogger(JspxDataSource.class.getName());
     }
 
-    @Override
+    @Scheduled(force = true)
     public void run() {
-        while (maxPoolSize > 0) {
-            try {
-                if (Thread.currentThread().isInterrupted() ) {
-                    break;
-                }
-                Thread.sleep(DateUtil.SECOND * sleepSecond);
-                if (ArrayUtil.isEmpty(connectionPool)) {
+        try {
+            if (ArrayUtil.isEmpty(connectionPool)) {
+                return;
+            }
+            for (int i = 0; i < connectionPool.length; i++) {
+                ConnectionProxy conn = connectionPool[i];
+                if (conn == null) {
                     continue;
                 }
-
-                for (int i = 0; i < connectionPool.length; i++) {
-                    ConnectionProxy conn = connectionPool[i];
-                    if (conn == null) {
-                        continue;
-                    }
-                    if (conn.isOvertime() || !conn.isConnect()) {
-                        //周期比较长,有就直接关闭
-                        conn.close();
-                        conn.release();
-                        connectionPool[i] = null;
-                    }
+                if (conn.isOvertime() || !conn.isConnect()) {
+                    //周期比较长,有就直接关闭
+                    conn.close();
+                    conn.release();
+                    connectionPool[i] = null;
                 }
-            } catch (Exception e) {
-                log.error("连接池线程异常", e);
             }
+        } catch (Exception e) {
+            log.error("连接池线程异常", e);
         }
+
+        System.out.println(getPoolSize() + "--------连接池 scheduleWithFixedDelay执行完成时间："+ DateFormat.getTimeInstance().format(new Date()));
 
     }
 }

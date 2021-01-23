@@ -13,7 +13,6 @@ package com.github.jspxnet.datasource;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Driver;

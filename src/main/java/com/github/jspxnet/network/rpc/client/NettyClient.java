@@ -1,5 +1,6 @@
 package com.github.jspxnet.network.rpc.client;
 
+import com.github.jspxnet.boot.DaemonThreadFactory;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
@@ -26,7 +27,7 @@ import java.util.concurrent.*;
 public class NettyClient {
     final private static ResultHashMap RESULT_HASH_MAP = ResultHashMap.getInstance();
 
-    private NioEventLoopGroup workersGroup;
+    private final NioEventLoopGroup workersGroup;
     private final Bootstrap bootstrap = new Bootstrap();
     private ChannelFuture channelFuture = null;
     private SocketAddress address;
@@ -34,7 +35,7 @@ public class NettyClient {
     public NettyClient()
     {
         RpcConfig rpcConfig = RpcConfig.getInstance();
-        workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread());
+        workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory());
         bootstrap.group(workersGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new ClientChannelInitializer())

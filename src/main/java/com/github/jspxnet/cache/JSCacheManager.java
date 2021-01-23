@@ -96,7 +96,7 @@ public class JSCacheManager implements CacheManager {
     @Override
     public void registeredCache(JSCache cache) {
         if (!containsKey(cache.getName())) {
-            if (cache.getSecond() > 0 && cache.getStore().isUseTimer()) {
+            if (cache!=null&&cache.getSecond() > 0 && cache.getStore().isUseTimer()) {
                 SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
                 schedulerManager.add(cache.getName(), "* * * * *", cache);
             }
@@ -118,7 +118,7 @@ public class JSCacheManager implements CacheManager {
     @Override
     public Cache getCache(String key) {
         for (Cache cache : caches) {
-            if (cache.getName().equalsIgnoreCase(key)) {
+            if (cache!=null&&cache.getName().equalsIgnoreCase(key)) {
                 return cache;
             }
         }
@@ -352,11 +352,12 @@ public class JSCacheManager implements CacheManager {
     static public void shutdown() {
         SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
         for (Cache cache : caches) {
+            cache.destroy();
             Scheduler scheduler = schedulerManager.remove(cache.getName());
-            if (scheduler != null) {
+            if (scheduler != null&&scheduler.isStarted()) {
                 scheduler.stop();
             }
-            cache.destroy();
+
         }
         caches.clear();
     }

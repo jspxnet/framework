@@ -39,12 +39,14 @@ public class RpcConfig {
     //服务器本机地址
     final static private String MASTER_GROUP = "rpc.master.group";
 
-
     //服务器本机功能组名称
     final static private String GROUP_NAMES = "rpc.group.names";
 
     //超时,单位为秒
     final static private String TIMEOUT = "rpc.timeout";
+
+    //路由秒数
+    final static private String ROUTES_SECOND = "rpc.routesSecond";
 
 
     final static private RpcConfig instance = new RpcConfig();
@@ -78,6 +80,11 @@ public class RpcConfig {
     public int getTimeout() {
         return ENV_TEMPLATE.getInt(TIMEOUT, 3);
     }
+
+    public int getRoutesSecond() {
+        return ENV_TEMPLATE.getInt(ROUTES_SECOND, 5);
+    }
+
 
     public String getLocalAddress() {
         return ENV_TEMPLATE.getString(LOCAL_ADDRESS);

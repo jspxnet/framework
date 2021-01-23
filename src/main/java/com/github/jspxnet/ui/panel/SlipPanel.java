@@ -251,6 +251,7 @@ public class SlipPanel extends JPanel {
                     interrupt();
                 }
             };
+            thread.setDaemon(true);
             thread.start();
         }
         first = false;

@@ -101,17 +101,17 @@ public class UserSession implements IUserSession {
     @Override
     public IRole getRole(String namespace,String organizeId)
     {
-        if (namespace==null)
+        if (StringUtil.isEmpty(namespace))
         {
             namespace = StringUtil.empty;
         }
-        if (organizeId==null)
+        if (StringUtil.isEmpty(organizeId))
         {
             organizeId = StringUtil.empty;
         }
         for (Role role : roleList)
         {
-            if (role == null || role.getNamespace()==null)
+            if (role == null || StringUtil.isEmpty(role.getNamespace()))
             {
                 continue;
             }

@@ -10,7 +10,6 @@ import it.sauronsoftware.cron4j.Scheduler;
 import it.sauronsoftware.cron4j.SchedulingPattern;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Method;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,13 +23,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SchedulerTaskManager implements SchedulerManager {
 
     final private static Map<String, Scheduler> SCHEDULER_MAP = new ConcurrentHashMap<>();
-    private static SchedulerTaskManager instance = new SchedulerTaskManager();
+    private static final SchedulerTaskManager INSTANCE = new SchedulerTaskManager();
 
     private SchedulerTaskManager() {
     }
 
     public static SchedulerTaskManager getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override
@@ -43,6 +42,8 @@ public class SchedulerTaskManager implements SchedulerManager {
             pattern = "* * * * *";
         }
         Scheduler scheduler = new Scheduler();
+        //声明线程后调用setDeamon(true)，将该线程设置为守护线程，则容器关闭后，这些守护线程会立即关闭
+        scheduler.setDaemon(true);
         scheduler.schedule(pattern, runnable);
         scheduler.start();
         SCHEDULER_MAP.put(id, scheduler);
@@ -107,6 +108,7 @@ public class SchedulerTaskManager implements SchedulerManager {
         }
 
         Scheduler scheduler = new Scheduler();
+        scheduler.setDaemon(true);
         scheduler.schedule(taskProxy.getPattern(), taskProxy);
         scheduler.start();
         SCHEDULER_MAP.put(scheduledId, scheduler);

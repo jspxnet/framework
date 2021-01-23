@@ -37,9 +37,9 @@ public class NettyChannelPoolHandler implements ChannelPoolHandler {
     @Override
     public void channelCreated(Channel ch) throws Exception {
         //log.debug("---------channelCreated. Channel ID: " + ch.id());
-
         ch.config().setAllocator(PooledByteBufAllocator.DEFAULT);
         ChannelPipeline pipeline = ch.pipeline();
+
         pipeline.addLast(new LengthFieldBasedFrameDecoder(RpcConfig.getInstance().getMaxFrameLength(), 0, 4, 0, 4));
         pipeline.addLast(new LengthFieldPrepender(4));
         pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));

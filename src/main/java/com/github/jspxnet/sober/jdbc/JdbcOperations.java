@@ -1341,7 +1341,7 @@ public abstract class JdbcOperations implements SoberSupport {
         if (StringUtil.isEmpty(sqlText)) {
             return -2;
         }
-        int result = -1;
+        int result;
         Connection conn = null;
         PreparedStatement statement = null;
         try {
@@ -1631,12 +1631,9 @@ public abstract class JdbcOperations implements SoberSupport {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-
-
     /**
      * 查询返回列表
      * 使用jdbc完成,比较浪费资源
-     *
      * @param cla class
      * @param sql  sql
      * @param param 参数
@@ -2332,7 +2329,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public List<?> prepareQuery(String sqlText, Object[] param) {
-        List<Object> result = null;
+        List<Object> result;
         Connection conn = null;
         CallableStatement statement = null;
         ResultSet resultSet = null;

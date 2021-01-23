@@ -24,19 +24,17 @@ import com.github.jspxnet.network.vcs.VcsClient;
 import com.github.jspxnet.network.vcs.VcsFactory;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.BeanFactory;
+import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.factory.EntryFactory;
 import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
-import com.github.jspxnet.txweb.WebConfigManager;
+import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.txweb.config.DefaultConfiguration;
 import com.github.jspxnet.txweb.config.TXWebConfigManager;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.util.StringMap;
-import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.SystemUtil;
+import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.servlet.ServletContextListener;
@@ -105,6 +103,7 @@ public class JspxCoreListener implements ServletContextListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!StringUtil.isNull(defaultPath)) {
             jspxConfiguration.setDefaultPath(defaultPath);
@@ -203,10 +202,8 @@ public class JspxCoreListener implements ServletContextListener {
         ////////////导入Ioc配置 begin
         IocContext iocContext = ConfigureContext.getInstance();
         iocContext.setConfigFile(jspxConfiguration.getIocConfigFile());
-
         EntryFactory beanFactory = (EntryFactory) com.github.jspxnet.boot.EnvFactory.getBeanFactory();
         beanFactory.setIocContext(iocContext);
-
 
         //载入定时任务
         beanFactory.initScheduler();
@@ -243,7 +240,6 @@ public class JspxCoreListener implements ServletContextListener {
             log.error("载入Web配置错误", e);
         }
 
-
         TXWebConfigManager.getInstance().checkLoad();
         //rpc服务器,提供外部rpctcp调用 begin
         if (RpcConfig.getInstance().isUseNettyRpc()) {
@@ -251,8 +247,6 @@ public class JspxCoreListener implements ServletContextListener {
             NettyRpcServiceGroup.getInstance().start();
         }
         //rpc服务器,提供外部rpctcp调用 end
-
-
 
         log.info("-" + copyright + " start completed " + (isAndroid ? "for Android" : " J2SDK"));
         isRun = true;
@@ -263,38 +257,26 @@ public class JspxCoreListener implements ServletContextListener {
     public void contextDestroyed(javax.servlet.ServletContextEvent servletContextEvent) {
         log.info(Environment.frameworkName + " " + copyright + " shutdown start");
 
- /*       //定时任务
+       //定时任务
         SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
         schedulerManager.shutdown();
         log.info("scheduler shutdown");
-*/
+
         BeanFactory beanFactory = EnvFactory.getBeanFactory();
         beanFactory.shutdown();
         log.info("bean factory shutdown");
-
-
-        //关闭缓存和线程begin
-        JSCacheManager.shutdown();
-        log.info("JSCache shutdown");
-        //关闭缓存和线程end
-
-        //TXWeb配置卸载begin
-        WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
-        if (webConfigManager!=null)
-        {
-            webConfigManager.clear();
-        }
-        log.info("TXWeb config clean");
-        //TXWeb配置卸载end
 
         //Evasive配置卸载begin
         EvasiveConfiguration.getInstance().shutdown();
         log.info("Evasive config clean");
         //Evasive配置卸载begin
 
+        //关闭缓存和线程begin
+        JSCacheManager.shutdown();
+        log.info("JSCache shutdown");
+        //关闭缓存和线程end
 
-
-        //卸载jdbc驱动begin
+      //卸载jdbc驱动begin
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         Driver d = null;
         while (drivers.hasMoreElements()) {
@@ -307,17 +289,28 @@ public class JspxCoreListener implements ServletContextListener {
             }
         }
         //卸载jdbc驱动end
+        com.mysql.jdbc.AbandonedConnectionCleanupThread.getThread().setDaemon(true);
+        try {
+            Class<?> mysqlClass = ClassUtil.loadClass("com.mysql.jdbc.AbandonedConnectionCleanupThread");
+            if (mysqlClass!=null)
+            {
+                ClassUtil.invokeStaticMethod("com.mysql.jdbc.AbandonedConnectionCleanupThread","shutdown",null);
+            }
+        } catch (Exception e) {
+            //e.printStackTrace();
+            log.error("AbandonedConnectionCleanupThread线程关闭失败。这种情况通常出现在MySQL上。");
+        }
 
         //关闭定时器和其他线程begin
-
         //安卓系统跳过这里，否则会有错误
         if (!SystemUtil.isAndroid()) {
             com.github.jspxnet.boot.ThreadLocalImmolate threadLocalImmolate = new com.github.jspxnet.boot.ThreadLocalImmolate(true);
             log.info("ThreadLocal shutdown count is " + threadLocalImmolate.immolate());
         }
         //关闭定时器和其他线程end
-
+        System.gc();
         isRun = false;
         log.info(Environment.frameworkName + " " + copyright + " dispatcher shutdown completed ");
+        System.exit(1);
     }
 }

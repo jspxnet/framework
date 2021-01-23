@@ -11,7 +11,6 @@ import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
-import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.transfer.ChannelSession;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.utils.DateUtil;

@@ -2,6 +2,9 @@ package com.github.jspxnet.network.rpc.service;
 
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.service.route.RouteService;
+import com.github.jspxnet.sioc.SchedulerManager;
+import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
+
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +18,7 @@ import java.util.Map;
  * description: jspbox
  **/
 public class NettyRpcServiceGroup {
-    private static final RouteService routeService = new RouteService();
+
     private static final NettyRpcServiceGroup INSTANCE = new NettyRpcServiceGroup();
     public static NettyRpcServiceGroup getInstance(){
         return INSTANCE;
@@ -31,6 +34,7 @@ public class NettyRpcServiceGroup {
         if (nettyRpcServer==null)
         {
             nettyRpcServer = new NettyRpcServer(socketAddress);
+            nettyRpcServer.setDaemon(true);
             nettyRpcServer.start();
         } else
         if (!nettyRpcServer.isRun())
@@ -50,7 +54,9 @@ public class NettyRpcServiceGroup {
         {
             start(socketAddress);
         }
-        routeService.start();
+
+        SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
+        schedulerManager.add(new RouteService());
     }
 
     public  void stop() {
@@ -58,7 +64,7 @@ public class NettyRpcServiceGroup {
         {
             if (nettyRpcServer!=null)
             {
-                nettyRpcServer.stop();
+                nettyRpcServer.interrupt();
             }
         }
     }

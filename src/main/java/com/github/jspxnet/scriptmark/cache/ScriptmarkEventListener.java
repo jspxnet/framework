@@ -23,7 +23,7 @@ import com.github.jspxnet.scriptmark.TemplateModel;
  * Time: 15:33:29
  */
 public class ScriptmarkEventListener implements CacheEventListener {
-    //private static final Logger log = LoggerFactory.getLogger(LifecycEventListeners.class);
+
 
     //删除后
     @Override
