@@ -116,7 +116,6 @@ public class RouteService extends Thread implements Runnable {
             return;
         }
 
-        log.debug("检测关联服务器:{}", checkSessionList);
         JSONObject json = new JSONObject();
         json.put(RouteChannelManage.KEY_ROUTE, routeSessionList);
 
@@ -142,7 +141,10 @@ public class RouteService extends Thread implements Runnable {
                 }
             } catch (Exception e) {
                 //..
-                log.debug("检测关联服务器没有上线:{}", routeSession.getSocketAddress());
+               if (rpcConfig.isDebug())
+               {
+                   log.debug("检测关联服务器没有上线:{}", routeSession.getSocketAddress());
+               }
 
             }
         }
@@ -151,23 +153,30 @@ public class RouteService extends Thread implements Runnable {
     @Override
     public void run() {
         long lastTimeMillis = System.currentTimeMillis();
+        long lastRelevancyTimeMillis = System.currentTimeMillis();
         try {
             init();
+            RpcConfig rpcConfig = RpcConfig.getInstance();
             while (true) {
                 checkSocketAddressRoute();
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
                 linkRoute();
                 MasterSocketAddress.getInstance().flushAddress();
                 if (System.currentTimeMillis() - lastTimeMillis > DateUtil.MINUTE) {
-                    log.debug("当前路由表:\r\n{}", RouteChannelManage.getInstance().getSendRouteTable());
+                    if (rpcConfig.isDebug())
+                    {
+                        log.debug("当前路由表:\r\n{}", RouteChannelManage.getInstance().getSendRouteTable());
+                    }
                     lastTimeMillis = System.currentTimeMillis();
                 }
-                RpcConfig rpcConfig = RpcConfig.getInstance();
                 Thread.sleep(rpcConfig.getRoutesSecond() * DateUtil.SECOND);
-                relevancy();
+                if (System.currentTimeMillis() - lastRelevancyTimeMillis > DateUtil.MINUTE*5) {
+                    lastRelevancyTimeMillis = System.currentTimeMillis();
+                    relevancy();
+                }
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            log.error("路由线程异常退出:{}",e.getMessage());
         }
         //NETTY_CLIENT.shutdown();
 
@@ -222,7 +231,12 @@ public class RouteService extends Thread implements Runnable {
                 //把路由表自己保管起来
             } catch (Exception e) {
                 ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
-                log.error("RPC路由网络中存在异常服务器:{},错误:{}", ObjectUtil.toString(routeSession), e.getMessage());
+                RpcConfig rpcConfig = RpcConfig.getInstance();
+                if (rpcConfig.isDebug())
+                {
+                    log.debug("RPC路由网络中存在异常服务器:{}", ObjectUtil.toString(routeSession));
+                }
+
             }
         }
     }
@@ -254,7 +268,12 @@ public class RouteService extends Thread implements Runnable {
                 }
             } catch (Exception e) {
                 ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
-                log.error("RPC路由网络中存在异常服务器:{}", ObjectUtil.toString(routeSession));
+                RpcConfig rpcConfig = RpcConfig.getInstance();
+                if (rpcConfig.isDebug())
+                {
+                    log.debug("RPC路由网络中存在异常服务器:{}", ObjectUtil.toString(routeSession));
+                }
+
             }
         }
         checkRouteSocketList.clear();

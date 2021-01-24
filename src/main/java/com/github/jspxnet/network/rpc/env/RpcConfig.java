@@ -19,6 +19,7 @@ import java.util.List;
 public class RpcConfig {
     private EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     final static private String USE_NETTY_RPC = "useNettyRpc";
+    final static private String NETTY_RPC_DEBUG = "nettyRpcDebug";
 
     //包的最大长度
     final static private String MAX_FRAME_LENGTH = "rpc.maxFrameLength";
@@ -59,6 +60,10 @@ public class RpcConfig {
 
     public boolean isUseNettyRpc() {
         return ENV_TEMPLATE.getBoolean(USE_NETTY_RPC);
+    }
+
+    public boolean isDebug() {
+        return ENV_TEMPLATE.getBoolean(NETTY_RPC_DEBUG);
     }
 
     public int getMaxFrameLength() {
