@@ -107,6 +107,7 @@ public class RouteChannelManage {
                 if (routeSessionTmp!=null&&YesNoEnumType.NO.getValue()==routeSessionTmp.getOnline())
                 {
                     routeSessionTmp.setOnline(YesNoEnumType.YES.getValue());
+                    routeSessionTmp.setHeartbeatTimes(0);
                 }
             }
         }
@@ -156,9 +157,8 @@ public class RouteChannelManage {
         if (routeSession!=null)
         {
             routeSession.setHeartbeatTimes(routeSession.getHeartbeatTimes()+1);
-            if (routeSession.getHeartbeatTimes()>3)
+            if (routeSession.getHeartbeatTimes()>1)
             {
-
                 routeSession.setOnline(YesNoEnumType.NO.getValue());
             }
         }

@@ -126,7 +126,6 @@ public class RouteService   extends Thread implements Runnable {
             {
                 SendCmd getRoute = SendCommandFactory.createCommand(INetCommand.GET_ROUTE);
                 getRoute.setType(INetCommand.TYPE_JSON);
-
                 /*
                 Channel channel = NETTY_CLIENT.connect(routeSession.getSocketAddress());
                 if (!INetCommand.isConnect(channel))
@@ -164,7 +163,6 @@ public class RouteService   extends Thread implements Runnable {
                 //把路由表自己保管起来
             } catch (Exception e) {
                 ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
-                e.printStackTrace();
                 log.error("RPC路由网络中存在异常服务器:{},错误:{}", ObjectUtil.toString(routeSession), e.getMessage());
             }
         }
