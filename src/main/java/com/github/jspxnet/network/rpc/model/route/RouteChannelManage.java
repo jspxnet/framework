@@ -3,7 +3,6 @@ package com.github.jspxnet.network.rpc.model.route;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
-import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.IpUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;

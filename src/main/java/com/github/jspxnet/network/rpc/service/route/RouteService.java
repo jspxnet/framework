@@ -94,13 +94,13 @@ public class RouteService   extends Thread implements Runnable {
             init();
             while (true) {
                 checkSocketAddressRoute();
-                linkRoute();
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
+                linkRoute();
                 MasterSocketAddress.getInstance().flushAddress();
-                //if (System.currentTimeMillis()-lastTimeMillis>DateUtil.MINUTE)
+                if (System.currentTimeMillis()-lastTimeMillis>DateUtil.MINUTE)
                 {
                     log.debug("当前路由表:\r\n{}",RouteChannelManage.getInstance().getSendRouteTable());
-                  //  lastTimeMillis = System.currentTimeMillis();
+                    lastTimeMillis = System.currentTimeMillis();
                 }
                 RpcConfig rpcConfig = RpcConfig.getInstance();
                 Thread.sleep(rpcConfig.getRoutesSecond()*DateUtil.SECOND);
@@ -194,7 +194,7 @@ public class RouteService   extends Thread implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
                 log.error("RPC路由网络中存在异常服务器:{},错误:{}", ObjectUtil.toString(routeSession), e.getMessage());
             }
         }
