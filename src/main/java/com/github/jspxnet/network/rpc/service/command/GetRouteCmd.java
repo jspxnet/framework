@@ -17,12 +17,13 @@ import io.netty.channel.ChannelHandlerContext;
  * 请求后得到的路由表
  **/
 public class GetRouteCmd extends INetCommand {
-    private RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
+
 
     static final public String NAME = INetCommand.GET_ROUTE;
     @Override
     public SendCmd execute(Channel channel, SendCmd command)
     {
+        RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
         SendCmd reply = BeanUtil.copy(command, SendCmd.class);
         reply.setAction(INetCommand.GET_ROUTE);
         reply.setType(INetCommand.TYPE_JSON);

@@ -123,6 +123,24 @@ public class RouteChannelManage {
         return new ArrayList<>(routeSocketMap.values());
     }
 
+    public List<RouteSession> getNotRouteSessionList(List<RouteSession> configList)
+    {
+        if (ObjectUtil.isEmpty(configList))
+        {
+            return null;
+        }
+
+        List<RouteSession> result = new ArrayList<>();
+        for (RouteSession routeSession:configList)
+        {
+            if (!routeSocketMap.containsKey(routeSession.getSocketAddress()))
+            {
+                result.add(routeSession);
+            }
+        }
+        return result;
+    }
+
 
     /**
      *

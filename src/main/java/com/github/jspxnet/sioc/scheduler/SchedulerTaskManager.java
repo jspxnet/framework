@@ -31,6 +31,13 @@ public class SchedulerTaskManager implements SchedulerManager {
         return INSTANCE;
     }
 
+    /**
+     *
+     * @param id 任务id
+     * @param pattern 时间表达式
+     * @param runnable 执行类
+     * @return 添加是否成功
+     */
     @Override
     public boolean add(String id, String pattern, Runnable runnable) {
         if (SCHEDULER_MAP.containsKey(id)) {

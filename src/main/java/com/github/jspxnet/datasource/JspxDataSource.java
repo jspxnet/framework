@@ -19,8 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.logging.Logger;
 
 /**
@@ -316,6 +314,7 @@ public class JspxDataSource extends DriverManagerDataSource {
             if (ArrayUtil.isEmpty(connectionPool)) {
                 return;
             }
+            int poolSize = getPoolSize();
             for (int i = 0; i < connectionPool.length; i++) {
                 ConnectionProxy conn = connectionPool[i];
                 if (conn == null) {
@@ -325,10 +324,13 @@ public class JspxDataSource extends DriverManagerDataSource {
                     //周期比较长,有就直接关闭
                     conn.close();
                     conn.release();
-                    connectionPool[i] = null;
+                    if (poolSize<minPoolSize)
+                    {
+                        connectionPool[i] = createConnectionProxy();
+                    }
                 }
             }
-            log.debug("连接池有效长度:{}",getPoolSize());
+            log.debug("minPoolSize:{},连接池有效长度:{}",minPoolSize,poolSize);
         } catch (Exception e) {
             log.error("连接池线程异常", e);
         }
