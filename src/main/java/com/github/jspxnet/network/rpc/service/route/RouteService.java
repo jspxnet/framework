@@ -89,12 +89,17 @@ public class RouteService extends Thread implements Runnable {
         //初始化数据 begin
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
         List<RouteSession> routeSessionList = new ArrayList<>();
+        RpcConfig rpcConfig = RpcConfig.getInstance();
         List<String> nameList = masterSocketAddress.getDefaultSocketAddressGroupNames();
         for (String name : nameList) {
             if (StringUtil.isNull(name)) {
                 continue;
             }
-            List<SocketAddress> defaultSocketAddressList = masterSocketAddress.getDefaultSocketAddressList(name);
+            List<SocketAddress> defaultSocketAddressList = rpcConfig.getMasterGroupList(name);
+            if (ObjectUtil.isEmpty(defaultSocketAddressList))
+            {
+                continue;
+            }
             for (SocketAddress socketAddress : defaultSocketAddressList) {
                 RouteSession routeSession = new RouteSession();
                 routeSession.setSocketAddress(socketAddress);
