@@ -92,14 +92,10 @@ public class RouteService   extends Thread implements Runnable {
         long lastTimeMillis = System.currentTimeMillis();
         try {
             init();
-            Thread.sleep(DateUtil.SECOND);
             while (true) {
                 checkSocketAddressRoute();
-                Thread.sleep(DateUtil.SECOND);
                 linkRoute();
-                Thread.sleep(DateUtil.SECOND);
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
-
                 MasterSocketAddress.getInstance().flushAddress();
                 //if (System.currentTimeMillis()-lastTimeMillis>DateUtil.MINUTE)
                 {
