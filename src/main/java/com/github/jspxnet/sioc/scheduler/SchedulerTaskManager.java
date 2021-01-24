@@ -3,7 +3,6 @@ package com.github.jspxnet.sioc.scheduler;
 
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.annotation.Scheduled;
-import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import it.sauronsoftware.cron4j.Scheduler;
@@ -94,10 +93,7 @@ public class SchedulerTaskManager implements SchedulerManager {
         if (StringUtil.isEmpty(taskProxy.getMethodName()) || StringUtil.isEmpty(taskProxy.getPattern())) {
             return false;
         }
-        String scheduledId = AnnotationUtil.getScheduledId(taskProxy);
-        if (StringUtil.isEmpty(scheduledId)) {
-            return false;
-        }
+        String scheduledId = taskProxy.getScheduledId();
         if (SCHEDULER_MAP.containsKey(scheduledId)) {
             //已经有这个任务了，不重复
             return false;

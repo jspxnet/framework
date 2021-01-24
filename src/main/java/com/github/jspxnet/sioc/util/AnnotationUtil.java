@@ -2,17 +2,13 @@ package com.github.jspxnet.sioc.util;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.*;
-import com.github.jspxnet.sioc.scheduler.TaskProxy;
 import com.github.jspxnet.sober.annotation.SqlMap;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Transaction;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.StringUtil;
-
 import java.lang.reflect.Method;
 
 public final class AnnotationUtil {
@@ -61,22 +57,6 @@ public final class AnnotationUtil {
     }
 
     /**
-     * @param taskProxy 任务对象
-     * @return 生成任务ID
-     */
-    public static String getScheduledId(TaskProxy taskProxy) {
-        if (taskProxy == null) {
-            return StringUtil.empty;
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(taskProxy.getClass().getName()).append("_")
-                .append(taskProxy.getMethodName()).append("_").append(taskProxy.getPattern())
-                .append("_").append(taskProxy.isOnce()).append("_").append(taskProxy.getDelayed());
-        return EncryptUtil.getMd5(stringBuilder.toString());
-    }
-
-
-    /**
      * @param cls 类对象
      * @return 判断是否存在定时任务标签
      */
@@ -123,7 +103,7 @@ public final class AnnotationUtil {
         if (bean != null && !Empty.class.equals(bean.bind())) {
             return bean.bind().getName();
         }
-        Class<?> ices = null;
+        Class<?> ices;
         HttpMethod httpMethod = cls.getAnnotation(HttpMethod.class);
         if (httpMethod != null)
         {

@@ -2,9 +2,6 @@ package com.github.jspxnet.network.rpc.service;
 
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.service.route.RouteService;
-import com.github.jspxnet.sioc.SchedulerManager;
-import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
-
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
@@ -54,9 +51,9 @@ public class NettyRpcServiceGroup {
         {
             start(socketAddress);
         }
-
-        SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
-        schedulerManager.add(new RouteService());
+        RouteService routeService = new RouteService();
+        routeService.setDaemon(true);
+        routeService.start();
     }
 
     public  void stop() {

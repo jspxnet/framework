@@ -328,6 +328,7 @@ public class JspxDataSource extends DriverManagerDataSource {
                     connectionPool[i] = null;
                 }
             }
+            log.debug("连接池有效长度:{}",getPoolSize());
         } catch (Exception e) {
             log.error("连接池线程异常", e);
         }

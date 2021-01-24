@@ -30,7 +30,7 @@ import java.util.List;
  * description: 是服务器之间发送路由
  **/
 @Slf4j
-public class RouteService  {
+public class RouteService   extends Thread implements Runnable {
     private static final RouteChannelManage ROUTE_CHANNEL_MANAGE = RouteChannelManage.getInstance();
 
     //第一次使用配置服务器地址,以后将切换到路由表
@@ -87,7 +87,7 @@ public class RouteService  {
         //初始化数据 end
     }
 
-    @Scheduled(force = true)
+    @Override
     public void run() {
         long lastTimeMillis = System.currentTimeMillis();
         try {

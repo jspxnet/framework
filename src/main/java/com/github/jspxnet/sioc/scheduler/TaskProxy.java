@@ -2,8 +2,9 @@ package com.github.jspxnet.sioc.scheduler;
 
 
 
+import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.SchedulerManager;
-import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import it.sauronsoftware.cron4j.Scheduler;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,29 @@ public class TaskProxy implements Runnable {
     private int delayed = 0;
 
     private String methodName;
+
     private Object bean;
+
+    @Override
+    public String toString()
+    {
+        JSONObject json = new JSONObject();
+        json.put("pattern",pattern);
+        json.put("once",once);
+        json.put("delayed",delayed);
+        json.put("methodName",methodName);
+        if (bean!=null)
+        {
+            json.put("bean",bean.getClass().getName());
+        }
+        return json.toString();
+    }
+
+    public String getScheduledId()
+    {
+        return EncryptUtil.getMd5(toString());
+    }
+
 
 
     public String getPattern() {
@@ -74,7 +97,7 @@ public class TaskProxy implements Runnable {
         }
         if (once) {
             SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
-            String scheduledId = AnnotationUtil.getScheduledId(this);
+            String scheduledId = getScheduledId();
             Scheduler scheduler = schedulerManager.remove(scheduledId);
             if (scheduler != null) {
                 log.info("关闭一次性任务:" + bean + "method." + methodName);
