@@ -36,7 +36,7 @@ public class DBBundleProvider extends BundleProvider {
     final private static String BUNDLE_MODEL = "bundle";
     final private static String LANGUAGE_MODEL = "language";
 
-    private static Encrypt symmetryEncrypt = EnvFactory.getSymmetryEncrypt();
+
 
 
     public void setSoberFactory(SoberFactory soberFactory) {
@@ -90,6 +90,7 @@ public class DBBundleProvider extends BundleProvider {
         if (bundletable == null) {
             return false;
         }
+        Encrypt symmetryEncrypt = EnvFactory.getSymmetryEncrypt();
         BundleTable editBundleTable = getBundleTable(bundletable.getIdx());
         if (editBundleTable != null) {
             editBundleTable.setIdx(bundletable.getIdx());
@@ -111,13 +112,15 @@ public class DBBundleProvider extends BundleProvider {
      * @return 返回列表
      */
     @Override
-    public List getList() {
+    public List<BundleTable> getList() {
         List<BundleTable> bundleTableList = soberTemplate.createCriteria(BundleTable.class)
                 .add(Expression.eq("namespace", namespace))
                 .add(Expression.eq("dataType", dataType))
+                .setCurrentPage(1)
                 .setTotalCount(10000)
                 .list(false);
 
+        Encrypt symmetryEncrypt = EnvFactory.getSymmetryEncrypt();
         for (BundleTable bundleTable : bundleTableList) {
             try {
                 if (bundleTable.getEncrypt() == YesNoEnumType.YES.getValue() && !StringUtil.isNull(bundleTable.getContext())) {

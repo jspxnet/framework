@@ -311,7 +311,8 @@ public class UploadFileAction extends MultipartSupport {
             return;
         }
         IUserSession userSession = getUserSession();
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
+
         Object alreadyUploadFile = uploadFileDAO.getForHash(hash);
         IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;
         if (checkUploadFile != null && !StringUtil.isNull(hash) && checkUploadFile.getHash().equals(hash)) {
@@ -401,8 +402,7 @@ public class UploadFileAction extends MultipartSupport {
         }
         boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
         boolean mobile = getBoolean(MOBILE_VAR_NAME);
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
-
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
         printUploadFileInfo(objects,chunkJson, thumbnail,mobile,contentType, uploadFileDAO.getNamespace(),   language.getLang(LanguageRes.success),response);
         uploadFileDAO.evict(uploadFileDAO.getClassType());
 
@@ -842,7 +842,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("original", StringUtil.empty);
         json.put("namespace", uploadFileDAO.getNamespace());
         json.put(Environment.message, info);
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
         TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response);
     }
 
@@ -863,7 +863,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("thumbnail", 0);
         json.put(Environment.message, "need login");
         json.put("namespace", getRootNamespace());
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
         TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response, ErrorEnumType.NEED_LOGIN.getValue());
     }
 
@@ -884,7 +884,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("thumbnail", 0);
         json.put(Environment.message, "not config uploadFileDAO");
         json.put("namespace", getRootNamespace());
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
         TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response);
     }
 
@@ -905,7 +905,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("thumbnail", 0);
         json.put("namespace", uploadFileDAO.getNamespace());
         json.put(Environment.message, language.getLang(LanguageRes.uploadRequestError));
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
         TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response);
     }
 

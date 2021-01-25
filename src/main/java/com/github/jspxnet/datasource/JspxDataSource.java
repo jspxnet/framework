@@ -188,10 +188,9 @@ public class JspxDataSource extends DriverManagerDataSource {
 
     @Override
     public ConnectionProxy getConnection() {
-        int poolSize = connectionPool.length;
         try {
 
-            for (int i = 0; i < poolSize; i++) {
+            for (int i = 0; i < connectionPool.length; i++) {
                 ConnectionProxy conn = connectionPool[i];
                 if (conn == null) {
                     return connectionPool[i] = createConnectionProxy();
@@ -199,26 +198,17 @@ public class JspxDataSource extends DriverManagerDataSource {
                 if (conn.isClosed() && conn.open()) {
                     return conn;
                 }
-                if (conn.isOvertime()&&conn.isConnect() && conn.open()) {
+                if (conn.isOvertime()&& conn.isConnect() && conn.open()) {
                     return conn;
-                }
-                //周期比较长,有就直接关闭
-                conn.close();
-                conn.release();
-                connectionPool[i] = null;
-                if (i < (poolSize - 1)) {
-                  return connectionPool[i] = createConnectionProxy();
-                }
+                } 
             }
         } catch (SQLException e) {
             close();
             log.error("连接发生异常,当前最大连接数为:" + maxPoolSize + "当前连接数:" + getPoolSize() + ",已经不能分配连接," + System.getenv("user.dir"), e);
         }
         //留一个作为备用链接begin
-        int outI = poolSize - 1;
-        if (connectionPool[outI] == null) {
-            return connectionPool[outI] = createConnectionProxy();
-        }
+        int outI = connectionPool.length - 1;
+
         //留一个作为备用链接end
         if (connectionPool[outI].open()) {
             return connectionPool[outI];
@@ -328,10 +318,12 @@ public class JspxDataSource extends DriverManagerDataSource {
                     //周期比较长,有就直接关闭
                     conn.close();
                     conn.release();
-                    if (poolSize < minPoolSize) {
-                        connectionPool[i] = createConnectionProxy();
-                        poolSize++;
-                    }
+                    connectionPool[i] = null;
+                    continue;
+                }
+                if (poolSize < minPoolSize) {
+                    connectionPool[i] = createConnectionProxy();
+                    poolSize++;
                 }
             }
             log.debug("minPoolSize:{},连接池有效长度:{}", minPoolSize, poolSize);

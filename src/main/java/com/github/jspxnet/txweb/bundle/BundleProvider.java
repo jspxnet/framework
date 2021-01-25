@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.beans.XMLEncoder;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +34,13 @@ import org.slf4j.LoggerFactory;
  * date: 2007-4-27
  * Time: 11:35:25
  */
+@Slf4j
 public abstract class BundleProvider implements Bundle, Serializable {
-    private static final Logger log = LoggerFactory.getLogger(BundleProvider.class);
+
     protected String namespace = TXWeb.global;
     protected String dataType = StringUtil.empty;
     protected String encode = SystemUtil.encode;
-    final protected Map<String, String> cache = new HashMap<String, String>();
+    final protected Map<String, String> cache = new HashMap<>();
 
 
     @Override
@@ -161,7 +163,7 @@ public abstract class BundleProvider implements Bundle, Serializable {
     public abstract void flush() throws Exception;
 
     @Override
-    public abstract List getList();
+    public abstract List<BundleTable> getList();
 
     public abstract String getValue(String key);
 
@@ -192,7 +194,7 @@ public abstract class BundleProvider implements Bundle, Serializable {
     }
 
     @Override
-    public String toXML() throws IOException {
+    public String toXml() throws IOException {
         OutputStream sw = new StringOutputStream();
         try {
             java.beans.XMLEncoder en = new XMLEncoder(sw);

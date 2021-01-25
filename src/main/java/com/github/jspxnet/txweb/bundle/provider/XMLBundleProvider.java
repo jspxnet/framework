@@ -78,7 +78,7 @@ public class XMLBundleProvider extends BundleProvider {
             AbstractWrite aw = new WriteFile();
             aw.setFile(file.getAbsolutePath());
             aw.setEncode(encode);
-            aw.setContent(toXML(), false);
+            aw.setContent(toXml(), false);
         } catch (Exception e) {
             log.error(bundletable.getContext(), e);
         }

@@ -84,7 +84,7 @@ public class RocResponse<T> implements Serializable {
     }
 
     public long getTotalCount() {
-        return totalCount;
+        return totalCount==null?0:totalCount;
     }
 
     public RocResponse<T> setTotalCount(long totalCount) {

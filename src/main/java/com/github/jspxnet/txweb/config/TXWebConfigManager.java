@@ -269,7 +269,7 @@ public class TXWebConfigManager implements WebConfigManager {
             return;
         }
 
-        if (!StringUtil.hasLength(httpMethod.actionName())) {
+        if (StringUtil.isEmpty(httpMethod.actionName())) {
             return;
         }
 

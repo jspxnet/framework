@@ -431,7 +431,7 @@ public class ParamUtil {
                     if (action.hasFieldInfo()) {
                         return paramObj;
                     }
-                    if (paramObj[i] == null)
+                    if (paramObj[i] == null&&!StringUtil.empty.equals(param.value()))
                     {
                         //放入默认参数
                         paramObj[i] = BeanUtil.getTypeValue(param.value(), pType);

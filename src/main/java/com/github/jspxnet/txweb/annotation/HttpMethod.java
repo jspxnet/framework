@@ -10,6 +10,8 @@
 package com.github.jspxnet.txweb.annotation;
 
 import com.github.jspxnet.sioc.Sioc;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.lang.annotation.*;
 
 /**
@@ -43,6 +45,6 @@ public @interface HttpMethod {
 
     //RESTFull 路径,目录部分,也就是配置的命名空间，actionName是入口点，如果入口方法为@表示方法名称
     //这里和spring 有区别，这里相当于 namespace/actionName    的方式，目的是在一个目录下能够有多个bean入口，这样传统开发会方便很多
-    String actionName() default "";
+    String actionName() default StringUtil.empty;
 
 }

@@ -76,7 +76,7 @@ public interface Bundle extends Serializable {
 
     int size();
 
-    String toXML() throws IOException;
+    String toXml() throws IOException;
 
     String toJson() throws JSONException;
 

@@ -17,6 +17,7 @@ import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.txweb.table.TreeItem;
 import com.github.jspxnet.txweb.table.TreeRole;
 import com.github.jspxnet.utils.BeanUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
@@ -1309,27 +1310,29 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
     private static JSONArray getChildrenJsonTree(List<TreeItem> treeItemList, String nodeId, String treeType, String[] selectArray, String[] checked, String treeName) {
         JSONArray jsonResult = new JSONArray();
         List<TreeItem> itemList = getChildTreeItem(treeItemList, nodeId);
-        for (TreeItem treeItem : itemList) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", treeItem.getNodeId());
-            jsonObject.put("icon", treeItem.getIcon());
-            jsonObject.put("openIcon", treeItem.getOpenIcon());
-            jsonObject.put("inputType", treeItem.getInputType());
-            jsonObject.put("text", treeItem.getCaption());
-            jsonObject.put("pid", treeItem.getParentNodeId());
-            jsonObject.put("value", treeItem.getItemValue());
-            if (treeType.contains("role")) {
-                jsonObject.put("rolesCaption", treeItem.getRolesCaption());
-                jsonObject.put("roleIds", treeItem.getRoleIds());
-                jsonObject.put("manager", treeItem.getManager());
-            }
-            jsonObject.put("action", treeName + "Click('" + treeItem.getNodeId() + "')");
-            jsonObject.put("checked", ArrayUtil.inArray(selectArray, treeItem.getNodeId(), true));
-            if (ArrayUtil.isEmpty(checked)) {
-                jsonResult.put(jsonObject);
-            } else if (ArrayUtil.inArray(checked, treeItem.getNodeId(), true)) {
-                jsonResult.put(jsonObject);
-            } else {
+        if (!ObjectUtil.isEmpty(itemList))
+        {
+            for (TreeItem treeItem : itemList) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("id", treeItem.getNodeId());
+                jsonObject.put("icon", treeItem.getIcon());
+                jsonObject.put("openIcon", treeItem.getOpenIcon());
+                jsonObject.put("inputType", treeItem.getInputType());
+                jsonObject.put("text", treeItem.getCaption());
+                jsonObject.put("pid", treeItem.getParentNodeId());
+                jsonObject.put("value", treeItem.getItemValue());
+                if (treeType.contains("role")) {
+                    jsonObject.put("rolesCaption", treeItem.getRolesCaption());
+                    jsonObject.put("roleIds", treeItem.getRoleIds());
+                    jsonObject.put("manager", treeItem.getManager());
+                }
+                jsonObject.put("action", treeName + "Click('" + treeItem.getNodeId() + "')");
+                jsonObject.put("checked", ArrayUtil.inArray(selectArray, treeItem.getNodeId(), true));
+                if (ArrayUtil.isEmpty(checked)) {
+                    jsonResult.put(jsonObject);
+                } else if (ArrayUtil.inArray(checked, treeItem.getNodeId(), true)) {
+                    jsonResult.put(jsonObject);
+                }
                 jsonObject.put("children", getChildrenJsonTree(treeItemList, treeItem.getNodeId(), treeType, selectArray, checked, treeName));
             }
         }

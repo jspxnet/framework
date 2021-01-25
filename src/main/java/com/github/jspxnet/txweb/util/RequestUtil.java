@@ -201,9 +201,9 @@ public class RequestUtil {
      */
     public static Map<String, Object> getResponseMap(HttpServletResponse response) {
         if (response == null) {
-            return new HashMap(0);
+            return new HashMap<>(0);
         }
-        Map<String, Object> result = new HashMap();
+        Map<String, Object> result = new HashMap<>();
         result.put("bufferSize", response.getBufferSize());
         result.put("characterEncoding", response.getCharacterEncoding());
         result.put("locale", response.getLocale());
@@ -790,7 +790,22 @@ public class RequestUtil {
      * @return 判断是否为ie浏览器
      */
     static public boolean isIeBrowser(HttpServletRequest request) {
-        return getBrowser(request).contains("msie");
+        String s = getBrowser(request);
+        return s.contains("msie")||s.contains("Internet Explorer");
+    }
+
+    /**
+     * 判断是否为低版本IE
+     * @param request 请求
+     * @return 判断是否小于IE9 版本
+     */
+    static public boolean isLowIe(HttpServletRequest request) {
+        if (!isIeBrowser(request))
+        {
+            return false;
+        }
+        String s = getBrowser(request);
+        return s.contains(" 6") || s.contains(" 7") || s.contains(" 8") || s.contains(" 9");
     }
     /**
      * @param request 请求

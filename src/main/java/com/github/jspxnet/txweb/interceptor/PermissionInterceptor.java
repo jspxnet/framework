@@ -240,6 +240,7 @@ public class PermissionInterceptor extends InterceptorSupport {
                 closeInfo = action.getRootNamespace() + "关闭状态，不允许访问";
             }
             action.addFieldInfo(Environment.warningInfo, closeInfo);
+            config.flush();
             return ActionSupport.UNTITLED;
         }
         //站点关闭 end

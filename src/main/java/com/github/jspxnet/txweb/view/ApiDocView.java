@@ -81,7 +81,6 @@ public class ApiDocView extends ActionSupport {
                     if (beanElement == null || ArrayUtil.inArray(NO_VIEW_CLASS, beanElement.getClassName(), true)) {
                         continue;
                     }
-
                     ApiAction vo = new ApiAction();
                     vo.setUrl("/" + name + "/" + configBean.getActionName());
                     vo.setTitle(configBean.getCaption());
@@ -89,6 +88,10 @@ public class ApiDocView extends ActionSupport {
                     vo.setClassName(beanElement.getClassName());
                     vo.setNamespace(namespace);
                     vo.setId(EncryptUtil.getMd5(beanElement.getClassName()));
+                    if (StringUtil.isNull(vo.getTitle()))
+                    {
+                        continue;
+                    }
                     resultMap.put(vo.getId(), vo);
                 }
             }

@@ -32,7 +32,7 @@ import java.util.List;
  * date: 13-10-16
  * Time: 下午10:11
  */
-@HttpMethod(caption = "日志")
+
 public class ActionLogView extends ActionSupport {
 
     public ActionLogView() {
