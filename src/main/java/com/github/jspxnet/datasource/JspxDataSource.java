@@ -150,8 +150,8 @@ public class JspxDataSource extends DriverManagerDataSource {
             return;
         }
         this.maxPoolSize = maxPoolSize;
-        if (this.maxPoolSize < 2) {
-            this.maxPoolSize = 2;
+        if (this.maxPoolSize < 3) {
+            this.maxPoolSize = 3;
         }
         synchronized (this) {
             close();
@@ -182,13 +182,14 @@ public class JspxDataSource extends DriverManagerDataSource {
     }
 
     public void setMaxConnectionTime(int maxConnectionTime) {
-        this.maxConnectionTime = Math.max(maxConnectionTime, 1000);
+        this.maxConnectionTime = Math.max(maxConnectionTime, DateUtil.MINUTE);
     }
 
     @Override
     public ConnectionProxy getConnection() {
         try {
-            for (int i = 0; i < connectionPool.length; i++) {
+            int poolSize = connectionPool.length;;
+            for (int i = 0; i < poolSize; i++) {
                 ConnectionProxy conn = connectionPool[i];
                 if (conn == null) {
                     return connectionPool[i] = createConnectionProxy();
@@ -203,10 +204,9 @@ public class JspxDataSource extends DriverManagerDataSource {
                         //周期比较长,有就直接关闭
                         conn.close();
                         conn.release();
-                        if (i <= minPoolSize) {
+                        connectionPool[i] = null;
+                        if (i <(poolSize-1)) {
                             return connectionPool[i] = createConnectionProxy();
-                        } else {
-                            connectionPool[i] = null;
                         }
                     }
                 }

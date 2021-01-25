@@ -117,13 +117,14 @@ public class RouteService extends Thread implements Runnable {
         }
 
         JSONObject json = new JSONObject();
-        json.put(RouteChannelManage.KEY_ROUTE, routeSessionList);
+        json.put(RouteChannelManage.KEY_ROUTE, ROUTE_CHANNEL_MANAGE.getRouteSessionList());
 
         for (RouteSession routeSession : checkSessionList) {
-            SendCmd getRoute = SendCommandFactory.createCommand(INetCommand.GET_ROUTE);
-            getRoute.setType(INetCommand.TYPE_JSON);
+            SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
+            cmd.setType(INetCommand.TYPE_JSON);
+            cmd.setData(json.toString());
             try {
-                SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), getRoute);
+                SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
                 if (reply == null || reply.getAction().equalsIgnoreCase(INetCommand.EXCEPTION)) {
                     ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
                     continue;
@@ -170,10 +171,11 @@ public class RouteService extends Thread implements Runnable {
                     lastTimeMillis = System.currentTimeMillis();
                 }
                 Thread.sleep(rpcConfig.getRoutesSecond() * DateUtil.SECOND);
-                if (System.currentTimeMillis() - lastRelevancyTimeMillis > DateUtil.MINUTE*5) {
+       /*         if (System.currentTimeMillis() - lastRelevancyTimeMillis > DateUtil.MINUTE*5) {
                     lastRelevancyTimeMillis = System.currentTimeMillis();
                     relevancy();
-                }
+                }*/
+                relevancy();
             }
         } catch (Throwable e) {
             log.error("路由线程异常退出:{}",e.getMessage());
