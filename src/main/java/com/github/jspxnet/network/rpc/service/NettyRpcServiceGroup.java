@@ -1,11 +1,13 @@
 package com.github.jspxnet.network.rpc.service;
 
+import com.github.jspxnet.boot.DaemonThreadFactory;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.service.route.RouteService;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * Created by jspx.net
@@ -16,28 +18,25 @@ import java.util.Map;
  **/
 public class NettyRpcServiceGroup {
 
+    private static final String RPC_THREAD_NAME = "netty_rpc";
+    private static final String RPC_ROUTE_THREAD_NAME = "netty_rpc_route";
     private static final NettyRpcServiceGroup INSTANCE = new NettyRpcServiceGroup();
     public static NettyRpcServiceGroup getInstance(){
         return INSTANCE;
     }
     private static final  Map<SocketAddress,NettyRpcServer> SERVER_LIST = new HashMap<>();
-
+    private static final RouteService routeService = new RouteService();
     /**
      * 指定启动一个服务器
      * @param socketAddress 服务器地址
      */
-    public void start(SocketAddress socketAddress)  {
+    private NettyRpcServer createService(SocketAddress socketAddress)  {
         NettyRpcServer nettyRpcServer = SERVER_LIST.get(socketAddress);
         if (nettyRpcServer==null)
         {
             nettyRpcServer = new NettyRpcServer(socketAddress);
-            nettyRpcServer.setDaemon(true);
-            nettyRpcServer.start();
-        } else
-        if (!nettyRpcServer.isRun())
-        {
-            nettyRpcServer.start();
         }
+        return nettyRpcServer;
     }
 
     /**
@@ -47,23 +46,26 @@ public class NettyRpcServiceGroup {
     {
         RpcConfig rpcConfig = RpcConfig.getInstance();
         List<SocketAddress> addressList = rpcConfig.getLocalAddressList();
+        DaemonThreadFactory threadFactory =  new DaemonThreadFactory(RPC_THREAD_NAME);
         for (SocketAddress socketAddress:addressList)
         {
-            start(socketAddress);
+            NettyRpcServer nettyRpcServer = createService(socketAddress);
+            threadFactory.newThread(nettyRpcServer).start();
         }
-        RouteService routeService = new RouteService();
-        routeService.setDaemon(true);
-        routeService.start();
+        DaemonThreadFactory routeThreadFactory =  new DaemonThreadFactory(RPC_ROUTE_THREAD_NAME);
+        routeThreadFactory.newThread(routeService).start();
     }
 
-    public  void stop() {
+    public void stop() {
+        routeService.shutdown();
         for (NettyRpcServer nettyRpcServer:SERVER_LIST.values())
         {
             if (nettyRpcServer!=null)
             {
-                nettyRpcServer.interrupt();
+                nettyRpcServer.close();
             }
         }
+
     }
 
 }

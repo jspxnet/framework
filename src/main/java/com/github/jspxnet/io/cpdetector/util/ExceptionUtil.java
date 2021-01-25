@@ -22,6 +22,7 @@
  */
 package com.github.jspxnet.io.cpdetector.util;
 
+import com.github.jspxnet.boot.DaemonThreadFactory;
 import com.github.jspxnet.io.cpdetector.MultiplexingOutputStream;
 
 import java.io.BufferedReader;
@@ -85,9 +86,9 @@ public final class ExceptionUtil {
         InputStream systemout = captureSystemOutForDebuggingPurposesOnly(true);
         InputStreamTracer result = new InputStreamTracer(systemout, expectMatch,
                 Charset.defaultCharset());
-        Thread traceThread = new Thread(result);
-        traceThread.setDaemon(true);
-        traceThread.start();
+
+        DaemonThreadFactory routeThreadFactory =  new DaemonThreadFactory("ExceptionUtil");
+        routeThreadFactory.newThread(result).start();
         return result;
     }
 
@@ -96,9 +97,8 @@ public final class ExceptionUtil {
         InputStream systemout = captureSystemErrForDebuggingPurposesOnly(true);
         InputStreamTracer result = new InputStreamTracer(systemout, expectMatch,
                 Charset.defaultCharset());
-        Thread traceThread = new Thread(result);
-        traceThread.setDaemon(true);
-        traceThread.start();
+        DaemonThreadFactory routeThreadFactory =  new DaemonThreadFactory("ExceptionUtil");
+        routeThreadFactory.newThread(result).start();
         return result;
     }
 

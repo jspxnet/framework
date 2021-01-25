@@ -78,6 +78,7 @@ public class JspxDataSource extends DriverManagerDataSource {
     private String mailUser = "";
     private String mailPassword = ""; //111111
     private String mailSendTo = ""; //39793751@qq.com
+    private boolean isRun = true;
 
     public JspxDataSource() {
     }
@@ -189,7 +190,6 @@ public class JspxDataSource extends DriverManagerDataSource {
     @Override
     public ConnectionProxy getConnection() {
         try {
-
             for (int i = 0; i < connectionPool.length; i++) {
                 ConnectionProxy conn = connectionPool[i];
                 if (conn == null) {
@@ -246,6 +246,7 @@ public class JspxDataSource extends DriverManagerDataSource {
 
     @Destroy
     public void shutdown() throws SQLException {
+        isRun = false;
         close();
         super.getConnectionFromDriverManager().close();
     }
@@ -300,6 +301,10 @@ public class JspxDataSource extends DriverManagerDataSource {
 
     @Scheduled(force = true)
     public void run() {
+        if (!isRun)
+        {
+            return;
+        }
         try {
             if (ArrayUtil.isEmpty(connectionPool)) {
                 return;

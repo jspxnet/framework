@@ -12,7 +12,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +39,7 @@ public class NettyClientPool {
 
     private NettyClientPool(){
         RpcConfig rpcConfig = RpcConfig.getInstance();
-        NioEventLoopGroup workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory());
+        NioEventLoopGroup workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory("NettyRpcClientPool"));
         bootstrap.group(workersGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new ClientChannelInitializer())
@@ -49,6 +52,8 @@ public class NettyClientPool {
 
                 return new FixedChannelPool(bootstrap.remoteAddress(key),new NettyChannelPoolHandler(), ChannelHealthChecker.ACTIVE, FixedChannelPool.AcquireTimeoutAction.NEW, RpcConfig.getInstance().getTimeout()* DateUtil.SECOND, 100, 2147483647, true, false);
             }
+
+
         };
     }
 
@@ -76,7 +81,6 @@ public class NettyClientPool {
      * @throws Exception 异常
      */
     public SendCmd send(SocketAddress address, SendCmd command) throws Exception {
-
         final FixedChannelPool pool = pools.get(address);
         final Channel channel = pool.acquire().get();
         try {
@@ -99,4 +103,10 @@ public class NettyClientPool {
         return queue.poll(rpcConfig.getTimeout(), TimeUnit.SECONDS);
     }
 
+
+    public void close()
+    {
+        AbstractChannelPoolMap map = (AbstractChannelPoolMap)pools;
+        map.close();
+    }
 }

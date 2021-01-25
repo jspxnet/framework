@@ -5,6 +5,7 @@ import com.github.jspxnet.network.rpc.env.RpcConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -19,24 +20,25 @@ import java.net.SocketAddress;
  * description: jspbox
  **/
 @Slf4j
-public class NettyRpcServer extends Thread {
+public class NettyRpcServer implements Runnable {
 
 
     private NioEventLoopGroup bossGroup = null;
     private NioEventLoopGroup workerGroup = null; //CPU 内核数
-    final private SocketAddress socketAddress;
+    private final SocketAddress socketAddress;
     private boolean isRun = false;
     public NettyRpcServer(SocketAddress socketAddress) {
         this.socketAddress = socketAddress;
     }
 
+
     @Override
     public void run()
     {
         RpcConfig rpcConfig = RpcConfig.getInstance();
-        bossGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory());
+        bossGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory("NettyRpcServerBoss"));
         //CPU 内核数
-        workerGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory());
+        workerGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory("NettyRpcServerWorker"));
         try
         {
             ServerBootstrap bootstrap = new ServerBootstrap();
@@ -54,17 +56,18 @@ public class NettyRpcServer extends Thread {
             //UnpooledByteBufAllocator.DEFAULT 非池方式
             //PooledByteBufAllocator.DEFAULT  池方式
 
+
             ChannelFuture channelFuture = bootstrap.bind().sync();
             isRun = true;
+
             log.debug("-- started and listen on port:" + channelFuture.channel().localAddress());
-            channelFuture.channel().closeFuture().sync();
+            channelFuture.channel().closeFuture().addListener(ChannelFutureListener.CLOSE).sync();
         }
         catch (Exception e)
         {
             log.error("服务器启动失败",e);
             isRun = false;
-        }
-        finally {
+        }finally {
             close();
         }
     }
@@ -75,7 +78,7 @@ public class NettyRpcServer extends Thread {
 
     public void close()
     {
-        log.error("RPC 执行了关闭调用");
+        log.info("RPC 执行了关闭调用");
         if (workerGroup!=null) {
             workerGroup.shutdownGracefully();
         }

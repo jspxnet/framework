@@ -35,7 +35,7 @@ public class NettyClient {
     public NettyClient()
     {
         RpcConfig rpcConfig = RpcConfig.getInstance();
-        workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory());
+        workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory("NettyRpcClient"));
         bootstrap.group(workersGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new ClientChannelInitializer())

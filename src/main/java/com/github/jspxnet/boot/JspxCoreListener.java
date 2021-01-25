@@ -35,6 +35,7 @@ import com.github.jspxnet.txweb.config.TXWebConfigManager;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
+import com.mysql.jdbc.AbandonedConnectionCleanupThread;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.servlet.ServletContextListener;
@@ -250,7 +251,6 @@ public class JspxCoreListener implements ServletContextListener {
 
         log.info("-" + copyright + " start completed " + (isAndroid ? "for Android" : " J2SDK"));
         isRun = true;
-
     }
 
     @Override
@@ -276,6 +276,14 @@ public class JspxCoreListener implements ServletContextListener {
         log.info("JSCache shutdown");
         //关闭缓存和线程end
 
+        if (RpcConfig.getInstance().isUseNettyRpc()) {
+            log.info("关闭RPC服务器");
+            NettyRpcServiceGroup.getInstance().stop();
+        }
+
+        DaemonThreadFactory.shutdown();
+        log.info("Thread shutdown");
+
       //卸载jdbc驱动begin
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         Driver d = null;
@@ -289,16 +297,26 @@ public class JspxCoreListener implements ServletContextListener {
             }
         }
 
+        try {
+            ClassUtil.invokeStaticMethod("com.mysql.jdbc.AbandonedConnectionCleanupThread","uncheckedShutdown",null);
+        } catch (Exception e)
+        {
+            try {
+                ClassUtil.invokeStaticMethod("com.mysql.jdbc.AbandonedConnectionCleanupThread","shutdown",null);
+            } catch (Exception exception) {
+                //..
+            }
+            //...
+        }
         //关闭定时器和其他线程begin
         //安卓系统跳过这里，否则会有错误
-/*        if (!SystemUtil.isAndroid()) {
+      /* if (!SystemUtil.isAndroid()) {
             com.github.jspxnet.boot.ThreadLocalImmolate threadLocalImmolate = new com.github.jspxnet.boot.ThreadLocalImmolate(true);
             log.info("ThreadLocal shutdown count is " + threadLocalImmolate.immolate());
         }*/
+        //System.exit(0);
         //关闭定时器和其他线程end
-        System.gc();
         isRun = false;
         log.info(Environment.frameworkName + " " + copyright + " dispatcher shutdown completed ");
-        System.exit(1);
-    }
+     }
 }

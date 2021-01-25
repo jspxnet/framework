@@ -29,7 +29,7 @@ import java.util.List;
  * description: 是服务器之间发送路由
  **/
 @Slf4j
-public class RouteService extends Thread implements Runnable {
+public class RouteService implements Runnable {
     private static final RouteChannelManage ROUTE_CHANNEL_MANAGE = RouteChannelManage.getInstance();
 
     //第一次使用配置服务器地址,以后将切换到路由表
@@ -39,7 +39,7 @@ public class RouteService extends Thread implements Runnable {
     private static final NettyClientPool NETTY_CLIENT = NettyClientPool.getInstance();
     private static int configCount = 1;
     private static long lastInitTimeMillis = System.currentTimeMillis();
-
+    private static boolean isRun = true;
     private void init() {
         //初始化数据 begin
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
@@ -159,10 +159,12 @@ public class RouteService extends Thread implements Runnable {
 
     @Override
     public void run() {
+
+
         RpcConfig rpcConfig = RpcConfig.getInstance();
         long lastRelevancyTimeMillis = System.currentTimeMillis();
         init();
-        while (true) {
+        while (isRun) {
             try {
                 checkSocketAddressRoute();
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
@@ -186,6 +188,7 @@ public class RouteService extends Thread implements Runnable {
             }
         }
         //NETTY_CLIENT.shutdown();
+        isRun = false;
 
     }
 
@@ -275,4 +278,11 @@ public class RouteService extends Thread implements Runnable {
         }
         checkRouteSocketList.clear();
     }
+
+    public void shutdown()
+    {
+        isRun = false;
+        NettyClientPool.getInstance().close();
+    }
+
 }
