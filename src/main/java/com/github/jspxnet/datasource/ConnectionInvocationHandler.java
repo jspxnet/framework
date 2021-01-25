@@ -73,10 +73,10 @@ public class ConnectionInvocationHandler implements InvocationHandler {
             }
             try {
                 if (!StringUtil.isNull(checkSql)) {
-                    log.debug("checkSql:{}",checkSql);
                     target.prepareStatement(checkSql).executeQuery().close();
                 }
             } catch (Exception e) {
+                log.debug("checkSql:{}",checkSql);
                 isClosed = true;
                 return false;
             }

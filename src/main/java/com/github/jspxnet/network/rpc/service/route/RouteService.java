@@ -40,7 +40,7 @@ public class RouteService extends Thread implements Runnable {
     private static int configCount = 1;
     private static long lastInitTimeMillis = System.currentTimeMillis();
 
-    private void init() throws Exception {
+    private void init() {
         //初始化数据 begin
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
         List<RouteSession> routeSessionList = new ArrayList<>();
@@ -67,7 +67,13 @@ public class RouteService extends Thread implements Runnable {
             SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
             cmd.setType(INetCommand.TYPE_JSON);
             cmd.setData(json.toString());
-            SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
+
+            SendCmd reply = null;
+            try {
+                reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
                 String str = reply.getData();
                 if (StringUtil.isJsonObject(str)) {
@@ -153,32 +159,27 @@ public class RouteService extends Thread implements Runnable {
 
     @Override
     public void run() {
-        long lastTimeMillis = System.currentTimeMillis();
+        RpcConfig rpcConfig = RpcConfig.getInstance();
         long lastRelevancyTimeMillis = System.currentTimeMillis();
-        try {
-            init();
-            RpcConfig rpcConfig = RpcConfig.getInstance();
-            while (true) {
+        init();
+        while (true) {
+            try {
                 checkSocketAddressRoute();
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
                 linkRoute();
                 MasterSocketAddress.getInstance().flushAddress();
-                if (System.currentTimeMillis() - lastTimeMillis > DateUtil.MINUTE) {
-                    if (rpcConfig.isDebug())
-                    {
-                        log.debug("当前路由表:\r\n{}", RouteChannelManage.getInstance().getSendRouteTable());
-                    }
-                    lastTimeMillis = System.currentTimeMillis();
+                if (rpcConfig.isDebug())
+                {
+                    log.debug("当前路由表:\r\n{}", RouteChannelManage.getInstance().getSendRouteTable());
                 }
                 Thread.sleep(rpcConfig.getRoutesSecond() * DateUtil.SECOND);
-                if (System.currentTimeMillis() - lastRelevancyTimeMillis > DateUtil.MINUTE*5) {
+                if (System.currentTimeMillis() - lastRelevancyTimeMillis > rpcConfig.getRoutesSecond() * DateUtil.SECOND*10) {
                     lastRelevancyTimeMillis = System.currentTimeMillis();
                     relevancy();
                 }
-                relevancy();
+            } catch (Exception e) {
+                //...
             }
-        } catch (Throwable e) {
-            log.error("路由线程异常退出:{}",e.getMessage());
         }
         //NETTY_CLIENT.shutdown();
 
@@ -266,7 +267,6 @@ public class RouteService extends Thread implements Runnable {
                 {
                     log.debug("RPC路由网络中存在异常服务器:{}", ObjectUtil.toString(routeSession));
                 }
-
             }
         }
         checkRouteSocketList.clear();

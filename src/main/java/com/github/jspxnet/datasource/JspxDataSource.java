@@ -72,7 +72,7 @@ public class JspxDataSource extends DriverManagerDataSource {
     private String checkSql = "SELECT 1";
     private boolean mailTips = false;
     private int mailSendTimes = 0;
-    private int minPoolSize = 5;
+    private int minPoolSize = 6;
     private String smtp = ""; //mail.gzec.com.cn
     private String mailFrom = ""; //public@gzec.com.cn
     private String mailUser = "";
@@ -196,7 +196,6 @@ public class JspxDataSource extends DriverManagerDataSource {
                 if (conn == null) {
                     return connectionPool[i] = createConnectionProxy();
                 }
-
                 if (conn.isClosed() && conn.open()) {
                     return conn;
                 }
@@ -208,7 +207,7 @@ public class JspxDataSource extends DriverManagerDataSource {
                 conn.release();
                 connectionPool[i] = null;
                 if (i < (poolSize - 1)) {
-                    return connectionPool[i] = createConnectionProxy();
+                  return connectionPool[i] = createConnectionProxy();
                 }
             }
         } catch (SQLException e) {
