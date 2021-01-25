@@ -106,7 +106,7 @@ public class NettyClientPool {
 
     public void close()
     {
-        AbstractChannelPoolMap map = (AbstractChannelPoolMap)pools;
+        ChannelPool map = (ChannelPool)pools;
         map.close();
     }
 }
