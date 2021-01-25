@@ -171,10 +171,10 @@ public class RouteService extends Thread implements Runnable {
                     lastTimeMillis = System.currentTimeMillis();
                 }
                 Thread.sleep(rpcConfig.getRoutesSecond() * DateUtil.SECOND);
-       /*         if (System.currentTimeMillis() - lastRelevancyTimeMillis > DateUtil.MINUTE*5) {
+                if (System.currentTimeMillis() - lastRelevancyTimeMillis > DateUtil.MINUTE*5) {
                     lastRelevancyTimeMillis = System.currentTimeMillis();
                     relevancy();
-                }*/
+                }
                 relevancy();
             }
         } catch (Throwable e) {
@@ -197,15 +197,6 @@ public class RouteService extends Thread implements Runnable {
             try {
                 SendCmd getRoute = SendCommandFactory.createCommand(INetCommand.GET_ROUTE);
                 getRoute.setType(INetCommand.TYPE_JSON);
-                /*
-                Channel channel = NETTY_CLIENT.connect(routeSession.getSocketAddress());
-                if (!INetCommand.isConnect(channel))
-                {
-                    ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
-                    continue;
-                }
-                SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), getRoute);
-                */
                 SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), getRoute);
                 if (reply == null || reply.getAction().equalsIgnoreCase(INetCommand.EXCEPTION)) {
                     ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
