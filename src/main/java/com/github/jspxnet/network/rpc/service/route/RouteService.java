@@ -179,6 +179,10 @@ public class RouteService extends Thread implements Runnable {
                 }
             } catch (Exception e) {
                 //...
+                if (rpcConfig.isDebug())
+                {
+                    log.debug(e.getMessage());
+                }
             }
         }
         //NETTY_CLIENT.shutdown();
