@@ -7,9 +7,9 @@ import java.io.Serializable;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/1/26 17:26
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/1/26 17:26
+ * description: 端口信息
  **/
 @Data
 public class PortInfo implements Serializable {

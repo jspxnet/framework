@@ -1,8 +1,6 @@
 package com.github.jspxnet.util;
 
-import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
@@ -14,13 +12,14 @@ import java.util.Set;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/1/26 2:09
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/1/26 2:09
+ * description: tomcat端口
  **/
 public class TomcatUtil {
     /**
      *
+     * @return tomcat的端口信息
      */
     public static List<PortInfo> getPortList() {
         try {
