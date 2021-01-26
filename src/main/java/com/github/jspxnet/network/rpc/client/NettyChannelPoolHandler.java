@@ -2,7 +2,9 @@ package com.github.jspxnet.network.rpc.client;
 
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
@@ -29,6 +31,9 @@ public class NettyChannelPoolHandler implements ChannelPoolHandler {
     @Override
     public void channelReleased(Channel ch) throws Exception {
         //log.debug("---------channelReleased. Channel ID: " + ch.id());
+        // 刷新管道里的数据
+        ch.writeAndFlush(Unpooled.EMPTY_BUFFER);
+        //flush掉所有写回的数据
     }
     @Override
     public void channelAcquired(Channel ch) throws Exception {
@@ -38,6 +43,7 @@ public class NettyChannelPoolHandler implements ChannelPoolHandler {
     public void channelCreated(Channel ch) throws Exception {
         //log.debug("---------channelCreated. Channel ID: " + ch.id());
         ch.config().setAllocator(PooledByteBufAllocator.DEFAULT);
+
         ChannelPipeline pipeline = ch.pipeline();
 
         pipeline.addLast(new LengthFieldBasedFrameDecoder(RpcConfig.getInstance().getMaxFrameLength(), 0, 4, 0, 4));

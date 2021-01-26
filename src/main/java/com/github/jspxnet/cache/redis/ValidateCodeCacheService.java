@@ -2,17 +2,13 @@ package com.github.jspxnet.cache.redis;
 
 import com.github.jspxnet.cache.container.StringEntry;
 import com.github.jspxnet.cache.ValidateCodeCache;
-import com.github.jspxnet.enums.ValidateCodeEnumType;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
-
 import com.github.jspxnet.utils.StringUtil;
 import org.redisson.api.RBucket;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
-
-import java.security.Security;
 import java.util.concurrent.TimeUnit;
 
 @Bean(singleton = true)
@@ -39,9 +35,14 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
     @Ref(bind = RedissonClientConfig.class)
     static RedissonClient redissonClient;
 
-    //默认为3分钟
+    /**
+     * 默认为3分钟
+     */
     private int smsTimeOutSecond = 900;
     private int imgTimeOutSecond = 600;
+    /**
+     * 默认时间
+     */
     private int generalTimeOutSecond = 900;
 
     public int getSmsTimeOutSecond() {
@@ -73,6 +74,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
      */
     @Override
     public boolean addSmsCode(String mobile, String code) {
+
         StringEntry entry = new StringEntry();
         entry.setKey(mobile);
         entry.setValue(code);
@@ -309,19 +311,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         return times;
     }
 
-    /**
-     * @param id    设置次数
-     * @param times 次数
-     */
-    /*
-    public void setTimes(String id, int times) {
-        String timeKey = getTimesKey(id);
-        RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
-        bucket.set(times);
-        bucket.expire(10, TimeUnit.MINUTES);
-    }
-*/
-    /**
+   /**
      * @param id 更新次数
      */
     @Override

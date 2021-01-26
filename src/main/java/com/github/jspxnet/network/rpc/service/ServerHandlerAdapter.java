@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
 
-    private static final SessionChannelManage sessionChannelManage = SessionChannelManage.getInstance();
+    private static final SessionChannelManage SESSION_CHANNEL_MANAGE = SessionChannelManage.getInstance();
 
     @Override
     public void channelActive(ChannelHandlerContext ctx)  {
@@ -35,8 +35,8 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
         channelSession.setHeartbeatTimes(0);
         channelSession.setOnline(YesNoEnumType.YES.getValue());
         channelSession.setSocketAddress(channel.remoteAddress());
-        sessionChannelManage.add(channelSession);
-        sessionChannelManage.add(channel);
+        SESSION_CHANNEL_MANAGE.add(channelSession);
+        SESSION_CHANNEL_MANAGE.add(channel);
 
     }
 
@@ -56,12 +56,12 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        ChannelSession netSession = sessionChannelManage.getSession(channel.id());
+        ChannelSession netSession = SESSION_CHANNEL_MANAGE.getSession(channel.id());
         if (netSession == null) {
             return;
         }
-        sessionChannelManage.removeSession(channel.id());
-        sessionChannelManage.remove(channel);
+        SESSION_CHANNEL_MANAGE.removeSession(channel.id());
+        SESSION_CHANNEL_MANAGE.remove(channel);
         channel.close();
 
 
@@ -84,7 +84,7 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
-
+        //这里不能关闭,因为如果数据量大的情况,会多次进入这里读取数据
     }
 
     //发生异常
@@ -144,7 +144,7 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
 
     private void handleAllIdle(ChannelHandlerContext ctx) {
         //主动发出心跳请求
-        ChannelSession netSession = sessionChannelManage.getSession(ctx.channel().id());
+        ChannelSession netSession = SESSION_CHANNEL_MANAGE.getSession(ctx.channel().id());
         if (netSession != null) {
 
             if (netSession.getHeartbeatTimes()==0)

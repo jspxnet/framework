@@ -81,7 +81,7 @@ public class TextCountersView extends ActionSupport {
         return initValue.get();
     }
 
-    public long desc() throws Exception {
+    public long desc() {
         MutableLong initValue = new MutableLong(1);
         MutableLong oldValue = SingletonCounter.getInstance().getCounter().put(id, initValue);
         if (oldValue != null) {
@@ -96,7 +96,7 @@ public class TextCountersView extends ActionSupport {
     }
 
     private long get() throws Exception {
-        StringMap saveMap = new StringMap();
+        StringMap<String,String> saveMap = new StringMap();
         saveMap.setLineSplit(StringUtil.CRLF);
         saveMap.setKeySplit(StringUtil.EQUAL);
         if (StringUtil.isNull(file)) {

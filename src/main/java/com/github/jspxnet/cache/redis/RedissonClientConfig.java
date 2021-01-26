@@ -2,7 +2,9 @@ package com.github.jspxnet.cache.redis;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sioc.annotation.Bean;
+import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
+import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.redisson.config.Config;
 
 import java.io.File;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * threads（线程池数量）
@@ -80,6 +83,14 @@ public class RedissonClientConfig {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Destroy
+    public void close() {
+        if (redisson!=null && !redisson.isShutdown())
+        {
+            redisson.shutdown();
         }
     }
 

@@ -12,10 +12,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -36,10 +35,11 @@ public class NettyClientPool {
     private static NettyClientPool nettyClientPool;
     private ChannelPoolMap<SocketAddress,FixedChannelPool> pools = null;
     private final Bootstrap bootstrap = new Bootstrap();
+    private final NioEventLoopGroup workersGroup;
 
     private NettyClientPool(){
         RpcConfig rpcConfig = RpcConfig.getInstance();
-        NioEventLoopGroup workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory("NettyRpcClientPool"));
+        workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory("NettyRpcClientPool"));
         bootstrap.group(workersGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new ClientChannelInitializer())
@@ -103,10 +103,12 @@ public class NettyClientPool {
         return queue.poll(rpcConfig.getTimeout(), TimeUnit.SECONDS);
     }
 
-
-    public void close()
-    {
-        ChannelPool map = (ChannelPool)pools;
-        map.close();
+    public void close() {
+        AbstractChannelPoolMap poolMap = (AbstractChannelPoolMap) pools;
+        for (Map.Entry<InetSocketAddress, FixedChannelPool> inetSocketAddressFixedChannelPoolEntry : (Iterable<Map.Entry<InetSocketAddress, FixedChannelPool>>) poolMap) {
+            inetSocketAddressFixedChannelPoolEntry.getValue().close();
+        }
+        poolMap.close();
+        workersGroup.shutdownGracefully();
     }
 }
