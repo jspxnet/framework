@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.31</version>
+    <version>6.32</version>
 </dependency>
 ```
 
@@ -95,7 +95,7 @@
 ##硬件部署
 
 6.x 版本
- 只要满足租用空间可用内存1G内存以上,JDK版本 1.8版本以上。
+只要满足租用空间可用内存512M内存以上,JDK版本1.8版本以上。
  
 
 ##发展历程 
@@ -121,4 +121,4 @@
 *    2020年11月：Jspx.net Framework 6.24-26 微调
 *    2020年12月：Jspx.net Framework 6.27 稳定版本,迁移出部分功能,修复bug,做了部分调整避免事务才坑
 *    2021年01月：Jspx.net Framework 6.30 分布式通讯支持完善,RpcClient标签,支持Http和TCP方式,TCP方式可以实现gossip整合集群
-*    2021年01月：Jspx.net Framework 6.31 修复bug,完整API文档自动生成功能,稳定版本
+*    2021年01月：Jspx.net Framework 6.32 修复bug,完整API文档自动生成功能,线程优化,资源优化,稳定版本
