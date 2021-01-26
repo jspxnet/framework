@@ -33,7 +33,6 @@ public class NettyServerMain {
             }
             if ("stop".equalsIgnoreCase(args[0])||args.length>1&&"stop".equalsIgnoreCase(args[1])) {
                 stop();
-
             }
         }
     }
