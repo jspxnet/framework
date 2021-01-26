@@ -1,9 +1,14 @@
-package com.github.jspxnet.boot;
+package com.github.jspxnet.util;
+
+import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,29 +20,34 @@ import java.util.Set;
  **/
 public class TomcatUtil {
     /**
-     * 得到tomcat端口
+     *
      */
-    public static void getHttpPort() {
+    public static List<PortInfo> getPortList() {
         try {
             MBeanServer server = null;
             if (MBeanServerFactory.findMBeanServer(null).size() > 0) {
                 server = MBeanServerFactory.findMBeanServer(null).get(0);
             }
 
+            List<PortInfo> result = new ArrayList<>();
             Set<ObjectName> names = server.queryNames(new ObjectName("Catalina:type=Connector,*"), null);
             Iterator<ObjectName> iterator = names.iterator();
             ObjectName name = null;
             while (iterator.hasNext()) {
-                name = (ObjectName) iterator.next();
+                name = iterator.next();
 
-                String protocol = server.getAttribute(name, "protocol").toString();
-                String scheme = server.getAttribute(name, "scheme").toString();
-                String port = server.getAttribute(name, "port").toString();
-                System.out.println(protocol + " : " + scheme + " : " + port);
+                PortInfo portInfo = new PortInfo();
+                portInfo.setProtocol(server.getAttribute(name, "protocol").toString());
+                portInfo.setScheme(server.getAttribute(name, "scheme").toString());
+                portInfo.setPort(StringUtil.toInt(server.getAttribute(name, "port").toString()));
+                result.add(portInfo);
             }
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        return null;
     }
+
+
 }

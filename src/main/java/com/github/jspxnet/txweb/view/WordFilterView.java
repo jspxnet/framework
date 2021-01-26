@@ -9,7 +9,6 @@ import java.util.Set;
 /**
  * Created by yuan on 2015/6/16 0016.
  */
-@HttpMethod(caption = "屏蔽关键词")
 public class WordFilterView extends ActionSupport {
     ///////////////载入IOC DAO 对象 begin
     protected DFAFilter filter;
