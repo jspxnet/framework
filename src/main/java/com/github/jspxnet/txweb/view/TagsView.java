@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.view;
 
 import com.github.jspxnet.txweb.annotation.HttpMethod;
+import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 
 import com.github.jspxnet.txweb.dao.TagsDAO;
@@ -75,11 +76,27 @@ public class TagsView extends ActionSupport {
         this.count = count;
     }
 
+    @Operate(caption = "列表", method = "list")
     public List<TagWord> getList() throws Exception {
+
         return tagsDAO.getList(currentPage, count);
     }
 
+    @Operate(caption = "列表,内部参数方式", method = "many")
+    public List<TagWord> getMany(@Param(caption = "页数", required = true)int currentPage,@Param(caption = "行数", required = true)int count) throws Exception {
+        return tagsDAO.getList(currentPage, count);
+    }
+
+    @Operate(caption = "子单纯", method = "tagchild")
+    public List<TagWord> getTagChild(@Param(caption = "单词", required = true)String word,@Param(caption = "页数", required = true)int currentPage,@Param(caption = "行数", required = true)int count)  {
+        return tagsDAO.getTagWordChild(word, currentPage, count);
+    }
+
+    @Deprecated
     public List<TagWord> getTagWordChild()  {
         return tagsDAO.getTagWordChild(word, currentPage, count);
     }
+
+
+
 }

@@ -15,6 +15,7 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
+import com.github.jspxnet.utils.FileInfo;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 
@@ -98,12 +99,12 @@ public class FolderPhotoView extends ActionSupport {
         this.order = order;
     }
 
-    public List getFileList() throws Exception {
+    public List<FileInfo> getFileList() throws Exception {
         File file = new File(getPhotoDirectory());
         if (file.exists() && file.isDirectory()) {
             return FileUtil.getFileListSort(file.getAbsolutePath(), find, type, order, getSetupPath());
         }
-        return new ArrayList();
+        return new ArrayList<>();
     }
 
 }

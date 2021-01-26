@@ -16,7 +16,7 @@ import com.github.jspxnet.utils.StringUtil;
  */
 @HttpMethod(caption = "微信跳转验证")
 public class VerifyJumpView extends ActionSupport {
-    public static final String KEY_VerifyCode = "verifyCode";
+    public static final String KEY_VERIFY_CODE = "verifyCode";
     private String verifyCode = RandomUtil.getRandomAlphanumeric(4) + DateUtil.toString("yyMMddHHmmssS");
 
     public VerifyJumpView() {
@@ -36,9 +36,9 @@ public class VerifyJumpView extends ActionSupport {
 
     @Override
     public String execute() throws Exception {
-        session.setAttribute(KEY_VerifyCode, verifyCode);
+        session.setAttribute(KEY_VERIFY_CODE, verifyCode);
         if (!StringUtil.isNull(link)) {
-            response.sendRedirect(link + "?" + KEY_VerifyCode + "=" + verifyCode);
+            response.sendRedirect(link + "?" + KEY_VERIFY_CODE + "=" + verifyCode);
         }
         return NONE;
     }

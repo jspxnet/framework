@@ -34,6 +34,7 @@ import java.util.List;
  * date: 12-12-10
  * Time: 下午3:27
  */
+@Deprecated
 @HttpMethod(caption = "在线人员")
 public class OnlineView extends ActionSupport {
     public OnlineView() {

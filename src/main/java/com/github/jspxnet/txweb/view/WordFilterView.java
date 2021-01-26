@@ -1,6 +1,6 @@
 package com.github.jspxnet.txweb.view;
 
-import com.github.jspxnet.txweb.annotation.HttpMethod;
+import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.DFAFilter;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -12,7 +12,6 @@ import java.util.Set;
 public class WordFilterView extends ActionSupport {
     ///////////////载入IOC DAO 对象 begin
     protected DFAFilter filter;
-
     public void setFilter(DFAFilter filter) {
         this.filter = filter;
     }
@@ -27,16 +26,6 @@ public class WordFilterView extends ActionSupport {
         }
     }
 
-    private String caption;
-
-    public String getCaption() {
-        return caption;
-    }
-
-    public void setCaption(String caption) {
-        this.caption = caption;
-    }
-
     private String text;
 
     @Param(caption = "文档", max = 10000)
@@ -44,7 +33,8 @@ public class WordFilterView extends ActionSupport {
         this.text = text;
     }
 
-    public Set<String> getSearch( @Param(caption = "文档", max = 10000) String text) throws Exception {
+    @Operate(caption = "搜索")
+    public Set<String> getSearch( @Param(caption = "文档", max = 10000,required = true) String text) throws Exception {
         Set<String> result = filter.search(text, matchType);
         if (!result.isEmpty()) {
             filter.updateTimes(result);

@@ -20,7 +20,7 @@ import java.util.*;
  * Time: 21:54:27
  */
 public class ListUtil {
-    public static final List emptyList = new ArrayList(0);
+    public static final List<?> EMPTY = new ArrayList<>(0);
     private ListUtil() {
 
     }
@@ -30,7 +30,7 @@ public class ListUtil {
      * @param fen  分割
      * @return 切分后转换为字符串
      */
-    public static String toString(Collection list, String fen) {
+    public static String toString(Collection<?> list, String fen) {
         if (list == null || list.isEmpty()) {
             return StringUtil.empty;
         }
@@ -50,7 +50,7 @@ public class ListUtil {
         return sb.toString();
     }
 
-    public static String toString(Set set, String fen) {
+    public static String toString(Set<?> set, String fen) {
         if (set == null || set.isEmpty()) {
             return StringUtil.empty;
         }
@@ -72,7 +72,7 @@ public class ListUtil {
      * @param array list列表
      * @return String[]  List 转换为 String[] 类型
      */
-    public static String[] toArray(Collection array) {
+    public static String[] toArray(Collection<?> array) {
         String[] result = new String[array.size()];
         int i = 0;
         for (Object obj : array) {
