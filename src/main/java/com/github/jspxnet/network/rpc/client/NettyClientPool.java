@@ -103,6 +103,7 @@ public class NettyClientPool {
         return queue.poll(rpcConfig.getTimeout(), TimeUnit.SECONDS);
     }
 
+    @SuppressWarnings("all")
     public void close() {
         AbstractChannelPoolMap poolMap = (AbstractChannelPoolMap) pools;
         for (Map.Entry<InetSocketAddress, FixedChannelPool> inetSocketAddressFixedChannelPoolEntry : (Iterable<Map.Entry<InetSocketAddress, FixedChannelPool>>) poolMap) {
