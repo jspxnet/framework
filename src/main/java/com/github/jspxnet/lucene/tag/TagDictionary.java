@@ -12,9 +12,7 @@ package com.github.jspxnet.lucene.tag;
 import com.github.jspxnet.boot.environment.Environment;
 
 import com.github.jspxnet.utils.ValidUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -22,15 +20,16 @@ import java.io.IOException;
 import java.util.HashSet;
 
 
+@Slf4j
 public class TagDictionary {
-    private final static Logger log = LoggerFactory.getLogger(TagDictionary.class);
-    final private static String file_notag = "/com/github/jspxnet/lucene/tag/notag.txt";
 
-    final private static TagDictionary singleton = new TagDictionary();
+    final private static String FILE_NO_TAG = "/com/github/jspxnet/lucene/tag/notag.txt";
+
+    final private static TagDictionary SINGLETON = new TagDictionary();
     private HashSet<String> hsNotag = null;
 
     static public TagDictionary getInstance() {
-        return singleton;
+        return SINGLETON;
     }
 
     private TagDictionary() {
@@ -38,8 +37,8 @@ public class TagDictionary {
     }
 
     private void loadNoTag() {
-        InputStream is = TagDictionary.class.getResourceAsStream(TagDictionary.file_notag);
-        this.hsNotag = new HashSet<String>(32);
+        InputStream is = TagDictionary.class.getResourceAsStream(TagDictionary.FILE_NO_TAG);
+        this.hsNotag = new HashSet<>(32);
         String theWord;
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(is, Environment.defaultEncode), 512);

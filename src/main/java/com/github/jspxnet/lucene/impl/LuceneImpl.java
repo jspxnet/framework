@@ -54,7 +54,7 @@ public class LuceneImpl implements Lucene {
     public final static String domain = "domain";
     public final static String createDate = "createDate";
     private final static String defaultHighlighterColor = "#c60a00";
-    private Analyzer analyzer = new IKAnalyzer();
+    private final static Analyzer analyzer = new IKAnalyzer();
 
     private Path file = null;
 
@@ -215,8 +215,8 @@ public class LuceneImpl implements Lucene {
         if (query == null) {
             return null;
         }
-        SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=\"" + color + "\">", "</font></b>");
-        Highlighter highlighter = new Highlighter(simpleHTMLFormatter, new QueryScorer(query));
+        SimpleHTMLFormatter simpleHtmlFormatter = new SimpleHTMLFormatter("<b><font color=\"" + color + "\">", "</font></b>");
+        Highlighter highlighter = new Highlighter(simpleHtmlFormatter, new QueryScorer(query));
         highlighter.setTextFragmenter(new SimpleFragmenter(fontLength));//这个100是指定关键字字符串的context的长度，你可以自己设定，因为不可能返回整篇正文内容
 
         int begin = page * count - count;
@@ -295,8 +295,8 @@ public class LuceneImpl implements Lucene {
         }
 
         Query query = MultiFieldQueryParser.parse(queryText, keyName, analyzer);
-        SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=\"" + color + "\">", "</font></b>");
-        Highlighter highlighter = new Highlighter(simpleHTMLFormatter, new QueryScorer(query));
+        SimpleHTMLFormatter simpleHtmlFormatter = new SimpleHTMLFormatter("<b><font color=\"" + color + "\">", "</font></b>");
+        Highlighter highlighter = new Highlighter(simpleHtmlFormatter, new QueryScorer(query));
         highlighter.setTextFragmenter(new SimpleFragmenter(fontLength));//这个100是指定关键字字符串的context的长度，你可以自己设定，因为不可能返回整篇正文内容
 
         int begin = page * count - count;

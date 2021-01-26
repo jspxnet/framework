@@ -19,14 +19,14 @@ import java.util.*;
  */
 public class WordStatCount {
     //the default hyphen collection.
-    private static String regex = " '";
+    final private static String regex = " '";
 
 
     /**
      * @param text 字符串
      * @return the words as a Set by default comparator and hyphens
      */
-    public Set getWordCount(String text) {
+    public Set<OneWord> getWordCount(String text) {
         return getWordCount(text, regex, FREQUENCY_ORDER);
     }
 

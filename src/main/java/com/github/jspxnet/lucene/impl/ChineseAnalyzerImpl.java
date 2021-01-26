@@ -55,10 +55,9 @@ public class ChineseAnalyzerImpl implements ChineseAnalyzer {
             }
         }
         WordStatCount wst = new WordStatCount();
-        Set wordSet = wst.getWordCount(result.toString(), separator);
+        Set<OneWord> wordSet = wst.getWordCount(result.toString(), separator);
         result.setLength(0);
-        for (Object o : wordSet) {
-            OneWord ow = (OneWord) o;
+        for (OneWord ow : wordSet) {
             result.append(ow.getWord()).append(separator);
             num--;
             if (num <= 0) {
