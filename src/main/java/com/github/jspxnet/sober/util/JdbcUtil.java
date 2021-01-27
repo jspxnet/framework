@@ -114,6 +114,7 @@ public abstract class JdbcUtil {
                         log.info(warning.getMessage());
                     }
                     ConnectionProxy connectionProxy = ((ConnectionProxy) conn);
+                    connectionProxy.close();
                     connectionProxy.release();
                 }
             } else {

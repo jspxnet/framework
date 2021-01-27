@@ -13,6 +13,7 @@ package com.github.jspxnet.datasource;
 import com.github.jspxnet.network.mail.core.SendEmailAdapter;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Scheduled;
+import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +73,7 @@ public class JspxDataSource extends DriverManagerDataSource {
     private String checkSql = "SELECT 1";
     private boolean mailTips = false;
     private int mailSendTimes = 0;
-    private int minPoolSize = 6;
+    private int minPoolSize = 3;
     private String smtp = ""; //mail.gzec.com.cn
     private String mailFrom = ""; //public@gzec.com.cn
     private String mailUser = "";
@@ -234,7 +235,6 @@ public class JspxDataSource extends DriverManagerDataSource {
     /**
      * 关闭连接
      */
-
     public void close() {
         for (int i = 0; i < connectionPool.length; i++) {
             if (connectionPool[i] != null) {
@@ -245,10 +245,9 @@ public class JspxDataSource extends DriverManagerDataSource {
     }
 
     @Destroy
-    public void shutdown() throws SQLException {
+    public void shutdown() {
         isRun = false;
         close();
-        super.getConnectionFromDriverManager().close();
     }
 
     /**
@@ -301,34 +300,27 @@ public class JspxDataSource extends DriverManagerDataSource {
 
     @Scheduled(force = true)
     public void run() {
-        if (!isRun)
+        if (!isRun||ArrayUtil.isEmpty(connectionPool))
         {
             return;
         }
-        try {
-            if (ArrayUtil.isEmpty(connectionPool)) {
-                return;
-            }
-            int poolSize = getPoolSize();
+        int poolSize = getPoolSize();
+        try
+        {
             for (int i = 0; i < connectionPool.length; i++) {
                 ConnectionProxy conn = connectionPool[i];
                 if (conn == null) {
-                    if (poolSize < minPoolSize) {
+                    if (poolSize < minPoolSize)
+                    {
                         connectionPool[i] = createConnectionProxy();
                         poolSize++;
+                        continue;
                     }
-                    continue;
                 }
-                if (conn.isOvertime() || !conn.isConnect()) {
+                if (conn!=null&&(conn.isOvertime() || !conn.isConnect())) {
                     //周期比较长,有就直接关闭
-                    conn.close();
-                    conn.release();
+                    JdbcUtil.closeConnection(conn,true);
                     connectionPool[i] = null;
-                    continue;
-                }
-                if (poolSize < minPoolSize) {
-                    connectionPool[i] = createConnectionProxy();
-                    poolSize++;
                 }
             }
             log.debug("minPoolSize:{},连接池有效长度:{}", minPoolSize, poolSize);

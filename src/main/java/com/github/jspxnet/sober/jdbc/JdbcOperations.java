@@ -625,8 +625,8 @@ public abstract class JdbcOperations implements SoberSupport {
                 calcUnique(soberTable, result);
             }
         } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
-            throw new IllegalArgumentException("SQL:" + sqlText);
+            log.error("sql:" + sqlText, e);
+            throw new IllegalArgumentException("sql:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(preparedStatement);
