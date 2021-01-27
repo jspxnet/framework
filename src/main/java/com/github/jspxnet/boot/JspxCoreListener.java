@@ -308,13 +308,6 @@ public class JspxCoreListener implements ServletContextListener {
             }
             //...
         }
-        //关闭定时器和其他线程begin
-        //安卓系统跳过这里，否则会有错误
-      /* if (!SystemUtil.isAndroid()) {
-            com.github.jspxnet.boot.ThreadLocalImmolate threadLocalImmolate = new com.github.jspxnet.boot.ThreadLocalImmolate(true);
-            log.info("ThreadLocal shutdown count is " + threadLocalImmolate.immolate());
-        }*/
-        //System.exit(0);
         //关闭定时器和其他线程end
         isRun = false;
         log.info(Environment.frameworkName + " " + copyright + " dispatcher shutdown completed ");

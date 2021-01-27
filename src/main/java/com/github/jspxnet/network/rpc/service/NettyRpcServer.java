@@ -65,7 +65,7 @@ public class NettyRpcServer implements Runnable {
         }
         catch (Exception e)
         {
-            log.error("服务器启动失败",e);
+            log.error("RPC服务器启动失败",e);
             isRun = false;
         }finally {
             close();
