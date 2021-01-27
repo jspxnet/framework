@@ -20,7 +20,9 @@ public enum  WebOutEnumType implements EnumType {
 
     HTML(4, "html"),
 
-    TEXT(5, "text");
+    TEXT(5, "text"),
+
+    CSS(6, "CSS");
 
     /**
      *  
