@@ -45,15 +45,13 @@ public class ApiDocUtil {
      * @param lass 类对象
      * @return 得到参数对象的文档
      */
-    public static List<ApiParam> getApiParamList(Class<?> lass,List<Class<?>> checkList) {
-        checkList.add(lass);
+    public static List<ApiParam> getApiParamList(Class<?> lass) {
         List<ApiParam> result = new ArrayList<>();
         Field[] fields = ClassUtil.getDeclaredFields(lass);
         for (Field field : fields) {
             if (field.getModifiers() > 25) {
                 continue;
             }
-
 
             ApiParam objParam = new ApiParam();
             objParam.setFiled(field.getName());
@@ -145,8 +143,7 @@ public class ApiDocUtil {
             Class<?> theClass = findDtoClass(className,classList);
             if (theClass!=null)
             {
-                List<Class<?>> checkList = new ArrayList<>();
-                apiParam.setChildren(getApiParamList(theClass,checkList));
+                apiParam.setChildren(getApiParamList(theClass));
 
             }
         }
