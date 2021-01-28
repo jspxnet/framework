@@ -6,6 +6,7 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.utils.IpUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.List;
 
@@ -95,7 +96,7 @@ public class RpcConfig {
         return ENV_TEMPLATE.getString(LOCAL_ADDRESS);
     }
 
-    public List<SocketAddress> getLocalAddressList() {
+    public List<InetSocketAddress> getLocalAddressList() {
         String localAddressStr = getLocalAddress();
         return IpUtil.getSocketAddressList(localAddressStr);
     }
@@ -108,7 +109,7 @@ public class RpcConfig {
         return ENV_TEMPLATE.getString(MASTER_GROUP + StringUtil.DOT + groupName);
     }
 
-    public List<SocketAddress> getMasterGroupList(String groupName) {
+    public List<InetSocketAddress> getMasterGroupList(String groupName) {
         String masterGroupStr = getMasterGroup(groupName);
         return IpUtil.getSocketAddressList(masterGroupStr);
     }

@@ -17,6 +17,8 @@ import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +51,8 @@ public class RouteService implements Runnable {
             if (StringUtil.isNull(name)) {
                 continue;
             }
-            List<SocketAddress> defaultSocketAddressList = masterSocketAddress.getDefaultSocketAddressList(name);
-            for (SocketAddress socketAddress : defaultSocketAddressList) {
+            List<InetSocketAddress> defaultSocketAddressList = masterSocketAddress.getDefaultSocketAddressList(name);
+            for (InetSocketAddress socketAddress : defaultSocketAddressList) {
                 RouteSession routeSession = new RouteSession();
                 routeSession.setSocketAddress(socketAddress);
                 routeSession.setGroupName(name);
@@ -101,12 +103,12 @@ public class RouteService implements Runnable {
             if (StringUtil.isNull(name)) {
                 continue;
             }
-            List<SocketAddress> defaultSocketAddressList = rpcConfig.getMasterGroupList(name);
+            List<InetSocketAddress> defaultSocketAddressList = rpcConfig.getMasterGroupList(name);
             if (ObjectUtil.isEmpty(defaultSocketAddressList))
             {
                 continue;
             }
-            for (SocketAddress socketAddress : defaultSocketAddressList) {
+            for (InetSocketAddress socketAddress : defaultSocketAddressList) {
                 RouteSession routeSession = new RouteSession();
                 routeSession.setSocketAddress(socketAddress);
                 routeSession.setGroupName(name);

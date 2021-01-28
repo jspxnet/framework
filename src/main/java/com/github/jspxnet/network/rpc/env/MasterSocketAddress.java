@@ -6,6 +6,7 @@ import com.github.jspxnet.network.rpc.model.route.RouteSession;
 import com.github.jspxnet.utils.IpUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.*;
 
@@ -18,7 +19,7 @@ import java.util.*;
  **/
 @Slf4j
 public class MasterSocketAddress {
-    private static final Map<String,List<SocketAddress>> GROUP_LIST_MAP = new HashMap<>();
+    private static final Map<String,List<InetSocketAddress>> GROUP_LIST_MAP = new HashMap<>();
     private static int current = 0;
     final private static MasterSocketAddress INSTANCE = new  MasterSocketAddress();
     public static MasterSocketAddress getInstance()
@@ -36,20 +37,20 @@ public class MasterSocketAddress {
         }
         for (String name:groupNames)
         {
-            List<SocketAddress> defaultSocketAddressList = Collections.synchronizedList(new ArrayList<>());
+            List<InetSocketAddress> defaultSocketAddressList = Collections.synchronizedList(new ArrayList<>());
             defaultSocketAddressList.addAll(RpcConfig.getInstance().getMasterGroupList(name));
             GROUP_LIST_MAP.put(name,defaultSocketAddressList);
         }
     }
 
-    synchronized public SocketAddress getSocketAddress(String serviceName)
+    synchronized public InetSocketAddress getSocketAddress(String serviceName)
     {
         if (ObjectUtil.isEmpty(GROUP_LIST_MAP))
         {
             log.error("RPC服务调用,没有配置服务器地址列表");
             return null;
         }
-        List<SocketAddress> defaultSocketAddressList = GROUP_LIST_MAP.get(serviceName);
+        List<InetSocketAddress> defaultSocketAddressList = GROUP_LIST_MAP.get(serviceName);
         if (ObjectUtil.isEmpty(defaultSocketAddressList))
         {
             defaultSocketAddressList = GROUP_LIST_MAP.get("default");
@@ -71,9 +72,9 @@ public class MasterSocketAddress {
         }
     }
 
-    public List<SocketAddress> getDefaultSocketAddressList(String serviceName) {
-        List<SocketAddress> defaultSocketAddressList = GROUP_LIST_MAP.get(serviceName);
-        List<SocketAddress> result = new ArrayList<>();
+    public List<InetSocketAddress> getDefaultSocketAddressList(String serviceName) {
+        List<InetSocketAddress> defaultSocketAddressList = GROUP_LIST_MAP.get(serviceName);
+        List<InetSocketAddress> result = new ArrayList<>();
         for (SocketAddress socketAddress:defaultSocketAddressList)
         {
             String ipStr = IpUtil.getIp(socketAddress);
@@ -95,7 +96,7 @@ public class MasterSocketAddress {
         {
             return;
         }
-        List<SocketAddress> saveList = new ArrayList<>();
+        List<InetSocketAddress> saveList = new ArrayList<>();
         for (String groupName:GROUP_LIST_MAP.keySet())
         {
             List<RouteSession> list = routeChannelManage.getRouteSessionList();
@@ -112,7 +113,7 @@ public class MasterSocketAddress {
             }
             if (!ObjectUtil.isEmpty(list))
             {
-                List<SocketAddress> defaultSocketAddressList = GROUP_LIST_MAP.computeIfAbsent(groupName, k -> new ArrayList<>());
+                List<InetSocketAddress> defaultSocketAddressList = GROUP_LIST_MAP.computeIfAbsent(groupName, k -> new ArrayList<>());
                 defaultSocketAddressList.clear();
                 defaultSocketAddressList.addAll(saveList);
             }

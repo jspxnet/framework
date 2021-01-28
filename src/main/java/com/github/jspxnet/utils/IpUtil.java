@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
+ *
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2007-4-26
  * Time: 0:58:26
@@ -175,8 +176,7 @@ public class IpUtil {
     }
 
     public static String getIp(InetAddress address) {
-        if (address==null)
-        {
+        if (address == null) {
             return StringUtil.empty;
         }
         String host = address.getHostAddress();
@@ -187,8 +187,7 @@ public class IpUtil {
     }
 
     public static String getIp(SocketAddress address) {
-        if (address==null)
-        {
+        if (address == null) {
             return StringUtil.empty;
         }
         String host = address.toString();
@@ -255,6 +254,7 @@ public class IpUtil {
             return p;
         }
     }
+
     //-------------------------------------------------------------------------------------------------
     private static int ipc(byte b) {
         return (b >= 0) ? (int) b : ((int) b) + 256;
@@ -433,51 +433,92 @@ public class IpUtil {
     }
 
     /**
-     *
      * @param str 字符串转地址
      * @return 地址对象
      */
-    public static InetSocketAddress getSocketAddress(String str)
-    {
-        String ip = StringUtil.substringBefore(str,":");
-        String portStr = StringUtil.substringAfter(str,":");
-        return new InetSocketAddress(StringUtil.trim(ip),ObjectUtil.toInt(portStr));
+    public static InetSocketAddress getSocketAddress(String str) {
+        String ip = StringUtil.substringBefore(str, ":");
+        String portStr = StringUtil.substringAfter(str, ":");
+
+        return new InetSocketAddress(StringUtil.trim(ip), ObjectUtil.toInt(portStr));
     }
 
-
     /**
-     *  127.0.0.1:8991;127.0.0.1:8992;127.0.0.1:8993 转换为地址对象
-     * @param str 字符串转地址列表,
-     * @return 转换为地址对象列表
+     * @param str 字符串转地址,有范围的 192.168.0.1:1000-1010  这种将创建10个
+     * @return 地址对象列表
      */
-    public static List<SocketAddress> getSocketAddressList(String str)
-    {
-        List<SocketAddress> result = new ArrayList<>();
-        String[] ips = StringUtil.split(StringUtil.replace(str,StringUtil.COMMAS,StringUtil.SEMICOLON),StringUtil.SEMICOLON);
-        for (String ip:ips)
-        {
-            if (StringUtil.isNull(ip))
-            {
+    public static List<InetSocketAddress> getSocketAddressRange(String str) {
+        String ip = StringUtil.substringBefore(str, ":");
+        String portStr = StringUtil.substringAfter(str, ":");
+        int begin = ObjectUtil.toInt(StringUtil.substringBefore(portStr, "-"));
+        int end = ObjectUtil.toInt(StringUtil.substringBefore(portStr, "-"));
+        if (begin > end || begin == 0 || end == 0) {
+            return new ArrayList<>();
+        }
+        List<InetSocketAddress> result = new ArrayList<>();
+        for (int i = begin; i <= end; i++) {
+            if (i <= 0) {
                 continue;
             }
-            result.add(getSocketAddress(ip));
+            result.add(new InetSocketAddress(StringUtil.trim(ip), i));
         }
         return result;
     }
 
     /**
+     * 127.0.0.1:8991;127.0.0.1:8992;127.0.0.1:8993 转换为地址对象
      *
+     * @param str 字符串转地址列表,
+     * @return 转换为地址对象列表
+     */
+    public static List<InetSocketAddress> getSocketAddressList(String str) {
+        List<InetSocketAddress> result = new ArrayList<>();
+        String[] ips = StringUtil.split(StringUtil.replace(str, StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON);
+        for (String ip : ips) {
+            if (StringUtil.isNull(ip)) {
+                continue;
+            }
+            if (ip.contains("-")) {
+                result.addAll(getSocketAddressRange(str));
+            } else {
+                result.add(getSocketAddress(ip));
+            }
+        }
+        return result;
+    }
+
+    /**
      * @return 用于区分硬件标识
      */
-    public static String getIpEnd()
-    {
+    public static String getIpEnd() {
         try {
-            String ipStart =IpUtil.toLong(IpUtil.getIp(InetAddress.getLocalHost()))+StringUtil.empty;
-            return ipStart.substring(ipStart.length() -2);
+            String ipStart = IpUtil.toLong(IpUtil.getIp(InetAddress.getLocalHost())) + StringUtil.empty;
+            return ipStart.substring(ipStart.length() - 2);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
         return StringUtil.empty;
+    }
+
+
+    /**
+     * 测试主机Host的port端口是否被使用
+     *
+     * @param address InetSocketAddress地址
+     * @return 是否被使用
+     */
+    public static boolean isPortUsing(InetSocketAddress address) {
+
+        try {
+            Socket socket = new Socket(address.getAddress(), address.getPort());  //建立一个Socket连接
+            if (socket != null) {
+                socket.close();
+            }
+            return true;
+        } catch (IOException e) {
+            //...
+            return false;
+        }
     }
 
 }

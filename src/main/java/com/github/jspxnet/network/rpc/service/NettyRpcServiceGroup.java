@@ -3,6 +3,10 @@ package com.github.jspxnet.network.rpc.service;
 import com.github.jspxnet.boot.DaemonThreadFactory;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.service.route.RouteService;
+import com.github.jspxnet.utils.IpUtil;
+import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +19,7 @@ import java.util.Map;
  * date: 2020/6/21 13:26
  * description: jspbox
  **/
+@Slf4j
 public class NettyRpcServiceGroup {
 
     private static final String RPC_THREAD_NAME = "netty_rpc";
@@ -44,10 +49,15 @@ public class NettyRpcServiceGroup {
     public void start()
     {
         RpcConfig rpcConfig = RpcConfig.getInstance();
-        List<SocketAddress> addressList = rpcConfig.getLocalAddressList();
+        List<InetSocketAddress> addressList = rpcConfig.getLocalAddressList();
         DaemonThreadFactory threadFactory =  new DaemonThreadFactory(RPC_THREAD_NAME);
-        for (SocketAddress socketAddress:addressList)
+        for (InetSocketAddress socketAddress:addressList)
         {
+            if (IpUtil.isPortUsing(socketAddress))
+            {
+                log.info("------->netty rpc 调用地址端口已经被占用,将跳过不启动:{},同一台服务器是用同一个配置属于正常,否则检查配置是否有误",socketAddress);
+                continue;
+            }
             NettyRpcServer nettyRpcServer = createService(socketAddress);
             threadFactory.newThread(nettyRpcServer).start();
         }

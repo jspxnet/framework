@@ -6,6 +6,8 @@ import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.utils.IpUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,9 +34,9 @@ public class RouteChannelManage {
         RpcConfig rpcConfig = RpcConfig.getInstance();
         //初始化默认的路由表,就是自己的IP地址
         String[] groupNames = rpcConfig.getLocalGroupList();
-        List<SocketAddress> list = rpcConfig.getLocalAddressList();
+        List<InetSocketAddress> list = rpcConfig.getLocalAddressList();
         int i = 0;
-        for (SocketAddress socketAddress:list)
+        for (InetSocketAddress socketAddress:list)
         {
             RouteSession routeSession = new RouteSession();
             routeSession.setSocketAddress(socketAddress);
@@ -62,7 +64,7 @@ public class RouteChannelManage {
     /**
      * 路由表
      */
-    private final ConcurrentHashMap<SocketAddress, RouteSession> routeSocketMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<InetSocketAddress, RouteSession> routeSocketMap = new ConcurrentHashMap<>();
 
 
     /**
@@ -165,7 +167,7 @@ public class RouteChannelManage {
      */
     public void routeOff(SocketAddress address)
     {
-        List<SocketAddress>  localList = RpcConfig.getInstance().getLocalAddressList();
+        List<InetSocketAddress>  localList = RpcConfig.getInstance().getLocalAddressList();
         if (localList.contains(address))
         {
             return;
@@ -186,8 +188,8 @@ public class RouteChannelManage {
      */
     public void cleanOffRoute()
     {
-        List<SocketAddress>  localList = RpcConfig.getInstance().getLocalAddressList();
-        Enumeration<SocketAddress> keys = routeSocketMap.keys();
+        List<InetSocketAddress>  localList = RpcConfig.getInstance().getLocalAddressList();
+        Enumeration<InetSocketAddress> keys = routeSocketMap.keys();
         while (keys.hasMoreElements())
         {
             SocketAddress key=keys.nextElement();

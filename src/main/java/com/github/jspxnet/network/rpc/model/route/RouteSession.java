@@ -3,6 +3,7 @@ package com.github.jspxnet.network.rpc.model.route;
 import com.github.jspxnet.sober.annotation.Column;
 import lombok.Data;
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 /**
@@ -17,7 +18,7 @@ public class RouteSession implements Serializable {
 
     private String groupName;
 
-    private SocketAddress socketAddress;
+    private InetSocketAddress socketAddress;
 
     @Column(caption="最后请求时间",notNull = true)
     private long lastRequestTime = System.currentTimeMillis();
