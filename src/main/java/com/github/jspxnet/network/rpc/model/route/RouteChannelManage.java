@@ -165,7 +165,7 @@ public class RouteChannelManage {
      *
      * @param address 标记下线
      */
-    public void routeOff(SocketAddress address)
+    public void routeOff(InetSocketAddress address)
     {
         List<InetSocketAddress>  localList = RpcConfig.getInstance().getLocalAddressList();
         if (localList.contains(address))
