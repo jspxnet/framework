@@ -11,10 +11,7 @@ import com.github.jspxnet.sioc.util.Empty;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.NullClass;
 import com.github.jspxnet.txweb.annotation.*;
-import com.github.jspxnet.txweb.apidoc.ApiField;
-import com.github.jspxnet.txweb.apidoc.ApiMethod;
-import com.github.jspxnet.txweb.apidoc.ApiOperate;
-import com.github.jspxnet.txweb.apidoc.ApiParam;
+import com.github.jspxnet.txweb.apidoc.*;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -48,36 +45,113 @@ public class ApiDocUtil {
      * @param lass 类对象
      * @return 得到参数对象的文档
      */
-    public static ApiParam getApiParam(Class<?> lass) {
-        ApiParam apiParam = new ApiParam();
+    public static List<ApiParam> getApiParamList(Class<?> lass,List<Class<?>> checkList) {
+        checkList.add(lass);
+        List<ApiParam> result = new ArrayList<>();
         Field[] fields = ClassUtil.getDeclaredFields(lass);
         for (Field field : fields) {
             if (field.getModifiers() > 25) {
                 continue;
             }
-            String key = field.getName();
-            JsonField jsonField = field.getAnnotation(JsonField.class);
-            if (jsonField != null && !StringUtil.isNull(jsonField.name())) {
-                key = jsonField.name();
+
+
+            ApiParam objParam = new ApiParam();
+            objParam.setFiled(field.getName());
+            objParam.setFiledType(field.getType().getSimpleName());
+
+            Param param = field.getAnnotation(Param.class);
+            if (param != null) {
+                objParam.setSafety("安全级别[" + param.level() + "]");
+                objParam.setRequired(param.required());
+                objParam.setName(field.getName());
+                objParam.setCaption(param.caption());
+                if (!param.enumType().equals(NullClass.class)) {
+                    Map<Object, Object> enumMap = ClassUtil.getEnumMap(param.enumType(), "value", "name");
+                    if (enumMap != null) {
+                        objParam.setFormat(enumMap.toString());
+                    }
+                } else if (ClassUtil.isNumberProperty(field.getType())) {
+                    long max = Long.MAX_VALUE;
+                    if (param.max() == Long.MAX_VALUE && field.getType().equals(Integer.class)) {
+                        max = Integer.MAX_VALUE;
+                    }
+                    objParam.setSafety(param.min() + "-" + (Long.MAX_VALUE == Long.min(max, param.max()) ? "..." : Long.min(max, param.max())));
+                } else if (field.getType().equals(String.class)) {
+                    objParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-" + (Long.MAX_VALUE == param.max() ? "..." : param.max()) + ",安全[" + param.level() + "]");
+                }
+            } else
+            {
+                objParam.setCaption(field.getName());
             }
-            JsonIgnore notExpose = field.getAnnotation(JsonIgnore.class);
-            if (notExpose != null && !notExpose.isNull()) {
-                continue;
-            }
-            apiParam.setFiled(key);
-            if (jsonField != null) {
-                apiParam.setCaption(jsonField.caption());
-                apiParam.setFormat(jsonField.format());
-            } else {
-                apiParam.setCaption(field.getName());
-                apiParam.setFormat(StringUtil.empty);
-            }
-            apiParam.setFiledType(field.getType().getSimpleName());
+
+            result.add(objParam);
         }
-        return apiParam;
+        return result;
     }
 
+    public static void putChildApiParamForReturnTypeModel(ApiParam apiParam,List<Class<Object>> classList,String returnTypeModel) {
+        if (returnTypeModel.startsWith("<")&&returnTypeModel.endsWith(">"))
+        {
+            returnTypeModel = StringUtil.substringOutBetween(returnTypeModel,"<",">");
+        }
+        //得到第一层
+        String className =  StringUtil.trim(StringUtil.substringBefore(returnTypeModel,"<"));
+        if ("list".equalsIgnoreCase(className)||List.class.getName().equalsIgnoreCase(className)||Set.class.getName().equalsIgnoreCase(className)||Collections.class.getName().equalsIgnoreCase(className))
+        {
+            apiParam.setFiledType("list");
+            returnTypeModel = StringUtil.substringOutBetween(returnTypeModel,"<",">");
+            if (!StringUtil.isEmpty(returnTypeModel))
+            {
+                putChildApiParamForReturnTypeModel(apiParam, classList, returnTypeModel);
+            }
+        } else
+        if ("map".equalsIgnoreCase(className)||Map.class.getName().equalsIgnoreCase(className))
+        {
+            apiParam.setFiledType("map");
+            returnTypeModel = StringUtil.substringOutBetween(returnTypeModel,"<",">");
+            apiParam.setCaption(returnTypeModel);
 
+            if (!StringUtil.isEmpty(returnTypeModel) && returnTypeModel.contains(","))
+            {
+                String returnTypeModelKey = StringUtil.substringBefore(returnTypeModel,",");
+                String returnTypeModelValue = StringUtil.substringAfter(returnTypeModel,",");
+
+                ApiField apiFieldKey = new ApiField();
+                apiFieldKey.setName("key");
+                apiFieldKey.setType(returnTypeModelKey);
+                apiFieldKey.setCaption("关键字");
+
+                ApiField apiFieldValue = new ApiField();
+                apiFieldValue.setName("value");
+                apiFieldValue.setType(returnTypeModelValue);
+                apiFieldValue.setCaption("值");
+
+                if (!StringUtil.isEmpty(returnTypeModelKey))
+                {
+                    putChildApiFieldForReturnTypeModel(apiFieldKey, classList, returnTypeModelKey);
+                }
+                if (!StringUtil.isEmpty(returnTypeModelValue))
+                {
+                    putChildApiFieldForReturnTypeModel(apiFieldValue, classList, returnTypeModelValue);
+                }
+                JSONObject json = new JSONObject();
+                json.put("key",apiFieldKey);
+                json.put("value",apiFieldValue);
+                apiParam.setChildJson(json);
+            }
+        }
+        else
+        {
+            Class<?> theClass = findDtoClass(className,classList);
+            if (theClass!=null)
+            {
+                List<Class<?>> checkList = new ArrayList<>();
+                apiParam.setChildren(getApiParamList(theClass,checkList));
+
+            }
+        }
+
+    }
     /**
      * 添加方法参数
      *
@@ -116,6 +190,14 @@ public class ApiDocUtil {
                     } else if (field.getType().equals(String.class)) {
                         objParam.setSafety("限长" + (Math.max(param.min(), 0)) + "-" + (Long.MAX_VALUE == param.max() ? "..." : param.max()) + ",安全[" + param.level() + "]");
                     }
+                }
+
+                String returnTypeModel = field.getGenericType().getTypeName();
+                if (returnTypeModel.contains("<") && returnTypeModel.contains(">"))
+                {
+                    Class<?>[] returnTypeClass  = ClassUtil.getClassForTypeModel(field.getGenericType().getTypeName()).toArray(new Class<?>[0]);
+                    List<Class<Object>> classList =  toList(returnTypeClass);
+                    putChildApiParamForReturnTypeModel(objParam, classList,returnTypeModel);
                 }
                 children.add(objParam);
             }
@@ -359,8 +441,8 @@ public class ApiDocUtil {
         }
 
         //方法参数-------------------------------------------------------------------------------------------
-        TreeMap<String, ApiParam> methodParamList = new TreeMap<>();
-        apiMethod.setParams(methodParamList);
+        Map<String, ApiParam> methodParamList = new LinkedHashMap<>();
+
         //i 表示第几个参数，下边完成参数组装
         Annotation[][] parameterAnnotations = exeMethod.getParameterAnnotations();
         Parameter[] parameters = exeMethod.getParameters();
@@ -369,6 +451,7 @@ public class ApiDocUtil {
             Annotation[] annotations = parameterAnnotations[i];
             methodParam.setName(parameters[i].getName());
             methodParam.setFiledType(parameters[i].getType().getSimpleName());
+            methodParam.setFiledClass(parameters[i].getType());
             for (Annotation annotation : annotations) {
                 if (annotation instanceof Param) {
                     Param param = (Param) annotation;
@@ -398,14 +481,14 @@ public class ApiDocUtil {
 
                     } else if (!param.type().equals(NullClass.class)) {
                         methodParam.setFiledType(param.type().getSimpleName());
-                        ApiDocUtil.addMethodParam(methodParam.getChildren(), param.type());
+                        addMethodParam(methodParam.getChildren(), param.type());
                     } else if (param.type().equals(NullClass.class) && !ClassUtil.isStandardProperty(parameters[i].getType())) {
                         methodParam.setFiledType(parameters[i].getType().getSimpleName());
                         methodParam.setClassParam(true);
-                        ApiDocUtil.addMethodParam(methodParam.getChildren(), parameters[i].getType());
+                        addMethodParam(methodParam.getChildren(), parameters[i].getType());
                     } else if (!ClassUtil.isIocInterfaces(parameters[i].getType())) {
                         methodParam.setFiledType(parameters[i].getType().getSimpleName());
-                        ApiDocUtil.addMethodParam(methodParam.getChildren(), parameters[i].getType());
+                        addMethodParam(methodParam.getChildren(), parameters[i].getType());
                     }
                 }
                 if (annotation instanceof Validate) {
@@ -421,6 +504,7 @@ public class ApiDocUtil {
             }
 
         }
+
         //修复路径方式表述
         if (!StringUtil.isNull(apiMethod.getName()) && apiOperate.getUrl().endsWith("*")) {
             String tmpUrl = apiOperate.getUrl().substring(0, apiOperate.getUrl().length() - 1);
@@ -430,6 +514,30 @@ public class ApiDocUtil {
                 apiOperate.setUrl(tmpUrl + apiMethod.getName());
             }
         }
+
+      /*
+       排序,目前不是用,是用默认的字段顺序
+        List<Map.Entry<String, ApiParam>> list = new ArrayList<>(methodParamList.entrySet());
+        //然后通过比较器来实现排序
+        Collections.sort(list,new Comparator<Map.Entry<String, ApiParam>>() {
+            //升序排序
+            @Override
+            public int compare(Map.Entry<String, ApiParam> o1,
+                               Map.Entry<String, ApiParam> o2) {
+                if (o1==null || o2==null || o1.getValue()==null || o2.getValue()==null || o1.getValue().getCaption()==null)
+                {
+                    return 0;
+                }
+                return o1.getValue().getCaption().compareTo(o2.getValue().getCaption());
+            }
+        });
+
+        Map<String, ApiParam> sortMap = new LinkedHashMap<>();
+        for(Map.Entry<String, ApiParam> mapping:list){
+            sortMap.put(mapping.getKey(),mapping.getValue());
+        }*/
+
+        apiMethod.setParams(methodParamList);
         return apiOperate;
     }
 
@@ -719,6 +827,8 @@ public class ApiDocUtil {
             cont = ArrayUtil.toString(describe.value(), "<br />");
         } else {
             cont = findDescribe(id,describe.flag(),describe.namespace());
+            cont = StringUtil.replace(cont,"\n        ```","\n```");
+            cont = StringUtil.replace(cont,"\n\t```","\n```");
         }
         return ScriptMarkUtil.getMarkdownHtml(StringUtil.trim(cont));
     }

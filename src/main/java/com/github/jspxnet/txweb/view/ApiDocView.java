@@ -223,20 +223,6 @@ public class ApiDocView extends ActionSupport {
         for (Method exeMethod : operateMap.values()) {
             ApiOperate apiOperate = ApiDocUtil.getMethodApiOperate(cla,exeMethod, apiDocument.getUrl());
             Map<String, ApiParam> methodParamList = apiOperate.getMethod().getParams();
-            for (ApiParam param : methodParamList.values()) {
-                if ("object".equals(param.getFiledType()) && !StringUtil.isEmpty(param.getFiled())) {
-                    Map<String, ApiParam> theParams = new LinkedHashMap<>();
-                    try {
-                        ApiParam apiParam = ApiDocUtil.getApiParam(ClassUtil.loadClass(param.getFiled()));
-                        theParams.put(apiParam.getName(), apiParam);
-                        apiDocument.setParams(theParams);
-                    } catch (ClassNotFoundException e) {
-                        log.error(exeMethod.toString(),e);
-                        //...
-                    }
-                }
-            }
-
             apiOperate.setParams(params);
             operateList.add(apiOperate);
             ApiDocUtil.putReturnApiField(exeMethod,apiOperate);
@@ -274,7 +260,7 @@ public class ApiDocView extends ActionSupport {
         ApiDocView apiDocView = new ApiDocView();
         //System.out.println(new JSONObject(apiDocView.indexing(),true).toString(4));
 
-        String id = "6d63185d5018a4ec48c6000db1834e1a";
+        String id = "9f3d18c59fbbf4e71aae4640f5f8e059";
         ApiDocument response = apiDocView.getDocument(id);
 
         System.out.println(new JSONObject(response, true).toString(4));

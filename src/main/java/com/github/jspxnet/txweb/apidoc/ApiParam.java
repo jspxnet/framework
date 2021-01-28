@@ -1,10 +1,12 @@
 package com.github.jspxnet.txweb.apidoc;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,6 +22,9 @@ public class ApiParam implements Serializable {
     @Column(caption = "字段类型")
     @JsonIgnore(isNull = true)
     private String filedType;
+
+    @JsonIgnore
+    private Type filedClass;
 
     @Column(caption = "是否必须")
     private boolean required = false;
@@ -38,7 +43,11 @@ public class ApiParam implements Serializable {
     @Column(caption = "包含字段")
     private List<ApiParam> children = new LinkedList<>();
 
+    @JsonIgnore(isNull = true)
+    private JSONObject childJson;
+
     @Column(caption = "类参数")
     private boolean classParam = false;
+
 
 }

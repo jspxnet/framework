@@ -1155,8 +1155,13 @@ public class JSONObject extends HashMap<String, Object> {
                 v = super.get(o);
                 sb.append(StringUtil.quote(o == null ? "" : o.toString(), true));
                 sb.append(": ");
-
-                sb.append(valueToString(getJsonField(o.toString()),v, indentFactor, indent, needClass));
+                if (o==null)
+                {
+                    sb.append("null");
+                } else
+                {
+                    sb.append(valueToString(getJsonField(o.toString()),v, indentFactor, indent, needClass));
+                }
             } else {
                 int newIndent = indent + indentFactor;
                 while (keys.hasNext()) {
