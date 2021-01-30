@@ -36,7 +36,6 @@ public class ClientHandlerAdapter extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        //log.debug("--------------channelActive=" + ctx.channel());
         ctx.channel().read();
     }
 

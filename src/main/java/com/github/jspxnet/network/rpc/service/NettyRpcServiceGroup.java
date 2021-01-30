@@ -7,7 +7,6 @@ import com.github.jspxnet.network.rpc.service.route.RouteService;
 import com.github.jspxnet.utils.IpUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +94,7 @@ public class NettyRpcServiceGroup {
                 nettyRpcServer.close();
             }
         }
+        started = false;
 
     }
 

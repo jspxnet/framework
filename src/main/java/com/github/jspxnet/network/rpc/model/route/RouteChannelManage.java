@@ -68,6 +68,12 @@ public class RouteChannelManage {
     private final ConcurrentHashMap<InetSocketAddress, RouteSession> routeSocketMap = new ConcurrentHashMap<>();
 
 
+    /**
+     * 检查表,只有成功了的才加入路由表里边
+     */
+    private final Map<InetSocketAddress, RouteSession> checkRouteSocketMap = new ConcurrentHashMap<>();
+
+
     public static List<InetSocketAddress> getStartList() {
         return START_LIST;
     }
@@ -96,7 +102,50 @@ public class RouteChannelManage {
      * 放入请求得到的路由表
      * @param list 路由表
      */
-    public void join(List<RouteSession> list)
+    public void joinCheckRoute(List<RouteSession> list)
+    {
+        if (ObjectUtil.isEmpty(list))
+        {
+            return;
+        }
+
+        for (RouteSession routeSession:list)
+        {
+            if (routeSession==null)
+            {
+                continue;
+            }
+            joinCheckRoute(routeSession);
+        }
+    }
+
+    public void joinCheckRoute(RouteSession routeSession)
+    {
+        if (ObjectUtil.isEmpty(routeSession))
+        {
+            return;
+        }
+
+
+        if (routeSession==null)
+        {
+            return;
+        }
+        if (START_LIST.contains(routeSession.getSocketAddress()))
+        {
+            return;
+        }
+        if (!checkRouteSocketMap.containsKey(routeSession.getSocketAddress()))
+        {
+            routeSession.setHeartbeatTimes(0);
+            checkRouteSocketMap.put(routeSession.getSocketAddress(),routeSession);
+        }
+    }
+    /**
+     * 真正的加入到路由表中
+     * @param list 路由表
+     */
+    public void joinRoute(List<RouteSession> list)
     {
         if (ObjectUtil.isEmpty(list))
         {
@@ -104,22 +153,18 @@ public class RouteChannelManage {
         }
         for (RouteSession routeSession:list)
         {
+            if (routeSession==null)
+            {
+                continue;
+            }
             if (!routeSocketMap.containsKey(routeSession.getSocketAddress()))
             {
+                routeSession.setOnline(YesNoEnumType.YES.getValue());
+                routeSession.setHeartbeatTimes(0);
                 routeSocketMap.put(routeSession.getSocketAddress(),routeSession);
-            } else
-            {
-                RouteSession routeSessionTmp = routeSocketMap.get(routeSession.getSocketAddress());
-                if (routeSessionTmp!=null&&YesNoEnumType.NO.getValue()==routeSessionTmp.getOnline())
-                {
-                    routeSessionTmp.setOnline(YesNoEnumType.YES.getValue());
-                    routeSessionTmp.setHeartbeatTimes(0);
-                }
             }
         }
-
     }
-
 
     /**
      *
@@ -130,6 +175,20 @@ public class RouteChannelManage {
         return new ArrayList<>(routeSocketMap.values());
     }
 
+    /**
+     *
+     * @return 拷贝一份出去,带检查的路由表
+     */
+    public Map<InetSocketAddress, RouteSession> getCheckRouteSocketMap()
+    {
+        return checkRouteSocketMap;
+    }
+
+    /**
+     *
+     * @param configList 当前路由表
+     * @return 当前路由表排除当前服务
+     */
     public List<RouteSession> getNotRouteSessionList(List<RouteSession> configList)
     {
         if (ObjectUtil.isEmpty(configList))
@@ -140,10 +199,40 @@ public class RouteChannelManage {
         List<RouteSession> result = new ArrayList<>();
         for (RouteSession routeSession:configList)
         {
-            if (!routeSocketMap.containsKey(routeSession.getSocketAddress()))
+            if (START_LIST.contains(routeSession.getSocketAddress()))
             {
-                result.add(routeSession);
+                continue;
             }
+            result.add(routeSession);
+        }
+        return result;
+    }
+
+
+    /**
+     *
+     * @param configList 带检查的路由列表
+     * @return 需要检查的
+     */
+    public List<RouteSession> getNotCheckRouteSessionList(List<RouteSession> configList)
+    {
+        if (ObjectUtil.isEmpty(configList))
+        {
+            return null;
+        }
+
+        List<RouteSession> result = new ArrayList<>();
+        for (RouteSession routeSession:configList)
+        {
+            if (START_LIST.contains(routeSession.getSocketAddress()))
+            {
+                continue;
+            }
+            if (routeSocketMap.containsKey(routeSession.getSocketAddress()))
+            {
+                continue;
+            }
+            result.add(routeSession);
         }
         return result;
     }
@@ -180,10 +269,7 @@ public class RouteChannelManage {
         if (routeSession!=null)
         {
             routeSession.setHeartbeatTimes(routeSession.getHeartbeatTimes()+1);
-            if (routeSession.getHeartbeatTimes()>1)
-            {
-                routeSession.setOnline(YesNoEnumType.NO.getValue());
-            }
+            routeSession.setOnline(YesNoEnumType.NO.getValue());
         }
     }
 
@@ -203,15 +289,15 @@ public class RouteChannelManage {
                 continue;
             }
             RouteSession routeSession = routeSocketMap.get(key);
-            if (YesNoEnumType.NO.getValue()==routeSession.getOnline()&&routeSession.getHeartbeatTimes()>3)
+            if (YesNoEnumType.NO.getValue()==routeSession.getOnline()&&routeSession.getHeartbeatTimes()>2)
             {
-                log.debug("路由表清除下线服务器:{}",IpUtil.getIp(routeSession.getSocketAddress()));
+                RpcConfig rpcConfig = RpcConfig.getInstance();
+                if (rpcConfig.isDebug())
+                {
+                    log.debug("路由表清除下线服务器:{}",IpUtil.getIp(routeSession.getSocketAddress()));
+                }
                 routeSocketMap.remove(key);
             }
-        }
-        if (getRouteSessionCount()<1)
-        {
-            initConfigRoute();
         }
     }
 }

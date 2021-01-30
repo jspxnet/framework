@@ -12,13 +12,16 @@ import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
+import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jspx.net
@@ -38,8 +41,9 @@ public class RouteService implements Runnable {
     private static final NettyClientPool NETTY_CLIENT = NettyClientPool.getInstance();
 
     private static boolean isRun = true;
-    private void init()
-    {
+
+    private void init() {
+        RpcConfig rpcConfig = RpcConfig.getInstance();
         //初始化数据 begin
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
         List<RouteSession> routeSessionList = new ArrayList<>();
@@ -66,21 +70,29 @@ public class RouteService implements Runnable {
             SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
             cmd.setType(INetCommand.TYPE_JSON);
             cmd.setData(json.toString());
+            cmd.setMd5(EncryptUtil.getMd5(json.toString() + rpcConfig.getJoinKey()));
 
             SendCmd reply = null;
             try {
                 reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
             } catch (Exception e) {
-                log.info("netty rpc 调用服务器没有启动:{}",routeSession.getSocketAddress());
+                if (rpcConfig.isDebug()) {
+                    log.debug("测试,netty rpc 调用服务器没有启动:{}", routeSession.getSocketAddress());
+                }
             }
             if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
                 String str = reply.getData();
-                if (StringUtil.isJsonObject(str)) {
+                String md5V = EncryptUtil.getMd5(str + rpcConfig.getJoinKey());
+                if (StringUtil.isNull(reply.getMd5()) && !reply.getMd5().equalsIgnoreCase(md5V)) {
+                    if (rpcConfig.isDebug()) {
+                        log.debug("netty rpc join key 验证错误不允许加入:{}", routeSession.getSocketAddress());
+                    }
+                } else if (StringUtil.isJsonObject(str)) {
                     JSONObject jsonTmp = new JSONObject(str);
                     //只有同一个功能组的才加入进来
                     JSONArray jsonArray = jsonTmp.getJSONArray(RouteChannelManage.KEY_ROUTE);
                     List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                    ROUTE_CHANNEL_MANAGE.join(list);
+                    ROUTE_CHANNEL_MANAGE.joinCheckRoute(list);
                 }
             }
         }
@@ -101,8 +113,7 @@ public class RouteService implements Runnable {
                 continue;
             }
             List<InetSocketAddress> defaultSocketAddressList = rpcConfig.getMasterGroupList(name);
-            if (ObjectUtil.isEmpty(defaultSocketAddressList))
-            {
+            if (ObjectUtil.isEmpty(defaultSocketAddressList)) {
                 continue;
             }
             for (InetSocketAddress socketAddress : defaultSocketAddressList) {
@@ -112,8 +123,7 @@ public class RouteService implements Runnable {
                 routeSession.setCreateTimeMillis(System.currentTimeMillis());
                 routeSession.setLastRequestTime(System.currentTimeMillis());
                 //本地启动端口ip不判断
-                if (!RouteChannelManage.getStartList().contains(socketAddress))
-                {
+                if (!RouteChannelManage.getStartList().contains(socketAddress)) {
                     routeSessionList.add(routeSession);
                 }
             }
@@ -132,37 +142,81 @@ public class RouteService implements Runnable {
             SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
             cmd.setType(INetCommand.TYPE_JSON);
             cmd.setData(json.toString());
+            cmd.setMd5(EncryptUtil.getMd5(json.toString() + rpcConfig.getJoinKey()));
             try {
                 SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
                 if (reply == null || reply.getAction().equalsIgnoreCase(INetCommand.EXCEPTION)) {
                     ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
                     continue;
                 }
-
                 if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
                     String str = reply.getData();
-                    if (StringUtil.isJsonObject(str)) {
+                    String md5V = EncryptUtil.getMd5(str + rpcConfig.getJoinKey());
+                    if (StringUtil.isNull(reply.getMd5()) && !reply.getMd5().equalsIgnoreCase(md5V)) {
+                        if (rpcConfig.isDebug()) {
+                            log.debug("netty rpc join key 验证错误不允许加入:{}", routeSession.getSocketAddress());
+                        }
+                    } else if (StringUtil.isJsonObject(str)) {
                         JSONObject jsonTmp = new JSONObject(str);
                         //只有同一个功能组的才加入进来
                         JSONArray jsonArray = jsonTmp.getJSONArray(RouteChannelManage.KEY_ROUTE);
                         List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                        ROUTE_CHANNEL_MANAGE.join(list);
+                        ROUTE_CHANNEL_MANAGE.joinCheckRoute(list);
                     }
                 }
             } catch (Exception e) {
                 //..
-               if (rpcConfig.isDebug())
-               {
-                   log.debug("检测关联服务器没有上线:{}", routeSession.getSocketAddress());
-               }
+                if (rpcConfig.isDebug()) {
+                    log.debug("检测关联服务器没有上线:{}", routeSession.getSocketAddress());
+                }
             }
         }
     }
 
+    /**
+     * 检查网络传递的路由表,如果可用加入到路由表里边
+     */
+    private void checkRouteJoin() {
+        Map<InetSocketAddress, RouteSession> routeSessionMap = ROUTE_CHANNEL_MANAGE.getCheckRouteSocketMap();
+        if (ObjectUtil.isEmpty(routeSessionMap)) {
+            return;
+        }
+        List<RouteSession> checkRouteSessionList = ROUTE_CHANNEL_MANAGE.getNotCheckRouteSessionList(new ArrayList<>(routeSessionMap.values()));
+
+        RpcConfig rpcConfig = RpcConfig.getInstance();
+        if (rpcConfig.isDebug()) {
+            log.debug("测试进入的路由表:{}", ObjectUtil.toString(routeSessionMap));
+        }
+        //可以使用的路由表
+        List<RouteSession> canUseList = new ArrayList<>();
+        //交换路由表
+        for (RouteSession routeSession : checkRouteSessionList) {
+            try {
+                SendCmd cmd = SendCommandFactory.createCommand(INetCommand.PING);
+                cmd.setType(INetCommand.TYPE_JSON);
+                SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
+                if (reply != null && INetCommand.PONG.equalsIgnoreCase(reply.getAction())) {
+
+                    canUseList.add(routeSession);
+                }
+                //把路由表自己保管起来
+            } catch (Exception e) {
+                if (rpcConfig.isDebug()) {
+                    log.debug("netty rpc 新进入路由验证没有连接:{}", routeSession.getSocketAddress());
+                }
+            }
+        }
+
+        if (rpcConfig.isDebug()) {
+            log.debug("测试后可以添加用的路由表:{}", ObjectUtil.toString(canUseList));
+        }
+        ROUTE_CHANNEL_MANAGE.joinRoute(canUseList);
+        routeSessionMap.clear();
+    }
+
+
     @Override
     public void run() {
-
-
         RpcConfig rpcConfig = RpcConfig.getInstance();
         long lastRelevancyTimeMillis = System.currentTimeMillis();
         init();
@@ -170,21 +224,22 @@ public class RouteService implements Runnable {
             try {
                 checkSocketAddressRoute();
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
-                linkRoute();
+                refreshLinkRoute();
                 MasterSocketAddress.getInstance().flushAddress();
-                if (System.currentTimeMillis() - lastRelevancyTimeMillis > rpcConfig.getRoutesSecond() * DateUtil.SECOND*4&&rpcConfig.isDebug())
-                {
+                if (System.currentTimeMillis() - lastRelevancyTimeMillis > rpcConfig.getRoutesSecond() * DateUtil.SECOND * 4 && rpcConfig.isDebug()) {
                     log.debug("当前路由表:\r\n{}", RouteChannelManage.getInstance().getSendRouteTable());
                 }
                 Thread.sleep(rpcConfig.getRoutesSecond() * DateUtil.SECOND);
-                if (System.currentTimeMillis() - lastRelevancyTimeMillis > rpcConfig.getRoutesSecond() * DateUtil.SECOND*12) {
-                    lastRelevancyTimeMillis = System.currentTimeMillis();
+                //if (System.currentTimeMillis() - lastRelevancyTimeMillis > rpcConfig.getRoutesSecond() * DateUtil.SECOND*12)
+                {
+                    //    lastRelevancyTimeMillis = System.currentTimeMillis();
                     relevancy();
                 }
+                checkRouteJoin();
+
             } catch (Exception e) {
                 //...
-                if (rpcConfig.isDebug())
-                {
+                if (rpcConfig.isDebug()) {
                     log.debug(e.getMessage());
                 }
             }
@@ -194,18 +249,26 @@ public class RouteService implements Runnable {
 
     }
 
-    private void linkRoute() {
+    /**
+     * 验证本地有效的路由表里边是否有失效的,并且得到其他服务器的路由表
+     */
+    private void refreshLinkRoute() {
         List<RouteSession> routeSessionList = ROUTE_CHANNEL_MANAGE.getRouteSessionList();
         if (ObjectUtil.isEmpty(routeSessionList)) {
             return;
         }
-       // int startIpCount = RouteChannelManage.getStartList().size();
+
+        routeSessionList = ROUTE_CHANNEL_MANAGE.getNotRouteSessionList(routeSessionList);
+        RpcConfig rpcConfig = RpcConfig.getInstance();
         //交换路由表
         for (RouteSession routeSession : routeSessionList) {
             try {
-                SendCmd getRoute = SendCommandFactory.createCommand(INetCommand.GET_ROUTE);
-                getRoute.setType(INetCommand.TYPE_JSON);
-                SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), getRoute);
+                SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
+                cmd.setType(INetCommand.TYPE_JSON);
+                JSONObject json = new JSONObject();
+                json.put(RouteChannelManage.KEY_ROUTE, routeSessionList);
+                cmd.setMd5(EncryptUtil.getMd5(json.toString() + rpcConfig.getJoinKey()));
+                SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
                 if (reply == null || reply.getAction().equalsIgnoreCase(INetCommand.EXCEPTION)) {
                     ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
                     continue;
@@ -215,23 +278,26 @@ public class RouteService implements Runnable {
                 }
                 if (INetCommand.TYPE_JSON.equals(reply.getType())) {
                     String str = reply.getData();
+
+                    String md5V = EncryptUtil.getMd5(str + rpcConfig.getJoinKey());
+                    if (StringUtil.isNull(reply.getMd5()) && !reply.getMd5().equalsIgnoreCase(md5V)) {
+                        if (rpcConfig.isDebug()) {
+                            log.debug("netty rpc join key 验证错误不允许加入:{}", routeSession.getSocketAddress());
+                        }
+                    } else
                     if (StringUtil.isJsonObject(str)) {
-                        JSONObject json = new JSONObject(str);
+                        json = new JSONObject(str);
                         //只有同一个功能组的才加入进来
                         JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                         List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                        ROUTE_CHANNEL_MANAGE.join(list);
+                        ROUTE_CHANNEL_MANAGE.joinCheckRoute(list);
                     }
                 }
-
-
                 //把路由表自己保管起来
             } catch (Exception e) {
                 ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
-                RpcConfig rpcConfig = RpcConfig.getInstance();
-                if (rpcConfig.isDebug())
-                {
-                    log.debug("RPC路由网络中存在异常服务器:{}", ObjectUtil.toString(routeSession));
+                if (rpcConfig.isDebug()) {
+                    log.debug("netty rpc 路由网络中存在异常服务器:{}", ObjectUtil.toString(routeSession));
                 }
 
             }
@@ -239,44 +305,53 @@ public class RouteService implements Runnable {
     }
 
     /**
-     * 验证注册的地址是否正确
+     * 验证当前路由表里边是否有失效的ip服务器
      */
     private void checkSocketAddressRoute() {
         List<RouteSession> checkRouteSocketList = ROUTE_CHANNEL_MANAGE.getRouteSessionList();
         if (checkRouteSocketList.isEmpty()) {
             return;
         }
-        SendCmd cmd = new SendCmd();
-        cmd.setAction(INetCommand.GET_ROUTE);
+        checkRouteSocketList = ROUTE_CHANNEL_MANAGE.getNotCheckRouteSessionList(checkRouteSocketList);
+        RpcConfig rpcConfig = RpcConfig.getInstance();
+        SendCmd cmd = SendCommandFactory.createCommand(INetCommand.REGISTER);
         cmd.setType(INetCommand.TYPE_JSON);
+        JSONObject json = new JSONObject();
+        json.put(RouteChannelManage.KEY_ROUTE, ROUTE_CHANNEL_MANAGE.getRouteSessionList());
+        cmd.setMd5(EncryptUtil.getMd5(json.toString() + rpcConfig.getJoinKey()));
         for (RouteSession routeSession : checkRouteSocketList) {
             try {
                 SendCmd reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
                 if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
                     String str = reply.getData();
+                    String md5V = EncryptUtil.getMd5(str + rpcConfig.getJoinKey());
+                    if (StringUtil.isNull(reply.getMd5()) && !reply.getMd5().equalsIgnoreCase(md5V)) {
+                        if (rpcConfig.isDebug()) {
+                            log.debug("netty rpc join key 验证错误不允许加入:{}", routeSession.getSocketAddress());
+                        }
+                    } else
                     if (StringUtil.isJsonObject(str)) {
-                        JSONObject json = new JSONObject(str);
+                        json = new JSONObject(str);
                         //只有同一个功能组的才加入进来
                         JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                         List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
                         //把路由表自己保管起来
-                        ROUTE_CHANNEL_MANAGE.join(list);
+                        ROUTE_CHANNEL_MANAGE.joinCheckRoute(list);
                     }
+                } else {
+                    ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
                 }
             } catch (Exception e) {
                 ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
-                RpcConfig rpcConfig = RpcConfig.getInstance();
-                if (rpcConfig.isDebug())
-                {
-                    log.debug("RPC路由网络中存在异常服务器:{}", ObjectUtil.toString(routeSession));
+                if (rpcConfig.isDebug()) {
+                    log.debug("netty rpc路由网络中存在无效服务器:{}", routeSession.getSocketAddress());
                 }
             }
         }
         checkRouteSocketList.clear();
     }
 
-    public void shutdown()
-    {
+    public void shutdown() {
         isRun = false;
         NettyClientPool.getInstance().close();
     }

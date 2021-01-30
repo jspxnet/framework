@@ -16,11 +16,8 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.internal.logging.InternalLogLevel;
 import lombok.extern.slf4j.Slf4j;
-
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 

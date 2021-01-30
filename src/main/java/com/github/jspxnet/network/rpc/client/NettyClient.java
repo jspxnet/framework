@@ -68,15 +68,7 @@ public class NettyClient {
             public void operationComplete(ChannelFuture futureListener) {
                 if (futureListener.isSuccess()) {
                     channel = futureListener.channel();
-                } /*else {
-                    log.info("Failed to connect to server, try connect after 3s:3秒后重连");
-                    futureListener.channel().eventLoop().schedule(new Runnable() {
-                        @Override
-                        public void run() {
-                            channelFuture = bootstrap.connect(address);
-                        }
-                    }, 3, TimeUnit.SECONDS);
-                }*/
+                }
             }
         });
         return channelFuture.channel();

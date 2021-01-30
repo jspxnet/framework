@@ -16,8 +16,6 @@ public class ReplyCmdFactory {
     {
         //让客户端退出
         CMD_ACTION_MAP.put(ExitCmd.NAME,ExitCmd.class.getName());
-        //得到路由信息, 同时返回本服务器知道的路由信息,客户端收到后不回复
-        CMD_ACTION_MAP.put(RouteCmd.NAME,RouteCmd.class.getName());
         //ping
         CMD_ACTION_MAP.put(PingCmd.NAME,PingCmd.class.getName());
     }

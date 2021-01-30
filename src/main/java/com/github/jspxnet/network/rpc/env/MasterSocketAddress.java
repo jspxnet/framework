@@ -86,6 +86,18 @@ public class MasterSocketAddress {
     public List<String> getDefaultSocketAddressGroupNames() {
         return new ArrayList<>(GROUP_LIST_MAP.keySet());
     }
+
+
+    public boolean remoteGroupSocketAddress(String groupName,InetSocketAddress socketAddress ) {
+
+        List<InetSocketAddress> list = GROUP_LIST_MAP.get(groupName);
+        if (list!=null)
+        {
+            return list.remove(socketAddress);
+        }
+        return false;
+    }
+
     /**
      * 将路由表放入请求缓存中
      */
@@ -99,6 +111,10 @@ public class MasterSocketAddress {
         List<InetSocketAddress> saveList = new ArrayList<>();
         for (String groupName:GROUP_LIST_MAP.keySet())
         {
+            if (groupName==null)
+            {
+                continue;
+            }
             List<RouteSession> list = routeChannelManage.getRouteSessionList();
             for (RouteSession session:list)
             {
@@ -118,10 +134,8 @@ public class MasterSocketAddress {
                 defaultSocketAddressList.addAll(saveList);
             }
         }
-
-
-
     }
+
 
 
 }

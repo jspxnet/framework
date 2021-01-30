@@ -39,10 +39,9 @@ public class RpcInvokerFactory {
         CMD_ACTION_MAP.put(RouteCmd.NAME,RouteCmd.class.getName());
         //ping
         CMD_ACTION_MAP.put(PingCmd.NAME,PingCmd.class.getName());
-        //注册进来作为服务器
+        //注册进来作为服务器,包含了请求路由的功能,GetRoute 作废
         CMD_ACTION_MAP.put(RegisterCmd.NAME,RegisterCmd.class.getName());
-        //请求得到路由
-        CMD_ACTION_MAP.put(GetRouteCmd.NAME,GetRouteCmd.class.getName());
+
     }
 
 
@@ -69,10 +68,6 @@ public class RpcInvokerFactory {
             return;
         }
         ICmd cmd = (ICmd)ClassUtil.newInstance(actionCmdName);
-        if (!command.getAction().contains(INetCommand.ROUTE))
-        {
-            log.debug("<---{}接收到:{},cmd:{}",ctx.channel().localAddress(),ctx.channel().remoteAddress(),command.getAction());
-        }
         SendCmd reply =  cmd.execute(ctx,command);
         if (reply!=null)
         {

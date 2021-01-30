@@ -21,6 +21,10 @@ public class SendCmd implements Serializable {
     //传输的data数据类型,默认为json,特殊情况byte为base64编码
     private String type = "json";
 
+    private String md5 = "";
+
+
+
     private Map<String,Object> request;
 
     private String data;

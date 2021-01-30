@@ -47,6 +47,8 @@ public class RpcConfig {
     //服务器本机功能组名称
     final static private String GROUP_NAMES = "rpc.group.names";
 
+    final static private String JOIN_KEY = "rpc.joinKey";
+
     //超时,单位为秒
     final static private String TIMEOUT = "rpc.timeout";
 
@@ -102,6 +104,11 @@ public class RpcConfig {
     public String getLocalAddress() {
         return ENV_TEMPLATE.getString(LOCAL_ADDRESS);
     }
+
+    public String getJoinKey() {
+        return ENV_TEMPLATE.getString(JOIN_KEY);
+    }
+
 
     public List<InetSocketAddress> getLocalAddressList() {
         String localAddressStr = getLocalAddress();

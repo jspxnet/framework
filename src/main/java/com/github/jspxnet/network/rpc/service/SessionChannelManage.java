@@ -20,16 +20,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionChannelManage {
-    final private static SessionChannelManage instance = new SessionChannelManage();
+    final private static SessionChannelManage INSTANCE = new SessionChannelManage();
     //屏道id,用户session
-    final private static Map<ChannelId, ChannelSession> sessionMap = new ConcurrentHashMap<>();
+    final private static Map<ChannelId, ChannelSession> SESSION_MAP = new ConcurrentHashMap<>();
 
     //ChannelGroup 和 sessionMap 是不一样多的,这里作为RPC其实不需要,但为了扩展功能,保存
-    final private static ChannelGroup channelGroupList = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    final private static ChannelGroup CHANNEL_GROUP = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     public static SessionChannelManage getInstance()
     {
-        return instance;
+        return INSTANCE;
     }
 
     private SessionChannelManage()
@@ -39,27 +39,27 @@ public class SessionChannelManage {
 
     public boolean add(Channel channel)
     {
-        return channelGroupList.add(channel);
+        return CHANNEL_GROUP.add(channel);
     }
 
     public ChannelSession add(ChannelSession netSession)
     {
-        return sessionMap.put(netSession.getChannelId(),netSession);
+        return SESSION_MAP.put(netSession.getChannelId(),netSession);
     }
 
     public boolean remove(Channel channel)
     {
-        return channelGroupList.remove(channel);
+        return CHANNEL_GROUP.remove(channel);
     }
 
     public ChannelSession getSession(ChannelId channelId)
     {
-        return sessionMap.get(channelId);
+        return SESSION_MAP.get(channelId);
     }
 
     public ChannelSession removeSession(ChannelId channelId)
     {
-        return sessionMap.remove(channelId);
+        return SESSION_MAP.remove(channelId);
     }
 
 

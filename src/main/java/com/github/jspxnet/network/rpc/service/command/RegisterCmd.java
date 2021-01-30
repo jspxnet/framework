@@ -40,13 +40,12 @@ public class RegisterCmd extends INetCommand {
         {
             //注册上来的是一个地址列表,还没有路由表,将路由表给对方
             String str = command.getData();
-
             if (StringUtil.isJsonObject(str)) {
                 JSONObject json = new JSONObject(str);
                 //只有同一个功能组的才加入进来
                 JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                 List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                routeChannelManage.join(list);
+                routeChannelManage.joinCheckRoute(list);
             }
 
         }

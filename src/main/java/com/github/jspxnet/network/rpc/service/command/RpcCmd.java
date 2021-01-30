@@ -1,7 +1,6 @@
 package com.github.jspxnet.network.rpc.service.command;
 
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;

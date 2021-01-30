@@ -42,7 +42,7 @@ public abstract class INetCommand implements ICmd {
     static public final String REGISTER = "register";
 
     //请求得到路由表
-    static public final String GET_ROUTE = "get_route";
+    //static public final String GET_ROUTE = "get_route";
 
     static public final String PING = "ping";
     static public final String PONG = "pong";
