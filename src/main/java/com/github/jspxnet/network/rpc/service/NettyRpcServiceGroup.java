@@ -32,13 +32,13 @@ public class NettyRpcServiceGroup {
     public static NettyRpcServiceGroup getInstance(){
         return INSTANCE;
     }
-    private static final  Map<SocketAddress,NettyRpcServer> SERVER_LIST = new HashMap<>();
+    private static final  Map<InetSocketAddress,NettyRpcServer> SERVER_LIST = new HashMap<>();
     private static final RouteService routeService = new RouteService();
     /**
      * 指定启动一个服务器
      * @param socketAddress 服务器地址
      */
-    private NettyRpcServer createService(SocketAddress socketAddress)  {
+    private NettyRpcServer createService(InetSocketAddress socketAddress)  {
         NettyRpcServer nettyRpcServer = SERVER_LIST.get(socketAddress);
         if (nettyRpcServer==null)
         {

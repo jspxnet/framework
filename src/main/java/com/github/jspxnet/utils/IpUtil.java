@@ -451,7 +451,7 @@ public class IpUtil {
         String ip = StringUtil.substringBefore(str, ":");
         String portStr = StringUtil.substringAfter(str, ":");
         int begin = ObjectUtil.toInt(StringUtil.substringBefore(portStr, "-"));
-        int end = ObjectUtil.toInt(StringUtil.substringBefore(portStr, "-"));
+        int end = ObjectUtil.toInt(StringUtil.substringAfter(portStr, "-"));
         if (begin > end || begin == 0 || end == 0) {
             return new ArrayList<>();
         }

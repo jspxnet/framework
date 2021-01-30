@@ -1,7 +1,6 @@
 package com.github.jspxnet.network.rpc.service.route;
 
 
-import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClientPool;
@@ -37,7 +36,7 @@ public class RouteService implements Runnable {
     //private static final NettyClient NETTY_CLIENT = new NettyClient();
 
     private static final NettyClientPool NETTY_CLIENT = NettyClientPool.getInstance();
-    private static long lastInitTimeMillis = System.currentTimeMillis();
+
     private static boolean isRun = true;
     private void init()
     {
@@ -73,7 +72,6 @@ public class RouteService implements Runnable {
                 reply = NETTY_CLIENT.send(routeSession.getSocketAddress(), cmd);
             } catch (Exception e) {
                 log.info("netty rpc 调用服务器没有启动:{}",routeSession.getSocketAddress());
-               // e.printStackTrace();
             }
             if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
                 String str = reply.getData();
@@ -94,7 +92,6 @@ public class RouteService implements Runnable {
      */
     private void relevancy() {
         //初始化数据 begin
-
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
         RpcConfig rpcConfig = RpcConfig.getInstance();
         List<String> nameList = masterSocketAddress.getDefaultSocketAddressGroupNames();
@@ -158,7 +155,6 @@ public class RouteService implements Runnable {
                {
                    log.debug("检测关联服务器没有上线:{}", routeSession.getSocketAddress());
                }
-
             }
         }
     }
@@ -228,11 +224,7 @@ public class RouteService implements Runnable {
                     }
                 }
 
-                //如果路由表里边只有自己,配置里边还有其他的,要让其他的注册过来
-               /* if (ROUTE_CHANNEL_MANAGE.getRouteSessionList().size()<startIpCount && System.currentTimeMillis() - lastInitTimeMillis > DateUtil.MINUTE) {
-                    init();
-                    lastInitTimeMillis = System.currentTimeMillis();
-                }*/
+
                 //把路由表自己保管起来
             } catch (Exception e) {
                 ROUTE_CHANNEL_MANAGE.routeOff(routeSession.getSocketAddress());
