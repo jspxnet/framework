@@ -230,13 +230,12 @@ public class RouteService implements Runnable {
                     log.debug("当前路由表:\r\n{}", RouteChannelManage.getInstance().getSendRouteTable());
                 }
                 Thread.sleep(rpcConfig.getRoutesSecond() * DateUtil.SECOND);
-                //if (System.currentTimeMillis() - lastRelevancyTimeMillis > rpcConfig.getRoutesSecond() * DateUtil.SECOND*12)
+                if (System.currentTimeMillis() - lastRelevancyTimeMillis > rpcConfig.getRoutesSecond() * DateUtil.SECOND*10)
                 {
-                    //    lastRelevancyTimeMillis = System.currentTimeMillis();
+                    lastRelevancyTimeMillis = System.currentTimeMillis();
                     relevancy();
                 }
                 checkRouteJoin();
-
             } catch (Exception e) {
                 //...
                 if (rpcConfig.isDebug()) {
