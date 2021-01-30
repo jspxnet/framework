@@ -38,6 +38,9 @@ public class RpcConfig {
 
     final static private String LOCAL_GROUP_NAME = "rpc.localGroupName";
 
+    //分组个数,是用在多个tomcat是用统一个配置的时候,每个容器启动几个服务
+    final static private String LOCAL_GROUP_COUNT = "rpc.localGroupCount";
+
     //服务器本机地址
     final static private String MASTER_GROUP = "rpc.master.group";
 
@@ -81,6 +84,10 @@ public class RpcConfig {
 
     public int getWorkThread() {
         return ENV_TEMPLATE.getInt(WORK_THREAD, 1);
+    }
+
+    public int getGroupCount() {
+        return ENV_TEMPLATE.getInt(LOCAL_GROUP_COUNT, 1);
     }
 
     public int getTimeout() {

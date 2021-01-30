@@ -23,7 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RouteChannelManage {
     final public static String KEY_ROUTE = "route";
     final private static RouteChannelManage INSTANCE = new RouteChannelManage();
-
+    //本服务启动的ip地址,配置的不一定都启动,应为要分组,这里的ip不会被路由表不删除
+    private static final List<InetSocketAddress> START_LIST = new ArrayList<>();
     private RouteChannelManage()
     {
         initConfigRoute();
@@ -66,6 +67,10 @@ public class RouteChannelManage {
      */
     private final ConcurrentHashMap<InetSocketAddress, RouteSession> routeSocketMap = new ConcurrentHashMap<>();
 
+
+    public static List<InetSocketAddress> getStartList() {
+        return START_LIST;
+    }
 
     /**
      *
@@ -167,8 +172,7 @@ public class RouteChannelManage {
      */
     public void routeOff(InetSocketAddress address)
     {
-        List<InetSocketAddress>  localList = RpcConfig.getInstance().getLocalAddressList();
-        if (localList.contains(address))
+        if (RouteChannelManage.getStartList().contains(address))
         {
             return;
         }
@@ -188,7 +192,7 @@ public class RouteChannelManage {
      */
     public void cleanOffRoute()
     {
-        List<InetSocketAddress>  localList = RpcConfig.getInstance().getLocalAddressList();
+        List<InetSocketAddress>  localList = RouteChannelManage.getStartList();
         Enumeration<InetSocketAddress> keys = routeSocketMap.keys();
         while (keys.hasMoreElements())
         {
