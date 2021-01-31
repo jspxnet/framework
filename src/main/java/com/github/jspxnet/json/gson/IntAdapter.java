@@ -23,7 +23,7 @@ public class IntAdapter implements JsonSerializer<Integer>, JsonDeserializer<Int
     @Override
     public JsonElement serialize(Integer src, Type typeOfSrc,
                                  JsonSerializationContext context) {
-        String value = "";
+        String value = null;
         if(src != null){
             value = NumberUtil.getNumberStdFormat(src.toString());
         }

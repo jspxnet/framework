@@ -23,7 +23,7 @@ public class SocketAddressAdapter implements JsonSerializer<SocketAddress>, Json
 
     @Override
     public JsonElement serialize(SocketAddress socketAddress, Type type, JsonSerializationContext jsonSerializationContext) {
-        String value = "";
+        String value = null;
         if(socketAddress != null){
             value = IpUtil.getIp(socketAddress);
         }

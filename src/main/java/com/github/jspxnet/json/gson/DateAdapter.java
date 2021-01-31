@@ -27,7 +27,7 @@ public class DateAdapter implements JsonSerializer<Date>, JsonDeserializer<Date>
     @Override
     public JsonElement serialize(Date src, Type typeOfSrc,
                                  JsonSerializationContext context) {
-        String value = "";
+        String value = null;
         if(src != null){
             value = DateUtil.toString(src, JSONObject.FULL_ST_FORMAT);
         }

@@ -24,7 +24,7 @@ public class BigDecimalAdapter implements JsonSerializer<BigDecimal>, JsonDeseri
     @Override
     public JsonElement serialize(BigDecimal src, Type typeOfSrc,
                                  JsonSerializationContext context) {
-        String value = "";
+        String value = null;
         if(src != null){
             value = NumberUtil.getNumberStdFormat(src.toString());
         }

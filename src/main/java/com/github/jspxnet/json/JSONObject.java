@@ -29,13 +29,6 @@ public class JSONObject extends HashMap<String, Object> {
     static public String BIN_DATA_START = "data:stream/byte;base64,";
 
 
-    @Override
-    public final JSONObject clone() {
-        JSONObject cloneJson = new JSONObject();
-        cloneJson.putAll(this);
-        return cloneJson;
-    }
-
     /**
      * JSONObject.NULL is equivalent transfer the value that JavaScript calls null,
      * whilst Java's null is equivalent transfer the value that JavaScript calls
@@ -1420,8 +1413,6 @@ public class JSONObject extends HashMap<String, Object> {
 
 
     public static <T> T parseObject(JSONObject json, Class<T> clazz) {
-
-
         String className = null;
         //检查内部是否保存了对象名称
         if (clazz == null || ClassUtil.isStandardProperty(clazz) || Object.class.equals(clazz) || Class.class.equals(clazz)) {
@@ -1453,8 +1444,7 @@ public class JSONObject extends HashMap<String, Object> {
             Map<String, Object> valueMap = json.toMap();
             return (T) ReflectUtil.createDynamicBean(valueMap);
         }
-
-        Class cls = null;
+        Class<?> cls = null;
         try {
             cls = ClassUtil.loadClass(className);
         } catch (Exception e) {

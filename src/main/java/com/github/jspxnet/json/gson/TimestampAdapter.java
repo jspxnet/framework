@@ -38,7 +38,7 @@ public class TimestampAdapter implements JsonSerializer<Timestamp>, JsonDeserial
     @Override
     public JsonElement serialize(Timestamp src, Type typeOfSrc,
                                  JsonSerializationContext context) {
-        String value = "";
+        String value = null;
         if(src != null){
             value =  String.valueOf(src.getTime());
         }

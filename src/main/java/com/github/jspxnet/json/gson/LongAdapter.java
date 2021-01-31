@@ -24,7 +24,7 @@ public class LongAdapter implements JsonSerializer<Long>, JsonDeserializer<Long>
     @Override
     public JsonElement serialize(Long src, Type typeOfSrc,
                                  JsonSerializationContext context) {
-        String value = "";
+        String value = null;
         if(src != null){
             value = NumberUtil.getNumberStdFormat(src.toString());
         }
