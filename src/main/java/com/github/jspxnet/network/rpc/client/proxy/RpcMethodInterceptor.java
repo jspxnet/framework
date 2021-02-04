@@ -10,7 +10,6 @@ import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
 import com.github.jspxnet.network.rpc.model.transfer.IocRequest;
-import com.github.jspxnet.network.rpc.model.transfer.IocResponse;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.security.utils.EncryptUtil;
@@ -24,7 +23,6 @@ import net.sf.cglib.proxy.MethodProxy;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 /**
  * Created by jspx.net
@@ -115,22 +113,20 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         AssertException.isNull(address,"TCP调用没有配置服务器地址");
 
         SendCmd reply = NettyClientPool.getInstance().send(address, command);
-        if (reply == null) {
-            if (masterSocketAddress.remoteGroupSocketAddress(serviceName,address))
-            {
-                RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
-                RouteSession routeSession = new RouteSession();
-                routeSession.setHeartbeatTimes(0);
-                routeSession.setOnline(YesNoEnumType.YES.getValue());
-                routeSession.setLastRequestTime(System.currentTimeMillis());
-                routeSession.setCreateTimeMillis(System.currentTimeMillis());
-                routeSession.setGroupName(serviceName);
-                routeSession.setSocketAddress(address);
-                routeChannelManage.joinCheckRoute(routeSession);
-            }
-            return null;
+        if (masterSocketAddress.remoteGroupSocketAddress(serviceName,address))
+        {
+            RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
+            RouteSession routeSession = new RouteSession();
+            routeSession.setHeartbeatTimes(0);
+            routeSession.setOnline(YesNoEnumType.YES.getValue());
+            routeSession.setLastRequestTime(System.currentTimeMillis());
+            routeSession.setCreateTimeMillis(System.currentTimeMillis());
+            routeSession.setGroupName(serviceName);
+            routeSession.setSocketAddress(address);
+            routeChannelManage.joinCheckRoute(routeSession);
         }
-
+        return null;
+/*
         if (INetCommand.RPC.equalsIgnoreCase(reply.getAction()) && INetCommand.TYPE_BASE64.equals(reply.getType())) {
             IocResponse iocResponse;
             try {
@@ -148,7 +144,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
                 throw iocResponse.getError();
             }
             return iocResponse.getResult();
-        }
-        return null;
+        }*/
+       // return null;
     }
 }

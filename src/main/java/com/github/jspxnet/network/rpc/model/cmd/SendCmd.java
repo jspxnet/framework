@@ -23,8 +23,6 @@ public class SendCmd implements Serializable {
 
     private String md5 = "";
 
-
-
     private Map<String,Object> request;
 
     private String data;

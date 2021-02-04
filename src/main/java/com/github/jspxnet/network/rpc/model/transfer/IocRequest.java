@@ -21,14 +21,9 @@ public class IocRequest implements Serializable {
 
     //调用的具体方法 begin
     private String methodName;
-    //private Class<?>[] parameterTypes;
     //放入json 格式参数
     private String parameters;
     //调用的具体方法 end
-
-    //set方式参数 很难用代理实现, 用 request 来代替set方法
-    //private Map<String,Object> params;
-
     //http方式调用,是用,就是action方式
     private RequestTo request;
     private ResponseTo response;

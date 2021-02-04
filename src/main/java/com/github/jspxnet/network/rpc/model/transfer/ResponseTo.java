@@ -23,7 +23,7 @@ import java.util.Map;
 public class ResponseTo extends HashMap<String,Object>  implements HttpServletResponse, Serializable {
 
 
-    private StringWriter writer = new StringWriter();
+    final private StringWriter writer = new StringWriter();
 
     public ResponseTo(Map<String,Object> map)
     {
