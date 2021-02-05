@@ -271,7 +271,7 @@ public class PacketUtil {
         }
 
         //解缩
-        if (ZIP.equals(zip)) {
+        if (ZIP.equals(zip)&&byteData!=null) {
             byteData = ZipUtil.unZip(byteData);
         }
 

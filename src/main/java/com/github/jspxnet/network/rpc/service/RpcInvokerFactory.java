@@ -48,7 +48,7 @@ public class RpcInvokerFactory {
     public static void invokeService(ChannelHandlerContext ctx,String str) throws Exception {
 
         String jsonStr = INetCommand.getDecodePacket(str);
-        if (null==jsonStr)
+        if (!StringUtil.isJsonObject(jsonStr))
         {
             return;
         }

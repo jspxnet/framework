@@ -36,7 +36,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
     private RequestTo request;
     private ResponseTo response;
     private String serviceName;
-
+    private InetSocketAddress address;
     //ioc 名称,类名
     private String url;
 
@@ -71,6 +71,10 @@ public class RpcMethodInterceptor implements MethodInterceptor {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public void setAddress(InetSocketAddress address) {
+        this.address = address;
     }
 
     @Override
@@ -108,8 +112,11 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             serviceName = "default";
         }
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
-
         InetSocketAddress address = masterSocketAddress.getSocketAddress(serviceName);
+        if (address==null&&this.address!=null)
+        {
+            address = this.address;
+        }
         AssertException.isNull(address,"TCP调用没有配置服务器地址");
 
         SendCmd reply = NettyClientPool.getInstance().send(address, command);
@@ -126,25 +133,6 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             routeChannelManage.joinCheckRoute(routeSession);
         }
         return null;
-/*
-        if (INetCommand.RPC.equalsIgnoreCase(reply.getAction()) && INetCommand.TYPE_BASE64.equals(reply.getType())) {
-            IocResponse iocResponse;
-            try {
-                iocResponse = ObjectUtil.getUnSerializable(EncryptUtil.getBase64Decode(reply.getData()));
-            } catch (Throwable e) {
-                log.debug("iocRequest={},error:{}",ObjectUtil.toString(iocRequest),e.getMessage());
-                e.printStackTrace();
-                iocResponse = new IocResponse();
-                iocResponse.setError(e);
-            }
-            if (iocResponse == null) {
-                return null;
-            }
-            if (iocResponse.getError() != null) {
-                throw iocResponse.getError();
-            }
-            return iocResponse.getResult();
-        }*/
-       // return null;
+
     }
 }

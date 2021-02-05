@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 
+import java.net.InetSocketAddress;
+
 /**
  * Created by jspx.net
  *
@@ -29,6 +31,23 @@ public class NettyRpcProxy {
     {
         return create(target,url,requestTo,responseTo,null);
     }
+
+    /**
+     *
+     * @param target 类对象
+     * @param url 路径
+     * @param address 服务器分组服务, 默认就是网关路径
+     * @param <T> 类型
+     * @return 代理对象
+     */
+    static  public <T>T create(Class<T>  target,String url,  InetSocketAddress address)
+    {
+        RpcMethodInterceptor clientInvocationHandler = new RpcMethodInterceptor();
+        clientInvocationHandler.setUrl(url);
+        clientInvocationHandler.setAddress(address);
+        //目前还没有继承接口,后边看是否需要
+        return createProxyInstance(target,clientInvocationHandler);
+    }
     /**
      *
      * @param target 类对象
@@ -46,6 +65,7 @@ public class NettyRpcProxy {
         clientInvocationHandler.setRequest(requestTo);
         clientInvocationHandler.setResponse(responseTo);
         clientInvocationHandler.setServiceName(serviceName);
+        clientInvocationHandler.setAddress(null);
         //目前还没有继承接口,后边看是否需要
         return createProxyInstance(target,clientInvocationHandler);
     }

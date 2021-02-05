@@ -54,4 +54,17 @@ public class SignParam implements Serializable {
         JSONObject json = new JSONObject(desData);
         return json.parseObject(tClass);
     }
+
+    @Override
+    public String toString()
+    {
+        JSONObject json = new JSONObject();
+        json.put("data",data);
+        json.put("className",className);
+        json.put("sign",sign);
+        json.put("signType",signType);
+        return json.toString();
+    }
+
+
 }
