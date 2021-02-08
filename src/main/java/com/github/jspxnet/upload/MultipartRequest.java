@@ -64,10 +64,9 @@ import com.github.jspxnet.utils.StringUtil;
 
 @SuppressWarnings({"deprecation"})
 public class MultipartRequest implements HttpServletRequest {
-    private static final int DEFAULT_MAX_POST_SIZE = 1024 * 1024 * 2;  // 2 M  eg
-    //static final public String UPLOAD_STATS = "JSPX_NET_FileUploadStats";
-    private Hashtable<String, List<String>> parameters = new Hashtable<String, List<String>>();  // name - Vector of values
-    private List<UploadedFile> fileList = new ArrayList<UploadedFile>();       // name - UploadedFile
+    private static final int DEFAULT_MAX_POST_SIZE = 1024 * 1024 * 5;  // 2 M  eg
+    private Hashtable<String, String[]> parameters = new Hashtable<>();  // name - Vector of values
+    private List<UploadedFile> fileList = new ArrayList<>();       // name - UploadedFile
 
 
     public HttpServletRequest getRequest() {
@@ -241,7 +240,7 @@ public class MultipartRequest implements HttpServletRequest {
         // Parse the incoming multipart, storing files in the dir provided,
         // and populate the meta objects which describe what we found
 
-        MultipartParser parser = new MultipartParser(request, maxPostSize, true, true, encoding);
+        MultipartParser parser = new MultipartParser(request, maxPostSize, true, maxPostSize > 0, encoding);
 
         // Some people like transfer fetch query string parameters from
         // MultipartRequest, so here we make that possible.  Thanks transfer
@@ -254,7 +253,7 @@ public class MultipartRequest implements HttpServletRequest {
                 String[] values = queryParameters.get(paramName);
                 Vector<String> newValues = new Vector<>();
                 newValues.addAll(Arrays.asList(values));
-                parameters.put(paramName, newValues);
+                parameters.put(paramName, newValues.toArray(new String[0]));
             }
         }
 
@@ -265,9 +264,9 @@ public class MultipartRequest implements HttpServletRequest {
                 // It's a parameter troop, add it transfer the vector of values
                 ParamPart paramPart = (ParamPart) part;
                 String value = paramPart.getStringValue();
-                List<String> existingValues = parameters.computeIfAbsent(name, k -> new Vector<>());
-                existingValues.add(value);
-
+                String[] existingValues = parameters.computeIfAbsent(name, k -> new String[0]);
+                existingValues = ArrayUtil.add(existingValues,value);
+                parameters.put(name,existingValues);
             } else if (part.isFile()) {
                 FilePart filePart = (FilePart) part;
                 String fileName = filePart.getFileName();
@@ -419,8 +418,7 @@ public class MultipartRequest implements HttpServletRequest {
     }
 
     @Override
-    @SuppressWarnings({"unchecked"})
-    public Map getParameterMap() {
+    public Map<String, String[]> getParameterMap() {
         return parameters;
     }
 
@@ -450,11 +448,11 @@ public class MultipartRequest implements HttpServletRequest {
     @Override
     public String getParameter(String name) {
         try {
-            List<String> values = parameters.get(name);
-            if (values == null || values.size() == 0) {
+            String[] values = parameters.get(name);
+            if (values == null || values.length == 0) {
                 return null;
             }
-            return values.get(values.size() - 1);
+            return values[values.length-1];
         } catch (Exception e) {
             return null;
         }
@@ -473,11 +471,11 @@ public class MultipartRequest implements HttpServletRequest {
     @Override
     public String[] getParameterValues(String name) {
         try {
-            List<String> values = parameters.get(name);
-            if (values == null || values.size() == 0) {
+            String[] values = parameters.get(name);
+            if (values == null || values.length == 0) {
                 return null;
             }
-            return values.toArray(new String[values.size()]);
+            return values;
         } catch (Exception e) {
             return null;
         }

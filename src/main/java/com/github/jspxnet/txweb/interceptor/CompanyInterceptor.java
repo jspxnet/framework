@@ -7,6 +7,7 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Method;
 
@@ -69,12 +70,13 @@ public class CompanyInterceptor extends InterceptorSupport {
     private String getOrganizeId(ActionSupport action) {
         HttpSession httpSession = action.getSession();
         String organizeId = null;
+        HttpServletRequest request = action.getRequest();
         switch (mode) {
             default: {
                 if (httpSession != null && httpSession.getAttribute(TXWeb.organizeId) != null) {
                     organizeId = ObjectUtil.toString(httpSession.getAttribute(TXWeb.organizeId));
                 }
-                if (StringUtil.isEmpty(organizeId)) {
+                if (request!=null&&StringUtil.isEmpty(organizeId)) {
                     String hostName = URLUtil.getHostName(action.getRequest().getRequestURL().toString());
                     if (!IpUtil.isIpv4(hostName) && !IpUtil.isIpv6(hostName)) {
                         String subdomain = URLUtil.getSubdomainPrefix(action.getRequest().getRequestURL().toString());
@@ -121,6 +123,7 @@ public class CompanyInterceptor extends InterceptorSupport {
      */
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {
+
         //配置为空，不拦截任何目录
         if (ArrayUtil.isEmpty(folders)) {
             return actionInvocation.invoke();

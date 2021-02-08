@@ -54,6 +54,11 @@
         </developer>
     </developers>
     <dependencies>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.4</version>
+        </dependency>
         <!-- 临时的activiti -->
         <dependency>
             <groupId>org.activiti</groupId>

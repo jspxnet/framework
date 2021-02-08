@@ -163,9 +163,9 @@ public class MultipartParser {
             type = (type1.length() > type2.length() ? type1 : type2);
         }
 
-        if (type == null || !type.toLowerCase().startsWith("multipart")) {
-            throw new IOException("Posted content type isn't multipart/form-data");
-        }
+ /*       if (type == null || !type.toLowerCase().startsWith("multipart")) {
+            throw new IOException("Posted content type isn't multipart/form-data type=" + type);
+        }*/
 
         int length = req.getContentLength();
         if (maxSize != 0 && length > maxSize) {
@@ -185,7 +185,7 @@ public class MultipartParser {
         if (buffer) {
             in = new BufferedServletInputStream(in);
         }
-        if (limitLength) {
+        if (limitLength && length > 0) {
             // Check the content length transfer prevent denial of components attacks
             in = new LimitedServletInputStream(in, length);
         }
@@ -328,6 +328,10 @@ public class MultipartParser {
     private String extractBoundary(String line) {
         // Use lastIndexOf() because IE 4.01 on Win98 has been known transfer send the
         // "boundary=" string multiple times.  Thanks transfer David Wall for this fix.
+        if (line==null)
+        {
+            return null;
+        }
         int index = line.lastIndexOf("boundary=");
         if (index == -1) {
             return null;
@@ -367,7 +371,7 @@ public class MultipartParser {
         if (start == -1 || end == -1) {
             throw new IOException("Content disposition corrupt: " + origline);
         }
-        String disposition = line.substring(start + 21, end);
+        String disposition = line.substring(start + 21, end).trim();
         if (!"form-data".equals(disposition)) {
             throw new IOException("Invalid content disposition: " + disposition);
         }

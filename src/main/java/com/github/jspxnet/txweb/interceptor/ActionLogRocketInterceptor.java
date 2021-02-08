@@ -76,6 +76,11 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
         String result = actionInvocation.invoke();
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         ActionSupport action = actionProxy.getAction();
+
+        if (RequestUtil.isMultipart(action.getRequest()))
+        {
+            return actionInvocation.invoke();
+        }
         //游客就不记录了
         if (guestLog && action.isGuest() || !actionInvocation.isExecuted()) {
             return result;

@@ -9,13 +9,11 @@
 package com.github.jspxnet.txweb.action;
 
 import com.github.jspxnet.boot.environment.Environment;
-
 import com.github.jspxnet.boot.res.LanguageRes;
-import com.github.jspxnet.boot.sign.HttpStatusType;
-import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.io.AbstractRead;
 import com.github.jspxnet.io.ReadPdfTextFile;
 import com.github.jspxnet.io.ReadWordTextFile;
+import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.lucene.ChineseAnalyzer;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.CloudServiceFactory;
@@ -42,15 +40,15 @@ import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -77,6 +75,7 @@ public class UploadFileAction extends MultipartSupport {
     final public static String GROUP_VAR_NAME = "groupName";
     final public static String THUMBNAIL_VAR_NAME = "thumbnail";
     final public static String MOBILE_VAR_NAME = "mobile";
+    final public static String USE_FAST_UPLOAD = "useFastUpload";
     final public static String CONTENT_TYPE_VAR_NAME = "contentType";
 
     // 状态
@@ -86,6 +85,16 @@ public class UploadFileAction extends MultipartSupport {
     protected boolean useCloudFile = false;
 
     private boolean useOriginalDate = false;
+
+    private boolean useFastUpload = false;
+
+    private boolean editorUpload = false;
+
+    //编辑器上传不打印,只返回,属于外部调用
+    @Param(caption = "是否为编辑器上传")
+    public void setEditorUpload(boolean editorUpload) {
+        this.editorUpload = editorUpload;
+    }
 
     private String organizeId = StringUtil.empty;
 
@@ -114,6 +123,15 @@ public class UploadFileAction extends MultipartSupport {
     @Param(request = false)
     public void setUseCloudFile(boolean useCloudFile) {
         this.useCloudFile = useCloudFile;
+    }
+
+    @Param(caption = "是否是用快传")
+    public void setUseFastUpload(boolean useFastUpload) {
+        this.useFastUpload = useFastUpload;
+    }
+
+    public boolean isUseFastUpload() {
+        return useFastUpload;
     }
 
     @Param(caption = "机构id")
@@ -266,34 +284,36 @@ public class UploadFileAction extends MultipartSupport {
         this.hash = hash;
     }
 
+    //language.getLang(LanguageRes.uploadRequestError)
     @Operate(caption = "hash验证")
     public void hasHash() {
         JSONObject json = new JSONObject();
         json.put("OK", 0);
         json.put("success", false);
-        if (isGuest()) {
-            json.put(Environment.message, language.getLang(LanguageRes.needLogin));
-            TXWebUtil.print(json.toString(), WebOutEnumType.JSON.getValue(), response);
+        setResult(json);
+        if (isGuest())
+        {
+            json.put(Environment.message, "没有登陆");
             return;
         }
 
         if (StringUtil.isNull(hash)) {
-            json.put(Environment.message, language.getLang(LanguageRes.invalidParameter));
-            TXWebUtil.print(json.toString(), WebOutEnumType.JSON.getValue(), response);
+            json.put(Environment.message,language.getLang(LanguageRes.invalidParameter));
             return;
         }
 
         Object alreadyUploadFile = uploadFileDAO.getForHash(hash);
         IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;
-        if (checkUploadFile != null && hash.equalsIgnoreCase(checkUploadFile.getHash()))
-        {
+        if (checkUploadFile != null && hash.equalsIgnoreCase(checkUploadFile.getHash())) {
             json.put(Environment.message, language.getLang(LanguageRes.alreadyExist));
             json.put("success", true);
             json.put("hash", hash);
             json.put("hashType", hashType);
             json.put("OK", 1);
         }
-        TXWebUtil.print(json.toString(), WebOutEnumType.JSON.getValue(), response);
+
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
+        TXWebUtil.print(json.toString(), contentType, response);
     }
 
     @Operate(caption = "秒传")
@@ -301,32 +321,32 @@ public class UploadFileAction extends MultipartSupport {
         JSONObject json = new JSONObject();
         json.put("OK", 0);
         json.put("success", false);
+        setResult(json);
         if (isGuest()) {
-            printNoLoginError();
+            json.put(Environment.message, "没有登陆");
             return;
         }
+
         if (StringUtil.isNull(hash)) {
             json.put(Environment.message, language.getLang(LanguageRes.invalidParameter));
-            TXWebUtil.print(json.toString(), WebOutEnumType.JSON.getValue(), response);
             return;
         }
-        IUserSession userSession = getUserSession();
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
 
+        IUserSession userSession = getUserSession();
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
         Object alreadyUploadFile = uploadFileDAO.getForHash(hash);
         IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;
-        if (checkUploadFile != null && !StringUtil.isNull(hash) && checkUploadFile.getHash().equals(hash)) {
+        if (useFastUpload&&checkUploadFile != null && !StringUtil.isNull(hash) && fileEquals(checkUploadFile.getHash(), hash)) {
             Object[] copyUploadFile = copyUploadToUser(alreadyUploadFile, userSession);
-            if (ObjectUtil.isEmpty(copyUploadFile))
-            {
-                TXWebUtil.print(json.toString(), contentType, response);
+            if (ObjectUtil.isEmpty(copyUploadFile)) {
+                json.put(Environment.message, "不支持秒传");
                 return;
             }
-            printUploadFileInfo(copyUploadFile,chunkJson, getBoolean(THUMBNAIL_VAR_NAME),getBoolean(MOBILE_VAR_NAME),contentType, uploadFileDAO.getNamespace(),
-                    language.getLang(LanguageRes.success),response);
-            return;
+            json = getUploadFileInfo(copyUploadFile, chunkJson, getBoolean(THUMBNAIL_VAR_NAME), getBoolean(MOBILE_VAR_NAME), uploadFileDAO.getNamespace(),
+                    language.getLang(LanguageRes.success), response);
         }
         TXWebUtil.print(json.toString(), contentType, response);
+
     }
 
     private String fileName = StringUtil.empty;
@@ -344,9 +364,10 @@ public class UploadFileAction extends MultipartSupport {
         json.put("uploadType", "chunk");
 
         if (isGuest()) {
-            printNoLoginError();
+            printErrorInfo("没有登陆");
             return;
         }
+
         IUserSession userSession = getUserSession();
         UploadedFile uf = new UploadedFile(fileName, getUploadDirectory(config), fileName, fileName, "application/octet-stream", FileUtil.getTypePart(fileName));
         int diskChunk = uf.getLastChunk(NumberUtil.toString(userSession.getUid()));
@@ -359,8 +380,10 @@ public class UploadFileAction extends MultipartSupport {
             json.put("uploadType", "file");
             json.put(Environment.message, "chunk upload " + language.getLang(LanguageRes.success));
         }
+
         //兼容 plupload  end
-        TXWebUtil.print(json.toString(), WebOutEnumType.JSON.getValue(), response);
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
+        TXWebUtil.print(json.toString(), contentType, response);
     }
 
 
@@ -378,41 +401,69 @@ public class UploadFileAction extends MultipartSupport {
         }
         //--------------------------------------------------------------------------------------------------------------
         if (uploadFileDAO == null) {
-            printDaoError();
+            printErrorInfo("DAO配置错误");
             return NONE;
         }
-        if (multipartRequest == null && !RequestUtil.isMultipart(request)&&!response.isCommitted()) {
-            printRequestError();
+        if (multipartRequest == null && !RequestUtil.isMultipart(request) && !response.isCommitted()) {
+            printErrorInfo(language.getLang(LanguageRes.uploadRequestError));
             return NONE;
         }
         IUserSession userSession = getUserSession();
         if (userSession == null || userSession.isGuest()) {
-            printNoLoginError();
+            printErrorInfo("没有登陆");
             for (UploadedFile uf : multipartRequest.getFiles()) {
                 FileUtil.delete(uf.getFile());
             }
             return NONE;
         }
 
-        Object[]  objects = localUploadFile(userSession);
-        if (ObjectUtil.isEmpty(objects))
-        {
+        Object[] objects = localUploadFile(userSession);
+        if (ObjectUtil.isEmpty(objects)) {
             printErrorInfo("上传失败");
             return NONE;
         }
         boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
         boolean mobile = getBoolean(MOBILE_VAR_NAME);
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
-        printUploadFileInfo(objects,chunkJson, thumbnail,mobile,contentType, uploadFileDAO.getNamespace(),   language.getLang(LanguageRes.success),response);
-        uploadFileDAO.evict(uploadFileDAO.getClassType());
+        useFastUpload = getBoolean(USE_FAST_UPLOAD);
 
+
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
+        JSONObject json =  getUploadFileInfo(objects, chunkJson, thumbnail, mobile, uploadFileDAO.getNamespace(), language.getLang(LanguageRes.success), response);
+        if (getResult()!=null)
+        {
+            Object obj = getResult();
+            if (obj instanceof JSONObject)
+            {
+                JSONArray jsonArray = new JSONArray();
+                jsonArray.add(obj);
+                jsonArray.add(json);
+                setResult(jsonArray);
+            } else
+            if (obj instanceof JSONArray)
+            {
+                JSONArray jsonArray = (JSONArray)getResult();
+                jsonArray.add(json);
+                setResult(jsonArray);
+            }
+        } else
+        {
+            //一个文件
+            setResult(json);
+        }
+
+        if (!editorUpload)
+        {
+            TXWebUtil.print(json.toString(4),contentType,response);
+        }
+        uploadFileDAO.evict(uploadFileDAO.getClassType());
         return NONE;
     }
+
     protected JSONObject chunkJson;
+
     /**
-     *
      * @param userSession 用户信息
-     * @return  上传的数据列表
+     * @return 上传的数据列表
      * @throws Exception 异常
      */
     public Object[] localUploadFile(IUserSession userSession) throws Exception {
@@ -421,33 +472,32 @@ public class UploadFileAction extends MultipartSupport {
         for (UploadedFile uf : multipartRequest.getFiles()) {
             if (ArrayUtil.inArray(STOP_EXS, uf.getFileType(), true)) {
                 FileUtil.delete(uf.getFile());
-                printErrorInfo(language.getLang(LanguageRes.notAllowedFileType) + StringUtil.COLON + uf.getFileType());
+                printErrorInfo(language.getLang(LanguageRes.notAllowedFileType) + StringUtil.COLON + uf.getFileType(),null);
                 return null;
             }
             if (!uf.isUpload()) {
                 FileUtil.delete(uf.getFile());
-                printErrorInfo(language.getLang(LanguageRes.notAllowedFileTypeOrUploadError));
+                printErrorInfo(language.getLang(LanguageRes.notAllowedFileTypeOrUploadError),null);
                 return null;
             }
             //分片上传
             if (uf.isChunkUpload()) {
                 chunkJson = getChunkUploadInfo(uf, userSession);
                 //0:未知;1:continue;2:错误;3:完成
-                if (1 == chunkJson.getInt("chunked") || 0 == chunkJson.getInt("chunked")  || 2 == chunkJson.getInt("chunked")) {
-                    printError(chunkJson, HttpStatusType.HTTP_status_OK);
+                if (1 == chunkJson.getInt("chunked") || 0 == chunkJson.getInt("chunked") || 2 == chunkJson.getInt("chunked")) {
+                    printErrorInfo("",chunkJson);
                     return null;
                 }
-            } else
-            {
+            } else {
                 chunkJson = null;
             }
-            String hashCode = FileUtil.getHash(uf.getFile(), hashType);
+
             if (!uf.moveToTypeDir()) {
                 //没有移动成功的文件
-                printErrorInfo(language.getLang(LanguageRes.folderWriteError));
+                printErrorInfo(language.getLang(LanguageRes.folderWriteError),null);
                 return null;
             }
-
+            String hashCode = FileUtil.getFileGuid(uf.getFile(), hashType);
             Object saveUploadFile = uploadFileDAO.getClassType().newInstance();
             IUploadFile upFile = (IUploadFile) saveUploadFile;
             upFile.setTitle(FileUtil.getNamePart(uf.getOriginal()));
@@ -464,16 +514,16 @@ public class UploadFileAction extends MultipartSupport {
             upFile.setPutUid(userSession.getUid());
             upFile.setIp(getRemoteAddr());
             upFile.setOrganizeId(getOrganizeId());
-            upFile.setHash(FileUtil.getHash(uf.getFile(), hashType));
+            upFile.setHash(hashCode);
             Object alreadyUploadFile = null;
-            if (!StringUtil.isNull(upFile.getHash()) && hashCode.equals(upFile.getHash())) {
+            if (useFastUpload && fileEquals(hashCode, upFile.getHash())) {
                 alreadyUploadFile = uploadFileDAO.getForHash(hashCode);
             }
             IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;
-            if (checkUploadFile != null && checkUploadFile.getPid() == 0 && !StringUtil.isNull(upFile.getHash()) &&
-                    checkUploadFile.getHash().equals(upFile.getHash()) && checkUploadFile.getPutUid() == userSession.getUid()
+            if (useFastUpload && checkUploadFile != null && checkUploadFile.getPid() == 0 && !StringUtil.isNull(upFile.getHash()) &&
+                    fileEquals(checkUploadFile.getHash(), upFile.getHash()) && checkUploadFile.getPutUid() == userSession.getUid()
                     && (checkUploadFile.getOrganizeId() != null && checkUploadFile.getOrganizeId().equals(getOrganizeId())
-                    && checkUploadFile.getFileSize()==upFile.getFileSize()
+                    && checkUploadFile.getFileSize() == upFile.getFileSize()
             )
             ) {
                 //已经上传过的,拷贝一份
@@ -482,30 +532,24 @@ public class UploadFileAction extends MultipartSupport {
                 //boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
                 //还没有保存到数据库
                 Object[] uploadObjArray = newUpload(uf, upFile, userSession);
-                if (ObjectUtil.isEmpty(uploadObjArray))
-                {
+                if (ObjectUtil.isEmpty(uploadObjArray)) {
                     return null;
                 }
                 if (!useCloudFile) {
                     //上传到本地目录
-
                     uploadFileDAO.save(uploadObjArray[0]);
                     IUploadFile uploadFile = (IUploadFile) uploadObjArray[0];
                     long pid = uploadFile.getId();
-                    for (int i=1;i<uploadObjArray.length;i++)
-                    {
+                    for (int i = 1; i < uploadObjArray.length; i++) {
                         IUploadFile tmpUploadFile = (IUploadFile) uploadObjArray[i];
-                        if (tmpUploadFile==null)
-                        {
+                        if (tmpUploadFile == null) {
                             continue;
                         }
                         tmpUploadFile.setPid(pid);
                         uploadFileDAO.save(uploadObjArray[i]);
                     }
                     return uploadObjArray;
-                }
-                else
-                {
+                } else {
                     //上传到云盘
                     CloudFileConfig cloudFileConfig = uploadFileDAO.getCloudFileConfig();
                     AssertException.isNull(cloudFileConfig, "云盘空间没有配置");
@@ -513,23 +557,19 @@ public class UploadFileAction extends MultipartSupport {
                     AssertException.isNull(cloudFileClient, "云盘空间没有配置正确");
                     List<File> files = new ArrayList<>();
                     long pid = 0;
-                    for (int i=0;i<uploadObjArray.length;i++)
-                    {
+                    for (int i = 0; i < uploadObjArray.length; i++) {
                         IUploadFile tmpUploadFile = (IUploadFile) uploadObjArray[i];
-                        if (tmpUploadFile==null)
-                        {
+                        if (tmpUploadFile == null) {
                             continue;
                         }
                         File localFile = new File(tmpUploadFile.getTempFilePath());
-                        String cloudUrl = cloudFileClient.upload(cloudFileConfig.getNamespace(),localFile);
+                        String cloudUrl = cloudFileClient.upload(cloudFileConfig.getNamespace(), localFile);
                         tmpUploadFile.setFileName(cloudUrl);
                         files.add(localFile);
-                        if (i == 0)
-                        {
+                        if (i == 0) {
                             uploadFileDAO.save(uploadObjArray[i]);
                             pid = tmpUploadFile.getPid();
-                        } else
-                        {
+                        } else {
                             tmpUploadFile.setPid(pid);
                             uploadFileDAO.save(uploadObjArray[i]);
                         }
@@ -542,9 +582,9 @@ public class UploadFileAction extends MultipartSupport {
     }
 
     /**
-     * @param uf 上传的文件
+     * @param uf             上传的文件
      * @param saveUploadFile 上传将保存的对象
-     * @param userSession 用户信息
+     * @param userSession    用户信息
      * @return 图片正常是3张
      * @throws Exception 异常
      */
@@ -571,9 +611,9 @@ public class UploadFileAction extends MultipartSupport {
                 //兼容 plupload  begin
                 json.put("OK", 0);
                 json.put(Environment.message, "不能识别的图片格式");
-                setResult(json);
                 log.info("未知不能识别的图片格式:" + file.getAbsolutePath());
-                TXWebUtil.print(json.toString(), WebOutEnumType.JSON.getValue(), response);
+
+                printErrorInfo("不能识别的图片格式");
                 return null;
             }
 
@@ -604,7 +644,7 @@ public class UploadFileAction extends MultipartSupport {
             if (ImageUtil.thumbnail(image, new FileOutputStream(thumbnailFile), uf.getFileType(), width, height)) {
                 String thumbnailPath = FileUtil.mendPath(FileUtil.getDecrease(setupPath, uf.getDir())) + thumbnailImg;
                 IUploadFile thumbnailUploadFile = (IUploadFile) uploadFileDAO.getClassType().newInstance();
-                thumbnailUploadFile.setHash(FileUtil.getHash(thumbnailFile, hashType));
+                thumbnailUploadFile.setHash(FileUtil.getFileGuid(thumbnailFile, hashType));
                 thumbnailUploadFile.setTitle(FileUtil.getNamePart(thumbnailImg));
                 thumbnailUploadFile.setFileType(FileUtil.getTypePart(thumbnailFile));
                 thumbnailUploadFile.setFileName(thumbnailPath);
@@ -636,7 +676,7 @@ public class UploadFileAction extends MultipartSupport {
                     json.put("mobileUrl", '/' + uploadFileDAO.getNamespace() + '/' + mobilePath);
                 }
                 IUploadFile mobileUploadFile = (IUploadFile) uploadFileDAO.getClassType().newInstance();
-                mobileUploadFile.setHash(FileUtil.getHash(mobileFile, hashType));
+                mobileUploadFile.setHash(FileUtil.getFileGuid(mobileFile, hashType));
                 mobileUploadFile.setTitle(FileUtil.getNamePart(mobileImg));
                 mobileUploadFile.setFileType(FileUtil.getTypePart(mobileFile));
                 mobileUploadFile.setFileName(mobilePath);
@@ -654,20 +694,17 @@ public class UploadFileAction extends MultipartSupport {
             }
         }
         boolean useUploadConverter = config.getBoolean(Environment.useUploadConverterTxt);
-        if (useUploadConverter && ArrayUtil.inArray(OFFICE_FILE_TYPES, uf.getFileType(), true))
-        {
+        if (useUploadConverter && ArrayUtil.inArray(OFFICE_FILE_TYPES, uf.getFileType(), true)) {
             //文档转换,为了方便安卓下编译
             String content = "";
             try {
 
-                if ("doc".equalsIgnoreCase(uf.getFileType()) ||  "docx".equalsIgnoreCase(uf.getFileType()))
-                {
+                if ("doc".equalsIgnoreCase(uf.getFileType()) || "docx".equalsIgnoreCase(uf.getFileType())) {
                     AbstractRead abstractRead = new ReadWordTextFile();
                     abstractRead.setFile(uf.getFile());
                     content = abstractRead.getContent();
                 }
-                if ("pdf".equalsIgnoreCase(uf.getFileType()))
-                {
+                if ("pdf".equalsIgnoreCase(uf.getFileType())) {
                     AbstractRead abstractRead = new ReadPdfTextFile();
                     abstractRead.setFile(uf.getFile());
                     content = abstractRead.getContent();
@@ -726,11 +763,10 @@ public class UploadFileAction extends MultipartSupport {
             return objects;
         }
         List<Object> saveChildList = BeanUtil.copyList(childList, uploadFileDAO.getClassType());
-        Object[] objects = new Object[saveChildList.size()+1];
+        Object[] objects = new Object[saveChildList.size() + 1];
         objects[0] = copySaveUploadFile;
 
-        for (int i=0;i<saveChildList.size();i++)
-        {
+        for (int i = 0; i < saveChildList.size(); i++) {
             IUploadFile childUploadFile = (IUploadFile) childList.get(i);
             childUploadFile.setOrganizeId(getOrganizeId());
             childUploadFile.setPutName(userSession.getName());
@@ -742,18 +778,25 @@ public class UploadFileAction extends MultipartSupport {
             childUploadFile.setPid(newPid);
             childUploadFile.setId(0);
             uploadFileDAO.save(childUploadFile);
-            objects[i+1] = childList.get(i);
+            objects[i + 1] = childList.get(i);
         }
         return objects;
     }
 
-
     //---------------------------------------------
+    public static boolean fileEquals(String hash1, String hash2) {
+        if (StringUtil.isNull(hash1) || StringUtil.isNull(hash2)) {
+            return false;
+        }
+        return hash1.equals(hash2);
+    }
+    //---------------------------------------------
+
 
     /**
      * 分片上传,打印返回协议信息,返回
      *
-     * @param uf 上传的文件
+     * @param uf          上传的文件
      * @param userSession 用户信息
      * @return chunked 0:未知;1:continue;2:错误;3:完成
      */
@@ -764,7 +807,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("repair", false);
         json.put("success", false);
         json.put("error", 1);
-        json.put("url","");
+        json.put("url", "");
         json.put("state", "error");
         json.put("thumbnail", 0);
         json.put("uploadType", "chunk");
@@ -825,9 +868,18 @@ public class UploadFileAction extends MultipartSupport {
     /**
      * @param info 打印错误信息
      */
-    protected void printErrorInfo(String info) {
-        if (response.isCommitted())
-        {
+    protected void printErrorInfo(String info)
+    {
+        printErrorInfo( info, null);
+    }
+
+    /**
+     *
+     * @param info 打印错误信息
+     * @param valueMap 其他数据
+     */
+    protected void printErrorInfo(String info, Map<String,Object> valueMap) {
+        if (response.isCommitted()) {
             return;
         }
         JSONObject json = new JSONObject();
@@ -841,95 +893,37 @@ public class UploadFileAction extends MultipartSupport {
         json.put("url", StringUtil.empty);
         json.put("original", StringUtil.empty);
         json.put("namespace", uploadFileDAO.getNamespace());
+        if (!ObjectUtil.isEmpty(valueMap))
+        {
+            json.putAll(valueMap);
+        }
         json.put(Environment.message, info);
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
-        TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response);
-    }
-
-    /**
-     * 需要登陆
-     */
-    protected void printNoLoginError() {
-        if (response.isCommitted())
+        if (!editorUpload)
         {
-            return;
+            int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
+            TXWebUtil.print(json.toString(),contentType,response);
         }
-        JSONObject json = new JSONObject();
-        json.put("OK", 0);
-        json.put("success", false);
-        json.put("repair", false);
-        json.put("error", 1);
-        json.put("state", "error");
-        json.put("thumbnail", 0);
-        json.put(Environment.message, "need login");
-        json.put("namespace", getRootNamespace());
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
-        TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response, ErrorEnumType.NEED_LOGIN.getValue());
-    }
-
-    /**
-     * 打印uploadFileDAO配置错误
-     */
-    protected void printDaoError() {
-        if (response.isCommitted())
-        {
-            return;
-        }
-        JSONObject json = new JSONObject();
-        json.put("OK", 0);
-        json.put("success", false);
-        json.put("repair", false);
-        json.put("error", 1);
-        json.put("state", "error");
-        json.put("thumbnail", 0);
-        json.put(Environment.message, "not config uploadFileDAO");
-        json.put("namespace", getRootNamespace());
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
-        TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response);
-    }
-
-    /**
-     * 打印请求错误
-     */
-    protected void printRequestError() {
-        JSONObject json = new JSONObject();
-        json.put("OK", 0);
-        json.put("success", false);
-        json.put("repair", false);
-        json.put("error", 1);
-        json.put("state", "error");
-        json.put("fileName", "");
-        json.put("url", "");
-        json.put("original", "");
-        json.put("name", "");
-        json.put("thumbnail", 0);
-        json.put("namespace", uploadFileDAO.getNamespace());
-        json.put(Environment.message, language.getLang(LanguageRes.uploadRequestError));
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME,RequestUtil.isLowIe(request)?WebOutEnumType.HTML.getValue():WebOutEnumType.JSON.getValue());
-        TXWebUtil.print(json.toString(), WebOutEnumType.find(contentType).getValue(), response);
     }
 
 
+
+
+
     /**
-     *
-     * @param objects 上次的对象
-     * @param chunkJson 分片上传信息
-     * @param thumbnail 是否有缩图
-     * @param contentType 输出头信息控制 ie9 等浏览器不能是用json,需要设置为html方式输出
-     * @param mobile 是否有手机
-     * @param namespace 命名空间
-     * @param message 消息
-     * @param response 应答
+     * @param objects     上次的对象
+     * @param chunkJson   分片上传信息
+     * @param thumbnail   是否有缩图
+     * @param mobile      是否有手机
+     * @param namespace   命名空间
+     * @param message     消息
+     * @param response    应答
      */
-    public static void printUploadFileInfo(Object[]  objects, JSONObject chunkJson, boolean thumbnail, boolean mobile, int contentType,String namespace, String message, HttpServletResponse response)
-    {
-        IUploadFile uploadFile = (IUploadFile)objects[0];
+    public JSONObject getUploadFileInfo(Object[] objects, JSONObject chunkJson, boolean thumbnail, boolean mobile, String namespace, String message, HttpServletResponse response) {
+        IUploadFile uploadFile = (IUploadFile) objects[0];
         JSONObject json;
-        if (chunkJson==null)
-        {
+        if (chunkJson == null) {
             json = new JSONObject();
-        } else
-        {
+        } else {
             json = chunkJson;
         }
 
@@ -950,8 +944,8 @@ public class UploadFileAction extends MultipartSupport {
         }
 
         //缩图
-        if (thumbnail && objects.length>1) {
-            IUploadFile thumbnailUploadFile = (IUploadFile)objects[1];
+        if (thumbnail && objects.length > 1) {
+            IUploadFile thumbnailUploadFile = (IUploadFile) objects[1];
             if (URLUtil.isUrl(thumbnailUploadFile.getFileName())) {
                 json.put("thumbnailUrl", thumbnailUploadFile.getFileName());
             } else {
@@ -963,8 +957,8 @@ public class UploadFileAction extends MultipartSupport {
             }
         }
 
-        if (mobile && objects.length>2) {
-            IUploadFile mobileUploadFile = (IUploadFile)objects[2];
+        if (mobile && objects.length > 2) {
+            IUploadFile mobileUploadFile = (IUploadFile) objects[2];
             if (URLUtil.isUrl(mobileUploadFile.getFileName())) {
                 json.put("mobileUrl", mobileUploadFile.getFileName());
             } else {
@@ -988,10 +982,7 @@ public class UploadFileAction extends MultipartSupport {
         json.put("success", true);
         //兼容 plupload  begin
         json.put("OK", 1);
-        //兼容 plupload  end
-        json.put(Environment.message, message);
-
-        TXWebUtil.print(json.toString(),WebOutEnumType.find(contentType).getValue(), response);
+        return json;
     }
 
 }

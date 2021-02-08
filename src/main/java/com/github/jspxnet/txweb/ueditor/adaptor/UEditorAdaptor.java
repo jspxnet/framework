@@ -2,6 +2,7 @@ package com.github.jspxnet.txweb.ueditor.adaptor;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.lucene.ChineseAnalyzer;
 import com.github.jspxnet.sioc.annotation.Ref;
@@ -23,8 +24,13 @@ import com.github.jspxnet.txweb.ueditor.hunter.ImageHunter;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.upload.MultipartRequest;
+import com.github.jspxnet.upload.multipart.FileRenamePolicy;
+import com.github.jspxnet.upload.multipart.JspxNetFileRenamePolicy;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
 import com.github.jspxnet.utils.*;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -32,6 +38,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -220,34 +227,68 @@ public class UEditorAdaptor extends ActionSupport {
                 e.printStackTrace();
             }
         }
-
         if (!RequestUtil.isMultipart(request)) {
             return new BaseState(false, AppInfo.NOT_MULTIPART_CONTENT);
         }
         try {
-
-            uploadFileAction.setRequest(request);
+            uploadFileAction.setEditorUpload(true);
+            uploadFileAction.setUseFastUpload(false);
+            //uploadFileAction.setRequest(request);
             uploadFileAction.setResponse(response);
             uploadFileAction.setConfig(config);
             uploadFileAction.setLanguage(language);
             uploadFileAction.initialize();
             uploadFileAction.setMultipartRequest(new MultipartRequest(request, uploadFileAction.getSaveDirectory()));
             uploadFileAction.execute();
+            Object obj = uploadFileAction.getResult();
+            if (obj==null)
+            {
+                return new BaseState(false, AppInfo.PARSE_REQUEST_ERROR);
+            }
 
-            JSONObject json = (JSONObject) uploadFileAction.getResult();
-            BaseState state = new BaseState(true, json.getString("url"));
-            state.setJson(json);
-            if (json.getBoolean("success") || json.getBoolean("OK")) {
-                return state;
+            if (obj instanceof JSONObject)
+            {
+                JSONObject json = (JSONObject)obj;
+
+                if (json.getString(Environment.message)!=null&&(json.getString(Environment.message).contains("登录")||json.getString(Environment.message).contains("login"))) {
+                    return new BaseState(false, AppInfo.USER_NEED_LOGIN);
+                }
+
+                BaseState state = new BaseState(json.getBoolean("success"), json.getString("url"));
+                state.setJson( new JSONObject(json.clone()));
+                if (json.containsKey(Environment.message))
+                {
+                    state.setInfo(json.getString(Environment.message));
+                }
+                if (json.getBoolean("success") || json.getBoolean("OK")) {
+                    return state;
+                }
             }
-            if (json.getString(Environment.message).contains("登录")) {
-                return new BaseState(false, AppInfo.USER_NEED_LOGIN);
+
+            if (obj instanceof JSONArray)
+            {
+                JSONArray jsonArray = (JSONArray)obj;
+                MultiState multiState = new MultiState(true);
+                for (int i=0;i<jsonArray.size();i++)
+                {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    BaseState state = new BaseState(json.getBoolean("success"), json.getString("url"));
+                    state.setJson(new JSONObject(json.clone()));
+                    if (json.containsKey(Environment.message))
+                    {
+                        state.setInfo(json.getString(Environment.message));
+                    }
+                    multiState.addState(state);
+                }
+                return multiState;
             }
-            return new BaseState(false, AppInfo.NOTFOUND_UPLOAD_DATA);
+            //return new BaseState(false, AppInfo.NOTFOUND_UPLOAD_DATA);
         } catch (Exception e) {
             e.printStackTrace();
-            return new BaseState(false, AppInfo.PARSE_REQUEST_ERROR);
+        } finally {
+            uploadFileAction.destroy();
         }
+        return new BaseState(false, AppInfo.PARSE_REQUEST_ERROR);
     }
 
     private State base64Save(String content, String saveDirectory, String setupPath, long maxSize) throws Exception {
@@ -257,7 +298,6 @@ public class UEditorAdaptor extends ActionSupport {
         if (!validSize(data, maxSize)) {
             return new BaseState(false, AppInfo.MAX_SIZE);
         }
-
         String suffix = FileType.getSuffix("JPG");
         RenamePolicy fileRenamePolicy = TXWebUtil.getFileRenamePolicy("DefaultFileRenamePolicy");
         File file = new File(saveDirectory, System.currentTimeMillis() + suffix);
@@ -295,11 +335,10 @@ public class UEditorAdaptor extends ActionSupport {
             upFile.setPutUid(userSession.getUid());
             upFile.setIp(getRemoteAddr());
         }
-        upFile.setHash(FileUtil.getHash(file, UploadFileAction.hashType));
-
+        upFile.setHash(FileUtil.getFileGuid(file, UploadFileAction.hashType));
         Object alreadyUploadFile = uploadFileDAO.getForHash(upFile.getHash());
         IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;
-        if (!StringUtil.isNull(upFile.getHash()) && alreadyUploadFile != null && checkUploadFile.getHash().equalsIgnoreCase(upFile.getHash())) {
+      /*  if (alreadyUploadFile!=null &&!StringUtil.isNull(upFile.getHash()) && alreadyUploadFile != null && checkUploadFile.getHash().equalsIgnoreCase(upFile.getHash())) {
             if (checkUploadFile.getPutUid() != userSession.getUid()) {
                 //不同用户发布的，转存一份
                 checkUploadFile.setId(0);
@@ -320,7 +359,7 @@ public class UEditorAdaptor extends ActionSupport {
             FileUtil.delete(file);
             return state;
 
-        } else if (uploadFileDAO != null) {
+        } else */if (uploadFileDAO != null) {
 
             uploadFileDAO.save(upFile);
 
@@ -371,10 +410,30 @@ public class UEditorAdaptor extends ActionSupport {
         } else {
             result = this.invoke();
         }
-
         TXWebUtil.print(result, WebOutEnumType.JSON.getValue(), response);
         return NONE;
     }
+    private final static FileRenamePolicy renamePolicy = new JspxNetFileRenamePolicy();
+    /**
+     * @return 移动到类型目录
+     */
+    public File moveToTypeDir(FileItem fileItem) {
+        if (fileItem == null) {
+            return null;
+        }
 
 
+        File newDir = new File(getSaveDirectory(), FileUtil.getTypePart(fileItem.getFieldName()).toLowerCase());
+        FileUtil.makeDirectory(newDir);
+        File newFile = renamePolicy.rename(new File(newDir, fileItem.getFieldName()));
+        try {
+             fileItem.write(newFile);
+             return newFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return null;
+
+    }
 }

@@ -18,6 +18,7 @@ package com.github.jspxnet.utils;
  */
 
 import com.github.jspxnet.io.file.MultiFile;
+import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
 import lombok.extern.slf4j.Slf4j;
 
@@ -377,7 +378,22 @@ public class FileUtil {
         return md5.digest();
     }
 
-
+    /**
+     *
+     * @param fileName 文件名称
+     * @param hashType 哈希类型
+     * @return  文件唯一标识ID
+     * @throws Exception 异常
+     */
+    public static String getFileGuid(File fileName, String hashType) throws Exception {
+        if (fileName==null)
+        {
+            return null;
+        }
+        String head = EncryptUtil.toHex(FileUtil.readFileByte(fileName,100));
+        String value = FileUtil.getHash(fileName,hashType);
+        return EncryptUtil.getMd5(value + head + FileUtil.getTypePart(fileName) + fileName.length());
+    }
     /**
      * 上边是标准的验证方式，但有的文件太大验证时间很慢
      * 所以提供下边这个快速的验证方法，只起一个包来比较，并不是所有的数据都比较，
@@ -1165,7 +1181,7 @@ public class FileUtil {
      * @return 读取数据
      */
     static public byte[] readFileByte(File filename, int length) {
-        if (filename == null) {
+        if (filename == null||!filename.isFile()) {
             return null;
         }
         try (FileInputStream fis = new FileInputStream(filename); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
