@@ -65,7 +65,7 @@ import com.github.jspxnet.utils.StringUtil;
 @SuppressWarnings({"deprecation"})
 public class MultipartRequest implements HttpServletRequest {
     private static final int DEFAULT_MAX_POST_SIZE = 1024 * 1024 * 5;  // 2 M  eg
-    private Hashtable<String, String[]> parameters = new Hashtable<>();  // name - Vector of values
+    private Hashtable<String, List<String>> parameters = new Hashtable<>();  // name - Vector of values
     private List<UploadedFile> fileList = new ArrayList<>();       // name - UploadedFile
 
 
@@ -253,7 +253,7 @@ public class MultipartRequest implements HttpServletRequest {
                 String[] values = queryParameters.get(paramName);
                 Vector<String> newValues = new Vector<>();
                 newValues.addAll(Arrays.asList(values));
-                parameters.put(paramName, newValues.toArray(new String[0]));
+                parameters.put(paramName, newValues);
             }
         }
 
@@ -264,9 +264,9 @@ public class MultipartRequest implements HttpServletRequest {
                 // It's a parameter troop, add it transfer the vector of values
                 ParamPart paramPart = (ParamPart) part;
                 String value = paramPart.getStringValue();
-                String[] existingValues = parameters.computeIfAbsent(name, k -> new String[0]);
-                existingValues = ArrayUtil.add(existingValues,value);
-                parameters.put(name,existingValues);
+                List<String> existingValues = parameters.computeIfAbsent(name, k -> new Vector<>());
+                existingValues.add(value);
+
             } else if (part.isFile()) {
                 FilePart filePart = (FilePart) part;
                 String fileName = filePart.getFileName();
@@ -418,8 +418,18 @@ public class MultipartRequest implements HttpServletRequest {
     }
 
     @Override
-    public Map<String, String[]> getParameterMap() {
-        return parameters;
+    public Map<String, String[]>  getParameterMap() {
+        Map<String, String[]> result = new HashMap<>();
+        for (String name:parameters.keySet())
+        {
+            List<String> list = parameters.get(name);
+            if (list==null)
+            {
+                continue;
+            }
+            result.put(name,list.toArray(new String[list.size()]));
+        }
+        return result;
     }
 
     /**
@@ -448,11 +458,11 @@ public class MultipartRequest implements HttpServletRequest {
     @Override
     public String getParameter(String name) {
         try {
-            String[] values = parameters.get(name);
-            if (values == null || values.length == 0) {
+            List<String> values = parameters.get(name);
+            if (values == null || values.size() == 0) {
                 return null;
             }
-            return values[values.length-1];
+            return values.get(values.size() - 1);
         } catch (Exception e) {
             return null;
         }
@@ -471,11 +481,11 @@ public class MultipartRequest implements HttpServletRequest {
     @Override
     public String[] getParameterValues(String name) {
         try {
-            String[] values = parameters.get(name);
-            if (values == null || values.length == 0) {
+            List<String> values = parameters.get(name);
+            if (values == null || values.size() == 0) {
                 return null;
             }
-            return values;
+            return values.toArray(new String[values.size()]);
         } catch (Exception e) {
             return null;
         }

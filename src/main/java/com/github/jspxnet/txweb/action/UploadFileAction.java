@@ -297,8 +297,13 @@ public class UploadFileAction extends MultipartSupport {
             return;
         }
 
+        if (!useFastUpload)
+        {
+            printErrorInfo("秒传已经关闭");
+            return;
+        }
         if (StringUtil.isNull(hash)) {
-            json.put(Environment.message,language.getLang(LanguageRes.invalidParameter));
+            printErrorInfo(language.getLang(LanguageRes.invalidParameter));
             return;
         }
 
@@ -326,9 +331,13 @@ public class UploadFileAction extends MultipartSupport {
             json.put(Environment.message, "没有登陆");
             return;
         }
-
+        if (!useFastUpload)
+        {
+            printErrorInfo("秒传已经关闭");
+            return;
+        }
         if (StringUtil.isNull(hash)) {
-            json.put(Environment.message, language.getLang(LanguageRes.invalidParameter));
+            printErrorInfo(language.getLang(LanguageRes.invalidParameter));
             return;
         }
 
@@ -426,32 +435,33 @@ public class UploadFileAction extends MultipartSupport {
         boolean mobile = getBoolean(MOBILE_VAR_NAME);
         useFastUpload = getBoolean(USE_FAST_UPLOAD);
 
-
         int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
         JSONObject json =  getUploadFileInfo(objects, chunkJson, thumbnail, mobile, uploadFileDAO.getNamespace(), language.getLang(LanguageRes.success), response);
-        if (getResult()!=null)
+        if (editorUpload)
         {
-            Object obj = getResult();
-            if (obj instanceof JSONObject)
+            if (getResult()!=null)
             {
-                JSONArray jsonArray = new JSONArray();
-                jsonArray.add(obj);
-                jsonArray.add(json);
-                setResult(jsonArray);
+                Object obj = getResult();
+                if (obj instanceof JSONObject)
+                {
+                    JSONArray jsonArray = new JSONArray();
+                    jsonArray.add(obj);
+                    jsonArray.add(json);
+                    setResult(jsonArray);
+                } else
+                if (obj instanceof JSONArray)
+                {
+                    JSONArray jsonArray = (JSONArray)getResult();
+                    jsonArray.add(json);
+                    setResult(jsonArray);
+                }
             } else
-            if (obj instanceof JSONArray)
             {
-                JSONArray jsonArray = (JSONArray)getResult();
-                jsonArray.add(json);
-                setResult(jsonArray);
+                //一个文件
+                setResult(json);
             }
-        } else
-        {
-            //一个文件
-            setResult(json);
         }
-
-        if (!editorUpload)
+        else
         {
             TXWebUtil.print(json.toString(4),contentType,response);
         }

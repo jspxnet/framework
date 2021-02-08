@@ -29,16 +29,12 @@ import com.github.jspxnet.upload.multipart.JspxNetFileRenamePolicy;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
 import com.github.jspxnet.utils.*;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -249,11 +245,9 @@ public class UEditorAdaptor extends ActionSupport {
             if (obj instanceof JSONObject)
             {
                 JSONObject json = (JSONObject)obj;
-
                 if (json.getString(Environment.message)!=null&&(json.getString(Environment.message).contains("登录")||json.getString(Environment.message).contains("login"))) {
                     return new BaseState(false, AppInfo.USER_NEED_LOGIN);
                 }
-
                 BaseState state = new BaseState(json.getBoolean("success"), json.getString("url"));
                 state.setJson( new JSONObject(json.clone()));
                 if (json.containsKey(Environment.message))
