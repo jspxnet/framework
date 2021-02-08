@@ -24,11 +24,8 @@ import com.github.jspxnet.txweb.ueditor.hunter.ImageHunter;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.upload.MultipartRequest;
-import com.github.jspxnet.upload.multipart.FileRenamePolicy;
-import com.github.jspxnet.upload.multipart.JspxNetFileRenamePolicy;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
 import com.github.jspxnet.utils.*;
-import org.apache.commons.fileupload.FileItem;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -229,7 +226,7 @@ public class UEditorAdaptor extends ActionSupport {
         try {
             uploadFileAction.setEditorUpload(true);
             uploadFileAction.setUseFastUpload(false);
-            //uploadFileAction.setRequest(request);
+            uploadFileAction.setRequest(request);
             uploadFileAction.setResponse(response);
             uploadFileAction.setConfig(config);
             uploadFileAction.setLanguage(language);
@@ -239,7 +236,7 @@ public class UEditorAdaptor extends ActionSupport {
             Object obj = uploadFileAction.getResult();
             if (obj==null)
             {
-                return new BaseState(false, AppInfo.PARSE_REQUEST_ERROR);
+                return new BaseState(false, AppInfo.NOTFOUND_UPLOAD_DATA);
             }
 
             if (obj instanceof JSONObject)
@@ -248,12 +245,8 @@ public class UEditorAdaptor extends ActionSupport {
                 if (json.getString(Environment.message)!=null&&(json.getString(Environment.message).contains("登录")||json.getString(Environment.message).contains("login"))) {
                     return new BaseState(false, AppInfo.USER_NEED_LOGIN);
                 }
-                BaseState state = new BaseState(json.getBoolean("success"), json.getString("url"));
+                BaseState state = new BaseState(json.getBoolean("success"),json.getString(Environment.message));
                 state.setJson( new JSONObject(json.clone()));
-                if (json.containsKey(Environment.message))
-                {
-                    state.setInfo(json.getString(Environment.message));
-                }
                 if (json.getBoolean("success") || json.getBoolean("OK")) {
                     return state;
                 }
@@ -266,20 +259,21 @@ public class UEditorAdaptor extends ActionSupport {
                 for (int i=0;i<jsonArray.size();i++)
                 {
                     JSONObject json = jsonArray.getJSONObject(i);
-                    BaseState state = new BaseState(json.getBoolean("success"), json.getString("url"));
-                    state.setJson(new JSONObject(json.clone()));
-                    if (json.containsKey(Environment.message))
+                    if (json==null)
                     {
-                        state.setInfo(json.getString(Environment.message));
+                        continue;
                     }
+                    BaseState state = new BaseState(json.getBoolean("success"),json.getString(Environment.message));
+                    state.setJson(new JSONObject(json.clone()));
                     multiState.addState(state);
                 }
                 return multiState;
             }
-            //return new BaseState(false, AppInfo.NOTFOUND_UPLOAD_DATA);
+
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
             uploadFileAction.destroy();
         }
         return new BaseState(false, AppInfo.PARSE_REQUEST_ERROR);
@@ -407,27 +401,5 @@ public class UEditorAdaptor extends ActionSupport {
         TXWebUtil.print(result, WebOutEnumType.JSON.getValue(), response);
         return NONE;
     }
-    private final static FileRenamePolicy renamePolicy = new JspxNetFileRenamePolicy();
-    /**
-     * @return 移动到类型目录
-     */
-    public File moveToTypeDir(FileItem fileItem) {
-        if (fileItem == null) {
-            return null;
-        }
 
-
-        File newDir = new File(getSaveDirectory(), FileUtil.getTypePart(fileItem.getFieldName()).toLowerCase());
-        FileUtil.makeDirectory(newDir);
-        File newFile = renamePolicy.rename(new File(newDir, fileItem.getFieldName()));
-        try {
-             fileItem.write(newFile);
-             return newFile;
-        } catch (Exception e) {
-            e.printStackTrace();
-
-        }
-        return null;
-
-    }
 }
