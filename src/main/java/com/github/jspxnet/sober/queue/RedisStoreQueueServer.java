@@ -1,21 +1,17 @@
 package com.github.jspxnet.sober.queue;
 
 
-import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.sioc.annotation.Scheduled;
 import com.github.jspxnet.sober.queue.cmd.SaveObjectCmd;
 import com.github.jspxnet.sober.queue.cmd.UpdateObjectCmd;
 import com.github.jspxnet.sober.queue.cmd.UpdateSqlCmd;
-import com.github.jspxnet.sober.table.StoreQueueStatus;
 import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.utils.DateUtil;
-import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RQueue;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -25,9 +21,9 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Bean(bind = RedisStoreQueueServer.class, singleton = true)
-public class RedisStoreQueueServer extends BaseRedisStoreQueue implements Runnable {
+public class RedisStoreQueueServer extends BaseRedisStoreQueue  {
 
-    private static Map<String, CmdRun> CMD_RUN_MAP = new HashMap<>();
+    final private static Map<String, CmdRun> CMD_RUN_MAP = new HashMap<>();
 
     /**
      * 保存成功日志记录，生产环境没必要保存
@@ -53,8 +49,8 @@ public class RedisStoreQueueServer extends BaseRedisStoreQueue implements Runnab
      * 一个长线程，间隔10秒的保存数据，主要使用在分布式上，单机服务器也可以利用换成来提高性能，
      * 避免数据库卡死，这里只是分离出了保存，不能执行更新
      */
-    @Override
-    synchronized public void run() {
+    @Scheduled
+    public void run() {
         if (CMD_RUN_MAP.isEmpty()) {
             CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_SAVE, new SaveObjectCmd());
             CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_UPDATE, new UpdateObjectCmd());
