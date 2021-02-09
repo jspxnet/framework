@@ -43,7 +43,7 @@ public class DateUtil {
     final static public String CN_FORMAT = "yy年MM月dd日 HH:mm";
     final static public String DAY_FORMAT = "yyyy-MM-dd";
     final static public String SHORT_DATE_FORMAT = "yy-MM-dd";
-
+    final static public String DATE_GUID = "yyyyMMddHHmmssSSS";
 
     //空日期日期 1800-01-01 01:01:01  太小有些数据库和语言不支持
     final static public Date empty = new Date(-5364687539000L);

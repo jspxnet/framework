@@ -13,6 +13,7 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
+import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.IUploadFile;
@@ -282,12 +283,11 @@ public class UEditorAdaptor extends ActionSupport {
     private State base64Save(String content, String saveDirectory, String setupPath, long maxSize) throws Exception {
 
         byte[] data = com.github.jspxnet.security.utils.Base64.decode(content, com.github.jspxnet.security.utils.Base64.DEFAULT);
-
         if (!validSize(data, maxSize)) {
             return new BaseState(false, AppInfo.MAX_SIZE);
         }
         String suffix = FileType.getSuffix("JPG");
-        RenamePolicy fileRenamePolicy = TXWebUtil.getFileRenamePolicy("DefaultFileRenamePolicy");
+        RenamePolicy fileRenamePolicy = FileCoveringPolicyEnumType.JSPX.getRenamePolicy();
         File file = new File(saveDirectory, System.currentTimeMillis() + suffix);
         file = FileUtil.moveToTypeDir(file, fileRenamePolicy, false);
         if (file == null) {

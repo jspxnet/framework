@@ -36,15 +36,14 @@ public class ChineseUtil {
 
     /**
      * 返回字符串的全拼,是汉字转化为全拼,其它字符不进行转换
-     *
      * @param src       字符串
      * @param separator 分割
      * @return 转换成全拼后的字符串
      */
     public static String fullSpell(String src, String separator) {
-        char[] t1 = null;
+        char[] t1;
         t1 = src.toCharArray();
-        String[] t2 = new String[t1.length];
+        String[] t2;
         HanyuPinyinOutputFormat t3 = new HanyuPinyinOutputFormat();
         t3.setCaseType(HanyuPinyinCaseType.LOWERCASE);
         t3.setToneType(HanyuPinyinToneType.WITHOUT_TONE);

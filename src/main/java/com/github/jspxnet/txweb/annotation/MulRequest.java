@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.annotation;
 
+import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.lang.annotation.*;
@@ -28,7 +29,7 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MulRequest {
-    String covering() default "false"; //是否覆盖文件
+    FileCoveringPolicyEnumType covering() default FileCoveringPolicyEnumType.JSPX; //是否覆盖文件
 
     String saveDirectory() default "saveDirectory"; //保存目录
 

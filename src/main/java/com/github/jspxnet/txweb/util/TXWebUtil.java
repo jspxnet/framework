@@ -42,14 +42,10 @@ import com.github.jspxnet.txweb.support.MultipartSupport;
 import com.github.jspxnet.txweb.turnpage.TurnPageButton;
 import com.github.jspxnet.txweb.turnpage.impl.TurnPageButtonImpl;
 import com.github.jspxnet.upload.MultipartRequest;
-import com.github.jspxnet.upload.multipart.CoveringsFileRenamePolicy;
-import com.github.jspxnet.upload.multipart.FileRenamePolicy;
-import com.github.jspxnet.upload.multipart.JspxNetFileRenamePolicy;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -88,25 +84,6 @@ public class TXWebUtil {
     }
 
     /**
-     * 上传命名方式
-     *
-     * @param covering 是否覆盖
-     * @return cos 上传的命名方式
-     */
-    public static FileRenamePolicy getFileRenamePolicy(final String covering) {
-        if ("CoveringsFileRenamePolicy".equalsIgnoreCase(covering)) {
-            return new CoveringsFileRenamePolicy();
-        } else if ("DateRandomNamePolicy".equalsIgnoreCase(covering)) {
-            return new CoveringsFileRenamePolicy();
-        } else if ("DefaultFileRenamePolicy".equalsIgnoreCase(covering)) {
-            return new CoveringsFileRenamePolicy();
-        } else {
-            return new JspxNetFileRenamePolicy();
-        }
-    }
-    //------------------------------------------------------------------------------------------------------------------
-
-    /**
      * 上传请求
      *
      * @param action 设置上传方式的请求
@@ -134,13 +111,6 @@ public class TXWebUtil {
                 fileType = fileType.substring(1);
                 fileType = (String) BeanUtil.getProperty(action, fileType);
             }
-
-            String covering = mulRequest.covering();
-            if (covering.startsWith(AT)) {
-                covering = covering.substring(1);
-                covering = BeanUtil.getProperty(action, covering).toString();
-            }
-
             String maxPostSize = mulRequest.maxPostSize();
             if (maxPostSize.startsWith(AT)) {
                 maxPostSize = maxPostSize.substring(1);
@@ -152,10 +122,9 @@ public class TXWebUtil {
             if (!StringUtil.isNull(fileType) && !"*".equals(fileType)) {
                 fileTypes = StringUtil.split(StringUtil.replace(fileType, StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON);
             }
-            MultipartRequest multipartRequest = new MultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, getFileRenamePolicy(covering), fileTypes);
+            MultipartRequest multipartRequest = new MultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, mulRequest.covering().getRenamePolicy(), fileTypes);
             BeanUtil.setSimpleProperty(action, method.getName(), multipartRequest);
             action.setRequest(multipartRequest);
-
         }
     }
     //------------------------------------------------------------------------------------------------------------------

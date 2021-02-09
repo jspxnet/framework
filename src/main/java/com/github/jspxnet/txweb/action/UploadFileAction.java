@@ -28,6 +28,7 @@ import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
+import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.ImageSysEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.support.MultipartSupport;
@@ -248,20 +249,13 @@ public class UploadFileAction extends MultipartSupport {
         return FileUtil.getFile(searchPaths, name);
     }
 
-    /**
-     * @return 是否覆盖
-     */
-    @Override
-    public boolean getCovering() {
-        return config.getBoolean(Environment.uploadCovering);
-    }
 
     /**
      * @param multipartRequest 请求接口
      */
     @Override
     @Param(request = false)
-    @MulRequest(covering = "@covering", saveDirectory = "@saveDirectory", fileTypes = "@fileTypes", maxPostSize = "@maxPostSize")
+    @MulRequest(covering = FileCoveringPolicyEnumType.JSPX, saveDirectory = "@saveDirectory", fileTypes = "@fileTypes", maxPostSize = "@maxPostSize")
     public void setMultipartRequest(MultipartRequest multipartRequest) {
         request = this.multipartRequest = multipartRequest;
     }

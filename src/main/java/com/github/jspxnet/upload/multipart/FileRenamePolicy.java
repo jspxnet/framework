@@ -31,7 +31,7 @@ public abstract class FileRenamePolicy implements RenamePolicy {
 
     boolean createNewFile(File f) {
         try {
-            return f.createNewFile();
+            return !f.exists()&&f.createNewFile();
         } catch (IOException ignored) {
             return false;
         }

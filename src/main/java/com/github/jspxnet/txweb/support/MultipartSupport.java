@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.support;
 
 import com.github.jspxnet.txweb.annotation.HttpMethod;
+import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.upload.MultipartRequest;
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.utils.*;
@@ -29,7 +30,7 @@ public abstract class MultipartSupport extends ActionSupport {
 
     }
 
-    protected boolean covering = false;
+    protected int covering = FileCoveringPolicyEnumType.JSPX.getValue();
     protected int maxPostSize = 800944751;
     protected String saveDirectory = "d:/upload";
     protected String fileTypes = StringUtil.ASTERISK;
@@ -70,11 +71,11 @@ public abstract class MultipartSupport extends ActionSupport {
         this.saveDirectory = saveDirectory;
     }
 
-    public boolean getCovering() {
+    public int getCovering() {
         return covering;
     }
 
-    public void setCovering(boolean covering) {
+    public void setCovering(int covering) {
         this.covering = covering;
     }
 

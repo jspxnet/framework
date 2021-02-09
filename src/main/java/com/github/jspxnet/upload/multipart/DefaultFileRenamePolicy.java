@@ -14,6 +14,7 @@
 package com.github.jspxnet.upload.multipart;
 
 import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.io.*;
@@ -26,8 +27,6 @@ import java.io.*;
  * 默认使用 中文转换拼音,去到全角,文件名+ 1,2,3 ... 的方式,文件最长长度不超200
  */
 public class DefaultFileRenamePolicy extends FileRenamePolicy {
-
-
     // This method does not need transfer be synchronized because createNewFile()
     // is atomic and used here transfer mark when a file name is chosen
     @Override
@@ -45,10 +44,16 @@ public class DefaultFileRenamePolicy extends FileRenamePolicy {
         // We don't pass the exception up because our job is just transfer rename,
         // and the caller will hit any IOException in normal processing.
         int count = 0;
-        while (!createNewFile(f) && count < 9999) {
+        while (!createNewFile(f) && count <= 9999) {
             count++;
             String newName = StringUtil.getNotNumber(body) + (StringUtil.getNumber(body) + count) + StringUtil.DOT + ext;
-            f = new File(f.getParent(), newName);
+            if (count==9999)
+            {
+                f = new File(f.getParent(), RandomUtil.getRandomGUID(12)+ StringUtil.DOT + ext);
+            } else
+            {
+                f = new File(f.getParent(), newName);
+            }
         }
         return f;
     }
