@@ -41,9 +41,7 @@ import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
@@ -346,7 +344,7 @@ public class UploadFileAction extends MultipartSupport {
                 return;
             }
             json = getUploadFileInfo(copyUploadFile, chunkJson, getBoolean(THUMBNAIL_VAR_NAME), getBoolean(MOBILE_VAR_NAME), uploadFileDAO.getNamespace(),
-                    language.getLang(LanguageRes.success), response);
+                    language.getLang(LanguageRes.success));
         }
         TXWebUtil.print(json.toString(), contentType, response);
 
@@ -430,7 +428,7 @@ public class UploadFileAction extends MultipartSupport {
         useFastUpload = getBoolean(USE_FAST_UPLOAD);
 
         int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
-        JSONObject json =  getUploadFileInfo(objects, chunkJson, thumbnail, mobile, uploadFileDAO.getNamespace(), language.getLang(LanguageRes.success), response);
+        JSONObject json =  getUploadFileInfo(objects, chunkJson, thumbnail, mobile, uploadFileDAO.getNamespace(), language.getLang(LanguageRes.success));
         if (editorUpload)
         {
             if (getResult()!=null)
@@ -920,9 +918,9 @@ public class UploadFileAction extends MultipartSupport {
      * @param mobile      是否有手机
      * @param namespace   命名空间
      * @param message     消息
-     * @param response    应答
+     * @return 返回json
      */
-    public JSONObject getUploadFileInfo(Object[] objects, JSONObject chunkJson, boolean thumbnail, boolean mobile, String namespace, String message, HttpServletResponse response) {
+    public JSONObject getUploadFileInfo(Object[] objects, JSONObject chunkJson, boolean thumbnail, boolean mobile, String namespace, String message) {
         IUploadFile uploadFile = (IUploadFile) objects[0];
         JSONObject json;
         if (chunkJson == null) {
