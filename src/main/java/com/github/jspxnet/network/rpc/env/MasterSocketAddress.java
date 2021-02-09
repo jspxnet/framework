@@ -88,7 +88,7 @@ public class MasterSocketAddress {
     }
 
 
-    public boolean remoteGroupSocketAddress(String groupName,InetSocketAddress socketAddress ) {
+    public boolean removeGroupSocketAddress(String groupName,InetSocketAddress socketAddress ) {
 
         List<InetSocketAddress> list = GROUP_LIST_MAP.get(groupName);
         if (list!=null)
