@@ -5,9 +5,9 @@ import com.github.jspxnet.upload.multipart.*;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/2/9 21:15
- * @description: 文件上传重命名方式
+ * author: chenYuan
+ * date: 2021/2/9 21:15
+ * description: 文件上传重命名方式
  **/
 public enum FileCoveringPolicyEnumType  {
 
