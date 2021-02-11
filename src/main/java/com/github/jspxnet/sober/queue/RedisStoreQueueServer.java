@@ -8,7 +8,6 @@ import com.github.jspxnet.sober.queue.cmd.SaveObjectCmd;
 import com.github.jspxnet.sober.queue.cmd.UpdateObjectCmd;
 import com.github.jspxnet.sober.queue.cmd.UpdateSqlCmd;
 import com.github.jspxnet.txweb.dao.GenericDAO;
-import com.github.jspxnet.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RQueue;
@@ -24,6 +23,13 @@ import java.util.concurrent.TimeUnit;
 public class RedisStoreQueueServer extends BaseRedisStoreQueue  {
 
     final private static Map<String, CmdRun> CMD_RUN_MAP = new HashMap<>();
+
+    static {
+        CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_SAVE, new SaveObjectCmd());
+        CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_UPDATE, new UpdateObjectCmd());
+        CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_UPDATE_SQL, new UpdateSqlCmd());
+    }
+
 
     /**
      * 保存成功日志记录，生产环境没必要保存
@@ -51,72 +57,54 @@ public class RedisStoreQueueServer extends BaseRedisStoreQueue  {
      */
     @Scheduled
     public void run() {
-        if (CMD_RUN_MAP.isEmpty()) {
-            CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_SAVE, new SaveObjectCmd());
-            CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_UPDATE, new UpdateObjectCmd());
-            CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_UPDATE_SQL, new UpdateSqlCmd());
-        }
-        while (genericDAO != null && redissonClient != null) {
-            try {
-                if (redissonClient.isShutdown()) {
-                    Thread.sleep(DateUtil.SECOND * second * 2);
-                    if (redissonClient.isShutdown()) {
-                        log.error("redissonClient.isShutdown 关闭存储队列");
-                        return;
-                    }
-                }
-                Thread.sleep(DateUtil.SECOND * second);
-                //锁定单线程begin
-                RBucket<Integer> bucket = redissonClient.getBucket(LOCK_SERVER_KEY);
-                if (bucket.isExists()) {
-                    continue;
-                }
-                bucket.set(second, second, TimeUnit.SECONDS);
-                //锁定单线程end
 
-                if (debug_times < 3) {
-                    log.debug("存储队列运行次数{}", (debug_times++));
-                }
-
-                //锁定为单线程允许,不要并行，数据库压力太大 begin
-                RQueue<?> queue = redissonClient.getQueue(STORE_KEY);
-                if (queue == null || queue.isEmpty()) {
-                    continue;
-                }
-                //null异常情况
-                CmdContainer cmdContainer = null;
-                try {
-                    Object cmdObj = queue.poll();
-                    if (cmdObj == null) {
-                        continue;
-                    }
-
-                    if (!(cmdObj instanceof CmdContainer)) {
-                        continue;
-                    }
-
-                    cmdContainer = (CmdContainer) cmdObj;
-                    if (!cmdContainer.isValid()) {
-                        continue;
-                    }
-                } catch (IllegalStateException e) {
-                    queue.clear();
-                    continue;
-                }
-                log.debug("存储队列queue长度:{}", queue.size());
-                //有效性判断
-                CmdRun cmdRun = CMD_RUN_MAP.get(cmdContainer.getCmd());
-                if (cmdRun == null) {
-                    continue;
-                }
-                cmdRun.setCmdContainer(cmdContainer);
-                cmdRun.setGenericDAO(genericDAO);
-                cmdRun.setSaveSucceedLog(saveSucceedLog);
-                cmdRun.execute();
-            } catch (Throwable e) {
-                e.printStackTrace();
-                log.debug("存储队列保存数据发生异常:", e);
+        try {
+            //锁定单线程begin
+            RBucket<Integer> bucket = redissonClient.getBucket(LOCK_SERVER_KEY);
+            if (bucket.isExists()) {
+                return;
             }
+            bucket.set(second, second, TimeUnit.SECONDS);
+            //锁定单线程end
+
+            if (debug_times < 3) {
+                log.debug("存储队列运行次数{}", (debug_times++));
+            }
+
+            //锁定为单线程允许,不要并行，数据库压力太大 begin
+            RQueue<?> queue = redissonClient.getQueue(STORE_KEY);
+            if (queue == null || queue.isEmpty()) {
+                return;
+            }
+            //null异常情况
+            CmdContainer cmdContainer = null;
+            Object cmdObj = queue.poll();
+            if (cmdObj == null) {
+                return;
+            }
+
+            if (!(cmdObj instanceof CmdContainer)) {
+                return;
+            }
+
+            cmdContainer = (CmdContainer) cmdObj;
+            if (!cmdContainer.isValid()) {
+                return;
+            }
+            log.debug("存储队列queue长度:{}", queue.size());
+            //有效性判断
+            CmdRun cmdRun = CMD_RUN_MAP.get(cmdContainer.getCmd());
+            if (cmdRun == null) {
+                return;
+            }
+            cmdRun.setCmdContainer(cmdContainer);
+            cmdRun.setGenericDAO(genericDAO);
+            cmdRun.setSaveSucceedLog(saveSucceedLog);
+            cmdRun.execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.debug("存储队列保存数据发生异常:", e);
+
         }
         log.debug("存储队列服务退出");
     }
