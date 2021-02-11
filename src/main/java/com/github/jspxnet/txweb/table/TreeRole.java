@@ -34,9 +34,11 @@ public class TreeRole extends OperateTable {
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;
 
-    @JsonIgnore
     @Column(caption = "机构ID", length = 32)
     private String organizeId = StringUtil.empty;
+
+    @Column(caption = "树ID", length = 32, notNull = true)
+    private String treeId = StringUtil.empty;
 
     public void joinNodeIds(String nodeIds) {
         String[] lines = ArrayUtil.join(StringUtil.split(this.nodeIds, StringUtil.SEMICOLON), StringUtil.split(nodeIds, StringUtil.SEMICOLON));

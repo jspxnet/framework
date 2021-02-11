@@ -9,7 +9,6 @@
  */
 package com.github.jspxnet.txweb.table;
 
-import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
@@ -41,9 +40,9 @@ public class MemberTree extends OperateTable {
     @Column(caption = "树名", length = 50, notNull = true)
     private String namespace = StringUtil.empty;
 
-    @JsonIgnore
     @Column(caption = "机构ID", length = 32)
     private String organizeId = StringUtil.empty;
 
-
+    @Column(caption = "树ID", length = 50, notNull = true)
+    private String treeId = StringUtil.empty;
 }
