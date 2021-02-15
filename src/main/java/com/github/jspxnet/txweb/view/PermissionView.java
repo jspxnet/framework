@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.view;
 
+import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.annotation.Describe;
@@ -18,13 +19,14 @@ import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.config.ActionConfigBean;
 import com.github.jspxnet.txweb.config.TXWebConfigManager;
 import com.github.jspxnet.txweb.dao.PermissionDAO;
+import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.MemberRole;
 import com.github.jspxnet.txweb.vo.OperateVo;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,17 +60,17 @@ public class PermissionView extends ActionSupport {
     }
 
     @Operate(caption = "命名空间列表")
-    public List<String> getNamespaceList() throws Exception {
+    public List<String> getNamespaceList()  {
         return WEB_CONFIG_MANAGER.getNamespaceList();
     }
 
     @Operate(caption = "继承关系表")
-    public Map<String, String> getExtendList() throws Exception {
+    public Map<String, String> getExtendList() {
         return WEB_CONFIG_MANAGER.getExtendList();
     }
 
     @Operate(caption = "动作映射表")
-    public Map<String, ActionConfigBean> getActionMap() throws Exception {
+    public Map<String, ActionConfigBean> getActionMap()  {
         return WEB_CONFIG_MANAGER.getActionMap(permissionDAO.getNamespace());
     }
 
@@ -133,6 +135,24 @@ public class PermissionView extends ActionSupport {
         return permissionDAO.getRoleList(find);
     }
 
+    @Operate(caption = "列表")
+    public int getTotalCount() throws Exception {
+        return permissionDAO.getRoleCount(find);
+    }
+
+    @Operate(caption = "分页列表", method = "list/page" )
+    public RocResponse<List<Role>> getListPage(@Param(caption = "查询数据",max = 20)String find,
+                                               @Param(caption = "行数",min = 1,max = 5000,value = "12") Integer count,
+                                               @Param(caption = "当前页数",max = 5000,value = "1") Integer currentPage
+                                               ) throws SQLException {
+        int totalCount = permissionDAO.getRoleCount(find);
+        if (totalCount <= 0) {
+            return RocResponse.success(new ArrayList<>(), language.getLang(LanguageRes.notDataFind));
+        }
+        List<Role> list =  permissionDAO.getRoleList(find,count,currentPage);
+        return RocResponse.success(list).setTotalCount(count).setCurrentPage(currentPage);
+    }
+
 
     @Operate(caption = "得到选项")
     public String getOptionList() throws SQLException {
@@ -149,10 +169,6 @@ public class PermissionView extends ActionSupport {
         return sb.toString();
     }
 
-    @Operate(caption = "列表")
-    public int getTotalCount() throws Exception {
-        return permissionDAO.getRoleCount(find);
-    }
 
 
 }

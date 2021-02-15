@@ -47,6 +47,8 @@ public interface PermissionDAO extends SoberSupport {
 
     boolean updateCongealType(String[] ids, int congealType);
 
+    List<Role> getRoleList(String find, int count, int page);
+
     Map<String, ActionConfigBean> getActionList() throws Exception;
 
     boolean deleteRoles(String[] ids) ;

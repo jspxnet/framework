@@ -172,6 +172,27 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         return criteria.intUniqueResult();
     }
 
+
+
+    /**
+     * 得到本软件的角色列表
+     *
+     * @return 返回角色列表
+     */
+    @Override
+    public List<Role> getRoleList(String find,int count,int page) {
+        Criteria criteria = createCriteria(Role.class).add(Expression.eq("namespace", namespace));
+        if (!StringUtil.isNull(find)) {
+            criteria = criteria.add(Expression.like("name", "%" + find + "%"));
+        }
+        if (!StringUtil.isEmpty(organizeId)) {
+            criteria = criteria.add(Expression.eq("organizeId", organizeId));
+        }
+        return criteria.addOrder(Order.desc("sortDate")).addOrder(Order.desc("userType")).setTotalCount(count).setCurrentPage(page)
+                .list(false);
+    }
+
+
     /**
      * 得到本软件的所有动作事件
      *
@@ -179,7 +200,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
      * @throws Exception 异常
      */
     @Override
-    public Map<String, ActionConfigBean> getActionList() throws Exception {
+    public Map<String, ActionConfigBean> getActionList() {
         WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
         final Map<String, ActionConfigBean> actionConfigMap = new HashMap<String, ActionConfigBean>();
         final Map<String, String> map = webConfigManager.getExtendList();
