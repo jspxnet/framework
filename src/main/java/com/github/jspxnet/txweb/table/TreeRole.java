@@ -23,20 +23,21 @@ public class TreeRole extends OperateTable {
     @Column(caption = "ID", notNull = true)
     private long id = 0;
 
-    //总的常量，默认为 0
-    @Column(caption = "角色", length = 32)
+    @Column(caption = "角色", length = 32, notNull = true)
     private String roleId = StringUtil.empty;
 
     @Column(caption = "栏目ID", length = 10000, notNull = true)
     private String nodeIds = StringUtil.empty;
 
-    @JsonIgnore
+    //只做记录,不做逻辑关系
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;
 
+    //只做记录,不做逻辑关系
     @Column(caption = "机构ID", length = 32)
     private String organizeId = StringUtil.empty;
 
+    //逻辑关系对应数结构id
     @Column(caption = "树ID", length = 32, notNull = true)
     private String treeId = StringUtil.empty;
 
