@@ -197,7 +197,6 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
      * 得到本软件的所有动作事件
      *
      * @return 得到动作列表
-     * @throws Exception 异常
      */
     @Override
     public Map<String, ActionConfigBean> getActionList() {
