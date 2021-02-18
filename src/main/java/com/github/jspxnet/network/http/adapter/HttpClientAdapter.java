@@ -20,6 +20,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
@@ -242,6 +243,67 @@ public class HttpClientAdapter implements HttpClient {
         return param;
     }
 
+    @Override
+    public HttpEntity put(String url, Map<String, String> params, Map<String, String> headers) throws ParseException, IOException {
+        HttpPut httpPost = new HttpPut(url);
+        if (params != null && !params.isEmpty()) {
+            UrlEncodedFormEntity postEntity = new UrlEncodedFormEntity(getParam(params), encode);
+            postEntity.setContentEncoding(encode);
+            httpPost.setEntity(postEntity);
+        }
+        if (headers != null && !headers.isEmpty()) {
+            addHeaders(httpPost, headers);
+        }
+        httpResponse = httpClient.execute(httpPost);
+        return httpResponse.getEntity();
+    }
+
+    @Override
+    public HttpEntity put(String url, JSONObject json, Map<String, String> headers) throws Exception
+    {
+        if (headers == null || headers.isEmpty()) {
+            return null;
+        }
+        HttpPut httpPost = new HttpPut(url);
+        if (!headers.isEmpty()) {
+            addHeaders(httpPost, headers);
+        }
+        String requestedWith = headers.get("X-Requested-With");
+        if (requestedWith != null && requestedWith.contains(Environment.rocSecret)) {
+            String k1 = RandomUtil.getRandomAlphanumeric(16);
+            String iv = RandomUtil.getRandomAlphanumeric(16);
+
+            Encrypt symmetryEncrypt = (Encrypt) ClassUtil.newInstance(com.github.jspxnet.security.symmetry.impl.AESEncrypt.class.getName());
+            symmetryEncrypt.setCipherIv(iv);
+            symmetryEncrypt.setSecretKey(k1);
+            symmetryEncrypt.setCipherAlgorithm(CIPHER_ALGORITHM);
+            String data = symmetryEncrypt.getEncode(json.toString());
+            String ps = k1 + '-' + iv;
+
+            AsyEncrypt asyEncrypt = EnvFactory.getAsymmetricEncrypt();
+            byte[] key = asyEncrypt.encryptByPublicKey(ps.getBytes(Environment.defaultEncode), EnvFactory.getPublicKey());
+            JSONObject posts = new JSONObject();
+            posts.put("keyType", "rsa");
+            posts.put("dataType", "aes");
+            posts.put("key", EncryptUtil.byteToHex(key));
+            posts.put("data", data);
+            json = posts;
+        }
+        if (json != null) {
+            StringEntity s = new StringEntity(json.toString(4), encode);
+            s.setContentEncoding(encode);
+            s.setContentType("application/json;charset=" + encode);//发送json数据需要设置contentType
+            httpPost.setEntity(s);
+        }
+        httpResponse = httpClient.execute(httpPost);
+        return httpResponse.getEntity();
+    }
+
+    @Override
+    public String put(String url, JSONObject json) throws Exception {
+        return EntityUtils.toString(put(url, json, defaultHeaders));
+    }
+
     /**
      * POST 请求
      *
@@ -254,6 +316,7 @@ public class HttpClientAdapter implements HttpClient {
      */
     @Override
     public HttpEntity post(String url, Map<String, String> params, Map<String, String> headers) throws ParseException, IOException {
+
         HttpPost httpPost = new HttpPost(url);
         if (params != null && !params.isEmpty()) {
             UrlEncodedFormEntity postEntity = new UrlEncodedFormEntity(getParam(params), encode);

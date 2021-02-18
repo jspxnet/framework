@@ -81,6 +81,12 @@ public interface HttpClient {
 
     String upload(File[] files, String name);
 
+    HttpEntity put(String url, Map<String, String> params, Map<String, String> headers) throws ParseException, IOException;
+
+    HttpEntity put(String url, JSONObject json, Map<String, String> headers) throws Exception;
+
+    String put(String url, JSONObject json) throws Exception;
+
     HttpEntity post(String url, Map<String, String> params, Map<String, String> headers) throws ParseException, IOException;
 
     String post(String url, Map<String, String> params) throws ParseException, IOException;
