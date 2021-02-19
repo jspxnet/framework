@@ -10,10 +10,12 @@ import com.ecwid.consul.v1.health.model.HealthService;
 import com.ecwid.consul.v1.kv.model.GetValue;
 import com.github.jspxnet.network.consul.ConsulConfig;
 import com.github.jspxnet.network.consul.ConsulService;
+import com.github.jspxnet.network.consul.DiscoveryService;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
@@ -58,29 +60,28 @@ public class EcwidConsulServiceImpl implements ConsulService {
         }
     }
 
+
     /**
      *
-     * @param serviceId 服务id
-     * @param serviceName 服务名称
-     * @param tags tag
-     * @param ip ip地址
-     * @param port  端口
-     * @param path 访问路径
+     * @param discoveryService 注册对象
      */
     @Override
-    public void register(String serviceId,String serviceName,String tags,String ip,int port,String path) {
+    public void register(DiscoveryService discoveryService) {
         // register new service
         NewService newService = new NewService();
-        newService.setId(serviceId);
-        newService.setName(serviceName);
-        newService.setTags(Arrays.asList(StringUtil.split(tags," ")));
-        newService.setPort(port);
+        newService.setId(discoveryService.getId());
+        newService.setName(discoveryService.getName());
+        newService.setTags(Arrays.asList(StringUtil.split(discoveryService.getTags()," ")));
+        newService.setPort(discoveryService.getPort());
+        newService.setAddress(discoveryService.getAddress());
+        newService.setEnableTagOverride(true);
+
         NewService.Check serviceCheck = new NewService.Check();
-        serviceCheck.setHttp("http://"+ip+":" + port + "/" + path);
+        serviceCheck.setHttp("http://"+discoveryService.getAddress()+":" + discoveryService.getPort() + "/" + discoveryService.getPath());
         serviceCheck.setTlsSkipVerify(false);
         serviceCheck.setInterval("10s");
         newService.setCheck(serviceCheck);
-        client.agentServiceRegister(newService);
+        register(newService);
     }
 
     /**
@@ -110,9 +111,32 @@ public class EcwidConsulServiceImpl implements ConsulService {
      */
     @Override
     public List<HealthService> getHealthServices(String serviceName) {
-        HealthServicesRequest consulRequest = HealthServicesRequest.newBuilder().build();
+
+        HealthServicesRequest.Builder builder = HealthServicesRequest.newBuilder();
+        builder.setPassing(true);
+        HealthServicesRequest consulRequest = builder.build();
         Response<List<HealthService>> healthyServices = client.getHealthServices(serviceName,consulRequest);
         return healthyServices.getValue();
+    }
+
+    /**
+     * 随机的得到一个当前可用的
+     * @param serviceName 请求的服务名称
+     * @return 返回一个当前可用的服务
+     */
+    @Override
+    public HealthService.Service getRunServices(String serviceName) {
+        List<HealthService> list = getHealthServices(serviceName);
+        if (ObjectUtil.isEmpty(list))
+        {
+            return null;
+        }
+        int to = list.size()-1;
+        if (to<=0)
+        {
+            to = RandomUtil.getRandomInt(0,list.size()-1);
+        }
+        return list.get(to).getService();
     }
 
     /**

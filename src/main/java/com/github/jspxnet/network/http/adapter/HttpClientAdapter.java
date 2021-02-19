@@ -259,7 +259,7 @@ public class HttpClientAdapter implements HttpClient {
     }
 
     @Override
-    public HttpEntity put(String url, JSONObject json, Map<String, String> headers) throws Exception
+    public HttpEntity put(JSONObject json, Map<String, String> headers) throws Exception
     {
         if (headers == null || headers.isEmpty()) {
             return null;
@@ -300,8 +300,8 @@ public class HttpClientAdapter implements HttpClient {
     }
 
     @Override
-    public String put(String url, JSONObject json) throws Exception {
-        return EntityUtils.toString(put(url, json, defaultHeaders));
+    public String put(JSONObject json) throws Exception {
+        return EntityUtils.toString(put(json, defaultHeaders));
     }
 
     /**

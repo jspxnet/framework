@@ -12,16 +12,14 @@ import java.util.List;
  * description: Consul接口
  **/
 public interface ConsulService {
+
+
     /**
      *
-     * @param serviceId 服务id
-     * @param serviceName 服务名称
-     * @param tags tag
-     * @param ip ip地址
-     * @param port  端口
-     * @param path 访问路径
+     * @param discoveryService 注册对象
      */
-    void register(String serviceId,String serviceName,String tags,String ip,int port,String path);
+    void register(DiscoveryService discoveryService);
+
     /**
      *
      * @param newService 注册参数
@@ -38,6 +36,9 @@ public interface ConsulService {
      * @return 得到健康的服务组
      */
     List<HealthService> getHealthServices(String serviceName);
+
+    HealthService.Service getRunServices(String serviceName);
+
     /**
      *
      * @param key key
