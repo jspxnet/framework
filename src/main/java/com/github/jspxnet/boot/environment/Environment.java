@@ -615,5 +615,7 @@ public abstract class Environment {
 
     //网络RPC调用服务发现模式
     static public final String serviceDiscoverMode = "serviceDiscoverMode";
+    static public final String consul = "consul";
+
 
 }

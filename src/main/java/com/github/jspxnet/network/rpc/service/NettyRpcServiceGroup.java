@@ -3,6 +3,7 @@ package com.github.jspxnet.network.rpc.service;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.github.jspxnet.boot.DaemonThreadFactory;
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.network.consul.ConsulService;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
@@ -32,14 +33,12 @@ public class NettyRpcServiceGroup {
     private static boolean started = false;
     private static final NettyRpcServiceGroup INSTANCE = new NettyRpcServiceGroup();
 
-
-
     public static NettyRpcServiceGroup getInstance(){
         return INSTANCE;
     }
     private static final  Map<InetSocketAddress,NettyRpcServer> SERVER_LIST = new HashMap<>();
     private static final RouteService routeService = new RouteService();
-    private static RpcConfig RPC_CONFIG = RpcConfig.getInstance();
+    private static final RpcConfig RPC_CONFIG = RpcConfig.getInstance();
     /**
      * 指定启动一个服务器
      *
@@ -86,7 +85,7 @@ public class NettyRpcServiceGroup {
             NettyRpcServer nettyRpcServer = createService(routeSession);
             threadFactory.newThread(nettyRpcServer).start();
 
-            if ("consul".equalsIgnoreCase(RPC_CONFIG.getServiceDiscoverMode()))
+            if (Environment.consul.equalsIgnoreCase(RPC_CONFIG.getServiceDiscoverMode()))
             {
                 //注册
                 ConsulService consulService = EnvFactory.getBeanFactory().getBean(ConsulService.class);
@@ -96,10 +95,11 @@ public class NettyRpcServiceGroup {
                     log.info("注册发现服务是用consul,但是没有找到ioc中配置的consulService");
                     continue;
                 }
+
                 NewService discoveryService = new NewService();
                 discoveryService.setId(nettyRpcServer.getId());
                 discoveryService.setName(nettyRpcServer.getName());
-                discoveryService.setAddress(IpUtil.getIp(routeSession.getSocketAddress()));
+                discoveryService.setAddress(IpUtil.getOnlyIp(routeSession.getSocketAddress()));
                 discoveryService.setPort(routeSession.getSocketAddress().getPort());
                 discoveryService.setTags(Arrays.asList(StringUtil.split("jspx rpc"," ")));
 
@@ -116,7 +116,7 @@ public class NettyRpcServiceGroup {
             groupCount--;
         }
 
-        if (!"consul".equalsIgnoreCase(RPC_CONFIG.getServiceDiscoverMode()))
+        if (!Environment.consul.equalsIgnoreCase(RPC_CONFIG.getServiceDiscoverMode()))
         {
             DaemonThreadFactory routeThreadFactory = new DaemonThreadFactory(RPC_ROUTE_THREAD_NAME);
             routeThreadFactory.newThread(routeService).start();
@@ -132,26 +132,28 @@ public class NettyRpcServiceGroup {
         }
 
         started = false;
-        routeService.shutdown();
-
-        for (NettyRpcServer nettyRpcServer:SERVER_LIST.values())
+        String serviceDiscoverMode = RPC_CONFIG.getServiceDiscoverMode();
+        if (!Environment.consul.equalsIgnoreCase(serviceDiscoverMode))
         {
-            if (nettyRpcServer==null)
+            routeService.shutdown();
+        }
+        ConsulService consulService = EnvFactory.getBeanFactory().getBean(ConsulService.class);
+        if (consulService!=null)
+        {
+            for (NettyRpcServer nettyRpcServer:SERVER_LIST.values())
             {
-                continue;
-            }
-            if ("consul".equalsIgnoreCase(RPC_CONFIG.getServiceDiscoverMode()))
-            {
-                ConsulService consulService = EnvFactory.getBeanFactory().getBean(ConsulService.class);
-                if (consulService==null)
+                if (nettyRpcServer==null)
                 {
-                    log.info("注册发现服务是用consul,但是没有找到ioc中配置的consulService");
                     continue;
                 }
-                consulService.deregister(nettyRpcServer.getId());
+                if (Environment.consul.equalsIgnoreCase(serviceDiscoverMode))
+                {
+                    consulService.deregister(nettyRpcServer.getId());
+                }
+                nettyRpcServer.close();
             }
-            nettyRpcServer.close();
         }
+
 
 
     }

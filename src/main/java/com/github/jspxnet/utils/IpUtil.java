@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.net.*;
 import java.text.Normalizer;
@@ -32,7 +34,7 @@ import java.util.regex.Pattern;
  * println("bindip.isIP()=" + bindip.isIpExpression(ipaddress);
  * println("bindip.interiorly()=" + bindip.interiorly(ipaddress));
  */
-
+@Slf4j
 public class IpUtil {
     final static private char[] ExpChar = new char[]{'@', '#', '$', '%', '^', '<', '>', '&', '+', '\\', '\'', '\"'};
 
@@ -94,13 +96,14 @@ public class IpUtil {
             String[] blist2 = StringUtil.split(ips[1], "\\.");
             for (int i = 0; i < ipList.length; i++) {
                 if (StringUtil.ASTERISK.equals(alist1[i]) || (StringUtil.toInt(ipList[i]) >= 0 && StringUtil.toInt(ipList[i]) >= StringUtil.toInt(alist1[i]))) {
-
+                    //...
                 } else {
                     return false;
                 }
             }
             for (int i = 0; i < ipList.length; i++) {
                 if (StringUtil.ASTERISK.equals(blist2[i]) || (StringUtil.toInt(ipList[i]) >= 0 && StringUtil.toInt(ipList[i]) <= StringUtil.toInt(blist2[i]))) {
+                    //..
                 } else {
                     return false;
                 }
@@ -197,6 +200,35 @@ public class IpUtil {
         return host;
     }
 
+    public static String getOnlyIp(InetAddress address) {
+        if (address == null) {
+            return StringUtil.empty;
+        }
+        String host = address.getHostAddress();
+        if (host != null && host.contains("/")) {
+            host = StringUtil.substringAfter(host, "/");
+        }
+        if (host.contains(":"))
+        {
+            return StringUtil.substringBefore(host,":");
+        }
+        return host;
+    }
+
+    public static String getOnlyIp(SocketAddress address) {
+        if (address == null) {
+            return StringUtil.empty;
+        }
+        String host = address.toString();
+        if (host != null && host.contains("/")) {
+            host = StringUtil.substringAfter(host, "/");
+        }
+        if (host.contains(":"))
+        {
+            return StringUtil.substringBefore(host,":");
+        }
+        return host;
+    }
 
     /**
      * @param min 范围，最小
@@ -260,7 +292,7 @@ public class IpUtil {
         return (b >= 0) ? (int) b : ((int) b) + 256;
     }
 
-    public static InetAddress publicIP() {
+    public static InetAddress getPublicIP() {
 
         try {
             InetAddress[] ia = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
@@ -307,6 +339,7 @@ public class IpUtil {
             }
             return ia[0];
         } catch (java.net.UnknownHostException e) {
+
             System.err.println("ERROR: (internal) " + e.getMessage());
 
         }

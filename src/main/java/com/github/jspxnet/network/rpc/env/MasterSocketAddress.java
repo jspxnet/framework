@@ -1,5 +1,6 @@
 package com.github.jspxnet.network.rpc.env;
 
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
@@ -53,7 +54,7 @@ public class MasterSocketAddress {
         List<InetSocketAddress> defaultSocketAddressList = GROUP_LIST_MAP.get(serviceName);
         if (ObjectUtil.isEmpty(defaultSocketAddressList))
         {
-            defaultSocketAddressList = GROUP_LIST_MAP.get("default");
+            defaultSocketAddressList = GROUP_LIST_MAP.get(Environment.defaultValue);
         }
         if (ObjectUtil.isEmpty(defaultSocketAddressList))
         {

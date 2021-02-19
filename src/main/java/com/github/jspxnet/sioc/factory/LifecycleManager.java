@@ -62,21 +62,18 @@ public class LifecycleManager implements Lifecycle {
      */
     @Override
     public void shutdown() {
-        synchronized (this)
-        {
-            for (String key : CACHE.keySet()) {
-                LifecycleObject lifecycleObject = CACHE.get(key);
-                if (lifecycleObject != null && lifecycleObject.getObject() != null) {
-                    try {
-                        Object bean = lifecycleObject.getObject();
-                        AnnotationUtil.invokeDestroy(bean);
-                    } catch (Exception e) {
-                        log.error(key, e);
-                    }
+        for (String key : CACHE.keySet()) {
+            LifecycleObject lifecycleObject = CACHE.get(key);
+            if (lifecycleObject != null && lifecycleObject.getObject() != null) {
+                try {
+                    Object bean = lifecycleObject.getObject();
+                    AnnotationUtil.invokeDestroy(bean);
+                } catch (Exception e) {
+                    log.error(key, e);
                 }
             }
-            CACHE.clear();
         }
+        CACHE.clear();
     }
 
 }

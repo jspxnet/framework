@@ -1,17 +1,15 @@
 package com.github.jspxnet.network.consul;
 
 import com.github.jspxnet.sober.annotation.Column;
-import com.github.jspxnet.txweb.annotation.Param;
 import lombok.Data;
-
 import java.io.Serializable;
 
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/2/19 17:47
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/2/19 17:47
+ * description: 简单的注册类型
  **/
 @Data
 public class DiscoveryService implements Serializable {

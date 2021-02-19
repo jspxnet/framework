@@ -257,48 +257,52 @@ public class JspxCoreListener implements ServletContextListener {
     public void contextDestroyed(javax.servlet.ServletContextEvent servletContextEvent) {
         log.info(Environment.frameworkName + " " + copyright + " shutdown start");
 
-       //定时任务
-        SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
-        schedulerManager.shutdown();
-        log.info("scheduler shutdown");
-
-        BeanFactory beanFactory = EnvFactory.getBeanFactory();
-        beanFactory.shutdown();
-        log.info("bean factory shutdown");
-
         //Evasive配置卸载begin
         EvasiveConfiguration.getInstance().shutdown();
         log.info("Evasive config clean");
         //Evasive配置卸载begin
 
-        //关闭缓存和线程begin
-        JSCacheManager.shutdown();
-        log.info("JSCache shutdown");
-        //关闭缓存和线程end
+
+        //定时任务
+        SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
+        schedulerManager.shutdown();
+        log.info("scheduler shutdown");
 
         if (RpcConfig.getInstance().isUseNettyRpc()) {
             log.info("关闭RPC服务器");
             NettyRpcServiceGroup.getInstance().stop();
         }
 
-        DaemonThreadFactory.shutdown();
-        log.info("Thread shutdown");
+        BeanFactory beanFactory = EnvFactory.getBeanFactory();
+        beanFactory.shutdown();
+        log.info("bean factory shutdown");
 
-      //卸载jdbc驱动begin
+        //关闭缓存和线程begin
+        JSCacheManager.shutdown();
+        log.info("JSCache shutdown");
+        //关闭缓存和线程end
+
+        try {
+            DaemonThreadFactory.shutdown();
+            log.info("Thread shutdown");
+        } catch (Exception exception) {
+            //..
+        }
+        //卸载jdbc驱动begin
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         Driver d = null;
         while (drivers.hasMoreElements()) {
             try {
                 d = drivers.nextElement();
                 DriverManager.deregisterDriver(d);
-                log.info(String.format("jdbc driver %s deregister", d));
+                log.debug(String.format("jdbc driver %s deregister", d));
             } catch (SQLException ex) {
                 log.error(String.format("Error deregistering driver %s", d));
             }
         }
 
         try {
-            ClassUtil.invokeStaticMethod("com.mysql.jdbc.AbandonedConnectionCleanupThread","uncheckedShutdown",null);
+          ClassUtil.invokeStaticMethod("com.mysql.jdbc.AbandonedConnectionCleanupThread","uncheckedShutdown",null);
         } catch (Exception e)
         {
             try {
@@ -308,6 +312,8 @@ public class JspxCoreListener implements ServletContextListener {
             }
             //...
         }
+
+
         //关闭定时器和其他线程end
         isRun = false;
         log.info(Environment.frameworkName + " " + copyright + " dispatcher shutdown completed ");

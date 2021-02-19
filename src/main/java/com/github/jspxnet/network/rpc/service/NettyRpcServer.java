@@ -38,7 +38,7 @@ public class NettyRpcServer implements Runnable {
     }
 
     public String getId() {
-        return StringUtil.replace(StringUtil.replace(IpUtil.getIp(socketAddress),".","") + "-" + socketAddress.getPort() + name,"/","-");
+        return StringUtil.replace(StringUtil.replace(IpUtil.getOnlyIp(socketAddress),".","") + "-" + socketAddress.getPort() + "-" +  name,"/","-");
     }
 
     public String getName() {
@@ -52,9 +52,9 @@ public class NettyRpcServer implements Runnable {
         bossGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory("NettyRpcServerBoss"));
         //CPU 内核数
         workerGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory("NettyRpcServerWorker"));
+        ServerBootstrap bootstrap = new ServerBootstrap();
         try
         {
-            ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .localAddress(socketAddress)
@@ -75,11 +75,8 @@ public class NettyRpcServer implements Runnable {
             log.debug("--rpc service {} started and listen on port:{}",name,channelFuture.channel().localAddress());
             channelFuture.channel().closeFuture().addListener(ChannelFutureListener.CLOSE).sync();
         }
-        catch (Exception e)
+        catch (InterruptedException ignored)
         {
-            log.error("RPC服务器启动失败",e);
-            isRun = false;
-        }finally {
             close();
         }
     }
@@ -90,6 +87,11 @@ public class NettyRpcServer implements Runnable {
 
     public void close()
     {
+        if (isRun)
+        {
+            return;
+        }
+        isRun = false;
         log.info("RPC 执行了关闭调用");
         if (workerGroup!=null) {
             workerGroup.shutdownGracefully();
@@ -97,7 +99,6 @@ public class NettyRpcServer implements Runnable {
         if (bossGroup!=null) {
             bossGroup.shutdownGracefully();
         }
-        isRun = false;
     }
 
 

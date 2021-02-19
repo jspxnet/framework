@@ -45,7 +45,7 @@ public class DaemonThreadFactory implements ThreadFactory {
     {
         for (Thread thread:THREAD_LIST)
         {
-            if (!thread.isInterrupted())
+            if (thread.isAlive()&&!thread.isInterrupted())
             {
                 thread.interrupt();
                 try {

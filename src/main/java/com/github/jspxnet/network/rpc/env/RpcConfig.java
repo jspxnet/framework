@@ -56,8 +56,12 @@ public class RpcConfig {
     //路由秒数
     final static private String ROUTES_SECOND = "rpc.routesSecond";
 
-    //路由秒数
+    //分布式服务器发现模式
     final static private String SERVICE_DISCOVER_MODE = "serviceDiscoverMode";
+
+    //127.0.0.1IP自动转内网ip
+    final static private String LOCAL_IP_AUTO_PUBLIC_IP = "localIpAutoPublicIp";
+
 
 
 
@@ -117,7 +121,24 @@ public class RpcConfig {
 
     public List<InetSocketAddress> getLocalAddressList() {
         String localAddressStr = getLocalAddress();
-        return IpUtil.getSocketAddressList(localAddressStr);
+        List<InetSocketAddress> result = IpUtil.getSocketAddressList(localAddressStr);
+        if (getLocalIpAutoPublicIp()&&result!=null)
+        {
+            String ip = IpUtil.getPublicIP().getHostAddress();
+            if (!StringUtil.isNull(ip))
+            {
+                for (int i=0;i<result.size();i++)
+                {
+                    InetSocketAddress address = result.get(i);
+                    if ("127.0.0.1".equalsIgnoreCase(IpUtil.getOnlyIp(address)))
+                    {
+                        address = new InetSocketAddress(ip,address.getPort());
+                        result.set(i,address);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     public String[] getLocalGroupList() {
@@ -138,7 +159,6 @@ public class RpcConfig {
     }
 
 
-
     public String getSecretKey() {
         return ENV_TEMPLATE.getString(Environment.secretKey, Environment.defaultDrug);
     }
@@ -151,6 +171,9 @@ public class RpcConfig {
         return StringUtil.split(ENV_TEMPLATE.getString(GROUP_NAMES, "default"),StringUtil.SEMICOLON);
     }
 
+    public boolean getLocalIpAutoPublicIp() {
+        return ENV_TEMPLATE.getBoolean(LOCAL_IP_AUTO_PUBLIC_IP);
+    }
 
     /**
      *

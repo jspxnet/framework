@@ -12,9 +12,9 @@ import java.net.InetSocketAddress;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/2/19 20:01
- * @description: 查询分布式调用适配器
+ * author: chenYuan
+ * date: 2021/2/19 20:01
+ * description: 查询分布式调用适配器
  **/
 @Slf4j
 public  class DiscoveryServiceAddress {
@@ -36,13 +36,17 @@ public  class DiscoveryServiceAddress {
             }
         }
 
-        if ("consul".equalsIgnoreCase(serviceDiscoverMode))
+        if (Environment.consul.equalsIgnoreCase(serviceDiscoverMode))
         {
             if (consulService==null)
             {
-                consulService =   EnvFactory.getBeanFactory().getBean(ConsulService.class);
+                consulService = EnvFactory.getBeanFactory().getBean(ConsulService.class);
             }
-            HealthService.Service service  = consulService.getRunServices(serviceName);
+            HealthService.Service service  = consulService.getRunServices(Environment.defaultValue);
+            if (service==null)
+            {
+                service  = consulService.getRunServices(serviceName);
+            }
             if (service==null)
             {
                 log.error("consul 当前没有可用的访问");
