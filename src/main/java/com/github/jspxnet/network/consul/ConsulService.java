@@ -36,7 +36,11 @@ public interface ConsulService {
      * @return 得到健康的服务组
      */
     List<HealthService> getHealthServices(String serviceName);
-
+    /**
+     * 随机的得到一个当前可用的
+     * @param serviceName 请求的服务名称
+     * @return 返回一个当前可用的服务
+     */
     HealthService.Service getRunServices(String serviceName);
 
     /**

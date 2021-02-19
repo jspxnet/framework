@@ -613,4 +613,7 @@ public abstract class Environment {
     static public final String HTTP_RPC_DOMAIN = "http.rpc.domain";
     static public final String HTTP_RPC_ROUTES = "http.rpc.routes.";
 
+    //网络RPC调用服务发现模式
+    static public final String serviceDiscoverMode = "serviceDiscoverMode";
+
 }

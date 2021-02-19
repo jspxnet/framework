@@ -3,11 +3,12 @@ package com.github.jspxnet.network.rpc.env;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.enums.YesNoEnumType;
+import com.github.jspxnet.network.rpc.model.route.RouteSession;
 import com.github.jspxnet.utils.IpUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ import java.util.List;
  * description: rpc服务配置
  **/
 public class RpcConfig {
-    private EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
+    final static EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     final static private String USE_NETTY_RPC = "useNettyRpc";
     final static private String NETTY_RPC_DEBUG = "nettyRpcDebug";
 
@@ -55,12 +56,16 @@ public class RpcConfig {
     //路由秒数
     final static private String ROUTES_SECOND = "rpc.routesSecond";
 
+    //路由秒数
+    final static private String SERVICE_DISCOVER_MODE = "serviceDiscoverMode";
 
-    final static private RpcConfig instance = new RpcConfig();
+
+
+    final static private RpcConfig INSTANCE = new RpcConfig();
 
     public static RpcConfig getInstance() {
 
-        return instance;
+        return INSTANCE;
     }
 
 
@@ -128,6 +133,11 @@ public class RpcConfig {
         return IpUtil.getSocketAddressList(masterGroupStr);
     }
 
+    public String getServiceDiscoverMode() {
+        return ENV_TEMPLATE.getString(SERVICE_DISCOVER_MODE);
+    }
+
+
 
     public String getSecretKey() {
         return ENV_TEMPLATE.getString(Environment.secretKey, Environment.defaultDrug);
@@ -139,5 +149,36 @@ public class RpcConfig {
 
     public String[] getGroupNames() {
         return StringUtil.split(ENV_TEMPLATE.getString(GROUP_NAMES, "default"),StringUtil.SEMICOLON);
+    }
+
+
+    /**
+     *
+     * @return 得到配置的路由表
+     */
+    public List<RouteSession> getConfigRouteSessionList()
+    {
+
+        List<RouteSession> result = new ArrayList<>();
+        //初始化默认的路由表,就是自己的IP地址
+        String[] groupNames = getLocalGroupList();
+        List<InetSocketAddress> list = getLocalAddressList();
+        int i = 0;
+        for (InetSocketAddress socketAddress:list)
+        {
+            RouteSession routeSession = new RouteSession();
+            routeSession.setSocketAddress(socketAddress);
+            routeSession.setOnline(YesNoEnumType.YES.getValue());
+            routeSession.setHeartbeatTimes(0);
+            if (groupNames.length>=list.size())
+            {
+                routeSession.setGroupName(groupNames[i]);
+            } else
+            {
+                routeSession.setGroupName(groupNames[0]);
+            }
+            result.add(routeSession);
+        }
+        return result;
     }
 }

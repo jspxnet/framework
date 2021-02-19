@@ -2,6 +2,9 @@ package com.github.jspxnet.network.rpc.service;
 
 import com.github.jspxnet.boot.DaemonThreadFactory;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
+import com.github.jspxnet.network.rpc.model.route.RouteSession;
+import com.github.jspxnet.utils.IpUtil;
+import com.github.jspxnet.utils.StringUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
@@ -10,6 +13,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 /**
@@ -21,16 +26,24 @@ import java.net.SocketAddress;
  **/
 @Slf4j
 public class NettyRpcServer implements Runnable {
-
-
     private NioEventLoopGroup bossGroup = null;
     private NioEventLoopGroup workerGroup = null; //CPU 内核数
-    private final SocketAddress socketAddress;
+    private final InetSocketAddress socketAddress;
+    private final String name;
     private boolean isRun = false;
-    public NettyRpcServer(SocketAddress socketAddress) {
-        this.socketAddress = socketAddress;
+
+    public NettyRpcServer(RouteSession routeSession) {
+        this.socketAddress = routeSession.getSocketAddress();
+        this.name = routeSession.getGroupName();
     }
 
+    public String getId() {
+        return StringUtil.replace(StringUtil.replace(IpUtil.getIp(socketAddress),".","") + "-" + socketAddress.getPort() + name,"/","-");
+    }
+
+    public String getName() {
+        return name;
+    }
 
     @Override
     public void run()
@@ -56,11 +69,10 @@ public class NettyRpcServer implements Runnable {
             //UnpooledByteBufAllocator.DEFAULT 非池方式
             //PooledByteBufAllocator.DEFAULT  池方式
 
-
             ChannelFuture channelFuture = bootstrap.bind().sync();
             isRun = true;
 
-            log.debug("-- started and listen on port:" + channelFuture.channel().localAddress());
+            log.debug("--rpc service {} started and listen on port:{}",name,channelFuture.channel().localAddress());
             channelFuture.channel().closeFuture().addListener(ChannelFutureListener.CLOSE).sync();
         }
         catch (Exception e)

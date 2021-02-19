@@ -38,6 +38,7 @@ public class JSCacheManager implements CacheManager {
     private static final List<Cache> caches = Collections.synchronizedList(new ArrayList<>());
     private static final CacheManager CACHE_MANAGER = new JSCacheManager();
 
+
     /**
      * 公开的构造子，外界可以直接实例化
      */
@@ -132,7 +133,8 @@ public class JSCacheManager implements CacheManager {
                 namespace = StringUtil.substringAfterLast(key, "@");
             }
             try {
-                if (beanFactory.containsBean(cacheName, namespace)) {
+                if (beanFactory.containsBean(cacheName, namespace))
+                {
                     Object o = beanFactory.getBean(cacheName, namespace);
                     if ((o instanceof Cache)) {
                         return (Cache) o;
@@ -285,7 +287,8 @@ public class JSCacheManager implements CacheManager {
             removeAll(cacheName);
             return;
         }
-        Set<String>  set = cache.getKeys();
+
+        Set<String> set = cache.getKeys();
         if (set!=null)
         {
             for (String key : set) {

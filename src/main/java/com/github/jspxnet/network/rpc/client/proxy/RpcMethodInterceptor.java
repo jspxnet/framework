@@ -3,6 +3,7 @@ package com.github.jspxnet.network.rpc.client.proxy;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClientPool;
+import com.github.jspxnet.network.rpc.env.DiscoveryServiceAddress;
 import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
@@ -112,8 +113,10 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         {
             serviceName = "default";
         }
+
+
         MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
-        InetSocketAddress address = masterSocketAddress.getSocketAddress(serviceName);
+        InetSocketAddress address = DiscoveryServiceAddress.getSocketAddress(serviceName);
         if (address==null&&this.address!=null)
         {
             address = this.address;

@@ -58,9 +58,6 @@ public interface Cache extends Serializable, Cloneable {
 
     void setMaxElements(int maxElements);
 
-    @Override
-    String toString();
-
     boolean isExpired(com.github.jspxnet.cache.container.CacheEntry entry) throws IllegalStateException, NullPointerException;
 
     boolean isElementOnDisk(String key);

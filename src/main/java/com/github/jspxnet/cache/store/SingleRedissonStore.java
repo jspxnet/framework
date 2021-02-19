@@ -1,6 +1,7 @@
 package com.github.jspxnet.cache.store;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.CacheException;
 import com.github.jspxnet.cache.IStore;
 import com.github.jspxnet.cache.container.CacheEntry;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SingleRedissonStore extends Store implements IStore {
     private static RedissonClient redisson = null;
-
+    private static  boolean useCache;
 
     public SingleRedissonStore() {
 
@@ -33,6 +34,7 @@ public class SingleRedissonStore extends Store implements IStore {
             return;
         }
         redisson =  (RedissonClient)EnvFactory.getBeanFactory().getBean(RedissonClientConfig.class);
+        useCache = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useCache);
     }
 
 
@@ -71,6 +73,10 @@ public class SingleRedissonStore extends Store implements IStore {
      */
     @Override
     public CacheEntry get(String key) {
+        if (!useCache)
+        {
+            return null;
+        }
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         if (rMap==null)
         {
@@ -118,7 +124,7 @@ public class SingleRedissonStore extends Store implements IStore {
     @Override
     public CacheEntry remove(String key) {
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
-        if (rMap==null)
+        if (!useCache||rMap==null)
         {
             return null;
         }
@@ -135,7 +141,7 @@ public class SingleRedissonStore extends Store implements IStore {
      */
     @Override
     public void removeAll() {
-        if (redisson==null||redisson.isShutdown()) {
+        if (!useCache||redisson==null||redisson.isShutdown()) {
             return;
         }
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
@@ -157,6 +163,10 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public Set<String> getKeys() {
+        if (!useCache)
+        {
+            return new HashSet<>(0);
+        }
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         if (rMap==null)
         {

@@ -6,7 +6,6 @@ import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.utils.IpUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.*;
@@ -33,24 +32,11 @@ public class RouteChannelManage {
     public void initConfigRoute()
     {
         RpcConfig rpcConfig = RpcConfig.getInstance();
-        //初始化默认的路由表,就是自己的IP地址
-        String[] groupNames = rpcConfig.getLocalGroupList();
-        List<InetSocketAddress> list = rpcConfig.getLocalAddressList();
+        List<RouteSession>  list = rpcConfig.getConfigRouteSessionList();
         int i = 0;
-        for (InetSocketAddress socketAddress:list)
+        for (RouteSession routeSession:list)
         {
-            RouteSession routeSession = new RouteSession();
-            routeSession.setSocketAddress(socketAddress);
-            routeSession.setOnline(YesNoEnumType.YES.getValue());
-            routeSession.setHeartbeatTimes(0);
-            if (groupNames.length>=list.size())
-            {
-                routeSession.setGroupName(groupNames[i]);
-            } else
-            {
-                routeSession.setGroupName(groupNames[0]);
-            }
-            routeSocketMap.put(socketAddress,routeSession);
+          routeSocketMap.put(routeSession.getSocketAddress(),routeSession);
         }
         log.debug("初始化路由表:{}",ObjectUtil.toString(list));
     }
