@@ -35,7 +35,6 @@ import com.github.jspxnet.txweb.config.TXWebConfigManager;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
-import com.mysql.jdbc.AbandonedConnectionCleanupThread;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.servlet.ServletContextListener;
@@ -312,8 +311,6 @@ public class JspxCoreListener implements ServletContextListener {
             }
             //...
         }
-
-
         //关闭定时器和其他线程end
         isRun = false;
         log.info(Environment.frameworkName + " " + copyright + " dispatcher shutdown completed ");
