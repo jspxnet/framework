@@ -119,7 +119,6 @@ public class RsaRocHandle extends RocHandle {
         }
 
         String rpc = StringUtil.trim(callStr);
-
         JSONObject jsonData = null;
         if (StringUtil.isXml(rpc)) {
             //XML格式

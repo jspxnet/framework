@@ -19,7 +19,7 @@ public class CloseTomcatFinalizer implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         try {
-            Thread.sleep(DateUtil.SECOND*3);
+            Thread.sleep(DateUtil.SECOND*10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

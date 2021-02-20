@@ -21,7 +21,11 @@ import java.util.Date;
  * date: 2007-5-25
  * Time: 16:31:31
  */
-public class JspxNetApplication {
+public final class JspxNetApplication {
+    private JspxNetApplication()
+    {
+
+    }
 
     final private static JspxCoreListener JSPX_CORE_LISTENER = new JspxCoreListener();
 

@@ -1,7 +1,5 @@
 package com.github.jspxnet.txweb.dispatcher;
 
-import com.github.jspxnet.txweb.util.TXWebUtil;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,7 +21,7 @@ public class CrossDomainFilter implements Filter {
         response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
         response.setHeader("Access-Control-Allow-OssSts", "true");
         response.setHeader("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH");
-        response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With,Authorization, Content-Type,Token,Accept, Connection, User-Agent, Cookie");
+        response.setHeader("Access-Control-Allow-Headers", "Accept, Origin, X-Requested-With,Authorization, Content-Type,Token,Accept, Connection, User-Agent, Last-Modified,Cookie");
         response.setHeader("Access-Control-Max-Age", "3628800");
         response.setHeader("Access-Control-Allow-OssSts", "true");  //是否支持cookie跨
         chain.doFilter(request, response);

@@ -49,6 +49,7 @@ public class NettyRpcServiceGroup {
         if (nettyRpcServer==null)
         {
             nettyRpcServer = new NettyRpcServer(routeSession);
+            SERVER_LIST.put(routeSession.getSocketAddress(),nettyRpcServer);
         }
         return nettyRpcServer;
     }
@@ -148,14 +149,15 @@ public class NettyRpcServiceGroup {
                 }
                 if (Environment.consul.equalsIgnoreCase(serviceDiscoverMode))
                 {
+                    log.info("删除consul注册服务{}",nettyRpcServer.getId());
+
                     consulService.deregister(nettyRpcServer.getId());
                 }
                 nettyRpcServer.close();
             }
         }
 
-
-
+        SERVER_LIST.clear();
     }
 
 }

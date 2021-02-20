@@ -24,6 +24,9 @@ public class AttachmentsVo implements Serializable {
     @Column(caption = "关键字")
     private String tags = StringUtil.empty;
 
+    @Column(caption = "分组名称")
+    private String groupName = StringUtil.empty;
+
     @Column(caption = "属性")
     private String attributes = StringUtil.empty;
 
@@ -48,4 +51,5 @@ public class AttachmentsVo implements Serializable {
 
     @Column(caption = "关联ID")
     private long pid = 0;
+
 }

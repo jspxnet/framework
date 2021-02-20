@@ -7,12 +7,13 @@ import javax.servlet.ServletContextListener;
 
 /**
  * Created by chenyuan on 2015-7-30.
+ *
  */
 public class JspxNetListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        JspxNetApplication.autoRun();
+        Dispatcher.init(servletContextEvent.getServletContext());
     }
 
 

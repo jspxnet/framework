@@ -192,12 +192,12 @@ public class UploadFileView extends ActionSupport {
         if (role.getUserType() < UserEnumType.MANAGER.getValue()) {
             return RocResponse.error(ErrorEnumType.POWER);
         }
-        int totalCount = uploadFileDAO.getCount(param.getField(),param.getFind(),getTerm(),param.getUid(),param.getPid());
+        int totalCount = uploadFileDAO.getCount(param.getField(),param.getFind(),param.getTerm(),param.getUid(),param.getPid());
         if (totalCount<=0)
         {
             return RocResponse.success(new ArrayList<>(),"无数据");
         }
-        List<Object> list = uploadFileDAO.getList(param.getField(), param.getFind(), getTerm(),param.getSort(), getUid(),param.getPid(), param.getCurrentPage(), param.getCount());
+        List<Object> list = uploadFileDAO.getList(param.getField(), param.getFind(), param.getTerm(),param.getSort(), param.getUid(),param.getPid(), param.getCurrentPage(), param.getCount());
         RocResponse<List<AttachmentsVo>> rocResponse = RocResponse.success(BeanUtil.copyList(list,AttachmentsVo.class));
         rocResponse.setTotalCount(totalCount);
         return rocResponse.setCurrentPage(param.getCurrentPage()).setCount(param.getCount());

@@ -28,6 +28,7 @@ import java.io.PrintWriter;
  * Time: 18:28:15
  * 生成择要
  */
+@Deprecated
 @HttpMethod(caption = "生成简介或tag")
 public class DescriptionView extends ActionSupport {
     private String content = StringUtil.empty;

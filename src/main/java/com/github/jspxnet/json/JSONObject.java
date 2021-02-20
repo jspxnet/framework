@@ -262,6 +262,11 @@ public class JSONObject extends HashMap<String, Object> {
      * @param bean 对象
      * @param includeSuperClass 是否包含子对象
      * @param dataField 显示字段
+     *
+     *  {
+     *      data:[company,name,addresss,user]
+     *      user:[name,sex]
+     *  }
      */
     public JSONObject(Object bean,boolean includeSuperClass,JSONObject dataField)
     {

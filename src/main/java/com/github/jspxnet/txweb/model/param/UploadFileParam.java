@@ -1,5 +1,6 @@
 package com.github.jspxnet.txweb.model.param;
 
+import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
@@ -25,6 +26,9 @@ public class UploadFileParam implements Serializable {
 
     @Param(caption = "标题", max = 250)
     private String title = StringUtil.empty;
+
+    @Param(caption = "分组名称")
+    private String groupName = StringUtil.empty;
 
     @Param(caption = "关键字", max = 240)
     private String tags = StringUtil.empty;

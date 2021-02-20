@@ -82,7 +82,7 @@ public class RocService extends IService {
 
         //////////////////初始end
 
-        String namespace = null;
+        String namespace;
         String namePart = jsonData.getString(Environment.rocId);
         if (StringUtil.isNull(namePart)) {
             namePart = URLUtil.getFileNamePart(request.getRequestURI());
