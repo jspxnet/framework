@@ -9,10 +9,11 @@
  */
 package com.github.jspxnet.txweb.action;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
+import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.view.IpLocationView;
 import com.github.jspxnet.utils.StringUtil;
 
@@ -35,13 +36,11 @@ public class IpLocationAction extends IpLocationView {
      * @throws Exception                                         异常
      */
     @Operate(caption = "保存")
-    public void save() throws Exception {
+    public RocResponse<Boolean> save() throws Exception {
         if (StringUtil.isNull(ipLocationDAO.getFileName())) {
-            addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.fileNameNotConfig));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.fileNameNotConfig));
         }
-        ipLocationDAO.deleteAll();
-        addActionMessage(language.getLang(LanguageRes.importData) + "," + ipLocationDAO.fileToDataBase());
+        return RocResponse.success(ipLocationDAO.deleteAll(),language.getLang(LanguageRes.importData) + "," + ipLocationDAO.fileToDataBase());
     }
 
 

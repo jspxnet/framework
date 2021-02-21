@@ -122,6 +122,7 @@ public class SoberUtil {
         }
         return resultMap;
     }
+/*
 
     public static Object getSingleValue(ResultSetMetaData resultSetMetaData, Dialect dialect, ResultSet resultSet) throws SQLException {
         int numColumns = resultSetMetaData.getColumnCount();
@@ -132,6 +133,7 @@ public class SoberUtil {
         }
         return resultMap;
     }
+*/
 
 
     /**

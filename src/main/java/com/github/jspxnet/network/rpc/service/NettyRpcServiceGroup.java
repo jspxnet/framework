@@ -72,6 +72,7 @@ public class NettyRpcServiceGroup {
         }
         List<RouteSession> routeSessionList = RPC_CONFIG.getConfigRouteSessionList();
         DaemonThreadFactory threadFactory =  new DaemonThreadFactory(RPC_THREAD_NAME);
+
         for (RouteSession routeSession:routeSessionList)
         {
             if (groupCount<=0)
@@ -109,14 +110,18 @@ public class NettyRpcServiceGroup {
                 check.setInterval(RPC_CONFIG.getTimeout()*2+"s");
                 check.setTimeout(RPC_CONFIG.getTimeout()+"s");
                 discoveryService.setCheck(check);
-                consulService.register(discoveryService);
+                try {
+                    consulService.register(discoveryService);
+                } catch (Exception e)
+                {
+                    log.error("*严重异常* 检查consul注册中心是否运行正常,必须先启动consul,否则系统将不能分布式调用");
+                }
             } else
             {
                 RouteChannelManage.getStartList().add(routeSession.getSocketAddress());
             }
             groupCount--;
         }
-
         if (!Environment.consul.equalsIgnoreCase(RPC_CONFIG.getServiceDiscoverMode()))
         {
             DaemonThreadFactory routeThreadFactory = new DaemonThreadFactory(RPC_ROUTE_THREAD_NAME);
@@ -125,13 +130,14 @@ public class NettyRpcServiceGroup {
         started = true;
     }
 
+
+
     public void stop() {
 
         if (!started)
         {
             return;
         }
-
         started = false;
         String serviceDiscoverMode = RPC_CONFIG.getServiceDiscoverMode();
         if (!Environment.consul.equalsIgnoreCase(serviceDiscoverMode))
@@ -150,8 +156,12 @@ public class NettyRpcServiceGroup {
                 if (Environment.consul.equalsIgnoreCase(serviceDiscoverMode))
                 {
                     log.info("删除consul注册服务{}",nettyRpcServer.getId());
-
-                    consulService.deregister(nettyRpcServer.getId());
+                    try {
+                        consulService.deregister(nettyRpcServer.getId());
+                    } catch (Exception e)
+                    {
+                       //..
+                    }
                 }
                 nettyRpcServer.close();
             }

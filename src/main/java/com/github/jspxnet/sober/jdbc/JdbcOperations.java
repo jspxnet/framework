@@ -1952,6 +1952,7 @@ public abstract class JdbcOperations implements SoberSupport {
         return null;
     }
 
+
     /**
      * 删除一堆对象
      *

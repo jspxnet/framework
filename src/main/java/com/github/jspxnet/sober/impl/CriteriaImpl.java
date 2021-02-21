@@ -612,7 +612,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     }
 
     @Override
-    public List<?> groupList() {
+    public List<Object> groupList() {
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
         if (soberTable == null) {
             log.error("no fond sober Config :" + criteriaClass.getName());
@@ -677,7 +677,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         valueMap.put(Dialect.SQL_RESULT_BEGIN_ROW, iBegin);
         valueMap.put(Dialect.SQL_RESULT_END_ROW, iEnd);
 
-        List resultList = null;
+        List<Object> resultList = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         Connection conn = null;
@@ -708,8 +708,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 termKey.setLength(termKey.length() - 1);
             }
             cacheKey = SoberUtil.getListKey(soberTable.getEntity(), StringUtil.replace(termText.toString(), "=", "_"),orderText.toString(),iBegin,iEnd,false);
-            resultList = (List<?>) JSCacheManager.get(criteriaClass, cacheKey);
-            if (resultList != null && !resultList.isEmpty()) {
+            resultList = (List) JSCacheManager.get(criteriaClass, cacheKey);
+            if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
             }
         }
@@ -748,9 +748,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 resultSet.absolute(iBegin);
             }
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-            resultList = new ArrayList();
+            resultList = new ArrayList<>();
             while (resultSet.next()) {
-                resultList.add(SoberUtil.getDataHashMap(resultSetMetaData, dialect, resultSet));
+                Map<String,Object> beanMap = SoberUtil.getHashMap(resultSetMetaData, dialect, resultSet);
+                resultList.add(ReflectUtil.createDynamicBean(beanMap));
                 if (resultList.size() >= totalCount) {
                     break;
                 }

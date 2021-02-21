@@ -20,6 +20,7 @@ import java.util.Date;
  * 在线图片编辑器,绑定上传文件
  * 为了实现历史还原功能，以前操作的文件不删除，只有点击确定后才删除
  */
+@Deprecated
 @HttpMethod(caption = "图片编辑器")
 public class PhotoEditAction extends UploadFileView {
     //支持的文件类型

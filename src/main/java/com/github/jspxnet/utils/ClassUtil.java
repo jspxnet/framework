@@ -1104,9 +1104,10 @@ public class ClassUtil {
                 {
                     resultList.add(Map.class);
                 }
+
                 else
                 {
-                    if (name.contains(StringUtil.DOT))
+                    if (name.contains(StringUtil.DOT)&&!name.endsWith("[]"))
                     {
                         resultList.add(ClassUtil.loadClass(name));
                     }

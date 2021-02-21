@@ -39,7 +39,7 @@ public interface Criteria extends Serializable {
 
     <T> List<T> list(boolean loadChild);
 
-    List<?> groupList();
+    List<Object> groupList();
 
     Object uniqueResult();
 
