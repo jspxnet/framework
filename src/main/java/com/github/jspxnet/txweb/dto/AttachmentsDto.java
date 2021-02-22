@@ -1,4 +1,4 @@
-package com.github.jspxnet.txweb.vo;
+package com.github.jspxnet.txweb.dto;
 
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Data
 @Table(caption = "附件", create = false, cache = false)
-public class AttachmentsVo implements Serializable {
+public class AttachmentsDto implements Serializable {
 
     @Column(caption = "ID")
     private long id = 0;

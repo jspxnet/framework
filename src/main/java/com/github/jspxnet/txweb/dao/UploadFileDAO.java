@@ -55,5 +55,10 @@ public interface UploadFileDAO extends SoberSupport {
 
     void setOrganizeId(String organizeId);
 
-    List<String> getGroups();
+    /**
+     *
+     * @param uid 用户id
+     * @return 分组列表
+     */
+    List<String> getGroups(long uid);
 }

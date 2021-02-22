@@ -511,7 +511,7 @@ public class UploadFileAction extends MultipartSupport {
             upFile.setFileType(uf.getFileType());
             upFile.setContent(FileUtil.getNamePart(uf.getOriginal()));
             upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
-            upFile.setGroupName(getString(GROUP_VAR_NAME));
+            upFile.setGroupName(getString(GROUP_VAR_NAME,"未分类",true));
             upFile.setPutName(userSession.getName());
             upFile.setPutUid(userSession.getUid());
             upFile.setIp(getRemoteAddr());
@@ -752,7 +752,7 @@ public class UploadFileAction extends MultipartSupport {
         copySaveUploadFile.setPutUid(userSession.getUid());
         copySaveUploadFile.setSortDate(new Date());
         copySaveUploadFile.setCreateDate(new Date());
-        copySaveUploadFile.setGroupName(getString(GROUP_VAR_NAME));
+        copySaveUploadFile.setGroupName(getString(GROUP_VAR_NAME,"未分类",true));
         copySaveUploadFile.setSortType(0);
         copySaveUploadFile.setId(0);
         uploadFileDAO.save(copyUploadFile);
@@ -775,7 +775,7 @@ public class UploadFileAction extends MultipartSupport {
             childUploadFile.setPutUid(userSession.getUid());
             childUploadFile.setSortDate(new Date());
             childUploadFile.setCreateDate(new Date());
-            childUploadFile.setGroupName(getString(GROUP_VAR_NAME));
+            childUploadFile.setGroupName(getString(GROUP_VAR_NAME,"未分类",true));
             childUploadFile.setSortType(0);
             childUploadFile.setPid(newPid);
             childUploadFile.setId(0);
@@ -906,10 +906,6 @@ public class UploadFileAction extends MultipartSupport {
             TXWebUtil.print(json.toString(),contentType,response);
         }
     }
-
-
-
-
 
     /**
      * @param objects     上次的对象

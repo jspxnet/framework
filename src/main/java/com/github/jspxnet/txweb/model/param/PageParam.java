@@ -35,7 +35,7 @@ public class PageParam implements Serializable  {
     private Integer currentPage;
 
     @Param(caption = "用户ID")
-    private long uid;
+    private long uid = 0;
 
     @Param(caption = "父ID")
     private long pid = 0;

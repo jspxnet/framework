@@ -263,9 +263,18 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         return criteria.setProjection(Projections.rowCount()).intUniqueResult();
     }
 
+    /**
+     *
+     * @param uid 用户id
+     * @return 分组列表
+     */
     @Override
-    public  List<String> getGroups() {
-        List<Object> list = createCriteria(tableClass).addGroup("groupName").addOrder(Order.asc("groupName")).setCurrentPage(1).setCurrentPage(getMaxRows()).groupList();
+    public  List<String> getGroups(long uid) {
+        Criteria criteria = createCriteria(tableClass).addGroup("groupName").addOrder(Order.asc("groupName"));
+        if (uid > 0) {
+            criteria = criteria.add(Expression.eq("putUid", uid));
+        }
+        List<Object> list = criteria.setCurrentPage(1).setTotalCount(getMaxRows()).groupList();
         return BeanUtil.copyFieldList(list,"groupName");
     }
 }

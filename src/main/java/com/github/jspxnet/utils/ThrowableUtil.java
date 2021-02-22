@@ -23,11 +23,16 @@ public class ThrowableUtil {
         {
             return StringUtil.empty;
         }
+        if (e instanceof  NullPointerException)
+        {
+            return "null 空异常";
+        }
         String result = e.getMessage();
         if (StringUtil.isNull(result)&&e.getCause()!=null)
         {
             result = e.getCause().getMessage();
         }
+
         return result;
     }
 }

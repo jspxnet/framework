@@ -24,7 +24,7 @@ import com.github.jspxnet.txweb.model.param.PageParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.IUploadFile;
-import com.github.jspxnet.txweb.vo.AttachmentsVo;
+import com.github.jspxnet.txweb.dto.AttachmentsDto;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -186,7 +186,7 @@ public class UploadFileView extends ActionSupport {
      * @return 日志列表
      */
     @Operate(caption = "附件翻页列表", method = "/list/page")
-    public RocResponse<List<AttachmentsVo>> getList(@Param("翻页参数") PageParam param)
+    public RocResponse<List<AttachmentsDto>> getList(@Param("翻页参数") PageParam param)
     {
         IRole role = getRole();
         if (role.getUserType() < UserEnumType.MANAGER.getValue()) {
@@ -198,7 +198,7 @@ public class UploadFileView extends ActionSupport {
             return RocResponse.success(new ArrayList<>(),"无数据");
         }
         List<Object> list = uploadFileDAO.getList(param.getField(), param.getFind(), param.getTerm(),param.getSort(), param.getUid(),param.getPid(), param.getCurrentPage(), param.getCount());
-        RocResponse<List<AttachmentsVo>> rocResponse = RocResponse.success(BeanUtil.copyList(list,AttachmentsVo.class));
+        RocResponse<List<AttachmentsDto>> rocResponse = RocResponse.success(BeanUtil.copyList(list, AttachmentsDto.class));
         rocResponse.setTotalCount(totalCount);
         return rocResponse.setCurrentPage(param.getCurrentPage()).setCount(param.getCount());
     }

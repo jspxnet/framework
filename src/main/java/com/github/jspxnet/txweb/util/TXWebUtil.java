@@ -907,10 +907,11 @@ public class TXWebUtil {
             } else if (e instanceof Exception) {
                 //--------------------------
                 Exception err = (Exception) e;
-                action.addFieldInfo(Environment.errorInfo, ThrowableUtil.getThrowableMessage(err));
+                log.error("执行方法异常:{},error:{}",exeMethod.getName(),e.getMessage());
+                action.addFieldInfo(Environment.errorInfo,exeMethod.getName() + " " + ThrowableUtil.getThrowableMessage(err));
             }
             else {
-                action.addFieldInfo(Environment.errorInfo, ThrowableUtil.getThrowableMessage(e));
+                action.addFieldInfo(Environment.errorInfo, exeMethod.getName() + " " + ThrowableUtil.getThrowableMessage(e));
             }
         } finally {
             action.put(ActionEnv.Key_CallMethodName, exeMethod);
