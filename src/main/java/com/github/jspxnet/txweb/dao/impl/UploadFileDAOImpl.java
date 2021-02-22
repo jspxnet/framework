@@ -56,6 +56,10 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         }
     }
 
+    /**
+     *
+     * @return 类对象
+     */
     @Override
     public Class<T> getClassType() {
         return tableClass;
@@ -67,6 +71,10 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         this.namespace = namespace;
     }
 
+    /**
+     *
+     * @return 命名空间
+     */
     @Override
     public String getNamespace() {
         return namespace;
@@ -81,6 +89,11 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         return super.load(tableClass, id);
     }
 
+    /**
+     *
+     * @param id id
+     * @return 查询
+     */
     @Override
     public T get(Long id) {
         return super.get(tableClass, id);
@@ -118,6 +131,11 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         return createCriteria(tableClass).add(Expression.eq("hash", hash)).objectUniqueResult(false);
     }
 
+    /**
+     *
+     * @param hash hash值
+     * @return 是否存在
+     */
     @Override
     public boolean haveHash(String hash) {
         return createCriteria(tableClass).add(Expression.eq("hash", hash)).setProjection(Projections.rowCount()).intUniqueResult() > 0;
