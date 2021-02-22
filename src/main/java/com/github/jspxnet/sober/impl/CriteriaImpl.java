@@ -209,7 +209,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!SoberUtil.containsFields(soberTable, orderEntry.getOrder().getFields())) {
                 continue;
             }
-            orderText.append(orderEntry.getOrder().toString());
+
+            orderText.append(orderEntry.getOrder().toSqlString(databaseName));
             if (i != (orderEntries.size() - 1)) {
                 orderText.append(",");
             }
@@ -481,7 +482,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!SoberUtil.containsFields(soberTable, orderEntry.getOrder().getFields())) {
                 continue;
             }
-            orderText.append(orderEntry.getOrder().toString());
+            orderText.append(orderEntry.getOrder().toSqlString(databaseName));
             if (i != (orderEntries.size() - 1)) {
                 orderText.append(",");
             }
@@ -648,7 +649,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!SoberUtil.containsFields(soberTable, orderEntry.getOrder().getFields())) {
                 continue;
             }
-            orderText.append(orderEntry.getOrder().toString());
+            orderText.append(orderEntry.getOrder().toSqlString(databaseName));
             if (i != (orderEntries.size() - 1)) {
                 orderText.append(",");
             }

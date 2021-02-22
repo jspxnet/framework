@@ -9,6 +9,9 @@
  */
 package com.github.jspxnet.sober.criteria;
 
+import com.github.jspxnet.sober.SoberEnv;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.Serializable;
 
 /**
@@ -23,8 +26,13 @@ public class Order implements Serializable {
     //排序字段
     private String propertyName;
 
-    @Override
-    public String toString() {
+
+    public String toSqlString(String databaseName)
+    {
+        if (SoberEnv.POSTGRESQL.equalsIgnoreCase(databaseName))
+        {
+            return StringUtil.quote(propertyName,true) + " " + (ascending ? "asc" : "desc");
+        }
         return propertyName + " " + (ascending ? "asc" : "desc");
     }
 

@@ -22,12 +22,10 @@ import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.DialectFactory;
-
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
 import com.github.jspxnet.sober.transaction.JDBCTransaction;
 import com.github.jspxnet.sober.transaction.JTATransaction;
 import com.github.jspxnet.sober.transaction.TransactionManager;
-import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
@@ -334,7 +332,8 @@ public class SoberMappingBean implements SoberFactory {
     private void checkConnection(Connection conn) throws Exception {
         log.info("Connection is " + conn);
         try {
-            if (conn == null || conn.isClosed()) {
+            if (conn == null || conn.isClosed())
+            {
                 log.error("database dataSource not get JDBC Connection，数据库配置错误");
                 throw new SQLException("database dataSource not get JDBC Connection,数据库配置错误");
             }
