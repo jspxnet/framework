@@ -1,4 +1,4 @@
-package com.github.jspxnet.txweb.vo;
+package com.github.jspxnet.txweb.dto;
 
 import com.github.jspxnet.txweb.result.RocResponse;
 import lombok.Data;
@@ -14,6 +14,6 @@ import java.util.List;
  **/
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class AttachmentGroupVo extends RocResponse<List<AttachmentsVo>> {
+public class AttachmentRocResponse<T> extends RocResponse<T> {
     private List<String> groups;
 }
