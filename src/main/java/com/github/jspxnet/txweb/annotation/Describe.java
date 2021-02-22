@@ -1,8 +1,6 @@
 package com.github.jspxnet.txweb.annotation;
 
-import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.lang.annotation.*;
 
 
@@ -15,7 +13,7 @@ public @interface Describe {
     //路径在document目录
     String[] value() default StringUtil.empty;
 
-    String namespace() default Sioc.global;
+    String namespace() default StringUtil.empty;
 
     //方法同名的时候区分标识
     String flag() default StringUtil.empty;

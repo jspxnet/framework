@@ -1188,7 +1188,7 @@ public abstract class JdbcOperations implements SoberSupport {
             throw e;
         }
 
-        int result = -2;
+        int result;
         String sqlText = StringUtil.empty;
         try {
             conn = getConnection(SoberEnv.READ_WRITE);
@@ -1462,7 +1462,6 @@ public abstract class JdbcOperations implements SoberSupport {
         if (object instanceof Collection) {
             return saveOrUpdateAll((Collection<?>) object);
         }
-
         //////////配置验证才能够保存 begin
         if (soberFactory.isValid()) {
             validator(object);
@@ -1493,9 +1492,7 @@ public abstract class JdbcOperations implements SoberSupport {
         }
         String sqlText = StringUtil.empty;
         Connection conn = null;
-
         try {
-
             conn = getConnection(SoberEnv.READ_WRITE);
             sqlText = dialect.processTemplate(Dialect.SQL_HAVE, valueMap);
             if (!dialect.supportsConcurReadOnly()) {
@@ -1516,7 +1513,6 @@ public abstract class JdbcOperations implements SoberSupport {
             } else {
                 sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
                 debugPrint(sqlText);
-
                 if (!dialect.supportsConcurReadOnly()) {
                     statement = conn.prepareStatement(sqlText);
                 } else {
@@ -1533,9 +1529,7 @@ public abstract class JdbcOperations implements SoberSupport {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
             JdbcUtil.closeConnection(conn);
-
         }
-
     }
 
     /**

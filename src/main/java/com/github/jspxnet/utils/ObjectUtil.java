@@ -586,10 +586,10 @@ public class ObjectUtil {
      */
     public static Map<String, Object> getMap(Object o) {
         if (o == null) {
-            return new HashMap();
+            return new HashMap<>();
         }
         if (o instanceof Class) {
-            return new HashMap();
+            return new HashMap<>();
         }
         if (o instanceof AbstractMap) {
             return (Map<String, Object>) o;

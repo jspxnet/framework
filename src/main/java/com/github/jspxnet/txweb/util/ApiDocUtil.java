@@ -7,6 +7,7 @@ import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
+import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.util.Empty;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.NullClass;
@@ -396,13 +397,15 @@ public class ApiDocUtil {
      * @param cla 类型
      * @param exeMethod 方法
      * @param url       路径
+     * @param namespace 备用命名空间
      * @return 文档操作对象
      */
-    public static ApiOperate getMethodApiOperate(Class<?> cla,Method exeMethod, final String url) {
+    public static ApiOperate getMethodApiOperate(Class<?> cla,Method exeMethod, final String url,String namespace) {
         Operate operate = exeMethod.getAnnotation(Operate.class);
         ApiOperate apiOperate = new ApiOperate();
         apiOperate.setCaption(operate.caption());
         apiOperate.setAction(operate.post() ? "POST" : "GET;POST");
+
 
         Deprecated deprecated = exeMethod.getAnnotation(Deprecated.class);
         apiOperate.setDeprecated(deprecated!=null);
@@ -433,7 +436,7 @@ public class ApiDocUtil {
 
         Describe describe = exeMethod.getAnnotation(Describe.class);
         if (describe != null) {
-            String cont = getDescribeValue(cla.getName() + StringUtil.DOT + exeMethod.getName(),describe);
+            String cont = getDescribeValue(cla.getName() + StringUtil.DOT + exeMethod.getName(),describe,namespace);
             apiOperate.setDescribe(cont);
         }
 
@@ -794,13 +797,10 @@ public class ApiDocUtil {
         while (elementList.hasNext())
         {
             Element el = (Element)elementList.next();
-            if (StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(StringUtil.trim(el.attributeValue("id"))))
+            String id = StringUtil.trim(el.attributeValue("id"));
+            if (StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(id)||!StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(id)&&flag.equalsIgnoreCase(StringUtil.trim(el.attributeValue("flag"))))
             {
                 return el.getStringValue();
-            }
-            if (!StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(StringUtil.trim(el.attributeValue("id")))&&flag.equalsIgnoreCase(StringUtil.trim(el.attributeValue("flag"))))
-            {
-                return el.getStringValue();// XMLUtil.escapeDecrypt();
             }
         }
         return null;
@@ -810,20 +810,26 @@ public class ApiDocUtil {
      *
      * @param id 文档id
      * @param describe 注释
+     * @param namespace 备用命名空间
      * @return 得到描述
      */
-    public static String getDescribeValue(String id,Describe describe)
+    public static String getDescribeValue(String id,Describe describe,String namespace)
     {
         if (describe == null)
         {
             return null;
-
         }
+
         String cont;
         if (!ObjectUtil.isEmpty(describe.value()) && !"[\"\"]".equalsIgnoreCase(ObjectUtil.toString(describe.value()))) {
             cont = ArrayUtil.toString(describe.value(), "<br />");
         } else {
-            cont = findDescribe(id,describe.flag(),describe.namespace());
+            String name = describe.namespace();
+            if (StringUtil.isNull(name)|| Sioc.global.equals(name))
+            {
+                name = namespace;
+            }
+            cont = findDescribe(id,describe.flag(),name);
             cont = StringUtil.replace(cont,"\n        ```","\n```");
             cont = StringUtil.replace(cont,"\n\t```","\n```");
         }

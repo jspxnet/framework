@@ -86,7 +86,12 @@ public class ApiDocView extends ActionSupport {
                     vo.setTitle(configBean.getCaption());
                     vo.setConfMethod(configBean.getMethod());
                     vo.setClassName(beanElement.getClassName());
-                    vo.setNamespace(namespace);
+                    String theNamespace = namespace;
+                    if (StringUtil.isNull(theNamespace)||StringUtil.ASTERISK.equals(theNamespace))
+                    {
+                        theNamespace = softName;
+                    }
+                    vo.setNamespace(theNamespace);
                     vo.setId(EncryptUtil.getMd5(beanElement.getClassName()));
                     if (StringUtil.isNull(vo.getTitle()))
                     {
@@ -212,8 +217,10 @@ public class ApiDocView extends ActionSupport {
         ApiAction apiAction = indexCache.get(id);
         AssertException.isNull(indexCache, "不存在的文档id");
 
+
         ApiDocument apiDocument = BeanUtil.copy(apiAction, ApiDocument.class);
         Class<?> cla = ClassUtil.loadClass(apiDocument.getClassName());
+
 
         Map<String, ApiParam> params = ApiDocUtil.getSetMethodApiOperate(cla);
         apiDocument.setParams(params);
@@ -221,7 +228,7 @@ public class ApiDocView extends ActionSupport {
         List<ApiOperate> operateList = new LinkedList<>();
         Map<Operate, Method> operateMap = TXWebUtil.getClassOperateList(cla);
         for (Method exeMethod : operateMap.values()) {
-            ApiOperate apiOperate = ApiDocUtil.getMethodApiOperate(cla,exeMethod, apiDocument.getUrl());
+            ApiOperate apiOperate = ApiDocUtil.getMethodApiOperate(cla,exeMethod, apiDocument.getUrl(),apiDocument.getNamespace());
             Map<String, ApiParam> methodParamList = apiOperate.getMethod().getParams();
             apiOperate.setParams(params);
             operateList.add(apiOperate);
@@ -231,7 +238,7 @@ public class ApiDocView extends ActionSupport {
 
         Describe describe = cla.getAnnotation(Describe.class);
         if (describe != null) {
-            String cont = ApiDocUtil.getDescribeValue(cla.getName(),describe);
+            String cont = ApiDocUtil.getDescribeValue(cla.getName(),describe,apiDocument.getNamespace());
             apiDocument.setDescribe(cont);
         }
 
