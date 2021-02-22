@@ -337,7 +337,7 @@ public abstract class JdbcOperations implements SoberSupport {
                         continue;
                     }
                     //对应id对象
-                    Object objField = BeanUtil.getFieldValue(object, soberNexus.getField());
+                    Object objField = BeanUtil.getFieldValue(object, soberNexus.getField(),false);
                     if (objField==null)
                     {
                         continue;
@@ -349,7 +349,7 @@ public abstract class JdbcOperations implements SoberSupport {
                         {
                             continue;
                         }
-                        Object keyField = BeanUtil.getFieldValue(loadObj,soberNexus.getTargetField());
+                        Object keyField = BeanUtil.getFieldValue(loadObj,soberNexus.getTargetField(),false);
                         if (objField.equals(keyField))
                         {
                             valueLstCache.add(loadObj);
@@ -731,7 +731,7 @@ public abstract class JdbcOperations implements SoberSupport {
             throw  new Exception("@Table 标签没有配置");
         }
 
-        Object idValue = BeanUtil.getFieldValue(object, soberTable.getPrimary());
+        Object idValue = BeanUtil.getFieldValue(object, soberTable.getPrimary(),false);
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
 
@@ -800,7 +800,7 @@ public abstract class JdbcOperations implements SoberSupport {
                                 continue;
                             }
                             Object oneToOneValue = BeanUtil.getProperty(object, soberNexus.getField());
-                            Object v = BeanUtil.getFieldValue(oneToOneObject,soberNexus.getTargetField());
+                            Object v = BeanUtil.getFieldValue(oneToOneObject,soberNexus.getTargetField(),false);
                             if (ObjectUtil.isEmpty(v))
                             {
                                 BeanUtil.setSimpleProperty(oneToOneObject, soberNexus.getTargetField(), oneToOneValue);
@@ -814,7 +814,7 @@ public abstract class JdbcOperations implements SoberSupport {
                             }
                             Object oneToManyValue = BeanUtil.getProperty(object, soberNexus.getField());
                             for (Object o : oneToMayObjects) {
-                                Object v = BeanUtil.getFieldValue(o,soberNexus.getTargetField());
+                                Object v = BeanUtil.getFieldValue(o,soberNexus.getTargetField(),false);
                                 if (ObjectUtil.isEmpty(v))
                                 {
                                     BeanUtil.setSimpleProperty(o, soberNexus.getTargetField(), oneToManyValue);
@@ -2253,7 +2253,7 @@ public abstract class JdbcOperations implements SoberSupport {
         {
             return false;
         }
-        Object key = BeanUtil.getFieldValue(obj,soberTable.getPrimary());
+        Object key = BeanUtil.getFieldValue(obj,soberTable.getPrimary(),false);
         SoberColumn soberColumn = soberTable.getColumn(soberTable.getPrimary());
         boolean isNum = ClassUtil.isNumberType(soberColumn.getClassType());
         String sql = "UPDATE " + soberTable.getName() + " SET "+field+"=" + field + "+"+ num +" WHERE " + soberTable.getPrimary() + "="+(isNum?key:StringUtil.quoteSql((String)key));

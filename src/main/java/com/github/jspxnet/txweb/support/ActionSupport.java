@@ -471,7 +471,7 @@ public abstract class ActionSupport implements Action {
             JSONObject params = getJsonParams();
             if (params != null) {
                 if (checkSql) {
-                    return ParamUtil.getSafeFilter(params.getString(name), RequestUtil.paramMaxLength, SafetyEnumType.LOW);
+                    return ParamUtil.getSafeFilter(params.getString(name,def), RequestUtil.paramMaxLength, SafetyEnumType.LOW);
                 }
                 return params.getString(name);
             }

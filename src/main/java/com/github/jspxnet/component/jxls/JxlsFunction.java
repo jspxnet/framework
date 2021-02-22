@@ -211,16 +211,16 @@ public class JxlsFunction {
         int[] rowValue = new int[objectList.size()];
         int j = 0;
         rowValue[0] = 0;
-        String name = (String) BeanUtil.getFieldValue(objectList.get(0), field);
+        String name = BeanUtil.getFieldValue(objectList.get(0), field,true);
         for (int i = 1; i < objectList.size(); i++) {
-            if (name != null && name.equals(BeanUtil.getFieldValue(objectList.get(i), field))) {
+            if (name != null && name.equals(BeanUtil.getFieldValue(objectList.get(i), field,true))) {
                 j++;
                 rowValue[i] = 0;
             } else {
                 rowValue[i - 1] = j;
                 j = 0;
             }
-            name = (String) BeanUtil.getFieldValue(objectList.get(i), field);
+            name =  BeanUtil.getFieldValue(objectList.get(i), field,true);
         }
         for (int i = 0; i < objectList.size(); i++) {
             objectList.get(i).setMergerRows(rowValue[i]);

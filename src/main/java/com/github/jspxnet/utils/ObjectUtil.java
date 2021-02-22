@@ -599,7 +599,7 @@ public class ObjectUtil {
         if (fields != null) {
             for (Field field : fields) {
                 try {
-                    Object value = BeanUtil.getFieldValue(o, field.getName());
+                    Object value = BeanUtil.getFieldValue(o, field.getName(),false);
                     valueMap.put(field.getName(), value);
                 } catch (Exception e) {
                     log.error(o + "   method=" + field.getName(), e);

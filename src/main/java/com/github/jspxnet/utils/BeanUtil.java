@@ -481,9 +481,9 @@ public class BeanUtil {
      * @param <T> 类型
      * @return 得到字段的值
      */
-    public static <T> T getFieldValue(Object object, String name)
+    public static <T> T getFieldValue(Object object, String name,boolean anyField)
     {
-        return getFieldValue(object, name,null);
+        return getFieldValue(object, name,null,anyField);
     }
 
     /**
@@ -494,7 +494,7 @@ public class BeanUtil {
      * @param <T> 类型
      * @return 得到字段的值
      */
-    public static <T> T getFieldValue(Object object, String name,Class<T> cls)
+    public static <T> T getFieldValue(Object object, String name,Class<T> cls,boolean anyField)
     {
         if (!StringUtil.hasLength(name)) {
             return null;
@@ -519,30 +519,24 @@ public class BeanUtil {
         if (ClassUtil.isProxy(object.getClass()))
         {
             BeanMap beanMap = BeanMap.create(object);
-
-            return (T)beanMap.get(name);
-
-/*            if (cls==null)
+            if (anyField)
             {
-                return (T)beanMap.get(name);
+                for (Object key:beanMap.keySet())
+                {
+                    if (name.equalsIgnoreCase((String)key))
+                    {
+                        return (T)beanMap.get(key);
+                    }
+                }
             }
-
-            T result;
-            try {
-                result = cls.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return (T)beanMap.get(name);*/
-
+            return (T)beanMap.get(name);
         }
         Field[] fields = ClassUtil.getDeclaredFields(object.getClass());
         if (fields == null) {
             return null;
         }
         for (Field field : fields) {
-            if (field.getName().equals(name)) {
+            if ((!anyField&&field.getName().equals(name))||(anyField&&field.getName().equalsIgnoreCase(name))) {
                 try {
                     field.setAccessible(true);
                     if (cls==null)
@@ -740,9 +734,32 @@ public class BeanUtil {
             }
         }
     }
+
+    /**
+     *
+     * @param list 列表
+     * @param field 字段
+     * @param dis 去重
+     * @param anyField 不区分大小写
+     * @param <T> 泛型类型
+     * @return 列表
+     */
+    static public <T> List<T> copyFieldList(List<?> list, String field, boolean dis,boolean anyField)
+    {
+        return copyFieldList(list,  field, null,dis, anyField);
+    }
+
+    /**
+     *
+     * @param list 列表
+     * @param field 字段
+     * @param dis 去重
+     * @param <T> 泛型类型
+     * @return 列表
+     */
     static public <T> List<T> copyFieldList(List<?> list, String field, boolean dis)
     {
-        return copyFieldList(list,  field, null,dis);
+        return copyFieldList(list,  field, null,dis,false);
     }
 
     /**
@@ -755,7 +772,7 @@ public class BeanUtil {
      */
     static public <T> List<T> copyFieldList(List<?> list, String field,  Class<T> cls)
     {
-        return copyFieldList(list,  field, cls,false);
+        return copyFieldList(list,  field, cls,false,false);
     }
     /**
      * 拷贝字段列
@@ -767,7 +784,7 @@ public class BeanUtil {
      */
     static public <T> List<T> copyFieldList(List<?> list, String field)
     {
-        return copyFieldList( list,  field,null,false);
+        return copyFieldList( list,  field,false,false);
     }
     /**
      *
@@ -775,10 +792,11 @@ public class BeanUtil {
      * @param field 字段
      * @param cls 类
      * @param dis 是否去重
+     * @param anyField 不区分大小写
      * @param <T> 泛型类型
      * @return 列表
      */
-    static public <T> List<T> copyFieldList(List<?> list, String field, Class<T> cls,boolean dis)
+    static public <T> List<T> copyFieldList(List<?> list, String field, Class<T> cls,boolean dis,boolean anyField)
     {
         if (list == null) {
             return new ArrayList<>(0);
@@ -788,10 +806,10 @@ public class BeanUtil {
             T v = null;
             if (cls!=null)
             {
-                v = getFieldValue(bean, field,cls);
+                v = getFieldValue(bean, field,cls,anyField);
             } else
             {
-                v = getFieldValue(bean, field);
+                v = getFieldValue(bean, field ,anyField);
             }
             if (dis)
             {

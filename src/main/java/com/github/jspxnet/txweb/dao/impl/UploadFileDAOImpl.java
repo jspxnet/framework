@@ -17,7 +17,6 @@ import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by yuan on 2014/7/13 0013.
@@ -275,6 +274,6 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
             criteria = criteria.add(Expression.eq("putUid", uid));
         }
         List<Object> list = criteria.setCurrentPage(1).setTotalCount(getMaxRows()).groupList();
-        return BeanUtil.copyFieldList(list,"groupName");
+        return BeanUtil.copyFieldList(list,"groupName",true,true);
     }
 }
