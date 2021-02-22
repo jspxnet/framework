@@ -22,7 +22,6 @@ import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.txweb.IRole;
 import com.github.jspxnet.txweb.IUserSession;
-import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.MulRequest;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
@@ -65,7 +64,6 @@ import java.util.Map;
  * </p>
  */
 @Slf4j
-@HttpMethod(caption = "上传文件")
 public class UploadFileAction extends MultipartSupport {
     final static public String[] OFFICE_FILE_TYPES = FileSuffixUtil.officeTypes;
     final static public String[] STOP_EXS = new String[]{"php", "jsp", "ftl", "html", "htm", "exe", "com", "bat", "asp", "aspx", "sh", "jar", "js", "dll"};
