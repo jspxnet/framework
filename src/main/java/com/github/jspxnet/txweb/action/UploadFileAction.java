@@ -445,7 +445,8 @@ public class UploadFileAction extends MultipartSupport {
                     jsonArray.add(json);
                     setResult(jsonArray);
                 }
-            } else
+            }
+            else
             {
                 //一个文件
                 setResult(json);

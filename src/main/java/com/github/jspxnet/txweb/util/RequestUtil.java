@@ -988,6 +988,10 @@ public class RequestUtil {
      */
     static public String getReader(HttpServletRequest request) throws IOException {
         ///////////////////读取ajax请求 begin
+        if (isMultipart(request))
+        {
+            return null;
+        }
         BufferedReader buffer = request.getReader();
         StringBuilder call = new StringBuilder();
         String str;

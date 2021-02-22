@@ -28,20 +28,22 @@ public class JspxNetFileRenamePolicy extends FileRenamePolicy {
                 log.warn("没有载入中文支持包jspx-zhex-*.jar,不能正确转换中文名", e);
             }
         }
-        body = StringUtil.getPolicyName(body, 40, special);
-        body = StringUtil.trim(StringUtil.deleteChinese(body));
+        body = StringUtil.trim(StringUtil.getPolicyName(StringUtil.deleteChinese(body), 10, special));
         File newFile = new File(f.getParentFile(), body + DateUtil.toString(new Date(),DateUtil.DATE_GUID) + ext);
         if (createNewFile(newFile)) {
             return newFile;
         }
+        body = StringUtil.trim(StringUtil.getPolicyName(StringUtil.deleteChinese(body), 6, special));
         String newName = body + DateUtil.toString(new Date(),DateUtil.DATE_GUID) + RandomUtil.getRandomGUID(4);
+
+        newFile = new File(f.getParentFile(), newName+ ext);
+        if (createNewFile(newFile)) {
+            return newFile;
+        }
         int count = 0;
-        int maxCount = count + 100;
-        while (count < maxCount) {
-            String fileName = newName + count + ext;
-            if (fileName.length() > 220) {
-                fileName = body+RandomUtil.getRandomGUID(10) + ext;
-            }
+        while (count < 100)
+        {
+            String fileName = body+RandomUtil.getRandomGUID(10) + ext;
             f = new File(f.getParent(), fileName);
             if (createNewFile(f)) {
                 break;

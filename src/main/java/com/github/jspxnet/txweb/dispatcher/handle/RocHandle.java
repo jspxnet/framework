@@ -42,7 +42,7 @@ public class RocHandle extends ActionHandle {
     static String getRequestReader(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String callStr = RequestUtil.getReader(request);
         //////////////////初始begin
-        if (callStr.length() > REQUEST_MAX_LENGTH) {
+        if (callStr!=null&&callStr.length() > REQUEST_MAX_LENGTH) {
             TXWebUtil.print(new JSONObject(RocResponse.error(-32600, "Invalid params.参数无效,长度超出范围")).toString(4), WebOutEnumType.JSON.getValue(), response);
             return null;
         }
