@@ -819,7 +819,6 @@ public class ApiDocUtil {
         {
             return null;
         }
-
         String cont;
         if (!ObjectUtil.isEmpty(describe.value()) && !"[\"\"]".equalsIgnoreCase(ObjectUtil.toString(describe.value()))) {
             cont = ArrayUtil.toString(describe.value(), "<br />");
