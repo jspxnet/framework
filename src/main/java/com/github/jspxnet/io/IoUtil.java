@@ -39,6 +39,7 @@ public class IoUtil {
     public static String autoReadText(File file) throws IOException {
         return autoReadText( file.getAbsolutePath(), Environment.defaultEncode);
     }
+
     /**
      *
      * @param file 文件

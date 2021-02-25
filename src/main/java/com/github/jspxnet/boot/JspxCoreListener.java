@@ -9,6 +9,12 @@
  */
 package com.github.jspxnet.boot;
 
+import com.ctrip.framework.apollo.Config;
+import com.ctrip.framework.apollo.ConfigChangeListener;
+import com.ctrip.framework.apollo.ConfigService;
+import com.ctrip.framework.apollo.enums.PropertyChangeType;
+import com.ctrip.framework.apollo.model.ConfigChange;
+import com.ctrip.framework.apollo.model.ConfigChangeEvent;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
@@ -18,6 +24,7 @@ import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.cache.core.JSCache;
 import com.github.jspxnet.cache.store.MemoryStore;
+import com.github.jspxnet.enums.BootConfigEnumType;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.service.NettyRpcServiceGroup;
 import com.github.jspxnet.network.vcs.VcsClient;
@@ -33,20 +40,16 @@ import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.txweb.config.DefaultConfiguration;
 import com.github.jspxnet.txweb.config.TXWebConfigManager;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
-import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.servlet.ServletContextListener;
-import java.io.File;
 import java.security.Provider;
 import java.security.Security;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -110,36 +113,28 @@ public class JspxCoreListener implements ServletContextListener {
         }
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        //路径配置
-        String checkDefaultPath = jspxConfiguration.getDefaultPath();
-        if (StringUtil.isNull(checkDefaultPath)) {
-            jspxConfiguration.setDefaultConfigFile(Environment.USE_VCS_CONFIG_FILE);
-            checkDefaultPath = jspxConfiguration.getDefaultPath();
-        }
 
-        //判断是否是用远程vcs配置begin
-        File file = new File(checkDefaultPath, Environment.USE_VCS_CONFIG_FILE);
-        if (file.exists() && file.canRead()) {
-            StringMap<String, String> stringMap = new StringMap<>();
-            stringMap.setLineSplit(StringUtil.CRLF);
-            stringMap.setKeySplit(StringUtil.EQUAL);
+
+
+        Properties properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
+
+        String bootConfMode = properties.getProperty(Environment.BOOT_CONF_MODE,Environment.defaultValue);
+        if (BootConfigEnumType.VCS.getName().equalsIgnoreCase(bootConfMode))
+        {
             synchronized (this) {
                 try {
-                    stringMap.loadFile(file.getAbsolutePath());
-                    if (stringMap.getBoolean(Environment.USE_VCS_CONFIG)) {
-                        log.info("配置检测到是用vcs分布式配置");
-                        String url = StringUtil.trim(stringMap.getString(Environment.VCS_URL));
-                        String localPath = StringUtil.trim(stringMap.getString(Environment.VCS_LOCAL_PATH));
-                        String name = StringUtil.trim(stringMap.getString(Environment.VCS_USER_NAME));
-                        String password = StringUtil.trim(stringMap.getString(Environment.VCS_USER_PASSWORD));
-                        Map<String, Object> valueMap = new HashMap<>();
-                        valueMap.put(Environment.defaultPath, checkDefaultPath);
-                        localPath = EnvFactory.getPlaceholder().processTemplate(valueMap, localPath);
-                        VcsClient vcsClient = VcsFactory.createClient(url, localPath, name, password);
-                        if (vcsClient != null) {
-                            String vcsVersion = vcsClient.download();
-                            log.info("下载vcs配置版本：{}", vcsVersion);
-                        }
+                    log.info("配置检测到是用vcs分布式配置");
+                    String url = StringUtil.trim(properties.getProperty(Environment.VCS_URL));
+                    String localPath = StringUtil.trim(properties.getProperty(Environment.VCS_LOCAL_PATH));
+                    String name = StringUtil.trim(properties.getProperty(Environment.VCS_USER_NAME));
+                    String password = StringUtil.trim(properties.getProperty(Environment.VCS_USER_PASSWORD));
+                    Map<String, Object> valueMap =  new HashMap<String, Object>((Map) properties);
+                    valueMap.put(Environment.defaultPath, defaultPath);
+                    localPath = EnvFactory.getPlaceholder().processTemplate(valueMap, localPath);
+                    VcsClient vcsClient = VcsFactory.createClient(url, localPath, name, password);
+                    if (vcsClient != null) {
+                        String vcsVersion = vcsClient.download();
+                        log.info("下载vcs配置版本：{}", vcsVersion);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -148,18 +143,55 @@ public class JspxCoreListener implements ServletContextListener {
                     jspxConfiguration.setDefaultConfigFile(Environment.jspx_properties_file);
                 }
             }
-        } else {
-            log.info("是用本地配置方式");
-        }
-        //判断是否是用远程vcs配置end
-
-
-        try {
-            envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
+        if (BootConfigEnumType.APPOLLO.getName().equalsIgnoreCase(bootConfMode))
+        {
+            //appollo 启动配置
+            System.setProperty(Environment.APOLLO_ENV,properties.getProperty(Environment.APOLLO_ENV));
+            System.setProperty(Environment.APOLLO_APP_ID,properties.getProperty(Environment.APOLLO_APP_ID));
+            System.setProperty(Environment.APOLLO_BOOTSTRAP_ENABLED,properties.getProperty(Environment.APOLLO_BOOTSTRAP_ENABLED));
+            System.setProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES,properties.getProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES));
+            System.setProperty(Environment.APOLLO_META,properties.getProperty(Environment.APOLLO_META));
+
+            envTemplate.putEnv(Environment.BOOT_CONF_MODE,BootConfigEnumType.APPOLLO.getName());
+
+            Config config = ConfigService.getAppConfig();
+            Set<String> names = config.getPropertyNames();
+            for (String key:names)
+            {
+                envTemplate.putEnv(key,config.getProperty(key,StringUtil.empty));
+            }
+
+            ConfigChangeListener changeListener = new ConfigChangeListener() {
+                @Override
+                public void onChange(ConfigChangeEvent changeEvent) {
+                    log.info("Changes for namespace {}", changeEvent.getNamespace());
+                    for (String key : changeEvent.changedKeys()) {
+                        ConfigChange change = changeEvent.getChange(key);
+                        log.info("Change - key: {}, oldValue: {}, newValue: {}, changeType: {}",
+                                change.getPropertyName(), change.getOldValue(), change.getNewValue(),
+                                change.getChangeType());
+                        if (PropertyChangeType.ADDED.equals(change.getChangeType())||PropertyChangeType.MODIFIED.equals(change.getChangeType()))
+                        {
+                            envTemplate.putEnv(change.getPropertyName(),change.getNewValue());
+                        }
+                        if (PropertyChangeType.DELETED.equals(change.getChangeType()))
+                        {
+                            envTemplate.deleteEnv(change.getPropertyName());
+                        }
+                    }
+                }
+            };
+            config.addChangeListener(changeListener);
+        }
+        else
+        {
+            envTemplate.createJspxEnv(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
+        }
+
+        //默认方式
+        envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
         //jdbc配置
         if (!FileUtil.isFileExist(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file)) {
             String info = "not found " + Environment.jspx_properties_file + ",不能找到基本的配置文件" + Environment.jspx_properties_file + ",构架将不能正常工作";
@@ -168,11 +200,10 @@ public class JspxCoreListener implements ServletContextListener {
             return;
         }
 
-        envTemplate.createJspxEnv(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
+
         log.info("create log4j config");
         Log4jConfig log4jConfig = new Log4jConfigImpl();
         log4jConfig.createConfig();
-
 
         log.info("create jspx.net system Environment");
         //环境配置

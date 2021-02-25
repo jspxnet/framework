@@ -44,7 +44,7 @@ public class MasterSocketAddress {
         }
     }
 
-    synchronized public InetSocketAddress getSocketAddress(String serviceName)
+     public InetSocketAddress getSocketAddress(String serviceName)
     {
         if (ObjectUtil.isEmpty(GROUP_LIST_MAP))
         {

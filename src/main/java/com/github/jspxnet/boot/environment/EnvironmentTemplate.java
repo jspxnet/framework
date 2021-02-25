@@ -44,9 +44,15 @@ public interface EnvironmentTemplate extends Serializable {
 
     String processTemplate(String templateString) ;
 
+    Properties readDefaultProperties(String fileName);
+
     void createJspxEnv(String fileName);
 
     Properties getProperties();
+
+    void putEnv(String key, String value);
+
+    void deleteEnv(String key);
 
     void restorePlaceholder();
 

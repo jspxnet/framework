@@ -15,7 +15,6 @@ import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
@@ -118,7 +117,7 @@ public class EcwidConsulServiceImpl implements ConsulService {
         Response<List<HealthService>> healthyServices = client.getHealthServices(serviceName,consulRequest);
         return healthyServices.getValue();
     }
-
+    private static int current = 0;
     /**
      * 随机的得到一个当前可用的
      * @param serviceName 请求的服务名称
@@ -131,12 +130,12 @@ public class EcwidConsulServiceImpl implements ConsulService {
         {
             return null;
         }
-        int to = list.size()-1;
-        if (to<=0)
+        current++;
+        if (current>=list.size())
         {
-            to = RandomUtil.getRandomInt(0,list.size()-1);
+            current = 0;
         }
-        return list.get(to).getService();
+        return list.get(current).getService();
     }
 
     /**

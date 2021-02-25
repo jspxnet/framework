@@ -122,7 +122,7 @@ public final class EntryFactory implements BeanFactory {
             return lifecycleObject.getObject();
         }
 
-        Object result = null;
+        Object result;
         Class<?> cla = ClassUtil.loadClass(lifecycleObject.getClassName());
         RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
         if (rpcClient!=null) {
@@ -341,6 +341,11 @@ public final class EntryFactory implements BeanFactory {
         if (o == null) {
             return;
         }
+        if (superclass.getName().contains("ProgramItem"))
+        {
+            System.out.println("-----------------");
+
+        }
 
         Map<String, Object> valueMap;
         PropertySource propertySource = superclass.getAnnotation(PropertySource.class);
@@ -392,70 +397,68 @@ public final class EntryFactory implements BeanFactory {
 
         //匹配方式
         PropPrefix propPrefix = superclass.getAnnotation(PropPrefix.class);
-        if (propertySource != null) {
-            Field[] fields = ClassUtil.getDeclaredFields(superclass);
-            if (fields != null && propPrefix != null) {
-                for (Field field : fields) {
-                    if (Modifier.isFinal(field.getModifiers()) || Modifier.isTransient(field.getModifiers())
-                            || Modifier.isInterface(field.getModifiers())) {
-                        continue;
-                    }
-                    Value value = field.getAnnotation(Value.class);
-                    String key = null;
-                    if (value != null) {
-                        key = propPrefix.prefix() + StringUtil.DOT + value.value();
+        Field[] fields = ClassUtil.getDeclaredFields(superclass);
+        if (fields != null && propPrefix != null) {
+            for (Field field : fields) {
+                if (Modifier.isFinal(field.getModifiers()) || Modifier.isTransient(field.getModifiers())
+                        || Modifier.isInterface(field.getModifiers())) {
+                    continue;
+                }
+                Value value = field.getAnnotation(Value.class);
+                String key = null;
+                if (value != null) {
+                    key = propPrefix.prefix() + StringUtil.DOT + value.value();
+                } else {
+                    key = propPrefix.prefix() + StringUtil.DOT + field.getName();
+                }
+                String valueStr = (String) valueMap.get(key);
+                if (StringUtil.isEmpty(valueStr)) {
+                    continue;
+                }
+                String valueObj = EnvFactory.getPlaceholder().processTemplate(valueMap, valueStr);
+                BeanUtil.setFieldValue(o, field.getName(), valueObj);
+            }
+        }
+        String[] fieldNames = null;
+        if (fields != null) {
+            for (Field field : fields) {
+                Value val = field.getAnnotation(Value.class);
+                if (val != null) {
+                    String valueStr = StringUtil.empty;
+                    if (val.value().startsWith("$")) {
+                        String[] varNames = StringUtil.getFreeMarkerVar(val.value());
+                        valueStr = (String) valueMap.get(varNames[0]);
                     } else {
-                        key = propPrefix.prefix() + StringUtil.DOT + field.getName();
-                    }
-                    String valueStr = (String) valueMap.get(key);
-                    if (StringUtil.isEmpty(valueStr)) {
-                        continue;
+                        valueStr = (String) valueMap.get(val.value());
                     }
                     String valueObj = EnvFactory.getPlaceholder().processTemplate(valueMap, valueStr);
+                    fieldNames = ArrayUtil.add(fieldNames, field.getName());
                     BeanUtil.setFieldValue(o, field.getName(), valueObj);
                 }
             }
-            String[] fieldNames = null;
-            if (fields != null) {
-                for (Field field : fields) {
-                    Value val = field.getAnnotation(Value.class);
-                    if (val != null) {
-                        String valueStr = StringUtil.empty;
-                        if (val.value().startsWith("$")) {
-                            String[] varNames = StringUtil.getFreeMarkerVar(val.value());
-                            valueStr = (String) valueMap.get(varNames[0]);
-                        } else {
-                            valueStr = (String) valueMap.get(val.value());
-                        }
-                        String valueObj = EnvFactory.getPlaceholder().processTemplate(valueMap, valueStr);
-                        fieldNames = ArrayUtil.add(fieldNames, field.getName());
-                        BeanUtil.setFieldValue(o, field.getName(), valueObj);
-                    }
+        }
+        //装置值
+        Method[] methods = ClassUtil.getDeclaredSetMethods(superclass);
+        if (methods != null) {
+            for (Method method : methods) {
+                if (ArrayUtil.contains(fieldNames, ClassUtil.getMethodFiledName(method.getName()))) {
+                    //已经设置过,不重复
+                    continue;
                 }
-            }
-            //装置值
-            Method[] methods = ClassUtil.getDeclaredSetMethods(superclass);
-            if (methods != null) {
-                for (Method method : methods) {
-                    if (ArrayUtil.contains(fieldNames, ClassUtil.getMethodFiledName(method.getName()))) {
-                        //已经设置过,不重复
+                Value val = method.getAnnotation(Value.class);
+                if (val != null) {
+                    String valueStr = StringUtil.empty;
+                    if (val.value().startsWith("$")) {
+                        String[] varNames = StringUtil.getFreeMarkerVar(val.value());
+                        valueStr = (String) valueMap.get(varNames[0]);
+                    } else {
+                        valueStr = (String) valueMap.get(val.value());
+                    }
+                    String valueObj = EnvFactory.getPlaceholder().processTemplate(valueMap, valueStr);
+                    if (valueObj == null) {
                         continue;
                     }
-                    Value val = method.getAnnotation(Value.class);
-                    if (val != null) {
-                        String valueStr = StringUtil.empty;
-                        if (val.value().startsWith("$")) {
-                            String[] varNames = StringUtil.getFreeMarkerVar(val.value());
-                            valueStr = (String) valueMap.get(varNames[0]);
-                        } else {
-                            valueStr = (String) valueMap.get(val.value());
-                        }
-                        String valueObj = EnvFactory.getPlaceholder().processTemplate(valueMap, valueStr);
-                        if (valueObj == null) {
-                            continue;
-                        }
-                        BeanUtil.setSimpleProperty(o, method.getName(), valueObj);
-                    }
+                    BeanUtil.setSimpleProperty(o, method.getName(), valueObj);
                 }
             }
         }

@@ -14,8 +14,6 @@ import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by IntelliJ IDEA.

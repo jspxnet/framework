@@ -10,18 +10,20 @@
 package com.github.jspxnet.boot.environment.impl;
 
 
+import com.ctrip.framework.apollo.ConfigChangeListener;
+import com.ctrip.framework.apollo.model.ConfigChange;
+import com.ctrip.framework.apollo.model.ConfigChangeEvent;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Placeholder;
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.AutoReadTextFile;
+import com.github.jspxnet.enums.BootConfigEnumType;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.security.symmetry.impl.XOREncrypt;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.*;
 import java.util.*;
 
@@ -38,7 +40,10 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     public EnvironmentTemplateImpl() {
 
+
     }
+
+
 
     @Override
     public Map<String, Object> getVariableMap() {
@@ -398,28 +403,42 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         }
     }
 
-
+    /**
+     * 读取当前原始的启动配置文件
+     * @param fileName 文件路径
+     * @return 得到配置属性,注意这里只是在内存中
+     */
     @Override
-    public void createJspxEnv(String fileName) {
+    public Properties readDefaultProperties(String fileName) {
         try {
-            AbstractRead abstractRead = new AutoReadTextFile();
-            abstractRead.setEncode(Environment.defaultEncode);
-            abstractRead.setFile(fileName);
-            String cont = abstractRead.getContent();
-
+            String cont = IoUtil.autoReadText(fileName);
             XOREncrypt encrypt = new XOREncrypt();
             encrypt.setSecretKey(Environment.defaultDrug);
             if (encrypt.isEncrypt(cont)) {
                 cont = encrypt.getDecode(cont);
             }
-
             Properties p = new Properties();
             p.load(new StringReader(cont));
+            return p;
+        } catch (Exception e) {
+            log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+        //创建配置 begin
+        return null;
+    }
 
-            if (!Environment.defaultEncode.equalsIgnoreCase((String) p.get(Environment.encode))) {  //修正配置文件编码
-                abstractRead.setEncode((String) p.get(Environment.encode));
-                p.load(new StringReader(abstractRead.getContent()));
+    @Override
+    public void createJspxEnv(String fileName) {
+        try {
+            String cont = IoUtil.autoReadText(fileName);
+            XOREncrypt encrypt = new XOREncrypt();
+            encrypt.setSecretKey(Environment.defaultDrug);
+            if (encrypt.isEncrypt(cont)) {
+                cont = encrypt.getDecode(cont);
             }
+            Properties p = new Properties();
+            p.load(new StringReader(cont));
             for (Object key : p.keySet()) {
                 Object o = p.get(key);
                 if (o == null) {
@@ -434,7 +453,16 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             e.printStackTrace();
         }
         //创建配置 begin
+    }
 
+    @Override
+    public void putEnv(String key, String value) {
+          VALUE_MAP.put(key, value);
+    }
+
+    @Override
+    public void deleteEnv(String key) {
+        VALUE_MAP.remove(key);
     }
 
     @Override

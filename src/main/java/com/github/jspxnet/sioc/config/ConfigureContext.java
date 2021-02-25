@@ -224,33 +224,6 @@ public class ConfigureContext implements IocContext {
         }
     }
 
-    /**
-     * 注册class
-     *
-     *
-     */
-  /*  @Override
-    public void registryRpcClientBean(Class<?> cla) {
-
-        //注册bean标签
-        try {
-            RpcClient iocBean = cla.getAnnotation(RpcClient.class);
-            if (iocBean == null) {
-                return;
-            }
-            BeanModel beanModel = new BeanModel();
-            beanModel.setId(cla.getName());
-            beanModel.setSingleton(false);
-            beanModel.setNamespace(iocBean.namespace());
-            beanModel.setClassName(cla.getName());
-            beanModel.setCreate(Sioc.KEY_RPC_CLIENT);
-            log.info("registry rpc client Bean class=" + cla + " id=" + beanModel.getId() + " namespace=" + beanModel.getNamespace());
-            registerBean(beanModel);
-        } catch (Exception e) {
-            log.error("ioc load error" + cla, e);
-        }
-    }
-*/
     @Override
     public void setConfigFile(String file) {
         String[] configFile = new String[]{file};
@@ -334,10 +307,7 @@ public class ConfigureContext implements IocContext {
             }
         }
 
-        AbstractRead abstractRead = new AutoReadTextFile();
-        abstractRead.setEncode(envTemplate.getString(Environment.encode, Environment.defaultEncode));
-        abstractRead.setFile(fileNamePath);
-        return abstractRead.getContent();
+        return IoUtil.autoReadText(fileNamePath,envTemplate.getString(Environment.encode, Environment.defaultEncode));
     }
 
     private String readHttpFile(String fileName) throws IOException {
@@ -388,10 +358,7 @@ public class ConfigureContext implements IocContext {
                 log.debug("ioc not found file:" + loadFile);
                 throw new Exception("ioc not found file:" + loadFile);
             }
-            AbstractRead read = new AutoReadTextFile();
-            read.setEncode(encode);
-            read.setFile(file);
-            String readCont = read.getContent();
+            String readCont = IoUtil.autoReadText(file.getAbsolutePath(),encode);
             int headPost = StringUtil.indexIgnoreCaseOf(readCont, "<?xml");
             if (headPost != -1) {
                 readCont = StringUtil.substringAfter(readCont, ">");

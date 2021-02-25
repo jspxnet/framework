@@ -19,7 +19,7 @@ public class AggregateProjection extends SimpleProjection {
 
 
     protected String propertyName;
-    private String aggregate;
+    final private String aggregate;
 
     protected AggregateProjection(String aggregate, String propertyName) {
         this.aggregate = aggregate;

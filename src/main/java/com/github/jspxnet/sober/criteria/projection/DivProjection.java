@@ -17,9 +17,9 @@ package com.github.jspxnet.sober.criteria.projection;
  */
 public class DivProjection implements Projection {
     //字段1
-    private Projection projection1;
+    final private Projection projection1;
     //字段2
-    private Projection projection2;
+    final private Projection projection2;
 
     //字段1除字段2
 

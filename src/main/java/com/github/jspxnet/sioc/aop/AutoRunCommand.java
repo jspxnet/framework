@@ -16,8 +16,6 @@ import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sioc.BeanFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.github.jspxnet.utils.StringUtil;
 
 /**

@@ -16,7 +16,7 @@ package com.github.jspxnet.sober.criteria.projection;
  * Time: 10:16:03
  */
 public class SQLProjection implements Projection {
-    private String sql;
+    final private String sql;
 
     @Override
     public String toString() {

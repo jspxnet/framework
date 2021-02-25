@@ -106,7 +106,6 @@ public class BaseConfigurationImpl implements JspxConfiguration {
 
         /**
          * 查找 lib 目录
-         *
          */
         if (path == null) {
             path = FileUtil.getPathPart(ClassUtil.getClassFilePath(com.github.jspxnet.boot.conf.JarDefaultConfig.class.getName()));

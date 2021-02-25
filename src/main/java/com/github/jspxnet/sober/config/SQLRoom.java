@@ -73,7 +73,7 @@ public class SQLRoom implements Serializable {
     public void addQuery(SqlMapConfig sqlMapConfig)
     {
         Map<String, SqlMapConfig> configMap = queryMap.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
-        configMap.put(sqlMapConfig.getDatabase(),sqlMapConfig);
+        configMap.put(StringUtil.toLowerCase(sqlMapConfig.getDatabase()),sqlMapConfig);
     }
 
 
@@ -85,7 +85,7 @@ public class SQLRoom implements Serializable {
     public void addUpdate(SqlMapConfig sqlMapConfig)
     {
         Map<String, SqlMapConfig> configMap = updateMap.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
-        configMap.put(sqlMapConfig.getDatabase(),sqlMapConfig);
+        configMap.put(StringUtil.toLowerCase(sqlMapConfig.getDatabase()),sqlMapConfig);
     }
     /**
      *  添加跟新执行配置
@@ -94,7 +94,7 @@ public class SQLRoom implements Serializable {
     public void addExecute(SqlMapConfig sqlMapConfig)
     {
         Map<String, SqlMapConfig> configMap = executeMap.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
-        configMap.put(sqlMapConfig.getDatabase(),sqlMapConfig);
+        configMap.put(StringUtil.toLowerCase(sqlMapConfig.getDatabase()),sqlMapConfig);
     }
 
     /**
@@ -106,7 +106,7 @@ public class SQLRoom implements Serializable {
     private static SqlMapConfig addConfig(Map<String, Map<String, SqlMapConfig>> map,SqlMapConfig sqlMapConfig)
     {
         Map<String, SqlMapConfig> configMap = map.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
-        return configMap.put(sqlMapConfig.getDatabase(),sqlMapConfig);
+        return configMap.put(StringUtil.toLowerCase(sqlMapConfig.getDatabase()),sqlMapConfig);
     }
 
     /**
@@ -152,7 +152,7 @@ public class SQLRoom implements Serializable {
         }
         if (result==null)
         {
-            result = map.get(Environment.defaultValue);
+            result = map.get(db);
         }
         if (result!=null&&!StringUtil.isEmpty(result.getQuote())&&!result.getQuote().equalsIgnoreCase(id))
         {

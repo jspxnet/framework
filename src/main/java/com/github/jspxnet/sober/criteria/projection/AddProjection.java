@@ -16,8 +16,8 @@ package com.github.jspxnet.sober.criteria.projection;
  * Time: 10:23:11
  */
 public class AddProjection implements Projection {
-    private Projection projection1;
-    private Projection projection2;
+    final private Projection projection1;
+    final private Projection projection2;
 
     protected AddProjection(Projection projection1, Projection projection2) {
         this.projection1 = projection1;

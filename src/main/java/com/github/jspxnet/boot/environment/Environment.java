@@ -602,13 +602,22 @@ public abstract class Environment {
 
     static public final String untitledUrl = "untitledUrl";
 
-    static public final String USE_VCS_CONFIG_FILE = "vcsconfig.properties";
-    static public final String USE_VCS_CONFIG = "useVcsConfig";
-    static public final String VCS_URL = "url";
-    static public final String VCS_LOCAL_PATH = "localPath";
-    static public final String VCS_USER_NAME = "name";
-    static public final String VCS_USER_PASSWORD = "password";
 
+    //启动配置模式
+    static public final String BOOT_CONF_MODE = "bootConfMode";
+
+    //VCS启动配置
+    static public final String VCS_URL = "vcs.url";
+    static public final String VCS_LOCAL_PATH = "vcs.localPath";
+    static public final String VCS_USER_NAME = "vcs.name";
+    static public final String VCS_USER_PASSWORD = "vcs.password";
+
+    //appollo启动配置
+    static public final String APOLLO_ENV = "env";
+    static public final String APOLLO_APP_ID = "app.id";
+    static public final String APOLLO_BOOTSTRAP_ENABLED = "apollo.bootstrap.enabled";
+    static public final String APOLLO_BOOTSTRAP_NAMESPACES = "apollo.bootstrap.namespaces";
+    static public final String APOLLO_META = "apollo.meta";
 
     static public final String HTTP_RPC_DOMAIN = "http.rpc.domain";
     static public final String HTTP_RPC_ROUTES = "http.rpc.routes.";

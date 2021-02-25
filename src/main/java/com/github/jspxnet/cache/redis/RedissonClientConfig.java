@@ -1,20 +1,16 @@
 package com.github.jspxnet.cache.redis;
 
-import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
-import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
-
 import java.io.File;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 /**
  * threads（线程池数量）
@@ -30,9 +26,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class RedissonClientConfig {
     private static RedissonClient redisson = null;
-    private String configFile = StringUtil.empty;
-    private Config config = null;
-    private String content = StringUtil.empty;
+    private String config = StringUtil.empty;
+    private Config redisConfig = null;
 
     public RedissonClientConfig()
     {
@@ -42,43 +37,38 @@ public class RedissonClientConfig {
     @Init
      public void init() {
         if (redisson == null) {
-            if (StringUtil.isNull(content) && StringUtil.isNull(configFile)) {
+            if (StringUtil.isNull(config) && StringUtil.isNull(config)) {
                 log.error("not config Redis cache link, 没有正确配置Redis 链接");
                 return;
             }
             try {
-
-                File file = new File(configFile);
-                if (!file.exists()) {
-                    file = EnvFactory.getFile(configFile);
-                }
-
-                if (file.isFile() && file.canRead()) {
+                File file = new File(config);
+                if (!StringUtil.isJsonObject(config)&&file.isFile() && file.canRead()) {
                     String fileType = FileUtil.getTypePart(file);
                     if ("json".equalsIgnoreCase(fileType) || "conf".equalsIgnoreCase(fileType)) {
-                        if (configFile.startsWith("http")) {
-                            config = Config.fromJSON(new URL(configFile));
+                        if (config.startsWith("http")) {
+                            redisConfig = Config.fromJSON(new URL(config));
                         } else {
-                            config = Config.fromJSON(file);
+                            redisConfig = Config.fromJSON(file);
                         }
                     } else if ("yaml".equalsIgnoreCase(fileType)||"yml".equalsIgnoreCase(fileType)) {
-                        if (configFile.startsWith("http")) {
-                            config = Config.fromYAML(new URL(configFile));
+                        if (config.startsWith("http")) {
+                            redisConfig = Config.fromYAML(new URL(config));
                         } else {
-                            config = Config.fromYAML(file);
+                            redisConfig = Config.fromYAML(file);
                         }
                     } else {
-                        config = Config.fromJSON(file);
+                        redisConfig = Config.fromJSON(file);
                     }
                 } else {
-                    if (StringUtil.isJsonObject(content)) {
-                        config = Config.fromJSON(content);
+                    if (StringUtil.isJsonObject(config)) {
+                        redisConfig = Config.fromJSON(config);
                     } else {
-                        config = Config.fromYAML(content);
+                        redisConfig = Config.fromYAML(config);
                     }
                 }
 
-                redisson = Redisson.create(config);
+                redisson = Redisson.create(redisConfig);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -94,30 +84,13 @@ public class RedissonClientConfig {
         }
     }
 
-    public String getConfigFile() {
-        return configFile;
-    }
-
-    public void setConfigFile(String configFile) {
-        this.configFile = configFile;
-    }
-
-    public Config getConfig() {
-        return config;
-    }
-
-    public void setConfig(Config config) {
+    public void setConfig(String config) {
         this.config = config;
     }
 
-    public String getContent() {
-        return content;
+    public Config getConfig() {
+        return redisConfig;
     }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
 
     public RedissonClient getRedissonClient() {
         return redisson;

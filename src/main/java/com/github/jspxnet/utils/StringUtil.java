@@ -3163,5 +3163,13 @@ public class StringUtil {
     }
 
 
+    public static String toLowerCase(String str)
+    {
+        if (str==null)
+        {
+            return null;
+        }
+        return str.toLowerCase();
+    }
 
 }
