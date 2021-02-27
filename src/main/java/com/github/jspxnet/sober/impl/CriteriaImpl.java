@@ -409,20 +409,19 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     @Override
     public int delete(boolean delChild) {
         int result = 0;
-
         if (delChild) {
             List<T> list = list(false);
             for (T o : list) {
-                if (o != null) {
-                    result = result + jdbcOperations.deleteNexus(o);
-                    //删除 缓存
-                    if (soberFactory.isUseCache()) {
-                        //同时更新缓存
-                        TableModels soberTable = soberFactory.getTableModels(o.getClass(), jdbcOperations);
-                        String cacheKey = SoberUtil.getLoadKey(o.getClass(), soberTable.getPrimary(), BeanUtil.getProperty(o, soberTable.getPrimary()), true);
-                        JSCacheManager.remove(o.getClass(), cacheKey);
-                    }
-
+                if (o == null) {
+                    continue;
+                }
+                result = result + jdbcOperations.deleteNexus(o);
+                //删除 缓存
+                if (soberFactory.isUseCache()) {
+                    //同时更新缓存
+                    TableModels soberTable = soberFactory.getTableModels(o.getClass(), jdbcOperations);
+                    String cacheKey = SoberUtil.getLoadKey(o.getClass(), soberTable.getPrimary(), BeanUtil.getProperty(o, soberTable.getPrimary()), true);
+                    JSCacheManager.remove(o.getClass(), cacheKey);
                 }
             }
         }

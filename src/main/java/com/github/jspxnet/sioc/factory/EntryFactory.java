@@ -424,10 +424,18 @@ public final class EntryFactory implements BeanFactory {
             for (Field field : fields) {
                 Value val = field.getAnnotation(Value.class);
                 if (val != null) {
-                    String valueStr = StringUtil.empty;
+                    String valueStr;
                     if (val.value().startsWith("$")) {
                         String[] varNames = StringUtil.getFreeMarkerVar(val.value());
-                        valueStr = (String) valueMap.get(varNames[0]);
+                        //有点的会被当成子对象
+                        if (varNames[0].contains("."))
+                        {
+                            valueStr = (String) valueMap.get(varNames[0]);
+                        }
+                        else
+                        {
+                            valueStr = EnvFactory.getPlaceholder().processTemplate(valueMap, val.value());
+                        }
                     } else {
                         valueStr = (String) valueMap.get(val.value());
                     }

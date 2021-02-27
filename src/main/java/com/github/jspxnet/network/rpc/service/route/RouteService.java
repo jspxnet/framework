@@ -17,7 +17,6 @@ import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +35,6 @@ public class RouteService implements Runnable {
 
     //第一次使用配置服务器地址,以后将切换到路由表
     //有被误判拦截ip的可能
-    //private static final NettyClient NETTY_CLIENT = new NettyClient();
-
     private static final NettyClientPool NETTY_CLIENT = NettyClientPool.getInstance();
 
     private static boolean isRun = true;

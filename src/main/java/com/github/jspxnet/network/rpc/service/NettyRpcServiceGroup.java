@@ -67,7 +67,7 @@ public class NettyRpcServiceGroup {
         int groupCount = RPC_CONFIG.getGroupCount();
         if (groupCount<=0)
         {
-            log.info("------->netty rpc 调用配置参数,分组个数 rpc.localGroupCount={}配置错误,不能等于小于0",groupCount);
+            log.info("------->netty rpc 调用配置参数,分组个数 rpc_localGroupCount={}配置错误,不能等于小于0",groupCount);
             return;
         }
         List<RouteSession> routeSessionList = RPC_CONFIG.getConfigRouteSessionList();

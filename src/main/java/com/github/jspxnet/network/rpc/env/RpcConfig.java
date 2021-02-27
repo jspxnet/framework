@@ -24,37 +24,37 @@ public class RpcConfig {
     final static private String NETTY_RPC_DEBUG = "nettyRpcDebug";
 
     //包的最大长度
-    final static private String MAX_FRAME_LENGTH = "rpc.maxFrameLength";
+    final static private String MAX_FRAME_LENGTH = "rpc_maxFrameLength";
     //缓存大小
-    final static private String BUFFER_SIZE = "rpc.bufferSize";
+    final static private String BUFFER_SIZE = "rpc_bufferSize";
 
     //队列的大小
-    final static private String BACKLOG = "rpc.backlog";
+    final static private String BACKLOG = "rpc_backlog";
 
     //线程数,用CPU数量
-    final static private String WORK_THREAD = "rpc.workThread";
+    final static private String WORK_THREAD = "rpc_workThread";
 
     //服务器本机地址
-    final static private String LOCAL_ADDRESS = "rpc.localAddress";
+    final static private String LOCAL_ADDRESS = "rpc_localAddress";
 
-    final static private String LOCAL_GROUP_NAME = "rpc.localGroupName";
+    final static private String LOCAL_GROUP_NAME = "rpc_localGroupName";
 
     //分组个数,是用在多个tomcat是用统一个配置的时候,每个容器启动几个服务
-    final static private String LOCAL_GROUP_COUNT = "rpc.localGroupCount";
+    final static private String LOCAL_GROUP_COUNT = "rpc_localGroupCount";
 
     //服务器本机地址
-    final static private String MASTER_GROUP = "rpc.master.group";
+    final static private String MASTER_GROUP = "rpc_master.group";
 
     //服务器本机功能组名称
-    final static private String GROUP_NAMES = "rpc.group.names";
+    final static private String GROUP_NAMES = "rpc_group_names";
 
-    final static private String JOIN_KEY = "rpc.joinKey";
+    final static private String JOIN_KEY = "rpc_joinKey";
 
     //超时,单位为秒
-    final static private String TIMEOUT = "rpc.timeout";
+    final static private String TIMEOUT = "rpc_timeout";
 
     //路由秒数
-    final static private String ROUTES_SECOND = "rpc.routesSecond";
+    final static private String ROUTES_SECOND = "rpc_routesSecond";
 
     //分布式服务器发现模式
     final static private String SERVICE_DISCOVER_MODE = "serviceDiscoverMode";
@@ -146,7 +146,7 @@ public class RpcConfig {
     }
 
     public String getMasterGroup(String groupName) {
-        return ENV_TEMPLATE.getString(MASTER_GROUP + StringUtil.DOT + groupName);
+        return ENV_TEMPLATE.getString(MASTER_GROUP + StringUtil.UNDERLINE + groupName);
     }
 
     public List<InetSocketAddress> getMasterGroupList(String groupName) {

@@ -47,7 +47,7 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public void put(CacheEntry entry) {
-        if (entry.getKey()==null)
+        if (!useCache||entry.getKey()==null)
         {
             return;
         }
@@ -62,6 +62,11 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public long size() {
+
+        if (!useCache||redisson==null)
+        {
+            return 0;
+        }
         return redisson.getMap(cacheKey).size();
     }
 

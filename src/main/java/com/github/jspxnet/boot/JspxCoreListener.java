@@ -129,7 +129,7 @@ public class JspxCoreListener implements ServletContextListener {
                     String name = StringUtil.trim(properties.getProperty(Environment.VCS_USER_NAME));
                     String password = StringUtil.trim(properties.getProperty(Environment.VCS_USER_PASSWORD));
                     Map<String, Object> valueMap =  new HashMap<String, Object>((Map) properties);
-                    valueMap.put(Environment.defaultPath, defaultPath);
+                    valueMap.put(Environment.defaultPath, jspxConfiguration.getDefaultPath());
                     localPath = EnvFactory.getPlaceholder().processTemplate(valueMap, localPath);
                     VcsClient vcsClient = VcsFactory.createClient(url, localPath, name, password);
                     if (vcsClient != null) {

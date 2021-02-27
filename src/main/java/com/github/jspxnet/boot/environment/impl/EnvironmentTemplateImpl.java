@@ -47,14 +47,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     @Override
     public Map<String, Object> getVariableMap() {
-        Map<String, Object> result = new Hashtable<>();
-        for (String key : VALUE_MAP.keySet()) {
-            if (StringUtil.isNull(key) || key.contains(".")) {
-                continue;
-            }
-            result.put(key, VALUE_MAP.get(key));
-        }
-        return result;
+        return new Hashtable<>(VALUE_MAP);
     }
 
     @Override

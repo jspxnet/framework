@@ -61,7 +61,6 @@ public class NettyRpcServer implements Runnable {
                     .childHandler(new ServerChannelInitializer())
                     .option(ChannelOption.SO_BACKLOG, rpcConfig.getBacklog())//TCP的缓冲区设置
                     .option(ChannelOption.SO_RCVBUF, rpcConfig.getBufferSize())//设置接收缓冲区大小
-
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);

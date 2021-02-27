@@ -607,10 +607,10 @@ public abstract class Environment {
     static public final String BOOT_CONF_MODE = "bootConfMode";
 
     //VCS启动配置
-    static public final String VCS_URL = "vcs.url";
-    static public final String VCS_LOCAL_PATH = "vcs.localPath";
-    static public final String VCS_USER_NAME = "vcs.name";
-    static public final String VCS_USER_PASSWORD = "vcs.password";
+    static public final String VCS_URL = "vcs_url";
+    static public final String VCS_LOCAL_PATH = "vcs_localPath";
+    static public final String VCS_USER_NAME = "vcs_name";
+    static public final String VCS_USER_PASSWORD = "vcs_password";
 
     //appollo启动配置
     static public final String APOLLO_ENV = "env";
