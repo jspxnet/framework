@@ -1,10 +1,10 @@
 /*
  * Copyright © 2004-2014 chenYuan. All rights reserved.
- * @Website:wwww.jspx.net
- * @Mail:39793751@qq.com
+ * Website:wwww.jspx.net
+ * Mail:39793751@qq.com
  * author: chenYuan , 陈原
- * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
- * @jvm:jdk1.6+  x86/amd64
+ * License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
+ * jvm:jdk1.6+  x86/amd64
  *
  */
 package com.github.jspxnet.utils;
@@ -597,7 +597,7 @@ public class BeanUtil {
      *
      * @param list 列表数据
      * @param cls  列表类型
-     * @param <T>  列表类型
+     * @param <T>  列表类型4
      * @param <V>  列表值
      * @return 返回新的列表
      */
