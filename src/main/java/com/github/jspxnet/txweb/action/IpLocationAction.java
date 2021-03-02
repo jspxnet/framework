@@ -30,10 +30,9 @@ public class IpLocationAction extends IpLocationView {
     }
 
     /**
-     * 删除内容,删除条件,1:包含mid列表,并且是在自己管理的栏目中
-     *
-     * @throws com.github.jspxnet.sober.exception.ValidException v
-     * @throws Exception                                         异常
+     *  删除内容,删除条件,1:包含mid列表,并且是在自己管理的栏目中
+     * @return 状态
+     * @throws Exception 异常
      */
     @Operate(caption = "保存")
     public RocResponse<Boolean> save() throws Exception {

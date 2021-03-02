@@ -110,15 +110,22 @@ public class ConfigureContext implements IocContext {
                 if (!StringUtil.isNull(appName)) {
                     applicationMap.put(namespace, appName);
                 }
+                try {
 
-                extendMap.put(namespace, extend);
-                Map<String, BeanElement> beanElements = beanElementMap.computeIfAbsent(namespace, k -> new HashMap<>());
+                    extendMap.put(namespace, extend);
+                    Map<String, BeanElement> beanElements = beanElementMap.computeIfAbsent(namespace, k -> new HashMap<>());
 
-                List<TagNode> beanLists = siocElement.getBeanElements();
-                for (TagNode aElement : beanLists) {
-                    BeanElement beanElement = (BeanElement) aElement;
-                    beanElements.put(beanElement.getId(), beanElement);
+                    List<TagNode> beanLists = siocElement.getBeanElements();
+                    for (TagNode aElement : beanLists) {
+
+                        BeanElement beanElement = (BeanElement) aElement;
+                        beanElements.put(beanElement.getId(), beanElement);
+                    }
+                } catch (Exception e)
+                {
+                    log.error("载入配置错误,appName:{},namespace:{},extend:{}",appName,namespace,extend);
                 }
+
             }
             iocElements.clear();
             //gc的时候修复

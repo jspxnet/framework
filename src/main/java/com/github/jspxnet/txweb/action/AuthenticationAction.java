@@ -35,6 +35,7 @@ import java.util.Map;
  * date: 12-12-15
  * Time: 上午10:43
  * 远程登陆接口
+ *
  */
 @HttpMethod(caption = "认证登陆接口")
 public class AuthenticationAction extends AuthenticationView {

@@ -16,6 +16,7 @@ import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,6 @@ import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.config.TXWebConfigManager;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sober.exception.ValidException;
@@ -91,7 +91,7 @@ public class JspxPhpModule extends AbstractQuercusModule {
     }
 
 
-    public ActionSupport getAction(Env env, String classname) throws ValidException {
+    public Action getAction(Env env, String classname) throws ValidException {
         HttpServletRequest request = (HttpServletRequest) env.getRequest();
         String namespace = TXWebUtil.getNamespace(request.getServletPath());
         if (classname == null) {
@@ -106,7 +106,7 @@ public class JspxPhpModule extends AbstractQuercusModule {
     }
 
 
-    public ActionSupport getAction(Env env, String namePart, String namespace) throws ValidException {
+    public Action getAction(Env env, String namePart, String namespace) throws ValidException {
 
         HttpServletRequest request = (HttpServletRequest) env.getRequest();
         HttpServletResponse response = (HttpServletResponse) env.getResponse();

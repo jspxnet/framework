@@ -23,7 +23,6 @@ import com.github.jspxnet.txweb.Result;
 import com.github.jspxnet.txweb.annotation.Redirect;
 import com.github.jspxnet.txweb.config.ResultConfigBean;
 import com.github.jspxnet.txweb.env.ActionEnv;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.*;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
@@ -44,14 +43,14 @@ import java.util.Map;
  */
 @Slf4j
 public abstract class ResultSupport implements Result {
-    final static protected EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-    final static protected boolean DEBUG = envTemplate.getBoolean(Environment.logJspxDebug);
+    final static protected EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
+    final static protected boolean DEBUG = ENV_TEMPLATE.getBoolean(Environment.logJspxDebug);
     //json 无对应返回标识
     private static final String KEY_GRID = "grid";
     static final String KEY_ROC_XML = "xml"; //xml 需要设置 json 为默认
 
 
-    private static final String[] gridMethods = new String[]{"currentPage", "count", "totalCount", "sort", "list"};
+    private static final String[] GRID_METHODS = new String[]{"currentPage", "count", "totalCount", "sort", "list"};
 
     public ResultSupport() {
 
@@ -128,7 +127,7 @@ public abstract class ResultSupport implements Result {
      */
     public static Object getRocAutoResult(ActionInvocation actionInvocation) {
         ActionProxy actionProxy = actionInvocation.getActionProxy();
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
         String resultMethods = action.getEnv(ActionEnv.Key_ResultMethods);
         if (StringUtil.isNull(resultMethods)) {
             resultMethods = action.getString(ActionEnv.Key_ResultMethods);
@@ -141,7 +140,7 @@ public abstract class ResultSupport implements Result {
         if (KEY_GRID.equalsIgnoreCase(resultMethods)) {
             //默认的表格调用方式
             JSONObject json = new JSONObject();
-            for (String callMethod : gridMethods) {
+            for (String callMethod : GRID_METHODS) {
                 if (StringUtil.isNull(callMethod)) {
                     continue;
                 }
@@ -203,7 +202,7 @@ public abstract class ResultSupport implements Result {
      * @param action   action
      * @param valueMap 环境变量
      */
-    static void initPageEnvironment(ActionSupport action, Map<String, Object> valueMap) {
+    static void initPageEnvironment(Action action, Map<String, Object> valueMap) {
         valueMap.put(ActionEnv.Key_Request, new RequestMap(action.getRequest()));
         valueMap.put(ActionEnv.Key_Response, RequestUtil.getResponseMap(action.getResponse()));
         valueMap.put(ActionEnv.Key_Session, new SessionMap(action.getSession()));
@@ -220,7 +219,7 @@ public abstract class ResultSupport implements Result {
      * @param action   action
      * @param response 请求
      */
-    static void checkCache(ActionSupport action, HttpServletResponse response) {
+    static void checkCache(Action action, HttpServletResponse response) {
         String browserCache = action.getEnv(ActionEnv.BrowserCache);
         if (!StringUtil.isNull(browserCache) && !StringUtil.toBoolean(browserCache)) {
             response.setHeader("Pragma", "No-cache");

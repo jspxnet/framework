@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 
@@ -23,13 +24,11 @@ import com.github.jspxnet.scriptmark.load.FileSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.StringUtil;
 import org.w3c.dom.Document;
 import org.xhtmlrenderer.resource.XMLResource;
 import org.xhtmlrenderer.simple.Graphics2DRenderer;
 import org.xml.sax.InputSource;
-
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -47,16 +46,16 @@ import java.util.Map;
  */
 public class HtmlImgResult extends ResultSupport {
     private static final Logger log = LoggerFactory.getLogger(HtmlImgResult.class);
-    private final static TemplateConfigurable configurable = new TemplateConfigurable();
-    private static String templatePath = envTemplate.getString(Environment.templatePath);
+    private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
+    private static String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
 
     static {
-        configurable.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
+        CONFIGURABLE.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
     }
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin
@@ -68,10 +67,10 @@ public class HtmlImgResult extends ResultSupport {
         //如果使用cache 就使用uri
 
         String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
-        configurable.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), templatePath});
+        CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), templatePath});
         ScriptMark scriptMark;
         try {
-            scriptMark = new ScriptMarkEngine(cacheKey, fileSource, configurable);
+            scriptMark = new ScriptMarkEngine(cacheKey, fileSource, CONFIGURABLE);
         } catch (Exception e) {
             if (DEBUG) {
                 log.debug("file not found:" + f.getAbsolutePath(), e);

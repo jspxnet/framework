@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
+import com.github.jspxnet.txweb.Action;
 import com.itextpdf.text.pdf.BaseFont;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.HtmlUtil;
@@ -23,11 +24,9 @@ import com.github.jspxnet.scriptmark.load.FileSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.StringUtil;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
 import org.xhtmlrenderer.pdf.ITextRenderer;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -54,17 +53,17 @@ public class HtmlPdfResult extends ResultSupport {
     private static final Logger log = LoggerFactory.getLogger(HtmlPdfResult.class);
     private final static TemplateConfigurable configurable = new TemplateConfigurable();
 
-    private static String templatePath = envTemplate.getString(Environment.templatePath);
-    private static String fontsPath = envTemplate.getString(Environment.fontsPath);
+    private static String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
+    private static String fontsPath = ENV_TEMPLATE.getString(Environment.fontsPath);
 
     static {
-        configurable.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
+        configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
     }
 
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin

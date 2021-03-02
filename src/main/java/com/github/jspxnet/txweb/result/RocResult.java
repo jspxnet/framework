@@ -16,6 +16,7 @@ import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.XML;
 import com.github.jspxnet.json.XMLParserConfiguration;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
@@ -61,7 +62,7 @@ public class RocResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
         if (response.isCommitted()) {
 

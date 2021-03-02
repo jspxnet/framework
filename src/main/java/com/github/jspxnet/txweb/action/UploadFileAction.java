@@ -763,7 +763,7 @@ public class UploadFileAction extends MultipartSupport {
             objects[0] = copyUploadFile;
             return objects;
         }
-        List<Object> saveChildList = BeanUtil.copyList(childList, uploadFileDAO.getClassType());
+        List<?> saveChildList = BeanUtil.copyList(childList, uploadFileDAO.getClassType());
         Object[] objects = new Object[saveChildList.size() + 1];
         objects[0] = copySaveUploadFile;
 

@@ -14,6 +14,7 @@ import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.scriptmark.core.script.ScriptTypeConverter;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.util.AnnotationUtil;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -77,7 +78,7 @@ public class ExcelResult extends ResultSupport {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception
     {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         action.setActionResult(ActionSupport.NONE);
         HttpServletResponse response = action.getResponse();
         String browserCache = action.getEnv(ActionEnv.BrowserCache);

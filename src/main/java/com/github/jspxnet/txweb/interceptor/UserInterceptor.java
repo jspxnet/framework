@@ -16,6 +16,7 @@ import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.IRole;
@@ -71,7 +72,7 @@ public class UserInterceptor extends InterceptorSupport {
     public String intercept(ActionInvocation actionInvocation) throws Exception {
 //这里是不需要验证的action
         ActionProxy actionProxy = actionInvocation.getActionProxy();
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
         UserSession userSession = onlineManager.getUserSession(action);
 
 

@@ -3,12 +3,12 @@ package com.github.jspxnet.txweb.dispatcher.handle;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.HttpStatusType;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.service.client.HessianSkeleton;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +60,7 @@ public class HessianHandle extends ActionHandle {
 
     static public void execute(ActionProxy actionProxy) {
 
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
         Class<?> actionClass = ClassUtil.getClass(action.getClass());
         //Hessian远程接口方式调用 begin
         String serviceId = actionClass.getName();

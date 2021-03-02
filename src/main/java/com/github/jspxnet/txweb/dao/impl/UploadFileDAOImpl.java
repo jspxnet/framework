@@ -57,11 +57,10 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
     }
 
     /**
-     *
      * @return 类对象
      */
     @Override
-    public Class<T> getClassType() {
+    public Class<?> getClassType() {
         return tableClass;
     }
 
@@ -154,14 +153,15 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
     public CloudFileConfig getCloudFileConfig() {
         return createCriteria(CloudFileConfig.class).add(Expression.eq("namespace", namespace)).addOrder(Order.desc("sortDate")).objectUniqueResult(false);
     }
+
     /**
      * 得到子图列表
-     *
      * @param pid 父id
+     * @param <T> 类型
      * @return 返回子文件列表
      */
     @Override
-    public List<T> getChildFileList(long pid) {
+    public <T> List<T> getChildFileList(long pid) {
         Criteria criteria = createCriteria(tableClass).add(Expression.eq("pid", pid));
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.eq("organizeId", organizeId));
@@ -293,5 +293,14 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         }
         List<Object> list = criteria.setCurrentPage(1).setTotalCount(getMaxRows()).groupList();
         return BeanUtil.copyFieldList(list,"groupName",true,true);
+    }
+
+    @Override
+    public  int moveGroup(String groupName,String newGroupName,long uid) throws Exception {
+
+       String tableName = getTableName(tableClass);
+       String sql = "UPDATE " + tableName + "set groupName=?" + StringUtil.quote(newGroupName,false) +
+               "WHERE groupName="+StringUtil.quote(groupName,false) + " AND putUid="+uid;
+       return super.update(sql);
     }
 }

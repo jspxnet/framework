@@ -3,9 +3,9 @@ package com.github.jspxnet.enums;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/2/25 12:32
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/2/25 12:32
+ * description: 启动配置方式
 0.传统普通web方式,jspx.properties放在classes目录读取,或打包压缩作为应用是用的时候可以放在 conf这个目录
 1.vcs下载方式,配置好git或者svn 后启动会自动下载来是用这个配置
 2.appollo配置中心方式,appollo的配置直接写在jspx.properties

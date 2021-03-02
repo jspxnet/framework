@@ -89,7 +89,7 @@ public class TXWebUtil {
      * @param action 设置上传方式的请求
      * @throws Exception 异常 错误
      */
-    public static void setMulRequest(final ActionSupport action) throws Exception {
+    public static void setMulRequest(Action action) throws Exception {
         if (!RequestUtil.isMultipart(action.getRequest())) {
             return;
         }
@@ -519,7 +519,7 @@ public class TXWebUtil {
      * @throws Exception 异常
      */
     public static Object invokeJson(ActionProxy actionProxy) throws Exception {
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
         JSONObject callJson = actionProxy.getCallJson();
         if (callJson == null) {
             //避免空异常
@@ -675,7 +675,7 @@ public class TXWebUtil {
         //放入请求参数 begin
         Map<String, Object> actionParams = new HashMap<>();
         JSONObject callJson = actionProxy.getCallJson();
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
         //参数表示 set全局action参数
         JSONObject paramsJson = callJson.getJSONObject(Environment.rocParams);
         if (paramsJson != null) {

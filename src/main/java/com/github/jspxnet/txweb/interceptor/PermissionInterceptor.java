@@ -21,6 +21,7 @@ import com.github.jspxnet.io.AutoReadTextFile;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.IRole;
@@ -143,7 +144,7 @@ public class PermissionInterceptor extends InterceptorSupport {
 
         //这里是不需要验证的action
         ActionProxy actionProxy = actionInvocation.getActionProxy();
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
         if (onlineManager==null)
         {
             action.addFieldInfo(Environment.warningInfo,"onlineManager 为空,检查ioc配置是否正确");

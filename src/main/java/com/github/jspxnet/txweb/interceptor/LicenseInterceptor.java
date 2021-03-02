@@ -2,12 +2,10 @@ package com.github.jspxnet.txweb.interceptor;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.network.mac.NetworkInfo;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ILicense;
-import com.github.jspxnet.txweb.support.ActionSupport;
-
 import com.github.jspxnet.utils.StringUtil;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -41,7 +39,7 @@ public class LicenseInterceptor extends InterceptorSupport {
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {
         //这里是不需要验证的action
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         String licenseVersion = Environment.versionFree;
 
         //许可值 0,没有注册,1：专业版:2:企业版

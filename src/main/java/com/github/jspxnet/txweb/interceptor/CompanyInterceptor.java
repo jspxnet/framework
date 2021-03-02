@@ -1,12 +1,11 @@
 package com.github.jspxnet.txweb.interceptor;
 
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Method;
@@ -67,7 +66,7 @@ public class CompanyInterceptor extends InterceptorSupport {
      * @param action action
      * @return 支持多种方式
      */
-    private String getOrganizeId(ActionSupport action) {
+    private String getOrganizeId(Action action) {
         HttpSession httpSession = action.getSession();
         String organizeId = null;
         HttpServletRequest request = action.getRequest();
@@ -128,7 +127,7 @@ public class CompanyInterceptor extends InterceptorSupport {
         if (ArrayUtil.isEmpty(folders)) {
             return actionInvocation.invoke();
         }
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         String organizeId = getOrganizeId(action);
        /*
         if (organizeId <= 0) {

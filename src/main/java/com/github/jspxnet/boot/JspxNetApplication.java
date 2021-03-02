@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.boot;
 
+import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import com.github.jspxnet.utils.DateUtil;
@@ -45,6 +46,15 @@ public final class JspxNetApplication {
             JSPX_CORE_LISTENER.setDefaultPath(defaultPath);
         }
         JSPX_CORE_LISTENER.contextInitialized(null);
+
+    }
+
+    public static void run(Class<?> cls,String[] args) {
+        try {
+            TomcatApplication.main(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

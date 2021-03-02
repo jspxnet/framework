@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.result;
 
+import com.github.jspxnet.txweb.Action;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -39,12 +40,12 @@ public class PdfPageImgResult extends ResultSupport {
     private final static TemplateConfigurable configurable = new TemplateConfigurable();
 
     static {
-        configurable.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
+        configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
     }
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin

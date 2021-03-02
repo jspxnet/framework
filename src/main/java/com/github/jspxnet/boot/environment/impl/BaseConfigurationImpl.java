@@ -230,8 +230,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
      */
     @Override
     public String getIocConfigFile() {
-
-        return defaultPath + Environment.config_file;
+        return FileUtil.mendFile(defaultPath + Environment.config_file);
     }
 
 

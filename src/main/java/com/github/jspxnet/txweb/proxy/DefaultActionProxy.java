@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.proxy;
 
 import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
@@ -49,7 +50,7 @@ public class DefaultActionProxy implements ActionProxy {
         this.exeType = exeType;
     }
 
-    private ActionSupport action;
+    private Action action;
 
     @Override
     public void setCallJson(JSONObject callJson) {
@@ -68,12 +69,12 @@ public class DefaultActionProxy implements ActionProxy {
     }
 
     @Override
-    public ActionSupport getAction() {
+    public Action getAction() {
         return action;
     }
 
     @Override
-    public void setAction(ActionSupport action) {
+    public void setAction(Action action) {
         this.action = action;
     }
 

@@ -63,5 +63,4 @@
             <useProjectArtifact>true</useProjectArtifact> <!-- 当前项目构件是否包含在这个依赖集合里 -->
         </dependencySet>
     </dependencySets>
-
 </assembly>

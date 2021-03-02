@@ -220,7 +220,9 @@ public abstract class ActionSupport implements Action {
     /**
      * @return 判断是否为游客
      */
-    public boolean isGuest() {
+    @Override
+    public boolean isGuest()
+    {
         return isGuest(getUserSession());
     }
 

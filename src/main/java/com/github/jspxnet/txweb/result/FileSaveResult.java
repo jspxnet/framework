@@ -16,9 +16,9 @@ import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.scriptmark.core.ScriptMarkEngine;
 import com.github.jspxnet.scriptmark.load.FileSource;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -45,11 +45,11 @@ public class FileSaveResult extends ResultSupport {
     private final static Logger log = LoggerFactory.getLogger(FileSaveResult.class);
     private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
 
-    private static String TEMPLATE_PATH = envTemplate.getString(Environment.templatePath);
+    private static String TEMPLATE_PATH = ENV_TEMPLATE.getString(Environment.templatePath);
     public static final String SAVE_FILE = "saveFile";
 
     static {
-        CONFIGURABLE.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
+        CONFIGURABLE.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
     }
 
     public FileSaveResult() {
@@ -58,10 +58,10 @@ public class FileSaveResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
         HttpServletRequest request = action.getRequest();
-        String defaultEncode = envTemplate.getString(Environment.encode, Environment.defaultEncode);
+        String defaultEncode = ENV_TEMPLATE.getString(Environment.encode, Environment.defaultEncode);
         File f = new File(action.getTemplatePath(), action.getTemplateFile());
         FileSource fileSource = new FileSource(f, action.getTemplateFile(), defaultEncode);
         //如果使用cache 就使用uri

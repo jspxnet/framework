@@ -3,13 +3,13 @@ package com.github.jspxnet.txweb.dispatcher.handle;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.dispatcher.WebHandle;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -69,7 +69,7 @@ public class ActionHandle extends WebHandle {
 
 
     static public void execute(ActionProxy actionProxy) throws Exception {
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
         Method exeMethod = actionProxy.getMethod();
         Object result;
         if (exeMethod.getParameterCount() == 0) {

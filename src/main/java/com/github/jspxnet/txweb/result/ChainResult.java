@@ -12,6 +12,7 @@ package com.github.jspxnet.txweb.result;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.sober.exception.ValidException;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
@@ -42,7 +43,7 @@ public class ChainResult extends RedirectResult {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
         String location = getConfigLocationUrl(actionInvocation);
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         String namespace = action.getEnv(ActionEnv.Key_Namespace);
         if (location.contains("/")) {
             if (location.startsWith("/")) {

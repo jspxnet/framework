@@ -2,6 +2,7 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.component.jxls.JxlsUtil;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -29,7 +30,7 @@ public class JxlsResult extends ResultSupport {
     public final static String EXCEL_TEMPLATE = "EXCEL_TEMPLATE";
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         action.setActionResult(ActionSupport.NONE);
         HttpServletResponse response = action.getResponse();
         String browserCache = action.getEnv(ActionEnv.BrowserCache);

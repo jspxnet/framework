@@ -9,9 +9,8 @@
  */
 package com.github.jspxnet.txweb.result;
 
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
-import com.github.jspxnet.txweb.support.ActionSupport;
-
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -24,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 public class NoneResult extends ResultSupport {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
         if (response != null && response.isCommitted()) {
             response.getOutputStream().close();

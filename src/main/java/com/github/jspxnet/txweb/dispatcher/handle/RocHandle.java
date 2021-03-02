@@ -4,6 +4,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.XML;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.WebConfigManager;
@@ -166,7 +167,7 @@ public class RocHandle extends ActionHandle {
 
     static public void execute(ActionProxy actionProxy) throws Exception
     {
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
         //ROC 普通调用
         Object result = TXWebUtil.invokeJson(actionProxy);
         if (action != null && action.getResult()==null && result != null) {

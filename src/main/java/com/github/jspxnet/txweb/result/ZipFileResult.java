@@ -4,6 +4,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.io.zip.ZipFile;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -22,7 +23,7 @@ public class ZipFileResult extends ResultSupport {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception
     {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         action.setActionResult(ActionSupport.NONE);
 
         HttpServletResponse response = action.getResponse();

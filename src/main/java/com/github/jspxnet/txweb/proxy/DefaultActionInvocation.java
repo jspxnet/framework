@@ -131,11 +131,19 @@ public class DefaultActionInvocation implements ActionInvocation {
         this.namespace = (StringUtil.isNull(actionConfig.getNamespace()) || Sioc.global.equals(actionConfig.getNamespace())) ? (String) params.get(ActionEnv.Key_Namespace) : actionConfig.getNamespace();
         this.actionProxy.setExeType(exeType);
         this.actionProxy.setNamespace(this.namespace);
-
         /////////创建bean对象 begin
-        ActionSupport action = (ActionSupport) BEAN_FACTORY.getBean(actionConfig.getIocBean(), namespace);
+        Object obj = BEAN_FACTORY.getBean(actionConfig.getIocBean(), namespace);
+        Action action = null;
+        try {
+            action = (Action)obj;
+        } catch (Exception e)
+        {
+            log.debug("ioc class "+obj+" is not action");
+            e.printStackTrace();
+        }
+
         if (action == null) {
-            throw new Exception("ioc get action error :" + actionConfig.getIocBean() + "   namespace=" + namespace + ",检查ioc 配置或者txweb class 部分配置");
+            throw new Exception("ioc get action error :" + actionConfig.getIocBean() + "   namespace=" + namespace + ",检查ioc 配置或者txweb class 部分配置,或tomcat嵌入方式异常");
         }
         /////////创建bean对象 end
 
@@ -143,10 +151,6 @@ public class DefaultActionInvocation implements ActionInvocation {
         action.setRequest(request);
         action.setResponse(response);
         //设置请求参数 end
-
-
-
-
 
         //////////////载入配置参数 begin
         Placeholder placeholder = EnvFactory.getPlaceholder();
@@ -314,7 +318,7 @@ public class DefaultActionInvocation implements ActionInvocation {
     @Override
     public void initAction() throws Exception {
         ////////////////////////////// 加载参数
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
         if (action == null) {
             log.error("TXWeb不能创建类," + actionProxy.getActionName());
             throw new Exception("ERROR :TXWeb不能创建类");

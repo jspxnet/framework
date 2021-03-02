@@ -9,8 +9,8 @@
  */
 package com.github.jspxnet.txweb.interceptor;
 
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
-import com.github.jspxnet.txweb.support.ActionSupport;
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,7 +43,7 @@ public class PageOfficeInterceptor extends InterceptorSupport {
 
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
 
         /*
         PageOfficeCtrl pageOfficeCtrl =  new com.zhuozhengsoft.pageoffice.PageOfficeCtrl(action.getRequest());

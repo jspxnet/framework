@@ -627,4 +627,19 @@ public abstract class Environment {
     static public final String consul = "consul";
 
 
+    static public final String SERVER_PORT = "server.port";
+
+    static public final String SERVER_WEB_PATH = "server.web.path";
+
+    static public final String SERVER_IP = "server.ip";
+
+    static public final String SERVER_CORS = "server.cors";
+
+    static public final String SERVER_THREADS = "server.threads";
+
+    static public final String SERVER_SESSION_REDIS = "server.session.redis";
+
+    static public final String SERVER_REDISSON_SESSION_CONFIG = "server.redissonSessionConfig";
+
+
 }

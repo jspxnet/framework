@@ -9,6 +9,7 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import org.slf4j.Logger;
@@ -22,9 +23,7 @@ import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.StringUtil;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.PrintWriter;
@@ -42,11 +41,11 @@ public class MarkdownResult extends ResultSupport {
     private static final Logger log = LoggerFactory.getLogger(MarkdownResult.class);
     private static final TemplateConfigurable configurable = new TemplateConfigurable();
 
-    private static final String markdownTemplate = envTemplate.getString(Environment.markdownTemplate);
-    private static final String templatePath = envTemplate.getString(Environment.templatePath);
+    private static final String markdownTemplate = ENV_TEMPLATE.getString(Environment.markdownTemplate);
+    private static final String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
 
     static {
-        configurable.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
+        configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
     }
 
     public MarkdownResult() {
@@ -55,7 +54,7 @@ public class MarkdownResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin

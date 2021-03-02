@@ -9,13 +9,11 @@
  */
 package com.github.jspxnet.txweb.result;
 
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.support.ActionSupport;
-import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Method;
 
 /**
  * Created by IntelliJ IDEA.
@@ -48,7 +46,7 @@ public class RpcResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         if (ActionSupport.NONE.equalsIgnoreCase(action.getActionResult()))
         {
             return;

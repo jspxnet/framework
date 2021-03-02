@@ -129,7 +129,7 @@ public final class EntryFactory implements BeanFactory {
             Class<?> classObj = rpcClient.bind().equals(Empty.class) ? cla : rpcClient.bind();
             return RpcClientProxyFactory.createRpcClientProxy(classObj);
         } else {
-            result = ClassUtil.newInstance(lifecycleObject.getClassName());
+            result = cla.newInstance();
             if (AnnotationUtil.hasProxyMethod(cla)) {
                 GlobalMethodInterceptor methodInterceptor = new GlobalMethodInterceptor();
                 result = methodInterceptor.getProxyInstance(result);

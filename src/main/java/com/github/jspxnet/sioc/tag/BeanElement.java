@@ -52,16 +52,24 @@ public class BeanElement extends IocTagNode {
         if (!StringUtil.isEmpty(id)) {
             return id;
         }
-        Class cls;
+        String className = getClassName();
+        if (StringUtil.isNull(className))
+        {
+            log.error("bean 配置错误 className:{}",className);
+            return null;
+        }
+        log.debug("bean load className:{}",className);
+        Class<?> cls;
         try {
             cls = ClassUtil.loadClass(getClassName());
-        } catch (ClassNotFoundException e) {
-            log.error(getSource(), e);
+        } catch (Exception e) {
+            log.error("bean 配置错误 className:{},source:{},error:{}",className,getSource(),e.getMessage());
             e.printStackTrace();
             return null;
         }
         return AnnotationUtil.getBeanId(cls);
     }
+
 
     /**
      * 真实所在的命名空间,在扫描后才载入,因为存在继承关系，所以要在这里标明，不然会出现两个单引用对象

@@ -15,12 +15,12 @@ import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.scriptmark.load.AbstractSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.util.MimeTypesUtil;
@@ -50,12 +50,12 @@ import java.util.Map;
 @Slf4j
 public class TemplateResult extends ResultSupport {
 
-    private final static String DEFAULT_ENCODE = envTemplate.getString(Environment.encode, Environment.defaultEncode);
-    private final static String TEMPLATE_PATH = envTemplate.getString(Environment.templatePath);
+    private final static String DEFAULT_ENCODE = ENV_TEMPLATE.getString(Environment.encode, Environment.defaultEncode);
+    private final static String TEMPLATE_PATH = ENV_TEMPLATE.getString(Environment.templatePath);
     private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
 
     static {
-        CONFIGURABLE.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
+        CONFIGURABLE.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
     }
 
     public TemplateResult() {
@@ -64,7 +64,7 @@ public class TemplateResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        ActionSupport action = actionInvocation.getActionProxy().getAction();
+        Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin
@@ -133,7 +133,7 @@ public class TemplateResult extends ResultSupport {
         //如果使用cache 就使用uri
 
         String cacheKey = ScriptmarkEnv.noCache;
-        if (!envTemplate.getBoolean(Environment.logJspxDebug)) {
+        if (!ENV_TEMPLATE.getBoolean(Environment.logJspxDebug)) {
             cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
         }
         CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), TEMPLATE_PATH});

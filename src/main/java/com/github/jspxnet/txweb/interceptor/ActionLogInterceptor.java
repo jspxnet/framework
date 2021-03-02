@@ -12,10 +12,10 @@ package com.github.jspxnet.txweb.interceptor;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.sober.queue.RedisStoreQueueClient;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.online.OnlineManager;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -65,12 +65,13 @@ public class ActionLogInterceptor extends InterceptorSupport {
     public String intercept(ActionInvocation actionInvocation) throws Exception {
         String result = actionInvocation.invoke();
         ActionProxy actionProxy = actionInvocation.getActionProxy();
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
 
         if (RequestUtil.isMultipart(action.getRequest()))
         {
             return actionInvocation.invoke();
         }
+
         //游客就不记录了
         if (guestLog && action.isGuest() || !actionInvocation.isExecuted()) {
             return result;

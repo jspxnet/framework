@@ -12,7 +12,6 @@ package com.github.jspxnet.txweb;
 import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.txweb.table.UserSession;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -140,6 +139,8 @@ public interface Action extends Serializable {
     void addActionMessage(String msg);
 
     boolean hasActionMessage();
+
+    boolean isGuest();
 
     //字段错误信息
     Map<String, String> getFieldInfo();

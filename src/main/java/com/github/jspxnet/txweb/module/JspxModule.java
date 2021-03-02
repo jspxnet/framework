@@ -13,6 +13,7 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.sioc.BeanFactory;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
@@ -20,7 +21,6 @@ import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.config.TXWebConfigManager;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sober.exception.ValidException;
@@ -72,12 +72,12 @@ public class JspxModule {
         return beanFactory.getBean(name, namespace);
     }
 
-    public static ActionSupport getAction(HttpServletRequest request, HttpServletResponse response, String namePart) throws ValidException {
+    public static Action getAction(HttpServletRequest request, HttpServletResponse response, String namePart) throws ValidException {
         String namespace = TXWebUtil.getNamespace(request.getServletPath());
         return getAction(request, response, namePart, namespace);
     }
 
-    public static ActionSupport getAction(HttpServletRequest request, HttpServletResponse response, String namePart, String namespace) throws ValidException {
+    public static Action getAction(HttpServletRequest request, HttpServletResponse response, String namePart, String namespace) throws ValidException {
         if (StringUtil.isNull(namespace)) {
             namespace = StringUtil.empty;
         }

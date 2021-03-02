@@ -10,8 +10,6 @@
 package com.github.jspxnet.txweb;
 
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.txweb.support.ActionSupport;
-
 import java.lang.reflect.Method;
 
 /**
@@ -22,9 +20,11 @@ import java.lang.reflect.Method;
  */
 public interface ActionProxy {
 
+    void setAction(Action action);
+
     Method getMethod();
 
-    ActionSupport getAction();
+    Action getAction();
 
     String execute() throws Exception;
 
@@ -32,7 +32,6 @@ public interface ActionProxy {
 
     void setMethod(String method);
 
-    void setAction(ActionSupport action);
 
     String getNamespace();
 

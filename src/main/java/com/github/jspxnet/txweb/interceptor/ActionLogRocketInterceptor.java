@@ -5,10 +5,10 @@ import com.github.jspxnet.mq.RocketMqProducer;
 import com.github.jspxnet.mq.env.MqIoc;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.online.OnlineManager;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -75,7 +75,7 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
     public String intercept(ActionInvocation actionInvocation) throws Exception {
         String result = actionInvocation.invoke();
         ActionProxy actionProxy = actionInvocation.getActionProxy();
-        ActionSupport action = actionProxy.getAction();
+        Action action = actionProxy.getAction();
 
         if (RequestUtil.isMultipart(action.getRequest()))
         {
