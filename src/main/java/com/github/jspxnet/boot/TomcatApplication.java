@@ -101,9 +101,9 @@ public class TomcatApplication {
          jndiName="bean/redisson" />
          */
 
-/*        Wrapper wrapper =  TOMCAT.addServlet("", "jspxServlet", new ServletDispatcher());
+        Wrapper wrapper =  TOMCAT.addServlet("", "jspxServlet", new ServletDispatcher());
         wrapper.addMapping("/");
-        wrapper.setEnabled(true);*/
+
         if(context instanceof StandardContext){
             StandardContext standardContext = (StandardContext) context;
 
