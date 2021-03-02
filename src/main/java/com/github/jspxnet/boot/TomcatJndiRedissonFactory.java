@@ -2,12 +2,10 @@ package com.github.jspxnet.boot;
 
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
-import org.apache.catalina.LifecycleException;
 import org.redisson.JndiRedissonFactory;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
-
 import javax.naming.NamingException;
 import java.io.File;
 import java.net.URL;
@@ -15,9 +13,9 @@ import java.net.URL;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/3/2 20:23
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/3/2 20:23
+ * description: 配置适配器
  **/
 public class TomcatJndiRedissonFactory extends JndiRedissonFactory {
     @Override

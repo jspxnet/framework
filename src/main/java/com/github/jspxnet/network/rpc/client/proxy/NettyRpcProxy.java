@@ -76,6 +76,7 @@ public class NettyRpcProxy {
      * @param <T> 类型
      * @return 对象
      */
+    @SuppressWarnings("all")
     public static <T> T createProxyInstance(Class<T> cls, Callback callback){
         return (T) Enhancer.create(cls, callback);
     }

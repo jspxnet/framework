@@ -62,6 +62,7 @@ public class AuthenticationAction extends AuthenticationView {
         if (loginTimes > 10) {
             return RocResponse.error(ErrorEnumType.CONGEAL.getValue(), language.getLang(LanguageRes.validationTimesFailure));
         }
+
         if (!validateCodeCache.validateSms(mobile, validate)) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.validationFailure));
         }
@@ -103,6 +104,7 @@ public class AuthenticationAction extends AuthenticationView {
             rocResponse.setData(json);
             return rocResponse;
         }
+
         Map<String, String> loginInfo = onlineManager.login(this, field, loginId, password, cookieDate);
         if (!loginInfo.isEmpty()) {
 
@@ -126,11 +128,7 @@ public class AuthenticationAction extends AuthenticationView {
         return RocResponse.success(json);
     }
 
-    @Operate(caption = "退出", post = false)
-    public void exit() throws Exception {
-        onlineManager.exit(this);
-        setActionResult(SUCCESS);
-    }
+
 
     //这个接口和上边的区别就是不会使用验证码,直接的加密验证
     @Operate(caption = "远程登录接口")
@@ -223,6 +221,12 @@ public class AuthenticationAction extends AuthenticationView {
         } else {
             return RocResponse.success(0);
         }
+    }
+
+    @Operate(caption = "退出", post = false)
+    public void exit() throws Exception {
+        onlineManager.exit(this);
+        setActionResult(SUCCESS);
     }
 
 }

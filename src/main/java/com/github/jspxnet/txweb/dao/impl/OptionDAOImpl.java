@@ -18,7 +18,6 @@ import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.tag.MapElement;
 import com.github.jspxnet.sioc.tag.ValueElement;
 import com.github.jspxnet.sober.Criteria;
-import com.github.jspxnet.sober.annotation.SqlMap;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;

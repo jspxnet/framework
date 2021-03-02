@@ -114,8 +114,6 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             serviceName = "default";
         }
 
-
-        MasterSocketAddress masterSocketAddress = MasterSocketAddress.getInstance();
         InetSocketAddress address = DiscoveryServiceAddress.getSocketAddress(serviceName);
         if (address==null&&this.address!=null)
         {
@@ -124,7 +122,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         AssertException.isNull(address,"TCP调用没有配置服务器地址");
 
         SendCmd reply = NettyClientPool.getInstance().send(address, command);
-        if (reply == null && masterSocketAddress.removeGroupSocketAddress(serviceName,address)) {
+        if (reply == null && MasterSocketAddress.getInstance().removeGroupSocketAddress(serviceName,address)) {
             //异常后删除重新检查
             RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
             RouteSession routeSession = new RouteSession();

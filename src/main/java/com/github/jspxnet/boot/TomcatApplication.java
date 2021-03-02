@@ -1,41 +1,29 @@
 package com.github.jspxnet.boot;
 
 
-import com.github.jspxnet.boot.conf.JarDefaultConfig;
+import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
-import com.github.jspxnet.txweb.dispatcher.JspxNetListener;
 import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
 import com.github.jspxnet.utils.*;
+import com.thetransactioncompany.cors.CORSConfiguration;
+import com.thetransactioncompany.cors.CORSFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
-import org.apache.catalina.mbeans.GlobalResourcesLifecycleListener;
-import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.catalina.startup.VersionLoggerListener;
-import org.apache.catalina.webresources.CachedResource;
-import org.apache.catalina.webresources.StandardRoot;
 import org.apache.jasper.servlet.JspServlet;
-import org.apache.tomcat.JarScanFilter;
-import org.apache.tomcat.JarScanType;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.apache.tomcat.util.descriptor.web.ContextResourceLink;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.redisson.tomcat.JndiRedissonSessionManager;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -49,21 +37,28 @@ import java.util.Properties;
 @Slf4j
 public class TomcatApplication {
     private final static Tomcat TOMCAT = new Tomcat();
+
+    private static JspxNetBootApplication jspxNetBootApplication;
+    public static void setJspxNetBootApplication(JspxNetBootApplication jspxNetBootApplication) {
+        TomcatApplication.jspxNetBootApplication = jspxNetBootApplication;
+    }
+
     public static void main(String[] args) throws Exception{
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
 
- /*       JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
+        JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!ArrayUtil.isEmpty(args)) {
+            log.debug("tomcat param:{}",args[0]);
             jspxConfiguration.setDefaultPath(args[0]);
         }
-*/
-       // EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-       // Properties properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
-        String defaultPath = "D:\\website\\webapps\\root\\WEB-INF\\classes\\";
-        File configFile = new File(defaultPath,Environment.jspx_properties_file);
-        Properties properties = new Properties();
-        properties.load(new FileReader(configFile));
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        Properties properties = envTemplate.readDefaultProperties(FileUtil.mendFile(jspxConfiguration.getDefaultPath() + "/" + Environment.jspx_properties_file));
+        String defaultPath = jspxConfiguration.getDefaultPath();
+        log.debug("defaultPath:{}",defaultPath);
+        //File configFile = new File(defaultPath,Environment.jspx_properties_file);
+        //Properties properties = new Properties();
+        //properties.load(new FileReader(configFile));
 
         int port = StringUtil.toInt(properties.getProperty(Environment.SERVER_PORT,"8080"));
         String webPath = properties.getProperty(Environment.SERVER_WEB_PATH,System.getProperty("user.dir"));
@@ -71,11 +66,24 @@ public class TomcatApplication {
         boolean cors = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CORS,"true"));
         int threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS,"3"));
 
+        if (TomcatApplication.jspxNetBootApplication!=null)
+        {
+            port = TomcatApplication.jspxNetBootApplication.port();
+            webPath = TomcatApplication.jspxNetBootApplication.webPath();
+            ip = TomcatApplication.jspxNetBootApplication.ip();
+            cors = TomcatApplication.jspxNetBootApplication.cors();
+            threads = TomcatApplication.jspxNetBootApplication.threads();
+        } else {
+            port = StringUtil.toInt(properties.getProperty(Environment.SERVER_PORT,"8080"));
+            webPath = properties.getProperty(Environment.SERVER_WEB_PATH,System.getProperty("user.dir"));
+            ip = properties.getProperty(Environment.SERVER_IP,"127.0.0.1");
+            cors = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CORS,"true"));
+            threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS,"3"));
+        }
+
         boolean openRedis = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_SESSION_REDIS));
         String redisConfig = properties.getProperty(Environment.SERVER_REDISSON_SESSION_CONFIG);
-
         log.debug("tomcat web path:{}, port:{},session share:{}",webPath, port,openRedis);
-
 
         File file = new File(webPath);
         FileUtil.makeDirectory(file);
@@ -84,18 +92,21 @@ public class TomcatApplication {
         //TOMCAT.setBaseDir(file.getParent());
         Connector connector = TOMCAT.getConnector();
         connector.setPort(port);
-        connector.setURIEncoding("UTF-8");
+        connector.setURIEncoding(Environment.defaultEncode);
+        //让 URI 和 body 编码一致。(针对POST请求)
+        connector.setUseBodyEncodingForURI(true);
         //设置Host
 
         Host host = TOMCAT.getHost();
         TOMCAT.setSilent(true);
+
 
         //我们会根据xml配置文件来
         host.setName("localhost");
         //host.setCreateDirs(true);
         //host.setAppBase(FileUtil.mendPath(file.getParent()));
         //host.setAppBase("d:/website/webapps");
-        Context standardContext =  TOMCAT.addWebapp("","d:/website/webapps/root");
+        Context standardContext =  TOMCAT.addWebapp("",webPath);
 
         //前面的那个步骤只是把Tomcat起起来了，但是没啥东西
         //要把class加载进来,把启动的工程加入进来了
@@ -108,7 +119,11 @@ public class TomcatApplication {
         //standardContext.setOriginalDocBase("/"+ file.getName());
         //standardContext.setDocBase("");
         standardContext.setCrossContext(true);
-        standardContext.setRequestCharacterEncoding("UTF-8");
+        standardContext.setUseHttpOnly(true);
+        standardContext.setCookies(true);
+        standardContext.setSessionCookiePathUsesTrailingSlash(true);
+        standardContext.setResponseCharacterEncoding(Environment.defaultEncode);
+        standardContext.setRequestCharacterEncoding(Environment.defaultEncode);
 
 
        // standardContext.setReloadable(false);
@@ -116,8 +131,7 @@ public class TomcatApplication {
        // standardContext.addApplicationLifecycleListener(new JspxNetListener());
 
         //standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
-        standardContext.addLifecycleListener(new GlobalResourcesLifecycleListener());
-        standardContext.addLifecycleListener(new VersionLoggerListener());
+//        standardContext.addLifecycleListener(new GlobalResourcesLifecycleListener());
         standardContext.addLifecycleListener(new Tomcat.FixContextListener());
        // host.addChild(standardContext);
 
@@ -136,9 +150,9 @@ public class TomcatApplication {
         StandardJarScanFilter scanFilter = new StandardJarScanFilter();
         scanFilter.setDefaultPluggabilityScan(false);
         scanFilter.setDefaultTldScan(false);
-
         scanner.setJarScanFilter(scanFilter);
         standardContext.setJarScanner(scanner);
+
         if (openRedis&&!StringUtil.isNull(redisConfig))
         {
             TomcatRedissonSessionManager redissonSessionManager = new TomcatRedissonSessionManager();
@@ -171,6 +185,7 @@ public class TomcatApplication {
         /*
         <Manager className="org.redisson.tomcat.RedissonSessionManager"
           configPath="c:/jwebs/tomcat/conf/redisson.conf" readMode="REDIS" updateMode="DEFAULT"/>
+
 	<ResourceLink name="bean/redisson" global="bean/redisson"
 		  type="org.redisson.api.RedissonClient" />
 
@@ -180,6 +195,7 @@ public class TomcatApplication {
          */
 
         StandardContext tmpContext = (StandardContext)standardContext;
+
 /*
 
         File tempFile = EnvFactory.getFile("/resources/tomcat/web.xml");
@@ -215,7 +231,7 @@ public class TomcatApplication {
         tmpContext.setSkipMemoryLeakChecksOnJvmShutdown(true);
         //我们要把Servlet设置进去
 
-/*        if (cors)
+       if (cors)
         {
             FilterDef filterDef = new FilterDef();
             CORSFilter corsFilter = new CORSFilter();
@@ -235,21 +251,30 @@ public class TomcatApplication {
             filterDef.setDisplayName("跨域");
 
             standardContext.addFilterDef(filterDef);
-        }*/
+        }
 
 
         //Tomcat跑起来
         //设置Tomcat的端口tomcat.setPort(9091)。两种写法都可以设置端口
+        //tmpContext.addApplicationLifecycleListener(new JspxNetListener());
+        tmpContext.setValidateClientProvidedNewSessionId(true);
+        tmpContext.setSessionTimeout(60);
+        tmpContext.setSessionCookiePathUsesTrailingSlash(false);
+        tmpContext.setOverride(true);
+        tmpContext.setDistributable(true);
+        tmpContext.setSessionCookiePath("/");
 
-
+        /*
+        　　defaultSessionTimeOut="3600" isWARExpanded="true"
+　　isWARValidated="false" isInvokerEnabled="true"
+　　isWorkDirPersistent="false
+         */
         TOMCAT.start();
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = TOMCAT.getServer();
-/*
         server.setAddress(ip);
         server.setUtilityThreads(threads);
-*/
         server.await();
     }
 }

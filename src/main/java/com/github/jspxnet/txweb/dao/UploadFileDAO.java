@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
+ * author chenYuan (mail:39793751@qq.com)
  * date: 2005-11-14
  * Time: 18:20:02
  */
@@ -69,9 +69,12 @@ public interface UploadFileDAO extends SoberSupport {
      * @return 查询
      */
     Object get(Long id) ;
+
     /**
+     *
      * @param id id
      * @return 载入
+     * @throws Exception 异常
      */
     Object load(Long id) throws Exception;
     /**
@@ -91,12 +94,13 @@ public interface UploadFileDAO extends SoberSupport {
      * @param ids id
      * @return 更新排序日期
      */
-    boolean updateSortDate(Long[] ids) throws Exception;
+    boolean updateSortDate(Long[] ids);
     /**
      * @param field      字段
      * @param find       查询条件
      * @param term       条件
      * @param sortString 排序
+     * @param pid        父id
      * @param uid        用户id
      * @param page       页数
      * @param count      返回数量
@@ -109,6 +113,7 @@ public interface UploadFileDAO extends SoberSupport {
      * @param find  查询条件
      * @param term  条件
      * @param uid   用户id
+     * @param pid   父id
      * @return 得到记录条数
      */
     int getCount(String[] field, String[] find, String term, long uid, long pid);

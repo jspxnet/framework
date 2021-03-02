@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.boot;
 
+import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
 
@@ -51,11 +52,15 @@ public final class JspxNetApplication {
 
     public static void run(Class<?> cls,String[] args) {
         try {
+            JspxNetBootApplication jspxNetBootApplication = cls.getAnnotation(JspxNetBootApplication.class);
+            if (jspxNetBootApplication!=null)
+            {
+                TomcatApplication.setJspxNetBootApplication(jspxNetBootApplication);
+            }
             TomcatApplication.main(args);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     public static void destroy() {

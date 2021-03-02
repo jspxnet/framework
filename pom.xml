@@ -654,11 +654,11 @@
                 </plugin>
 
 -->
-
+<!--
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>3.3.0</version>
                     <configuration>
                         <finalName>jspxnet-${project.version}</finalName>
                         <archive>
@@ -670,8 +670,34 @@
                             <descriptorRef>jar-with-dependencies</descriptorRef>
                         </descriptorRefs>
                     </configuration>
+            <executions>
+                 <execution>
+                    <id>create-archive</id>
+                    <phase>package</phase>
+                <goals>
+                    <goal>single</goal>
+                </goals>
+            </execution>
+                </plugin>-->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.4</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals><goal>shade</goal></goals>
+                            <configuration>
+                                <minimizeJar>false</minimizeJar>
+                                <transformers>
+                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <mainClass>com.github.jspxnet.boot.TomcatApplication</mainClass>
+                                    </transformer>
+                                </transformers>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
-
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -754,7 +780,6 @@
                         </archive>
                         <includes>
                             <include>com/github/**/*</include>
-                            <include>resources/tomcat/web.xml</include>
                         </includes>
                     </configuration>
                 </plugin>

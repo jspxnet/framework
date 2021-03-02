@@ -4,7 +4,6 @@ import com.github.jspxnet.network.rpc.env.RpcConfig;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
@@ -13,7 +12,6 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
-
 import java.nio.charset.StandardCharsets;
 
 /**

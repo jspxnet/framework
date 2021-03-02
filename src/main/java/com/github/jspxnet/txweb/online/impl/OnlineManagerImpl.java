@@ -63,7 +63,7 @@ import java.util.Map;
 @Slf4j
 public class OnlineManagerImpl implements OnlineManager {
 
-    final private static int DEFAULT_COOKIE_SECOND = 60 * 60 * 24;
+    final private static int DEFAULT_COOKIE_SECOND = 60 * 60;
     static private final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     final private static String GUI_PASSWORD_KEY = "gui:password";
     //上一次清空超时时间，清空超时是全局性的，放这里比较合适
@@ -285,6 +285,9 @@ public class OnlineManagerImpl implements OnlineManager {
         //信息检查完成
 
 
+
+
+
         String token = null;
         if (session != null) {
             token =  JWTUtil.createToken(ip,member.getId()+"",SessionUtil.getSessionId(session));
@@ -369,6 +372,7 @@ public class OnlineManagerImpl implements OnlineManager {
             language = lang;
         }
 
+        CookieUtil.cookieClear(action.getRequest(),action.getResponse());
         Map<String, String> errorInfo = new HashMap<>();
         if (StringUtil.getLength(loginId) < 3) {
             errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorLoginName));

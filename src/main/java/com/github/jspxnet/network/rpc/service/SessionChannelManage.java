@@ -57,9 +57,9 @@ public class SessionChannelManage {
         return SESSION_MAP.get(channelId);
     }
 
-    public ChannelSession removeSession(ChannelId channelId)
+    public void removeSession(ChannelId channelId)
     {
-        return SESSION_MAP.remove(channelId);
+        SESSION_MAP.remove(channelId);
     }
 
 

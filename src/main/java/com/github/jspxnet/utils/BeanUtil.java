@@ -468,6 +468,7 @@ public class BeanUtil {
      *
      * @param object 对象
      * @param name 字段名称
+     * @param anyField 不屈服大小写
      * @param <T> 类型
      * @return 得到字段的值
      */
@@ -481,6 +482,7 @@ public class BeanUtil {
      * @param object 对象
      * @param name 字段名称
      * @param cls 类对象
+     * @param anyField 不屈服大小写
      * @param <T> 类型
      * @return 得到字段的值
      */
