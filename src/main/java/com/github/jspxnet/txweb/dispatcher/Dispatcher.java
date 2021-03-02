@@ -219,15 +219,19 @@ public class Dispatcher {
             if (!StringUtil.isNull(filePath) && FileUtil.isDirectory(filePath)) {
                 JspxNetApplication.autoRun(FileUtil.mendPath(filePath));
             } else {
-
                 JspxNetApplication.autoRun();
             }
         }
         String realPath = servletContext.getInitParameter(Environment.realPath);
         if (StringUtil.isNull(realPath)) {
+            realPath = (String)servletContext.getAttribute(Environment.realPath);
+        }
+        if (StringUtil.isNull(realPath)) {
             realPath = servletContext.getRealPath("/");
         }
-        Dispatcher.realPath = FileUtil.mendPath(realPath);
+        if (!StringUtil.isNull(realPath)) {
+            Dispatcher.realPath = FileUtil.mendPath(realPath);
+        }
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         markdownSuffix = envTemplate.getString(Environment.markdownSuffix, "md");

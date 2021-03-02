@@ -12,8 +12,6 @@ package com.github.jspxnet.sioc.config;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.AutoReadTextFile;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
 import com.github.jspxnet.sioc.annotation.Bean;

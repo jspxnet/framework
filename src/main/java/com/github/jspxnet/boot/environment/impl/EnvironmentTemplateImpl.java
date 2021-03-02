@@ -10,13 +10,9 @@
 package com.github.jspxnet.boot.environment.impl;
 
 
-import com.ctrip.framework.apollo.ConfigChangeListener;
-import com.ctrip.framework.apollo.model.ConfigChange;
-import com.ctrip.framework.apollo.model.ConfigChangeEvent;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Placeholder;
-import com.github.jspxnet.enums.BootConfigEnumType;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.security.symmetry.impl.XOREncrypt;
 import com.github.jspxnet.utils.ArrayUtil;
