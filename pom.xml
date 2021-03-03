@@ -17,6 +17,7 @@
         <github.global.server>github</github.global.server>
         <tomcat.version>9.0.43</tomcat.version>
         <jackson.version>2.12.0</jackson.version>
+        <redisson.version>3.14.0</redisson.version>
     </properties>
     <licenses>
         <license>
@@ -78,13 +79,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-el</artifactId>
+            <artifactId>tomcat-embed-websocket</artifactId>
             <version>${tomcat.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
-            <version>9.0.43</version>
+            <version>${tomcat.version}</version>
         </dependency>
         <!-- 临时的activiti -->
         <dependency>
@@ -120,7 +121,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>3.14.0</version>
+            <version>${redisson.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -398,11 +399,11 @@
             <version>5.9.0.202009080501-r</version>
         </dependency>
         <!--测试基础支持begin -->
-        <dependency>
+  <!--      <dependency>
             <groupId>com.intellij</groupId>
             <artifactId>forms_rt</artifactId>
             <version>7.0.3</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -423,7 +424,6 @@
             <artifactId>gson</artifactId>
             <version>2.8.6</version>
         </dependency>
-
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
@@ -483,10 +483,11 @@
             <version>1.16</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.redisson/redisson-tomcat-9 -->
+
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-tomcat-9</artifactId>
-            <version>3.14.0</version>
+            <version>${redisson.version}</version>
         </dependency>
         <dependency>
             <groupId>it.sauronsoftware.cron4j</groupId>
@@ -624,7 +625,7 @@
                     </configuration>
                 </plugin>
 
-<!--
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
@@ -653,8 +654,7 @@
                     </executions>
                 </plugin>
 
--->
-<!--
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -670,16 +670,17 @@
                             <descriptorRef>jar-with-dependencies</descriptorRef>
                         </descriptorRefs>
                     </configuration>
-            <executions>
-                 <execution>
-                    <id>create-archive</id>
-                    <phase>package</phase>
-                <goals>
-                    <goal>single</goal>
-                </goals>
-            </execution>
-                </plugin>-->
-                <plugin>
+                    <executions>
+                         <execution>
+                            <id>create-archive</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                    </execution>
+                    </executions>
+                </plugin>
+               <!-- <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.2.4</version>
@@ -697,7 +698,7 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin>-->
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

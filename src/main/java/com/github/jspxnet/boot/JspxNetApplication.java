@@ -10,16 +10,13 @@
 package com.github.jspxnet.boot;
 
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
-import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import com.github.jspxnet.utils.DateUtil;
-
 import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
+ * author chenYuan (mail:39793751@qq.com)
  * date: 2007-5-25
  * Time: 16:31:31
  */

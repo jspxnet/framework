@@ -95,6 +95,9 @@ public class TomcatApplication {
         connector.setURIEncoding(Environment.defaultEncode);
         //让 URI 和 body 编码一致。(针对POST请求)
         connector.setUseBodyEncodingForURI(true);
+        connector.setMaxPostSize(-1);
+        connector.setMaxSavePostSize(-1);
+        connector.setEnableLookups(true);
         //设置Host
 
         Host host = TOMCAT.getHost();
