@@ -3,7 +3,6 @@ package com.github.jspxnet.boot;
 
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
@@ -51,19 +50,16 @@ public class TomcatApplication {
             log.debug("tomcat param:{}",args[0]);
             jspxConfiguration.setDefaultPath(args[0]);
         }
-        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        Properties properties = envTemplate.readDefaultProperties(FileUtil.mendFile(jspxConfiguration.getDefaultPath() + "/" + Environment.jspx_properties_file));
+
+        Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile(jspxConfiguration.getDefaultPath() + "/" + Environment.jspx_properties_file));
         String defaultPath = jspxConfiguration.getDefaultPath();
         log.debug("defaultPath:{}",defaultPath);
-        //File configFile = new File(defaultPath,Environment.jspx_properties_file);
-        //Properties properties = new Properties();
-        //properties.load(new FileReader(configFile));
 
-        int port = StringUtil.toInt(properties.getProperty(Environment.SERVER_PORT,"8080"));
-        String webPath = properties.getProperty(Environment.SERVER_WEB_PATH,System.getProperty("user.dir"));
-        String ip = properties.getProperty(Environment.SERVER_IP,"127.0.0.1");
-        boolean cors = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CORS,"true"));
-        int threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS,"3"));
+        int port;
+        String webPath;
+        String ip;
+        boolean cors;
+        int threads;
 
         if (TomcatApplication.jspxNetBootApplication!=null)
         {
@@ -88,7 +84,6 @@ public class TomcatApplication {
         FileUtil.makeDirectory(file);
 
 
-        //TOMCAT.setBaseDir(file.getParent());
         Connector connector = TOMCAT.getConnector();
         connector.setPort(port);
         connector.setURIEncoding(Environment.defaultEncode);
@@ -113,7 +108,6 @@ public class TomcatApplication {
         //前面的那个步骤只是把Tomcat起起来了，但是没啥东西
         //要把class加载进来,把启动的工程加入进来了
         //StandardContext standardContext = new StandardContext();
-
 
         standardContext.setPath("");
         standardContext.setPrivileged(false);
