@@ -295,12 +295,17 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         return BeanUtil.copyFieldList(list,"groupName",true,true);
     }
 
+    /**
+     * 移动分组
+     * @param groupName 原分组名称
+     * @param newGroupName 新的分组名称
+     * @param uid 用户id
+     * @return 移动数量
+     * @throws Exception 异常
+     */
     @Override
     public  int moveGroup(String groupName,String newGroupName,long uid) throws Exception {
-
-       String tableName = getTableName(tableClass);
-       String sql = "UPDATE " + tableName + "set groupName=?" + StringUtil.quote(newGroupName,false) +
-               "WHERE groupName="+StringUtil.quote(groupName,false) + " AND putUid="+uid;
-       return super.update(sql);
+       String sql = "UPDATE " + getTableName(tableClass) + " set groupName=? WHERE groupName=? AND putUid=?";
+       return super.update(sql,new Object[]{newGroupName,groupName,uid});
     }
 }
