@@ -46,7 +46,6 @@ public class TomcatApplication {
     public static void main(String[] args) throws Exception{
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
-
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!ArrayUtil.isEmpty(args)) {
             log.debug("tomcat param:{}",args[0]);

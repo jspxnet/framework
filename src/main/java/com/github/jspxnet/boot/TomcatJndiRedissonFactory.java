@@ -21,7 +21,7 @@ public class TomcatJndiRedissonFactory extends JndiRedissonFactory {
     @Override
     protected RedissonClient buildClient(String config) throws NamingException
     {
-        Config redisConfig = null;
+        Config redisConfig;
         try {
             File file = new File(config);
             if (!StringUtil.isJsonObject(config)&&file.isFile() && file.canRead()) {
