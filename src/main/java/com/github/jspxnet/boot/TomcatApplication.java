@@ -1,6 +1,8 @@
 package com.github.jspxnet.boot;
 
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
@@ -36,6 +38,21 @@ import java.util.Properties;
 @Slf4j
 public class TomcatApplication {
     private final static Tomcat TOMCAT = new Tomcat();
+    @Parameter(names = "-port", description = "tomcat server port")
+    private static int port;
+    @Parameter(names = "-webPath", description = "web path")
+    private static String webPath;
+    @Parameter(names = "-ip", description = "default 127.0.0.1")
+    private static String ip;
+    @Parameter(names = "-cors", description = "boolean is website cors")
+    private static boolean cors;
+
+    @Parameter(names = "-threads", description = "threads tomcat start threads")
+    private static int threads;
+
+    @Parameter(names = "-config", description = "application config path")
+    private static int config;
+
 
     private static JspxNetBootApplication jspxNetBootApplication;
     public static void setJspxNetBootApplication(JspxNetBootApplication jspxNetBootApplication) {
@@ -45,22 +62,23 @@ public class TomcatApplication {
     public static void main(String[] args) throws Exception{
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
+        String[] argv = { "-port", null, "-webPath", null,"-ip","127.0.0.1","-cors","true","-config",null };
+        JCommander.newBuilder()
+                .addObject(args)
+                .build()
+                .parse(argv);
+
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
-        if (!ArrayUtil.isEmpty(args)) {
-            log.debug("tomcat param:{}",args[0]);
-            jspxConfiguration.setDefaultPath(args[0]);
-        }
 
         Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile(jspxConfiguration.getDefaultPath() + "/" + Environment.jspx_properties_file));
         String defaultPath = jspxConfiguration.getDefaultPath();
         log.debug("defaultPath:{}",defaultPath);
 
-        int port;
-        String webPath;
-        String ip;
-        boolean cors;
-        int threads;
 
+        if (!ArrayUtil.isEmpty(args)) {
+            log.debug("tomcat param:{}",argv[9]);
+            jspxConfiguration.setDefaultPath(argv[9]);
+        } else
         if (TomcatApplication.jspxNetBootApplication!=null)
         {
             port = TomcatApplication.jspxNetBootApplication.port();
