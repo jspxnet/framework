@@ -62,23 +62,16 @@ public class TomcatApplication {
     public static void main(String[] args) throws Exception{
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
-        String[] argv = { "-port", null, "-webPath", null,"-ip","127.0.0.1","-cors","true","-config",null };
-        JCommander.newBuilder()
-                .addObject(args)
-                .build()
-                .parse(argv);
 
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
-
+        if (!ArrayUtil.isEmpty(args)) {
+            log.debug("tomcat param:{}",args[0]);
+            jspxConfiguration.setDefaultPath(args[0]);
+        }
         Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile(jspxConfiguration.getDefaultPath() + "/" + Environment.jspx_properties_file));
         String defaultPath = jspxConfiguration.getDefaultPath();
         log.debug("defaultPath:{}",defaultPath);
 
-
-        if (!ArrayUtil.isEmpty(args)) {
-            log.debug("tomcat param:{}",argv[9]);
-            jspxConfiguration.setDefaultPath(argv[9]);
-        } else
         if (TomcatApplication.jspxNetBootApplication!=null)
         {
             port = TomcatApplication.jspxNetBootApplication.port();
