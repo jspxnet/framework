@@ -195,9 +195,16 @@ public abstract class EnvFactory {
      * @return 得到文件，如果为空，表示没有找到文件
      */
     static public File getFile(String loadFile) {
-        String[] findDirs = new String[]{envTemplate.getString(Environment.defaultPath), envTemplate.getString(Environment.templatePath), envTemplate.getString(Environment.resPath)};
+        String[] findDirs;
+        if (StringUtil.isNull(envTemplate.getString(Environment.defaultPath)))
+        {
+            JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
+            findDirs =  new String[]{ jspxConfiguration.getDefaultPath(),System.getProperty("user.dir")};
+        }
+        else
+        {
+            findDirs = new String[]{envTemplate.getString(Environment.defaultPath), envTemplate.getString(Environment.templatePath), envTemplate.getString(Environment.resPath)};
+        }
         return FileUtil.scanFile(findDirs, loadFile);
     }
-
-
 }

@@ -1,5 +1,6 @@
 package com.github.jspxnet.boot;
 
+import com.github.jspxnet.cache.redis.RedissonClientConfig;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import org.redisson.JndiRedissonFactory;
@@ -21,34 +22,8 @@ public class TomcatJndiRedissonFactory extends JndiRedissonFactory {
     @Override
     protected RedissonClient buildClient(String config) throws NamingException
     {
-        Config redisConfig;
         try {
-            File file = new File(config);
-            if (!StringUtil.isJsonObject(config)&&file.isFile() && file.canRead()) {
-                String fileType = FileUtil.getTypePart(file);
-                if ("json".equalsIgnoreCase(fileType) || "conf".equalsIgnoreCase(fileType)) {
-                    if (config.startsWith("http")) {
-                        redisConfig = Config.fromJSON(new URL(config));
-                    } else {
-                        redisConfig = Config.fromJSON(file);
-                    }
-                } else if ("yaml".equalsIgnoreCase(fileType)||"yml".equalsIgnoreCase(fileType)) {
-                    if (config.startsWith("http")) {
-                        redisConfig = Config.fromYAML(new URL(config));
-                    } else {
-                        redisConfig = Config.fromYAML(file);
-                    }
-                } else {
-                    redisConfig = Config.fromJSON(file);
-                }
-            } else {
-                if (StringUtil.isJsonObject(config)) {
-                    redisConfig = Config.fromJSON(config);
-                } else {
-                    redisConfig = Config.fromYAML(config);
-                }
-            }
-
+            Config redisConfig = RedissonClientConfig.getRedisConfig(config);
             return Redisson.create(redisConfig);
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,15 +1,16 @@
 package com.github.jspxnet.cache.redis;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
-import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -34,6 +35,46 @@ public class RedissonClientConfig {
 
     }
 
+    public static Config getRedisConfig(String config) throws IOException {
+        if (StringUtil.isNull(config) && StringUtil.isNull(config)) {
+            log.error("not config Redis cache link, 没有正确配置Redis 链接");
+            return null;
+        }
+        config = StringUtil.trim(config);
+        Config redisConfig;
+        boolean json = StringUtil.isNull(config);
+        File file = null;
+        if (!json&&(config.toLowerCase().endsWith(".json")||config.toLowerCase().endsWith(".yml")))
+        {
+            file = EnvFactory.getFile(config);
+        }
+        if (file!=null&&config.toLowerCase().endsWith(".json"))
+        {
+            if (config.startsWith("http")) {
+                redisConfig = Config.fromJSON(new URL(config));
+            } else {
+                redisConfig = Config.fromJSON(file);
+            }
+        } else
+        if (file!=null&&config.toLowerCase().endsWith(".yml"))
+        {
+            if (config.startsWith("http")) {
+                redisConfig = Config.fromYAML(new URL(config));
+            } else {
+                redisConfig = Config.fromYAML(file);
+            }
+        }
+        else
+        if (StringUtil.isJsonObject(config)) {
+            redisConfig = Config.fromJSON(config);
+        } else {
+            redisConfig = Config.fromYAML(config);
+        }
+        return redisConfig;
+
+    }
+
+
     @Init
      public void init() {
         if (redisson == null) {
@@ -42,34 +83,8 @@ public class RedissonClientConfig {
                 return;
             }
             try {
-                File file = new File(config);
-                if (!StringUtil.isJsonObject(config)&&file.isFile() && file.canRead()) {
-                    String fileType = FileUtil.getTypePart(file);
-                    if ("json".equalsIgnoreCase(fileType) || "conf".equalsIgnoreCase(fileType)) {
-                        if (config.startsWith("http")) {
-                            redisConfig = Config.fromJSON(new URL(config));
-                        } else {
-                            redisConfig = Config.fromJSON(file);
-                        }
-                    } else if ("yaml".equalsIgnoreCase(fileType)||"yml".equalsIgnoreCase(fileType)) {
-                        if (config.startsWith("http")) {
-                            redisConfig = Config.fromYAML(new URL(config));
-                        } else {
-                            redisConfig = Config.fromYAML(file);
-                        }
-                    } else {
-                        redisConfig = Config.fromJSON(file);
-                    }
-                } else {
-                    if (StringUtil.isJsonObject(config)) {
-                        redisConfig = Config.fromJSON(config);
-                    } else {
-                        redisConfig = Config.fromYAML(config);
-                    }
-                }
-
+                redisConfig = getRedisConfig( config);
                 redisson = Redisson.create(redisConfig);
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
