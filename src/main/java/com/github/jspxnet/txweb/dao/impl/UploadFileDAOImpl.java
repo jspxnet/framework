@@ -49,6 +49,7 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         return tableClass.getName();
     }
 
+    @SuppressWarnings("all")
     @Param(request = false)
     public void setClassName(final String className) throws Exception {
         if (tableClass == null && !StringUtil.isNull(className)) {
@@ -308,4 +309,19 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
        String sql = "UPDATE " + getTableName(tableClass) + " set groupName=? WHERE groupName=? AND putUid=?";
        return super.update(sql,new Object[]{newGroupName,groupName,uid});
     }
+
+    /**
+     *
+     * @param id id
+     * @param newGroupName 分组名称
+     * @param uid 用户id
+     * @return 移动条数
+     * @throws Exception 异常
+     */
+    @Override
+    public  int moveToGroup(long id,String newGroupName,long uid) throws Exception {
+        String sql = "UPDATE " + getTableName(tableClass) + " set groupName=? WHERE id=? AND putUid=?";
+        return super.update(sql,new Object[]{newGroupName,id,uid});
+    }
+
 }

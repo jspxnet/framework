@@ -36,9 +36,6 @@ public interface UploadFileDAO extends SoberSupport {
      * @throws Exception 异常
      */
     boolean haveHash(String hash) throws Exception;
-
-
-
     /**
      *
      * @return 得到云配配置
@@ -143,6 +140,22 @@ public interface UploadFileDAO extends SoberSupport {
      * @return 分组列表
      */
     List<String> getGroups(long uid);
-
+    /**
+     * 移动分组
+     * @param groupName 原分组名称
+     * @param newGroupName 新的分组名称
+     * @param uid 用户id
+     * @return 移动数量
+     * @throws Exception 异常
+     */
     int moveGroup(String groupName, String newGroupName, long uid) throws Exception;
+    /**
+     *
+     * @param id id
+     * @param newGroupName 分组名称
+     * @param uid 用户id
+     * @return 移动条数
+     * @throws Exception 异常
+     */
+    int moveToGroup(long id, String newGroupName, long uid) throws Exception;
 }

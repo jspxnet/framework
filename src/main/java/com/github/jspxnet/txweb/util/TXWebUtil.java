@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 /**
  * Created by IntelliJ IDEA.
  *
- * @author chenYuan (mail:39793751@qq.com)
+ * author chenYuan (mail:39793751@qq.com)
  * date: 2006-12-27
  * Time: 15:16:56
  * LifecycleManager
@@ -538,7 +538,7 @@ public class TXWebUtil {
 
         //ROC roc Json 根据指定调用返回
         Object[] paramObj = null;
-        Object rocParams = null;
+        Object rocParams;
         if (ParamUtil.isRocRequest(callJson))
         {
             JSONObject methodJson = callJson.getJSONObject(Environment.rocMethod);
