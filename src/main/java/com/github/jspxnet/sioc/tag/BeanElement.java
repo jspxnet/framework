@@ -58,7 +58,6 @@ public class BeanElement extends IocTagNode {
             log.error("bean 配置错误 className:{}",className);
             return null;
         }
-        log.debug("bean load className:{}",className);
         Class<?> cls;
         try {
             cls = ClassUtil.loadClass(getClassName());

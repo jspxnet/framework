@@ -1,7 +1,6 @@
 package com.github.jspxnet.boot;
 
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
@@ -108,10 +107,9 @@ public class TomcatApplication {
         Host host = TOMCAT.getHost();
         TOMCAT.setSilent(true);
 
-
         //我们会根据xml配置文件来
         host.setName("localhost");
-        //host.setCreateDirs(true);
+        host.setCreateDirs(false);
         //host.setAppBase(FileUtil.mendPath(file.getParent()));
         //host.setAppBase("d:/website/webapps");
         Context standardContext =  TOMCAT.addWebapp("",webPath);
@@ -122,7 +120,7 @@ public class TomcatApplication {
 
         standardContext.setPath("");
         standardContext.setPrivileged(false);
-        //standardContext.setWorkDir(file.getAbsolutePath());
+
         //standardContext.setOriginalDocBase("/"+ file.getName());
         //standardContext.setDocBase("");
         standardContext.setCrossContext(true);
@@ -153,6 +151,7 @@ public class TomcatApplication {
 
         TOMCAT.addServlet("", "jsp", new JspServlet());
         standardContext.addServletMappingDecoded("*.jsp", "jsp");
+
         JarScanner scanner = new StandardJarScanner();
         StandardJarScanFilter scanFilter = new StandardJarScanFilter();
         scanFilter.setDefaultPluggabilityScan(false);
@@ -228,7 +227,7 @@ public class TomcatApplication {
             tmpContext.setDefaultContextXml(tempFile.getAbsolutePath());
         }
 */
-
+        tmpContext.setWorkDir(webPath);
         File webFile = new File(file,"WEB-INF/web.xml");
         if (webFile.exists()&&webFile.isFile())
         {

@@ -1,10 +1,12 @@
 package com.github.jspxnet.io.jar;
 
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.io.ScanJar;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.io.File;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -12,9 +14,9 @@ import java.util.function.Predicate;
 
 public class FileScanner implements ScanJar {
 
-    private String defaultClassPath = FileScanner.class.getResource("/").getPath();
+    private String defaultClassPath;
     private static final String CLASS_SUFFIX = ".class";
-    private static final String[] jumpClassList = {"Big5", "GB2Big5"};
+    private static final String[] JUMP_CLASS_LIST = {"Big5", "GB2Big5"};
 
 
     public String getDefaultClassPath() {
@@ -30,13 +32,22 @@ public class FileScanner implements ScanJar {
     }
 
     public FileScanner() {
+
+        URL url = FileScanner.class.getResource("/");
+        if (url!=null)
+        {
+            defaultClassPath =  url.getPath();
+        } else
+        {
+            defaultClassPath = System.getProperty("user.dir");
+        }
     }
 
     private static boolean isJumpClass(String name) {
         if (StringUtil.isNull(name)) {
             return true;
         }
-        for (String className : jumpClassList) {
+        for (String className : JUMP_CLASS_LIST) {
             if (name.toLowerCase().contains(className.toLowerCase())) {
                 return true;
             }
@@ -45,7 +56,7 @@ public class FileScanner implements ScanJar {
     }
 
     private static class ClassSearcher {
-        private Set<Class<?>> classPaths = new HashSet<>();
+        final private Set<Class<?>> classPaths = new HashSet<>();
 
         private Set<Class<?>> doPath(File file, String packageName, Predicate<Class<?>> predicate, boolean flag) {
 
@@ -83,11 +94,14 @@ public class FileScanner implements ScanJar {
     public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate) {
         //先把包名转换为路径,首先得到项目的classpath
         String classpath = defaultClassPath;
+        if (classpath==null)
+        {
+            classpath = StringUtil.empty;
+        }
         //然后把我们的包名basPack转换为路径名
         String basePackPath = packageName.replace(".", File.separator);
         String searchPath = classpath + basePackPath;
         return new ClassSearcher().doPath(new File(searchPath), packageName, predicate, true);
     }
-
 
 }

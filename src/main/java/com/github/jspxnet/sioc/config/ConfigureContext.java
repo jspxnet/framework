@@ -370,7 +370,8 @@ public class ConfigureContext implements IocContext {
             }
             readCont = StringUtil.trim(StringUtil.substringBeforeLast(StringUtil.substringAfter(readCont, ">"), "<"));
             String readTxt = EnvFactory.getPlaceholder().processTemplate(valueMap, readCont);
-            configString = StringUtil.replace(configString, se.getSource(), readTxt);
+            String loadTagSource =  se.getSource();
+            configString = StringUtil.replace(configString, loadTagSource, readTxt);
         }
         return EnvFactory.getPlaceholder().processTemplate(envTemplate.getVariableMap(), configString);
     }
@@ -389,8 +390,15 @@ public class ConfigureContext implements IocContext {
         if (FileUtil.isPatternPath(fileName)) {
             List<TagNode> results = new ArrayList<>();
             File[] findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), fileName);
-            for (File f : findFiles) {
-                results.addAll(getIocElementsForFile(f.getAbsolutePath()));
+            if (findFiles==null)
+            {
+                findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.templatePath), fileName);
+            }
+            if (findFiles!=null)
+            {
+                for (File f : findFiles) {
+                    results.addAll(getIocElementsForFile(f.getAbsolutePath()));
+                }
             }
             return results;
         }
