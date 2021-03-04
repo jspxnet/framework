@@ -38,6 +38,11 @@ public class AnnotationUtil {
 
     }
 
+    /**
+     * postgre 数据库seq修复
+     * @param soberTable 模型
+     * @param jdbcOperations jdbc
+     */
     public static void postgreSqlFixSeqId(TableModels soberTable,JdbcOperations jdbcOperations) {
         try {
             jdbcOperations.update(" SELECT setval('"+soberTable.getName()+"_id_seq', (SELECT MAX(id) FROM "+soberTable.getName()+")+1)");
@@ -89,6 +94,8 @@ public class AnnotationUtil {
         {
             value = ObjectUtil.toLong(jdbcOperations.getUniqueResult("SELECT count(1) FROM " + soberTable.getName()));
         }
+        SequenceFactory sequenceFactory = EnvFactory.getBeanFactory().getBean(SequenceFactory.class);
+        sequenceFactory.fixCache(object.getClass().getName(),value);
     }
     /**
      * @param object       自动生成ID

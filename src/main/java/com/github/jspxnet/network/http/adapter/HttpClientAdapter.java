@@ -11,6 +11,7 @@ import com.github.jspxnet.utils.*;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.http.*;
@@ -484,8 +485,8 @@ public class HttpClientAdapter implements HttpClient {
             }
             postMethod.setRequestHeader(key,defaultHeaders.get(key));
         }
-
-        Part[] parts = new Part[files.length];
+        int len = files.length + (params==null?0:params.size());
+        Part[] parts = new Part[len];
         try {
             //----------------------------------------------
             // FilePart：用来上传文件的类,file即要上传的文件
@@ -496,13 +497,20 @@ public class HttpClientAdapter implements HttpClient {
                 filePart.setContentType("text/plain");
                 parts[i]= filePart;
             }
-            if (params!=null)
+            if (params==null)
             {
+                int i = files.length;
                 for (String key:params.keySet())
                 {
-                    postMethod.addParameter(key,params.get(key));
+                    StringPart strPart = new StringPart(key,params.get(key),Environment.defaultEncode);
+                    strPart.setContentType("text/plain");
+                    strPart.setTransferEncoding(Environment.defaultEncode);
+                    parts[i]= strPart;
+                    i++;
                 }
             }
+
+
             // 对于MIME类型的请求，httpclient建议全用MulitPartRequestEntity进行包装
             MultipartRequestEntity multipartRequest = new MultipartRequestEntity(parts, postMethod.getParams());
             postMethod.setRequestEntity(multipartRequest);
@@ -514,7 +522,6 @@ public class HttpClientAdapter implements HttpClient {
             httpClientParams.setConnectionManagerTimeout(10000);
             httpClientParams.setHttpElementCharset(Environment.defaultEncode);
             httpClientParams.setUriCharset(Environment.defaultEncode);
-
             client.setParams(httpClientParams);
 
             int status = client.executeMethod(postMethod);
