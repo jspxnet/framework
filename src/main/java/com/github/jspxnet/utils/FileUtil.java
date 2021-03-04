@@ -1710,7 +1710,7 @@ public class FileUtil {
         File classStartDir = new File(startPath);
         startPath = classStartDir.getAbsolutePath();
 
-        File[] files = getPatternFiles(path, "*.class");
+        List<File> files = getPatternFiles(path, "*.class");
         List<String> list = new ArrayList<>();
         for (File f : files) {
             String fileName = f.getAbsolutePath();
@@ -1752,9 +1752,9 @@ public class FileUtil {
      *
      * @param dir          String 文件夹名称
      * @param findFileName String 查找文件名，可带*.?进行模糊查询
-     * @return File[] 找到的文件
+     * @return List<File> 找到的文件
      */
-    public static File[] getPatternFiles(String dir, final String findFileName) {
+    public static List<File> getPatternFiles(String dir, final String findFileName) {
         if (dir != null && dir.startsWith("file:/")) {
             dir = dir.substring(6);
         }
@@ -1772,14 +1772,7 @@ public class FileUtil {
             return null;
         }
         Pattern p = Pattern.compile(s);
-        List<File> list = filePattern(new File(dir), dir, p);
-        if (list==null)
-        {
-            return null;
-        }
-        File[] rtn = new File[list.size()];
-        list.toArray(rtn);
-        return rtn;
+        return filePattern(new File(dir), dir, p);
     }
 
     /**
@@ -2313,9 +2306,9 @@ public class FileUtil {
             }
             if (url != null) {
                 String findDir = new File(url.getPath()).getAbsolutePath();
-                File[] files = FileUtil.getPatternFiles(findDir, find);
-                if (files.length > 0) {
-                    return files[0];
+                List<File> files = FileUtil.getPatternFiles(findDir, find);
+                if (!ObjectUtil.isEmpty(files)) {
+                    return files.get(0);
                 }
             }
         } else if (loadFile.toLowerCase().startsWith(KEY_libraryPath)) {
@@ -2328,9 +2321,9 @@ public class FileUtil {
                 }
 
                 String findDir = new File(path).getAbsolutePath();
-                File[] files = FileUtil.getPatternFiles(findDir, findFile);
-                if (files.length > 0) {
-                    return files[0];
+                List<File> files = FileUtil.getPatternFiles(findDir, findFile);
+                if (!ObjectUtil.isEmpty(files)) {
+                    return files.get(0);
                 }
             }
         }
@@ -2343,9 +2336,9 @@ public class FileUtil {
             if (file.isFile()) {
                 return file;
             }
-            File[] files = FileUtil.getPatternFiles(path, loadFile);
-            if (files!=null&&files.length > 0) {
-                return files[0];
+            List<File> files = FileUtil.getPatternFiles(path, loadFile);
+            if (!ObjectUtil.isEmpty(files)) {
+                return files.get(0);
             }
         }
         return null;

@@ -449,11 +449,25 @@ public class SoberMappingBean implements SoberFactory {
             String[] files = new String[0];
             for (String file : strings) {
                 if (file.contains(StringUtil.ASTERISK) || file.contains("?") || file.contains("#")) {
-                    File[] findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), file);
-                    if (findFiles!=null)
+                    List<File> findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), file);
+                    if (findFiles==null&&!StringUtil.isNull(envTemplate.getString(Environment.sqlXmlPath)))
+                    {
+                        String sqlXmlPath = envTemplate.getString(Environment.sqlXmlPath);
+                        String[] pathList = StringUtil.split(sqlXmlPath,StringUtil.SEMICOLON);
+                        for (String path:pathList)
+                        {
+                            List<File> childFindFiles = FileUtil.getPatternFiles(path, file);
+                            if (childFindFiles!=null)
+                            {
+                                findFiles.addAll(childFindFiles);
+                            }
+                        }
+                    }
+                    if (!ObjectUtil.isEmpty(findFiles))
                     {
                         for (File f : findFiles) {
-                            if (f.isFile()) {
+                            if (f.isFile())
+                            {
                                 files = ArrayUtil.add(files, f.getName());
                             }
                         }

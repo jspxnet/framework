@@ -86,6 +86,8 @@ public abstract class Environment {
 
     final public static String defaultPath = "defaultPath";
 
+    final public static String sqlXmlPath = "sqlXmlPath";
+
     final public static String loaderPath = "loaderPath";
 
     final public static String lucenePath = "lucenePath";
