@@ -13,15 +13,13 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
+import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.AbstractRead;
 import com.github.jspxnet.io.AutoReadTextFile;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.XMLUtil;
+
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.*;
@@ -237,8 +235,8 @@ public class DefaultConfiguration implements Configuration {
                 if (iFiles != null) {
                     for (String mif : iFiles) {
                         if (FileUtil.isPatternFileName(mif)) {
-                            File[] fileName = FileUtil.getPatternFiles(defaultPath, mif);
-                            if (fileName!=null)
+                            List<File> fileName = FileUtil.getPatternFiles(defaultPath, mif);
+                            if (!ObjectUtil.isEmpty(fileName))
                             {
                                 for (File f : fileName) {
                                     includeFixedFiles = ArrayUtil.add(includeFixedFiles, f.getName());

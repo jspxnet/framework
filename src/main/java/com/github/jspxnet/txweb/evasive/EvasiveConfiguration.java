@@ -219,7 +219,7 @@ public class EvasiveConfiguration implements Configuration {
                 if (iFiles != null) {
                     for (String mif : iFiles) {
                         if (FileUtil.isPatternFileName(mif)) {
-                            File[] fileName = FileUtil.getPatternFiles(defaultPath, mif);
+                            List<File> fileName = FileUtil.getPatternFiles(defaultPath, mif);
                             for (File f : fileName) {
                                 includeFixedFiles = ArrayUtil.add(includeFixedFiles, f.getName());
                             }

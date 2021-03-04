@@ -389,12 +389,12 @@ public class ConfigureContext implements IocContext {
         readFile = ArrayUtil.add(readFile, FileUtil.getFileName(fileName));
         if (FileUtil.isPatternPath(fileName)) {
             List<TagNode> results = new ArrayList<>();
-            File[] findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), fileName);
-            if (findFiles==null)
+            List<File> findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), fileName);
+            if (ObjectUtil.isEmpty(findFiles))
             {
                 findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.templatePath), fileName);
             }
-            if (findFiles!=null)
+            if (ObjectUtil.isEmpty(findFiles))
             {
                 for (File f : findFiles) {
                     results.addAll(getIocElementsForFile(f.getAbsolutePath()));
