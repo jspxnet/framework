@@ -174,6 +174,8 @@ public class SoberUtil {
         xmlEngine.putTag(ExecuteXml.TAG_NAME, ExecuteXml.class.getName());
         xmlEngine.putTag(QueryXml.TAG_NAME, QueryXml.class.getName());
         xmlEngine.putTag(UpdateXml.TAG_NAME, UpdateXml.class.getName());
+        xmlEngine.putTag(IncludeXml.TAG_NAME, IncludeXml.class.getName());
+
         List<TagNode> list = xmlEngine.getTagNodes(xmlString);
         SQLRoom sqlRoom = allSqlMap.get(namespace.toLowerCase());
         if (sqlRoom == null) {
@@ -209,6 +211,10 @@ public class SoberUtil {
             if (UpdateXml.TAG_NAME.equalsIgnoreCase(node.getTagName()))
             {
                 sqlRoom.addUpdate(config);
+            }else
+            if (IncludeXml.TAG_NAME.equalsIgnoreCase(node.getTagName())&&beanEl.getId()!=null)
+            {
+               sqlRoom.addInclude(beanEl.getId(),StringUtil.trim(beanEl.getSource()));
             }
         }
     }

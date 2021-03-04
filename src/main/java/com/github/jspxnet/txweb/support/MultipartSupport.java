@@ -31,7 +31,7 @@ public abstract class MultipartSupport extends ActionSupport {
     }
 
     protected int covering = FileCoveringPolicyEnumType.JSPX.getValue();
-    protected int maxPostSize = 800944751;
+    protected int maxPostSize = -1;
     protected String saveDirectory = "d:/upload";
     protected String fileTypes = StringUtil.ASTERISK;
     protected MultipartRequest multipartRequest = null;

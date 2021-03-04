@@ -446,7 +446,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public <T> T getBean(Class<T> cla) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return params.parseObject(cla);
@@ -469,7 +469,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public String getString(String name, String def, boolean checkSql) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 if (checkSql) {
@@ -483,7 +483,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public int getInt(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return params.getInt(name);
@@ -494,7 +494,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public int getInt(String name, int def) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return params.getInt(name);
@@ -505,7 +505,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public String[] getArray(String name, boolean checkSql) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), String[].class);
@@ -516,7 +516,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public int[] getIntArray(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), int[].class);
@@ -536,7 +536,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public Integer[] getIntegerArray(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), Integer[].class);
@@ -572,7 +572,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public Long[] getLongArray(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), Long[].class);
@@ -583,7 +583,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public float[] getFloatArray(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), float[].class);
@@ -594,7 +594,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public double[] getDoubleArray(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), double[].class);
@@ -616,7 +616,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public Double[] getDoubleObjectArray(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), Double[].class);
@@ -627,7 +627,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public double getDouble(String name, double def) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), double.class);
@@ -638,7 +638,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public BigDecimal[] getBigDecimalArray(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), BigDecimal[].class);
@@ -654,7 +654,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public long getLong(String name, long def) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return params.getLong(name);
@@ -665,7 +665,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public float getFloat(String name, float def) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return params.getFloat(name);
@@ -676,7 +676,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public boolean getBoolean(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 return params.getBoolean(name);
@@ -692,7 +692,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public Date getDate(String name, String format) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 try {
@@ -707,7 +707,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public String[] getParameterNames() {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
+        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
             if (params != null) {
                 try {

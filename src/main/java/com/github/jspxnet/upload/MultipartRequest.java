@@ -215,9 +215,6 @@ public class MultipartRequest implements HttpServletRequest {
         if (saveDirectory == null) {
             throw new IllegalArgumentException("saveDirectory cannot be null,saveDirectory=" + saveDirectory);
         }
-        if (maxPostSize <= 0) {
-            throw new IllegalArgumentException("maxPostSize must be positive,maxPostSize=" + maxPostSize);
-        }
 
         // Save the dir
         File dir = new File(saveDirectory);

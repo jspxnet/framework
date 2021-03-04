@@ -48,7 +48,7 @@ import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
+ * author chenYuan (mail:39793751@qq.com)
  * date: 2007-1-12
  * Time: 9:40:31
  * com.github.jspxnet.sober.config.SoberMappingBean

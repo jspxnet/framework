@@ -26,6 +26,7 @@ import java.io.Serializable;
 public class SQLRoom implements Serializable {
     private String namespace;
 
+    private final Map<String,String> includeMap = new HashMap<>();
     //查询SQL表
     private final Map<String,Map<String, SqlMapConfig>> queryMap = new HashMap<>();
     //更新SQL表
@@ -51,6 +52,15 @@ public class SQLRoom implements Serializable {
         this.namespace = namespace;
     }
 
+    public String getReplenish(String sql)
+    {
+        for (String key:includeMap.keySet())
+        {
+            sql = StringUtil.replace(sql,key,includeMap.get(key));
+        }
+        return sql;
+    }
+
     public SqlMapConfig getQueryMapSql(String id, String db)
     {
         return getMapSql( queryMap, id,  fixDbName(db));
@@ -66,6 +76,16 @@ public class SQLRoom implements Serializable {
         return getMapSql( executeMap, id,  fixDbName(db));
     }
 
+
+    /**
+     *
+     * @param key map key
+     * @param value body
+     */
+    public void addInclude(String key,String value)
+    {
+        includeMap.put(key,value);
+    }
     /**
      * 添加查询配置
      * @param sqlMapConfig 配置文件

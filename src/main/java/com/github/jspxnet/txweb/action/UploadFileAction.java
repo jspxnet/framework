@@ -181,9 +181,10 @@ public class UploadFileAction extends MultipartSupport {
                 maxPostSize = role.getUploadSize() * 1024;
             }
         }
-        if (maxPostSize < 0 && config != null) {
+        if (maxPostSize == 0 && config != null) {
             maxPostSize = config.getInt(Environment.uploadMaxSize) * 1024;
         }
+
         return maxPostSize;
     }
 

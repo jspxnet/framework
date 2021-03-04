@@ -453,10 +453,23 @@ public class HttpClientAdapter implements HttpClient {
      *
      * @param files 文件
      * @param name 文件变量名
-     * @return  上传文件到指定URL
+     * @return  返回信息
      */
     @Override
     public String upload(File[] files, String name)
+    {
+        return upload( files,  name,null);
+    }
+
+    /**
+     *
+     * @param files 文件
+     * @param name 文件变量名
+     * @param params 参数
+     * @return 返回信息
+     */
+    @Override
+    public String upload(File[] files, String name,Map<String,String> params)
     {
         String response = "";
         if (files==null) {
@@ -483,7 +496,13 @@ public class HttpClientAdapter implements HttpClient {
                 filePart.setContentType("text/plain");
                 parts[i]= filePart;
             }
-
+            if (params!=null)
+            {
+                for (String key:params.keySet())
+                {
+                    postMethod.addParameter(key,params.get(key));
+                }
+            }
             // 对于MIME类型的请求，httpclient建议全用MulitPartRequestEntity进行包装
             MultipartRequestEntity multipartRequest = new MultipartRequestEntity(parts, postMethod.getParams());
             postMethod.setRequestEntity(multipartRequest);
@@ -495,6 +514,7 @@ public class HttpClientAdapter implements HttpClient {
             httpClientParams.setConnectionManagerTimeout(10000);
             httpClientParams.setHttpElementCharset(Environment.defaultEncode);
             httpClientParams.setUriCharset(Environment.defaultEncode);
+
             client.setParams(httpClientParams);
 
             int status = client.executeMethod(postMethod);
@@ -530,6 +550,7 @@ public class HttpClientAdapter implements HttpClient {
         return FileUtil.writeFile(file, EntityUtils.toByteArray(post(url, json, defaultHeaders)));
     }
 
+    @SuppressWarnings("all")
     @Override
     public boolean download(File file,Map map) throws Exception
     {

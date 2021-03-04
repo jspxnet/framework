@@ -120,6 +120,7 @@ public abstract class BundleProvider implements Bundle, Serializable {
     @Override
     public boolean save(String key, String value, int encrypt) throws Exception {
         BundleTable bundleTable = new BundleTable();
+        bundleTable.setId(0);
         bundleTable.setIdx(key);
         bundleTable.setContext(value);
         bundleTable.setDataType(dataType);

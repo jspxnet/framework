@@ -52,8 +52,16 @@ public interface HttpClient {
 
 
     boolean download(File file,Map map) throws Exception;
+    /**
+     *
+     * @param files 文件
+     * @param name 文件变量名
+     * @param params 参数
+     * @return 返回信息
+     */
+    String upload(File[] files, String name, Map<String, String> params);
 
-    boolean download(File file,JSONObject json) throws Exception;
+    boolean download(File file, JSONObject json) throws Exception;
 
     void setUrl(String url);
 
@@ -78,7 +86,12 @@ public interface HttpClient {
     String getResponseString() throws ParseException, IOException;
 
     String post() throws Exception;
-
+    /**
+     *
+     * @param files 文件
+     * @param name 文件变量名
+     * @return  返回信息
+     */
     String upload(File[] files, String name);
 
     HttpEntity put(String url, Map<String, String> params, Map<String, String> headers) throws ParseException, IOException;

@@ -168,7 +168,7 @@ public class MultipartParser {
         }*/
 
         int length = req.getContentLength();
-        if (maxSize != 0 && length > maxSize) {
+        if (maxSize >= 0 && length > maxSize) {
             throw new ExceededSizeException("Posted content length of " + length + " exceeds limit of " + maxSize);
         }
 

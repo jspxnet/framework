@@ -841,6 +841,11 @@ public abstract class JdbcOperations implements SoberSupport {
                 //关键字重复了,这些去修复一下
                 AnnotationUtil.fixIdCacheMax(soberTable,object,this);
             }
+            if (SoberEnv.POSTGRESQL.equalsIgnoreCase(soberFactory.getDatabaseName())&&msg!=null&&msg.contains("duplicate key value"))
+            {
+                //手工修改了数据库的seq,这里尝试修复
+                AnnotationUtil.postgreSqlFixSeqId(soberTable,this);
+            }
             log.error(sqlText, e);
             //在事务中不能关闭连接,关闭了会滚会失败
             throw e;

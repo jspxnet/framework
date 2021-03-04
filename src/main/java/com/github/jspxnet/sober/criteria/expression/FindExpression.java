@@ -40,7 +40,7 @@ public class FindExpression implements Criterion {
     final static private String field_tags = "tags"; //搜索关键字
     final static private String field_title = "title"; //支持空格 or 搜索
     final static private String field_name = "name"; //支持空格 or 搜索
-    final static private String field_organize = "organize"; //支持空格 or 搜索
+    //final static private String field_organize = "organize"; //支持空格 or 搜索
 
     private String[] propertyName;
     private Object[] value;
@@ -124,7 +124,7 @@ public class FindExpression implements Criterion {
                 } else {
                     sb.append(" LIKE ? AND ");
                 }
-            } else if (field_title.equals(field) || field_name.equals(field) || field_organize.equals(field)) {
+            } else if (field_title.equals(field) || field_name.equals(field) ) {
                 String[] findArray = StringUtil.split(StringUtil.trim(StringUtil.replace(find, "  ", " ")), " ");
                 sb.append("(");
                 if (soberTable.containsField(field_tags)) {
@@ -311,7 +311,7 @@ public class FindExpression implements Criterion {
 
             if (find.contains(find_wildcard) || find.contains("_")) {
                 result = ArrayUtil.add(result, value[i]);
-            } else if (field_title.equalsIgnoreCase(field) || field_name.equalsIgnoreCase(field) || field_organize.equalsIgnoreCase(field)) {
+            } else if (field_title.equalsIgnoreCase(field) || field_name.equalsIgnoreCase(field)) {
                 //标题方式支持 or
                 String[] findArray = StringUtil.split(StringUtil.trim(StringUtil.replace(find, "  ", " ")), " ");
                 for (int j = 0; j < findArray.length && j < 3; j++) {
@@ -442,15 +442,22 @@ public class FindExpression implements Criterion {
         int min = NumberUtil.getMin(new int[]{propertyName.length, value.length});
         for (int i = 0; i < min; i++) {
             String find = ((String) value[i]);
-            if ((find.contains(find_wildcard) || find.contains("_")) && !find.contains("~")) {
-                sb.append(propertyName[i]).append(" LIKE ").append(StringUtil.quote(find + find_wildcard, false));
+            if (find.contains(find_wildcard) || find.contains("_") || find.contains("~")) {
+                sb.append(propertyName[i]).append(" LIKE ").append(StringUtil.quote(find, false));
+                if (or) {
+                    sb.append(" OR ");
+                } else {
+                    sb.append(" AND ");
+                }
+            } else
+            if (!find.contains(find_wildcard) && !find.contains("_") && !find.contains("~")) {
+                sb.append(propertyName[i]).append(" LIKE ").append(StringUtil.quote(find_wildcard + find + find_wildcard, false));
 
                 if (or) {
                     sb.append(" OR ");
                 } else {
                     sb.append(" AND ");
                 }
-
             } else if (!find.startsWith("~") && !find.endsWith("~") && find.contains("~")) {
                 String value1 = StringUtil.substringBefore(find, "~");
                 String value2 = StringUtil.substringAfter(find, "~");
@@ -490,5 +497,10 @@ public class FindExpression implements Criterion {
     @Override
     public String termString() {
         return toString();
+    }
+
+    public static void main(String[] args) {
+        FindExpression findExpression = new FindExpression(new String[]{"f1","f2"},new String[]{"%aaa","bbb"});
+        System.out.println(findExpression.toString());
     }
 }

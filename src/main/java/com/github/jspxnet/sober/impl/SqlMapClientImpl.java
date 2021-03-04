@@ -95,7 +95,7 @@ public class SqlMapClientImpl implements SqlMapClient {
             return null;
         }
         Dialect dialect = soberFactory.getDialect();
-        String sql = dialect.processSQL(mapSql.getContext(), valueMap);
+        String sql = dialect.processSQL(sqlRoom.getReplenish(mapSql.getContext()), valueMap);
         return jdbcOperations.getUniqueResult(sql);
     }
 
@@ -253,7 +253,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         valueMap.put("beginRow", beginRow);
         valueMap.put("endRow", endRow);
         valueMap.put("namespace", namespace);
-        String sqlText  = dialect.processSQL(mapSql.getContext(), valueMap);
+        String sqlText  = dialect.processSQL(sqlRoom.getReplenish(mapSql.getContext()), valueMap);
         if (StringUtil.isNull(sqlText)) {
             throw new Exception("ERROR SQL IS NULL");
         }
@@ -262,7 +262,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         Table table = AnnotationUtil.getTable(cls);
         String cacheKey = null;
         if (table!=null&&soberFactory.isUseCache() && table.cache()) {
-            cacheKey = SoberUtil.getListKey(cls, sqlText,"",beginRow,endRow, loadChild);
+            cacheKey = SoberUtil.getListKey(cls, sqlText,StringUtil.empty,beginRow,endRow, loadChild);
             List<T> resultList = (List<T>) JSCacheManager.get(cls, cacheKey);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
@@ -376,8 +376,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         valueMap.put("loadChild", false);
         valueMap.put("rollRows", false);
         valueMap.put("namespace", namespace);
-        String sqlText = StringUtil.empty;
-        sqlText = dialect.processSQL(mapSql.getContext(), valueMap);
+        String sqlText = dialect.processSQL(sqlRoom.getReplenish(mapSql.getContext()), valueMap);
         if (StringUtil.isNull(sqlText)) {
             throw new IllegalArgumentException("ERROR SQL IS NULL:" + sqlText);
         }
@@ -417,7 +416,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         if (mapSql == null) {
             return false;
         }
-        return jdbcOperations.execute(dialect.processSQL(mapSql.getContext(), valueMap));
+        return jdbcOperations.execute(dialect.processSQL(sqlRoom.getReplenish(mapSql.getContext()), valueMap));
 
     }
 
@@ -450,6 +449,6 @@ public class SqlMapClientImpl implements SqlMapClient {
             log.error("ERROR SQL map not config SQL update id :" + exeId + "  namespace:" + namespace);
             return -3;
         }
-        return jdbcOperations.update(dialect.processSQL(mapSql.getContext(), valueMap));
+        return jdbcOperations.update(dialect.processSQL(sqlRoom.getReplenish(mapSql.getContext()), valueMap));
     }
 }
