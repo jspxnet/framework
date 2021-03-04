@@ -497,16 +497,21 @@ public class HttpClientAdapter implements HttpClient {
                 filePart.setContentType("text/plain");
                 parts[i]= filePart;
             }
-            if (params==null)
+            if (params!=null)
             {
                 int i = files.length;
                 for (String key:params.keySet())
                 {
+                    if (key==null)
+                    {
+                        continue;
+                    }
                     StringPart strPart = new StringPart(key,params.get(key),Environment.defaultEncode);
                     strPart.setContentType("text/plain");
                     strPart.setTransferEncoding(Environment.defaultEncode);
                     parts[i]= strPart;
                     i++;
+                    postMethod.setParameter(key,params.get(key));
                 }
             }
 
@@ -514,7 +519,6 @@ public class HttpClientAdapter implements HttpClient {
             // 对于MIME类型的请求，httpclient建议全用MulitPartRequestEntity进行包装
             MultipartRequestEntity multipartRequest = new MultipartRequestEntity(parts, postMethod.getParams());
             postMethod.setRequestEntity(multipartRequest);
-
             //---------------------------------------------
             org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
             HttpClientParams httpClientParams = client.getParams();

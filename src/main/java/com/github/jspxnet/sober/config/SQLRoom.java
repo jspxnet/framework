@@ -10,8 +10,14 @@
 package com.github.jspxnet.sober.config;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.scriptmark.XmlEngine;
+import com.github.jspxnet.scriptmark.core.TagNode;
+import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
+import com.github.jspxnet.sober.config.xml.*;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.Serializable;
@@ -52,8 +58,25 @@ public class SQLRoom implements Serializable {
         this.namespace = namespace;
     }
 
-    public String getReplenish(String sql)
-    {
+    public String getReplenish(String sql)  {
+
+        XmlEngine xmlEngine = new XmlEngineImpl();
+        xmlEngine.putTag(IncludeXml.TAG_NAME, IncludeXml.class.getName());
+        List<TagNode> list = null;
+        try {
+            list = xmlEngine.getTagNodes(sql);
+        } catch (Exception e) {
+            log.error("sql map 配置中语法存在错误sql:{}",sql);
+            e.printStackTrace();
+        }
+        if (list!=null)
+        {
+            for (TagNode node : list) {
+                BaseXmlTagNode beanEl = (BaseXmlTagNode) node;
+                String includeStr = includeMap.get(beanEl.getId());
+                sql = StringUtil.replace(sql,beanEl.getSource(),includeStr);
+            }
+        }
         for (String key:includeMap.keySet())
         {
             sql = StringUtil.replace(sql,key,includeMap.get(key));
