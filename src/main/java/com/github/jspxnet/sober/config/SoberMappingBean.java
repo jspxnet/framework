@@ -450,7 +450,7 @@ public class SoberMappingBean implements SoberFactory {
             for (String file : strings) {
                 if (file.contains(StringUtil.ASTERISK) || file.contains("?") || file.contains("#")) {
                     List<File> findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), file);
-                    if (findFiles==null&&!StringUtil.isNull(envTemplate.getString(Environment.sqlXmlPath)))
+                    if (ObjectUtil.isEmpty(findFiles)&&!StringUtil.isNull(envTemplate.getString(Environment.sqlXmlPath)))
                     {
                         String sqlXmlPath = envTemplate.getString(Environment.sqlXmlPath);
                         String[] pathList = StringUtil.split(sqlXmlPath,StringUtil.SEMICOLON);

@@ -617,7 +617,7 @@ public class ArrayUtil {
             array[0] = element;
             return array;
         }
-        Class type = element != null ? element.getClass() : Object.class;
+        Class<?> type = element != null ? element.getClass() : Object.class;
         Object[] newArray = (Object[]) copyArrayGrow1(array, type);
         newArray[newArray.length - 1] = element;
         return newArray;

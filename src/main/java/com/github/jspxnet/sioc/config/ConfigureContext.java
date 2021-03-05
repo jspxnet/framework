@@ -394,7 +394,7 @@ public class ConfigureContext implements IocContext {
             {
                 findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.templatePath), fileName);
             }
-            if (ObjectUtil.isEmpty(findFiles))
+            if (!ObjectUtil.isEmpty(findFiles))
             {
                 for (File f : findFiles) {
                     results.addAll(getIocElementsForFile(f.getAbsolutePath()));

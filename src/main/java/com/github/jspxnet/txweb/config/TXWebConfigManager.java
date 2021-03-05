@@ -61,7 +61,7 @@ public class TXWebConfigManager implements WebConfigManager {
 
     //这里保存已经扫描过的包，避免重复扫描
     static private List<String> scanPackageList;
-    static private Configuration configuration;
+    //static private Configuration configuration;
 
     //读取锁 begin
 
@@ -129,7 +129,7 @@ public class TXWebConfigManager implements WebConfigManager {
         //1.初始化所有配置动作
 
         scanPackageList.clear();
-        configuration = DefaultConfiguration.getInstance();
+        Configuration configuration = DefaultConfiguration.getInstance();
         try {
             configTable.putAll(configuration.loadConfigMap());
         } catch (Exception e) {

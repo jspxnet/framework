@@ -171,26 +171,6 @@ public class EvasiveConfiguration implements Configuration {
             log.info("evasive load config file:" + file);
 
             File readFile = EnvFactory.getFile(file);
-
-           /*
-            String defaultFile;
-            if (FileUtil.isFileExist(file)) defaultFile = file;
-            else defaultFile = defaultPath + file;
-
-            if (!FileUtil.isFileExist(defaultFile)) {
-                URL url = Environment.class.getResource("/" + file);
-                if (url != null) {
-                    defaultFile = url.getPath();
-                }
-            }
-            if (!FileUtil.isFileExist(defaultFile)) {
-                URL url = Environment.class.getResource(file);
-                if (url != null) {
-                    defaultFile = url.getPath();
-                }
-            }
-            if (!FileUtil.isFileExist(defaultFile)) continue;
-            */
             if (!FileUtil.isFileExist(readFile)) {
                 continue;
             }
