@@ -114,6 +114,12 @@ public class DataTypeValidator implements Validator {
             url = ClassUtil.getResource("/" + configFile);
             if (url != null) {
                 fileNamePath = url.getPath();
+            } else
+            {
+                url = ClassUtil.getResource("/resources/" + configFile);
+                if (url != null) {
+                    fileNamePath = url.getPath();
+                }
             }
         }
         return fileNamePath;

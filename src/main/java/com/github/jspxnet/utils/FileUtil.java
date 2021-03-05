@@ -1749,10 +1749,9 @@ public class FileUtil {
     /**
      * 模糊（通配符）文件查找程序
      * 可以根据正则表达式查找
-     *
-     * @param dir          String 文件夹名称
+     * @param dir 文件夹名称
      * @param findFileName String 查找文件名，可带*.?进行模糊查询
-     * @return List<File> 找到的文件
+     * @return 找到的文件
      */
     public static List<File> getPatternFiles(String dir, final String findFileName) {
         if (dir != null && dir.startsWith("file:/")) {

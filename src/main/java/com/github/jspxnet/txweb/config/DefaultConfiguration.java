@@ -109,6 +109,12 @@ public class DefaultConfiguration implements Configuration {
             }
         }
         if (!FileUtil.isFileExist(defaultFile)) {
+            URL url = Environment.class.getResource("/resources/" + fileName);
+            if (url != null) {
+                defaultFile = url.getPath();
+            }
+        }
+        if (!FileUtil.isFileExist(defaultFile)) {
             URL url = Environment.class.getResource(fileName);
             if (url != null) {
                 defaultFile = url.getPath();
@@ -156,6 +162,12 @@ public class DefaultConfiguration implements Configuration {
 
             if (!FileUtil.isFileExist(defaultFile)) {
                 URL url = Thread.currentThread().getContextClassLoader().getResource(includeFile);
+                if (url != null) {
+                    defaultFile = url.getPath();
+                }
+            }
+            if (!FileUtil.isFileExist(defaultFile)) {
+                URL url = Environment.class.getResource("/resources/" + fileName);
                 if (url != null) {
                     defaultFile = url.getPath();
                 }

@@ -487,6 +487,9 @@ public class SoberMappingBean implements SoberFactory {
                 if (url == null) {
                     url = ClassUtil.getResource(defaultPath + file);
                 }
+                if (url == null) {
+                    url = ClassUtil.getResource("/resources/" + file);
+                }
                 if (url == null && (file.startsWith("http") || file.startsWith("file") || file.startsWith("ftp"))) {
                     url = new URL(file);
                 }

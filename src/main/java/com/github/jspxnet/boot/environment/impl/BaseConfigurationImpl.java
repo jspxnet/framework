@@ -82,7 +82,15 @@ public class BaseConfigurationImpl implements JspxConfiguration {
                 }
             }
         }
-
+        if (path == null) {
+            url = ClassUtil.getResource("/resources"+defaultConfigFile);
+            if (url != null) {
+                path = url.getPath();
+                if (!FileUtil.isFileExist(path)) {
+                    path = null;
+                }
+            }
+        }
         if (path == null) {
             path = FileUtil.mendPath(System.getProperty("user.dir")) + defaultConfigFile;
             if (!FileUtil.isFileExist(path)) {

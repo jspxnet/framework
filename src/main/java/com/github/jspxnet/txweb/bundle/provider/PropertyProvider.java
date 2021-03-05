@@ -49,6 +49,10 @@ public class PropertyProvider extends BundleProvider {
         if (url == null) {
             url = ClassUtil.getResource("/" + name);
         }
+        if (url == null) {
+            url = ClassUtil.getResource("/resources/" + name);
+        }
+
         if (url != null) {
             file = new File(url.getPath());
         }

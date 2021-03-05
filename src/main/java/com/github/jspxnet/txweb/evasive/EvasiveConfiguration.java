@@ -131,6 +131,14 @@ public class EvasiveConfiguration implements Configuration {
         }
 
         if (!FileUtil.isFileExist(defaultFile)) {
+            URL url = JarDefaultConfig.class.getResource("/resources/"+fileName);
+            if (url != null) {
+                defaultFile = url.getPath();
+            }
+        }
+
+
+        if (!FileUtil.isFileExist(defaultFile)) {
             URL url = JarDefaultConfig.class.getResource(fileName);
             if (url != null) {
                 defaultFile = url.getPath();

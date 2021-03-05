@@ -39,7 +39,15 @@ public class FileScanner implements ScanJar {
             defaultClassPath =  url.getPath();
         } else
         {
-            defaultClassPath = System.getProperty("user.dir");
+            url = FileScanner.class.getResource("/resources");
+            if (url!=null)
+            {
+                defaultClassPath =  url.getPath();
+            }
+            else
+            {
+                defaultClassPath = System.getProperty("user.dir");
+            }
         }
     }
 
