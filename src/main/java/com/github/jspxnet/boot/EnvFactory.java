@@ -66,13 +66,13 @@ public abstract class EnvFactory {
     /**
      * SIoc 上下文
      */
-    static private BeanFactory beanFactory = new EntryFactory();
+    final static private BeanFactory BEAN_FACTORY = new EntryFactory();
 
     static public BeanFactory getBeanFactory() {
-        return beanFactory;
+        return BEAN_FACTORY;
     }
 
-    static private EnvironmentTemplate envTemplate = new EnvironmentTemplateImpl();
+    final static private EnvironmentTemplate ENV_TEMPLATE = new EnvironmentTemplateImpl();
 
     /**
      * 环境变量和环境模版
@@ -80,7 +80,7 @@ public abstract class EnvFactory {
      * @return 得到环境变量
      */
     static public EnvironmentTemplate getEnvironmentTemplate() {
-        return envTemplate;
+        return ENV_TEMPLATE;
     }
 
     final static private Placeholder PLACEHOLDER = new PlaceholderImpl();
@@ -94,15 +94,15 @@ public abstract class EnvFactory {
     }
 
     static public String getHashAlgorithm() {
-        return envTemplate.getString(Environment.hashAlgorithm, "Md5");
+        return ENV_TEMPLATE.getString(Environment.hashAlgorithm, "Md5");
     }
 
     static public String getHashAlgorithmKey() {
-        return envTemplate.getString(Environment.hashAlgorithmKey, StringUtil.empty);
+        return ENV_TEMPLATE.getString(Environment.hashAlgorithmKey, StringUtil.empty);
     }
 
     static public String getSecretKey() {
-        return envTemplate.getString(Environment.secretKey, "chenYuan");
+        return ENV_TEMPLATE.getString(Environment.secretKey, "chenYuan");
     }
 
 
@@ -118,19 +118,19 @@ public abstract class EnvFactory {
         if (symmetryEncrypt != null) {
             return symmetryEncrypt;
         }
-        String encryptionAlgorithmClass = envTemplate.getString(Environment.symmetryAlgorithm, SM4Encrypt.class.getName());
+        String encryptionAlgorithmClass = ENV_TEMPLATE.getString(Environment.symmetryAlgorithm, SM4Encrypt.class.getName());
         try {
             symmetryEncrypt = (Encrypt) ClassUtil.newInstance(encryptionAlgorithmClass);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String secretKey = envTemplate.getString(Environment.secretKey, Environment.defaultDrug);
+        String secretKey = ENV_TEMPLATE.getString(Environment.secretKey, Environment.defaultDrug);
         if (secretKey.length() > 16) {
             secretKey = StringUtil.cut(secretKey, 16, StringUtil.empty);
         }
         symmetryEncrypt.setSecretKey(secretKey);
-        symmetryEncrypt.setCipherAlgorithm(envTemplate.getString(Environment.cipherAlgorithm));
-        symmetryEncrypt.setCipherIv(envTemplate.getString(Environment.cipherIv));
+        symmetryEncrypt.setCipherAlgorithm(ENV_TEMPLATE.getString(Environment.cipherAlgorithm));
+        symmetryEncrypt.setCipherIv(ENV_TEMPLATE.getString(Environment.cipherIv));
         return symmetryEncrypt;
     }
 
@@ -148,7 +148,7 @@ public abstract class EnvFactory {
         if (asymmetricEncrypt != null) {
             return asymmetricEncrypt;
         }
-        String encryptionAlgorithmClass = envTemplate.getString(Environment.asymmetricAlgorithm, RSAEncrypt.class.getName());
+        String encryptionAlgorithmClass = ENV_TEMPLATE.getString(Environment.asymmetricAlgorithm, RSAEncrypt.class.getName());
         try {
             asymmetricEncrypt = (AsyEncrypt) ClassUtil.newInstance(encryptionAlgorithmClass);
         } catch (Exception e) {
@@ -169,7 +169,7 @@ public abstract class EnvFactory {
         if (privateKey != null) {
             return privateKey;
         }
-        String key = StringUtil.trim(envTemplate.getString(Environment.privateKey));
+        String key = StringUtil.trim(ENV_TEMPLATE.getString(Environment.privateKey));
         return privateKey = EncryptUtil.getStoreToKey(key);
     }
 
@@ -184,7 +184,7 @@ public abstract class EnvFactory {
         if (publicKey != null) {
             return publicKey;
         }
-        String key = StringUtil.trim(envTemplate.getString(Environment.publicKey));
+        String key = StringUtil.trim(ENV_TEMPLATE.getString(Environment.publicKey));
         return publicKey = EncryptUtil.getStoreToKey(key);
     }
 
@@ -195,16 +195,7 @@ public abstract class EnvFactory {
      * @return 得到文件，如果为空，表示没有找到文件
      */
     static public File getFile(String loadFile) {
-        String[] findDirs;
-        if (StringUtil.isNull(envTemplate.getString(Environment.defaultPath)))
-        {
-            JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
-            findDirs =  new String[]{ jspxConfiguration.getDefaultPath(),System.getProperty("user.dir")};
-        }
-        else
-        {
-            findDirs = new String[]{envTemplate.getString(Environment.defaultPath), envTemplate.getString(Environment.templatePath), envTemplate.getString(Environment.resPath)};
-        }
+        String[]  findDirs = new String[]{ENV_TEMPLATE.getString(Environment.defaultPath), ENV_TEMPLATE.getString(Environment.templatePath), ENV_TEMPLATE.getString(Environment.resPath)};
         return FileUtil.scanFile(findDirs, loadFile);
     }
 }

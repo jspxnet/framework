@@ -13,8 +13,7 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.StringUtil;
-import org.slf4j.LoggerFactory;
-
+import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.util.Objects;
 
@@ -31,12 +30,9 @@ import java.util.Objects;
  * @version 1.0
  */
 
+@Slf4j
 public class GB2Big5 {
-
-    private final static org.slf4j.Logger log = LoggerFactory.getLogger(GB2Big5.class);
-
-    private static GB2Big5 pTmp = new GB2Big5();
-
+    private static final GB2Big5 pTmp = new GB2Big5();
     private byte[] b_big5Table;
     private byte[] b_gbTable = null;
     private StringMap<String, String> twZhUesdMap = null;
@@ -116,11 +112,15 @@ public class GB2Big5 {
      * @throws NullPointerException 异常
      */
     private GB2Big5() throws NullPointerException {
-        twZhUesdMap = new StringMap();
+        twZhUesdMap = new StringMap<>();
         twZhUesdMap.setKeySplit("=");
         twZhUesdMap.setLineSplit("\r\n");
 
         InputStream inputStream = GB2Big5.class.getResourceAsStream(zhtwusedFile);
+        if (inputStream==null)
+        {
+            inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +zhtwusedFile);
+        }
         if (inputStream == null) {
             File file = EnvFactory.getFile(zhtwusedFile);
             if (file != null) {

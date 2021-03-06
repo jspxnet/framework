@@ -151,7 +151,6 @@ public class JspxCoreListener implements ServletContextListener {
             System.setProperty(Environment.APOLLO_BOOTSTRAP_ENABLED,properties.getProperty(Environment.APOLLO_BOOTSTRAP_ENABLED));
             System.setProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES,properties.getProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES));
             System.setProperty(Environment.APOLLO_META,properties.getProperty(Environment.APOLLO_META));
-
             envTemplate.putEnv(Environment.BOOT_CONF_MODE,BootConfigEnumType.APPOLLO.getName());
 
             Config config = ConfigService.getAppConfig();

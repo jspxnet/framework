@@ -1,7 +1,6 @@
 package com.github.jspxnet.txweb.evasive;
 
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.conf.JarDefaultConfig;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.io.AbstractRead;
@@ -24,15 +23,15 @@ import java.util.*;
  */
 public class EvasiveConfiguration implements Configuration {
     final static private Logger log = LoggerFactory.getLogger(EvasiveConfiguration.class);
-    private List<EvasiveRule> evasiveRuleList = new ArrayList<EvasiveRule>();
+    final private List<EvasiveRule> evasiveRuleList = new ArrayList<EvasiveRule>();
     private List<ResultConfigBean> resultConfigList = new ArrayList<ResultConfigBean>();
     private String[] whiteList = null;
     private String[] blackList = null;
     //黑名单
-    private List<String> blacklist = new ArrayList<String>();
+    final private List<String> blacklist = new ArrayList<String>();
     private String[] insecureUrlKeys = null;
     private String[] insecureQueryStringKeys = null;
-    private List<QueryBlack> queryBlackRuleList = new ArrayList<QueryBlack>();
+    final private List<QueryBlack> queryBlackRuleList = new ArrayList<QueryBlack>();
     //包含的文件,用作判断，如果已经载入的文件将不再载入
     private String[] includeFiles = null;
     //默认载入的文件名
@@ -124,14 +123,14 @@ public class EvasiveConfiguration implements Configuration {
         }
 
         if (!FileUtil.isFileExist(defaultFile)) {
-            URL url = JarDefaultConfig.class.getResource("/" + fileName);
+            URL url = Environment.class.getResource("/" + fileName);
             if (url != null) {
                 defaultFile = url.getPath();
             }
         }
 
         if (!FileUtil.isFileExist(defaultFile)) {
-            URL url = JarDefaultConfig.class.getResource("/resources/"+fileName);
+            URL url = Environment.class.getResource("/resources/"+fileName);
             if (url != null) {
                 defaultFile = url.getPath();
             }
@@ -139,7 +138,7 @@ public class EvasiveConfiguration implements Configuration {
 
 
         if (!FileUtil.isFileExist(defaultFile)) {
-            URL url = JarDefaultConfig.class.getResource(fileName);
+            URL url = Environment.class.getResource(fileName);
             if (url != null) {
                 defaultFile = url.getPath();
             }
@@ -156,9 +155,7 @@ public class EvasiveConfiguration implements Configuration {
         if (StringUtil.isNull(defaultPath)) {
             defaultPath = envTemplate.getString(Environment.defaultPath);
         }
-        String[] includeFixedFiles = new String[1];
-        includeFixedFiles[0] = fileName;
-        readIncludeFile(defaultPath, includeFixedFiles);
+        readIncludeFile(defaultPath,new String[]{fileName} );
 
     }
 
@@ -167,7 +164,7 @@ public class EvasiveConfiguration implements Configuration {
      * @param include     包含的路径
      * @throws Exception 异常
      */
-    private void readIncludeFile(String defaultPath, final String[] include) throws Exception {
+    private void readIncludeFile(String defaultPath, String[] include) throws Exception {
         if (include == null) {
             return;
         }

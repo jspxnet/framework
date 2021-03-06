@@ -54,5 +54,4 @@ public interface JspxConfiguration {
      */
     long getRunDay();
 
-    void checkLoader();
 }

@@ -17,27 +17,20 @@ package com.github.jspxnet.boot.environment.impl;
  * 配置文件接口
  */
 
-import com.github.jspxnet.boot.conf.JarDefaultConfig;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.io.AbstractWrite;
-import com.github.jspxnet.io.WriteFile;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
-
 import java.io.File;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 public class BaseConfigurationImpl implements JspxConfiguration {
 
-    private String defaultPath = StringUtil.empty;
+    private String defaultPath = null;
     final private static Date START_RUN_DATE = new Date();
-    private long configFileTime = 0;
-    private boolean handSet = false;
     private String defaultConfigFile = Environment.jspx_properties_file;
 
     public BaseConfigurationImpl() {
@@ -56,15 +49,6 @@ public class BaseConfigurationImpl implements JspxConfiguration {
     @Override
     public void setDefaultPath(String defaultPath) {
         this.defaultPath = defaultPath;
-        handSet = true;
-    }
-
-    @Override
-    public void checkLoader() {
-        if (!handSet || StringUtil.isNull(defaultPath) || (defaultPath != null && configFileTime != FileUtil.lastModified(defaultPath + defaultConfigFile))) {
-            loadPath();
-        }
-        configFileTime = FileUtil.lastModified(defaultPath + defaultConfigFile);
     }
 
     /**
@@ -72,9 +56,9 @@ public class BaseConfigurationImpl implements JspxConfiguration {
      */
     private void loadPath() {
         String path = null;
-        URL url = ClassUtil.getResource("/" + defaultConfigFile);
+        URL url = Environment.class.getResource("/" + defaultConfigFile);
         if (url == null) {
-            url = ClassUtil.getResource(defaultConfigFile);
+            url = Environment.class.getResource(defaultConfigFile);
             if (url != null) {
                 path = url.getPath();
                 if (!FileUtil.isFileExist(path)) {
@@ -83,7 +67,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
             }
         }
         if (path == null) {
-            url = ClassUtil.getResource("/resources"+defaultConfigFile);
+            url = Environment.class.getResource("/resources/"+defaultConfigFile);
             if (url != null) {
                 path = url.getPath();
                 if (!FileUtil.isFileExist(path)) {
@@ -112,36 +96,11 @@ public class BaseConfigurationImpl implements JspxConfiguration {
             }
         }
 
-        /**
-         * 查找 lib 目录
-         */
+        //查找 jar 路径
         if (path == null) {
-            path = FileUtil.getPathPart(ClassUtil.getClassFilePath(com.github.jspxnet.boot.conf.JarDefaultConfig.class.getName()));
-            if (path.contains(".jar!") || path.contains(".war!") || path.contains(".zip!")) {
-                path = FileUtil.mendPath(FileUtil.getPathPart(StringUtil.substringBefore(path, "!/")));
-            }
-            int i = 3;
-            while (!StringUtil.isNull(path) && i > 0) {
-                File f = new File(path + defaultConfigFile);
-                if (f.isFile()) {
-                    path = FileUtil.getPathPart(f.getAbsolutePath());
-                    break;
-                }
-                i--;
-            }
-            if (!FileUtil.isFileExist(path)) {
-                path = null;
-            }
-        }
-
-        /**
-         * 查找 classpath 路径
-         */
-        if (path == null) {
-            String classpath = System.getProperty("java.class.path");
-            String[] listDir = StringUtil.split(classpath, StringUtil.SEMICOLON);
-            for (String fileDir : listDir) {
-                path = FileUtil.getPathPart(fileDir) + defaultConfigFile;
+            List<File> listDir = ClassUtil.getRunJarDir();
+            for (File fileDir : listDir) {
+                path = new File(fileDir.getPath(),defaultConfigFile).getPath();
                 if (FileUtil.isFileExist(path)) {
                     break;
                 }
@@ -152,7 +111,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         }
 
         if (path == null) {
-            path = FileUtil.getPathPart(ClassUtil.getClassFilePath(JarDefaultConfig.class.getName())) + defaultConfigFile;
+            path = FileUtil.getPathPart(ClassUtil.getClassFilePath(Environment.class.getName())) + defaultConfigFile;
             if (!FileUtil.isFileExist(path)) {
                 path = null;
             }
@@ -164,22 +123,6 @@ public class BaseConfigurationImpl implements JspxConfiguration {
                 path = file.getParentFile().getAbsolutePath();
             } else {
                 path = null;
-            }
-        }
-        if (path == null) {
-            InputStream inputStream = BaseConfigurationImpl.class.getResourceAsStream("/resources/" + defaultConfigFile);
-            if (inputStream != null) {
-                String temp = FileUtil.readInputStream(inputStream);
-                File file = new File(FileUtil.mendPath(System.getProperty(" user.dir")) + defaultConfigFile);
-                if (file.isFile()) {
-                    file.delete();
-                }
-                AbstractWrite write = new WriteFile();
-                write.setFile(Environment.defaultEncode);
-                write.setFile(file.getAbsolutePath());
-                if (write.setContent(temp)) {
-                    path = file.getAbsolutePath();
-                }
             }
         }
 
@@ -213,10 +156,10 @@ public class BaseConfigurationImpl implements JspxConfiguration {
             return ;
         }
         File file = new File(path);
-        defaultPath = FileUtil.mendPath(file.getAbsolutePath());
+        defaultPath = FileUtil.mendPath(file.getPath());
+
         log.info("user.dir=" + System.getProperty("user.dir"));
         log.info("defaultPath=" + defaultPath);
-
     }
 
 
@@ -227,8 +170,9 @@ public class BaseConfigurationImpl implements JspxConfiguration {
      */
     @Override
     public String getDefaultPath() {
-        if (StringUtil.isNull(defaultPath)) {
-            checkLoader();
+        if (defaultPath==null)
+        {
+            loadPath();
         }
         return defaultPath;
     }

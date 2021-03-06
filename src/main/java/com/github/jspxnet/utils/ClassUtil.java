@@ -20,6 +20,7 @@ import net.sf.cglib.proxy.Enhancer;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URLClassLoader;
 import java.sql.Timestamp;
 import java.util.*;
 import java.io.*;
@@ -1120,8 +1121,52 @@ public class ClassUtil {
         return resultList;
     }
 
+    /**
+     *
+     * @return 得到当前系统运行的jar列表
+     */
+    public static List<File> getRunJarList()
+    {
+        List<File> result = new ArrayList<>();
+        ClassLoader effectiveClassLoader = ClassUtil.class.getClassLoader();
+        URL[] classPath = ((URLClassLoader) effectiveClassLoader).getURLs();
+        for (URL url:classPath)
+        {
+            File file = new File(url.getFile());
+            if (file.isFile())
+            {
+                result.add(file);
+            }
+        }
+        return result;
+    }
 
-
-
-
+    public static List<File> getRunJarDir()
+    {
+        List<File> result = new ArrayList<>();
+        ClassLoader effectiveClassLoader = ClassUtil.class.getClassLoader();
+        URL[] classPath = ((URLClassLoader) effectiveClassLoader).getURLs();
+        for (URL url:classPath)
+        {
+            File file = new File(url.getFile());
+            if (file.isFile())
+            {
+                file = file.getParentFile();
+                if (file.getPath().contains("repository"))
+                {
+                    continue;
+                }
+            }
+            if (file.isDirectory()&&!result.contains(file))
+            {
+                result.add(file);
+            }
+        }
+        File file = new File(System.getProperty("user.dir"));
+        if (!result.contains(file))
+        {
+            result.add(file);
+        }
+        return result;
+    }
 }

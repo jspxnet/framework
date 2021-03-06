@@ -45,7 +45,7 @@ public class AutoReadTextFile extends AbstractRead {
         }
         resource = FileUtil.mendFile(resource);
         /////////不在jar文件中
-        if (FileUtil.isZipFile(resource)) {
+        if (FileUtil.isZipPackageFile(resource)) {
             String jarFileName = null;
             if (resource.contains(".jar!")) {
                 jarFileName = resource.substring(0, resource.indexOf(".jar!") + 4);
@@ -81,7 +81,7 @@ public class AutoReadTextFile extends AbstractRead {
             isr = new InputStreamReader(zis, encode);
             return true;
         }
-        if (FileUtil.isZipFile(resource) && FileUtil.isRead(resource)) {
+        if (FileUtil.isZipPackageFile(resource) && FileUtil.isRead(resource)) {
             zis = new ZipInputStream(new CheckedInputStream(new FileInputStream(resource), new Adler32()));
             zis.getNextEntry();
             isr = new InputStreamReader(zis, encode);

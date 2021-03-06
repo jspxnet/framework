@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
@@ -216,7 +217,7 @@ public class Dispatcher {
             if (!StringUtil.isNull(filePath)) {
                 filePath = FileUtil.mendPath(filePath + "WEB-INF/classes");
             }
-            if (!StringUtil.isNull(filePath) && FileUtil.isDirectory(filePath)) {
+            if (!StringUtil.isNull(filePath) && FileUtil.isDirectory(filePath) && FileUtil.isFileExist(new File(filePath,Environment.jspx_properties_file))) {
                 JspxNetApplication.autoRun(FileUtil.mendPath(filePath));
             } else {
                 JspxNetApplication.autoRun();

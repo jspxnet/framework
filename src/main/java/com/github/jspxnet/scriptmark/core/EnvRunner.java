@@ -9,20 +9,17 @@
  */
 package com.github.jspxnet.scriptmark.core;
 
-import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.AutoReadTextFile;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.scriptmark.*;
 import com.github.jspxnet.scriptmark.core.block.*;
 import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
 import com.github.jspxnet.scriptmark.core.script.ScriptTypeConverter;
 import com.github.jspxnet.scriptmark.exception.ScriptException;
 import com.github.jspxnet.scriptmark.exception.ScriptRunException;
-
 import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.List;
 import java.util.Map;
 import java.io.*;
@@ -188,28 +185,41 @@ public class EnvRunner {
      */
     static private List<TagNode> getAutoImport(Configurable configurable) throws ScriptRunException {
         String[] paths = configurable.getSearchPath();
-        if (paths == null) {
-            return null;
-        }
+
         TemplateLoader templateLoader = TemplateManager.getInstance();
         StringBuilder autoImportSrc = new StringBuilder();
-        autoImportSrc.append(templateLoader.get(ScriptmarkEnv.autoImportCache));
+        if (!ObjectUtil.isEmpty(templateLoader.get(ScriptmarkEnv.autoImportCache)))
+        {
+            autoImportSrc.append(templateLoader.get(ScriptmarkEnv.autoImportCache));
+        }
         if (autoImportSrc.length() < 5) {
             for (String importFile : configurable.getAutoImports()) {
                 if (StringUtil.isNull(importFile)) {
                     continue;
                 }
-                for (String path : paths) {
-                    File f = new File(path, importFile);
-                    if (FileUtil.isFileExist(f.getAbsolutePath())) {
-                        AbstractRead read = new AutoReadTextFile();
-                        read.setEncode(Environment.defaultEncode);
-                        read.setFile(f);
-                        try {
-                            autoImportSrc.append(read.getContent()).append(StringUtil.CRLF);
-                        } catch (IOException e) {
-                            throw new ScriptRunException(null, importFile);
+                if (!ObjectUtil.isEmpty(paths)) {
+                    for (String path : paths) {
+                        if (StringUtil.isNull(path))
+                        {
+                            continue;
                         }
+                        File f = new File(path, importFile);
+                        if (FileUtil.isFileExist(f.getAbsolutePath())) {
+                            try {
+                                autoImportSrc.append(IoUtil.autoReadText(f.getPath())).append(StringUtil.CRLF);
+                            } catch (IOException e) {
+                                throw new ScriptRunException(null, importFile);
+                            }
+                        }
+                    }
+                }
+                File file = FileUtil.scanFile(null,importFile);
+                if (file!=null)
+                {
+                    try {
+                        autoImportSrc.append(IoUtil.autoReadText(file.getPath())).append(StringUtil.CRLF);
+                    } catch (IOException e) {
+                        throw new ScriptRunException(null, importFile);
                     }
                 }
             }

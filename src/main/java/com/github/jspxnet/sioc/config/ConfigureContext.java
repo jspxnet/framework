@@ -172,7 +172,6 @@ public class ConfigureContext implements IocContext {
             }
             try {
                 registryIocBean(cls);
-                //registryRpcClientBean(cls);
             } catch (Exception e) {
                 log.error("ioc scan load class dir error" + cls, e);
             }
@@ -292,7 +291,7 @@ public class ConfigureContext implements IocContext {
         }
     }
 
-    private String readFile(String fileName) throws IOException {
+    private String readFileText(String fileName) throws IOException {
         String fileNamePath = fileName;
         if (!FileUtil.isFileExist(fileName)) {
 
@@ -315,16 +314,6 @@ public class ConfigureContext implements IocContext {
         return IoUtil.autoReadText(fileNamePath,envTemplate.getString(Environment.encode, Environment.defaultEncode));
     }
 
-    private String readHttpFile(String fileName) throws IOException {
-        if (StringUtil.isNull(fileName)) {
-            return StringUtil.empty;
-        }
-        String encode = Environment.defaultEncode;
-        if (fileName.toLowerCase().contains("gb")) {
-            encode = "GBK";
-        }
-        return IoUtil.autoReadText(fileName,encode);
-    }
 
     /**
      * 读取文件,支持url 方式
@@ -334,12 +323,7 @@ public class ConfigureContext implements IocContext {
      * @throws Exception 异常 运行错误
      */
     private String readContext(String fileName) throws Exception {
-        String configString;
-        if (fileName.startsWith("http")) {
-            configString = readHttpFile(fileName);
-        } else {
-            configString = readFile(fileName);
-        }
+        String  configString = readFileText(fileName);
 
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag(LoadElement.TAG_NAME, LoadElement.class.getName());
@@ -359,11 +343,13 @@ public class ConfigureContext implements IocContext {
             }
 
             File file = EnvFactory.getFile(loadFile);
+            System.out.println("-----file.getAbsolutePath()=" + file.getAbsolutePath());
+            System.out.println("-----file.getPath()=" + file.getPath());
             if (!FileUtil.isFileExist(file)) {
                 log.debug("ioc not found file:" + loadFile);
                 throw new Exception("ioc not found file:" + loadFile);
             }
-            String readCont = IoUtil.autoReadText(file.getAbsolutePath(),encode);
+            String readCont = IoUtil.autoReadText(file.getPath(),encode);
             int headPost = StringUtil.indexIgnoreCaseOf(readCont, "<?xml");
             if (headPost != -1) {
                 readCont = StringUtil.substringAfter(readCont, ">");
@@ -382,11 +368,11 @@ public class ConfigureContext implements IocContext {
      * @throws Exception 异常
      */
     private List<TagNode> getIocElementsForFile(String fileName) throws Exception {
-        fileName = FileUtil.mendFile(fileName);
-        if (ArrayUtil.inArray(readFile, FileUtil.getFileName(fileName), true) || StringUtil.isNull(fileName)) {
+
+        if (ArrayUtil.inArray(readFile, fileName, true) || StringUtil.isNull(fileName)) {
             return new ArrayList<>();
         }
-        readFile = ArrayUtil.add(readFile, FileUtil.getFileName(fileName));
+        readFile = ArrayUtil.add(readFile, fileName);
         if (FileUtil.isPatternPath(fileName)) {
             List<TagNode> results = new ArrayList<>();
             List<File> findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), fileName);
@@ -394,12 +380,20 @@ public class ConfigureContext implements IocContext {
             {
                 findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.templatePath), fileName);
             }
+
             if (!ObjectUtil.isEmpty(findFiles))
             {
                 for (File f : findFiles) {
                     results.addAll(getIocElementsForFile(f.getAbsolutePath()));
                 }
             }
+
+            //两个都没找到,说明在jar包里边
+            if (ObjectUtil.isEmpty(findFiles))
+            {
+                findFiles.addAll(FileUtil.getPatternFiles(null, fileName));
+            }
+
             return results;
         }
 

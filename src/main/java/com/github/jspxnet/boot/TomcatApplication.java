@@ -67,8 +67,9 @@ public class TomcatApplication {
             log.debug("tomcat param:{}",args[0]);
             jspxConfiguration.setDefaultPath(args[0]);
         }
-        Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile(jspxConfiguration.getDefaultPath() + "/" + Environment.jspx_properties_file));
         String defaultPath = jspxConfiguration.getDefaultPath();
+        Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile((defaultPath==null?"":defaultPath) + "/" + Environment.jspx_properties_file));
+
         log.debug("defaultPath:{}",defaultPath);
 
         if (TomcatApplication.jspxNetBootApplication!=null)
@@ -202,31 +203,7 @@ public class TomcatApplication {
 
         StandardContext tmpContext = (StandardContext)standardContext;
 
-/*
 
-        File tempFile = EnvFactory.getFile("/resources/tomcat/web.xml");
-        if (!FileUtil.isFileExist(tempFile))
-        {
-            InputStream inputStream = JarDefaultConfig.class.getResourceAsStream("/resources/tomcat/web.xml");
-            if (inputStream!=null)
-            {
-                File tempCheckFile = new File(System.getProperty("java.io.tmpdir"),System.currentTimeMillis()+".xml");
-                if (StreamUtil.copy(inputStream,new FileOutputStream(tempCheckFile),1024)&&tempCheckFile.length()>2)
-                {
-                    tempFile = tempCheckFile;
-                }
-            }
-        }
-        if (!FileUtil.isFileExist(tempFile))
-        {
-            tempFile = new File(defaultPath,"/resources/tomcat/web.xml");
-        }
-        if (tempFile!=null&&tempFile.isFile()&&tempFile.length()>2)
-        {
-
-            tmpContext.setDefaultContextXml(tempFile.getAbsolutePath());
-        }
-*/
         tmpContext.setWorkDir(webPath);
         File webFile = new File(file,"WEB-INF/web.xml");
         if (webFile.exists()&&webFile.isFile())

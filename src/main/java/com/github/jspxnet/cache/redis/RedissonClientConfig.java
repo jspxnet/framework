@@ -1,6 +1,7 @@
 package com.github.jspxnet.cache.redis;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
@@ -50,19 +51,11 @@ public class RedissonClientConfig {
         }
         if (file!=null&&config.toLowerCase().endsWith(".json"))
         {
-            if (config.startsWith("http")) {
-                redisConfig = Config.fromJSON(new URL(config));
-            } else {
-                redisConfig = Config.fromJSON(file);
-            }
+            redisConfig = Config.fromJSON(IoUtil.autoReadText(file));
         } else
         if (file!=null&&config.toLowerCase().endsWith(".yml"))
         {
-            if (config.startsWith("http")) {
-                redisConfig = Config.fromYAML(new URL(config));
-            } else {
-                redisConfig = Config.fromYAML(file);
-            }
+            redisConfig = Config.fromYAML(IoUtil.autoReadText(file));
         }
         else
         if (StringUtil.isJsonObject(config)) {

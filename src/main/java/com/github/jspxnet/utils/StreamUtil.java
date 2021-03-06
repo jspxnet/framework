@@ -9,6 +9,9 @@
  */
 package com.github.jspxnet.utils;
 
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.io.StringOutputStream;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,4 +119,20 @@ public class StreamUtil {
         return data;
     }
 
+    /**
+     *
+     * @param in 读取流
+     * @return 读取字符串
+     * @throws IOException 异常
+     */
+    public static String readStreamText(InputStream in) throws IOException
+    {
+        return readStreamText(in, Environment.defaultEncode);
+    }
+
+    public static String readStreamText(InputStream in,String encode) throws IOException {
+        StringOutputStream out = new StringOutputStream();
+        copy(in,out,1024);
+        return out.toString(encode);
+    }
 }

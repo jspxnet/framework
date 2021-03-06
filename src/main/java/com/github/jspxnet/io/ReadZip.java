@@ -9,9 +9,9 @@
  */
 package com.github.jspxnet.io;
 
-/**
+/*
  * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
+ * author chenYuan (mail:39793751@qq.com)
  * date: 2004-4-1
  * Time: 20:53:41
  */

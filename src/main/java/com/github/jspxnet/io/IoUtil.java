@@ -37,7 +37,7 @@ public class IoUtil {
      * @throws IOException 异常
      */
     public static String autoReadText(File file) throws IOException {
-        return autoReadText( file.getAbsolutePath(), Environment.defaultEncode);
+        return autoReadText( file.getPath(), Environment.defaultEncode);
     }
 
     /**

@@ -18,6 +18,7 @@ import com.github.jspxnet.scriptmark.core.block.template.*;
 import com.github.jspxnet.scriptmark.core.dispose.*;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -130,7 +131,8 @@ public class TemplateConfigurable implements Configurable, Cloneable {
 
     @Override
     public void setSearchPath(String[] searchPath) {
-        this.searchPath = searchPath;
+
+        this.searchPath = ArrayUtil.remove(ArrayUtil.remove(searchPath,StringUtil.empty),null);
     }
 
     @Override
@@ -140,6 +142,10 @@ public class TemplateConfigurable implements Configurable, Cloneable {
 
     @Override
     public void addAutoIncludes(String file) {
+        if (StringUtil.isNull(file))
+        {
+            return;
+        }
         if (!ArrayUtil.inArray(autoIncludes, file, true)) {
             autoIncludes = ArrayUtil.add(autoIncludes, file);
         }

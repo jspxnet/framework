@@ -17,6 +17,7 @@ package com.github.jspxnet.utils;
  * 文件处理单元
  */
 
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.file.MultiFile;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
@@ -29,11 +30,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.*;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +50,8 @@ import java.util.regex.Pattern;
 @Slf4j
 public class FileUtil {
     static final private String[] zipFiles = new String[]{".zip!", ".jar!", ".apk!", ".war!", ".jzb!"};
+
+    static final private String[] zipEx = new String[]{"zip", "jar", "apk", "war", "jzb"};
     //路径通配符
     static final private String[] pathMarks = {"#", "*", "?"};
     //缩图文件名称
@@ -83,7 +86,7 @@ public class FileUtil {
         }
     }
 
-    public static boolean isZipFile(String file) {
+    public static boolean isZipPackageFile(String file) {
         if (file == null) {
             return false;
         }
@@ -870,7 +873,7 @@ public class FileUtil {
         if (fileName == null) {
             return false;
         }
-        return isFileExist(fileName.getAbsolutePath());
+        return isFileExist(fileName.getPath());
     }
 
     /**
@@ -922,13 +925,23 @@ public class FileUtil {
         fileName = mendFile(fileName);
         i = fileName.indexOf(fileEx);
         String jarFileName = fileName.substring(0, i + 4);
-        String entryName = fileName.substring(jarFileName.length() + 2);
+        String entryName = StringUtil.substringAfterLast(fileName,fileEx);
+
         File file = new File(jarFileName);
         if (!file.isFile()) {
             return false;
         }
 
-        JarFile jarFile = null;
+        Path apkFile = Paths.get(jarFileName);
+        try {
+            FileSystem fs = FileSystems.newFileSystem(apkFile, null);
+            Path dexFile = fs.getPath(entryName);
+            return Files.exists(dexFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+       /* JarFile jarFile = null;
         try {
             jarFile = new JarFile(jarFileName);
             Enumeration<JarEntry> fileEnum = jarFile.entries();
@@ -950,7 +963,7 @@ public class FileUtil {
                     e.printStackTrace();
                 }
             }
-        }
+        }*/
         return false;
     }
 
@@ -1199,26 +1212,6 @@ public class FileUtil {
         }
         return null;
     }
-
-
-    /**
-     * @param isr 读取流
-     * @return 读取字符串
-     */
-    static public String readInputStream(InputStream isr) {
-        StringBuilder result = new StringBuilder();
-        try {
-            int ch;
-            while ((ch = isr.read()) > -1) {
-                result.append((char) ch);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result.toString();
-
-    }
-
 
     /**
      * 把byte数组写出到文件
@@ -1715,7 +1708,7 @@ public class FileUtil {
         for (File f : files) {
             String fileName = f.getAbsolutePath();
             String tempName;
-            if (isZipFile(fileName)) {
+            if (isZipPackageFile(fileName)) {
                 tempName = StringUtil.substringBetween(fileName, "!", ".class");
                 if (tempName != null && (tempName.startsWith("/") || tempName.startsWith("\\"))) {
                     tempName = tempName.substring(1);
@@ -1766,16 +1759,31 @@ public class FileUtil {
         s = s.replace("?", "#");
         s = s.replaceAll("#", ".?");
         s = "^" + s + "$";
+        Pattern p = Pattern.compile(s);
         if (dir==null)
         {
-            return null;
+            List<File> result = new ArrayList<>();
+            List<File> jarList = ClassUtil.getRunJarList();
+            for (File searchFile:jarList)
+            {
+                if (searchFile.getPath().contains("/j2sdk"))
+                {
+                    continue;
+                }
+                List<File> searchList = filePattern(new File(searchFile.getPath()), null, p);
+                if (!ObjectUtil.isEmpty(searchList))
+                {
+                    result.addAll(searchList);
+                }
+            }
+            return result;
         }
-        Pattern p = Pattern.compile(s);
+
         return filePattern(new File(dir), dir, p);
     }
 
     /**
-     * @param file 起始文件夹
+     * @param file 起始文件夹 或者jar文件
      * @param dir  在那个路径里边查询
      * @param p    Pattern 匹配类型
      * @return 列表路径过滤
@@ -1785,40 +1793,18 @@ public class FileUtil {
             return null;
         }
 
-        if (isZipFile(file.getPath())) {
-            String jarFileName = null;
-            String fileType = FileUtil.getTypePart(file).toLowerCase();
-            if (fileType.contains(".jar!")) {
-                jarFileName = fileType.substring(0, fileType.indexOf(".jar!") + 4);
-            }
-            if (fileType.contains(".zip!")) {
-                jarFileName = fileType.substring(0, fileType.indexOf(".zip!") + 4);
-            }
-            if (fileType.contains(".war!")) {
-                jarFileName = fileType.substring(0, fileType.indexOf(".war!") + 4);
-            }
-            if (fileType.contains(".jzb!")) {
-                jarFileName = fileType.substring(0, fileType.indexOf(".jzb!") + 4);
-            }
-            if (jarFileName == null) {
-                return new ArrayList<File>();
-            }
-            try (JarInputStream zis = new JarInputStream(new FileInputStream(jarFileName))) {
+        if (FileUtil.getTypePart(file).toLowerCase().equals("jar")) {
+            try (JarInputStream zis = new JarInputStream(new FileInputStream(file.getPath()))) {
 
-                List<File> list = new ArrayList<File>();
+                List<File> list = new ArrayList<>();
                 JarEntry e;
                 while ((e = zis.getNextJarEntry()) != null) {
                     if (e.isDirectory() || "..\\".equals(e.getName()) || "../".equals(e.getName())) {
                         continue;
                     }
-                    String fileDir = FileUtil.getPathPart(e.getName());
-                    String findDir = StringUtil.substringAfter(dir, "!/");
-                    if (!fileDir.contains(findDir)) {
-                        continue;
-                    }
                     Matcher fMatcher = p.matcher(FileUtil.getFileName(e.getName()));
                     if (fMatcher.matches()) {
-                        list.add(new File(jarFileName + "!/" + e.getName()));
+                        list.add(new File(file.getPath() + "!/" + e.getName()));
                     }
                 }
                 zis.closeEntry();
@@ -2264,7 +2250,6 @@ public class FileUtil {
         return fileSizeString;
     }
 
-
     final static public String KEY_classPath = "classpath:";
     final static public String KEY_classPathEx = "classpath*:";
     final static public String KEY_libraryPath = "java.library.path:";
@@ -2280,6 +2265,7 @@ public class FileUtil {
      * @return 得到文件，如果为空，表示没有找到文件
      */
     static public File scanFile(String[] paths, String loadFile) {
+
         //找文件路径 begin
         if (loadFile.toLowerCase().startsWith(KEY_classPath)) {
             String tempPath = loadFile.substring(KEY_classPath.length());
@@ -2289,11 +2275,12 @@ public class FileUtil {
             }
             if (url != null) {
                 File file = new File(url.getPath());
-                if (file.isFile()) {
+                if (FileUtil.isFileExist(file)) {
                     return file;
                 }
             }
-        } else if (loadFile.toLowerCase().startsWith(KEY_classPathEx)) {
+        }
+        else if (loadFile.toLowerCase().startsWith(KEY_classPathEx)) {
             String find = loadFile.substring(KEY_classPathEx.length());
             URL url = Thread.currentThread().getContextClassLoader().getResource("");
             if (url == null) {
@@ -2315,7 +2302,7 @@ public class FileUtil {
             String[] findDirs = StringUtil.split(System.getProperty(KEY_libraryPath), StringUtil.SEMICOLON);
             for (String path : findDirs) {
                 File file = new File(path, findFile);
-                if (file.isFile()) {
+                if (FileUtil.isFileExist(file)) {
                     return file;
                 }
 
@@ -2330,16 +2317,46 @@ public class FileUtil {
         if (loadFile.toLowerCase().startsWith(KEY_defaultPath)) {
             loadFile = loadFile.substring(KEY_defaultPath.length());
         }
-        for (String path : paths) {
-            File file = new File(path, loadFile);
-            if (file.isFile()) {
-                return file;
-            }
-            List<File> files = FileUtil.getPatternFiles(path, loadFile);
-            if (!ObjectUtil.isEmpty(files)) {
-                return files.get(0);
+        if (paths!=null && !loadFile.toLowerCase().contains(".jar!"))
+        {
+            for (String path : paths) {
+                if (StringUtil.isNull(path))
+                {
+                    continue;
+                }
+                File file = new File(path, loadFile);
+                if (file.isFile()) {
+                    return file;
+                }
+                List<File> files = FileUtil.getPatternFiles(path, loadFile);
+                if (!ObjectUtil.isEmpty(files)) {
+                    return files.get(0);
+                }
             }
         }
+
+        URL url =  Environment.class.getResource("/resources/" + loadFile);
+        if (url!=null)
+        {
+            return new File(url.getPath());
+        }
+
+        url =  Environment.class.getResource("/resources/template/" + loadFile);
+        if (url!=null)
+        {
+            return new File(url.getPath());
+        }
+        url =  Environment.class.getResource("/resources/reslib/" + loadFile);
+        if (url!=null)
+        {
+            return new File(url.getPath());
+        }
+        url =  Environment.class.getResource(loadFile);
+        if (url!=null)
+        {
+            return new File(url.getPath());
+        }
+
         return null;
     }
 

@@ -112,6 +112,11 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
      */
     @Override
     public void createPathEnv(String defaultPath)  {
+        if (defaultPath==null)
+        {
+            log.error("系统不能找{},文件所在路径,将不能正常运行:",Environment.config_file );
+            defaultPath = System.getProperty("user.dir");
+        }
         VALUE_MAP.put(Environment.defaultPath, defaultPath);
         VALUE_MAP.put(Environment.ConfigFile, defaultPath + Environment.config_file);
         String logPath = System.getProperty("java.io.tmpdir");
@@ -399,6 +404,11 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
      */
     @Override
     public Properties readDefaultProperties(String fileName) {
+        Properties p = new Properties();
+        if (!FileUtil.isFileExist(fileName))
+        {
+            return p;
+        }
         try {
             String cont = IoUtil.autoReadText(fileName);
             XOREncrypt encrypt = new XOREncrypt();
@@ -406,15 +416,13 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (encrypt.isEncrypt(cont)) {
                 cont = encrypt.getDecode(cont);
             }
-            Properties p = new Properties();
             p.load(new StringReader(cont));
-            return p;
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
             e.printStackTrace();
         }
         //创建配置 begin
-        return null;
+        return p;
     }
 
     @Override
