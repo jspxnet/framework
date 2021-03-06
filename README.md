@@ -11,7 +11,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.35</version>
+    <version>6.36</version>
 </dependency>
 ```
     
