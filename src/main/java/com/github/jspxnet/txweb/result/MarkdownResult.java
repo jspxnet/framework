@@ -10,7 +10,9 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.sign.HttpStatusType;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.scriptmark.load.Source;
+import com.github.jspxnet.scriptmark.load.StringSource;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -90,11 +92,11 @@ public class MarkdownResult extends ResultSupport {
             f = new File(templatePath, markdownTemplate);
         }
 
-        if (f.isFile()) {
+        if (!f.isFile()) {
             f = EnvFactory.getFile(markdownTemplate);
         }
 
-        Source fileSource = new FileSource(f, markdownTemplate, Dispatcher.getEncode());
+        Source fileSource = new StringSource(IoUtil.autoReadText(f.getPath(), Dispatcher.getEncode()));
 
         //如果使用cache 就使用uri
         String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
@@ -140,7 +142,6 @@ public class MarkdownResult extends ResultSupport {
         } finally {
             valueMap.clear();
         }
-
         out.flush();
         out.close();
     }

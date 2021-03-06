@@ -115,7 +115,6 @@ public class ConfigureContext implements IocContext {
 
                     List<TagNode> beanLists = siocElement.getBeanElements();
                     for (TagNode aElement : beanLists) {
-
                         BeanElement beanElement = (BeanElement) aElement;
                         beanElements.put(beanElement.getId(), beanElement);
                     }
@@ -138,7 +137,6 @@ public class ConfigureContext implements IocContext {
 
             //扫描目录加载注释的IocBean
             for (String classPath : scanPackageList) {
-
                 sanIocBean(StringUtil.trim(classPath));
             }
 
@@ -299,14 +297,8 @@ public class ConfigureContext implements IocContext {
             if (file != null) {
                 fileNamePath = file.getPath();
             }
-
-            if (!FileUtil.isFileExist(fileNamePath)) {
-                file = new File(System.getProperty("user.dir"), fileName);
-                if (file.isFile()) {
-                    fileNamePath = file.getPath();
-                }
-            }
-            if (!FileUtil.isFileExist(fileNamePath)) {
+            if (file==null)
+            {
                 throw new IOException("jspx sioc no find fileName Path: " + fileNamePath + " \r\n 不能找到配置文件:" + fileNamePath);
             }
         }

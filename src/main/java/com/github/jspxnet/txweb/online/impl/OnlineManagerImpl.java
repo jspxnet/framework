@@ -139,10 +139,10 @@ public class OnlineManagerImpl implements OnlineManager {
         String sign = encrypt.sign(strM,EnvFactory.getHashAlgorithmKey());
         boolean verify = encrypt.verify(strM,EnvFactory.getHashAlgorithmKey(),sign);
         String str = encrypt.getDecode(strM);
-        System.out.println(encrypt.getClass().getName()+"-------------sign="+ sign);
+      /*  System.out.println(encrypt.getClass().getName()+"-------------sign="+ sign);
         System.out.println("-------------verify="+ verify);
         System.out.println("-------------strM="+ strM);
-        System.out.println("-------------str="+ str);
+        System.out.println("-------------str="+ str);*/
     }
 
     @Override

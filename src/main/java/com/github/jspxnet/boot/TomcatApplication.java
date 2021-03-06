@@ -15,6 +15,7 @@ import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.webresources.FileResourceSet;
 import org.apache.jasper.servlet.JspServlet;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
@@ -141,7 +142,6 @@ public class TomcatApplication {
         standardContext.addLifecycleListener(new Tomcat.FixContextListener());
        // host.addChild(standardContext);
 
-
         TOMCAT.addServlet("", "jspxServlet", new ServletDispatcher());
         standardContext.addServletMappingDecoded("*.jhtml", "jspxServlet");
         standardContext.addServletMappingDecoded("*.jwc", "jspxServlet");
@@ -159,6 +159,7 @@ public class TomcatApplication {
         scanFilter.setDefaultTldScan(false);
         scanner.setJarScanFilter(scanFilter);
         standardContext.setJarScanner(scanner);
+        standardContext.setAddWebinfClassesResources(true);
 
         if (openRedis&&!StringUtil.isNull(redisConfig))
         {
