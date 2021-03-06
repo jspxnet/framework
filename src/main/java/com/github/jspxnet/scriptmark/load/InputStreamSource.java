@@ -19,7 +19,7 @@ import java.io.InputStream;
  * Time: 11:37:12
  */
 public class InputStreamSource extends AbstractSource {
-    private InputStream inputStream;
+    final private InputStream inputStream;
 
     public InputStreamSource(InputStream inputStream, String name, String encoding) {
         super(name, encoding);

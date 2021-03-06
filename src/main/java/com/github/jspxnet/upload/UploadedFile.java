@@ -211,7 +211,7 @@ public class UploadedFile implements Serializable {
             if (chunk == 0) {
                 File crcFile = new File(newDir, crcFileName);
                 AbstractWrite write = new WriteFile();
-                write.setFile(crcFile.getAbsolutePath());
+                write.setFile(crcFile.getPath());
                 StringMap<String,String> valueMap = new StringMap<>();
                 valueMap.setKeySplit(StringUtil.EQUAL);
                 valueMap.setLineSplit(StringUtil.CRLF);
@@ -244,7 +244,7 @@ public class UploadedFile implements Serializable {
         if (chunks <= 0) {
             File crcFile = new File(newDir, crcFileName);
             AbstractRead read = new AutoReadTextFile();
-            read.setFile(crcFile.getAbsolutePath());
+            read.setFile(crcFile.getPath());
             StringMap<String, String> valueMap = new StringMap<>();
             valueMap.setKeySplit(StringUtil.EQUAL);
             valueMap.setLineSplit(StringUtil.CRLF);
@@ -316,7 +316,7 @@ public class UploadedFile implements Serializable {
         if (chunks <= 0) {
             File crcFile = new File(newDir, crcFileName);
             AbstractRead read = new AutoReadTextFile();
-            read.setFile(crcFile.getAbsolutePath());
+            read.setFile(crcFile.getPath());
 
             StringMap<String, String> valueMap = new StringMap<String, String>();
             valueMap.setKeySplit(StringUtil.EQUAL);

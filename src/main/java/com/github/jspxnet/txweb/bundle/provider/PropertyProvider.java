@@ -79,7 +79,7 @@ public class PropertyProvider extends BundleProvider {
         }
         cache.put(bundletable.getIdx(), bundletable.getContext());
         try {
-            save(file.getAbsolutePath());
+            save(file.getPath());
         } catch (Exception e) {
             log.error(bundletable.getContext(), e);
             return false;
@@ -209,7 +209,7 @@ public class PropertyProvider extends BundleProvider {
     @Override
     public boolean remove(String key) {
         cache.remove(key);
-        save(file.getAbsolutePath());
+        save(file.getPath());
         return true;
     }
 

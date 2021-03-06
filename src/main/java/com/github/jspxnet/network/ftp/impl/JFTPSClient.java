@@ -85,7 +85,7 @@ Explicit和Implicit, 即显示传输和隐式传输。
     public void setCertificate(String certFile, String keyPassword) throws Exception {
         File file = new File(certFile);
         if (!file.exists()) {
-            throw new FileNotFoundException(file.getAbsolutePath());
+            throw new FileNotFoundException(file.getPath());
         }
 
 

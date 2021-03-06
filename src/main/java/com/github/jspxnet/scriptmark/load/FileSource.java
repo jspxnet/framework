@@ -33,10 +33,6 @@ public class FileSource extends AbstractSource {
 
     @Override
     protected InputStream getInputStream() throws FileNotFoundException {
-
-        if (!file.isFile()) {
-            new FileNotFoundException(file.getAbsolutePath());
-        }
         return new FileInputStream(file);
     }
 

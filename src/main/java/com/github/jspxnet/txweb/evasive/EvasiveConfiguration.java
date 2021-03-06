@@ -181,10 +181,10 @@ public class EvasiveConfiguration implements Configuration {
             }
 
             // File readFile = new File(defaultFile);
-            if (ArrayUtil.inArray(includeFiles, readFile.getAbsolutePath(), true)) {
+            if (ArrayUtil.inArray(includeFiles, readFile.getPath(), true)) {
                 continue;
             }
-            includeFiles = ArrayUtil.add(includeFiles, readFile.getAbsolutePath());
+            includeFiles = ArrayUtil.add(includeFiles, readFile.getPath());
 
             AbstractRead ar = new AutoReadTextFile();
             ar.setFile(readFile);

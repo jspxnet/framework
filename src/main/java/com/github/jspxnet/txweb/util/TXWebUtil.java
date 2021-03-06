@@ -23,6 +23,7 @@ import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.scriptmark.core.ScriptMarkEngine;
 import com.github.jspxnet.scriptmark.load.AbstractSource;
 import com.github.jspxnet.scriptmark.load.FileSource;
+import com.github.jspxnet.scriptmark.load.InputStreamSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sober.SoberSupport;
@@ -49,6 +50,7 @@ import org.redisson.api.RedissonClient;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.lang.reflect.*;
@@ -1148,8 +1150,24 @@ public class TXWebUtil {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         TemplateConfigurable configurable = new TemplateConfigurable();
         configurable.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
+        AbstractSource fileSource = null;
         File f = new File(envTemplate.getString(Environment.templatePath), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
-        AbstractSource fileSource = new FileSource(f, envTemplate.getString(Environment.templatePath), envTemplate.getString(Environment.encode, Environment.defaultEncode));
+        if (!f.isFile())
+        {
+            InputStream inputStream = TXWebUtil.class.getResourceAsStream("/resources/template/"+envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+            if (inputStream!=null)
+            {
+                fileSource = new InputStreamSource(inputStream,envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"), envTemplate.getString(Environment.encode, Environment.defaultEncode));
+            }
+        } else
+        {
+            fileSource = new FileSource(f, envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"), envTemplate.getString(Environment.encode, Environment.defaultEncode));
+        }
+        if (fileSource==null)
+        {
+            TXWebUtil.print("error template page not found,错误信息显示模版没有配置", WebOutEnumType.HTML.getValue(), response);
+            return;
+        }
         configurable.setSearchPath(new String[]{envTemplate.getString(Environment.templatePath), Dispatcher.getRealPath()});
         ScriptMark scriptMark;
         try {

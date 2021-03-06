@@ -39,9 +39,8 @@ import org.mozilla.javascript.*;
 
 
 public class TemplateScriptEngine implements ScriptRunner {
-    final private static EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
 
-    private Context context;
+    final private Context context;
     private Scriptable scope;
 
     /**
@@ -54,7 +53,7 @@ public class TemplateScriptEngine implements ScriptRunner {
         scope = context.newObject(sharedScope);
         scope.setPrototype(sharedScope);
         scope.setParentScope(null);
-        if (environmentTemplate.getBoolean(Environment.logJspxDebug)) {
+        if (EnvFactory.getEnvironmentTemplate().getBoolean(Environment.logJspxDebug)) {
             scope.put("console", scope, java.lang.System.out);
         }
     }

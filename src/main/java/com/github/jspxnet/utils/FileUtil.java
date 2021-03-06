@@ -518,7 +518,7 @@ public class FileUtil {
      */
     static public String getAbsolutePath(String fileName) {
         File file = new File(fileName);
-        return file.getAbsolutePath();
+        return file.getPath();
     }
 
     /**
@@ -1790,7 +1790,7 @@ public class FileUtil {
      */
     public static List<File> filePattern(File file, String dir, Pattern p) {
         if (file == null) {
-            return null;
+            return new ArrayList<>(0);
         }
 
         if (FileUtil.getTypePart(file).toLowerCase().equals("jar")) {
@@ -1814,7 +1814,7 @@ public class FileUtil {
             }
         } else {
             if (file.isFile()) {
-                String fileDir = FileUtil.getPathPart(file.getAbsolutePath());
+                String fileDir = FileUtil.getPathPart(file.getPath());
                 String findDir = FileUtil.mendPath(StringUtil.substringBeforeLast(dir, "/"));
                 findDir = FileUtil.getDecrease(fileDir, findDir);
                 String checkName = findDir + FileUtil.getFileName(file.getName());
@@ -1840,7 +1840,7 @@ public class FileUtil {
             }
 
         }
-        return new ArrayList(0);
+        return new ArrayList<>(0);
     }
 
     /**
@@ -2020,7 +2020,7 @@ public class FileUtil {
             if (t < 0 && aFile.isFile() && aFile.canWrite()) {
                 if (DateUtil.compareDay(new Date(aFile.lastModified())) > day) {
                     if (ArrayUtil.inArray(fileType, getTypePart(aFile.getName()), true)) {
-                        sb.append(aFile.getAbsolutePath()).append(StringUtil.CRLF);
+                        sb.append(aFile.getPath()).append(StringUtil.CRLF);
                         if (!aFile.delete()) {
                             aFile.deleteOnExit();
                         }
@@ -2178,7 +2178,7 @@ public class FileUtil {
             assert subfiles != null;
             for (File file : subfiles) {
                 if (file.isDirectory()) {
-                    getFileList(file.getAbsolutePath(), files);
+                    getFileList(file.getPath(), files);
                 } else {
                     files.add(file);
                 }

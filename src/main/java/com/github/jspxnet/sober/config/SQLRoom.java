@@ -15,6 +15,7 @@ import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.sober.config.xml.*;
 import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -107,7 +108,7 @@ public class SQLRoom implements Serializable {
      */
     public void addInclude(String key,String value)
     {
-        includeMap.put(key,value);
+        includeMap.put(key,XMLUtil.xmlCdataDecrypt(value));
     }
     /**
      * 添加查询配置

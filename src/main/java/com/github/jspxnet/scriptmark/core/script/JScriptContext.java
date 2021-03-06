@@ -33,7 +33,7 @@ import org.mozilla.javascript.ScriptableObject;
  */
 @Slf4j
 public class JScriptContext implements SingletonContext {
-    final static private transient SingletonContext instance = new JScriptContext();
+    final static private transient SingletonContext INSTANCE = new JScriptContext();
     private ScriptableObject globalScope = null;
     private static boolean useDynamicScope = true;
 
@@ -51,7 +51,7 @@ public class JScriptContext implements SingletonContext {
     }
 
     public static SingletonContext getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     private JScriptContext() {

@@ -37,7 +37,6 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import javax.transaction.UserTransaction;
 import java.io.File;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -448,7 +447,8 @@ public class SoberMappingBean implements SoberFactory {
         if (strings != null) {
             String[] files = new String[0];
             for (String file : strings) {
-                if (file.contains(StringUtil.ASTERISK) || file.contains("?") || file.contains("#")) {
+                if (FileUtil.isPatternFileName(file))
+                {
                     List<File> findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), file);
                     if (ObjectUtil.isEmpty(findFiles)&&!StringUtil.isNull(envTemplate.getString(Environment.sqlXmlPath)))
                     {
@@ -463,13 +463,11 @@ public class SoberMappingBean implements SoberFactory {
                             }
                         }
                     }
+                    findFiles.addAll(FileUtil.getPatternFiles(null, file));
                     if (!ObjectUtil.isEmpty(findFiles))
                     {
                         for (File f : findFiles) {
-                            if (f.isFile())
-                            {
-                                files = ArrayUtil.add(files, f.getName());
-                            }
+                            files = ArrayUtil.add(files, f.getPath());
                         }
                     }
                 } else {
@@ -482,31 +480,32 @@ public class SoberMappingBean implements SoberFactory {
                 if (StringUtil.isNull(file)||fileList.contains(file)) {
                     continue;
                 }
-                String fileName = file;
-                URL url = ClassUtil.getResource(file);
-                if (url == null) {
-                    url = ClassUtil.getResource(defaultPath + file);
-                }
-                if (url == null) {
-                    url = ClassUtil.getResource("/resources/" + file);
-                }
-                if (url == null && (file.startsWith("http") || file.startsWith("file") || file.startsWith("ftp"))) {
-                    url = new URL(file);
-                }
-                if (url == null)
+                String fileName = null;
+                if (FileUtil.isFileExist(file))
                 {
-                    if (FileUtil.isFileExist(file)) {
-                        fileName = file;
-                    } else if (FileUtil.isFileExist(defaultPath + file)) {
-                        fileName = defaultPath + file;
-                    }
-                } else {
-                    fileName = url.getPath();
+                    fileName = file;
                 }
-                if (!FileUtil.isFileExist(fileName)) {
+
+                if (fileName==null) {
+                    String checkFile = new File(defaultPath,file).getPath();
+                    if (FileUtil.isFileExist(checkFile))
+                    {
+                        fileName = checkFile;
+                    }
+                }
+                if (fileName==null) {
+                    File f = EnvFactory.getFile(file);
+                    if (f!=null)
+                    {
+                        fileName = f.getPath();
+                    }
+                }
+
+                if (fileName==null) {
                     log.error("not find file :{}", file);
                     continue;
                 }
+
                 fileList.add(fileName);
                 String xmlString = IoUtil.autoReadText(fileName,envTemplate.getString(Environment.encode, Environment.defaultEncode));
                 xmlString = StringUtil.trim(xmlString);

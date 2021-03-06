@@ -593,7 +593,7 @@ public class ZipFile {
      * @return 压缩包的全文件名
      */
     public String getFullName() {
-        return selfFile.getAbsolutePath();
+        return selfFile.getPath();
     }
 
     /**

@@ -79,7 +79,7 @@ public class XMLBundleProvider extends BundleProvider {
         cache.put(bundletable.getIdx(), bundletable.getContext());
         try {
             AbstractWrite aw = new WriteFile();
-            aw.setFile(file.getAbsolutePath());
+            aw.setFile(file.getPath());
             aw.setEncode(encode);
             aw.setContent(toXml(), false);
         } catch (Exception e) {

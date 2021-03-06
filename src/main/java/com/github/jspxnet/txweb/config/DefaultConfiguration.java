@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.config;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
@@ -17,9 +18,6 @@ import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.AutoReadTextFile;
-
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.*;
@@ -153,37 +151,26 @@ public class DefaultConfiguration implements Configuration {
                 continue;
             }
 
-            String defaultFile;
+            File readFile = null;
             if (FileUtil.isFileExist(includeFile)) {
-                defaultFile = includeFile;
-            } else {
-                defaultFile = FileUtil.mendFile(defaultPath + includeFile);
+                readFile = new File(includeFile);
             }
 
-            if (!FileUtil.isFileExist(defaultFile)) {
-                URL url = Thread.currentThread().getContextClassLoader().getResource(includeFile);
-                if (url != null) {
-                    defaultFile = url.getPath();
+            if (readFile==null) {
+                readFile = new File(defaultPath ,includeFile);
+                if (!FileUtil.isFileExist(readFile)) {
+                    readFile = null;
                 }
             }
-            if (!FileUtil.isFileExist(defaultFile)) {
-                URL url = Environment.class.getResource("/resources/" + fileName);
-                if (url != null) {
-                    defaultFile = url.getPath();
-                }
+            if (readFile==null) {
+                readFile = EnvFactory.getFile(includeFile);
             }
-            if (!FileUtil.isFileExist(defaultFile)) {
-                URL url = Environment.class.getResource(includeFile);
-                if (url != null) {
-                    defaultFile = url.getPath();
-                }
-            }
-            if (!FileUtil.isFileExist(defaultFile)) {
-                continue;
+            if (readFile==null) {
+                log.error("txweb not found file:{}",includeFile);
+                throw new FileNotFoundException(includeFile);
             }
 
-            File readFile = new File(defaultFile);
-            String path = readFile.getAbsolutePath();
+            String path = readFile.getPath();
             if (includeFiles.contains(path))
             {
                 continue;
@@ -193,10 +180,7 @@ public class DefaultConfiguration implements Configuration {
                 log.debug("TXWeb load config file:" + includeFile);
             }
 
-            AbstractRead ar = new AutoReadTextFile();
-            ar.setEncode(envTemplate.getString(Environment.encode, Environment.defaultEncode));
-            ar.setFile(readFile);
-            String configString = ar.getContent();
+            String configString = IoUtil.autoReadText(path,envTemplate.getString(Environment.encode, Environment.defaultEncode));
 
             XmlEngine xmlEngine = new XmlEngineImpl();
             xmlEngine.putTag(LoadElement.tagName, LoadElement.class.getName());
@@ -214,22 +198,13 @@ public class DefaultConfiguration implements Configuration {
                 if (StringUtil.isNull(encode)) {
                     encode = Environment.defaultEncode;
                 }
-
                 File file = EnvFactory.getFile(loadFile);
                 if (file==null) {
                     log.error("ioc not found file:" + loadFile);
                     throw new FileNotFoundException(loadFile);
                 }
 
-                if (!file.exists()) {
-                    log.error("ioc not found file:" + loadFile);
-                    throw new FileNotFoundException(loadFile);
-                }
-
-                AbstractRead read = new AutoReadTextFile();
-                read.setEncode(encode);
-                read.setFile(file);
-                String readCont = read.getContent();
+                String readCont = IoUtil.autoReadText(file.getPath(),encode);
                 int headPost = StringUtil.indexIgnoreCaseOf(readCont, "<?xml");
                 if (headPost != -1) {
                     readCont = StringUtil.substringAfter(readCont, ">");
@@ -245,21 +220,31 @@ public class DefaultConfiguration implements Configuration {
                 String[] includeFixedFiles = null;
                 String[] iFiles = readConfig.getInclude();
                 if (iFiles != null) {
-                    for (String mif : iFiles) {
-                        if (FileUtil.isPatternFileName(mif)) {
-                            List<File> fileName = FileUtil.getPatternFiles(defaultPath, mif);
-                            if (!ObjectUtil.isEmpty(fileName))
+                    for (String findName : iFiles) {
+                        if (FileUtil.isPatternFileName(findName)) {
+                            List<File> fileList = FileUtil.getPatternFiles(defaultPath, findName);
+                            //都没找到,说明在jar包里边
+                            if (fileList==null||fileList.isEmpty())
                             {
-                                for (File f : fileName) {
-                                    includeFixedFiles = ArrayUtil.add(includeFixedFiles, f.getName());
+
+                                fileList.addAll(FileUtil.getPatternFiles(null, findName));
+                            }
+                            if (fileList!=null)
+                            {
+                                for (File f : fileList) {
+                                    includeFixedFiles = ArrayUtil.add(includeFixedFiles, f.getPath());
                                 }
                             }
-                        } else {
-                            includeFixedFiles = ArrayUtil.add(includeFixedFiles, mif);
+                        }
+                       else {
+                            includeFixedFiles = ArrayUtil.add(includeFixedFiles, findName);
                         }
                     }
                 }
-                readIncludeFile(defaultPath, includeFixedFiles, actionConfigMap);
+                if (includeFixedFiles!=null)
+                {
+                    readIncludeFile(defaultPath, includeFixedFiles, actionConfigMap);
+                }
 
                 List<ScanConfig> scanConfigs = readConfig.getScanConfigList();
                 if (!scanConfigs.isEmpty()) {

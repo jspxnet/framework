@@ -284,7 +284,7 @@ public class DownloadFileView extends ActionSupport {
                 }
                 out.close();
             } catch (Exception e) {
-                log.error(file.getAbsolutePath(), e);
+                log.error(file.getPath(), e);
                 out.flush();
                 out.close();
                 fin.close();
@@ -327,7 +327,7 @@ public class DownloadFileView extends ActionSupport {
             }
             out.flush();
         } catch (Exception e) {
-            log.error(file.getAbsolutePath(), e);
+            log.error(file.getPath(), e);
         }
     }
 }

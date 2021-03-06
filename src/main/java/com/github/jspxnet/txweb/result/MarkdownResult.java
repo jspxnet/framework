@@ -8,7 +8,9 @@
 
 package com.github.jspxnet.txweb.result;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.sign.HttpStatusType;
+import com.github.jspxnet.scriptmark.load.Source;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -87,7 +89,13 @@ public class MarkdownResult extends ResultSupport {
         if (!f.exists()) {
             f = new File(templatePath, markdownTemplate);
         }
-        FileSource fileSource = new FileSource(f, markdownTemplate, Dispatcher.getEncode());
+
+        if (f.isFile()) {
+            f = EnvFactory.getFile(markdownTemplate);
+        }
+
+        Source fileSource = new FileSource(f, markdownTemplate, Dispatcher.getEncode());
+
         //如果使用cache 就使用uri
         String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
         configurable.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), templatePath});
@@ -123,8 +131,8 @@ public class MarkdownResult extends ResultSupport {
             scriptMark.process(out, valueMap);
         } catch (Exception e) {
             if (DEBUG) {
-                log.info("TemplateResult file not found:" + mdFile.getAbsolutePath(), e);
-                TXWebUtil.errorPrint("TemplateResult file not found:" + mdFile.getAbsolutePath() + "\r\n" + StringUtil.toBrLine(e.getMessage()), null,response, HttpStatusType.HTTP_status_404);
+                log.info("TemplateResult file not found:" + mdFile.getPath(), e);
+                TXWebUtil.errorPrint("TemplateResult file not found:" + mdFile.getPath() + "\r\n" + StringUtil.toBrLine(e.getMessage()), null,response, HttpStatusType.HTTP_status_404);
             } else {
                 TXWebUtil.errorPrint("file not found,不存在的文件", null,response, HttpStatusType.HTTP_status_404);
                 return;

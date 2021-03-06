@@ -297,10 +297,10 @@ public class UEditorAdaptor extends ActionSupport {
         boolean thumbnail = getBoolean("thumbnail");
         int maxImageWidth = config.getInt(Environment.maxImageWidth, 1280);
 
-        State state = StorageManager.saveBinaryFile(data, file.getAbsolutePath());
+        State state = StorageManager.saveBinaryFile(data, file.getPath());
 
         //------------------------------------------------------hash算法 判断重复
-        String url = "/" + uploadFileDAO.getNamespace() + "/" + FileUtil.getDecrease(file.getAbsolutePath(), setupPath);
+        String url = "/" + uploadFileDAO.getNamespace() + "/" + FileUtil.getDecrease(file.getPath(), setupPath);
         url = FileUtil.mendFile(url);
 
         if (state.isSuccess()) {

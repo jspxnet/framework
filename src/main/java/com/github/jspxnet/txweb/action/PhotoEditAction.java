@@ -145,7 +145,7 @@ public class PhotoEditAction extends UploadFileView {
 
         boolean cutYes = ImageUtil.cut(new FileInputStream(history), new FileOutputStream(file), fileType, left, top, width, height);
         if (cutYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
-            setActionLogContent(file.getAbsolutePath());
+            setActionLogContent(file.getPath());
             json.put(SUCCESS, 1);
             json.put(ERROR, 0);
             json.put(Environment.infoType, Environment.promptInfo);
@@ -213,7 +213,7 @@ public class PhotoEditAction extends UploadFileView {
         boolean thumbnailYes = ImageUtil.thumbnail(new FileInputStream(history), new FileOutputStream(file), fileType, width, height);
         uploadFile.setLastDate(new Date());
         if (thumbnailYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
-            setActionLogContent(file.getAbsolutePath());
+            setActionLogContent(file.getPath());
             json.put(SUCCESS, 1);
             json.put(ERROR, 0);
             json.put(Environment.infoType, Environment.promptInfo);
@@ -286,7 +286,7 @@ public class PhotoEditAction extends UploadFileView {
         boolean rotateYes = ImageUtil.rotate(new FileInputStream(history), new FileOutputStream(file), fileType, degree);
         uploadFile.setLastDate(new Date());
         if (rotateYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
-            setActionLogContent(file.getAbsolutePath());
+            setActionLogContent(file.getPath());
             json.put(SUCCESS, 1);
             json.put(ERROR, 0);
             json.put(Environment.infoType, Environment.promptInfo);
@@ -345,7 +345,7 @@ public class PhotoEditAction extends UploadFileView {
         boolean grayYes = ImageUtil.gray(new FileInputStream(history), new FileOutputStream(file), fileType);
         uploadFile.setLastDate(new Date());
         if (grayYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
-            setActionLogContent(file.getAbsolutePath());
+            setActionLogContent(file.getPath());
             json.put(SUCCESS, 1);
             json.put(ERROR, 0);
             json.put(Environment.infoType, Environment.promptInfo);
@@ -406,7 +406,7 @@ public class PhotoEditAction extends UploadFileView {
         boolean grayYes = ImageUtil.filter(new FileInputStream(history), new FileOutputStream(file), fileType, 1.1f, 1.3f);
         uploadFile.setLastDate(new Date());
         if (grayYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
-            setActionLogContent(file.getAbsolutePath());
+            setActionLogContent(file.getPath());
             json.put(SUCCESS, 1);
             json.put(ERROR, 0);
             json.put(Environment.infoType, Environment.promptInfo);
@@ -466,7 +466,7 @@ public class PhotoEditAction extends UploadFileView {
         boolean grayYes = ImageUtil.filter(new FileInputStream(history), new FileOutputStream(file), fileType, 0.9f, 0.9f);
         uploadFile.setLastDate(new Date());
         if (grayYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
-            setActionLogContent(file.getAbsolutePath());
+            setActionLogContent(file.getPath());
             json.put(SUCCESS, 1);
             json.put(ERROR, 0);
             json.put(Environment.infoType, Environment.promptInfo);
@@ -540,7 +540,7 @@ public class PhotoEditAction extends UploadFileView {
         boolean scaleYes = ImageUtil.scale(new FileInputStream(history), new FileOutputStream(file), fileType, scaleValue);
         uploadFile.setLastDate(new Date());
         if (scaleYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
-            setActionLogContent(file.getAbsolutePath());
+            setActionLogContent(file.getPath());
             json.put(SUCCESS, 1);
             json.put(ERROR, 0);
             json.put(Environment.infoType, Environment.promptInfo);
@@ -599,7 +599,7 @@ public class PhotoEditAction extends UploadFileView {
         uploadFile.setHistory(list.toString());
         uploadFile.setLastDate(new Date());
         if (FileUtil.copy(history, file, true) && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
-            setActionLogContent(file.getAbsolutePath());
+            setActionLogContent(file.getPath());
             FileUtil.delete(history);
             json.put(Environment.SUCCESS, 1);
             json.put(Environment.infoType, Environment.promptInfo);
@@ -654,9 +654,9 @@ public class PhotoEditAction extends UploadFileView {
         uploadFile.setHash(FileUtil.getHash(file, UploadFileAction.hashType));
 
         if (uploadFileDAO.update(uploadFileObject, new String[]{"attributes", "fileSize", "hash", "history"}) > 0) {
-            setActionLogContent(file.getAbsolutePath());
+            setActionLogContent(file.getPath());
             //--------------------------------------
-            String thumbnailFileName = FileUtil.getThumbnailFileName(file.getAbsolutePath());
+            String thumbnailFileName = FileUtil.getThumbnailFileName(file.getPath());
             File thumbnailFile = new File(thumbnailFileName);
             if (thumbnailFile.isFile()) {
                 //如果有缩图，重新创建覆盖
@@ -668,7 +668,7 @@ public class PhotoEditAction extends UploadFileView {
                     json.put("thumbnail", 0);
                 }
             }
-            String mobileFileName = FileUtil.getMobileFileName(file.getAbsolutePath());
+            String mobileFileName = FileUtil.getMobileFileName(file.getPath());
             File mobileFile = new File(mobileFileName);
             if (mobileFile.isFile()) {
                 int mobileWidth = config.getInt("mobileWidth", 480);

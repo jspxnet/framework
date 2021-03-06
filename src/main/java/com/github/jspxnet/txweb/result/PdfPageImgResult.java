@@ -76,7 +76,7 @@ public class PdfPageImgResult extends ResultSupport {
             is.close();
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(file.getAbsolutePath(), e);
+            log.error(file.getPath(), e);
         } finally {
             if (outputStream != null) {
                 outputStream.flush();

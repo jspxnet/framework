@@ -128,7 +128,7 @@ public class MultiFile {
         if (files != null) {
             for (File fromFile : files) {
                 if (fromFile.isDirectory()) {
-                    if (copyDirectoryToOneDir(fromFile.getAbsolutePath(), outputDir)) {
+                    if (copyDirectoryToOneDir(fromFile.getPath(), outputDir)) {
                         deleteDirectory(fromFile, true);
                         result++;
                     }

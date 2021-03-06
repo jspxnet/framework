@@ -27,7 +27,7 @@ import java.util.HashMap;
  */
 
 public class ScriptMarkEngine implements ScriptMark {
-    private EnvRunner runner;
+    final private EnvRunner runner;
 
     public ScriptMarkEngine(String name, Source readSource, Configurable configurable) throws IOException {
         if (configurable == null) {
@@ -90,7 +90,7 @@ public class ScriptMarkEngine implements ScriptMark {
             putVarMap(scriptRunner, globalMap);
             //放入私有变量
             putVarMap(scriptRunner, map);
-            runner.Runner(out);
+            runner.run(out);
             //执行完成后不要情况模板
         } finally {
             scriptRunner.exit();

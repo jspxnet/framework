@@ -297,13 +297,13 @@ public class ConfigureContext implements IocContext {
 
             File file = EnvFactory.getFile(fileName);
             if (file != null) {
-                fileNamePath = file.getAbsolutePath();
+                fileNamePath = file.getPath();
             }
 
             if (!FileUtil.isFileExist(fileNamePath)) {
                 file = new File(System.getProperty("user.dir"), fileName);
                 if (file.isFile()) {
-                    fileNamePath = file.getAbsolutePath();
+                    fileNamePath = file.getPath();
                 }
             }
             if (!FileUtil.isFileExist(fileNamePath)) {
@@ -343,9 +343,8 @@ public class ConfigureContext implements IocContext {
             }
 
             File file = EnvFactory.getFile(loadFile);
-            System.out.println("-----file.getAbsolutePath()=" + file.getAbsolutePath());
-            System.out.println("-----file.getPath()=" + file.getPath());
-            if (!FileUtil.isFileExist(file)) {
+            if (file==null)
+            {
                 log.debug("ioc not found file:" + loadFile);
                 throw new Exception("ioc not found file:" + loadFile);
             }
@@ -376,24 +375,14 @@ public class ConfigureContext implements IocContext {
         if (FileUtil.isPatternPath(fileName)) {
             List<TagNode> results = new ArrayList<>();
             List<File> findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), fileName);
-            if (ObjectUtil.isEmpty(findFiles))
-            {
-                findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.templatePath), fileName);
-            }
+            findFiles.addAll(FileUtil.getPatternFiles(null, fileName));
 
             if (!ObjectUtil.isEmpty(findFiles))
             {
                 for (File f : findFiles) {
-                    results.addAll(getIocElementsForFile(f.getAbsolutePath()));
+                    results.addAll(getIocElementsForFile(f.getPath()));
                 }
             }
-
-            //两个都没找到,说明在jar包里边
-            if (ObjectUtil.isEmpty(findFiles))
-            {
-                findFiles.addAll(FileUtil.getPatternFiles(null, fileName));
-            }
-
             return results;
         }
 
@@ -410,7 +399,6 @@ public class ConfigureContext implements IocContext {
                 IncludeElement node = (IncludeElement) iNode;
                 includeFiles = ArrayUtil.add(includeFiles, node.getFile());
             }
-
             //得到要自动扫描的目录
             for (TagNode iNode : se.getScanElements()) {
                 ScanElement node = (ScanElement) iNode;

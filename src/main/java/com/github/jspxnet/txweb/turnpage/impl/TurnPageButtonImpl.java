@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -16,13 +16,13 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.
+ *
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2007-6-13
  * Time: 16:33:00
@@ -216,7 +216,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
     }
 
     @Override
-    public String getTurnPage()  {
+    public String getTurnPage() {
         long currentPage = getCurrentPage();
         long beginPage = currentPage - bound;
         if (beginPage <= 1) {
@@ -237,7 +237,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
         }
 
 
-        Map<String, Object> turnPageMap = new HashMap<String, Object>();
+        Map<String, Object> turnPageMap = new HashMap<>();
         turnPageMap.put("defaultCount", getDefaultCount());
         turnPageMap.put("count", getCount());
         turnPageMap.put("fristRow", getFristRow());
@@ -254,6 +254,9 @@ public class TurnPageButtonImpl implements TurnPageButton {
             EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
             String templatePath = envTemplate.getString(Environment.templatePath);
             file = new File(templatePath, fileName);
+        }
+        if (!file.isFile()) {
+            file = EnvFactory.getFile(fileName);
         }
         Placeholder placeholder = EnvFactory.getPlaceholder();
         placeholder.setRootDirectory(rootDirectory);

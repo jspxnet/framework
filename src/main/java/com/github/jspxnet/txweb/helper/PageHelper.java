@@ -86,15 +86,15 @@ public class PageHelper implements Helper, Serializable {
     private String getFileName() {
         File file = new File(path, configFile);
         if (file.isFile()) {
-            return file.getAbsolutePath();
+            return file.getPath();
         }
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
         file = new File(environmentTemplate.getString(Environment.defaultPath), configFile);
         if (file.isFile()) {
-            return file.getAbsolutePath();
+            return file.getPath();
         }
         file = new File(environmentTemplate.getString(Environment.defaultPath), FileUtil.getFileName(configFile));
-        return file.getAbsolutePath();
+        return file.getPath();
     }
 
     private HelpElement getConfig() throws Exception {

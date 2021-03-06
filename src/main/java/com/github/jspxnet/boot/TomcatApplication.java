@@ -208,8 +208,8 @@ public class TomcatApplication {
         File webFile = new File(file,"WEB-INF/web.xml");
         if (webFile.exists()&&webFile.isFile())
         {
-            tmpContext.setDefaultWebXml(webFile.getAbsolutePath());
-            log.debug("default web.xml:{}",webFile.getAbsolutePath());
+            tmpContext.setDefaultWebXml(webFile.getPath());
+            log.debug("default web.xml:{}",webFile.getPath());
         }
         tmpContext.setSkipMemoryLeakChecksOnJvmShutdown(true);
         //我们要把Servlet设置进去

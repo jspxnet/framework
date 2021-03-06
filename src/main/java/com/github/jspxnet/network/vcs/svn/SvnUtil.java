@@ -320,7 +320,7 @@ public class SvnUtil {
             revision = SVNRevision.HEAD;
         }
         File file = new File(localPath,".svn");
-        if (file.exists() || file.exists()&&file.getAbsolutePath().contains(".svn"))
+        if (file.exists() || file.exists()&&file.getPath().contains(".svn"))
         {
             //要把版本库的内容check out到的目录
             return SvnUtil.update(clientManager, localPath, revision, SVNDepth.INFINITY);

@@ -372,7 +372,7 @@ public final class EntryFactory implements BeanFactory {
             String cacheKey = propertySource.name();
             if (StringUtil.isNull(cacheKey)) {
                 if (loadFile != null) {
-                    cacheKey = loadFile.getAbsolutePath();
+                    cacheKey = loadFile.getPath();
                 }
             }
             if (cacheKey.length() > 32) {
@@ -385,7 +385,7 @@ public final class EntryFactory implements BeanFactory {
                 tempMap.setKeySplit(StringUtil.EQUAL);
                 tempMap.setLineSplit(StringUtil.CRLF);
                 if (loadFile != null) {
-                    tempMap.loadFile(loadFile.getAbsolutePath());
+                    tempMap.loadFile(loadFile.getPath());
                 }
                 valueMap = tempMap;
                 JSCacheManager.put(DefaultCache.class, cacheKey, valueMap);

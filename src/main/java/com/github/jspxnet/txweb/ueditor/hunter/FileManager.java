@@ -69,7 +69,7 @@ public class FileManager {
                     break;
                 }
                 fileState = new BaseState(true);
-                fileState.putInfo("url", FileUtil.mendFile("/" + FileUtil.getDecrease(setupPath, file.getAbsolutePath())));
+                fileState.putInfo("url", FileUtil.mendFile("/" + FileUtil.getDecrease(setupPath, file.getPath())));
                 fileState.putInfo("fileName", file.getName());
                 fileState.putInfo("title", FileUtil.getNamePart(file.getName()));
                 state.addState(fileState);

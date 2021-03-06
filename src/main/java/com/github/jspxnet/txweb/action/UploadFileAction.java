@@ -613,7 +613,7 @@ public class UploadFileAction extends MultipartSupport {
                 //兼容 plupload  begin
                 json.put("OK", 0);
                 json.put(Environment.message, "不能识别的图片格式");
-                log.info("未知不能识别的图片格式:" + file.getAbsolutePath());
+                log.info("未知不能识别的图片格式:" + file.getPath());
 
                 printErrorInfo("不能识别的图片格式");
                 return null;
@@ -658,7 +658,7 @@ public class UploadFileAction extends MultipartSupport {
                 thumbnailUploadFile.setSortDate(new Date());
                 thumbnailUploadFile.setCreateDate(new Date());
                 thumbnailUploadFile.setSysType(ImageSysEnumType.THUMBNAIL.getValue());
-                thumbnailUploadFile.setTempFilePath(thumbnailFile.getAbsolutePath());
+                thumbnailUploadFile.setTempFilePath(thumbnailFile.getPath());
                 thumbnailUploadFile.setOrganizeId(getOrganizeId());
                 result[1] = thumbnailUploadFile;
             }
@@ -691,7 +691,7 @@ public class UploadFileAction extends MultipartSupport {
                 mobileUploadFile.setCreateDate(new Date());
                 mobileUploadFile.setSysType(ImageSysEnumType.MOBILE.getValue());
                 mobileUploadFile.setOrganizeId(getOrganizeId());
-                mobileUploadFile.setTempFilePath(mobileFile.getAbsolutePath());
+                mobileUploadFile.setTempFilePath(mobileFile.getPath());
                 result[2] = mobileUploadFile;
             }
         }

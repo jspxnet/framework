@@ -11,9 +11,7 @@ package com.github.jspxnet.sober;
 
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.config.SQLRoom;
-import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.io.Serializable;

@@ -39,7 +39,7 @@ public class StorageManager {
             return new BaseState(false, AppInfo.IO_ERROR);
         }
 
-        state = new BaseState(true, file.getAbsolutePath());
+        state = new BaseState(true, file.getPath());
         state.putInfo("size", data.length);
         state.putInfo("title", file.getName());
         return state;

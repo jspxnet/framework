@@ -107,7 +107,7 @@ public class DataTypeValidator implements Validator {
         }
         File tempFile =  EnvFactory.getFile(configFile);
         if (FileUtil.isFileExist(tempFile)) {
-            return tempFile.getAbsolutePath() ;
+            return tempFile.getPath() ;
         }
         URL url = ClassUtil.getResource(configFile);
         if (url == null) {

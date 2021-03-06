@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.scriptmark.core;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.scriptmark.*;
 import com.github.jspxnet.scriptmark.core.block.*;
@@ -17,7 +18,6 @@ import com.github.jspxnet.scriptmark.core.script.ScriptTypeConverter;
 import com.github.jspxnet.scriptmark.exception.ScriptException;
 import com.github.jspxnet.scriptmark.exception.ScriptRunException;
 import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
@@ -33,8 +33,8 @@ import java.io.*;
  */
 @Slf4j
 public class EnvRunner {
-    private Map<String, Phrase> phrases;
-    private TemplateModel template;
+    final private Map<String, Phrase> phrases;
+    final private TemplateModel template;
     private ScriptRunner scriptEngine = null;
     private String variableBegin = "${";
     private String variableSafeBegin = "#{";
@@ -92,7 +92,7 @@ public class EnvRunner {
      * @param out 输出
      * @throws ScriptRunException io错误
      */
-    void Runner(Writer out) throws ScriptRunException {
+    void run(Writer out) throws ScriptRunException {
         List<TagNode> importList = getAutoImport(template.getConfigurable());
         if (importList != null && !importList.isEmpty()) {
             Writer writer = new StringWriter();
@@ -185,42 +185,42 @@ public class EnvRunner {
      */
     static private List<TagNode> getAutoImport(Configurable configurable) throws ScriptRunException {
         String[] paths = configurable.getSearchPath();
-
+        if (paths == null) {
+            return null;
+        }
         TemplateLoader templateLoader = TemplateManager.getInstance();
         StringBuilder autoImportSrc = new StringBuilder();
-        if (!ObjectUtil.isEmpty(templateLoader.get(ScriptmarkEnv.autoImportCache)))
+        TemplateModel templateModel = templateLoader.get(ScriptmarkEnv.autoImportCache);
+        if (templateModel!=null)
         {
-            autoImportSrc.append(templateLoader.get(ScriptmarkEnv.autoImportCache));
+            autoImportSrc.append(templateModel.getSource());
         }
         if (autoImportSrc.length() < 5) {
             for (String importFile : configurable.getAutoImports()) {
                 if (StringUtil.isNull(importFile)) {
                     continue;
                 }
-                if (!ObjectUtil.isEmpty(paths)) {
-                    for (String path : paths) {
-                        if (StringUtil.isNull(path))
-                        {
-                            continue;
+                for (String path : paths) {
+                    File f = new File(path, importFile);
+                    if (FileUtil.isFileExist(f.getPath())) {
+                        try {
+                            autoImportSrc.append(IoUtil.autoReadText(f)).append(StringUtil.CRLF);
+                        } catch (IOException e) {
+                            throw new ScriptRunException(null, importFile);
                         }
-                        File f = new File(path, importFile);
-                        if (FileUtil.isFileExist(f.getAbsolutePath())) {
+                    } else
+                    {
+                        f = EnvFactory.getFile(importFile);
+                        if (f!=null)
+                        {
                             try {
-                                autoImportSrc.append(IoUtil.autoReadText(f.getPath())).append(StringUtil.CRLF);
+                                autoImportSrc.append(IoUtil.autoReadText(f)).append(StringUtil.CRLF);
                             } catch (IOException e) {
                                 throw new ScriptRunException(null, importFile);
                             }
                         }
                     }
-                }
-                File file = FileUtil.scanFile(null,importFile);
-                if (file!=null)
-                {
-                    try {
-                        autoImportSrc.append(IoUtil.autoReadText(file.getPath())).append(StringUtil.CRLF);
-                    } catch (IOException e) {
-                        throw new ScriptRunException(null, importFile);
-                    }
+
                 }
             }
         }

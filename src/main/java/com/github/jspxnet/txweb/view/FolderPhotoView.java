@@ -102,7 +102,7 @@ public class FolderPhotoView extends ActionSupport {
     public List<FileInfo> getFileList() throws Exception {
         File file = new File(getPhotoDirectory());
         if (file.exists() && file.isDirectory()) {
-            return FileUtil.getFileListSort(file.getAbsolutePath(), find, type, order, getSetupPath());
+            return FileUtil.getFileListSort(file.getPath(), find, type, order, getSetupPath());
         }
         return new ArrayList<>();
     }

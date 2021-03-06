@@ -79,7 +79,7 @@ public class ScanningFile {
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
-                    result.add(chiFile.getAbsolutePath());
+                    result.add(chiFile.getPath());
                     if (superStrategy.isAssignableFrom(clazz)) {
                         eleStrategyList.add((Class<? extends String>) clazz);
                     }

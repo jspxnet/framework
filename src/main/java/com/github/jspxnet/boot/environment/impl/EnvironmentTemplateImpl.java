@@ -444,6 +444,15 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 VALUE_MAP.put((String) key, o);
             }
             VALUE_MAP.put(Environment.jspxProperties, fileName);
+            if (!VALUE_MAP.containsKey("catalina.base"))
+            {
+                VALUE_MAP.put("catalina.base",System.getProperty("CATALINA_BASE",System.getProperty("user.dir")));
+            }
+            if (!VALUE_MAP.containsKey("catalina.home"))
+            {
+                VALUE_MAP.put("catalina.home",System.getProperty("CATALINA_HOME",System.getProperty("user.dir")));
+            }
+
             p.clear();
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
@@ -464,14 +473,25 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     @Override
     public void restorePlaceholder()  {
+
         for (String key : VALUE_MAP.keySet()) {
             Object o = VALUE_MAP.get(key);
             if (StringUtil.isNull(key)) {
                 continue;
             }
             if (o != null) {
-                String value = o.toString();
-                VALUE_MAP.put(key, processTemplate(value));
+                String value = (String)o;
+                if (value.contains("${"))
+                {
+                    try {
+                        VALUE_MAP.put(key, processTemplate(value));
+                    } catch (Exception e)
+                    {
+                        log.error("检查配置key:{},value:{}",key,value);
+                        e.printStackTrace();
+                    }
+
+                }
             }
         }
     }

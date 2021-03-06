@@ -196,7 +196,7 @@ public class JspxCoreListener implements ServletContextListener {
             log.info("你需要放入" + Environment.jspx_properties_file + "配置文件,然后重新启动java服务器");
             return;
         }
-
+        envTemplate.debugPrint();
 
         log.info("create log4j config");
         Log4jConfig log4jConfig = new Log4jConfigImpl();
@@ -212,7 +212,7 @@ public class JspxCoreListener implements ServletContextListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        envTemplate.debugPrint();
         //////初始化环境变量 end
 
         log.info("default Path=" + envTemplate.getString(Environment.defaultPath));
@@ -221,7 +221,16 @@ public class JspxCoreListener implements ServletContextListener {
 
         //////////////////////初始化脚本语言环境 begin
         Configurable templateConfigurable = TemplateConfigurable.getInstance();
-        templateConfigurable.setSearchPath(new String[]{envTemplate.getString(Environment.defaultPath), envTemplate.getString(Environment.templatePath)});
+
+        String defaultPath = envTemplate.getString(Environment.defaultPath);
+        if (defaultPath.contains(".jar!"))
+        {
+            templateConfigurable.setSearchPath(null);
+        } else
+        {
+            templateConfigurable.setSearchPath(new String[]{defaultPath, envTemplate.getString(Environment.templatePath)});
+        }
+
         templateConfigurable.setAutoIncludes(StringUtil.split(envTemplate.getString(Environment.autoIncludes), StringUtil.SEMICOLON));
         templateConfigurable.setAutoImports(StringUtil.split(envTemplate.getString(Environment.autoImports), StringUtil.SEMICOLON));
         templateConfigurable.setGlobalMap(envTemplate.getVariableMap());

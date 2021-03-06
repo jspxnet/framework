@@ -78,9 +78,9 @@ public class ImageHunter {
             }
 
             File file = new File(saveDirectory, filename + "." + suffix);
-            State state = StorageManager.saveFileByInputStream(connection.getInputStream(), file.getAbsolutePath(), maxSize);
+            State state = StorageManager.saveFileByInputStream(connection.getInputStream(), file.getPath(), maxSize);
             if (state.isSuccess()) {
-                String showUrl = FileUtil.getDecrease(saveDirectory, file.getAbsolutePath());
+                String showUrl = FileUtil.getDecrease(saveDirectory, file.getPath());
                 state.putInfo("url", showUrl);
                 state.putInfo("source", urlStr);
             }

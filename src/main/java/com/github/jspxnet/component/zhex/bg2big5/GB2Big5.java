@@ -140,6 +140,10 @@ public class GB2Big5 {
         }
 
         inputStream = GB2Big5.class.getResourceAsStream(gb2Big5File);
+        if (inputStream==null)
+        {
+            inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +gb2Big5File);
+        }
         if (inputStream == null) {
             File file = EnvFactory.getFile(gb2Big5File);
             if (file != null) {
@@ -155,6 +159,10 @@ public class GB2Big5 {
         }
 
         inputStream = GB2Big5.class.getResourceAsStream(big52gb2File);
+        if (inputStream==null)
+        {
+            inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +big52gb2File);
+        }
         if (inputStream == null) {
             File file = EnvFactory.getFile(big52gb2File);
             if (file != null) {
