@@ -15,7 +15,7 @@ import java.io.Serializable;
 
 /**
  * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
+ * author chenYuan (mail:39793751@qq.com)
  * date: 2006-12-26
  * Time: 19:57:19
  */

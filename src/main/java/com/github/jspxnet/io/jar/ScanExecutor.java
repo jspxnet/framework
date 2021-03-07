@@ -11,11 +11,11 @@ public class ScanExecutor implements ScanJar {
     private volatile static ScanExecutor instance;
 
     @Override
-    public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate) {
+    public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath) {
         ScanJar fileSc = new FileScanner();
-        Set<Class<?>> fileSearch = fileSc.search(packageName, predicate);
+        Set<Class<?>> fileSearch = fileSc.search(packageName, predicate,defaultPath);
         ScanJar jarScanner = new JarScanner();
-        Set<Class<?>> jarSearch = jarScanner.search(packageName, predicate);
+        Set<Class<?>> jarSearch = jarScanner.search(packageName, predicate,defaultPath);
         fileSearch.addAll(jarSearch);
         return fileSearch;
     }

@@ -1,6 +1,8 @@
 package com.github.jspxnet.sober.queue;
 
 
+import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.sioc.annotation.Scheduled;
@@ -57,7 +59,10 @@ public class RedisStoreQueueServer extends BaseRedisStoreQueue  {
      */
     @Scheduled
     public void run() {
-
+        if (!EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useCache))
+        {
+            return;
+        }
         try {
             //锁定单线程begin
             RBucket<Integer> bucket = redissonClient.getBucket(LOCK_SERVER_KEY);

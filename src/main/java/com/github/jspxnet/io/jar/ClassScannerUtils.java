@@ -7,11 +7,12 @@ import java.util.function.Predicate;
 
 public class ClassScannerUtils {
 
-    public static Set<Class<?>> searchClasses(String packageName) {
-        return searchClasses(packageName, null);
+    public static Set<Class<?>> searchClasses(String packageName,String defaultPath) {
+        return searchClasses(packageName, null,defaultPath);
     }
 
-    public static Set<Class<?>> searchClasses(String packageName, Predicate predicate) {
-        return ScanExecutor.getInstance().search(packageName, predicate);
+    public static Set<Class<?>> searchClasses(String packageName, Predicate predicate,String defaultPath) {
+        ScanExecutor scanExecutor = ScanExecutor.getInstance();
+        return scanExecutor.search(packageName, predicate,defaultPath);
     }
 }

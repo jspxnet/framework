@@ -1,12 +1,9 @@
 package com.github.jspxnet.io.jar;
 
 
-import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.io.ScanJar;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.io.File;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -23,32 +20,10 @@ public class FileScanner implements ScanJar {
         return defaultClassPath;
     }
 
-    public void setDefaultClassPath(String defaultClassPath) {
-        this.defaultClassPath = defaultClassPath;
-    }
-
-    public FileScanner(String defaultClassPath) {
-        this.defaultClassPath = defaultClassPath;
-    }
 
     public FileScanner() {
 
-        URL url = FileScanner.class.getResource("/");
-        if (url!=null)
-        {
-            defaultClassPath =  url.getPath();
-        } else
-        {
-            url = FileScanner.class.getResource("/resources");
-            if (url!=null)
-            {
-                defaultClassPath =  url.getPath();
-            }
-            else
-            {
-                defaultClassPath = System.getProperty("user.dir");
-            }
-        }
+
     }
 
     private static boolean isJumpClass(String name) {
@@ -83,9 +58,10 @@ public class FileScanner implements ScanJar {
                 //标准文件我们就判断是否是class文件
                 if (file.getName().endsWith(CLASS_SUFFIX) && !isJumpClass(file.getName())) {
                     //如果是class文件我们就放入我们的集合中。
-
                     try {
-                        Class<?> clazz = Class.forName(packageName + "." + file.getName().substring(0, file.getName().lastIndexOf(".")));
+
+                        String className = packageName + "." + file.getName().substring(0, file.getName().lastIndexOf("."));
+                        Class<?> clazz = Class.forName(className);
                         if (predicate == null || predicate.test(clazz)) {
                             classPaths.add(clazz);
                         }
@@ -98,18 +74,13 @@ public class FileScanner implements ScanJar {
         }
     }
 
+
     @Override
-    public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate) {
+    public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath) {
         //先把包名转换为路径,首先得到项目的classpath
-        String classpath = defaultClassPath;
-        if (classpath==null)
-        {
-            classpath = StringUtil.empty;
-        }
         //然后把我们的包名basPack转换为路径名
         String basePackPath = packageName.replace(".", File.separator);
-        String searchPath = classpath + basePackPath;
-        return new ClassSearcher().doPath(new File(searchPath), packageName, predicate, true);
+        return new ClassSearcher().doPath(new File(defaultPath,basePackPath), packageName, predicate, true);
     }
 
 }

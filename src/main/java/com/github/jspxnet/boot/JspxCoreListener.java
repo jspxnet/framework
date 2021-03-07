@@ -196,7 +196,6 @@ public class JspxCoreListener implements ServletContextListener {
             log.info("你需要放入" + Environment.jspx_properties_file + "配置文件,然后重新启动java服务器");
             return;
         }
-        envTemplate.debugPrint();
 
         log.info("create log4j config");
         Log4jConfig log4jConfig = new Log4jConfigImpl();
@@ -212,7 +211,12 @@ public class JspxCoreListener implements ServletContextListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        envTemplate.debugPrint();
+
+        if (envTemplate.getBoolean(Environment.logJspxDebug))
+        {
+            envTemplate.debugPrint();
+        }
+
         //////初始化环境变量 end
 
         log.info("default Path=" + envTemplate.getString(Environment.defaultPath));

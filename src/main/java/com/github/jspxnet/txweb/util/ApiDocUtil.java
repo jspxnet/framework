@@ -49,6 +49,10 @@ public class ApiDocUtil {
     public static List<ApiParam> getApiParamList(Class<?> lass) {
         List<ApiParam> result = new ArrayList<>();
         Field[] fields = ClassUtil.getDeclaredFields(lass);
+        if (fields==null)
+        {
+            return result;
+        }
         for (Field field : fields) {
             if (field.getModifiers() > 25) {
                 continue;
@@ -163,6 +167,10 @@ public class ApiDocUtil {
         }
         try {
             Field[] fields = ClassUtil.getDeclaredFields(type);
+            if (fields==null)
+            {
+                return;
+            }
             for (Field field : fields) {
                 Param param = field.getAnnotation(Param.class);
                 ApiParam objParam = new ApiParam();

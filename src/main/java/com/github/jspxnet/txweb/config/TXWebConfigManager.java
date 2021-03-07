@@ -169,7 +169,7 @@ public class TXWebConfigManager implements WebConfigManager {
                 continue;
             }
             scanPackageList.add(scanConfig.getPackageName());
-            log.debug("san action package " + scanConfig.getPackageName());
+            log.debug("start san action package " + scanConfig.getPackageName());
             sanAction(scanConfig.getPackageName());
         }
 
@@ -241,7 +241,7 @@ public class TXWebConfigManager implements WebConfigManager {
      */
     @Override
     public void sanAction(String className) {
-        Set<Class<?>> list = ClassScannerUtils.searchClasses(className);
+        Set<Class<?>> list = ClassScannerUtils.searchClasses(className,EnvFactory.getBaseConfiguration().getDefaultPath());
         for (Class<?> cls : list) {
             if (cls == null) {
                 continue;
@@ -261,6 +261,7 @@ public class TXWebConfigManager implements WebConfigManager {
      */
     @Override
     public void registerAction(Class<?> cla) {
+
         if (cla.isInterface() || cla.isPrimitive() || cla.isAnonymousClass() || cla.isEnum()) {
             return;
         }
@@ -282,7 +283,7 @@ public class TXWebConfigManager implements WebConfigManager {
         actionConfigBean.setMobile(httpMethod.mobile());
         actionConfigBean.setSecret(httpMethod.secret());
         actionConfigBean.setRegister(true);
-
+        log.debug("register action package:\r\n{}",actionConfigBean.toString());
         Map<String, ActionConfigBean> actionConfigBeanMap = configTable.computeIfAbsent(httpMethod.namespace(), k -> new HashMap<>());
         actionConfigBeanMap.put(actionConfigBean.getActionName(), actionConfigBean);
 

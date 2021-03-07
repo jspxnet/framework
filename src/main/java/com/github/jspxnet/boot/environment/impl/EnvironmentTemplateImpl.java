@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -20,12 +20,14 @@ import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.util.*;
 
 
 /**
  * Created by IntelliJ IDEA.
+ *
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2006-8-4
  * Time: 0:19:29
@@ -38,7 +40,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
 
     }
-
 
 
     @Override
@@ -111,15 +112,14 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
      * @param defaultPath 默认路径
      */
     @Override
-    public void createPathEnv(String defaultPath)  {
-        if (defaultPath==null)
-        {
-            log.error("系统不能找{},文件所在路径,将不能正常运行:",Environment.config_file );
+    public void createPathEnv(String defaultPath) {
+        if (defaultPath == null) {
+            log.error("系统不能找{},文件所在路径,将不能正常运行:", Environment.config_file);
             defaultPath = System.getProperty("user.dir");
         }
         VALUE_MAP.put(Environment.defaultPath, defaultPath);
         VALUE_MAP.put(Environment.ConfigFile, defaultPath + Environment.config_file);
-        String logPath = System.getProperty("java.io.tmpdir");
+        String logPath;
         if (SystemUtil.isAndroid()) {
             //安卓方式目录环境
             String tmpDir = FileUtil.mendPath(System.getProperty("java.io.tmpdir"));
@@ -129,6 +129,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             VALUE_MAP.put(Environment.resPath, defaultPath);
             VALUE_MAP.put(Environment.cachePath, tmpDir);
             VALUE_MAP.put(Environment.tempPath, tmpDir);
+
 
         } else {
             //WebInfPath
@@ -360,9 +361,11 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         Enumeration<Object> enumeration = System.getProperties().keys();
         while (enumeration.hasMoreElements()) {
             String keys = (String) enumeration.nextElement();
-            if (System.getProperty(keys) != null) {
-                VALUE_MAP.put(keys, System.getProperty(keys));
+            if (keys == null) {
+                continue;
             }
+            VALUE_MAP.put(keys, System.getProperty(keys, ""));
+
         }
 
 
@@ -380,18 +383,18 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         //监测当前的web 服务器 end
         try {
             Class<?> cls = Class.forName("org.apache.xerces.parsers.SAXParser");
-            System.setProperty("org.xml.sax.driver",cls.getName());
+            System.setProperty("org.xml.sax.driver", cls.getName());
         } catch (Exception e) {
             try {
                 Class<?> cls = Class.forName("com.sun.org.apache.xerces.internal.parsers.SAXParser");
-                System.setProperty("org.xml.sax.driver",cls.getName());
+                System.setProperty("org.xml.sax.driver", cls.getName());
             } catch (Exception e2) {
                 log.info("com.sun.xml.internal.stream.XMLInputFactoryImpl " + e.getLocalizedMessage());
             }
         }
         try {
             Class<?> cls = Class.forName("com.sun.xml.internal.stream.XMLInputFactoryImpl");
-            System.setProperty("javax.xml.stream.XMLInputFactory",cls.getName());
+            System.setProperty("javax.xml.stream.XMLInputFactory", cls.getName());
         } catch (Exception e2) {
             log.info("com.sun.xml.internal.stream.XMLInputFactoryImpl " + e2.getLocalizedMessage());
         }
@@ -399,14 +402,14 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     /**
      * 读取当前原始的启动配置文件
+     *
      * @param fileName 文件路径
-     * @return 得到配置属性,注意这里只是在内存中
+     * @return 得到配置属性, 注意这里只是在内存中
      */
     @Override
     public Properties readDefaultProperties(String fileName) {
         Properties p = new Properties();
-        if (!FileUtil.isFileExist(fileName))
-        {
+        if (!FileUtil.isFileExist(fileName)) {
             return p;
         }
         try {
@@ -444,13 +447,11 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 VALUE_MAP.put((String) key, o);
             }
             VALUE_MAP.put(Environment.jspxProperties, fileName);
-            if (!VALUE_MAP.containsKey("catalina.base"))
-            {
-                VALUE_MAP.put("catalina.base",System.getProperty("CATALINA_BASE",System.getProperty("user.dir")));
+            if (!VALUE_MAP.containsKey("catalina.base")) {
+                VALUE_MAP.put("catalina.base", System.getProperty("CATALINA_BASE", System.getProperty("user.dir")));
             }
-            if (!VALUE_MAP.containsKey("catalina.home"))
-            {
-                VALUE_MAP.put("catalina.home",System.getProperty("CATALINA_HOME",System.getProperty("user.dir")));
+            if (!VALUE_MAP.containsKey("catalina.home")) {
+                VALUE_MAP.put("catalina.home", System.getProperty("CATALINA_HOME", System.getProperty("user.dir")));
             }
 
             p.clear();
@@ -463,7 +464,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     @Override
     public void putEnv(String key, String value) {
-          VALUE_MAP.put(key, value);
+        VALUE_MAP.put(key, value);
     }
 
     @Override
@@ -472,7 +473,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
     }
 
     @Override
-    public void restorePlaceholder()  {
+    public void restorePlaceholder() {
 
         for (String key : VALUE_MAP.keySet()) {
             Object o = VALUE_MAP.get(key);
@@ -480,14 +481,12 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 continue;
             }
             if (o != null) {
-                String value = (String)o;
-                if (value.contains("${"))
-                {
+                String value = (String) o;
+                if (value.contains("${")) {
                     try {
                         VALUE_MAP.put(key, processTemplate(value));
-                    } catch (Exception e)
-                    {
-                        log.error("检查配置key:{},value:{}",key,value);
+                    } catch (Exception e) {
+                        log.error("检查配置key:{},value:{}", key, value);
                         e.printStackTrace();
                     }
 
@@ -513,15 +512,17 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     @Override
     public void debugPrint() {
+
+        StringBuilder sb = new StringBuilder();
         for (String key : VALUE_MAP.keySet()) {
             Object o = VALUE_MAP.get(key);
             if (StringUtil.isNull(key)) {
                 continue;
             }
             if (o != null) {
-                log.info(key + "=" + o.toString());
+                sb.append(key).append("=").append(o).append("\r\n");
             }
         }
-
+        log.debug(sb.toString());
     }
 }

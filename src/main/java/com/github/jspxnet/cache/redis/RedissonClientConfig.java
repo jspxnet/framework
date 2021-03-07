@@ -1,6 +1,7 @@
 package com.github.jspxnet.cache.redis;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Destroy;
@@ -70,6 +71,10 @@ public class RedissonClientConfig {
 
     @Init
      public void init() {
+        if (!EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useCache))
+        {
+            return;
+        }
         if (redisson == null) {
             if (StringUtil.isNull(config) && StringUtil.isNull(config)) {
                 log.error("not config Redis cache link, 没有正确配置Redis 链接");

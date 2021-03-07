@@ -131,6 +131,8 @@ public interface Action extends Serializable {
     //环境数据
     Map<String, Object> getEnv();
 
+    void initEnv(Map<String, Object> paraMap);
+
     void put(String key, Object obj);
 
     //信息存储

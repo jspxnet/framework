@@ -25,6 +25,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class BaseConfigurationImpl implements JspxConfiguration {
@@ -111,10 +112,13 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         }
 
         if (path == null) {
-            path = FileUtil.getPathPart(ClassUtil.getClassFilePath(Environment.class.getName())) + defaultConfigFile;
-            if (!FileUtil.isFileExist(path)) {
-                path = null;
+
+            List<File> list = FileUtil.getPatternFiles(null,defaultConfigFile);
+            if (list!=null&&!list.isEmpty())
+            {
+                path = list.get(0).getPath();
             }
+
         }
 
         if (path == null) {
@@ -133,15 +137,6 @@ public class BaseConfigurationImpl implements JspxConfiguration {
             }
         }
 
-        if (path == null) {
-            File directory = new File("");
-            File file = new File(directory.getParent(), defaultConfigFile);
-            if (file.isFile() && file.exists()) {
-                path = file.getParentFile().getAbsolutePath();
-            } else {
-                path = null;
-            }
-        }
 
         if (path == null) {
             log.info("No find file:" + defaultConfigFile + ",不能找到" + defaultConfigFile + "文件");

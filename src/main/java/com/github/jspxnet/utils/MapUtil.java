@@ -11,6 +11,7 @@ package com.github.jspxnet.utils;
 
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.util.StringMap;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +43,9 @@ public class MapUtil {
     public static String toString(Map map) {
         if (map == null || map.isEmpty()) {
             return StringUtil.empty;
+        }
+        if (map instanceof JSONObject||map instanceof JSONArray) {
+            return map.toString();
         }
         return new JSONObject(map).toString();
     }

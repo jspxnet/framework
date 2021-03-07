@@ -16,10 +16,9 @@ import java.util.jar.JarFile;
 public class JarScanner implements ScanJar {
 
     @Override
-    public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate) {
+    public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath) {
 
         Set<Class<?>> classes = new HashSet<>();
-
         try {
             //通过当前线程得到类加载器从而得到URL的枚举
             Enumeration<URL> urlEnumeration = Thread.currentThread().getContextClassLoader().getResources(packageName.replace(".", "/"));
@@ -55,8 +54,7 @@ public class JarScanner implements ScanJar {
                     }
                 } else if ("file".equalsIgnoreCase(protocol)) {
                     FileScanner fileScanner = new FileScanner();
-                    fileScanner.setDefaultClassPath(url.getPath().replace(packageName.replace(".", "/"), ""));
-                    classes.addAll(fileScanner.search(packageName, predicate));
+                    classes.addAll(fileScanner.search(packageName, predicate, url.getPath().replace(packageName.replace(".", "/"), "")));
                 }
             }
         } catch (Exception e) {

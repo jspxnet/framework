@@ -10,6 +10,7 @@
 package com.github.jspxnet.sober.util;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.*;
@@ -426,7 +427,8 @@ public class AnnotationUtil {
             }
         }
 
-        Set<Class<?>> list = ClassScannerUtils.searchClasses(classPath);
+
+        Set<Class<?>> list = ClassScannerUtils.searchClasses(classPath,EnvFactory.getBaseConfiguration().getDefaultPath());
         for (Class<?> cls : list) {
             if (cls == null) {
                 continue;

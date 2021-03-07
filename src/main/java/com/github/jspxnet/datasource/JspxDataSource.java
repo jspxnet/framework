@@ -321,9 +321,10 @@ public class JspxDataSource extends DriverManagerDataSource {
                     //周期比较长,有就直接关闭
                     JdbcUtil.closeConnection(conn,true);
                     connectionPool[i] = null;
+                    log.debug("minPoolSize:{},连接池有效长度:{}", minPoolSize, poolSize);
                 }
             }
-            log.debug("minPoolSize:{},连接池有效长度:{}", minPoolSize, poolSize);
+
         } catch (Exception e) {
             log.error("连接池线程异常", e);
         }

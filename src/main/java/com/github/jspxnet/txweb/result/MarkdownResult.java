@@ -11,20 +11,19 @@ package com.github.jspxnet.txweb.result;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.io.IoUtil;
+import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.load.Source;
 import com.github.jspxnet.scriptmark.load.StringSource;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import org.slf4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.boot.environment.Environment;
-import org.slf4j.LoggerFactory;
 import com.github.jspxnet.scriptmark.ScriptMark;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.scriptmark.core.ScriptMarkEngine;
 import com.github.jspxnet.scriptmark.load.FileSource;
 import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
-import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.utils.StringUtil;
@@ -41,17 +40,9 @@ import java.util.Map;
  * 将Markdown格式转换为html显示出来
  * 载入代码着色,和转换
  */
+@Slf4j
 public class MarkdownResult extends ResultSupport {
-    private static final Logger log = LoggerFactory.getLogger(MarkdownResult.class);
-    private static final TemplateConfigurable configurable = new TemplateConfigurable();
-
-    private static final String markdownTemplate = ENV_TEMPLATE.getString(Environment.markdownTemplate);
-    private static final String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
-
-    static {
-        configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
-    }
-
+    private static Source fileSource;
     public MarkdownResult() {
 
     }
@@ -86,28 +77,35 @@ public class MarkdownResult extends ResultSupport {
         }
         //处理下载情况 end
 
+
+        TemplateConfigurable configurable = new TemplateConfigurable();
+        String markdownTemplate = ENV_TEMPLATE.getString(Environment.markdownTemplate);
+        String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
+        configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
+
         //找到模版文件
-        File f = new File(action.getTemplatePath(), markdownTemplate);
-        if (!f.exists()) {
-            f = new File(templatePath, markdownTemplate);
+        if (fileSource==null)
+        {
+            File f = new File(action.getTemplatePath(), markdownTemplate);
+            if (!f.exists()) {
+                f = new File(templatePath, markdownTemplate);
+            }
+            if (f==null||!f.isFile()) {
+                f = EnvFactory.getFile(markdownTemplate);
+            }
+            fileSource = new StringSource(IoUtil.autoReadText(f.getPath(), Dispatcher.getEncode()));
         }
-
-        if (!f.isFile()) {
-            f = EnvFactory.getFile(markdownTemplate);
-        }
-
-        Source fileSource = new StringSource(IoUtil.autoReadText(f.getPath(), Dispatcher.getEncode()));
 
         //如果使用cache 就使用uri
-        String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
+
         configurable.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), templatePath});
         ScriptMark scriptMark;
         try {
-            scriptMark = new ScriptMarkEngine(cacheKey, fileSource, configurable);
+            scriptMark = new ScriptMarkEngine(ScriptmarkEnv.noCache, fileSource, configurable);
         } catch (Exception e) {
             if (DEBUG) {
-                log.info("TemplateResult file not found:" + f.getAbsolutePath(), e);
-                TXWebUtil.errorPrint("TemplateResult file not found:" + f.getAbsolutePath() + "," + e.getMessage(), null,response, HttpStatusType.HTTP_status_404);
+                log.info("TemplateResult file not found, markdown 模版文件没有找到", e);
+                TXWebUtil.errorPrint("TemplateResult file not found,markdown 模版文件没有找到," + e.getMessage(), null,response, HttpStatusType.HTTP_status_404);
             } else {
                 TXWebUtil.errorPrint("file not found,不存在的文件",null, response, HttpStatusType.HTTP_status_404);
             }
@@ -118,13 +116,13 @@ public class MarkdownResult extends ResultSupport {
 
         //载入md文件begin
         action.put(Environment.templateSuffix, Dispatcher.getMarkdownSuffix());
+        action.put(Environment.scriptPath,ENV_TEMPLATE.getString(Environment.scriptPath));
         File mdFile = new File(action.getTemplatePath(), action.getTemplateFile());
         FileSource mdFileSource = new FileSource(mdFile, action.getTemplateFile(), Dispatcher.getEncode());
         //载入md文件end
 
         //输出模板数据
         PrintWriter out = response.getWriter();
-
         Map<String, Object> valueMap = action.getEnv();
         initPageEnvironment(action, valueMap);
         valueMap.put("title", action.getEnv(ActionEnv.Key_ActionName));
@@ -139,8 +137,6 @@ public class MarkdownResult extends ResultSupport {
                 TXWebUtil.errorPrint("file not found,不存在的文件", null,response, HttpStatusType.HTTP_status_404);
                 return;
             }
-        } finally {
-            valueMap.clear();
         }
         out.flush();
         out.close();

@@ -76,7 +76,9 @@ public class FileUtil {
 
     public static final String sortName = "name";
     public static final String sortDate = "date";
-
+    public static final String[] NO_SEARCH_JAR = {"org\\apache\\","org\\codehaus","org\\sonatype","com\\aliyun","org\\bouncycastle",
+            "com\\google","com\\atomikos","com\\twelvemonkeys","org\\mozilla","com\\jcraft","org\\postgresql","io\\netty\\netty"
+            ,"org\\slf4j","org\\codehaus","com\\intellij","asm\\asm-commons","com\\jgoodies",".m2","jre\\lib"};
 
     static {
         if (isSystemWindows()) {
@@ -1766,7 +1768,8 @@ public class FileUtil {
             List<File> jarList = ClassUtil.getRunJarList();
             for (File searchFile:jarList)
             {
-                if (searchFile.getPath().contains("/j2sdk"))
+                //排除系统库和maven库
+                if (isNoSearchJar(searchFile.getPath()))
                 {
                     continue;
                 }
@@ -1782,6 +1785,17 @@ public class FileUtil {
         return filePattern(new File(dir), dir, p);
     }
 
+    private static boolean isNoSearchJar(String file)
+    {
+        for (String tag:NO_SEARCH_JAR)
+        {
+            if (file!=null&&file.toLowerCase().contains(tag))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * @param file 起始文件夹 或者jar文件
      * @param dir  在那个路径里边查询
@@ -1793,7 +1807,7 @@ public class FileUtil {
             return new ArrayList<>(0);
         }
 
-        if (FileUtil.getTypePart(file).toLowerCase().equals("jar")) {
+        if ("jar".equals(FileUtil.getTypePart(file).toLowerCase())&&!file.getPath().endsWith("!")) {
             try (JarInputStream zis = new JarInputStream(new FileInputStream(file.getPath()))) {
 
                 List<File> list = new ArrayList<>();

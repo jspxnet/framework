@@ -163,7 +163,7 @@ public class ConfigureContext implements IocContext {
      */
     @Override
     public void sanIocBean(String className) {
-        Set<Class<?>> list = ClassScannerUtils.searchClasses(className);
+        Set<Class<?>> list = ClassScannerUtils.searchClasses(className,EnvFactory.getBaseConfiguration().getDefaultPath());
         for (Class<?> cls : list) {
             if (cls == null) {
                 continue;

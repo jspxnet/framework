@@ -357,11 +357,12 @@ public class ObjectUtil {
             }
             return obj + "";
         }
-        if (obj instanceof Map) {
-            return MapUtil.toString((Map)obj);
-        }
+
         if (obj.getClass().isArray() || obj instanceof List) {
             return new JSONArray(obj).toString();
+        }
+        if (obj instanceof JSONObject||obj instanceof JSONArray) {
+            return obj.toString();
         }
         return new JSONObject(obj).toString();
     }

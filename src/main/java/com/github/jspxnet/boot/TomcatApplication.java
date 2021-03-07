@@ -15,7 +15,6 @@ import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.catalina.webresources.FileResourceSet;
 import org.apache.jasper.servlet.JspServlet;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
@@ -33,7 +32,7 @@ import java.util.Properties;
  * author: chenYuan
  * date: 2021/3/1 18:30
  * description: tomcat启动类
- *
+ * com.github.jspxnet.boot.TomcatApplication
  **/
 @Slf4j
 public class TomcatApplication {
@@ -106,15 +105,19 @@ public class TomcatApplication {
         connector.setEnableLookups(true);
         //设置Host
 
-        Host host = TOMCAT.getHost();
+
         TOMCAT.setSilent(true);
+        TOMCAT.setAddDefaultWebXmlToWebapp(true);
+        TOMCAT.setHostname("localhost");
+        TOMCAT.setBaseDir(webPath);
 
         //我们会根据xml配置文件来
+        Host host = TOMCAT.getHost();
         host.setName("localhost");
         host.setCreateDirs(false);
         //host.setAppBase(FileUtil.mendPath(file.getParent()));
         //host.setAppBase("d:/website/webapps");
-        Context standardContext =  TOMCAT.addWebapp("",webPath);
+        Context standardContext = TOMCAT.addWebapp("",webPath);
 
         //前面的那个步骤只是把Tomcat起起来了，但是没啥东西
         //要把class加载进来,把启动的工程加入进来了
@@ -122,23 +125,14 @@ public class TomcatApplication {
 
         standardContext.setPath("");
         standardContext.setPrivileged(false);
-
-        //standardContext.setOriginalDocBase("/"+ file.getName());
-        //standardContext.setDocBase("");
-        standardContext.setCrossContext(true);
-        standardContext.setUseHttpOnly(true);
-        standardContext.setCookies(true);
-        standardContext.setSessionCookiePathUsesTrailingSlash(true);
-        standardContext.setResponseCharacterEncoding(Environment.defaultEncode);
-        standardContext.setRequestCharacterEncoding(Environment.defaultEncode);
+        standardContext.setAddWebinfClassesResources(true);
 
 
-       // standardContext.setReloadable(false);
 
-       // standardContext.addApplicationLifecycleListener(new JspxNetListener());
+
 
         //standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
-//        standardContext.addLifecycleListener(new GlobalResourcesLifecycleListener());
+        //standardContext.addLifecycleListener(new GlobalResourcesLifecycleListener());
         standardContext.addLifecycleListener(new Tomcat.FixContextListener());
        // host.addChild(standardContext);
 
@@ -212,7 +206,7 @@ public class TomcatApplication {
             tmpContext.setDefaultWebXml(webFile.getPath());
             log.debug("default web.xml:{}",webFile.getPath());
         }
-        tmpContext.setSkipMemoryLeakChecksOnJvmShutdown(true);
+
         //我们要把Servlet设置进去
 
        if (cors)
@@ -247,11 +241,23 @@ public class TomcatApplication {
         tmpContext.setOverride(true);
         tmpContext.setDistributable(true);
         tmpContext.setSessionCookiePath("/");
+        tmpContext.setSkipMemoryLeakChecksOnJvmShutdown(true);
+        tmpContext.setReplaceWelcomeFiles(true);
+
+        standardContext.setAddWebinfClassesResources(true);
+        standardContext.setCrossContext(true);
+        standardContext.setUseHttpOnly(true);
+        standardContext.setCookies(true);
+        standardContext.setSessionCookiePathUsesTrailingSlash(true);
+        standardContext.setResponseCharacterEncoding(Environment.defaultEncode);
+        standardContext.setRequestCharacterEncoding(Environment.defaultEncode);
+        standardContext.setReloadable(true);
 
         /*
         　　defaultSessionTimeOut="3600" isWARExpanded="true"
 　　isWARValidated="false" isInvokerEnabled="true"
 　　isWorkDirPersistent="false
+
          */
         TOMCAT.start();
 

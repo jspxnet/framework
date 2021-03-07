@@ -300,7 +300,13 @@ public class JSONObject extends HashMap<String, Object> {
             bean = ReflectUtil.getValueMap(bean);
         }
 
-        if (bean instanceof Map) {
+        if (bean instanceof JSONObject)
+        {
+            JSONObject json = (JSONObject)bean;
+            super.putAll(json.toMap());
+            return;
+        }
+        if (bean instanceof Map && !(bean instanceof JSONObject)) {
             Map map = (Map) bean;
             for (Object key : map.keySet()) {
                 //判断是否需要返回
@@ -313,7 +319,7 @@ public class JSONObject extends HashMap<String, Object> {
                 {
                     super.put((String) key, null);
                 } else
-                if (!ClassUtil.isStandardProperty(v.getClass())) {
+                if (!ClassUtil.isStandardProperty(v.getClass())&&!(v instanceof JSONObject)) {
                     super.put((String) key, new JSONObject(v, includeSuperClass,dataField));
                 } else {
                     super.put((String) key, v);
@@ -441,6 +447,7 @@ public class JSONObject extends HashMap<String, Object> {
         }
 
         //-------------------------------方法需要输出的注释
+
         Method[] methods = ClassUtil.getDeclaredReturnMethods(lass, 0);
         if (methods!=null)
         {

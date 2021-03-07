@@ -165,9 +165,13 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public Map<String, Object> getEnv() {
-        return environment;
+        return new HashMap<>(environment);
     }
 
+    @Override
+    public void initEnv(Map<String, Object> paraMap) {
+         environment.putAll(paraMap);
+    }
     /**
      * @param key 放入环境变量
      * @param obj 放入环境对象
