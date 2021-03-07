@@ -176,7 +176,7 @@ public class EvasiveConfiguration implements Configuration {
             log.info("evasive load config file:" + file);
 
             File readFile = EnvFactory.getFile(file);
-            if (!FileUtil.isFileExist(readFile)) {
+            if (readFile==null) {
                 continue;
             }
 

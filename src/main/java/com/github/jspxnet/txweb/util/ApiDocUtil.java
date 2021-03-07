@@ -767,7 +767,7 @@ public class ApiDocUtil {
             return null;
         }
         File file = EnvFactory.getFile(namespace + ".describe.xml");
-        if (file==null||!file.exists())
+        if (file==null)
         {
             return null;
         }

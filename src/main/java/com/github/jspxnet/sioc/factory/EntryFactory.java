@@ -355,7 +355,7 @@ public final class EntryFactory implements BeanFactory {
             if (!ArrayUtil.isEmpty(fileNames)) {
                 for (String fileName : fileNames) {
                     File f = EnvFactory.getFile(fileName);
-                    if (f != null && f.isFile()) {
+                    if (f != null) {
                         loadFile = f;
                     }
                 }

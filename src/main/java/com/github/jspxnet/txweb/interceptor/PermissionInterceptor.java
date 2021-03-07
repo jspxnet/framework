@@ -110,7 +110,7 @@ public class PermissionInterceptor extends InterceptorSupport {
         try {
             if (guestUrlFile != null && !guestUrlFile.startsWith("http")) {
                 File file = EnvFactory.getFile(guestUrlFile);
-                if (FileUtil.isFileExist(file)) {
+                if (file!=null) {
                     guestUrlFile = file.getPath();
                 } else {
                     log.error(guestUrlFile + "没有找到");
