@@ -94,7 +94,6 @@ public class TomcatApplication {
         File file = new File(webPath);
         FileUtil.makeDirectory(file);
 
-
         Connector connector = TOMCAT.getConnector();
         connector.setPort(port);
         connector.setURIEncoding(Environment.defaultEncode);
