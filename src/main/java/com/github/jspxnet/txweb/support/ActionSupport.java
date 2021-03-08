@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -71,6 +72,7 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public void destroy() {
+
         Iterator<Map.Entry<String, Object>> iterator = this.environment.entrySet().iterator();
         while(iterator.hasNext()) {
             Map.Entry<String, Object> entry = iterator.next();

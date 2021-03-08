@@ -435,7 +435,11 @@ public class ParamUtil {
                     {
                         //放入默认参数
                         paramObj[i] = BeanUtil.getTypeValue(param.value(), pType);
+                    } else if (paramObj[i]==null && ClassUtil.isBaseNumberType(pType))
+                    {
+                        paramObj[i] = 0;
                     }
+
                 }
 
                 if (annotation instanceof PathVar) {
@@ -792,13 +796,13 @@ public class ParamUtil {
             }
         }
         if (!ArrayUtil.isEmpty(strEnum) && !ArrayUtil.contains(strEnum, theParam)) {
-            String message = StringUtil.isEmpty(param.message()) ? (paramName + " is unsafe,参数不在允许范围," + param.caption()) : param.message();
+            String message = StringUtil.isEmpty(param.message()) ? (paramName + " ,参数不在允许范围," + param.caption()) : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
             return;
         }
 
         if (StringUtil.isEmpty(theParam)&&!isSafe(theParam, param.min(), param.max(), param.level())) {
-             String message = StringUtil.isEmpty(param.message()) ? (param.caption() + " " + paramName + " parameter is unsafe,参数不合规," + param.caption()) : param.message();
+             String message = StringUtil.isEmpty(param.message()) ? (param.caption() + " " + paramName + ",参数不在允许范围," + param.caption()) : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
         }
     }
@@ -834,13 +838,13 @@ public class ParamUtil {
         }
 
         if (!ArrayUtil.isEmpty(strEnum) && !ArrayUtil.contains(strEnum, theParam.intValue())) {
-            String message = StringUtil.isEmpty(param.message()) ? (paramName+  " is unsafe,参数不在允许范围") : param.message();
+            String message = StringUtil.isEmpty(param.message()) ? (paramName+  " ,参数不在允许范围") : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
             return;
         }
 
         if (theParam.intValue() < param.min() || theParam.intValue() > param.max()) {
-            String message = StringUtil.isEmpty(param.message()) ? (paramName + " parameter is unsafe,参数不合规") : param.message();
+            String message = StringUtil.isEmpty(param.message()) ? (paramName + " ,参数不在允许范围") : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
         }
     }

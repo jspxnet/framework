@@ -341,12 +341,6 @@ public final class EntryFactory implements BeanFactory {
         if (o == null) {
             return;
         }
-        if (superclass.getName().contains("ProgramItem"))
-        {
-            System.out.println("-----------------");
-
-        }
-
         Map<String, Object> valueMap;
         PropertySource propertySource = superclass.getAnnotation(PropertySource.class);
         if (propertySource != null) {

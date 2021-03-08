@@ -125,9 +125,9 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             String tmpDir = FileUtil.mendPath(System.getProperty("java.io.tmpdir"));
             logPath = tmpDir;
             VALUE_MAP.put(Environment.templatePath, defaultPath);
-            VALUE_MAP.put(Environment.loaderPath, defaultPath);
+            //VALUE_MAP.put(Environment.loaderPath, defaultPath);
             VALUE_MAP.put(Environment.resPath, defaultPath);
-            VALUE_MAP.put(Environment.cachePath, tmpDir);
+            //VALUE_MAP.put(Environment.cachePath, tmpDir);
             VALUE_MAP.put(Environment.tempPath, tmpDir);
 
 
@@ -144,9 +144,12 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 webInfPath = FileUtil.getParentPath(defaultPath);
             }
             webInfPath = FileUtil.mendPath(webInfPath);
+
+            boolean createWebInf = webInfPath.toLowerCase().contains("web-inf");
+
             VALUE_MAP.put(Environment.webInfPath, webInfPath);
             String tempDir = webInfPath + "template/";
-            if (!FileUtil.isDirectory(tempDir)) {
+            if (createWebInf&&!FileUtil.isDirectory(tempDir)) {
                 FileUtil.makeDirectory(tempDir);
             }
 
@@ -161,9 +164,9 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 VALUE_MAP.put(Environment.templatePath, tempDir);
             }
             //loader路径
-            tempDir = webInfPath + "loader/";
+            //tempDir = webInfPath + "loader/";
             //FileUtil.makeDirectory(tempDir);
-            VALUE_MAP.put(Environment.loaderPath, tempDir);
+            //VALUE_MAP.put(Environment.loaderPath, tempDir);
 
             //LucenePath     得到默认的Lucene 目录,应为文件放在外部不安全
             tempDir = webInfPath + "lucene/";
@@ -172,42 +175,53 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
             //本地数据库默认路径
             tempDir = webInfPath + "database/";
-            FileUtil.makeDirectory(tempDir);
-            VALUE_MAP.put(Environment.databasePath, tempDir);
+            if (createWebInf)
+            {
+                //为本地应用小型化数据库使用
+                FileUtil.makeDirectory(tempDir);
+                VALUE_MAP.put(Environment.databasePath, tempDir);
+            }
 
             //LibPath    得到库文件路径
             tempDir = webInfPath + "lib/";
-            FileUtil.makeDirectory(tempDir);
-            VALUE_MAP.put(Environment.libPath, tempDir);
+            if (createWebInf)
+            {
+                FileUtil.makeDirectory(tempDir);
+            }
 
-            //PluginsPath    插件目录
-            tempDir = webInfPath + "plugins/";
-            //FileUtil.makeDirectory(tempDir);
-            VALUE_MAP.put(Environment.pluginsPath, tempDir);
+            VALUE_MAP.put(Environment.libPath, tempDir);
 
             //fontsPath    字体目录
             tempDir = webInfPath + "fonts/";
-            //FileUtil.makeDirectory(tempDir);
+            if (createWebInf)
+            {
+                FileUtil.makeDirectory(tempDir);
+            }
             VALUE_MAP.put(Environment.fontsPath, tempDir);
 
             //ResPath    资源目录
             tempDir = webInfPath + "reslib/";
-            FileUtil.makeDirectory(tempDir);
+            if (createWebInf)
+            {
+                FileUtil.makeDirectory(tempDir);
+            }
             VALUE_MAP.put(Environment.resPath, tempDir);
 
             //CachePath    缓存目录
-            tempDir = webInfPath + "cache/";
+           /* tempDir = webInfPath + "cache/";
             FileUtil.makeDirectory(tempDir);
-            VALUE_MAP.put(Environment.cachePath, tempDir);
+            VALUE_MAP.put(Environment.cachePath, tempDir);*/
 
             //升级文件保存目录
+/*
             tempDir = webInfPath + "upgrade/";
             //FileUtil.makeDirectory(tempDir);
             VALUE_MAP.put(Environment.upgradePath, tempDir);
+*/
 
             //TempPath    临时路径
             tempDir = webInfPath + "tmp/";
-            if (FileUtil.isDirectory(tempDir)) {
+            if (createWebInf&&FileUtil.isDirectory(tempDir)) {
                 VALUE_MAP.put(Environment.tempPath, tempDir);
             } else {
                 VALUE_MAP.put(Environment.tempPath, FileUtil.mendPath(System.getProperty("java.io.tmpdir")));
@@ -323,10 +337,10 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             System.setProperty("user.timezone", timezone);
         }
 
-        if (VALUE_MAP.containsKey(Environment.cachePath)) {
+     /*   if (VALUE_MAP.containsKey(Environment.cachePath)) {
             System.setProperty(Environment.cachePath, (String) VALUE_MAP.get(Environment.cachePath));
         }
-
+*/
         //系统密钥
         if (VALUE_MAP.containsKey(Environment.secretKey)) {
             System.setProperty(Environment.secretKey, (String) VALUE_MAP.get(Environment.secretKey));

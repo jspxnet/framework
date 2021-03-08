@@ -16,8 +16,6 @@ import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.TemplateModel;
 import com.github.jspxnet.scriptmark.exception.ScriptRunException;
 import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.XMLUtil;
-
 import java.util.List;
 import java.util.Map;
 

@@ -78,7 +78,7 @@ public class FileUtil {
     public static final String sortDate = "date";
     public static final String[] NO_SEARCH_JAR = {"org\\apache\\","org\\codehaus","org\\sonatype","com\\aliyun","org\\bouncycastle",
             "com\\google","com\\atomikos","com\\twelvemonkeys","org\\mozilla","com\\jcraft","org\\postgresql","io\\netty\\netty"
-            ,"org\\slf4j","org\\codehaus","com\\intellij","asm\\asm-commons","com\\jgoodies",".m2","jre\\lib"};
+            ,"org\\slf4j","org\\codehaus","com\\intellij","asm\\asm-commons","com\\jgoodies",".m2","jre\\lib","j2sdk\\"};
 
     static {
         if (isSystemWindows()) {
@@ -1766,24 +1766,39 @@ public class FileUtil {
         {
             List<File> result = new ArrayList<>();
             List<File> jarList = ClassUtil.getRunJarList();
-            for (File searchFile:jarList)
-            {
+            for (File searchFile:jarList) {
                 //排除系统库和maven库
-                if (isNoSearchJar(searchFile.getPath()))
-                {
+                if (isNoSearchJar(searchFile.getPath())) {
                     continue;
                 }
-                List<File> searchList = filePattern(new File(searchFile.getPath()), null, p);
-                if (!ObjectUtil.isEmpty(searchList))
+                if (isPatternFileName(findFileName))
                 {
-                    result.addAll(searchList);
+                    List<File> searchList = filePattern(new File(searchFile.getPath()), null, p);
+                    if (!ObjectUtil.isEmpty(searchList))
+                    {
+                        result.addAll(searchList);
+                    }
+                } else
+                {
+                    try {
+                        Path apkFile = Paths.get(searchFile.getPath());
+                        FileSystem fs = FileSystems.newFileSystem(apkFile, null);
+                        Path dexFile = fs.getPath(findFileName);
+                        if (Files.exists(dexFile))
+                        {
+                            result.add(dexFile.toFile());
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             return result;
         }
-
         return filePattern(new File(dir), dir, p);
     }
+
+
 
     private static boolean isNoSearchJar(String file)
     {
@@ -1808,6 +1823,8 @@ public class FileUtil {
         }
 
         if ("jar".equals(FileUtil.getTypePart(file).toLowerCase())&&!file.getPath().endsWith("!")) {
+
+
             try (JarInputStream zis = new JarInputStream(new FileInputStream(file.getPath()))) {
 
                 List<File> list = new ArrayList<>();
@@ -2284,7 +2301,7 @@ public class FileUtil {
         if (loadFile.toLowerCase().startsWith(KEY_classPath)) {
             String tempPath = loadFile.substring(KEY_classPath.length());
             URL url = Thread.currentThread().getContextClassLoader().getResource(tempPath);
-            if (url == null && tempPath.startsWith("/")) {
+            if (url == null) {
                 url = Thread.currentThread().getContextClassLoader().getResource(tempPath.substring(1));
             }
             if (url != null) {

@@ -321,4 +321,7 @@ public class RocResponse<T> implements Serializable {
     }
 
 
+    public Integer getStatus() {
+        return status;
+    }
 }

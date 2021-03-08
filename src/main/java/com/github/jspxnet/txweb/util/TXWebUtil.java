@@ -13,6 +13,7 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.cache.redis.RedissonClientConfig;
+import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.json.JSONObject;
@@ -38,6 +39,7 @@ import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.interceptor.InterceptorSupport;
 import com.github.jspxnet.txweb.result.RocException;
+import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.support.MultipartSupport;
 import com.github.jspxnet.txweb.turnpage.TurnPageButton;
@@ -602,10 +604,10 @@ public class TXWebUtil {
                 }
                 //执行完后已经执行 execute，确保和form方式一样
             } catch (Exception e) {
+
                 log.error(actionProxy.getMethod() + " params is " + ObjectUtil.toString(paramObj), e);
                 //RPC 2.0 标准  返回
-                action.addFieldInfo(Environment.errorInfo, e.getMessage());
-                return null;
+                throw  new RocException(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(),"参数错误," + ObjectUtil.toString(paramObj)));
             }
         }
 
@@ -906,14 +908,15 @@ public class TXWebUtil {
                 //--------------------------
                 RocException rocException = (RocException) e;
                 action.setResult(rocException.getResponse());
-            } else if (e instanceof Exception) {
-                //--------------------------
-                Exception err = (Exception) e;
-                log.error("执行方法异常:{},error:{}",exeMethod.getName(),e.getMessage());
-                action.addFieldInfo(Environment.errorInfo,exeMethod.getName() + " " + ThrowableUtil.getThrowableMessage(err));
-            }
-            else {
-                action.addFieldInfo(Environment.errorInfo, exeMethod.getName() + " " + ThrowableUtil.getThrowableMessage(e));
+            }  else {
+                Transaction transaction = exeMethod.getAnnotation(Transaction.class);
+                if (transaction != null&&!StringUtil.isEmpty(transaction.message()))
+                {
+                    action.addFieldInfo(Environment.errorInfo, transaction.message());
+                } else
+                {
+                    action.addFieldInfo(Environment.errorInfo, exeMethod.getName() + " " + ThrowableUtil.getThrowableMessage(e));
+                }
             }
         } finally {
             action.put(ActionEnv.Key_CallMethodName, exeMethod);
@@ -1036,7 +1039,7 @@ public class TXWebUtil {
      * @param response 应答
      * @param status   状态
      */
-    public static void print(String string, int type, HttpServletResponse response, final int status) {
+    public static void print(String string, int type, HttpServletResponse response, Integer status) {
         if (response == null) {
             return;
         }
@@ -1071,7 +1074,7 @@ public class TXWebUtil {
         AtomicReference<StringBuilder> sb = new AtomicReference<>(new StringBuilder());
         sb.get().append(contentType).append(";charset=").append(response.getCharacterEncoding());
         response.setContentType(sb.toString());
-        if (status > 0) {
+        if (status!=null&&status>0&&status != 200) {
             response.setStatus(status);
         }
         PrintWriter out;
@@ -1098,7 +1101,7 @@ public class TXWebUtil {
      * @param response 应答
      * @param status   状态
      */
-    public static void print(JSONObject json, int type, HttpServletResponse response, int status) {
+    public static void print(JSONObject json, int type, HttpServletResponse response, Integer status) {
         if (WebOutEnumType.JSON.getValue() == type)
         {
             print(json.toString(4), type, response, status);

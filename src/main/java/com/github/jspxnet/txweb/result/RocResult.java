@@ -85,6 +85,10 @@ public class RocResult extends ResultSupport {
             json = (JSONObject) methodResult;
         } else if (methodResult instanceof RocResponse) {
             RocResponse<?> rocResponse = (RocResponse<?>)methodResult;
+            if (rocResponse.getStatus()!=null)
+            {
+                response.setStatus(rocResponse.getStatus());
+            }
             if (language!=null&&YesNoEnumType.YES.getValue()==rocResponse.getSuccess() && StringUtil.isEmpty(rocResponse.getMessage()))
             {
                 rocResponse.setMessage(language.getLang(LanguageRes.success));
@@ -120,7 +124,7 @@ public class RocResult extends ResultSupport {
                     TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_403);
                 } else
                 {
-                    TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_OK);
+                    TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, null);
                 }
             } else
             {

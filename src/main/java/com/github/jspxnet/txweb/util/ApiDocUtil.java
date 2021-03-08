@@ -221,6 +221,10 @@ public class ApiDocUtil {
     public static Map<String, ApiParam> getSetMethodApiOperate(Class<?> cla) {
         Method[] methods = ClassUtil.getDeclaredSetMethods(cla);
         Map<String, ApiParam> classParamList = new LinkedHashMap<>();
+        if (methods==null)
+        {
+            return classParamList;
+        }
         for (Method method : methods) {
             if (method.getParameterCount() != 1) {
                 continue;

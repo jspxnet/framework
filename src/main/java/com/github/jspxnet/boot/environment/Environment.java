@@ -88,7 +88,7 @@ public abstract class Environment {
 
     final public static String sqlXmlPath = "sqlXmlPath";
 
-    final public static String loaderPath = "loaderPath";
+    //final public static String loaderPath = "loaderPath";
 
     final public static String lucenePath = "lucenePath";
 
@@ -101,13 +101,13 @@ public abstract class Environment {
     final public static String tempPath = "tempPath";
 
     //升级
-    final public static String upgradePath = "upgradePath";
+    //final public static String upgradePath = "upgradePath";
 
-    final public static String pluginsPath = "pluginsPath";
+    //final public static String pluginsPath = "pluginsPath";
 
     final public static String fontsPath = "fontsPath";
 
-    final public static String cachePath = "cachePath";
+    //final public static String cachePath = "cachePath";
 
     final public static String resPath = "resPath";
 

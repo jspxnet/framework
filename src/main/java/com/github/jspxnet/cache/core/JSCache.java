@@ -29,7 +29,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2007-4-13
  * Time: 9:42:07
- * c
+ *
  */
 @Slf4j
 public class JSCache implements Runnable, Cache {

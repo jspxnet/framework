@@ -300,13 +300,13 @@ public class JSONObject extends HashMap<String, Object> {
             bean = ReflectUtil.getValueMap(bean);
         }
 
-        if (bean instanceof JSONObject)
+/*        if (bean instanceof JSONObject)
         {
             JSONObject json = (JSONObject)bean;
             super.putAll(json.toMap());
             return;
-        }
-        if (bean instanceof Map && !(bean instanceof JSONObject)) {
+        }*/
+        if (bean instanceof Map) {
             Map map = (Map) bean;
             for (Object key : map.keySet()) {
                 //判断是否需要返回

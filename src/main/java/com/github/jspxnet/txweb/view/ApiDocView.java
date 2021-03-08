@@ -45,7 +45,7 @@ public class ApiDocView extends ActionSupport {
 
     final private WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
     final private BeanFactory beanFactory = EnvFactory.getBeanFactory();
-    final private String API_INDEX_CACHE = "api:index:cache:%s";
+    //final private String API_INDEX_CACHE = "api:index:cache:%s";
     final private String API_FIELD_CACHE = "api:field:cache:%s";
 
     @Operate(caption = "应用名称", post = false, method = "appname")
@@ -60,10 +60,10 @@ public class ApiDocView extends ActionSupport {
 
     @Operate(caption = "文档索引", method = "indexing", post = false)
     public Collection<ApiAction> index()  {
-        Map<String, ApiAction> indexCache = (Map<String, ApiAction>) JSCacheManager.get(DefaultCache.class, String.format(API_INDEX_CACHE, getRootNamespace()));
-        if (indexCache != null && !indexCache.isEmpty()) {
-            return indexCache.values();
-        }
+        return createIndex().values();
+    }
+
+    private Map<String, ApiAction> createIndex()  {
 
         String softName = getRootNamespace();
         Map<String, ApiAction> resultMap = new HashMap<>();
@@ -121,9 +121,7 @@ public class ApiDocView extends ActionSupport {
         for(Map.Entry<String, ApiAction> mapping:list){
             sortMap.put(mapping.getKey(),mapping.getValue());
         }
-        indexCache = sortMap;
-        JSCacheManager.put(DefaultCache.class, String.format(API_INDEX_CACHE, getRootNamespace()), indexCache);
-        return indexCache.values();
+        return sortMap;
     }
 
     @Operate(caption = "字段索引", method = "fielding", post = false)
@@ -207,15 +205,11 @@ public class ApiDocView extends ActionSupport {
 
     @Operate(caption = "文档", method = "document/${id}", post = false)
     public ApiDocument getDocument(@PathVar String id) throws Exception {
-        Map<String, ApiAction> indexCache = (Map<String, ApiAction>) JSCacheManager.get(DefaultCache.class, String.format(API_INDEX_CACHE, getRootNamespace()));
-        if (indexCache == null || indexCache.isEmpty()) {
-            index();
-            indexCache = (Map<String, ApiAction>) JSCacheManager.get(DefaultCache.class, String.format(API_INDEX_CACHE, getRootNamespace()));
-        }
+        Map<String, ApiAction> indexCache = createIndex();
         AssertException.isNull(indexCache, "不存在的文档索引");
 
         ApiAction apiAction = indexCache.get(id);
-        AssertException.isNull(indexCache, "不存在的文档id");
+        AssertException.isNull(apiAction, "不存在的文档id");
 
 
         ApiDocument apiDocument = BeanUtil.copy(apiAction, ApiDocument.class);

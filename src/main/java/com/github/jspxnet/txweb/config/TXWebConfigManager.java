@@ -283,7 +283,7 @@ public class TXWebConfigManager implements WebConfigManager {
         actionConfigBean.setMobile(httpMethod.mobile());
         actionConfigBean.setSecret(httpMethod.secret());
         actionConfigBean.setRegister(true);
-        log.debug("register action package:\r\n{}",actionConfigBean.toString());
+        //log.debug("register action package:\r\n{}",actionConfigBean.toString());
         Map<String, ActionConfigBean> actionConfigBeanMap = configTable.computeIfAbsent(httpMethod.namespace(), k -> new HashMap<>());
         actionConfigBeanMap.put(actionConfigBean.getActionName(), actionConfigBean);
 

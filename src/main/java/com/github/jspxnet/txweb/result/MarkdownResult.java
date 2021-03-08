@@ -11,6 +11,7 @@ package com.github.jspxnet.txweb.result;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.io.IoUtil;
+import com.github.jspxnet.io.StringOutputStream;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.load.Source;
 import com.github.jspxnet.scriptmark.load.StringSource;
@@ -27,9 +28,10 @@ import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.utils.StringUtil;
+
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Map;
 
 /**
@@ -56,19 +58,6 @@ public class MarkdownResult extends ResultSupport {
         checkCache(action, response);
         //浏览器缓存控制end
 
-        //请求编码begin
-        String contentType = action.getEnv(ActionEnv.ContentType);
-        if (!StringUtil.isNull(contentType)) {
-            response.setContentType(contentType);
-            String tempEncode = StringUtil.substringAfterLast(StringUtil.replace(contentType, " ", ""), "charset=");
-            if (!StringUtil.isNull(tempEncode)) {
-                response.setCharacterEncoding(tempEncode);
-            }
-        } else {
-            response.setContentType("text/html; charset=" + Dispatcher.getEncode());
-            response.setCharacterEncoding(Dispatcher.getEncode());
-        }
-        //请求编码end
 
         //处理下载情况 begin
         String disposition = action.getEnv(ActionEnv.Content_Disposition);
@@ -93,7 +82,7 @@ public class MarkdownResult extends ResultSupport {
             if (f==null||!f.isFile()) {
                 f = EnvFactory.getFile(markdownTemplate);
             }
-            fileSource = new StringSource(IoUtil.autoReadText(f.getPath(), Dispatcher.getEncode()));
+            fileSource = new StringSource(IoUtil.autoReadText(f.getPath(), Environment.defaultEncode));
         }
 
         //如果使用cache 就使用uri
@@ -122,23 +111,41 @@ public class MarkdownResult extends ResultSupport {
         //载入md文件end
 
         //输出模板数据
-        PrintWriter out = response.getWriter();
+
         Map<String, Object> valueMap = action.getEnv();
         initPageEnvironment(action, valueMap);
         valueMap.put("title", action.getEnv(ActionEnv.Key_ActionName));
         valueMap.put("content", ScriptMarkUtil.getMarkdownHtml(mdFileSource.getSource()));
-        try {
-            scriptMark.process(out, valueMap);
-        } catch (Exception e) {
-            if (DEBUG) {
-                log.info("TemplateResult file not found:" + mdFile.getPath(), e);
-                TXWebUtil.errorPrint("TemplateResult file not found:" + mdFile.getPath() + "\r\n" + StringUtil.toBrLine(e.getMessage()), null,response, HttpStatusType.HTTP_status_404);
-            } else {
-                TXWebUtil.errorPrint("file not found,不存在的文件", null,response, HttpStatusType.HTTP_status_404);
-                return;
+
+        //请求编码begin
+        String contentType = action.getEnv(ActionEnv.ContentType);
+        if (!StringUtil.isNull(contentType)) {
+            response.setContentType(contentType);
+            String tempEncode = StringUtil.substringAfterLast(StringUtil.replace(contentType, " ", ""), "charset=");
+            if (!StringUtil.isNull(tempEncode)) {
+                response.setCharacterEncoding(tempEncode);
             }
+        } else {
+            String encode = Dispatcher.getEncode();
+            if (encode==null)
+            {
+                encode = Environment.defaultEncode;
+            }
+            response.setContentType("text/html; charset=" + encode);
+            response.setCharacterEncoding(encode);
+            action.getRequest().setCharacterEncoding(encode);
         }
-        out.flush();
-        out.close();
+        //请求编码end
+
+        try {
+            PrintWriter out = response.getWriter();
+            scriptMark.process(out, valueMap);
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            log.info("TemplateResult file :{} error:{},,检查模版文件是否存在,并且应用的js等存在", mdFile.getPath(), e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+
     }
 }
