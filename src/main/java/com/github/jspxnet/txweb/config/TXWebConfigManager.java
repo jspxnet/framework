@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.config;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
 import com.github.jspxnet.sioc.BeanFactory;
@@ -123,6 +124,11 @@ public class TXWebConfigManager implements WebConfigManager {
      */
     @Override
     synchronized public void checkLoad() {
+
+        if (!EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useTxWeb))
+        {
+            return;
+        }
         if (!configTable.isEmpty()) {
             return;
         }

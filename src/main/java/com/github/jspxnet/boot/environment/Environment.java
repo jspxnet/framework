@@ -414,6 +414,7 @@ public abstract class Environment {
 
 
     static public final String useCache = "useCache";
+    static public final String useTxWeb = "useTxWeb";
 
     static public final String onlinePrivilege = "onlinePrivilege";
 
