@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class XMLFormat {
     private static final String CLASS_w3c = "w3c";
-    private static final String CLASS_dom4j = "dom4j";
+    //private static final String CLASS_dom4j = "dom4j";
     private static final String CLASS_jdom = "jdom";
 
     final private static Map<String, String> classMap = new LinkedHashMap<String, String>();
@@ -37,7 +37,7 @@ public class XMLFormat {
     static {
         classMap.put(CLASS_jdom, "org.jdom.output.Format");
         classMap.put(CLASS_w3c, "org.w3c.dom.Document");
-        classMap.put(CLASS_dom4j, "org.dom4j.io.SAXReader");
+      //  classMap.put(CLASS_dom4j, "org.dom4j.io.SAXReader");
 
         defaultEncode = EnvFactory.getEnvironmentTemplate().getString(Environment.encode, Environment.defaultEncode);
         className = EnvFactory.getEnvironmentTemplate().getString(Environment.xmlFormatClass, Environment.auto);
@@ -54,7 +54,7 @@ public class XMLFormat {
                             break;
                         }
                     } catch (Exception e) {
-                        className = null;
+                        className = CLASS_jdom;
                     }
                 }
             }
@@ -82,11 +82,11 @@ public class XMLFormat {
      * @param xml xml 字符串
      * @return 格式化xml
      */
-    static private String formatForDom4j(String xml) {
+   /* static private String formatForDom4j(String xml) {
         try {
             org.dom4j.io.SAXReader saxReader = (org.dom4j.io.SAXReader) ClassUtil.newInstance("org.dom4j.io.SAXReader");
             org.dom4j.Document document = saxReader.read(new StringReader(deleteHtmlHead(xml)));
-            /** 格式化输出,类型IE浏览一样 */
+            *//** 格式化输出,类型IE浏览一样 *//*
             org.dom4j.io.OutputFormat format = org.dom4j.io.OutputFormat.createPrettyPrint();
             format.setEncoding(defaultEncode);
             format.setOmitEncoding(true);
@@ -104,7 +104,7 @@ public class XMLFormat {
             return StringUtil.empty;
         }
     }
-
+*/
     /**
      * @param xml xml 字符串
      * @return 格式化xml jdom 方式
@@ -202,10 +202,10 @@ public class XMLFormat {
             if (CLASS_w3c.equals(className)) {
                 return formatForW3C(xml);
             }
-            if (CLASS_dom4j.equals(className)) {
+           /* if (CLASS_dom4j.equals(className)) {
                 return formatForDom4j(xml);
             }
-
+*/
         } catch (Exception e) {
             e.printStackTrace();
         }

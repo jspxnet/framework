@@ -219,7 +219,7 @@ public class ConfigureContext implements IocContext {
             }
             beanModel.setNamespace(namespace);
             beanModel.setClassName(cla.getName());
-            log.info("registry Ioc Bean class=" + cla + " id=" + id + " namespace=" + namespace);
+            //log.info("registry Ioc Bean class=" + cla + " id=" + id + " namespace=" + namespace);
             registerBean(beanModel);
         } catch (Exception e) {
             log.error("ioc load error" + cla, e);
