@@ -207,7 +207,7 @@ public class RocResponse<T> implements Serializable {
      * @param <T> 类型
      * @return 列表返回封装简化
      */
-    public static <T> RocResponse<T> success(T data,int currentPage,int count,int totalCount) {
+    public static <T> RocResponse<T> success(T data,int currentPage,int count,long totalCount) {
         RocResponse<T> response = new RocResponse<>(data);
         response.setCurrentPage(currentPage).setCount(count).setTotalCount(totalCount);
         return response;
