@@ -15,9 +15,9 @@ import java.util.Map;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/3/10 23:31
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/3/10 23:31
+ * description: 给spring备用
  **/
 public class SpringResponse<T> implements Serializable {
 
