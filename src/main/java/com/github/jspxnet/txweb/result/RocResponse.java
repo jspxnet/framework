@@ -4,6 +4,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.enums.EnumType;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.txweb.model.param.PageParam;
@@ -324,4 +325,16 @@ public class RocResponse<T> implements Serializable {
     public Integer getStatus() {
         return status;
     }
+
+    @Override
+    public String toString()
+    {
+        return new JSONObject(this).toString(4);
+    }
+
+    public JSONObject getJson()
+    {
+        return new JSONObject(this);
+    }
+
 }

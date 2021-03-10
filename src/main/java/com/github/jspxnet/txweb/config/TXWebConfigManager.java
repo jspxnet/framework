@@ -125,6 +125,8 @@ public class TXWebConfigManager implements WebConfigManager {
     @Override
     synchronized public void checkLoad() {
 
+        EnvFactory.getEnvironmentTemplate();
+
         if (!EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useTxWeb))
         {
             return;

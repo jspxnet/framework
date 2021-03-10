@@ -151,6 +151,7 @@
             <groupId>com.caucho</groupId>
             <artifactId>quercus</artifactId>
             <version>4.0.63</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.htmlcleaner</groupId>
@@ -249,6 +250,7 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk15on</artifactId>
             <version>1.67</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
@@ -783,8 +785,6 @@
                     </executions>
                 </plugin>
 
-
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -798,7 +798,6 @@
                         <outputDirectory>D:\website\webapps\root\WEB-INF\lib\</outputDirectory>
                         <archive>
                             <manifest>
-                                <addClasspath>true</addClasspath>
                                 <mainClass>com.github.jspxnet.boot.TomcatApplication</mainClass>
                             </manifest>
                         </archive>

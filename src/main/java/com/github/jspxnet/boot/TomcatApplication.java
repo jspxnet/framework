@@ -36,7 +36,7 @@ import java.util.Properties;
  **/
 @Slf4j
 public class TomcatApplication {
-    private final static Tomcat TOMCAT = new Tomcat();
+
     @Parameter(names = "-port", description = "tomcat server port")
     private static int port;
     @Parameter(names = "-webPath", description = "web path")
@@ -93,8 +93,8 @@ public class TomcatApplication {
 
         File file = new File(webPath);
         FileUtil.makeDirectory(file);
-
-        Connector connector = TOMCAT.getConnector();
+        Tomcat tomcat = new Tomcat();
+        Connector connector = tomcat.getConnector();
         connector.setPort(port);
         connector.setURIEncoding(Environment.defaultEncode);
         //让 URI 和 body 编码一致。(针对POST请求)
@@ -105,18 +105,18 @@ public class TomcatApplication {
         //设置Host
 
 
-        TOMCAT.setSilent(true);
-        TOMCAT.setAddDefaultWebXmlToWebapp(true);
-        TOMCAT.setHostname("localhost");
-        TOMCAT.setBaseDir(webPath);
+        tomcat.setSilent(true);
+        tomcat.setAddDefaultWebXmlToWebapp(true);
+        tomcat.setHostname("localhost");
+        tomcat.setBaseDir(webPath);
 
         //我们会根据xml配置文件来
-        Host host = TOMCAT.getHost();
+        Host host = tomcat.getHost();
         host.setName("localhost");
         host.setCreateDirs(false);
         //host.setAppBase(FileUtil.mendPath(file.getParent()));
         //host.setAppBase("d:/website/webapps");
-        Context standardContext = TOMCAT.addWebapp("",webPath);
+        Context standardContext = tomcat.addWebapp("",webPath);
 
         //前面的那个步骤只是把Tomcat起起来了，但是没啥东西
         //要把class加载进来,把启动的工程加入进来了
@@ -135,7 +135,7 @@ public class TomcatApplication {
         standardContext.addLifecycleListener(new Tomcat.FixContextListener());
        // host.addChild(standardContext);
 
-        TOMCAT.addServlet("", "jspxServlet", new ServletDispatcher());
+        tomcat.addServlet("", "jspxServlet", new ServletDispatcher());
         standardContext.addServletMappingDecoded("*.jhtml", "jspxServlet");
         standardContext.addServletMappingDecoded("*.jwc", "jspxServlet");
         standardContext.addServletMappingDecoded("*.md", "jspxServlet");
@@ -143,7 +143,7 @@ public class TomcatApplication {
 
         Dispatcher.setRealPath(webPath);
 
-        TOMCAT.addServlet("", "jsp", new JspServlet());
+        tomcat.addServlet("", "jsp", new JspServlet());
         standardContext.addServletMappingDecoded("*.jsp", "jsp");
 
         JarScanner scanner = new StandardJarScanner();
@@ -180,7 +180,7 @@ public class TomcatApplication {
             redisResource.setName("bean/redisson");
             redisResource.setAuth("Container");
             redisResource.setProperty("factory",TomcatJndiRedissonFactory.class.getName());
-            TOMCAT.getServer().getGlobalNamingResources().addResource(redisResource);
+            tomcat.getServer().getGlobalNamingResources().addResource(redisResource);
         }
 
         /*
@@ -258,10 +258,10 @@ public class TomcatApplication {
 　　isWorkDirPersistent="false
 
          */
-        TOMCAT.start();
+        tomcat.start();
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
-        Server server = TOMCAT.getServer();
+        Server server = tomcat.getServer();
         server.setAddress(ip);
         server.setUtilityThreads(threads);
         server.await();

@@ -10,6 +10,8 @@
 package com.github.jspxnet.boot;
 
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
 import java.util.Date;
@@ -58,6 +60,14 @@ public final class JspxNetApplication {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void onlySql(String fileName) {
+        JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
+        jspxConfiguration.setDefaultConfigFile(fileName);
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
+        envTemplate.createSystemEnv();
     }
 
     public static void destroy() {
