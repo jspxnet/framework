@@ -12,6 +12,8 @@ package com.github.jspxnet.boot;
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
+import com.github.jspxnet.cache.JSCacheManager;
+import com.github.jspxnet.cache.store.MemoryStore;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
 import java.util.Date;
@@ -62,12 +64,21 @@ public final class JspxNetApplication {
         }
     }
 
-    public static void onlySql(String fileName) {
+    public static void onlySql(String fileName,Class<?>[] cacheList) {
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         jspxConfiguration.setDefaultConfigFile(fileName);
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
         envTemplate.createSystemEnv();
+        //简单的缓存控制
+        for (Class<?> cls:cacheList)
+        {
+            try {
+                JSCacheManager.getCacheManager().createCache(new MemoryStore(), cls,100,100,false,null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void destroy() {

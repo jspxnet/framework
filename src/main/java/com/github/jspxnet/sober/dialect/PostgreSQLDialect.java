@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.sober.dialect;
 
+import com.caucho.quercus.lib.db.ColumnType;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.utils.ObjectUtil;
@@ -31,14 +32,13 @@ public class PostgreSQLDialect extends Dialect {
     public PostgreSQLDialect() {
         standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE IF NOT EXISTS ${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
-                " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (\"${" + KEY_PRIMARY_KEY + "}\")\n)");
+                " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
 
 
         //pgsql特有
         standard_SQL.put(SQL_COMMENT, "COMMENT ON COLUMN ${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
 
         standard_SQL.put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
-
 
         standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} boolean <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toBoolean()}</#if>");
         standard_SQL.put(boolean.class.getName(), "${" + COLUMN_NAME + "} boolean <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toBoolean()}</#if>");
@@ -57,7 +57,7 @@ public class PostgreSQLDialect extends Dialect {
         standard_SQL.put(Float.class.getName(), "${" + COLUMN_NAME + "} real <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
         standard_SQL.put("float", "${" + COLUMN_NAME + "} real <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
-        standard_SQL.put(Date.class.getName(), "${" + COLUMN_NAME + "} timestamp NOT NULL default now()");
+        standard_SQL.put(Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
 
         standard_SQL.put(Time.class.getName(), "${" + COLUMN_NAME + "} time <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '${" + COLUMN_DEFAULT + "}'</#if>");
 
@@ -216,19 +216,18 @@ public class PostgreSQLDialect extends Dialect {
         return rs.getObject(index);
     }
 
-    @Override
+/*    @Override
     public void setPreparedStatementValue(PreparedStatement pstmt, int parameterIndex, Object obj) throws Exception {
-        if (obj == null && Types.VARCHAR == pstmt.getMetaData().getColumnType(parameterIndex)) {
-            pstmt.setObject(parameterIndex, StringUtil.empty);
-            return;
-        }
+        ResultSetMetaData resultSetMetaData = pstmt.getMetaData();
+
+        int columnType = resultSetMetaData.getColumnType(parameterIndex);
         //pgsql 支持boolean 类型
-        if (obj instanceof Boolean) {
+        if (Types.BOOLEAN==columnType) {
             pstmt.setBoolean(parameterIndex, ObjectUtil.toBoolean(obj));
             return;
         }
         super.setPreparedStatementValue(pstmt, parameterIndex, obj);
-    }
+    }*/
 
     @Override
     public boolean supportsSequenceName() {

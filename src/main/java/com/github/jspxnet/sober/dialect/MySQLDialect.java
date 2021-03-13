@@ -10,7 +10,6 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
@@ -91,15 +90,12 @@ public class MySQLDialect extends Dialect {
         return sql + " limit " + begin + "," + length;
     }
 
+/*
     @Override
     public void setPreparedStatementValue(PreparedStatement pstmt, int parameterIndex, Object obj) throws Exception {
-        //支持boolean 类型
-        if (obj instanceof Boolean) {
-            pstmt.setInt(parameterIndex, ObjectUtil.toInt(ObjectUtil.toBoolean(obj)));
-            return;
-        }
         super.setPreparedStatementValue(pstmt, parameterIndex, obj);
     }
+*/
 
     @Override
     public boolean supportsSequenceName() {

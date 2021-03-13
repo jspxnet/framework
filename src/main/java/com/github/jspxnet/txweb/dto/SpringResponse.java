@@ -38,7 +38,7 @@ public class SpringResponse<T> implements Serializable {
     private int totalPage;
 
     @Column(caption = "一页行数")
-    private Integer count  = null;
+    private int count  = 0;
 
     //当发生错误的时候code才有明细
     @Column(caption = "是否成功",enumType = YesNoEnumType.class)
@@ -297,11 +297,6 @@ public class SpringResponse<T> implements Serializable {
 
     private void calculatePage()
     {
-        if (count==null)
-        {
-            count = 0;
-        }
-
         if (count>0&&totalCount>0)
         {
             totalPage = (totalCount / count);

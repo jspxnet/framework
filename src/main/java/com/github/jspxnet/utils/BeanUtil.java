@@ -578,8 +578,8 @@ public class BeanUtil {
             {
                 copyFiledValue(object, result);
             }
-        } catch (Exception var4) {
-            log.error("对象copy失败," + cls);
+        } catch (Exception e) {
+            log.error("对象copy失败 class:{},error:{}",cls,e.getLocalizedMessage());
         }
         return result;
     }
@@ -693,7 +693,7 @@ public class BeanUtil {
                 try {
                     field.setAccessible(true);
                     field.set(oldData, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
-                } catch (IllegalAccessException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
                 }
@@ -713,10 +713,18 @@ public class BeanUtil {
                         field.setAccessible(true);
                         setField.setAccessible(true);
                         Object o = setField.get(getData);
-                        if (setField.getType().equals(field.getType())) {
-                            field.set(oldData, o);
-                        } else {
-                            field.set(oldData, copy(o, field.getType()));
+                        if (setField.getType().equals(field.getType())||ClassUtil.isStandardType(field.getType())) {
+                            if (o==null && ClassUtil.isBaseNumberType(field.getType()))
+                            {
+                                field.set(oldData, 0);
+                            } else
+                            {
+                                field.set(oldData, o);
+                            }
+                        }
+                        else
+                        {
+                            field.set(oldData,getTypeValue(o, field.getType()));
                         }
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
