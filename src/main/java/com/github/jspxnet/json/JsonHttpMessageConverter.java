@@ -10,11 +10,11 @@ import java.lang.reflect.Type;
 /**
  * Created by chenYuan
  *
- * @author: chenYuan
- * @date: 2021/3/10 22:17
- * @description: 替代spring的json解析器
+ * author: chenYuan
+ * date: 2021/3/10 22:17
+ * description: 替代spring的json解析器
  *  implements WebMvcConfigurer
- *  @Override
+ * Override
  *     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
  *         converters.clear();
  *         JsonHttpMessageConverter jsonConverter = new JsonHttpMessageConverter();
