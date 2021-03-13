@@ -15,11 +15,14 @@ import java.lang.reflect.Type;
  * description: 替代spring的json解析器
  *  implements WebMvcConfigurer
  * Override
+ * <pre>{@code
  *     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
  *         converters.clear();
  *         JsonHttpMessageConverter jsonConverter = new JsonHttpMessageConverter();
  *         converters.add(jsonConverter);
  *     }
+ *    }
+ * }</pre>
  **/
 public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 
