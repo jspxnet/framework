@@ -10,12 +10,15 @@
 package com.github.jspxnet.boot;
 
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.cache.store.MemoryStore;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Date;
 
 /**
@@ -24,6 +27,7 @@ import java.util.Date;
  * date: 2007-5-25
  * Time: 16:31:31
  */
+
 public final class JspxNetApplication {
     private JspxNetApplication()
     {
@@ -79,6 +83,7 @@ public final class JspxNetApplication {
                 e.printStackTrace();
             }
         }
+        System.out.println("当前默认路径:"+envTemplate.getString(Environment.defaultPath));
     }
 
     public static void destroy() {
