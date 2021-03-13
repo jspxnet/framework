@@ -12,7 +12,14 @@ import java.lang.reflect.Type;
  *
  * @author: chenYuan
  * @date: 2021/3/10 22:17
- * @description: springbase
+ * @description: 替代spring的json解析器
+ *  implements WebMvcConfigurer
+ *  @Override
+ *     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+ *         converters.clear();
+ *         JsonHttpMessageConverter jsonConverter = new JsonHttpMessageConverter();
+ *         converters.add(jsonConverter);
+ *     }
  **/
 public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 
