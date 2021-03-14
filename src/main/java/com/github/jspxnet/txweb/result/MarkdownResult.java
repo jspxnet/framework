@@ -106,6 +106,8 @@ public class MarkdownResult extends ResultSupport {
         //载入md文件begin
         action.put(Environment.templateSuffix, Dispatcher.getMarkdownSuffix());
         action.put(Environment.scriptPath,ENV_TEMPLATE.getString(Environment.scriptPath));
+
+
         File mdFile = new File(action.getTemplatePath(), action.getTemplateFile());
         FileSource mdFileSource = new FileSource(mdFile, action.getTemplateFile(), Dispatcher.getEncode());
         //载入md文件end
