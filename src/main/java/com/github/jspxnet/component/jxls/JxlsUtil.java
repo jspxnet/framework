@@ -1,6 +1,7 @@
 package com.github.jspxnet.component.jxls;
 
 import com.github.jspxnet.utils.BeanUtil;
+import com.github.jspxnet.utils.DateUtil;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.poi.hssf.usermodel.*;
@@ -13,10 +14,8 @@ import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.JxlsHelper;
 import java.io.*;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.DecimalFormat;
+import java.util.*;
 
 public class JxlsUtil {
 
@@ -143,11 +142,14 @@ public class JxlsUtil {
                 // 判断excel单元格内容的格式，并对其进行转换，以便插入数据库
                 if (CellType.NUMERIC==cell.getCellType())
                 {
-                    if (HSSFDateUtil.isCellDateFormatted(cell)) {
-                        cellValue =  cell.getDateCellValue();
+                    if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                        Date date = cell.getDateCellValue();
+                        cellValue = DateUtil.toString(date,DateUtil.DAY_FORMAT);
                     } else {
+                        DecimalFormat format = new DecimalFormat("######.##");
                         // int 类型操作
-                        cellValue = cell.getNumericCellValue();
+                        // cellValue = String.valueOf((int) cell.getNumericCellValue());
+                        cellValue = format.format(cell.getNumericCellValue());
                     }
                 } else
                 {
