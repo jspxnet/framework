@@ -212,18 +212,6 @@ public abstract class Dialect {
             ps.setNull(parameterIndex, Types.NULL);
             return;
         }
-
-        ResultSetMetaData resultSetMetaData = ps.getMetaData();
-        if (resultSetMetaData!=null)
-        {
-            //mysql 会为空,psql有
-            int columnType = resultSetMetaData.getColumnType(parameterIndex);
-            if (Types.BOOLEAN==columnType) {
-                ps.setBoolean(parameterIndex, ObjectUtil.toBoolean(obj));
-                return;
-            }
-        }
-
         if (obj instanceof String) {
             ps.setString(parameterIndex, (String) obj);
             return;
