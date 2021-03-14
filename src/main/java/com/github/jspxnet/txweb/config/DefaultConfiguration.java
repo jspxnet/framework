@@ -39,14 +39,14 @@ public class DefaultConfiguration implements Configuration {
     private String fileName = "jspx.txweb.xml";
 
     //默认环境
-    private EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-    private Map<String, String> extendMap = new Hashtable<String, String>();
+    private final EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+    private final Map<String, String> extendMap = new Hashtable<String, String>();
     //每个命名空间里边的默认拦截器列表
-    private Map<String, List<DefaultInterceptorBean>> defaultInterceptorMap = new Hashtable<>();
-    private Map<String, List<ResultConfigBean>> defaultResultMap = new HashMap<>();
+    private final Map<String, List<DefaultInterceptorBean>> defaultInterceptorMap = new Hashtable<>();
+    private final Map<String, List<ResultConfigBean>> defaultResultMap = new HashMap<>();
 
     //文件配置中要扫描的目录
-    private List<ScanConfig> scanPackageList = new ArrayList<>();
+    private final List<ScanConfig> scanPackageList = new ArrayList<>();
 
     private static Configuration instance;
 

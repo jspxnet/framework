@@ -713,18 +713,18 @@ public class BeanUtil {
                         field.setAccessible(true);
                         setField.setAccessible(true);
                         Object o = setField.get(getData);
-                        if (setField.getType().equals(field.getType())||ClassUtil.isStandardType(field.getType())) {
-                            if (o==null && ClassUtil.isBaseNumberType(field.getType()))
-                            {
-                                field.set(oldData, 0);
-                            } else
-                            {
-                                field.set(oldData, o);
-                            }
+                        if (o==null && ClassUtil.isBaseNumberType(field.getType()))
+                        {
+                            field.set(oldData, 0);
+                        } else
+                        if (setField.getType().equals(field.getType()) || ClassUtil.isNumberType(setField.getType()) && ClassUtil.isBaseNumberType(field.getType())) {
+                            //todo字符串 和数字类型需要避开
+                            field.set(oldData, o);
                         }
                         else
                         {
-                            field.set(oldData,getTypeValue(o, field.getType()));
+                            //对象二次拷贝
+                            field.set(oldData,copy(o, field.getType()));
                         }
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();

@@ -178,15 +178,15 @@ public abstract class Dialect {
     abstract public boolean supportsConcurReadOnly();
 
 
-    public String processSQL(String SQLText, Map<String, Object> valueMap) {
+    public String processSql(String sql, Map<String, Object> valueMap) {
         try {
-            if (SQLText.contains("<#"))
+            if (sql.contains("<#"))
             {
-                return placeholder.processTemplate(valueMap, SQLText);
+                return placeholder.processTemplate(valueMap, sql);
             }
-            return sqlPlaceholder.processTemplate(valueMap, SQLText);
+            return sqlPlaceholder.processTemplate(valueMap, sql);
         } catch (Exception e) {
-            log.error(SQLText + "  " + MapUtil.toString(valueMap), e);
+            log.error(sql + "  " + MapUtil.toString(valueMap), e);
             throw e;
         }
     }

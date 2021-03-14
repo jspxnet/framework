@@ -246,7 +246,7 @@ public abstract class JdbcOperations implements SoberSupport {
                     valueMap.put(tableName, getTableName(aClassArray));
                 }
             }
-            String sqlText = dialect.processSQL(soberCalcUnique.getSql(), valueMap);
+            String sqlText = dialect.processSql(soberCalcUnique.getSql(), valueMap);
             try {
                 Object[] param = null;
                 if (!ArrayUtil.isEmpty(soberCalcUnique.getValue())) {
@@ -1401,7 +1401,7 @@ public abstract class JdbcOperations implements SoberSupport {
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         assert params instanceof Object[];
-        return execute(dialect.processSQL(sqlText, valueMap), args);
+        return execute(dialect.processSql(sqlText, valueMap), args);
     }
 
     /**
@@ -1669,7 +1669,7 @@ public abstract class JdbcOperations implements SoberSupport {
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         try {
             conn = getConnection(SoberEnv.READ_ONLY);
-            sql = dialect.processSQL(sql, valueMap);
+            sql = dialect.processSql(sql, valueMap);
             debugPrint(sql);
             if (!dialect.supportsConcurReadOnly()) {
                 statement = conn.prepareStatement(sql);
@@ -1928,7 +1928,7 @@ public abstract class JdbcOperations implements SoberSupport {
         ResultSet resultSet = null;
         String sqlText = StringUtil.empty;
         try {
-            sqlText = dialect.processSQL(sql, valueMap);
+            sqlText = dialect.processSql(sql, valueMap);
             debugPrint(sqlText);
             conn = getConnection(SoberEnv.READ_ONLY);
             if (!dialect.supportsConcurReadOnly()) {
