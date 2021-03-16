@@ -1,9 +1,8 @@
 #Jspx Framework 6.x
 
 ##简介
-一套开源的 Jspx Framework (简实构架)是一套开源的java一体化构架, 完整的架构体系,ioc、cache、DAO、连接池、验证、模板、sqlmap持久层，b/s,c/s ,分布式集群调用支持,语言上只使用了标准的 java 和javascript,模板语言呈现页面和API接口方式无缝结合,支持读写分。支持resetFull和传统模板呈现页面。自动API文档生成,
-其中融入了很多作者开发软件碰到的问题解决方法。
-可替代sping cloud构架的的一套解决方案。
+ 一套开源的 Jspx Framework (简实构架)是一套开源的java一体化构架, 完整的架构体系,ioc、cache、DAO、连接池、验证、模板、sqlmap持久层，b/s,c/s ,分布式集群调用支持,语言上只使用了标准的 java 和javascript,模板语言呈现页面和API接口方式无缝结合,支持读写分。支持resetFull和传统模板呈现页面。自动API文档生成,
+其中融入了很多作者开发软件碰到的问题解决方法。可替代sping cloud构架的的一套解决方案,同时也可以嵌入到spring中是用持久层。
 
 ##仓库地址
 
@@ -11,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.37</version>
+    <version>6.38</version>
 </dependency>
 ```
     
