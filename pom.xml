@@ -622,6 +622,12 @@
             <version>3.0.1</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>5.2.13.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -796,7 +802,6 @@
                         </execution>
                     </executions>
                 </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -807,7 +812,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <!--<outputDirectory>D:\website\webapps\root\WEB-INF\lib\</outputDirectory>-->
+                        <outputDirectory>D:\website\webapps\root\WEB-INF\lib\</outputDirectory>
                         <archive>
                             <manifest>
                                 <mainClass>com.github.jspxnet.boot.TomcatApplication</mainClass>

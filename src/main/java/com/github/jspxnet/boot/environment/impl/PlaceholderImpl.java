@@ -36,24 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PlaceholderImpl implements Placeholder {
     private String currentPath = FileUtil.mendPath(System.getProperty("user.dir")); //当前路径，f方便include 使用
     private String rootDirectory = FileUtil.mendPath(System.getProperty("user.dir")); //路径范围
-    //private Configurable configuration = new TemplateConfigurable();
-/*
-
-    static {
-        configuration.put(ScriptmarkEnv.NumberFormat, "###0.######");
-        configuration.put(ScriptmarkEnv.DateFormat, DateUtil.DAY_FORMAT);
-        configuration.put(ScriptmarkEnv.DateTimeFormat, "yyyy-MM-dd HH:mm");
-        configuration.put(ScriptmarkEnv.TimeFormat, "HH:mm");
-        configuration.put(ScriptmarkEnv.Template_update_delay, 3600);
-        configuration.put(ScriptmarkEnv.MacroCallTag, "@");
-        configuration.put(ScriptmarkEnv.Language, "JavaScript");
-        configuration.put(ScriptmarkEnv.Syncopate, "<>");
-        configuration.put(ScriptmarkEnv.VariableBegin, "${");
-        configuration.put(ScriptmarkEnv.VariableEnd, "}");
-        configuration.put(ScriptmarkEnv.VariableSafeBegin, "${");
-        configuration.put(ScriptmarkEnv.escapeVariable, "\\");
-    }
-*/
 
     public PlaceholderImpl() {
 
