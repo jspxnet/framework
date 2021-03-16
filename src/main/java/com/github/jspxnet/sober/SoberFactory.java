@@ -38,11 +38,10 @@ public interface SoberFactory extends Serializable {
 
     /**
      *  创建一个事务 创建事务
-     * @param soberSupport sober支持
      * @return 事务对象
      * @throws SQLException 异常
      */
-    AbstractTransaction createTransaction(SoberSupport soberSupport) throws SQLException;
+    AbstractTransaction createTransaction() throws SQLException;
 
     /**
      * @param type 读写分离 0 ReadWrite 1 ReadOnly 2 WriteOnly

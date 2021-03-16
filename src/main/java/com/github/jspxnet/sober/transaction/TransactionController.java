@@ -18,7 +18,7 @@ public class TransactionController extends JdbcOperations {
      * @throws SQLException SQL 异常
      */
     public Transaction createTransaction() throws SQLException {
-        return getSoberFactory().createTransaction(this);
+        return getSoberFactory().createTransaction();
     }
 
 }

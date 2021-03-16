@@ -15,6 +15,7 @@ import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.exception.TransactionException;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.sql.DataSource;
 import java.sql.Savepoint;
 import java.sql.SQLException;
 
@@ -26,8 +27,8 @@ import java.sql.SQLException;
  */
 @Slf4j
 public class JDBCTransaction extends AbstractTransaction {
-    public JDBCTransaction(SoberSupport soberSupport) {
-        setSoberSupport(soberSupport);
+    public JDBCTransaction(DataSource dataSource) {
+        setDataSource(dataSource);
     }
 
     private JDBCTransaction() {

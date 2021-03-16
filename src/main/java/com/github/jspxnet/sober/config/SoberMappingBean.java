@@ -280,14 +280,14 @@ public class SoberMappingBean implements SoberFactory {
     }
 
     /**
-     * @param soberSupport 创建一个事务，如果事务已经存在那么就返回已经存在的事务
      * @return 事务对象
      * @throws SQLException sql 异常
      */
     @Override
-    public AbstractTransaction createTransaction(SoberSupport soberSupport) throws SQLException
+    public AbstractTransaction createTransaction() throws SQLException
     {
-        String  transactionId = Integer.toString(soberSupport.getSoberFactory().hashCode())+ Thread.currentThread().getId();
+        //DataSource dataSource
+        String  transactionId = Integer.toString(dataSource.hashCode())+ Thread.currentThread().getId();
         AbstractTransaction trans = TRANSACTION_MANAGER.get(transactionId);
         if (trans != null && !trans.isClosed()) {
             return trans;
@@ -297,7 +297,7 @@ public class SoberMappingBean implements SoberFactory {
             connection.setTransactionIsolation(transactionIsolation);
         }
         if (jta) {
-            JTATransaction transaction = new JTATransaction(soberSupport);
+            JTATransaction transaction = new JTATransaction(dataSource);
             try {
                 transaction.setUserTransaction((UserTransaction) context.lookup(userTransaction));
             } catch (NamingException e) {
@@ -311,7 +311,7 @@ public class SoberMappingBean implements SoberFactory {
             TRANSACTION_MANAGER.add(transaction);
             return transaction;
         } else {
-            JDBCTransaction transaction = new JDBCTransaction(soberSupport);
+            JDBCTransaction transaction = new JDBCTransaction(dataSource);
             transaction.setTransactionId(transactionId);
             transaction.setSupportsSavePoints(dialect.isSupportsSavePoints());
 
