@@ -14,6 +14,7 @@ import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.exception.TransactionException;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.sql.DataSource;
 import javax.transaction.*;
 
 /**
@@ -29,8 +30,8 @@ public class JTATransaction extends AbstractTransaction {
 
     }
 
-    public JTATransaction(SoberSupport soberSupport) {
-        this.setSoberSupport(soberSupport);
+    public JTATransaction(DataSource dataSource) {
+        this.setDataSource(dataSource);
     }
 
     private UserTransaction userTransaction = null;

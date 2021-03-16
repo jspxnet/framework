@@ -81,7 +81,7 @@ public class TransactionManager extends ThreadHashMap<String, AbstractTransactio
                     continue;
                 }
                 boolean isTimeOut = false;
-                if (t.isActive()&&System.currentTimeMillis() - t.getCreateTimeMillis() > t.getTimeout()*2) {
+                if (t.isActive()&&System.currentTimeMillis() - t.getCreateTimeMillis() > t.getTimeout()*2L) {
                     isTimeOut = true;
                 } else
                 if (!t.isActive()&&System.currentTimeMillis() - t.getCreateTimeMillis() > t.getTimeout()) {

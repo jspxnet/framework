@@ -22,6 +22,11 @@
     参考手册:http://www.jspx.net/help
     
     例子: https://github.com/jspxnet/demo
+
+    https://github.com.cnpmjs.org/jspxnet/framework
+    
+    https://github.com.cnpmjs.org/jspxnet/framework.git
+
 ##名称说明
 	
 *	请大家不要以为是jspx，jspx是一个来自于埃及的java web快速开发框架。本构架和它没一点关系，而且本框架在它之前就已经开发了。

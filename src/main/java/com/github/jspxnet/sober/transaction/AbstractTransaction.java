@@ -14,6 +14,7 @@ import com.github.jspxnet.sober.Transaction;
 import com.github.jspxnet.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -34,12 +35,12 @@ public abstract class AbstractTransaction implements Transaction {
     protected int timeout = DateUtil.MINUTE*2;
     protected boolean supportsSavePoints = false;
     //数据源
-    protected SoberSupport soberSupport = null;
+    protected DataSource dataSource = null;
 
     //事务ID,不再拼装
     protected String transactionId;
     //判断超时
-    private long createTimeMillis = System.currentTimeMillis();
+    final private long createTimeMillis = System.currentTimeMillis();
 
     @Override
     public long getCreateTimeMillis() {
@@ -54,13 +55,8 @@ public abstract class AbstractTransaction implements Transaction {
         this.supportsSavePoints = supportsSavePoints;
     }
 
-
-    public SoberSupport getSoberSupport() {
-        return soberSupport;
-    }
-
-    void setSoberSupport(SoberSupport soberSupport) {
-        this.soberSupport = soberSupport;
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -110,7 +106,7 @@ public abstract class AbstractTransaction implements Transaction {
     @Override
     public boolean isClosed() {
         try {
-            return (wasRolledBack || wasCommitted) || soberSupport == null || connection.isClosed();
+            return (wasRolledBack || wasCommitted) || dataSource == null || connection.isClosed();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -140,7 +136,7 @@ public abstract class AbstractTransaction implements Transaction {
         sb.append("isActive:").append(isActive).append("\r\n");
         sb.append("timeout:").append(timeout).append("\r\n");
         sb.append("supportsSavePoints:").append(supportsSavePoints).append("\r\n");
-        sb.append("soberSupport:").append(soberSupport).append("\r\n");
+        sb.append("dataSource:").append(dataSource.hashCode()).append("\r\n");
         return sb.toString();
     }
 }
