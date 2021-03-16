@@ -280,6 +280,16 @@ public class SoberMappingBean implements SoberFactory {
     }
 
     /**
+     *
+     * @return 事务id,只对当前线程有效
+     */
+    @Override
+    public String getTransactionId()
+    {
+        return "sbt"+dataSource.hashCode()+ Thread.currentThread().getId();
+    }
+
+    /**
      * @return 事务对象
      * @throws SQLException sql 异常
      */
@@ -287,7 +297,7 @@ public class SoberMappingBean implements SoberFactory {
     public AbstractTransaction createTransaction() throws SQLException
     {
         //DataSource dataSource
-        String  transactionId = Integer.toString(dataSource.hashCode())+ Thread.currentThread().getId();
+        String  transactionId = getTransactionId();
         AbstractTransaction trans = TRANSACTION_MANAGER.get(transactionId);
         if (trans != null && !trans.isClosed()) {
             return trans;
@@ -305,7 +315,6 @@ public class SoberMappingBean implements SoberFactory {
                 e.printStackTrace();
             }
             transaction.setTransactionId(transactionId);
-
             transaction.setTimeout(transactionTimeout);
             transaction.setConnection(connection);
             TRANSACTION_MANAGER.add(transaction);
@@ -314,7 +323,6 @@ public class SoberMappingBean implements SoberFactory {
             JDBCTransaction transaction = new JDBCTransaction(dataSource);
             transaction.setTransactionId(transactionId);
             transaction.setSupportsSavePoints(dialect.isSupportsSavePoints());
-
             transaction.setTimeout(transactionTimeout);
             transaction.setConnection(connection);
             TRANSACTION_MANAGER.add(transaction);

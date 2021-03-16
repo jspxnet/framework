@@ -10,11 +10,9 @@
 package com.github.jspxnet.sober.transaction;
 
 
-import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.exception.TransactionException;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.sql.DataSource;
 import java.sql.Savepoint;
 import java.sql.SQLException;

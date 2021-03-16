@@ -182,7 +182,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 返回一个连接
      */
     public Connection getConnection(final int type)  {
-        String  transactionId = Integer.toString(soberFactory.getDataSource().hashCode())+Thread.currentThread().getId();
+        String  transactionId = soberFactory.getTransactionId();
         try {
             return soberFactory.getConnection(type,transactionId);
         } catch (SQLException throwables) {

@@ -36,6 +36,8 @@ public interface SoberFactory extends Serializable {
     DataSource getDataSource();
 
 
+    String getTransactionId();
+
     /**
      *  创建一个事务 创建事务
      * @return 事务对象
