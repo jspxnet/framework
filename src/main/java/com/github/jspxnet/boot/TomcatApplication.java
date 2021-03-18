@@ -15,6 +15,7 @@ import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.webresources.StandardRoot;
 import org.apache.jasper.servlet.JspServlet;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
@@ -117,6 +118,13 @@ public class TomcatApplication {
         //host.setAppBase(FileUtil.mendPath(file.getParent()));
         //host.setAppBase("d:/website/webapps");
         Context standardContext = tomcat.addWebapp("",webPath);
+        final int maxCacheSize = 40 * 1024;
+        StandardRoot standardRoot = new StandardRoot();
+        standardRoot.setCacheMaxSize(maxCacheSize);
+        standardRoot.setCacheObjectMaxSize(1024);
+        standardRoot.setCachingAllowed(true);
+
+        standardContext.setResources(standardRoot);
 
         //前面的那个步骤只是把Tomcat起起来了，但是没啥东西
         //要把class加载进来,把启动的工程加入进来了
@@ -153,6 +161,9 @@ public class TomcatApplication {
         scanner.setJarScanFilter(scanFilter);
         standardContext.setJarScanner(scanner);
         standardContext.setAddWebinfClassesResources(true);
+
+
+
 
         if (openRedis&&!StringUtil.isNull(redisConfig))
         {
