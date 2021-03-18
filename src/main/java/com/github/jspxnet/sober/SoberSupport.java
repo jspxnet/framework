@@ -162,13 +162,19 @@ public interface SoberSupport extends Serializable {
      */
     int save(Object object, boolean child) throws Exception;
     /**
-     * @param collection 保持一个列表
+     * @param collection 保存一个列表
      * @return 返回保持数量
      * @throws Exception      验证错误
      * @throws ValidException 其他错误
      */
     int save(Collection<?> collection) throws Exception;
-
+    /**
+     *
+     * @param collection 保存一个列表
+     * @param child 子对象
+     * @return  返回保持数量
+     * @throws Exception 验证错误
+     */
     int save(Collection<?> collection, boolean child) throws Exception;
 
     /**

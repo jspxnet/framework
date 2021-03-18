@@ -815,6 +815,7 @@ public abstract class JdbcOperations implements SoberSupport {
                             Object oneToManyValue = BeanUtil.getProperty(object, soberNexus.getField());
                             for (Object o : oneToMayObjects) {
                                 Object v = BeanUtil.getFieldValue(o,soberNexus.getTargetField(),false);
+                                if (ObjectUtil.isEmpty(v)||ClassUtil.isNumberType(v.getClass())&&0==ObjectUtil.toLong(v))
                                 if (ObjectUtil.isEmpty(v) || ((v instanceof Number)&& ObjectUtil.toLong(v)==0))
                                 {
                                     BeanUtil.setSimpleProperty(o, soberNexus.getTargetField(), oneToManyValue);
