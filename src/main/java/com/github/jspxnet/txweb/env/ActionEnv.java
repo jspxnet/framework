@@ -17,7 +17,7 @@ public class ActionEnv {
 
     //保留的常量数据
     public static final String[] NO_CLEAN = new String[]{ActionEnv.Key_ActionName, ActionEnv.mobileTemplateSuffix,
-            ActionEnv.Key_RealPath,Environment.scriptPath,ActionEnv.mobileTemplateSuffix, Environment.templateSuffix,ActionEnv.KEY_MobileTemplate, ActionEnv.Key_Namespace,ActionEnv.ContentType};
+            ActionEnv.Key_RealPath,Environment.scriptPath,ActionEnv.mobileTemplateSuffix,Environment.filterSuffix,Environment.ApiFilterSuffix, Environment.templateSuffix,ActionEnv.KEY_MobileTemplate, ActionEnv.Key_Namespace,ActionEnv.ContentType};
 
     static public final String BrowserCache = "BrowserCache"; //是否使用浏览器缓存 默认为 true
     static public final String ContentType = "ContentType"; //请求类型

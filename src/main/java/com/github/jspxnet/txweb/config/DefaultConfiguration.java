@@ -85,10 +85,15 @@ public class DefaultConfiguration implements Configuration {
         return defaultResultMap;
     }
 
+    private final static Map<String, Map<String, ActionConfigBean>> ACTION_CONFIG_MAP = new Hashtable<>();
+
     @Override
     public Map<String, Map<String, ActionConfigBean>> loadConfigMap() throws Exception {
+        if (!ACTION_CONFIG_MAP.isEmpty())
+        {
+            return ACTION_CONFIG_MAP;
+        }
 
-        final Map<String, Map<String, ActionConfigBean>> actionConfigMap = new Hashtable<String, Map<String, ActionConfigBean>>();
         if (!StringUtil.isNull(envTemplate.getString(Environment.TXWebConfig))) {
             fileName = envTemplate.getString(Environment.TXWebConfig);
         }
@@ -130,9 +135,9 @@ public class DefaultConfiguration implements Configuration {
         }
         String[] includeFixedFiles = new String[1];
         includeFixedFiles[0] = fileName;
-        readIncludeFile(defaultPath, includeFixedFiles, actionConfigMap);
+        readIncludeFile(defaultPath, includeFixedFiles, ACTION_CONFIG_MAP);
         includeFiles.clear();
-        return actionConfigMap;
+        return ACTION_CONFIG_MAP;
     }
 
     /**
