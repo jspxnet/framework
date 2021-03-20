@@ -1,8 +1,8 @@
 #Jspx Framework 6.x
 
 ##简介
- 一套开源的 Jspx Framework (简实构架)是一套开源的java一体化构架, 完整的架构体系,ioc、cache、DAO、连接池、验证、模板、sqlmap持久层，b/s,c/s ,分布式集群调用支持,语言上只使用了标准的 java 和javascript,模板语言呈现页面和API接口方式无缝结合,支持读写分。支持resetFull和传统模板呈现页面。自动API文档生成,
-其中融入了很多作者开发软件碰到的问题解决方法。可替代sping cloud构架的的一套解决方案,同时也可以嵌入到spring中是用持久层。
+
+一套开源的 Jspx Framework (简实构架)是一套开源的java一体化构架, 完整的架构体系,ioc、cache、DAO、连接池、验证、模板、sqlmap持久层，b/s,c/s ,分布式集群调用支持, 语言上只使用了标准的 java 和javascript,模板语言呈现页面和API接口方式无缝结合,支持读写分。支持resetFull和传统模板呈现页面。自动API文档生成, 其中融入了很多作者开发软件碰到的问题解决方法。可替代sping cloud构架的的一套解决方案,同时也可以嵌入到spring中是用持久层。 主体结构和spring类似,但功能细节点的设计上不同,更多的添加易性,简化和实用性。 这套框架不但提供了技术实现,同时也提供了一套开发规范,让系统的结构分层,代码规范,文档一体化的实现。 
 
 ##仓库地址
 
@@ -113,4 +113,4 @@
 *    2021年01月：Jspx.net Framework 6.30 分布式通讯支持完善,RpcClient标签,支持Http和TCP方式,TCP方式可以实现gossip整合集群
 *    2021年02月：Jspx.net Framework 6.34 修复bug,完整API文档自动生成功能,线程优化,资源优化,稳定版本
 *    2021年03月：Jspx.net Framework 6.35 嵌入tomcat,整合consul,appollo
-*    2021年03月：Jspx.net Framework 6.39 bug修复版本稳定版本,嵌入spring 使用本架构支持，嵌入是用spring构架,主要使用持久层
+*    2021年03月：Jspx.net Framework 6.38 bug修复版本稳定版本,嵌入spring 使用本架构支持，嵌入是用spring构架,主要使用持久层
