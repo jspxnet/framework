@@ -717,7 +717,7 @@ public class BeanUtil {
                         {
                             field.set(oldData, 0);
                         } else
-                        if (setField.getType().equals(field.getType()) || ClassUtil.isNumberType(setField.getType()) && ClassUtil.isBaseNumberType(field.getType())) {
+                        if (setField.getType().equals(field.getType()) || ClassUtil.isNumberType(setField.getType()) && ClassUtil.isNumberType(field.getType())) {
                             //todo字符串 和数字类型需要避开
                             field.set(oldData, o);
                         }
