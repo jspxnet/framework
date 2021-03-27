@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.38</version>
+    <version>6.39</version>
 </dependency>
 ```
     
@@ -113,4 +113,4 @@
 *    2021年01月：Jspx.net Framework 6.30 分布式通讯支持完善,RpcClient标签,支持Http和TCP方式,TCP方式可以实现gossip整合集群
 *    2021年02月：Jspx.net Framework 6.34 修复bug,完整API文档自动生成功能,线程优化,资源优化,稳定版本
 *    2021年03月：Jspx.net Framework 6.35 嵌入tomcat,整合consul,appollo
-*    2021年03月：Jspx.net Framework 6.38 bug修复版本稳定版本,嵌入spring 使用本架构支持，嵌入是用spring构架,主要使用持久层
+*    2021年03月：Jspx.net Framework 6.39 bug修复版本稳定版本,支持嵌入spring使用
