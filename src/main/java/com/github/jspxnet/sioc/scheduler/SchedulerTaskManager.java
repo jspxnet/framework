@@ -1,6 +1,7 @@
 package com.github.jspxnet.sioc.scheduler;
 
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.annotation.Scheduled;
 import com.github.jspxnet.utils.ClassUtil;
@@ -70,6 +71,8 @@ public class SchedulerTaskManager implements SchedulerManager {
             return -1;
         }
 
+        Map<String, Object> valueMap = EnvFactory.getEnvironmentTemplate().getVariableMap();
+
         for (Method method : methods) {
             Scheduled scheduled = method.getAnnotation(Scheduled.class);
             if (scheduled == null) {
@@ -78,7 +81,17 @@ public class SchedulerTaskManager implements SchedulerManager {
             TaskProxy taskProxy = new TaskProxy();
             taskProxy.setBean(bean);
             taskProxy.setMethodName(method.getName());
-            taskProxy.setPattern(scheduled.cron());
+            //scheduled.cron() 变量替换
+            String cron = scheduled.cron();
+            if (scheduled.cron().contains("${"))
+            {
+                cron = EnvFactory.getPlaceholder().processTemplate(valueMap,cron);
+                if (StringUtil.isEmpty(cron))
+                {
+                    cron = "* * * * *";
+                }
+            }
+            taskProxy.setPattern(cron);
             taskProxy.setOnce(scheduled.once());
             taskProxy.setDelayed(scheduled.delayed());
             add(taskProxy);
@@ -112,7 +125,18 @@ public class SchedulerTaskManager implements SchedulerManager {
 
         Scheduler scheduler = new Scheduler();
         scheduler.setDaemon(true);
-        scheduler.schedule(taskProxy.getPattern(), taskProxy);
+
+        String cron = taskProxy.getPattern();
+        if (cron.contains("${"))
+        {
+            Map<String, Object> valueMap = EnvFactory.getEnvironmentTemplate().getVariableMap();
+            cron = EnvFactory.getPlaceholder().processTemplate(valueMap,cron);
+            if (StringUtil.isEmpty(cron))
+            {
+                cron = "* * * * *";
+            }
+        }
+        scheduler.schedule(cron, taskProxy);
         scheduler.start();
         SCHEDULER_MAP.put(scheduledId, scheduler);
         return true;
