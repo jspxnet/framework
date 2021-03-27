@@ -88,8 +88,6 @@ public abstract class Environment {
 
     final public static String sqlXmlPath = "sqlXmlPath";
 
-    //final public static String loaderPath = "loaderPath";
-
     final public static String lucenePath = "lucenePath";
 
     final public static String databasePath = "databasePath";
@@ -100,14 +98,7 @@ public abstract class Environment {
 
     final public static String tempPath = "tempPath";
 
-    //升级
-    //final public static String upgradePath = "upgradePath";
-
-    //final public static String pluginsPath = "pluginsPath";
-
     final public static String fontsPath = "fontsPath";
-
-    //final public static String cachePath = "cachePath";
 
     final public static String resPath = "resPath";
 
@@ -150,7 +141,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String version = "6.38";
+    final static public String version = "6.39";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";

@@ -527,10 +527,6 @@ public final class EntryFactory implements BeanFactory {
         }
 
         try {
-            if ("jspx.juweb.action.CollectAction".equals(beanName))
-            {
-                System.out.println(beanName + "---" + nameK);
-            }
             //得到的所在命名空间 begin
             BeanElement beanElement = iocContext.getBeanElement(beanName, nameK);
             //没有找到,到spring中找

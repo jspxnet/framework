@@ -563,6 +563,16 @@ public class StringUtil {
 
     /**
      * @param str 字符串
+     * @return 得到spring注册的beanId格式
+     */
+    public static String getSpringBeanId(String str) {
+        if (!hasLength(str) || !str.contains(StringUtil.DOT)) {
+            return str;
+        }
+        return StringUtil.uncapitalize(substringAfterLast(str,StringUtil.DOT));
+    }
+    /**
+     * @param str 字符串
      * @return 交换大小写
      */
     public static String swapCase(String str) {
