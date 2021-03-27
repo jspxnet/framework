@@ -26,13 +26,13 @@ public interface Lucene {
 
     String getFilePath();
 
-    boolean save(LuceneVO luceneVO);
+    boolean save(LuceneVo luceneVO);
 
-    boolean save(Collection<LuceneVO> list, boolean commit);
+    boolean save(Collection<LuceneVo> list, boolean commit);
 
     int delete(String kayName, String value) throws Exception;
 
-    Document toDocument(LuceneVO luceneVO);
+    Document toDocument(LuceneVo luceneVO);
 
     int delete(String id) throws Exception;
 

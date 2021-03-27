@@ -2,7 +2,7 @@
 package com.github.jspxnet.lucene.impl;
 
 import com.github.jspxnet.lucene.Lucene;
-import com.github.jspxnet.lucene.LuceneVO;
+import com.github.jspxnet.lucene.LuceneVo;
 import com.github.jspxnet.lucene.SearchResult;
 import com.github.jspxnet.sioc.annotation.Bean;
 
@@ -104,8 +104,8 @@ public class LuceneImpl implements Lucene {
     }
 
     @Override
-    public boolean save(LuceneVO luceneVO) {
-        List<LuceneVO> list = new ArrayList<>(1);
+    public boolean save(LuceneVo luceneVO) {
+        List<LuceneVo> list = new ArrayList<>(1);
         list.add(luceneVO);
         return save(list, true);
     }
@@ -118,14 +118,14 @@ public class LuceneImpl implements Lucene {
      * @return boolean
      */
     @Override
-    public boolean save(Collection<LuceneVO> list, boolean commit) {
+    public boolean save(Collection<LuceneVo> list, boolean commit) {
         IndexWriter indexwriter = getWriter();
         if (indexwriter == null) {
             return false;
         }
         Directory directory = getDirectory();
         try {
-            for (LuceneVO luceneVO : list) {
+            for (LuceneVo luceneVO : list) {
                 if (StringUtil.isNull(luceneVO.getTitle()) || StringUtil.isNull(luceneVO.getContent())) {
                     continue;
                 }
@@ -233,7 +233,7 @@ public class LuceneImpl implements Lucene {
         IndexSearcher searcher = new IndexSearcher(reader);
         //在索引器中使用IKSimilarity相似度评估器
         SearchResult searchResult = new SearchResult();
-        List<LuceneVO> result = new ArrayList<>();
+        List<LuceneVo> result = new ArrayList<>();
         try {
             TopDocs topDocs = searcher.search(query, end);
             ScoreDoc[] scoreDoc = topDocs.scoreDocs;
@@ -244,7 +244,7 @@ public class LuceneImpl implements Lucene {
             for (int i = begin; i < end; i++) {
                 ScoreDoc sDoc = scoreDoc[i];
                 Document doc = searcher.doc(sDoc.doc);
-                LuceneVO lto = new LuceneVO();
+                LuceneVo lto = new LuceneVo();
                 lto.setId(doc.get(id));
                 lto.setTitle(doc.get(title));
                 lto.setContent(doc.get(content));
@@ -311,7 +311,7 @@ public class LuceneImpl implements Lucene {
         DirectoryReader reader = DirectoryReader.open(getDirectory());
         IndexSearcher searcher = new IndexSearcher(reader);
         SearchResult searchResult = new SearchResult();
-        List<LuceneVO> result = new ArrayList<>();
+        List<LuceneVo> result = new ArrayList<>();
         try {
             TopDocs topDocs = searcher.search(query, end);
             ScoreDoc[] scoreDoc = topDocs.scoreDocs;
@@ -322,7 +322,7 @@ public class LuceneImpl implements Lucene {
             for (int i = begin; i < end; i++) {
                 ScoreDoc sDoc = scoreDoc[i];
                 Document doc = searcher.doc(sDoc.doc);
-                LuceneVO lto = new LuceneVO();
+                LuceneVo lto = new LuceneVo();
                 lto.setId(doc.get(id));
                 lto.setTitle(doc.get(title));
                 lto.setContent(doc.get(content));
@@ -348,7 +348,7 @@ public class LuceneImpl implements Lucene {
      * @return 转换到文档
      */
     @Override
-    public Document toDocument(LuceneVO luceneVO) {
+    public Document toDocument(LuceneVo luceneVO) {
         Document document = new Document();
         try {
             document.add(new StringField(id, luceneVO.getId() + "", Field.Store.YES));

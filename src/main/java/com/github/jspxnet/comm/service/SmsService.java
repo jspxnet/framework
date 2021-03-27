@@ -4,11 +4,8 @@ import com.github.jspxnet.comm.Router;
 import com.github.jspxnet.comm.SerialComm;
 import com.github.jspxnet.comm.router.DefaultRouter;
 import com.github.jspxnet.utils.StringUtil;
-
 import com.github.jspxnet.utils.ClassUtil;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,15 +14,18 @@ import java.util.Map;
 /**
  * Created by chenyuan on 2015/8/24.
  */
+@Slf4j
 public class SmsService extends Thread {
-
-    final static private org.slf4j.Logger log = LoggerFactory.getLogger(SmsService.class);
-    private static final Map<String, SerialComm> gatewayList = new HashMap<String, SerialComm>();
-    private static SmsService instance = new SmsService();
+    private static final Map<String, SerialComm> GATEWAY_LIST = new HashMap<String, SerialComm>();
+    private static SmsService INSTANCE;
     private static boolean quit = false;
 
-    public static SmsService getInstance() {
-        return instance;
+    public synchronized static SmsService getInstance() {
+        if (INSTANCE==null)
+        {
+            INSTANCE = new SmsService();
+        }
+        return INSTANCE;
     }
 
     private Router router = new DefaultRouter();
@@ -53,14 +53,14 @@ public class SmsService extends Thread {
                 serialModem = "com.jspx.comm.modem.Handler" + serialModem;
             }
             //加到路由表
-            if (gatewayList.containsKey(name)) {
-                return gatewayList.get(name);
+            if (GATEWAY_LIST.containsKey(name)) {
+                return GATEWAY_LIST.get(name);
             }
             SerialComm serialComm = (SerialComm) ClassUtil.newInstance(serialModem);
             serialComm.setSettings(settings);
             serialComm.connect();
             serialComm.init();
-            gatewayList.put(name, serialComm);
+            GATEWAY_LIST.put(name, serialComm);
             return serialComm;
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,20 +69,20 @@ public class SmsService extends Thread {
     }
 
     public SerialComm getGateway(String name) {
-        return gatewayList.get(name);
+        return GATEWAY_LIST.get(name);
     }
 
     /**
      * @return 得到路由计算
      */
     public SerialComm getRouterComm() {
-        router.setGatewayList(gatewayList);
+        router.setGatewayList(GATEWAY_LIST);
         return router.getRouter();
     }
 
     public List<SerialStatus> getSerialStatus()  {
         List<SerialStatus> list = new ArrayList<>();
-        for (SerialComm serialComm : gatewayList.values()) {
+        for (SerialComm serialComm : GATEWAY_LIST.values()) {
             list.add(serialComm.getStatus());
         }
         return list;
@@ -94,7 +94,7 @@ public class SmsService extends Thread {
     synchronized public void run() {
         while (!quit) {
             try {
-                for (SerialComm serialComm : gatewayList.values()) {
+                for (SerialComm serialComm : GATEWAY_LIST.values()) {
                     if (serialComm.isNeedReStart()) {
                         //如果发生错误,重置设备
                         serialComm.close();
@@ -126,11 +126,11 @@ public class SmsService extends Thread {
 
     public void shutdown() {
         quit = true;
-        for (SerialComm serialComm : gatewayList.values()) {
+        for (SerialComm serialComm : GATEWAY_LIST.values()) {
             log.info("关闭设备 {},串口 {}", serialComm.getName(), serialComm.getPortName());
             serialComm.close();
         }
-        gatewayList.clear();
+        GATEWAY_LIST.clear();
         log.info("关闭短信设备");
         System.out.println("-------------关闭短信设备-----------");
     }

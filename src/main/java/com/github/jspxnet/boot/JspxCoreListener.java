@@ -151,13 +151,13 @@ public class JspxCoreListener implements ServletContextListener {
             System.setProperty(Environment.APOLLO_BOOTSTRAP_ENABLED,properties.getProperty(Environment.APOLLO_BOOTSTRAP_ENABLED));
             System.setProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES,properties.getProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES));
             System.setProperty(Environment.APOLLO_META,properties.getProperty(Environment.APOLLO_META));
-            envTemplate.putEnv(Environment.BOOT_CONF_MODE,BootConfigEnumType.APPOLLO.getName());
+            envTemplate.put(Environment.BOOT_CONF_MODE,BootConfigEnumType.APPOLLO.getName());
 
             Config config = ConfigService.getAppConfig();
             Set<String> names = config.getPropertyNames();
             for (String key:names)
             {
-                envTemplate.putEnv(key,config.getProperty(key,StringUtil.empty));
+                envTemplate.put(key,config.getProperty(key,StringUtil.empty));
             }
 
             ConfigChangeListener changeListener = new ConfigChangeListener() {
@@ -171,7 +171,7 @@ public class JspxCoreListener implements ServletContextListener {
                                 change.getChangeType());
                         if (PropertyChangeType.ADDED.equals(change.getChangeType())||PropertyChangeType.MODIFIED.equals(change.getChangeType()))
                         {
-                            envTemplate.putEnv(change.getPropertyName(),change.getNewValue());
+                            envTemplate.put(change.getPropertyName(),change.getNewValue());
                         }
                         if (PropertyChangeType.DELETED.equals(change.getChangeType()))
                         {

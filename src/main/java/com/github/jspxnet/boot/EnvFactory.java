@@ -28,7 +28,6 @@ import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.io.File;
 
 /**

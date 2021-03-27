@@ -87,7 +87,7 @@ public class ConfigureContext implements IocContext {
 
     @Override
     public void reload() throws Exception {
-        log.error("ioc reload " + ObjectUtil.toString(configFile));
+        log.debug("ioc reload " + ObjectUtil.toString(configFile));
         synchronized (ConfigureContext.class) {
             for (String namespace : beanElementMap.keySet()) {
                 Map<String, BeanElement> beanMap = beanElementMap.get(namespace);

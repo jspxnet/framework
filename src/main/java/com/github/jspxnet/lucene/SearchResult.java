@@ -25,15 +25,15 @@ public class SearchResult {
 
     }
 
-    private List<LuceneVO> list;
+    private List<LuceneVo> list;
     //搜索到的结果数量
     private int totalCount = 0;
 
-    public List<LuceneVO> getList() {
+    public List<LuceneVo> getList() {
         return list;
     }
 
-    public void setList(List<LuceneVO> list) {
+    public void setList(List<LuceneVo> list) {
         this.list = list;
     }
 

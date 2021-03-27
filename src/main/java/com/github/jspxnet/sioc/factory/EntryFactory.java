@@ -10,6 +10,7 @@
 package com.github.jspxnet.sioc.factory;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.SpringBeanContext;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.security.utils.EncryptUtil;
@@ -496,6 +497,7 @@ public final class EntryFactory implements BeanFactory {
             e.printStackTrace();
             return null;
         }
+
     }
 
 
@@ -525,10 +527,21 @@ public final class EntryFactory implements BeanFactory {
         }
 
         try {
+            if ("jspx.juweb.action.CollectAction".equals(beanName))
+            {
+                System.out.println(beanName + "---" + nameK);
+            }
             //得到的所在命名空间 begin
             BeanElement beanElement = iocContext.getBeanElement(beanName, nameK);
-            if (beanElement == null) {
+            //没有找到,到spring中找
+            Object bean = SpringBeanContext.getBean(beanName);
+            if (beanElement == null && bean == null) {
                 throw new Exception("不能发现配置:sioc no find bean BeanElement name:" + beanName + " namespace:" + namespace + " 或 " + nameK);
+            }
+            if (bean!=null)
+            {
+                //spring中有,是用spring中的数据
+                return bean;
             }
             //得到的所在命名空间 end
 

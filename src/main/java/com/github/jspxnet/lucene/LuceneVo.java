@@ -22,7 +22,7 @@ import java.io.Serializable;
  * Time: 18:13:57
  */
 @Data
-public class LuceneVO implements Serializable {
+public class LuceneVo implements Serializable {
     private String id;
     private String title;
     private String content;
