@@ -437,7 +437,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.18</version>
+            <version>42.2.19</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -470,6 +470,7 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.12</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.thetransactioncompany/cors-filter -->
