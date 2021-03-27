@@ -816,7 +816,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <outputDirectory>D:\website\webapps\root\WEB-INF\lib\</outputDirectory>
+                        <!--<outputDirectory>D:\website\webapps\root\WEB-INF\lib\</outputDirectory>-->
                         <archive>
                             <manifest>
                                 <mainClass>com.github.jspxnet.boot.TomcatApplication</mainClass>
@@ -883,6 +883,3 @@
         </plugins>
     </reporting>
 </project>
-        <!--
-
-        -->
