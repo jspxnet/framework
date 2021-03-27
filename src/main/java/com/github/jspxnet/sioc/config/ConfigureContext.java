@@ -299,7 +299,8 @@ public class ConfigureContext implements IocContext {
             }
             if (file==null)
             {
-                throw new IOException("jspx sioc no find fileName Path: " + fileNamePath + " \r\n 不能找到配置文件:" + fileNamePath);
+                log.error("jspx sioc no find file path: " + fileNamePath + " \r\n 不能找到配置文件:" + fileNamePath);
+                return null;
             }
         }
 
@@ -316,6 +317,10 @@ public class ConfigureContext implements IocContext {
      */
     private String readContext(String fileName) throws Exception {
         String  configString = readFileText(fileName);
+        if (configString==null)
+        {
+            return null;
+        }
 
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag(LoadElement.TAG_NAME, LoadElement.class.getName());
@@ -381,6 +386,10 @@ public class ConfigureContext implements IocContext {
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag(SiocElement.TAG_NAME, SiocElement.class.getName());
         String txt = readContext(fileName);
+        if (txt==null)
+        {
+            return new ArrayList<>();
+        }
         log.debug("jspx sioc load file:" + fileName);
         List<TagNode> results = xmlEngine.getTagNodes(txt);
         String[] includeFiles = null;
