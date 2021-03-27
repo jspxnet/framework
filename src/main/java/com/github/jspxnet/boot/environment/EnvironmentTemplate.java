@@ -50,8 +50,6 @@ public interface EnvironmentTemplate extends Serializable {
 
     Properties getProperties();
 
-    void putEnv(String key, String value);
-
     void deleteEnv(String key);
 
     void restorePlaceholder();

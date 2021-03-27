@@ -17,8 +17,6 @@ import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.cache.store.MemoryStore;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Date;
 
 /**
@@ -74,6 +72,7 @@ public final class JspxNetApplication {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
         envTemplate.createSystemEnv();
+        envTemplate.put(Environment.useTxWeb,false);
         //简单的缓存控制
         for (Class<?> cls:cacheList)
         {
@@ -83,8 +82,10 @@ public final class JspxNetApplication {
                 e.printStackTrace();
             }
         }
-        System.out.println("当前默认路径:"+envTemplate.getString(Environment.defaultPath));
+        System.out.println("当前默认路径:" + envTemplate.getString(Environment.defaultPath));
     }
+
+
 
     public static void destroy() {
         JSPX_CORE_LISTENER.contextDestroyed(null);

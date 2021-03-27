@@ -41,16 +41,11 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     }
 
-
     @Override
     public Map<String, Object> getVariableMap() {
         return new Hashtable<>(VALUE_MAP);
     }
 
-    @Override
-    public void put(String keys, Object value) {
-        VALUE_MAP.put(keys, value);
-    }
 
     @Override
     public Object get(String keys) {
@@ -477,9 +472,10 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
     }
 
     @Override
-    public void putEnv(String key, String value) {
-        VALUE_MAP.put(key, value);
+    public void put(String keys, Object value) {
+        VALUE_MAP.put(keys, value);
     }
+
 
     @Override
     public void deleteEnv(String key) {
