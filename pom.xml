@@ -63,11 +63,11 @@
             <version>${tomcat.version}</version>
             <scope>provided</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-coyote</artifactId>
             <version>${tomcat.version}</version>
-             <scope>provided</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
@@ -91,14 +91,14 @@
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
             <version>${tomcat.version}</version>
-            <scope>runtime</scope>
+            <scope>compile</scope>
         </dependency>
         <!-- 临时的activiti -->
-       <dependency>
+        <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
             <version>7.1.0.M6</version>
-           <scope>provided</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -379,11 +379,11 @@
             <artifactId>metadata-extractor</artifactId>
             <version>2.15.0</version>
         </dependency>
-     <!--   <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
-        </dependency>-->
+        <!--   <dependency>
+               <groupId>dom4j</groupId>
+               <artifactId>dom4j</artifactId>
+               <version>1.6.1</version>
+           </dependency>-->
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
@@ -429,11 +429,11 @@
             <scope>compile</scope>
         </dependency>
         <!--测试基础支持begin -->
-  <!--      <dependency>
-            <groupId>com.intellij</groupId>
-            <artifactId>forms_rt</artifactId>
-            <version>7.0.3</version>
-        </dependency>-->
+        <!--      <dependency>
+                  <groupId>com.intellij</groupId>
+                  <artifactId>forms_rt</artifactId>
+                  <version>7.0.3</version>
+              </dependency>-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -746,31 +746,31 @@
                 </plugin>
 
 
-<!--                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.3.0</version>
-                    <configuration>
-                        <finalName>jspxnet-${project.version}</finalName>
-                        <archive>
-                            <manifest>
-                                <mainClass>com.github.jspxnet.boot.TomcatApplication</mainClass>
-                            </manifest>
-                        </archive>
-                        <descriptorRefs>
-                            <descriptorRef>jar-with-dependencies</descriptorRef>
-                        </descriptorRefs>
-                    </configuration>
-                    <executions>
-                         <execution>
-                            <id>create-archive</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                    </execution>
-                    </executions>
-                </plugin>-->
+                <!--                <plugin>
+                                    <groupId>org.apache.maven.plugins</groupId>
+                                    <artifactId>maven-assembly-plugin</artifactId>
+                                    <version>3.3.0</version>
+                                    <configuration>
+                                        <finalName>jspxnet-${project.version}</finalName>
+                                        <archive>
+                                            <manifest>
+                                                <mainClass>com.github.jspxnet.boot.TomcatApplication</mainClass>
+                                            </manifest>
+                                        </archive>
+                                        <descriptorRefs>
+                                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                                        </descriptorRefs>
+                                    </configuration>
+                                    <executions>
+                                         <execution>
+                                            <id>create-archive</id>
+                                            <phase>package</phase>
+                                            <goals>
+                                                <goal>single</goal>
+                                            </goals>
+                                    </execution>
+                                    </executions>
+                                </plugin>-->
 
 
                 <plugin>
@@ -883,6 +883,6 @@
         </plugins>
     </reporting>
 </project>
-<!--
+        <!--
 
--->
+        -->

@@ -1,11 +1,11 @@
 package com.github.jspxnet.boot;
 
 
-import com.beust.jcommander.Parameter;
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
+import com.github.jspxnet.txweb.dispatcher.JspxNetListener;
 import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
 import com.github.jspxnet.utils.*;
 import com.thetransactioncompany.cors.CORSConfiguration;
@@ -13,9 +13,11 @@ import com.thetransactioncompany.cors.CORSFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.core.JreMemoryLeakPreventionListener;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.StandardRoot;
+import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.jasper.servlet.JspServlet;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
@@ -38,19 +40,19 @@ import java.util.Properties;
 @Slf4j
 public class TomcatApplication {
 
-    @Parameter(names = "-port", description = "tomcat server port")
+    //@Parameter(names = "-port", description = "tomcat server port")
     private static int port;
-    @Parameter(names = "-webPath", description = "web path")
+    //@Parameter(names = "-webPath", description = "web path")
     private static String webPath;
-    @Parameter(names = "-ip", description = "default 127.0.0.1")
+    //@Parameter(names = "-ip", description = "default 127.0.0.1")
     private static String ip;
-    @Parameter(names = "-cors", description = "boolean is website cors")
+    //@Parameter(names = "-cors", description = "boolean is website cors")
     private static boolean cors;
 
-    @Parameter(names = "-threads", description = "threads tomcat start threads")
+   // @Parameter(names = "-threads", description = "threads tomcat start threads")
     private static int threads;
 
-    @Parameter(names = "-config", description = "application config path")
+    //@Parameter(names = "-config", description = "application config path")
     private static int config;
 
 
@@ -95,7 +97,8 @@ public class TomcatApplication {
         File file = new File(webPath);
         FileUtil.makeDirectory(file);
         Tomcat tomcat = new Tomcat();
-        Connector connector = tomcat.getConnector();
+
+        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
         connector.setPort(port);
         connector.setURIEncoding(Environment.defaultEncode);
         //让 URI 和 body 编码一致。(针对POST请求)
@@ -103,8 +106,17 @@ public class TomcatApplication {
         connector.setMaxPostSize(-1);
         connector.setMaxSavePostSize(-1);
         connector.setEnableLookups(true);
-        //设置Host
+        connector.setMaxCookieCount(500000);
 
+        Http11NioProtocol protocol = (Http11NioProtocol)connector.getProtocolHandler();
+        //设置最大连接数
+        protocol.setMaxConnections(3000);
+        //设置最大线程数
+        protocol.setMaxThreads(2000);
+        protocol.setConnectionTimeout(30000);
+
+        //设置Host
+        tomcat.setConnector(connector);
 
         tomcat.setSilent(true);
         tomcat.setAddDefaultWebXmlToWebapp(true);
@@ -134,15 +146,8 @@ public class TomcatApplication {
         standardContext.setPrivileged(false);
         standardContext.setAddWebinfClassesResources(true);
 
-
-
-
-
-        //standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
-        //standardContext.addLifecycleListener(new GlobalResourcesLifecycleListener());
+        standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
         standardContext.addLifecycleListener(new Tomcat.FixContextListener());
-       // host.addChild(standardContext);
-
         tomcat.addServlet("", "jspxServlet", new ServletDispatcher());
         standardContext.addServletMappingDecoded("*.jhtml", "jspxServlet");
         standardContext.addServletMappingDecoded("*.jwc", "jspxServlet");
@@ -244,7 +249,7 @@ public class TomcatApplication {
 
         //Tomcat跑起来
         //设置Tomcat的端口tomcat.setPort(9091)。两种写法都可以设置端口
-        //tmpContext.addApplicationLifecycleListener(new JspxNetListener());
+        tmpContext.addApplicationLifecycleListener(new JspxNetListener());
         tmpContext.setValidateClientProvidedNewSessionId(true);
         tmpContext.setSessionTimeout(60);
         tmpContext.setSessionCookiePathUsesTrailingSlash(false);
