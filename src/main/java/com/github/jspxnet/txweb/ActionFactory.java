@@ -17,7 +17,7 @@ import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.sioc.BeanFactory;
@@ -37,7 +37,7 @@ import java.util.HashMap;
  * Action 和 TXweb 整合接口
  */
 public class ActionFactory {
-    final private static WebConfigManager WEB_CONFIG_MANAGER = TXWebConfigManager.getInstance();
+    final private static WebConfigManager WEB_CONFIG_MANAGER = TxWebConfigManager.getInstance();
 
     private ActionFactory() {
 

@@ -12,7 +12,7 @@ import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.result.RpcResult;
@@ -101,7 +101,7 @@ public class RpcCmd extends INetCommand {
     public void exeAction(IocRequest iocRequest, SendCmd reply) {
 
         //得到请求对象
-        WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
+        WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         ActionConfig actionConfig = null;
         String namespace = TXWebUtil.getNamespace(iocRequest.getUrl());
         String urlName = URLUtil.getFileName(iocRequest.getUrl());

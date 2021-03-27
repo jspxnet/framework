@@ -17,7 +17,7 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.config.ActionConfigBean;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.dao.PermissionDAO;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -39,7 +39,7 @@ import java.util.Map;
  */
 @HttpMethod(caption = "权限")
 public class PermissionView extends ActionSupport {
-    private final WebConfigManager WEB_CONFIG_MANAGER = TXWebConfigManager.getInstance();
+    private final WebConfigManager WEB_CONFIG_MANAGER = TxWebConfigManager.getInstance();
 
     public PermissionView() {
 

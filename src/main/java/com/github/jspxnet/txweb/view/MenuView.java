@@ -3,7 +3,7 @@ package com.github.jspxnet.txweb.view;
 import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class MenuView extends ActionSupport {
     }
 
     public List<String> getSoftList()  {
-        WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
+        WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         return webConfigManager.getSoftList();
     }
 

@@ -20,7 +20,7 @@ import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sober.exception.ValidException;
@@ -91,7 +91,7 @@ public class JspxModule {
         envParams.put(ActionEnv.ContentType, "text/html; charset=" + request.getCharacterEncoding());
         ///////////////////////////////////环境参数 end
         ////////////////////ajax begin
-        WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
+        WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         try {
             ActionConfig actionConfig = webConfigManager.getActionConfig(namePart, namespace, true);
             if (actionConfig == null) {

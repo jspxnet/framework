@@ -18,7 +18,7 @@ import com.github.jspxnet.txweb.apidoc.*;
 import com.github.jspxnet.txweb.bundle.action.EditConfigAction;
 import com.github.jspxnet.txweb.bundle.action.EditLanguageAction;
 import com.github.jspxnet.txweb.config.ActionConfigBean;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ApiDocUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -43,7 +43,7 @@ public class ApiDocView extends ActionSupport {
     };
 
 
-    final private WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
+    final private WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
     final private BeanFactory beanFactory = EnvFactory.getBeanFactory();
     //final private String API_INDEX_CACHE = "api:index:cache:%s";
     final private String API_FIELD_CACHE = "api:field:cache:%s";

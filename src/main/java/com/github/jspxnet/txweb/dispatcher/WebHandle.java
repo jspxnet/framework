@@ -2,7 +2,7 @@ package com.github.jspxnet.txweb.dispatcher;
 
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -27,7 +27,7 @@ public abstract class WebHandle {
 
         String namePart = (String)valueMap.get(ActionEnv.Key_ActionName);
         String namespace = (String)valueMap.get(ActionEnv.Key_Namespace);
-        WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
+        WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         return webConfigManager.getActionConfig(namePart, namespace, true);
     }
 

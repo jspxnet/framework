@@ -41,16 +41,14 @@ import java.util.*;
  * Time: 15:50:50
  */
 @Slf4j
-public class TXWebConfigManager implements WebConfigManager {
+public class TxWebConfigManager implements WebConfigManager {
 
     private static WebConfigManager instance;
     //Map<String, ActionConfigBean> 这里使用Map主要是方便后边查询名称
-    static private Map<String, Map<String, ActionConfigBean>> configTable;
+    final static private Map<String, Map<String, ActionConfigBean>> CONFIG_TABLE = new HashMap<>();
     static private Map<String, String> extendMap;
     static private Map<String, List<DefaultInterceptorBean>> defaultInterceptorMap;
-    //static private Map<String, List<DefaultUrlInterceptorBean>> defaultUrlInterceptorMap;
     static private Map<String, List<ResultConfigBean>> defaultResultMap;
-
     static final private ActionConfigBean DEFAULT_ACTION_CONFIG = new ActionConfigBean();
 
     static {
@@ -63,8 +61,6 @@ public class TXWebConfigManager implements WebConfigManager {
 
     //这里保存已经扫描过的包，避免重复扫描
     static private List<String> scanPackageList;
-    //static private Configuration configuration;
-
     //读取锁 begin
 
 
@@ -72,18 +68,16 @@ public class TXWebConfigManager implements WebConfigManager {
 
     public static WebConfigManager getInstance() {
         if (instance == null) {
-            synchronized (TXWebConfigManager.class) {
-                instance = new TXWebConfigManager();
+            synchronized (TxWebConfigManager.class) {
+                instance = new TxWebConfigManager();
             }
         }
         return instance;
     }
 
-    private TXWebConfigManager() {
-        configTable = new HashMap<>();
+    private TxWebConfigManager() {
         extendMap = new HashMap<>();
         defaultInterceptorMap = new HashMap<>();
-
         defaultResultMap = new HashMap<>();
         scanPackageList = new ArrayList<>();
     }
@@ -93,10 +87,7 @@ public class TXWebConfigManager implements WebConfigManager {
      */
     @Override
     synchronized public void clear() {
-        if (configTable.isEmpty()) {
-            return;
-        }
-        configTable.clear();
+        CONFIG_TABLE.clear();
         defaultInterceptorMap.clear();
         defaultResultMap.clear();
         scanPackageList.clear();
@@ -117,7 +108,7 @@ public class TXWebConfigManager implements WebConfigManager {
      */
     @Override
     public Map<String, Map<String, ActionConfigBean>> getConfigTable() {
-        return configTable;
+        return CONFIG_TABLE;
     }
 
     /**
@@ -126,16 +117,19 @@ public class TXWebConfigManager implements WebConfigManager {
     @Override
     synchronized public void checkLoad() {
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
-        if (!environmentTemplate.getBoolean(Environment.useTxWeb))
+        if (environmentTemplate.containsName(Environment.useTxWeb)&&!environmentTemplate.getBoolean(Environment.useTxWeb))
         {
             return;
         }
         //1.初始化所有配置动作
-
+        if (!CONFIG_TABLE.isEmpty())
+        {
+            return;
+        }
         scanPackageList.clear();
         Configuration configuration = DefaultConfiguration.getInstance();
         try {
-            configTable.putAll(configuration.loadConfigMap());
+            CONFIG_TABLE.putAll(configuration.loadConfigMap());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -151,8 +145,8 @@ public class TXWebConfigManager implements WebConfigManager {
 
 
         //2.生成restFull路径
-        for (String namespace : configTable.keySet()) {
-            Map<String, ActionConfigBean> map = configTable.get(namespace);
+        for (String namespace : CONFIG_TABLE.keySet()) {
+            Map<String, ActionConfigBean> map = CONFIG_TABLE.get(namespace);
             if (map != null) {
                 for (ActionConfigBean actionConfigBean : map.values()) {
                     if (actionConfigBean == null) {
@@ -288,7 +282,7 @@ public class TXWebConfigManager implements WebConfigManager {
         actionConfigBean.setSecret(httpMethod.secret());
         actionConfigBean.setRegister(true);
         //log.debug("register action package:\r\n{}",actionConfigBean.toString());
-        Map<String, ActionConfigBean> actionConfigBeanMap = configTable.computeIfAbsent(httpMethod.namespace(), k -> new HashMap<>());
+        Map<String, ActionConfigBean> actionConfigBeanMap = CONFIG_TABLE.computeIfAbsent(httpMethod.namespace(), k -> new HashMap<>());
         actionConfigBeanMap.put(actionConfigBean.getActionName(), actionConfigBean);
 
         //检查放入继承关系
@@ -419,7 +413,7 @@ public class TXWebConfigManager implements WebConfigManager {
     public List<String> getActionList(String namespace) {
         String nameKey = StringUtil.isNull(namespace) ? TXWeb.global : StringUtil.fixedNamespace(namespace);
         List<String> result = new ArrayList<>();
-        for (String key : configTable.keySet()) {
+        for (String key : CONFIG_TABLE.keySet()) {
             if (key.startsWith(nameKey)) {
                 result.add(key);
             }
@@ -445,7 +439,7 @@ public class TXWebConfigManager implements WebConfigManager {
         ActionConfigBean result = null;
         Map<String, ActionConfigBean> elementMap;
         while (!StringUtil.isNull(nameKey) && !Sioc.global.equalsIgnoreCase(nameKey)) {
-            elementMap = configTable.get(nameKey);
+            elementMap = CONFIG_TABLE.get(nameKey);
             if (elementMap != null) {
                 for (String name : elementMap.keySet()) {
                     //通配符* 放在最后判断，否则会替代前边的配置
@@ -471,7 +465,7 @@ public class TXWebConfigManager implements WebConfigManager {
                 }
             }
         }
-        elementMap = configTable.get(Sioc.global);
+        elementMap = CONFIG_TABLE.get(Sioc.global);
         if (elementMap != null) {
             for (String name : elementMap.keySet()) {
                 if (!StringUtil.ASTERISK.equals(name) && StringUtil.getPatternFind(namePart, name)) {
@@ -506,7 +500,7 @@ public class TXWebConfigManager implements WebConfigManager {
      */
     private ActionConfigBean getActionConfigBean(String namePart, String namespace) {
         String nameKey = StringUtil.isNull(namespace) ? TXWeb.global : StringUtil.fixedNamespace(namespace);
-        Map<String, ActionConfigBean> map = configTable.get(nameKey);
+        Map<String, ActionConfigBean> map = CONFIG_TABLE.get(nameKey);
         if (map == null) {
             return null;
         }

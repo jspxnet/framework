@@ -38,7 +38,7 @@ import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.txweb.config.DefaultConfiguration;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -281,7 +281,7 @@ public class JspxCoreListener implements ServletContextListener {
             log.error("载入Web配置错误", e);
         }
 
-        TXWebConfigManager.getInstance().checkLoad();
+        TxWebConfigManager.getInstance().checkLoad();
         //rpc服务器,提供外部rpctcp调用 begin
         if (RpcConfig.getInstance().isUseNettyRpc()) {
             log.info("启动RPC服务器");

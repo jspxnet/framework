@@ -22,7 +22,7 @@ import com.github.jspxnet.txweb.annotation.Intercept;
 import com.github.jspxnet.txweb.annotation.Redirect;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.config.ResultConfigBean;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.dispatcher.handle.MarkdownHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.RsaRocHandle;
@@ -54,7 +54,7 @@ import java.util.*;
 public class DefaultActionInvocation implements ActionInvocation {
 
     final private static String[] NO_PARAMETER = new String[]{"session", "request", "response", "language", "config", "env", "actionLogTitle", "actionLogContent", "result", "templatePath", "actionResult"};
-    final private static WebConfigManager WEB_CONFIG_MANAGER = TXWebConfigManager.getInstance();
+    final private static WebConfigManager WEB_CONFIG_MANAGER = TxWebConfigManager.getInstance();
     final private static BeanFactory BEAN_FACTORY = EnvFactory.getBeanFactory();
     final private static Map<String, String> RESULT_MAP = new HashMap<>(22);
 

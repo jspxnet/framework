@@ -16,7 +16,7 @@ import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
@@ -55,7 +55,7 @@ public class ChainResult extends RedirectResult {
         }
         String namePart = URLUtil.getFileNamePart(location);
         action.put(ActionEnv.Key_ActionName, namePart);
-        WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
+        WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         final ActionConfig actionConfig = webConfigManager.getActionConfig(namePart, namespace, true);
         if (actionConfig == null) {
             log.info("Chain result  not find action config namespace=" + namespace + "  action=" + namePart);

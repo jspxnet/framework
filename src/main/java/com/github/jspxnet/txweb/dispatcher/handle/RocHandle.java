@@ -9,7 +9,7 @@ import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
@@ -122,7 +122,7 @@ public class RocHandle extends ActionHandle {
         ///////////////////////////////////环境参数 begin
 
 
-        WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
+        WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         ActionConfig actionConfig = webConfigManager.getActionConfig(namePart, namespace, true);
         if (actionConfig == null) {
             TXWebUtil.print(new JSONObject(RocResponse.error(-32600, "class not found.找不到执行对象")).toString(4), WebOutEnumType.JSON.getValue(), response);

@@ -17,7 +17,7 @@ import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfigBean;
-import com.github.jspxnet.txweb.config.TXWebConfigManager;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.dao.PermissionDAO;
 import com.github.jspxnet.txweb.table.MemberRole;
 import com.github.jspxnet.txweb.table.Role;
@@ -200,7 +200,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
      */
     @Override
     public Map<String, ActionConfigBean> getActionList() {
-        WebConfigManager webConfigManager = TXWebConfigManager.getInstance();
+        WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         final Map<String, ActionConfigBean> actionConfigMap = new HashMap<String, ActionConfigBean>();
         final Map<String, String> map = webConfigManager.getExtendList();
         for (String key : map.keySet()) {
