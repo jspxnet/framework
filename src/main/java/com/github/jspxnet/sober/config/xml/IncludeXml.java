@@ -11,6 +11,7 @@ import com.github.jspxnet.sober.config.BaseXmlTagNode;
  **/
 public class IncludeXml extends BaseXmlTagNode {
     public final static  String TAG_NAME = "include";
+
     public IncludeXml() {
         super.setTagName(TAG_NAME);
     }
