@@ -15,9 +15,10 @@ import org.springframework.stereotype.Component;
  * date: 2021/3/30 23:26
  * description: 让spring支持jspx sqlMap注释功能
  * 使用方法在spring总载入就可以了
+ * <pre>
  * {@code
- *  @Import(JspxAnnotationAspect.class})
- * }
+ *  Import(JspxAnnotationAspect.class})
+ * }</pre>
  **/
 @Aspect
 @Component
