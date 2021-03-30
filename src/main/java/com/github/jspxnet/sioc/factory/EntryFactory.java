@@ -133,7 +133,7 @@ public final class EntryFactory implements BeanFactory {
             result = cla.newInstance();
             if (AnnotationUtil.hasProxyMethod(cla)) {
                 GlobalMethodInterceptor methodInterceptor = new GlobalMethodInterceptor();
-                result = methodInterceptor.getProxyInstance(result);
+                result = methodInterceptor.getProxyInstance(cla);
             }
         }
 

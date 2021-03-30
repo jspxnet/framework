@@ -147,30 +147,6 @@ public final class JspxNetApplication {
         }
     }
 
-    @Deprecated
-    public static void onlySql(String fileName,Class<?>[] cacheList) {
-        JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
-        jspxConfiguration.setDefaultConfigFile(fileName);
-        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
-        envTemplate.createSystemEnv();
-        envTemplate.put(Environment.useTxWeb,false);
-        //简单的缓存控制
-        if (cacheList!=null)
-        {
-            for (Class<?> cls:cacheList)
-            {
-                try {
-                    JSCacheManager.getCacheManager().createCache(new MemoryStore(), cls,100,100,false,null);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        log.debug("当前默认路径:" + envTemplate.getString(Environment.defaultPath));
-
-
-    }
 
 
 

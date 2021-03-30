@@ -632,6 +632,12 @@
             <version>5.2.13.RELEASE</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.6</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -3,6 +3,7 @@ package com.github.jspxnet.sioc.interceptor;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.Sioc;
+import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.annotation.SqlMap;
 import com.github.jspxnet.sober.enums.ExecuteEnumType;
@@ -20,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+import org.aspectj.lang.ProceedingJoinPoint;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -30,30 +33,24 @@ import java.util.Map;
  * Created by jspx.net
  *
  * author: chenYuan
- * date: 2020/10/18 1:27
- * description: 因为多层嵌套代理问题比较多,这里就是用一个代理来处理
+ * date: 2021/3/30 22:36
+ * description: jspx 嵌入 spring事务执行
  **/
 @Slf4j
-public class GlobalMethodInterceptor implements MethodInterceptor  {
+public class SpringMethodInterceptor implements MethodInterceptor {
 
     private Class<?> targetClass;
-
+    private Object targetObject;
     /**
      *
      * @param targetObject 对象
      * @return 代理对象
      */
     public Object getProxyInstance(Object targetObject){
-        return getProxyInstance(targetObject.getClass());
-    }
-    /**
-     *
-     * @param cls 对象
-     * @return 代理对象
-     */
-    public Object getProxyInstance(Class<?> cls){
         //传入用户类
-        this.targetClass = cls;
+        this.targetClass = targetObject.getClass();
+        this.targetObject = targetObject;
+
         //Enhancer是cglib的核心类
         Enhancer enhancer = new Enhancer();
         // 将用户类设为 Enhancer对象的superclass属性,,即设为 Enhancer对象的父类
@@ -64,8 +61,10 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
         return enhancer.create();  //生成代理对象
     }
 
+
+
     @Override
-    public Object intercept(Object obj, Method method, Object[] arg,MethodProxy proxy) throws Throwable {
+    public Object intercept(Object obj, Method method, Object[] arg, MethodProxy proxy) throws Throwable {
         if ("toString".equals(method.getName()))
         {
             return targetClass.toString();
@@ -87,10 +86,10 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
         {
             if (sqlMap!=null)
             {
-                result = invokeSqlMap(targetClass, obj,  arg, proxy,sqlMap,exeMethod);
+                result = invokeSqlMap(targetClass, targetObject,  arg, proxy,sqlMap,exeMethod);
             } else
             {
-                result = proxy.invokeSuper(obj, arg);
+                result = proxy.invokeSuper(targetObject, arg);
             }
             if (transaction!=null&&invokeTransaction!=null)
             {
@@ -112,7 +111,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
     }
 
 
-    private static com.github.jspxnet.sober.Transaction getTransactionBegin(Transaction transaction,Method exeMethod) throws Throwable {
+    private static com.github.jspxnet.sober.Transaction getTransactionBegin(Transaction transaction, Method exeMethod) throws Throwable {
         //没有配置的情况,直接提示执行返回begin
         BeanFactory beanFactory = EnvFactory.getBeanFactory();
         TransactionController transactionController = beanFactory.getBean(TransactionController.class, Sioc.global);
@@ -132,13 +131,13 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
         return invokeTransaction;
     }
 
-    private static Object invokeSqlMap(Class<?> targetClass,Object obj, Object[] arg,MethodProxy proxy,SqlMap sqlMap,Method exeMethod) throws Throwable {
+    private static Object invokeSqlMap(Class<?> targetClass, Object obj, Object[] arg, MethodProxy proxy, SqlMap sqlMap, Method exeMethod) throws Throwable {
         String exeId = sqlMap.id();
         if (StringUtil.isNull(exeId))
         {
             exeId = ClassUtil.getImplements(targetClass).getName() + "." +exeMethod.getName();
         }
-        proxy.invokeSuper(obj, arg);
+        exeMethod.invoke(obj,arg);
 
         //这里开始事务处理
         SoberSupport soberSupport = (SoberSupport)obj;
@@ -148,8 +147,8 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
             Map<String,Object> valueMap = null;
             Object currentPageObj = ClassUtil.getParameterValue(exeMethod,sqlMap.currentPage(),arg);
             Object countObj = ClassUtil.getParameterValue(exeMethod,sqlMap.count(),arg);
-            Integer currentPage = currentPageObj!=null?ObjectUtil.toInt(currentPageObj):null;
-            Integer totalCount = countObj!=null?ObjectUtil.toInt(countObj):null;
+            Integer currentPage = currentPageObj!=null? ObjectUtil.toInt(currentPageObj):null;
+            Integer totalCount = countObj!=null? ObjectUtil.toInt(countObj):null;
             if (!ObjectUtil.isEmpty(arg))
             {
                 for (Object o:arg)
@@ -188,11 +187,11 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
                         {
                             continue;
                         }
-                       if (o instanceof Serializable)
-                       {
-                           valueMap = ObjectUtil.getMap(o);
-                           break;
-                       }
+                        if (o instanceof Serializable)
+                        {
+                            valueMap = ObjectUtil.getMap(o);
+                            break;
+                        }
                     }
                 }
             }
@@ -206,7 +205,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
             }
             if (QueryModelEnumType.SINGLE.equals(sqlMap.mode()))
             {
-                if (cls!=null&&ClassUtil.isStandardType(cls))
+                if (cls!=null&& ClassUtil.isStandardType(cls))
                 {
                     Object result = soberSupport.buildSqlMap().getUniqueResult(sqlMap.namespace(),exeId,valueMap);
                     return BeanUtil.getTypeValue(result,cls);
@@ -222,7 +221,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
             if (QueryModelEnumType.COUNT.equals(sqlMap.mode()))
             {
                 Object result = soberSupport.buildSqlMap().queryCount(sqlMap.namespace(),exeId,valueMap);
-                if (cls!=null&&ClassUtil.isStandardType(cls))
+                if (cls!=null&& ClassUtil.isStandardType(cls))
                 {
                     return BeanUtil.getTypeValue(result,cls);
                 }
@@ -273,6 +272,22 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
         return null;
     }
 
-
+    /**
+     *
+     * @param call jspx sqlMap 和注释在spring中生效
+     * @return 返回执行对象
+     * @throws Throwable 异常
+     */
+    public static Object springInvoke(ProceedingJoinPoint call) throws Throwable {
+        String methodName = call.getSignature().getName();
+        Object target = call.getTarget();
+        Method method = ClassUtil.getDeclaredMethod(target.getClass(), methodName);
+        if (AnnotationUtil.hasProxyMethod(target.getClass())) {
+            SpringMethodInterceptor methodInterceptor = new SpringMethodInterceptor();
+            Object targetObject = methodInterceptor.getProxyInstance(target);
+            return method.invoke(targetObject, call.getArgs());
+        }
+        return call.proceed();
+    }
 
 }
