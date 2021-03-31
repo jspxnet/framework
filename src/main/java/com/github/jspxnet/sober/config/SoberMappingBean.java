@@ -452,12 +452,14 @@ public class SoberMappingBean implements SoberFactory {
             return;
         }
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        String defaultPath = envTemplate.getString(Environment.defaultPath);
+        List<File> fileList = new ArrayList<>();
         if (strings != null) {
-            String[] files = new String[0];
+
             for (String file : strings) {
                 if (FileUtil.isPatternFileName(file))
                 {
-                    List<File> findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), file);
+                    List<File> findFiles = FileUtil.getPatternFiles(defaultPath, file);
                     if (ObjectUtil.isEmpty(findFiles)&&!StringUtil.isNull(envTemplate.getString(Environment.sqlXmlPath)))
                     {
                         String sqlXmlPath = envTemplate.getString(Environment.sqlXmlPath);
@@ -471,51 +473,56 @@ public class SoberMappingBean implements SoberFactory {
                             }
                         }
                     }
-                    findFiles.addAll(FileUtil.getPatternFiles(null, file));
+                    if (defaultPath!=null)
+                    {
+                        findFiles.addAll(FileUtil.getPatternFiles(null, file));
+                    }
                     if (!ObjectUtil.isEmpty(findFiles))
                     {
-                        for (File f : findFiles) {
-                            files = ArrayUtil.add(files, f.getPath());
-                        }
+                        fileList.addAll(findFiles);
                     }
                 } else {
-                    files = ArrayUtil.add(files, file);
+
+                    String fileName = null;
+                    if (FileUtil.isFileExist(file))
+                    {
+                        fileName = file;
+                    }
+
+                    if (fileName==null) {
+                        String checkFile = new File(defaultPath,file).getPath();
+                        if (FileUtil.isFileExist(checkFile))
+                        {
+                            fileName = checkFile;
+                        }
+                    }
+                    if (fileName==null) {
+                        File f = EnvFactory.getFile(file);
+                        if (f!=null)
+                        {
+                            fileName = f.getPath();
+                        }
+                    }
+
+                    if (fileName!=null) {
+                        fileList.add(new File(fileName));
+                    }
                 }
             }
-            String defaultPath = envTemplate.getString(Environment.defaultPath);
-            List<String> fileList = new ArrayList<>();
-            for (String file : files) {
-                if (StringUtil.isNull(file)||fileList.contains(file)) {
+
+            List<String> checkList = new ArrayList<>();
+            for (File file : fileList) {
+                if (file==null) {
                     continue;
                 }
-                String fileName = null;
-                if (FileUtil.isFileExist(file))
+
+                String fileId = file.getName() + "_" + file.length();
+                if (checkList.contains(fileId))
                 {
-                    fileName = file;
-                }
-
-                if (fileName==null) {
-                    String checkFile = new File(defaultPath,file).getPath();
-                    if (FileUtil.isFileExist(checkFile))
-                    {
-                        fileName = checkFile;
-                    }
-                }
-                if (fileName==null) {
-                    File f = EnvFactory.getFile(file);
-                    if (f!=null)
-                    {
-                        fileName = f.getPath();
-                    }
-                }
-
-                if (fileName==null) {
-                    log.error("not find file :{}", file);
                     continue;
                 }
-
-                fileList.add(fileName);
-                String xmlString = IoUtil.autoReadText(fileName,envTemplate.getString(Environment.encode, Environment.defaultEncode));
+                checkList.add(fileId);
+                String xmlString = IoUtil.autoReadText(file.getPath(),envTemplate.getString(Environment.encode, Environment.defaultEncode));
                 xmlString = StringUtil.trim(xmlString);
                 if (!StringUtil.isNull(xmlString))
                 {

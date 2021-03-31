@@ -1823,8 +1823,6 @@ public class FileUtil {
         }
 
         if ("jar".equals(FileUtil.getTypePart(file).toLowerCase())&&!file.getPath().endsWith("!")) {
-
-
             try (JarInputStream zis = new JarInputStream(new FileInputStream(file.getPath()))) {
 
                 List<File> list = new ArrayList<>();
@@ -2322,7 +2320,7 @@ public class FileUtil {
                 }
             }
             if (url != null) {
-                String findDir = new File(url.getPath()).getAbsolutePath();
+                String findDir = new File(url.getPath()).getPath();
                 List<File> files = FileUtil.getPatternFiles(findDir, find);
                 if (!ObjectUtil.isEmpty(files)) {
                     return files.get(0);
@@ -2337,7 +2335,7 @@ public class FileUtil {
                     return file;
                 }
 
-                String findDir = new File(path).getAbsolutePath();
+                String findDir = new File(path).getPath();
                 List<File> files = FileUtil.getPatternFiles(findDir, findFile);
                 if (!ObjectUtil.isEmpty(files)) {
                     return files.get(0);
