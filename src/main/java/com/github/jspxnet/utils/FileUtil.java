@@ -2346,17 +2346,25 @@ public class FileUtil {
         if (loadFile.toLowerCase().startsWith(KEY_defaultPath)) {
             loadFile = loadFile.substring(KEY_defaultPath.length());
         }
+
         if (paths!=null && !loadFile.toLowerCase().contains(".jar!"))
         {
-            for (String path : paths) {
+            for (String path : paths)
+            {
                 if (StringUtil.isNull(path))
                 {
                     continue;
                 }
-                File file = new File(path, loadFile);
+                File file = new File(loadFile);
                 if (file.isFile()) {
                     return file;
                 }
+
+                file = new File(path, loadFile);
+                if (file.isFile()) {
+                    return file;
+                }
+
                 List<File> files = FileUtil.getPatternFiles(path, loadFile);
                 if (!ObjectUtil.isEmpty(files)) {
                     return files.get(0);

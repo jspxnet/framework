@@ -467,7 +467,7 @@ public class SoberMappingBean implements SoberFactory {
                         for (String path:pathList)
                         {
                             List<File> childFindFiles = FileUtil.getPatternFiles(path, file);
-                            if (childFindFiles!=null)
+                            if (!ObjectUtil.isEmpty(childFindFiles))
                             {
                                 findFiles.addAll(childFindFiles);
                             }
@@ -516,7 +516,7 @@ public class SoberMappingBean implements SoberFactory {
                     continue;
                 }
 
-                String fileId = file.getName() + "_" + file.length();
+                String fileId = file.getName() + StringUtil.UNDERLINE + file.length();
                 if (checkList.contains(fileId))
                 {
                     continue;

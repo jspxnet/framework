@@ -420,15 +420,12 @@ public class ConfigureContext implements IocContext {
             }
         }
         if (includeFiles != null) {
-            for (String f : includeFiles) {
-                if (f == null) {
+            for (String fileName : includeFiles) {
+                if (StringUtil.isEmpty(fileName))
+                {
                     continue;
                 }
-                File readFile = EnvFactory.getFile(f);
-                if (readFile!=null)
-                {
-                    results.addAll(getIocElementsForFile(readFile));
-                }
+                results.addAll(getIocElementsForFile(new File(fileName)));
             }
         }
         return results;
@@ -441,11 +438,11 @@ public class ConfigureContext implements IocContext {
     private List<TagNode> getIocElements() throws Exception {
         List<TagNode> results = new ArrayList<>();
         for (String fileName : configFile) {
-            File readFile = EnvFactory.getFile(fileName);
-            if (readFile!=null)
+            if (StringUtil.isEmpty(fileName))
             {
-                results.addAll(getIocElementsForFile(readFile));
+                continue;
             }
+            results.addAll(getIocElementsForFile(new File(fileName)));
         }
         return results;
     }
@@ -544,6 +541,10 @@ public class ConfigureContext implements IocContext {
     }
 
 
+    /**
+     *
+     * @return 得到定时器map
+     */
     @Override
     public Map<String, String> getSchedulerMap() {
         return schedulerMap;
