@@ -202,7 +202,7 @@ public class TreeView extends ActionSupport {
         treeItemDAO.setInput(input);
         treeItemDAO.setUseLimb(useLimb);
         treeItemDAO.setChecked(ArrayUtil.emptyString);
-        return treeItemDAO.getTreeSrc(TreeItemDAOImpl.Type_json);
+        return treeItemDAO.getTreeSrc(TreeItemDAOImpl.TYPE_JSON);
     }
 
     /**
@@ -234,7 +234,7 @@ public class TreeView extends ActionSupport {
         treeItemDAO.setSelected(nodeId);
         treeItemDAO.setInput(input);
         treeItemDAO.setUseLimb(useLimb);
-        return treeItemDAO.getTreeSrc(TreeItemDAOImpl.Type_roleJson);
+        return treeItemDAO.getTreeSrc(TreeItemDAOImpl.TYPE_ROLE_JSON);
     }
 
     /**
@@ -297,7 +297,7 @@ public class TreeView extends ActionSupport {
         treeItemDAO.setSelected(nodeId);
         treeItemDAO.setInput(input);
         treeItemDAO.setUseLimb(useLimb);
-        return treeItemDAO.getTreeSrc(TreeItemDAOImpl.Type_json);
+        return treeItemDAO.getTreeSrc(TreeItemDAOImpl.TYPE_JSON);
     }
 
 
@@ -313,7 +313,7 @@ public class TreeView extends ActionSupport {
         treeItemDAO.setInput(input);
         treeItemDAO.setUseLimb(useLimb);
         treeItemDAO.setChecked(treeItemDAO.getRoleNodeIds(role.getId()));
-        return treeItemDAO.getTreeSrc(TreeItemDAOImpl.Type_json);
+        return treeItemDAO.getTreeSrc(TreeItemDAOImpl.TYPE_JSON);
     }
 
 

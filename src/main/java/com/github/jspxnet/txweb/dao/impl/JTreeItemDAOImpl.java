@@ -67,10 +67,10 @@ public class JTreeItemDAOImpl extends TreeItemDAOImpl {
 
     @Override
     public String getTreeSrc(String type) {
-        if (Type_json.equalsIgnoreCase(type)) {
+        if (TYPE_JSON.equalsIgnoreCase(type)) {
             return getJson("none");
         }
-        if (Type_roleJson.equalsIgnoreCase(type)) {
+        if (TYPE_ROLE_JSON.equalsIgnoreCase(type)) {
             return getJson("role");
         }
         if (Type_jsonTree.equalsIgnoreCase(type)) {

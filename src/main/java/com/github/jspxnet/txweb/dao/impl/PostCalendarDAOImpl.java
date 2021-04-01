@@ -71,7 +71,7 @@ public class PostCalendarDAOImpl extends JdbcOperations implements PostCalendarD
      */
     @Override
     public PostCalendar getPostCalendar(Date date) {
-        return (PostCalendar) createCriteria(PostCalendar.class).add(Expression.eq("shortDate", DateUtil.toString(date, DateUtil.DAY_FORMAT))).add(Expression.eq("namespace", namespace)).add(Expression.eq("organizeId", organizeId)).objectUniqueResult(false);
+        return  createCriteria(PostCalendar.class).add(Expression.eq("shortDate", DateUtil.toString(date, DateUtil.DAY_FORMAT))).add(Expression.eq("namespace", namespace)).add(Expression.eq("organizeId", organizeId)).objectUniqueResult(false);
     }
 
     /*
@@ -90,7 +90,7 @@ public class PostCalendarDAOImpl extends JdbcOperations implements PostCalendarD
         }
         sql.append(" GROUP BY dateMonth ORDER BY dateMonth DESC");
         List<Object> list = query(sql.toString(), null, 1, 5000);
-        Map<String, Integer> result = new HashMap<String, Integer>();
+        Map<String, Integer> result = new HashMap<>();
         for (Object bean : list) {
             if (bean == null) {
                 continue;

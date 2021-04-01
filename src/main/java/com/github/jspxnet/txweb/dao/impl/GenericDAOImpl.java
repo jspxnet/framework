@@ -15,6 +15,7 @@ import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.txweb.dao.GenericDAO;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.List;
  * Time: 17:27:49
  * com.github.jspxnet.txweb.dao.impl.GenericDAOImpl
  */
-public class GenericDAOImpl extends JdbcOperations implements GenericDAO {
+public class GenericDAOImpl<T> extends JdbcOperations implements GenericDAO<T> {
     public GenericDAOImpl() {
 
     }
@@ -46,8 +47,8 @@ public class GenericDAOImpl extends JdbcOperations implements GenericDAO {
     @Override
     public <T> List<T> getList(
             T cls,
-            String field,
-            String find,
+            String[] field,
+            String[] find,
             String term,
             long uid,
             String sortString,
@@ -59,8 +60,8 @@ public class GenericDAOImpl extends JdbcOperations implements GenericDAO {
             sort = sortString;
         }
         Criteria criteria = createCriteria((Class<T>)cls);
-        if (!StringUtil.isNull(field) && !StringUtil.isNull(find)) {
-            criteria = criteria.add(Expression.like(field, "%" + find + "%"));
+        if (!ObjectUtil.isEmpty(field) && !ObjectUtil.isEmpty(find)) {
+            criteria = criteria.add(Expression.find(field, find));
         }
         if (uid > 0) {
             criteria = criteria.add(Expression.eq("putUid", uid));
@@ -81,15 +82,15 @@ public class GenericDAOImpl extends JdbcOperations implements GenericDAO {
      */
     @Override
     public int getCount(
-            Class cls,
-            String field,
-            String find,
+            T cls,
+            String[] field,
+            String[] find,
             String term,
             long uid
     ) throws Exception {
-        Criteria criteria = createCriteria(cls);
-        if (!StringUtil.isNull(field) && !StringUtil.isNull(find)) {
-            criteria = criteria.add(Expression.like(field, "%" + find + "%"));
+        Criteria criteria = createCriteria((Class<T>)cls);
+        if (!ObjectUtil.isEmpty(field) && !ObjectUtil.isEmpty(find)) {
+            criteria = criteria.add(Expression.find(field, find));
         }
         if (uid > 0) {
             criteria = criteria.add(Expression.eq("putUid", uid));

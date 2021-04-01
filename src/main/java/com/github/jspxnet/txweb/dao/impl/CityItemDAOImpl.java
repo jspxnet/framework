@@ -18,8 +18,7 @@ import com.github.jspxnet.txweb.dao.CityItemDAO;
 import com.github.jspxnet.txweb.table.CityItem;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
 /**
@@ -28,8 +27,9 @@ import java.util.*;
  * date: 11-3-13
  * Time: 下午3:32
  */
+@Slf4j
 public class CityItemDAOImpl extends JdbcOperations implements CityItemDAO {
-    private static final Logger log = LoggerFactory.getLogger(CityItemDAOImpl.class);
+
     protected String namespace; //命名空间
 
     public CityItemDAOImpl() {
@@ -295,7 +295,6 @@ public class CityItemDAOImpl extends JdbcOperations implements CityItemDAO {
     /**
      * @return 得到根节点
      */
-    @SuppressWarnings("unchecked")
     public CityItem getRootCityItem() {
         List<CityItem> list = getList();
         for (CityItem treeItem : list) {
@@ -314,7 +313,6 @@ public class CityItemDAOImpl extends JdbcOperations implements CityItemDAO {
      *
      * @return 得到树的所有节点
      */
-    @SuppressWarnings("unchecked")
     public List<CityItem> getList() {
         return createCriteria(CityItem.class)
                 .add(Expression.eq("namespace", namespace))
@@ -337,7 +335,6 @@ public class CityItemDAOImpl extends JdbcOperations implements CityItemDAO {
     /**
      * @return 得到节点的数目
      */
-    @SuppressWarnings("unchecked")
     public int getSize() {
         return getList().size();
     }
@@ -389,7 +386,6 @@ public class CityItemDAOImpl extends JdbcOperations implements CityItemDAO {
     /**
      * @return String 创建节点ID,不能是数字开头和有特殊字符
      */
-    @SuppressWarnings("unchecked")
     private String createCityItemId() {
         int size = getSize() + 1;
         String id = namespace.toLowerCase() + size;
@@ -588,7 +584,7 @@ public class CityItemDAOImpl extends JdbcOperations implements CityItemDAO {
     /**
      * @return 得到xml格式数据
      */
-    public String toXMLString() {
+    public String toXmlString() {
         List<CityItem> list = getList();
         StringBuilder sb = new StringBuilder();
         sb.append("<city>\r\n");
