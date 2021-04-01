@@ -92,12 +92,13 @@ public class DefaultActionInvocation implements ActionInvocation {
         RESULT_MAP.put(ActionSupport.ERROR, ErrorResult.class.getName());
     }
 
+    final private DefaultActionProxy actionProxy;
+    final private String namespace;
+
     private boolean executed = false;
     private String resultCode = null;
-    private DefaultActionProxy actionProxy;
     private Iterator<Interceptor> interceptors;
     private ActionConfig actionConfig;
-    private String namespace;
 
 
     @Override

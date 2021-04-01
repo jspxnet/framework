@@ -24,7 +24,7 @@ import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.env.TXWeb;
-import com.github.jspxnet.txweb.vo.OperateVo;
+import com.github.jspxnet.txweb.model.vo.OperateVo;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.txweb.view.OperateComparator;
 import com.github.jspxnet.utils.*;

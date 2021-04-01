@@ -91,7 +91,7 @@ public class RestoreAction extends ActionSupport {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notDataFind));
             return;
         }
-        List list = (List) ObjectUtil.getForXml(loadXml);
+        List<?> list = (List<?>) ObjectUtil.getForXml(loadXml);
         if (list == null || list.isEmpty()) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notDataFind));
             return;
@@ -130,7 +130,7 @@ public class RestoreAction extends ActionSupport {
             }
         }
 
-        Class cla = ClassUtil.loadClass(backClass);
+        Class<?> cla = ClassUtil.loadClass(backClass);
         Criteria criteria = genericDAO.createCriteria(cla);
         if (!StringUtil.isNull(namespace) && ClassUtil.isDeclaredMethod(cla, "setNamespace")) {
             criteria = criteria.add(Expression.like("namespace", namespace + "%"));

@@ -31,16 +31,16 @@ import java.util.*;
  */
 @Slf4j
 public class HtmlEngineImpl implements HtmlEngine {
-    final static public String NoneTag = "none";
-    private TemplateModel templateElement;
+    final static public String NONE_TAG = "none";
+    final private TemplateModel templateElement;
     private String macroCallTag = "@";
     private char beginTag = '<';
     private char fenTag = '/';
     private char endTag = '>';
 
     //为了兼容HTML 采用注释格式为 <!--# 注释内容 #-->
-    final static private String noteTagBegin = CommentBlock.noteTagBegin;
-    final static private String noteTagEnd = CommentBlock.noteTagEnd;
+    final static private String NOTE_TAG_BEGIN = CommentBlock.noteTagBegin;
+    final static private String NOTE_TAG_END = CommentBlock.noteTagEnd;
 
     protected char escapeVariable = '\\';
     private boolean htmlExtType = false;
@@ -124,16 +124,16 @@ public class HtmlEngineImpl implements HtmlEngine {
             /////自己开始 begin
             if (str == beginTag && code.charAt(i + 1) != fenTag) {
                 //处理注释begin
-                if (!in && code.startsWith(noteTagBegin, i + 1)) {
-                    int pos = code.indexOf(noteTagEnd + endTag, i + noteTagBegin.length());
+                if (!in && code.startsWith(NOTE_TAG_BEGIN, i + 1)) {
+                    int pos = code.indexOf(NOTE_TAG_END + endTag, i + NOTE_TAG_BEGIN.length());
                     if (pos == -1) {
-                        i = i + noteTagBegin.length();
-                        log.error(noteTagBegin + " not end,注释标签没有结尾，" + code);
+                        i = i + NOTE_TAG_BEGIN.length();
+                        log.error(NOTE_TAG_BEGIN + " not end,注释标签没有结尾，" + code);
                         break;
                     }
                     TagNode commentTagNode = new CommentBlock();
                     commentTagNode.setStarLength(i);
-                    commentTagNode.setEndLength(pos + (noteTagEnd + endTag).length());
+                    commentTagNode.setEndLength(pos + (NOTE_TAG_END + endTag).length());
                     commentTagNode.setTemplate(templateElement);
                     i = commentTagNode.getEndLength();
                     nodeTree.add(commentTagNode);
@@ -178,7 +178,7 @@ public class HtmlEngineImpl implements HtmlEngine {
                             }
                         }
                         ////////////翻转修复 end
-                        if (in && tagNode.getTagName().equalsIgnoreCase(tagName) && !NoneTag.equals(tagNode.getTagName())) {
+                        if (in && tagNode.getTagName().equalsIgnoreCase(tagName) && !NONE_TAG.equals(tagNode.getTagName())) {
                             times++;
 
                         } else if (!in) {
@@ -212,11 +212,11 @@ public class HtmlEngineImpl implements HtmlEngine {
 
             ///////////////文本begin
             if (!in && htmlExtType) {
-                if (tagNode != null && NoneTag.equals(tagNode.getTagName())) {
+                if (tagNode != null && NONE_TAG.equals(tagNode.getTagName())) {
                     tagNode.setEndLength(i + 1);
                 } else {
                     tagNode = new NoneBlock();
-                    tagNode.setTagName(NoneTag);
+                    tagNode.setTagName(NONE_TAG);
                     tagNode.setStarLength(i);
                     tagNode.setEndLength(i + 1);
                     tagNode.setTemplate(templateElement);
@@ -266,7 +266,7 @@ public class HtmlEngineImpl implements HtmlEngine {
             i++;
             //最后修复
             ////////////翻转修复 begin
-            if (i == end && in && !NoneTag.equals(tagNode.getTagName()) && tagNode.isRepair()) {
+            if (i == end && in && !NONE_TAG.equals(tagNode.getTagName()) && tagNode.isRepair()) {
                 int ri = code.indexOf(endTag, tagNode.getStarLength());
                 if (ri != -1) {
                     tagNode.setEndLength(ri + 1);

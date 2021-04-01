@@ -6,7 +6,7 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
-package com.github.jspxnet.txweb.vo;
+package com.github.jspxnet.txweb.model.vo;
 
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;

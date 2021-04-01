@@ -10,17 +10,12 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.Action;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import org.slf4j.Logger;
-import com.github.jspxnet.boot.environment.Environment;
-import org.slf4j.LoggerFactory;
-import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
-import com.github.jspxnet.txweb.support.ActionSupport;
-
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -35,13 +30,9 @@ import java.io.*;
  * Time: 下午2:15
  * 将pdf 的一个页面转换为图片输出
  */
+@Slf4j
 public class PdfPageImgResult extends ResultSupport {
-    private static final Logger log = LoggerFactory.getLogger(PdfPageImgResult.class);
-    private final static TemplateConfigurable configurable = new TemplateConfigurable();
 
-    static {
-        configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
-    }
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {

@@ -80,7 +80,7 @@ public class SqlMapTemplateConfigurable implements Configurable, Cloneable {
         ////////////Tag配置 end
 
         //解析关系 begin
-        phrases.put(HtmlEngineImpl.NoneTag, new NonePhrase());
+        phrases.put(HtmlEngineImpl.NONE_TAG, new NonePhrase());
         phrases.put(CommentBlock.class.getName(), new CommentPhrase());
         phrases.put(CompressBlock.class.getName(), new CompressPhrase());
         phrases.put(AssignBlock.class.getName(), new AssignPhrase());

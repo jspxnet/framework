@@ -173,7 +173,7 @@ public class EnvRunner {
 
         Phrase phrase = phrases.get(tagNode.getClass().getName());
         if (phrase == null) {
-            phrase = phrases.get(HtmlEngineImpl.NoneTag);
+            phrase = phrases.get(HtmlEngineImpl.NONE_TAG);
         }
         return phrase.getRun(this, tagNode, out);
     }

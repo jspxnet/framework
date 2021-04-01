@@ -60,20 +60,20 @@ public class JspxPhpModule extends AbstractQuercusModule {
     }
 
     public Object getBean(String classname) {
-        String web_namespace = null;
+        String webNamespace = null;
         if (classname == null) {
             return null;
         }
         if (classname.contains(TXWebUtil.AT)) {
-            web_namespace = StringUtil.substringAfter(classname, TXWebUtil.AT);
+            webNamespace = StringUtil.substringAfter(classname, TXWebUtil.AT);
             classname = StringUtil.substringBefore(classname, TXWebUtil.AT);
         }
         BeanFactory beanFactory = getBeanFactory();
-        if (web_namespace == null) {
+        if (webNamespace == null) {
             return beanFactory.getBean(classname);
         }
         try {
-            return beanFactory.getBean(classname, web_namespace);
+            return beanFactory.getBean(classname, webNamespace);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

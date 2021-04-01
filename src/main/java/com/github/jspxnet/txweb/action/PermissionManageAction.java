@@ -25,7 +25,7 @@ import com.github.jspxnet.txweb.model.param.RoleParam;
 import com.github.jspxnet.txweb.support.DefaultTemplateAction;
 import com.github.jspxnet.txweb.table.Member;
 import com.github.jspxnet.txweb.table.MemberRole;
-import com.github.jspxnet.txweb.vo.OperateVo;
+import com.github.jspxnet.txweb.model.vo.OperateVo;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.txweb.view.PermissionView;

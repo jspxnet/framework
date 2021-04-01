@@ -12,7 +12,7 @@ package com.github.jspxnet.txweb;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.config.ActionConfigBean;
 import com.github.jspxnet.txweb.config.ResultConfigBean;
-import com.github.jspxnet.txweb.vo.OperateVo;
+import com.github.jspxnet.txweb.model.vo.OperateVo;
 
 import java.io.IOException;
 import java.util.List;

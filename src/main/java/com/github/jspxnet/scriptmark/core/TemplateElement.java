@@ -29,7 +29,7 @@ import java.util.Map;
 public class TemplateElement implements TemplateModel {
     private HtmlEngine htmlEngine = null;
     private String source;
-    private Configurable config;
+    final private Configurable config;
     private List<TagNode> nodeList;
     protected char beginTag = '<';
     protected char endTag = '>';
