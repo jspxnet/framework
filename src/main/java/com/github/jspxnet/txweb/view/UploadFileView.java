@@ -24,7 +24,7 @@ import com.github.jspxnet.txweb.model.param.PageParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.IUploadFile;
-import com.github.jspxnet.txweb.dto.AttachmentsDto;
+import com.github.jspxnet.txweb.model.dto.AttachmentsDto;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.StringUtil;

@@ -1,4 +1,4 @@
-package com.github.jspxnet.txweb.dto;
+package com.github.jspxnet.txweb.model.dto;
 
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
