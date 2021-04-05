@@ -299,7 +299,6 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
             return code.equalsIgnoreCase(StringUtil.substringBetween(value,"[","]"));
         }
         boolean check = code.equalsIgnoreCase(entry.getValue());
-        log.error("6 validateGeneralCheck key:{}",key);
         if (!check)
         {
             log.info("code验证失败1:{}\r\n2:{}",code,entry.getValue());
