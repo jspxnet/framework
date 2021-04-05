@@ -31,6 +31,7 @@ import java.util.Date;
  * date: 12-11-30
  * Time: 下午11:53
  */
+@Deprecated
 @HttpMethod(caption = "默认页面管理")
 public class TemplateAction extends TemplateView {
 

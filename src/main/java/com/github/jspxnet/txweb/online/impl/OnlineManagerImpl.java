@@ -16,6 +16,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.boot.sign.LoginField;
+import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.CongealEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
@@ -89,11 +90,12 @@ public class OnlineManagerImpl implements OnlineManager {
      */
     @Override
     public String getGuiPassword() {
-        String cacheKey = SoberUtil.getLoadKey(UserSession.class, GUI_PASSWORD_KEY,"",false);
-        String guiPassword = (String)JSCacheManager.get(UserSession.class, cacheKey);
+        String cacheKey = SoberUtil.getLoadKey(DefaultCache.class, GUI_PASSWORD_KEY,"",false);
+        String guiPassword = (String)JSCacheManager.get(DefaultCache.class, cacheKey);
         if (StringUtil.isEmpty(guiPassword))
         {
-            JSCacheManager.put(UserSession.class, cacheKey,guiPassword);
+            guiPassword = RandomUtil.getRandomGUID(8);
+            JSCacheManager.put(DefaultCache.class, cacheKey,guiPassword);
         }
         return guiPassword;
     }

@@ -27,17 +27,17 @@ import java.util.List;
  * date: 12-2-4
  * Time: 下午10:10
  */
-@HttpMethod(caption = "默认浏览")
+
 public class GenericView extends ActionSupport {
 
-    private String className = StringUtil.empty;
+    protected String className = StringUtil.empty;
     @Ref
     public void setClassName(String className) {
         this.className = className;
     }
 
     @Ref
-    private GenericDAO genericDAO;
+    protected GenericDAO genericDAO;
     public void setGenericDAO(GenericDAO genericDAO) {
         this.genericDAO = genericDAO;
     }
@@ -47,7 +47,7 @@ public class GenericView extends ActionSupport {
         return genericDAO.getList(ClassUtil.loadClass(className),params.getField() , params.getFind(), params.getTerm(),params.getUid(),params.getSort(),params.getCurrentPage(),params.getCount(),false);
     }
 
-    public long getTotalCount(PageParam  params) throws Exception {
+    public int getTotalCount(PageParam  params) throws Exception {
         return genericDAO.getCount(ClassUtil.loadClass(className),params.getField() , params.getFind(), params.getTerm(),params.getUid());
     }
 }
