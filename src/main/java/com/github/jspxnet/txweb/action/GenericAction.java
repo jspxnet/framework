@@ -19,11 +19,11 @@ import java.util.Date;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/4/5 22:36
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/4/5 22:36
+ * description: jspbox
  **/
-@HttpMethod(caption = "默认浏览")
+@HttpMethod(caption = "通用ACTION")
 public class GenericAction  extends GenericView {
 
     @Operate(caption = "保存")
