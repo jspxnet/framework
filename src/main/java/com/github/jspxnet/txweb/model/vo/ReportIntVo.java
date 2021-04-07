@@ -7,7 +7,7 @@
  * @jvm:jdk1.6+  x86/amd64
  *
  */
-package com.github.jspxnet.txweb.vo;
+package com.github.jspxnet.txweb.model.vo;
 
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.utils.StringUtil;

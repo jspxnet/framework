@@ -228,17 +228,10 @@ public class DefaultConfiguration implements Configuration {
                     for (String findName : iFiles) {
                         if (FileUtil.isPatternFileName(findName)) {
                             List<File> fileList = FileUtil.getPatternFiles(defaultPath, findName);
-                            //都没找到,说明在jar包里边
-                            if (fileList==null||fileList.isEmpty())
-                            {
-
-                                fileList.addAll(FileUtil.getPatternFiles(null, findName));
-                            }
-                            if (fileList!=null)
-                            {
-                                for (File f : fileList) {
-                                    includeFixedFiles = ArrayUtil.add(includeFixedFiles, f.getPath());
-                                }
+                            //再找,说明在jar包里边
+                            fileList.addAll(FileUtil.getPatternFiles(null, findName));
+                            for (File f : fileList) {
+                                includeFixedFiles = ArrayUtil.add(includeFixedFiles, f.getPath());
                             }
                         }
                        else {

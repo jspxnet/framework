@@ -1,4 +1,4 @@
-package com.github.jspxnet.txweb.vo;
+package com.github.jspxnet.txweb.model.vo;
 
 
 import com.github.jspxnet.enums.CongealEnumType;

@@ -31,7 +31,7 @@ import java.util.List;
 
 public abstract class TagNode implements Serializable {
     private TemplateModel templateElement;
-    private String name = HtmlEngineImpl.NoneTag;
+    private String name = HtmlEngineImpl.NONE_TAG;
     protected int starLength = 0; //开始长度
     private int endLength = 0; //块的长度
     //private int errorLine = 0; //块的长度
@@ -228,7 +228,7 @@ public abstract class TagNode implements Serializable {
         if (getTagName().equals(CommentBlock.noteTagBegin)) {
             return StringUtil.empty;
         }
-        if (HtmlEngineImpl.NoneTag.equals(name)) {
+        if (HtmlEngineImpl.NONE_TAG.equals(name)) {
             return getSource();
         }
         return templateElement.getBody(starLength, endLength);

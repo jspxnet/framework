@@ -52,19 +52,19 @@ public class JspxModule {
     }
 
     public static Object getBean(String classname) {
-        String txweb_namespace = null;
+        String webNamespace = null;
         if (classname == null) {
             return null;
         }
         if (classname.contains(TXWebUtil.AT)) {
-            txweb_namespace = StringUtil.substringAfter(classname, TXWebUtil.AT);
+            webNamespace = StringUtil.substringAfter(classname, TXWebUtil.AT);
             classname = StringUtil.substringBefore(classname, TXWebUtil.AT);
         }
         BeanFactory beanFactory = getBeanFactory();
-        if (txweb_namespace == null) {
+        if (webNamespace == null) {
             return beanFactory.getBean(classname);
         }
-        return beanFactory.getBean(classname, txweb_namespace);
+        return beanFactory.getBean(classname, webNamespace);
     }
 
     public static Object getBean(String name, String namespace) {

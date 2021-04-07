@@ -24,6 +24,7 @@ public class TomcatJndiRedissonFactory extends JndiRedissonFactory {
     {
         try {
             Config redisConfig = RedissonClientConfig.getRedisConfig(config);
+            assert redisConfig != null;
             return Redisson.create(redisConfig);
         } catch (Exception e) {
             e.printStackTrace();

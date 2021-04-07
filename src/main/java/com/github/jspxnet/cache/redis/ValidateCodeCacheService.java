@@ -6,11 +6,13 @@ import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Bean(singleton = true)
 public class ValidateCodeCacheService implements ValidateCodeCache {
 
@@ -278,6 +280,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
             return false;
         }
         String key = EncryptUtil.getMd5(type+id);
+
         RMap<String, StringEntry> map = redissonClient.getMap(GENERAL_VERIFY_KEY);
         StringEntry entry = map.remove(key);
         if (entry == null) {
@@ -295,7 +298,12 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         {
             return code.equalsIgnoreCase(StringUtil.substringBetween(value,"[","]"));
         }
-        return code.equalsIgnoreCase(entry.getValue());
+        boolean check = code.equalsIgnoreCase(entry.getValue());
+        if (!check)
+        {
+            log.info("code验证失败1:{}\r\n2:{}",code,entry.getValue());
+        }
+        return check;
     }
 
     @Override

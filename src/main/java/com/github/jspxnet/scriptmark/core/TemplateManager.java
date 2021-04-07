@@ -28,12 +28,12 @@ import com.github.jspxnet.scriptmark.cache.TemplateLifecycle;
  */
 public class TemplateManager implements TemplateLoader {
 
-    static private TemplateManager instance = new TemplateManager();
+    static private final TemplateManager INSTANCE = new TemplateManager();
     private boolean useCache = false;
     private static TemplateLoader templateLoader;
 
     static public TemplateManager getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     private TemplateManager() {

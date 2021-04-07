@@ -12,17 +12,13 @@ package com.github.jspxnet.scriptmark.core.script;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.scriptmark.ScriptRunner;
 import com.github.jspxnet.scriptmark.SingletonContext;
-
 import java.io.*;
 import java.util.Collection;
 import java.util.Map;
-
 import com.github.jspxnet.scriptmark.exception.ScriptException;
 import com.github.jspxnet.scriptmark.exception.ScriptRunException;
-
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;

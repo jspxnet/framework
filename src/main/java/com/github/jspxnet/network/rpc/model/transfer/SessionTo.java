@@ -3,7 +3,6 @@ package com.github.jspxnet.network.rpc.model.transfer;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -56,7 +55,7 @@ public class SessionTo extends HashMap<String,Object> implements HttpSession, Se
     }
 
     @Override
-    public HttpSessionContext getSessionContext() {
+    public javax.servlet.http.HttpSessionContext getSessionContext() {
         return null;
     }
 

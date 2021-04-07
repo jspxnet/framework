@@ -19,22 +19,23 @@ import java.util.List;
  * date: 12-2-4
  * Time: 下午10:54
  */
-public interface GenericDAO extends SoberSupport {
+public interface GenericDAO<T> extends SoberSupport {
 
 
     <T> List<T> getList(
             T cls,
-            String field,
-            String find,
+            String[] field,
+            String[] find,
             String term,
             long uid,
             String sortString,
             int page, int count, boolean load);
 
+
     int getCount(
-            Class T,
-            String field,
-            String find,
+            T cls,
+            String[] field,
+            String[] find,
             String term,
             long uid
     ) throws Exception;

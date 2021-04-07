@@ -1,5 +1,6 @@
 package com.github.jspxnet.network.rpc.client.proxy;
 
+import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClientPool;
@@ -15,7 +16,7 @@ import com.github.jspxnet.network.rpc.model.transfer.IocResponse;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.security.utils.EncryptUtil;
-import com.github.jspxnet.txweb.AssertException;
+import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
@@ -119,7 +120,18 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         {
             address = this.address;
         }
-        AssertException.isNull(address,"TCP调用没有配置服务器地址");
+        if (address==null)
+        {
+            if (System.currentTimeMillis()- JspxNetApplication.getRunDate().getTime()< DateUtil.SECOND*30)
+            {
+                Thread.sleep(1000);
+                address = DiscoveryServiceAddress.getSocketAddress(serviceName);
+            }
+        }
+        if (address==null)
+        {
+            log.error("TCP调用没有配置服务器地址:{}",serviceName);
+        }
 
         SendCmd reply = NettyClientPool.getInstance().send(address, command);
         if (reply == null && MasterSocketAddress.getInstance().removeGroupSocketAddress(serviceName,address)) {

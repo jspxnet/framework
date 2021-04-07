@@ -43,31 +43,31 @@ public class ActionFactory {
 
     }
 
-    final private static BeanFactory beanFactory = EnvFactory.getBeanFactory();
+    final private static BeanFactory BEAN_FACTORY = EnvFactory.getBeanFactory();
 
-    public static Object getActon(Action action, String className, List arguments) throws Exception {
+    public static Object getActon(Action action, String className, List<?> arguments) throws Exception {
         if (className == null) {
             return null;
         }
-        String txWeb_namespace = null;
+        String webNamespace = null;
         if (className.contains(TXWebUtil.AT)) {
             String tmpClassName = className;
             className = className.substring(0, tmpClassName.indexOf(TXWebUtil.AT));
-            txWeb_namespace = StringUtil.substringAfter(tmpClassName, TXWebUtil.AT);
+            webNamespace = StringUtil.substringAfter(tmpClassName, TXWebUtil.AT);
         } else if (action != null) {
-            txWeb_namespace = action.getEnv(ActionEnv.Key_Namespace);
+            webNamespace = action.getEnv(ActionEnv.Key_Namespace);
         }
-        if (!StringUtil.hasLength(txWeb_namespace)) {
-            txWeb_namespace = TXWeb.global;
+        if (StringUtil.isEmpty(webNamespace)) {
+            webNamespace = TXWeb.global;
         }
 
-        ActionConfig actionConfig = WEB_CONFIG_MANAGER.getActionConfig(className, txWeb_namespace, false);
+        ActionConfig actionConfig = WEB_CONFIG_MANAGER.getActionConfig(className, webNamespace, false);
         ActionSupport result = null;
         if (actionConfig != null) {
-            result = (ActionSupport) beanFactory.getBean(actionConfig.getIocBean(), txWeb_namespace);
+            result = (ActionSupport) BEAN_FACTORY.getBean(actionConfig.getIocBean(), webNamespace);
         }
         if (result == null) {
-            result = (ActionSupport) beanFactory.getBean(className, txWeb_namespace);
+            result = (ActionSupport) BEAN_FACTORY.getBean(className, webNamespace);
         }
         putArg(action, result, className, arguments);
         return result;
@@ -83,7 +83,7 @@ public class ActionFactory {
      * @throws Exception      异常      异常
      * @throws ValidException 验证错误
      */
-    static private void putArg(Action action, Action result, String className, List arguments) throws Exception {
+    static private void putArg(Action action, Action result, String className, List<?> arguments) throws Exception {
         //参数说明 1 isIgnoreParams， 2 Execute
         if (action != null && result != null) {
             result.setRequest(action.getRequest());

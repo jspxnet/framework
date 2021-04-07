@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.txweb.view;
 
-import com.github.jspxnet.txweb.vo.OperateVo;
+import com.github.jspxnet.txweb.model.vo.OperateVo;
 
 import java.util.Comparator;
 

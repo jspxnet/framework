@@ -1823,8 +1823,6 @@ public class FileUtil {
         }
 
         if ("jar".equals(FileUtil.getTypePart(file).toLowerCase())&&!file.getPath().endsWith("!")) {
-
-
             try (JarInputStream zis = new JarInputStream(new FileInputStream(file.getPath()))) {
 
                 List<File> list = new ArrayList<>();
@@ -2322,7 +2320,7 @@ public class FileUtil {
                 }
             }
             if (url != null) {
-                String findDir = new File(url.getPath()).getAbsolutePath();
+                String findDir = new File(url.getPath()).getPath();
                 List<File> files = FileUtil.getPatternFiles(findDir, find);
                 if (!ObjectUtil.isEmpty(files)) {
                     return files.get(0);
@@ -2337,7 +2335,7 @@ public class FileUtil {
                     return file;
                 }
 
-                String findDir = new File(path).getAbsolutePath();
+                String findDir = new File(path).getPath();
                 List<File> files = FileUtil.getPatternFiles(findDir, findFile);
                 if (!ObjectUtil.isEmpty(files)) {
                     return files.get(0);
@@ -2348,17 +2346,25 @@ public class FileUtil {
         if (loadFile.toLowerCase().startsWith(KEY_defaultPath)) {
             loadFile = loadFile.substring(KEY_defaultPath.length());
         }
+
         if (paths!=null && !loadFile.toLowerCase().contains(".jar!"))
         {
-            for (String path : paths) {
+            for (String path : paths)
+            {
                 if (StringUtil.isNull(path))
                 {
                     continue;
                 }
-                File file = new File(path, loadFile);
+                File file = new File(loadFile);
                 if (file.isFile()) {
                     return file;
                 }
+
+                file = new File(path, loadFile);
+                if (file.isFile()) {
+                    return file;
+                }
+
                 List<File> files = FileUtil.getPatternFiles(path, loadFile);
                 if (!ObjectUtil.isEmpty(files)) {
                     return files.get(0);

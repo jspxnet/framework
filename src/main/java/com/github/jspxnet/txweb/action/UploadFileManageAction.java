@@ -95,7 +95,6 @@ public class UploadFileManageAction extends UploadFileView {
                 List<Object> childFile =  uploadFileDAO.getChildFileList(iUploadFile.getId());
                 for (Object child : childFile) {
                     if (child == null) {
-                        //addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.fileNotFind));
                         continue;
                     }
                     IUploadFile childUpload = (IUploadFile) child;

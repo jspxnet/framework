@@ -65,7 +65,7 @@ public class ConfigureContext implements IocContext {
 
     private final EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
     private String[] configFile;
-    private static String[] readFile;
+    private static final List<String> fileIdList = new ArrayList<>();
 
     public static IocContext getInstance() {
         return INSTANCE;
@@ -311,12 +311,12 @@ public class ConfigureContext implements IocContext {
     /**
      * 读取文件,支持url 方式
      *
-     * @param fileName 读取文件
+     * @param file 读取文件
      * @return 文件内容
      * @throws Exception 异常 运行错误
      */
-    private String readContext(String fileName) throws Exception {
-        String  configString = readFileText(fileName);
+    private String readContext(File file) throws Exception {
+        String  configString = readFileText(file.getPath());
         if (configString==null)
         {
             return null;
@@ -339,13 +339,13 @@ public class ConfigureContext implements IocContext {
                 encode = Environment.defaultEncode;
             }
 
-            File file = EnvFactory.getFile(loadFile);
-            if (file==null)
+            File findFile = EnvFactory.getFile(loadFile);
+            if (findFile==null)
             {
                 log.debug("ioc not found file:" + loadFile);
                 throw new Exception("ioc not found file:" + loadFile);
             }
-            String readCont = IoUtil.autoReadText(file.getPath(),encode);
+            String readCont = IoUtil.autoReadText(findFile.getPath(),encode);
             int headPost = StringUtil.indexIgnoreCaseOf(readCont, "<?xml");
             if (headPost != -1) {
                 readCont = StringUtil.substringAfter(readCont, ">");
@@ -359,25 +359,35 @@ public class ConfigureContext implements IocContext {
     }
 
     /**
-     * @param fileName 文件
+     * @param file 文件
      * @return 读取所有配置文件
      * @throws Exception 异常
      */
-    private List<TagNode> getIocElementsForFile(String fileName) throws Exception {
-
-        if (ArrayUtil.inArray(readFile, fileName, true) || StringUtil.isNull(fileName)) {
-            return new ArrayList<>();
+    private List<TagNode> getIocElementsForFile(File file) throws Exception {
+        if (file==null)
+        {
+            return new ArrayList<>(0);
         }
-        readFile = ArrayUtil.add(readFile, fileName);
-        if (FileUtil.isPatternPath(fileName)) {
+        String fileId = file.getName() + StringUtil.UNDERLINE + file.length();
+        if (fileIdList.contains(fileId))
+        {
+            return new ArrayList<>(0);
+        }
+        fileIdList.add(fileId);
+
+        String defaultPath = envTemplate.getString(Environment.defaultPath);
+        if (FileUtil.isPatternPath(file.getName())) {
             List<TagNode> results = new ArrayList<>();
-            List<File> findFiles = FileUtil.getPatternFiles(envTemplate.getString(Environment.defaultPath), fileName);
-            findFiles.addAll(FileUtil.getPatternFiles(null, fileName));
+            List<File> findFiles = FileUtil.getPatternFiles(defaultPath, file.getName());
+            if (defaultPath!=null&&!defaultPath.contains(".jar"))
+            {
+                findFiles.addAll(FileUtil.getPatternFiles(null, file.getName()));
+            }
 
             if (!ObjectUtil.isEmpty(findFiles))
             {
                 for (File f : findFiles) {
-                    results.addAll(getIocElementsForFile(f.getPath()));
+                    results.addAll(getIocElementsForFile(f));
                 }
             }
             return results;
@@ -385,14 +395,15 @@ public class ConfigureContext implements IocContext {
 
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag(SiocElement.TAG_NAME, SiocElement.class.getName());
-        String txt = readContext(fileName);
+        String txt = readContext(file);
         if (txt==null)
         {
             return new ArrayList<>();
         }
-        log.debug("jspx sioc load file:" + fileName);
+        log.debug("jspx sioc load file:" + file);
         List<TagNode> results = xmlEngine.getTagNodes(txt);
         String[] includeFiles = null;
+
         for (TagNode tNode : results) {
             SiocElement se = (SiocElement) tNode;
             //得到包含标签
@@ -409,11 +420,12 @@ public class ConfigureContext implements IocContext {
             }
         }
         if (includeFiles != null) {
-            for (String f : includeFiles) {
-                if (f == null) {
+            for (String fileName : includeFiles) {
+                if (StringUtil.isEmpty(fileName))
+                {
                     continue;
                 }
-                results.addAll(getIocElementsForFile(f));
+                results.addAll(getIocElementsForFile(new File(fileName)));
             }
         }
         return results;
@@ -424,10 +436,13 @@ public class ConfigureContext implements IocContext {
      * @throws Exception 异常
      */
     private List<TagNode> getIocElements() throws Exception {
-        readFile = null;
         List<TagNode> results = new ArrayList<>();
         for (String fileName : configFile) {
-            results.addAll(getIocElementsForFile(fileName));
+            if (StringUtil.isEmpty(fileName))
+            {
+                continue;
+            }
+            results.addAll(getIocElementsForFile(new File(fileName)));
         }
         return results;
     }
@@ -526,6 +541,10 @@ public class ConfigureContext implements IocContext {
     }
 
 
+    /**
+     *
+     * @return 得到定时器map
+     */
     @Override
     public Map<String, String> getSchedulerMap() {
         return schedulerMap;

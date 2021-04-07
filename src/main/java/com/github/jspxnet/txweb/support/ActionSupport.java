@@ -476,7 +476,7 @@ public abstract class ActionSupport implements Action {
     public String getString(String name, String def, boolean checkSql) {
         if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
             JSONObject params = getJsonParams();
-            if (params != null) {
+            if (params != null && params.containsKey(name)) {
                 if (checkSql) {
                     return ParamUtil.getSafeFilter(params.getString(name,def), RequestUtil.paramMaxLength, SafetyEnumType.LOW);
                 }

@@ -16,8 +16,7 @@ import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.UserEnumType;
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.AutoReadTextFile;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
@@ -107,31 +106,32 @@ public class PermissionInterceptor extends InterceptorSupport {
         if (!ArrayUtil.isEmpty(guestStopUrl)) {
             return;
         }
+        File file = null;
         try {
             if (guestUrlFile != null && !guestUrlFile.startsWith("http")) {
-                File file = EnvFactory.getFile(guestUrlFile);
-                if (file!=null) {
-                    guestUrlFile = file.getPath();
-                } else {
+                file = EnvFactory.getFile(guestUrlFile);
+                if (file==null) {
                     log.error(guestUrlFile + "没有找到");
                 }
             }
             log.info("载入guestUrlFile:{}",guestUrlFile);
-            AbstractRead read = new AutoReadTextFile();
-            read.setFile(guestUrlFile);
-            read.setEncode(Environment.defaultEncode);
-            String txt = read.getContent();
-            String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
-            for (String str : array) {
-                if (str == null) {
-                    continue;
-                }
-                if (str.startsWith("!")) {
-                    guestStopUrl = ArrayUtil.add(guestStopUrl, StringUtil.substringAfter(str, "!"));
-                } else {
-                    ruleOutUrl = ArrayUtil.add(ruleOutUrl, str);
+
+            if (file!=null)
+            {
+                String txt = IoUtil.autoReadText(file);
+                String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
+                for (String str : array) {
+                    if (str == null) {
+                        continue;
+                    }
+                    if (str.startsWith("!")) {
+                        guestStopUrl = ArrayUtil.add(guestStopUrl, StringUtil.substringAfter(str, "!"));
+                    } else {
+                        ruleOutUrl = ArrayUtil.add(ruleOutUrl, str);
+                    }
                 }
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

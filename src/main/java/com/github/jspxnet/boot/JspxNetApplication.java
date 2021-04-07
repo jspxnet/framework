@@ -20,6 +20,7 @@ import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.sioc.factory.EntryFactory;
+import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.SystemUtil;
@@ -76,6 +77,49 @@ public final class JspxNetApplication {
     }
 
     /**
+     * 最小嵌入方式，实用二开环境
+     * @param fileName 默认配置文件
+     */
+    public static void runInEmbed(String fileName)
+    {
+        JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
+        jspxConfiguration.setDefaultConfigFile(fileName);
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
+        envTemplate.createSystemEnv();
+        envTemplate.put(Environment.useTxWeb,false);
+
+        //////////////////////初始化脚本语言环境 begin
+        Configurable templateConfigurable = TemplateConfigurable.getInstance();
+        String defaultPath = jspxConfiguration.getDefaultPath();
+        if (defaultPath.contains(".jar!"))
+        {
+            templateConfigurable.setSearchPath(null);
+        } else
+        {
+            templateConfigurable.setSearchPath(new String[]{defaultPath});
+        }
+
+
+        envTemplate.createJspxEnv(StringUtil.replace(defaultPath + "/" + fileName, "//", "/"));
+
+        templateConfigurable.setAutoIncludes(StringUtil.split(envTemplate.getString(Environment.autoIncludes), StringUtil.SEMICOLON));
+        templateConfigurable.setAutoImports(StringUtil.split(envTemplate.getString(Environment.autoImports), StringUtil.SEMICOLON));
+        templateConfigurable.setGlobalMap(envTemplate.getVariableMap());
+        //////////////////////初始化脚本语言环境 end
+
+        ////////////导入Ioc配置 begin
+        IocContext iocContext = ConfigureContext.getInstance();
+        iocContext.setConfigFile(jspxConfiguration.getIocConfigFile());
+        EntryFactory beanFactory = (EntryFactory) com.github.jspxnet.boot.EnvFactory.getBeanFactory();
+        beanFactory.setIocContext(iocContext);
+
+        //载入定时任务
+        beanFactory.initScheduler();
+    }
+
+
+    /**
      * 嵌入spring方式运行
      * @param fileName 默认配置文件
      * @param context spring 上下文
@@ -112,6 +156,8 @@ public final class JspxNetApplication {
             templateConfigurable.setSearchPath(new String[]{defaultPath});
         }
 
+        envTemplate.createJspxEnv(StringUtil.replace(defaultPath + "/" + fileName, "//", "/"));
+
         templateConfigurable.setAutoIncludes(StringUtil.split(envTemplate.getString(Environment.autoIncludes), StringUtil.SEMICOLON));
         templateConfigurable.setAutoImports(StringUtil.split(envTemplate.getString(Environment.autoImports), StringUtil.SEMICOLON));
         templateConfigurable.setGlobalMap(envTemplate.getVariableMap());
@@ -131,6 +177,8 @@ public final class JspxNetApplication {
         System.setProperty("sun.net.client.defaultReadTimeout", "5000");
         //系统默认超时时间end
 
+        SpringBeanContext.setApplicationContext(context);
+
         //jdk java.sdk.security 文件中添加配置        sdk.security.provider.11=org.bouncycastle.jce.provider.BouncyCastleProvider
         SystemUtil.encode = envTemplate.getString(Environment.systemEncode, SystemUtil.OS == SystemUtil.WINDOWS ? "GBK" : "UTF-8");
 
@@ -147,30 +195,6 @@ public final class JspxNetApplication {
         }
     }
 
-    @Deprecated
-    public static void onlySql(String fileName,Class<?>[] cacheList) {
-        JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
-        jspxConfiguration.setDefaultConfigFile(fileName);
-        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
-        envTemplate.createSystemEnv();
-        envTemplate.put(Environment.useTxWeb,false);
-        //简单的缓存控制
-        if (cacheList!=null)
-        {
-            for (Class<?> cls:cacheList)
-            {
-                try {
-                    JSCacheManager.getCacheManager().createCache(new MemoryStore(), cls,100,100,false,null);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        log.debug("当前默认路径:" + envTemplate.getString(Environment.defaultPath));
-
-
-    }
 
 
 

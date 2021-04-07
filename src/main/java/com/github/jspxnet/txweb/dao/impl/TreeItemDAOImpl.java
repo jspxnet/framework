@@ -44,8 +44,8 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
     final static public String BEHAVIOR_CLASSIC = "classic";
     final static public String TYPE_CHECKBOX = "checkbox";
     final static public String TYPE_RADIO = "radio";
-    public static final String Type_json = "json";
-    public static final String Type_roleJson = "roleJson";
+    public static final String TYPE_JSON = "json";
+    public static final String TYPE_ROLE_JSON = "roleJson";
     public static final String Type_jsonTree = "jsonTree";
     public static final String Type_roleJsonTree = "roleJsonTree";
 

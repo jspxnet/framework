@@ -12,7 +12,6 @@ import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.IRole;
-import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.annotation.TurnPage;
@@ -23,7 +22,6 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.util.List;
 
 /**

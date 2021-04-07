@@ -3,17 +3,14 @@ package com.github.jspxnet.txweb.evasive;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
-import com.github.jspxnet.io.AbstractRead;
-import com.github.jspxnet.io.AutoReadTextFile;
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.txweb.config.ResultConfigBean;
-
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.XMLUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.net.URL;
 import java.util.*;
@@ -180,16 +177,16 @@ public class EvasiveConfiguration implements Configuration {
                 continue;
             }
 
-            // File readFile = new File(defaultFile);
-            if (ArrayUtil.inArray(includeFiles, readFile.getPath(), true)) {
+            String fileId = readFile.getName()+"_" + readFile.length();
+            if (ArrayUtil.inArray(includeFiles, fileId, true)) {
                 continue;
             }
-            includeFiles = ArrayUtil.add(includeFiles, readFile.getPath());
+            includeFiles = ArrayUtil.add(includeFiles, fileId);
 
-            AbstractRead ar = new AutoReadTextFile();
-            ar.setFile(readFile);
+
+            String txt = IoUtil.autoReadText(readFile);
             ReadEvasiveRuleConfig readConfig = new ReadEvasiveRuleConfig();
-            if (XMLUtil.parseXmlString(readConfig, ar.getContent())) {
+            if (XMLUtil.parseXmlString(readConfig, txt)) {
                 String[] includeFixedFiles = null;
                 String[] iFiles = readConfig.getInclude();
 
@@ -205,6 +202,10 @@ public class EvasiveConfiguration implements Configuration {
                     for (String mif : iFiles) {
                         if (FileUtil.isPatternFileName(mif)) {
                             List<File> fileName = FileUtil.getPatternFiles(defaultPath, mif);
+                            if (defaultPath!=null)
+                            {
+                                fileName.addAll(FileUtil.getPatternFiles(null, mif));
+                            }
                             for (File f : fileName) {
                                 includeFixedFiles = ArrayUtil.add(includeFixedFiles, f.getName());
                             }

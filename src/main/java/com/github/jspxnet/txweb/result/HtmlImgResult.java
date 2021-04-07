@@ -14,6 +14,7 @@ import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import com.github.jspxnet.boot.environment.Environment;
 import org.slf4j.LoggerFactory;
@@ -44,10 +45,10 @@ import java.util.Map;
  * Time: 上午12:29
  * 将网页转换为图片输出
  */
+@Slf4j
 public class HtmlImgResult extends ResultSupport {
-    private static final Logger log = LoggerFactory.getLogger(HtmlImgResult.class);
     private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
-    private static String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
+
 
     static {
         CONFIGURABLE.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
@@ -67,6 +68,7 @@ public class HtmlImgResult extends ResultSupport {
         //如果使用cache 就使用uri
 
         String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
+        String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
         CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), templatePath});
         ScriptMark scriptMark;
         try {

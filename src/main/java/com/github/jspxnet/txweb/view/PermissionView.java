@@ -22,7 +22,7 @@ import com.github.jspxnet.txweb.dao.PermissionDAO;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.MemberRole;
-import com.github.jspxnet.txweb.vo.OperateVo;
+import com.github.jspxnet.txweb.model.vo.OperateVo;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.utils.StringUtil;
 import java.sql.SQLException;

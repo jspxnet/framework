@@ -34,5 +34,4 @@ public class CloudFileConfigParam implements Serializable  {
     @Param(caption = "云盘类型", max = 2,required = true, enumType = CloudServiceEnumType.class)
     private  int cloudType = CloudServiceEnumType.Ali.getValue();
 
-
 }

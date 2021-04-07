@@ -79,7 +79,7 @@ public class MarkdownResult extends ResultSupport {
             if (!f.exists()) {
                 f = new File(templatePath, markdownTemplate);
             }
-            if (f==null||!f.isFile()) {
+            if (!f.isFile()) {
                 f = EnvFactory.getFile(markdownTemplate);
             }
             fileSource = new StringSource(IoUtil.autoReadText(f.getPath(), Environment.defaultEncode));
