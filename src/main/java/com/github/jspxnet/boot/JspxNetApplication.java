@@ -78,9 +78,8 @@ public final class JspxNetApplication {
     /**
      * 最小嵌入方式，实用二开环境
      * @param fileName 默认配置文件
-     * @param context spring 上下文
      */
-    public static void runInEmbed(String fileName, ApplicationContext context)
+    public static void runInEmbed(String fileName)
     {
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         jspxConfiguration.setDefaultConfigFile(fileName);
