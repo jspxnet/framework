@@ -9,12 +9,8 @@
  */
 package com.github.jspxnet.boot;
 
-import com.ctrip.framework.apollo.Config;
-import com.ctrip.framework.apollo.ConfigChangeListener;
-import com.ctrip.framework.apollo.ConfigService;
-import com.ctrip.framework.apollo.enums.PropertyChangeType;
-import com.ctrip.framework.apollo.model.ConfigChange;
-import com.ctrip.framework.apollo.model.ConfigChangeEvent;
+import com.github.jspxnet.boot.conf.AppolloBootConfig;
+import com.github.jspxnet.boot.conf.VcsBootConfig;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
@@ -27,8 +23,6 @@ import com.github.jspxnet.cache.store.MemoryStore;
 import com.github.jspxnet.enums.BootConfigEnumType;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.rpc.service.NettyRpcServiceGroup;
-import com.github.jspxnet.network.vcs.VcsClient;
-import com.github.jspxnet.network.vcs.VcsFactory;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.SchedulerManager;
@@ -108,79 +102,25 @@ public class JspxCoreListener implements ServletContextListener {
         }
 
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
-
         if (!StringUtil.isNull(defaultPath)) {
             jspxConfiguration.setDefaultPath(defaultPath);
         }
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-
         Properties properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
         String bootConfMode = properties.getProperty(Environment.BOOT_CONF_MODE,Environment.defaultValue);
         if (BootConfigEnumType.VCS.getName().equalsIgnoreCase(bootConfMode))
         {
             synchronized (this) {
-                try {
-                    log.info("配置检测到是用vcs分布式配置");
-                    String url = StringUtil.trim(properties.getProperty(Environment.VCS_URL));
-                    String localPath = StringUtil.trim(properties.getProperty(Environment.VCS_LOCAL_PATH));
-                    String name = StringUtil.trim(properties.getProperty(Environment.VCS_USER_NAME));
-                    String password = StringUtil.trim(properties.getProperty(Environment.VCS_USER_PASSWORD));
-                    Map<String, Object> valueMap =  new HashMap<String, Object>((Map) properties);
-                    valueMap.put(Environment.defaultPath, jspxConfiguration.getDefaultPath());
-                    localPath = EnvFactory.getPlaceholder().processTemplate(valueMap, localPath);
-                    VcsClient vcsClient = VcsFactory.createClient(url, localPath, name, password);
-                    if (vcsClient != null) {
-                        String vcsVersion = vcsClient.download();
-                        log.info("下载vcs配置版本：{}", vcsVersion);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    log.info("下载vcs配置发生错误", e);
-                } finally {
-                    jspxConfiguration.setDefaultConfigFile(Environment.jspx_properties_file);
-                }
+                VcsBootConfig vcsBootConfig = new VcsBootConfig();
+                vcsBootConfig.bind(properties);
             }
         }
-
         if (BootConfigEnumType.APPOLLO.getName().equalsIgnoreCase(bootConfMode))
         {
             //appollo 启动配置
-            System.setProperty(Environment.APOLLO_ENV,properties.getProperty(Environment.APOLLO_ENV));
-            System.setProperty(Environment.APOLLO_APP_ID,properties.getProperty(Environment.APOLLO_APP_ID));
-            System.setProperty(Environment.APOLLO_BOOTSTRAP_ENABLED,properties.getProperty(Environment.APOLLO_BOOTSTRAP_ENABLED));
-            System.setProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES,properties.getProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES));
-            System.setProperty(Environment.APOLLO_META,properties.getProperty(Environment.APOLLO_META));
-            envTemplate.put(Environment.BOOT_CONF_MODE,BootConfigEnumType.APPOLLO.getName());
-
-            Config config = ConfigService.getAppConfig();
-            Set<String> names = config.getPropertyNames();
-            for (String key:names)
-            {
-                envTemplate.put(key,config.getProperty(key,StringUtil.empty));
-            }
-
-            ConfigChangeListener changeListener = new ConfigChangeListener() {
-                @Override
-                public void onChange(ConfigChangeEvent changeEvent) {
-                    log.info("Changes for namespace {}", changeEvent.getNamespace());
-                    for (String key : changeEvent.changedKeys()) {
-                        ConfigChange change = changeEvent.getChange(key);
-                        log.info("Change - key: {}, oldValue: {}, newValue: {}, changeType: {}",
-                                change.getPropertyName(), change.getOldValue(), change.getNewValue(),
-                                change.getChangeType());
-                        if (PropertyChangeType.ADDED.equals(change.getChangeType())||PropertyChangeType.MODIFIED.equals(change.getChangeType()))
-                        {
-                            envTemplate.put(change.getPropertyName(),change.getNewValue());
-                        }
-                        if (PropertyChangeType.DELETED.equals(change.getChangeType()))
-                        {
-                            envTemplate.deleteEnv(change.getPropertyName());
-                        }
-                    }
-                }
-            };
-            config.addChangeListener(changeListener);
+            AppolloBootConfig appolloBootConfig = new AppolloBootConfig();
+            appolloBootConfig.bind(properties);
         }
         else
         {

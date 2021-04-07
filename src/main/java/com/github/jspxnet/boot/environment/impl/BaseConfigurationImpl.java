@@ -58,13 +58,17 @@ public class BaseConfigurationImpl implements JspxConfiguration {
     private void loadPath() {
         String path = null;
         URL url = Environment.class.getResource("/" + defaultConfigFile);
+        if (url != null) {
+            path = url.getPath();
+            if (!FileUtil.isFileExist(path)) {
+                path = null;
+            }
+        }
         if (url == null) {
             url = Environment.class.getResource(defaultConfigFile);
             if (url != null) {
                 path = url.getPath();
-                if (!FileUtil.isFileExist(path)) {
-                    path = null;
-                }
+
             }
         }
         if (path == null) {

@@ -374,8 +374,8 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 continue;
             }
             VALUE_MAP.put(keys, System.getProperty(keys, ""));
-
         }
+
 
 
         //监测当前的web 服务器 begin

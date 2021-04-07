@@ -276,11 +276,13 @@
             <groupId>net.gplatform</groupId>
             <artifactId>Sdk4J</artifactId>
             <version>2.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
             <version>1.1.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -388,6 +390,7 @@
             <groupId>com.drewnoakes</groupId>
             <artifactId>metadata-extractor</artifactId>
             <version>2.15.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
                <groupId>dom4j</groupId>
@@ -423,20 +426,20 @@
             <groupId>com.jianggujin</groupId>
             <artifactId>IKAnalyzer-lucene</artifactId>
             <version>8.0.0</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.tmatesoft.svnkit</groupId>
             <artifactId>svnkit</artifactId>
             <version>1.10.1</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
             <version>5.9.0.202009080501-r</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <!--测试基础支持begin -->
         <!--      <dependency>
