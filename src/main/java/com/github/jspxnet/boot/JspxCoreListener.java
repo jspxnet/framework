@@ -107,7 +107,6 @@ public class JspxCoreListener implements ServletContextListener {
         }
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-
         Properties properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
         String bootConfMode = properties.getProperty(Environment.BOOT_CONF_MODE,Environment.defaultValue);
         if (BootConfigEnumType.VCS.getName().equalsIgnoreCase(bootConfMode))

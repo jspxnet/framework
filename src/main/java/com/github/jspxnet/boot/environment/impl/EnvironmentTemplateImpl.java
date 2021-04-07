@@ -377,6 +377,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         }
 
 
+
         //监测当前的web 服务器 begin
         if (Environment.auto.equalsIgnoreCase((String) VALUE_MAP.get(Environment.repairEncode)) || !VALUE_MAP.containsKey(Environment.repairEncode)) {
             try {
