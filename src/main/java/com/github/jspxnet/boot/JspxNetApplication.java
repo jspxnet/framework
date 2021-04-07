@@ -76,6 +76,47 @@ public final class JspxNetApplication {
     }
 
     /**
+     * 最小嵌入方式，实用二开环境
+     * @param fileName 默认配置文件
+     * @param context spring 上下文
+     */
+    public static void runInEmbed(String fileName, ApplicationContext context)
+    {
+        JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
+        jspxConfiguration.setDefaultConfigFile(fileName);
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
+        envTemplate.createSystemEnv();
+        envTemplate.put(Environment.useTxWeb,false);
+
+        //////////////////////初始化脚本语言环境 begin
+        Configurable templateConfigurable = TemplateConfigurable.getInstance();
+        String defaultPath = jspxConfiguration.getDefaultPath();
+        if (defaultPath.contains(".jar!"))
+        {
+            templateConfigurable.setSearchPath(null);
+        } else
+        {
+            templateConfigurable.setSearchPath(new String[]{defaultPath});
+        }
+
+        templateConfigurable.setAutoIncludes(StringUtil.split(envTemplate.getString(Environment.autoIncludes), StringUtil.SEMICOLON));
+        templateConfigurable.setAutoImports(StringUtil.split(envTemplate.getString(Environment.autoImports), StringUtil.SEMICOLON));
+        templateConfigurable.setGlobalMap(envTemplate.getVariableMap());
+        //////////////////////初始化脚本语言环境 end
+
+        ////////////导入Ioc配置 begin
+        IocContext iocContext = ConfigureContext.getInstance();
+        iocContext.setConfigFile(jspxConfiguration.getIocConfigFile());
+        EntryFactory beanFactory = (EntryFactory) com.github.jspxnet.boot.EnvFactory.getBeanFactory();
+        beanFactory.setIocContext(iocContext);
+
+        //载入定时任务
+        beanFactory.initScheduler();
+    }
+
+
+    /**
      * 嵌入spring方式运行
      * @param fileName 默认配置文件
      * @param context spring 上下文
@@ -130,6 +171,8 @@ public final class JspxNetApplication {
         System.setProperty("sun.net.client.defaultConnectTimeout", "5000");
         System.setProperty("sun.net.client.defaultReadTimeout", "5000");
         //系统默认超时时间end
+
+        SpringBeanContext.setApplicationContext(context);
 
         //jdk java.sdk.security 文件中添加配置        sdk.security.provider.11=org.bouncycastle.jce.provider.BouncyCastleProvider
         SystemUtil.encode = envTemplate.getString(Environment.systemEncode, SystemUtil.OS == SystemUtil.WINDOWS ? "GBK" : "UTF-8");
