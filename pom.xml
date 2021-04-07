@@ -240,13 +240,13 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.67</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpg-jdk15on</artifactId>
             <version>1.67</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -523,6 +523,7 @@
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
             <version>1.78</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>xml-apis</groupId>
@@ -557,7 +558,7 @@
             <groupId>org.bidib.jbidib.org.qbang.rxtx</groupId>
             <artifactId>rxtxcomm</artifactId>
             <version>2.2</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
 
         <!-- slf4j核心包-->

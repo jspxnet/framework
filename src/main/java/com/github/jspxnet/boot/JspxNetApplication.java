@@ -20,6 +20,7 @@ import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.sioc.factory.EntryFactory;
+import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.SystemUtil;
@@ -99,6 +100,9 @@ public final class JspxNetApplication {
             templateConfigurable.setSearchPath(new String[]{defaultPath});
         }
 
+
+        envTemplate.createJspxEnv(StringUtil.replace(defaultPath + "/" + fileName, "//", "/"));
+
         templateConfigurable.setAutoIncludes(StringUtil.split(envTemplate.getString(Environment.autoIncludes), StringUtil.SEMICOLON));
         templateConfigurable.setAutoImports(StringUtil.split(envTemplate.getString(Environment.autoImports), StringUtil.SEMICOLON));
         templateConfigurable.setGlobalMap(envTemplate.getVariableMap());
@@ -151,6 +155,8 @@ public final class JspxNetApplication {
         {
             templateConfigurable.setSearchPath(new String[]{defaultPath});
         }
+
+        envTemplate.createJspxEnv(StringUtil.replace(defaultPath + "/" + fileName, "//", "/"));
 
         templateConfigurable.setAutoIncludes(StringUtil.split(envTemplate.getString(Environment.autoIncludes), StringUtil.SEMICOLON));
         templateConfigurable.setAutoImports(StringUtil.split(envTemplate.getString(Environment.autoImports), StringUtil.SEMICOLON));

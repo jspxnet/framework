@@ -124,7 +124,7 @@ public class JspxCoreListener implements ServletContextListener {
         }
         else
         {
-            envTemplate.createJspxEnv(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
+           envTemplate.createJspxEnv(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
         }
 
         //默认方式
