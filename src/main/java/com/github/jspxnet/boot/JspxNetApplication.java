@@ -195,12 +195,16 @@ public final class JspxNetApplication {
     }
 
 
-
-
+    /**
+     * 卸载服务
+     */
     public static void destroy() {
         JSPX_CORE_LISTENER.contextDestroyed(null);
     }
 
+    /**
+     * 重启服务
+     */
     public static void restart() {
         JSPX_CORE_LISTENER.contextDestroyed(null);
         try {
@@ -211,14 +215,18 @@ public final class JspxNetApplication {
         JSPX_CORE_LISTENER.contextInitialized(null);
     }
 
-    //得到服务器运行天数
-
+    /**
+     *
+     * @return 得到服务器运行天数
+     */
     public static long runDay() {
         return DateUtil.compareDay(new Date(JspxCoreListener.getStartCurrentTimeMillis()));
     }
 
-    //得到服务器运行天数
-
+    /**
+     *
+     * @return 得到服务器运行天数
+     */
     public static Date getRunDate() {
         return new Date(JspxCoreListener.getStartCurrentTimeMillis());
     }
