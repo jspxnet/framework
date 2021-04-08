@@ -33,6 +33,8 @@ public interface JspxConfiguration {
      */
     void setDefaultPath(String defaultPath);
 
+    String getConfigFilePath();
+
     /**
      * 配置文件
      *

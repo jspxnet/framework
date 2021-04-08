@@ -53,9 +53,8 @@ public class ReadWordTextFile extends AbstractRead {
                 POIXMLTextExtractor extractor = new XWPFWordExtractor(opcPackage);
                 result.append(extractor.getText());
             } else {
-                System.out.println("此文件不是word文件！");
+                log.info("此文件不是word文件！");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

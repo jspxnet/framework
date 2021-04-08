@@ -26,7 +26,6 @@ import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import lombok.extern.slf4j.Slf4j;
-import java.io.IOException;
 import java.io.File;
 import java.util.*;
 
@@ -289,7 +288,7 @@ public class ConfigureContext implements IocContext {
         }
     }
 
-    private String readFileText(String fileName) throws IOException {
+    private String readFileText(String fileName) throws Exception {
         String fileNamePath = fileName;
         if (!FileUtil.isFileExist(fileName)) {
 

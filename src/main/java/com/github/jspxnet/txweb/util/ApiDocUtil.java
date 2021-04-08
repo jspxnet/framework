@@ -782,7 +782,7 @@ public class ApiDocUtil {
         String xml = null;
         try {
             xml = IoUtil.autoReadText(file);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         if (StringUtil.isEmpty(xml))

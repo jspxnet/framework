@@ -25,12 +25,12 @@ import java.io.File;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
 
 @Slf4j
 public class BaseConfigurationImpl implements JspxConfiguration {
 
     private String defaultPath = null;
+    private String configFilePath = null;
     final private static Date START_RUN_DATE = new Date();
     private String defaultConfigFile = Environment.jspx_properties_file;
 
@@ -118,7 +118,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         if (path == null) {
 
             List<File> list = FileUtil.getPatternFiles(null,defaultConfigFile);
-            if (list!=null&&!list.isEmpty())
+            if (!list.isEmpty())
             {
                 path = list.get(0).getPath();
             }
@@ -128,7 +128,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         if (path == null) {
             File file = new File(FileUtil.mendPath(System.getProperty(" user.dir")) + defaultConfigFile);
             if (file.isFile() && file.exists()) {
-                path = file.getParentFile().getAbsolutePath();
+                path = file.getParentFile().getPath();
             } else {
                 path = null;
             }
@@ -145,6 +145,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         if (path == null) {
             log.info("No find file:" + defaultConfigFile + ",不能找到" + defaultConfigFile + "文件");
         } else {
+            configFilePath = path;
             if (path.endsWith(defaultConfigFile)) {
                 path = FileUtil.getPathPart(path);
             }
@@ -156,11 +157,9 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         }
         File file = new File(path);
         defaultPath = FileUtil.mendPath(file.getPath());
-
         log.info("user.dir=" + System.getProperty("user.dir"));
         log.info("defaultPath=" + defaultPath);
     }
-
 
     /**
      * 得到本jspx 包的默认工作目录.
@@ -176,6 +175,14 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         return defaultPath;
     }
 
+    @Override
+    public String getConfigFilePath() {
+        if (defaultPath==null)
+        {
+            loadPath();
+        }
+        return configFilePath;
+    }
     /**
      * @return 得到配置文件
      */

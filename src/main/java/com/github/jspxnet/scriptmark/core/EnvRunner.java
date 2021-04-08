@@ -205,7 +205,7 @@ public class EnvRunner {
                     if (FileUtil.isFileExist(f.getPath())) {
                         try {
                             autoImportSrc.append(IoUtil.autoReadText(f)).append(StringUtil.CRLF);
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             throw new ScriptRunException(null, importFile);
                         }
                     } else
@@ -215,7 +215,7 @@ public class EnvRunner {
                         {
                             try {
                                 autoImportSrc.append(IoUtil.autoReadText(f)).append(StringUtil.CRLF);
-                            } catch (IOException e) {
+                            } catch (Exception e) {
                                 throw new ScriptRunException(null, importFile);
                             }
                         }

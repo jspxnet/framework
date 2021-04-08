@@ -202,18 +202,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             }
             VALUE_MAP.put(Environment.resPath, tempDir);
 
-            //CachePath    缓存目录
-           /* tempDir = webInfPath + "cache/";
-            FileUtil.makeDirectory(tempDir);
-            VALUE_MAP.put(Environment.cachePath, tempDir);*/
-
-            //升级文件保存目录
-/*
-            tempDir = webInfPath + "upgrade/";
-            //FileUtil.makeDirectory(tempDir);
-            VALUE_MAP.put(Environment.upgradePath, tempDir);
-*/
-
             //TempPath    临时路径
             tempDir = webInfPath + "tmp/";
             if (createWebInf&&FileUtil.isDirectory(tempDir)) {

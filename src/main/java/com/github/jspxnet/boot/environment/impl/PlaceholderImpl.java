@@ -77,7 +77,7 @@ public class PlaceholderImpl implements Placeholder {
         {
             try {
                 fs =  new StringSource(IoUtil.autoReadText(file.getPath()));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

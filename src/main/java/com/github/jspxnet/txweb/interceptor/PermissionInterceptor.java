@@ -37,7 +37,6 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -132,7 +131,7 @@ public class PermissionInterceptor extends InterceptorSupport {
                 }
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
