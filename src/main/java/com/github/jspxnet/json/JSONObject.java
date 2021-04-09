@@ -1115,7 +1115,16 @@ public class JSONObject extends HashMap<String, Object> {
     @Override
     public String toString() {
         try {
-            return toString(this,lass,0, 0, false);
+            return toString(this,lass,0, 0, false,false);
+        } catch (Exception e) {
+            log.error("解析错误", e);
+            return StringUtil.empty;
+        }
+    }
+
+    public String toSortString() {
+        try {
+            return toString(this,lass,0, 0, false,true);
         } catch (Exception e) {
             log.error("解析错误", e);
             return StringUtil.empty;
@@ -1123,17 +1132,17 @@ public class JSONObject extends HashMap<String, Object> {
     }
 
     public String toString(int indentFactor) {
-        return toString(this,lass,indentFactor, 0, false);
+        return toString(this,lass,indentFactor, 0, false,false);
     }
 
     public String toString(int indentFactor, boolean needClass) {
 
-        return toString(this,lass,indentFactor, 0, needClass);
+        return toString(this,lass,indentFactor, 0, needClass,false);
     }
 
     public String toString(int indentFactor, int indent, boolean needClass)
     {
-        return toString(this,lass,indentFactor, indent, needClass);
+        return toString(this,lass,indentFactor, indent, needClass,false);
     }
 
 
@@ -1150,11 +1159,19 @@ public class JSONObject extends HashMap<String, Object> {
      * with [code]{ } &nbsp;<small>(left brace)</small> and ending
      * with [code]} } &nbsp;<small>(right brace)</small>.
      */
-    static String toString(Map<String,?> valueMap,Class<?> lass,int indentFactor, int indent, boolean needClass) {
-        Map<String,?>  map = MapUtil.sortByKey(valueMap);
-        if (ObjectUtil.isEmpty(map)) {
+    static String toString(Map<String,?> valueMap,Class<?> lass,int indentFactor, int indent, boolean needClass,boolean sort) {
+        if (ObjectUtil.isEmpty(valueMap)) {
             return "{}";
         }
+        Map<String,?>  map;
+        if (sort)
+        {
+            map = MapUtil.sortByKey(valueMap);
+        } else
+        {
+            map = valueMap;
+        }
+
         StringBuilder sb = new StringBuilder("{");
         try {
             int j;
