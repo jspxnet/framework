@@ -1159,7 +1159,7 @@ public class JSONObject extends HashMap<String, Object> {
                 o = keys.next();
                 v = super.get(o);
                 sb.append(StringUtil.quote(o == null ? "" : o.toString(), true));
-                sb.append(": ");
+                sb.append(StringUtil.COLON);
                 if (o==null)
                 {
                     sb.append("null");
@@ -1195,7 +1195,7 @@ public class JSONObject extends HashMap<String, Object> {
                     {
                         sb.append(StringUtil.quote(o.toString(), true));
                     }
-                    sb.append(": ");
+                    sb.append(StringUtil.COLON);
                     sb.append(valueToString(getJsonField(o.toString()),v, indentFactor, newIndent, needClass));
                 }
                 if (sb.length() > 1) {
