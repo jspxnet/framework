@@ -88,7 +88,11 @@ public class MapUtil {
     }
 
 
-    public static <String extends Comparable, V> Map sortByKey(Map<String, V> map) {
+    public static <String extends Comparable, V> Map<String,V> sortByKey(Map<String, V> map) {
+        if (map==null)
+        {
+            return null;
+        }
         List<Map.Entry<String, V>> list = new LinkedList<Map.Entry<String, V>>(map.entrySet());
         Collections.sort(list, new Comparator<Map.Entry<String, V>>() {
             @Override

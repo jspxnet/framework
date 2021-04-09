@@ -1150,16 +1150,15 @@ public class JSONObject extends HashMap<String, Object> {
      * with [code]{ } &nbsp;<small>(left brace)</small> and ending
      * with [code]} } &nbsp;<small>(right brace)</small>.
      */
-    static String toString(Map<String,Object> valueMap,Class<?> lass,int indentFactor, int indent, boolean needClass) {
-        Map<String,Object>  map = MapUtil.sortByKey(valueMap);
-
+    static String toString(Map<String,?> valueMap,Class<?> lass,int indentFactor, int indent, boolean needClass) {
+        Map<String,?>  map = MapUtil.sortByKey(valueMap);
+        if (ObjectUtil.isEmpty(map)) {
+            return "{}";
+        }
         StringBuilder sb = new StringBuilder("{");
         try {
             int j;
-            if (ObjectUtil.isEmpty(map)) {
-                return "{}";
-            }
-            Iterator keys = map.keySet().iterator();
+            Iterator<String> keys = map.keySet().iterator();
             Object o;
             Object v;
             if (map.size() == 1) {
