@@ -23,6 +23,8 @@ ConcurrentHashMap
  */
 @Slf4j
 public class JSONObject extends HashMap<String, Object> {
+    final static private String KEY_DATA = "data";
+    //final static private String KEY_ROOT = "root";
 
     static public String FULL_ST_FORMAT = DateUtil.FULL_ST_FORMAT;
     static public String CLASS_NAME = "@class";
@@ -86,7 +88,6 @@ public class JSONObject extends HashMap<String, Object> {
      * output transfer guarantee that we are always writing valid JSON.
      */
     //static final Pattern NUMBER_PATTERN = Pattern.compile("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?");
-
 
     /**
      * It is sometimes more convenient and less ambiguous transfer have a
@@ -273,8 +274,6 @@ public class JSONObject extends HashMap<String, Object> {
         this(bean,null, includeSuperClass,dataField);
     }
     //保存对象格式化
-    private String KEY_DATA = "data";
-    private String KEY_ROOT = "root";
     private Class lass;
     private JSONObject dataField = null;
 
@@ -794,7 +793,7 @@ public class JSONObject extends HashMap<String, Object> {
         return JSONObject.NULL.equals(get(key)) || get(key)==null;
     }
 
-    public boolean isNull(Object bean) {
+    static public boolean isNull(Object bean) {
         return JSONObject.NULL.equals(bean) || bean==null;
     }
 
@@ -1116,7 +1115,7 @@ public class JSONObject extends HashMap<String, Object> {
     @Override
     public String toString() {
         try {
-            return toString(0, 0, false);
+            return toString(this,lass,0, 0, false);
         } catch (Exception e) {
             log.error("解析错误", e);
             return StringUtil.empty;
@@ -1124,12 +1123,19 @@ public class JSONObject extends HashMap<String, Object> {
     }
 
     public String toString(int indentFactor) {
-        return toString(indentFactor, 0, false);
+        return toString(this,lass,indentFactor, 0, false);
     }
 
     public String toString(int indentFactor, boolean needClass) {
-        return toString(indentFactor, 0, needClass);
+
+        return toString(this,lass,indentFactor, 0, needClass);
     }
+
+    public String toString(int indentFactor, int indent, boolean needClass)
+    {
+        return toString(this,lass,indentFactor, indent, needClass);
+    }
+
 
     /**
      * Make a prettyprinted JSON text of this JSONObject.
@@ -1144,20 +1150,21 @@ public class JSONObject extends HashMap<String, Object> {
      * with [code]{ } &nbsp;<small>(left brace)</small> and ending
      * with [code]} } &nbsp;<small>(right brace)</small>.
      */
-    String toString(int indentFactor, int indent, boolean needClass) {
+    static String toString(Map<String,Object> valueMap,Class<?> lass,int indentFactor, int indent, boolean needClass) {
+        Map<String,Object>  map = MapUtil.sortByKey(valueMap);
+
         StringBuilder sb = new StringBuilder("{");
         try {
             int j;
-
-            if (super.isEmpty()) {
+            if (ObjectUtil.isEmpty(map)) {
                 return "{}";
             }
-            Iterator keys = super.keySet().iterator();
+            Iterator keys = map.keySet().iterator();
             Object o;
             Object v;
-            if (super.size() == 1) {
+            if (map.size() == 1) {
                 o = keys.next();
-                v = super.get(o);
+                v = map.get(o);
                 sb.append(StringUtil.quote(o == null ? "" : o.toString(), true));
                 sb.append(StringUtil.COLON);
                 if (o==null)
@@ -1165,13 +1172,13 @@ public class JSONObject extends HashMap<String, Object> {
                     sb.append("null");
                 } else
                 {
-                    sb.append(valueToString(getJsonField(o.toString()),v, indentFactor, indent, needClass));
+                    sb.append(valueToString(getJsonField(lass,o.toString()),v, indentFactor, indent, needClass));
                 }
             } else {
                 int newIndent = indent + indentFactor;
                 while (keys.hasNext()) {
                     o = keys.next();
-                    v = super.get(o);
+                    v = map.get(o);
                     if (!needClass && CLASS_NAME.equals(o)) {
                         continue;
                     }
@@ -1196,7 +1203,7 @@ public class JSONObject extends HashMap<String, Object> {
                         sb.append(StringUtil.quote(o.toString(), true));
                     }
                     sb.append(StringUtil.COLON);
-                    sb.append(valueToString(getJsonField(o.toString()),v, indentFactor, newIndent, needClass));
+                    sb.append(valueToString(getJsonField(lass,o.toString()),v, indentFactor, newIndent, needClass));
                 }
                 if (sb.length() > 1) {
                     if (indentFactor > 0) {
@@ -1328,6 +1335,7 @@ public class JSONObject extends HashMap<String, Object> {
         }
 
         if (value instanceof JSONObject) {
+
             return ((JSONObject) value).toString(indentFactor, indent, classInfo);
         }
 
@@ -1370,11 +1378,11 @@ public class JSONObject extends HashMap<String, Object> {
                 Object v = super.get(k);
                 if (v==null)
                 {
-                    writer.write(valueToString(getJsonField(k.toString()),NULL));
+                    writer.write(valueToString(getJsonField(lass,k.toString()),NULL));
                 }
                 else
                 {
-                    writer.write(valueToString(getJsonField(k.toString()),v));
+                    writer.write(valueToString(getJsonField(lass,k.toString()),v));
                 }
                 b = true;
             }
@@ -1385,7 +1393,7 @@ public class JSONObject extends HashMap<String, Object> {
         }
     }
 
-    private JsonField getJsonField(String key)
+    private static JsonField getJsonField(Class<?> lass,String key)
     {
         if (lass==null)
         {
