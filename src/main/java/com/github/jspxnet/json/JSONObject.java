@@ -22,7 +22,7 @@ Information:java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
 ConcurrentHashMap
  */
 @Slf4j
-public class JSONObject extends HashMap<String, Object> {
+public class JSONObject extends LinkedHashMap<String, Object> {
     final static private String KEY_DATA = "data";
     //final static private String KEY_ROOT = "root";
 
