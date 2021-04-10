@@ -654,14 +654,15 @@
             <scope>provided</scope>
         </dependency>
         <!--
-         https://github.com/happyfish100/fastdfs-client-java.git
-
+         git clong https://github.com/happyfish100/fastdfs-client-java.git
+         mvn clean install
          mvn install:install-file -DgroupId=org.csource -DartifactId=fastdfs-client-java -Dversion=1.29-SNAPSHOT -Dpackaging=jar -Dfile=fastdfs-client-java-1.29-SNAPSHOT.jar
          -->
         <dependency>
             <groupId>org.csource</groupId>
             <artifactId>fastdfs-client-java</artifactId>
             <version>1.29-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
