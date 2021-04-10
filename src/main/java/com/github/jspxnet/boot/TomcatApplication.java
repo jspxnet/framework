@@ -167,9 +167,6 @@ public class TomcatApplication {
         standardContext.setJarScanner(scanner);
         standardContext.setAddWebinfClassesResources(true);
 
-
-
-
         if (openRedis&&!StringUtil.isNull(redisConfig))
         {
             TomcatRedissonSessionManager redissonSessionManager = new TomcatRedissonSessionManager();
@@ -212,7 +209,6 @@ public class TomcatApplication {
          */
 
         StandardContext tmpContext = (StandardContext)standardContext;
-
 
         tmpContext.setWorkDir(webPath);
         File webFile = new File(file,"WEB-INF/web.xml");

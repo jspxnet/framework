@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.*;
 import java.util.*;
 
-@HttpMethod(caption = "API文档")
 @Slf4j
 public class ApiDocView extends ActionSupport {
     final private static String[] NO_VIEW_CLASS = new String[]{
