@@ -38,7 +38,8 @@ import java.util.*;
  * http 请求
  */
 public class HttpClientAdapter implements HttpClient {
-    public static final int SUCCESS = 200;  // OK: Success!
+    // OK: Success!
+    public static final int SUCCESS = 200;
     protected org.apache.http.client.CookieStore cookieStore = new BasicCookieStore();
     protected CloseableHttpClient httpClient;
     protected boolean useProxy = false;
@@ -179,7 +180,7 @@ public class HttpClientAdapter implements HttpClient {
      * @throws IOException             异常
      */
     @Override
-    public HttpResponse getHttpResponse(String url, Map<String, Object> parameterMap, Map<String, String> headers) throws Exception {
+    public HttpResponse getHttpResponse(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception {
         URIBuilder uriBuilder = new URIBuilder(url);
         if (parameterMap != null && !parameterMap.isEmpty()) {
             /* 添加参数的形式*/
@@ -193,13 +194,81 @@ public class HttpClientAdapter implements HttpClient {
         return httpClient.execute(httpGet);
     }
 
+    /**
+     * 未了支持 Elasticsearch
+     * @param json json
+     * @return 请求结果
+     * @throws Exception 异常
+     */
     @Override
-    public String getString(String url, Map<String, Object> parameterMap, Map<String, String> headers) throws Exception {
+    public String get(JSONObject json) throws Exception
+    {
+        return EntityUtils.toString(get( url,  json, defaultHeaders));
+    }
+
+
+    /**
+     * 未了支持 Elasticsearch
+     * @param json json
+     * @param headers 请求头
+     * @return 请求结果
+     * @throws Exception 异常
+     */
+    @Override
+    public String get(JSONObject json, Map<String, String> headers) throws Exception
+    {
+        return EntityUtils.toString(get( url,  json, headers));
+    }
+
+
+    @Override
+    public HttpEntity get(String url, JSONObject json, Map<String, String> headers) throws Exception
+    {
+        if (headers == null || headers.isEmpty()) {
+            return null;
+        }
+        HttpGetEx httpPost = new HttpGetEx(url);
+        if (!ObjectUtil.isEmpty(headers)) {
+            addHeaders(httpPost, headers);
+        }
+        String requestedWith = headers.get("X-Requested-With");
+        if (requestedWith != null && requestedWith.contains(Environment.rocSecret)) {
+            String k1 = RandomUtil.getRandomAlphanumeric(16);
+            String iv = RandomUtil.getRandomAlphanumeric(16);
+
+            Encrypt symmetryEncrypt = (Encrypt) ClassUtil.newInstance(com.github.jspxnet.security.symmetry.impl.AESEncrypt.class.getName());
+            symmetryEncrypt.setCipherIv(iv);
+            symmetryEncrypt.setSecretKey(k1);
+            symmetryEncrypt.setCipherAlgorithm(CIPHER_ALGORITHM);
+            String data = symmetryEncrypt.getEncode(json.toString());
+            String ps = k1 + '-' + iv;
+
+            AsyEncrypt asyEncrypt = EnvFactory.getAsymmetricEncrypt();
+            byte[] key = asyEncrypt.encryptByPublicKey(ps.getBytes(Environment.defaultEncode), EnvFactory.getPublicKey());
+            JSONObject posts = new JSONObject();
+            posts.put("keyType", "rsa");
+            posts.put("dataType", "aes");
+            posts.put("key", EncryptUtil.byteToHex(key));
+            posts.put("data", data);
+            json = posts;
+        }
+        if (json != null) {
+            StringEntity s = new StringEntity(json.toString(4), encode);
+            s.setContentEncoding(encode);
+            s.setContentType("application/json;charset=" + encode);//发送json数据需要设置contentType
+            httpPost.setEntity(s);
+        }
+        httpResponse = httpClient.execute(httpPost);
+        return httpResponse.getEntity();
+    }
+
+    @Override
+    public String getString(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception {
         return EntityUtils.toString(getHttpResponse(url, parameterMap, headers).getEntity());
     }
 
     @Override
-    public String getString(String url, Map<String, Object> parameterMap) throws Exception {
+    public String getString(String url, Map<String, ?> parameterMap) throws Exception {
         return EntityUtils.toString(getHttpResponse(url, parameterMap, defaultHeaders).getEntity());
     }
 
@@ -219,12 +288,12 @@ public class HttpClientAdapter implements HttpClient {
     }
 
     @Override
-    public byte[] getBytes(String url, Map<String, Object> parameterMap, Map<String, String> headers) throws Exception {
+    public byte[] getBytes(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception {
         return EntityUtils.toByteArray(getHttpResponse(url, parameterMap, headers).getEntity());
     }
 
     @Override
-    public byte[] getBytes(String url, Map<String, Object> parameterMap) throws Exception {
+    public byte[] getBytes(String url, Map<String, ?> parameterMap) throws Exception {
         return EntityUtils.toByteArray(getHttpResponse(url, parameterMap, defaultHeaders).getEntity());
     }
 
@@ -243,11 +312,19 @@ public class HttpClientAdapter implements HttpClient {
         }
         return param;
     }
+    @Override
+    public String post(String url,  Map<String, ?> params) throws ParseException, IOException {
+        return EntityUtils.toString(post(url, params, defaultHeaders));
+    }
 
     @Override
-    public HttpEntity put(String url, Map<String, String> params, Map<String, String> headers) throws ParseException, IOException {
+    public String post( Map<String, ?> params) throws ParseException, IOException {
+        return post(url, params);
+    }
+    @Override
+    public HttpEntity put(String url, Map<String, ?> params, Map<String, String> headers) throws ParseException, IOException {
         HttpPut httpPost = new HttpPut(url);
-        if (params != null && !params.isEmpty()) {
+        if (!ObjectUtil.isEmpty(params)) {
             UrlEncodedFormEntity postEntity = new UrlEncodedFormEntity(getParam(params), encode);
             postEntity.setContentEncoding(encode);
             httpPost.setEntity(postEntity);
@@ -262,7 +339,7 @@ public class HttpClientAdapter implements HttpClient {
     @Override
     public HttpEntity put(JSONObject json, Map<String, String> headers) throws Exception
     {
-        if (headers == null || headers.isEmpty()) {
+        if (ObjectUtil.isEmpty(headers)) {
             return null;
         }
         HttpPut httpPost = new HttpPut(url);
@@ -301,6 +378,22 @@ public class HttpClientAdapter implements HttpClient {
     }
 
     @Override
+    public HttpEntity put(String url, String body, Map<String, String> headers) throws ParseException, IOException {
+        HttpPut httpPost = new HttpPut(url);
+        if (body!=null)
+        {
+            StringEntity postEntity = new StringEntity(body, encode);
+            postEntity.setContentEncoding(encode);
+            httpPost.setEntity(postEntity);
+        }
+        if (headers != null && !headers.isEmpty()) {
+            addHeaders(httpPost, headers);
+        }
+        httpResponse = httpClient.execute(httpPost);
+        return httpResponse.getEntity();
+    }
+
+    @Override
     public String put(JSONObject json) throws Exception {
         return EntityUtils.toString(put(json, defaultHeaders));
     }
@@ -316,7 +409,7 @@ public class HttpClientAdapter implements HttpClient {
      * @throws IOException    异常
      */
     @Override
-    public HttpEntity post(String url, Map<String, String> params, Map<String, String> headers) throws ParseException, IOException {
+    public HttpEntity post(String url, Map<String, ?> params, Map<String, String> headers) throws ParseException, IOException {
 
         HttpPost httpPost = new HttpPost(url);
         if (params != null && !params.isEmpty()) {
@@ -346,6 +439,8 @@ public class HttpClientAdapter implements HttpClient {
         httpResponse = httpClient.execute(httpPost);
         return httpResponse.getEntity();
     }
+
+
     @Override
     public String post(String url, String body) throws ParseException, IOException
     {
@@ -358,15 +453,7 @@ public class HttpClientAdapter implements HttpClient {
         return post(url, body);
     }
 
-    @Override
-    public String post(String url, Map params) throws ParseException, IOException {
-        return EntityUtils.toString(post(url, params, defaultHeaders));
-    }
 
-    @Override
-    public String post(Map params) throws ParseException, IOException {
-        return post(url, params);
-    }
 
     @Override
     public HttpEntity post(String url, JSONObject json, Map<String, String> headers) throws Exception
@@ -375,6 +462,47 @@ public class HttpClientAdapter implements HttpClient {
             return null;
         }
         HttpPost httpPost = new HttpPost(url);
+        if (!headers.isEmpty()) {
+            addHeaders(httpPost, headers);
+        }
+        String requestedWith = headers.get("X-Requested-With");
+        if (requestedWith != null && requestedWith.contains(Environment.rocSecret)) {
+            String k1 = RandomUtil.getRandomAlphanumeric(16);
+            String iv = RandomUtil.getRandomAlphanumeric(16);
+
+            Encrypt symmetryEncrypt = (Encrypt) ClassUtil.newInstance(com.github.jspxnet.security.symmetry.impl.AESEncrypt.class.getName());
+            symmetryEncrypt.setCipherIv(iv);
+            symmetryEncrypt.setSecretKey(k1);
+            symmetryEncrypt.setCipherAlgorithm(CIPHER_ALGORITHM);
+            String data = symmetryEncrypt.getEncode(json.toString());
+            String ps = k1 + '-' + iv;
+
+            AsyEncrypt asyEncrypt = EnvFactory.getAsymmetricEncrypt();
+            byte[] key = asyEncrypt.encryptByPublicKey(ps.getBytes(Environment.defaultEncode), EnvFactory.getPublicKey());
+            JSONObject posts = new JSONObject();
+            posts.put("keyType", "rsa");
+            posts.put("dataType", "aes");
+            posts.put("key", EncryptUtil.byteToHex(key));
+            posts.put("data", data);
+            json = posts;
+        }
+        if (json != null) {
+            StringEntity s = new StringEntity(json.toString(4), encode);
+            s.setContentEncoding(encode);
+            s.setContentType("application/json;charset=" + encode);//发送json数据需要设置contentType
+            httpPost.setEntity(s);
+        }
+        httpResponse = httpClient.execute(httpPost);
+        return httpResponse.getEntity();
+    }
+
+    @Override
+    public HttpEntity put(String url, JSONObject json, Map<String, String> headers) throws Exception
+    {
+        if (headers == null || headers.isEmpty()) {
+            return null;
+        }
+        HttpPut httpPost = new HttpPut(url);
         if (!headers.isEmpty()) {
             addHeaders(httpPost, headers);
         }
@@ -423,6 +551,8 @@ public class HttpClientAdapter implements HttpClient {
     public String post(JSONObject json) throws Exception {
         return EntityUtils.toString(post(url, json, defaultHeaders),encode);
     }
+
+
 
     @Override
     public String getResponseString() throws ParseException, IOException {

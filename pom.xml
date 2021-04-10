@@ -654,6 +654,7 @@
             <scope>provided</scope>
         </dependency>
         <!--
+         fastdfs 客户端
          git clong https://github.com/happyfish100/fastdfs-client-java.git
          mvn clean install
          mvn install:install-file -DgroupId=org.csource -DartifactId=fastdfs-client-java -Dversion=1.29-SNAPSHOT -Dpackaging=jar -Dfile=fastdfs-client-java-1.29-SNAPSHOT.jar

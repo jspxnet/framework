@@ -48,7 +48,7 @@ public interface HttpClient {
 
     HttpClient build();
 
-    HttpResponse getHttpResponse(String url, Map<String, Object> parameterMap, Map<String, String> headers) throws Exception;
+    HttpResponse getHttpResponse(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception;
 
 
     boolean download(File file,Map map) throws Exception;
@@ -69,9 +69,15 @@ public interface HttpClient {
 
     int getStatusCode() throws ParseException;
 
-    String getString(String url, Map<String, Object> parameterMap, Map<String, String> headers) throws Exception;
+    String get(JSONObject json) throws Exception;
 
-    String getString(String url, Map<String, Object> parameterMap) throws Exception;
+    String get(JSONObject json, Map<String, String> headers) throws Exception;
+
+    HttpEntity get(String url, JSONObject json, Map<String, String> headers) throws Exception;
+
+    String getString(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception;
+
+    String getString(String url, Map<String, ?> parameterMap) throws Exception;
 
     String getString(String url) throws Exception;
 
@@ -79,9 +85,9 @@ public interface HttpClient {
 
     String getString(Map<String, Object> parameterMap) throws Exception;
 
-    byte[] getBytes(String url, Map<String, Object> parameterMap) throws Exception;
+    byte[] getBytes(String url, Map<String, ?> parameterMap) throws Exception;
 
-    byte[] getBytes(String url, Map<String, Object> parameterMap, Map<String, String> headers) throws Exception;
+    byte[] getBytes(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception;
 
     String getResponseString() throws ParseException, IOException;
 
@@ -94,16 +100,16 @@ public interface HttpClient {
      */
     String upload(File[] files, String name);
 
-    HttpEntity put(String url, Map<String, String> params, Map<String, String> headers) throws ParseException, IOException;
+    HttpEntity put(String url, Map<String, ?> params, Map<String, String> headers) throws ParseException, IOException;
 
 
     HttpEntity put(JSONObject json, Map<String, String> headers) throws Exception;
 
     String put(JSONObject json) throws Exception;
 
-    HttpEntity post(String url, Map<String, String> params, Map<String, String> headers) throws ParseException, IOException;
+    HttpEntity post(String url, Map<String, ?> params, Map<String, String> headers) throws ParseException, IOException;
 
-    String post(String url, Map<String, String> params) throws ParseException, IOException;
+    String post(String url, Map<String, ?> params) throws ParseException, IOException;
 
     String post(Map<String, ?> params) throws ParseException, IOException;
 
@@ -113,9 +119,13 @@ public interface HttpClient {
 
     HttpEntity post(String url, JSONObject json, Map<String, String> headers) throws Exception;
 
+    HttpEntity put(String url, JSONObject json, Map<String, String> headers) throws Exception;
+
     String post(String url, JSONObject json) throws Exception;
 
     String post(JSONObject json) throws Exception;
+
+    HttpEntity put(String url, String body, Map<String, String> headers) throws ParseException, IOException;
 
     String post(String url, String body) throws ParseException, IOException;
 
