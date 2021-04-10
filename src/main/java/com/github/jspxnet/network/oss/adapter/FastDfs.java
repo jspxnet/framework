@@ -15,9 +15,9 @@ import java.io.*;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/4/10 14:36
- * @description:
+ * author: chenYuan
+ * date: 2021/4/10 14:36
+ * description:
  * FastDfs 本地分布式文件存储支持,自己要有一个内网系统的FastDfs服务器
  * 然后配置 CloudFileConfig
  * 配置中注意  Endpoint 是主机域名部分,getBucket 是 FastDfs 的文件分组名称
