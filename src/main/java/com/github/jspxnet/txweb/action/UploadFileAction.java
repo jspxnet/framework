@@ -16,7 +16,7 @@ import com.github.jspxnet.io.ReadWordTextFile;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.lucene.ChineseAnalyzer;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.network.CloudServiceFactory;
+import com.github.jspxnet.network.oss.CloudServiceFactory;
 import com.github.jspxnet.network.oss.CloudFileClient;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.AssertException;
@@ -567,6 +567,10 @@ public class UploadFileAction extends MultipartSupport {
                         File localFile = new File(tmpUploadFile.getTempFilePath());
                         String cloudUrl = cloudFileClient.upload(cloudFileConfig.getNamespace(), localFile);
                         tmpUploadFile.setFileName(cloudUrl);
+                        StringMap<String, String> attributeMap = tmpUploadFile.getAttributeMap();
+                        attributeMap.put("configId",cloudFileConfig.getId()+"");
+                        attributeMap.put("bucket",cloudFileConfig.getBucket());
+                        tmpUploadFile.setAttributes(attributeMap.toString());
                         files.add(localFile);
                         if (i == 0) {
                             uploadFileDAO.save(uploadObjArray[i]);
@@ -626,7 +630,10 @@ public class UploadFileAction extends MultipartSupport {
                 StringMap<String, String> map = ImageUtil.parsePhotoExif(file, ImageUtil.simpleExifTags);
                 upFile.setAttributes(map.toString());
             } else {
-                upFile.setAttributes("width=" + w + "\r\nheight=" + h);
+                StringMap<String, String> attributeMap = upFile.getAttributeMap();
+                attributeMap.put("width",w+"");
+                attributeMap.put("height",h+"");
+                upFile.setAttributes(attributeMap.toString());
             }
 
             if (image.getWidth() > maxImageWidth) {

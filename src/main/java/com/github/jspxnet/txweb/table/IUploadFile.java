@@ -13,7 +13,10 @@ import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.table.OperateTable;
+import com.github.jspxnet.txweb.enums.ImageSysEnumType;
+import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.utils.ImageUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -68,8 +71,8 @@ public abstract class IUploadFile extends OperateTable {
     @Column(caption = "大小", notNull = true)
     private long fileSize = 0;
 
-    @Column(caption = "系统分组", notNull = true)
-    private int sysType = 0;
+    @Column(caption = "系统分组", enumType = ImageSysEnumType.class,notNull = true)
+    private int sysType = ImageSysEnumType.NONE.getValue();
 
     //作为手机图片和缩图的标识, 缩图1,手机2
     @Column(caption = "排序", notNull = true)
@@ -122,4 +125,11 @@ public abstract class IUploadFile extends OperateTable {
         return attributes;
     }
 
+    public StringMap<String, String> getAttributeMap() {
+        StringMap<String, String> map = new StringMap<>();
+        map.setKeySplit(StringUtil.EQUAL);
+        map.setLineSplit(StringUtil.CRLF);
+        map.setString(attributes);
+        return map;
+    }
 }

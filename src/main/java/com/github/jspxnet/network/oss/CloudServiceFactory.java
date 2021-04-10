@@ -1,8 +1,8 @@
-package com.github.jspxnet.network;
+package com.github.jspxnet.network.oss;
 
 import com.github.jspxnet.enums.CloudServiceEnumType;
-import com.github.jspxnet.network.oss.CloudFileClient;
 import com.github.jspxnet.network.oss.adapter.AliYunOss;
+import com.github.jspxnet.network.oss.adapter.FastDfs;
 import com.github.jspxnet.network.oss.adapter.HuaWeiObs;
 import com.github.jspxnet.txweb.table.CloudFileConfig;
 
@@ -28,6 +28,10 @@ public  class CloudServiceFactory {
         if (CloudServiceEnumType.HuaWei.getValue()==config.getCloudType())
         {
             return new HuaWeiObs(config);
+        }
+        if (CloudServiceEnumType.FastDfs.getValue()==config.getCloudType())
+        {
+            return new FastDfs(config);
         }
         return null;
     }

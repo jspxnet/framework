@@ -4,7 +4,9 @@ import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.RandomUtil;
 
-import java.util.Calendar;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Created by jspx.net
@@ -15,9 +17,14 @@ import java.util.Calendar;
  **/
 public abstract class BaseCloudFile {
 
+    /**
+     *
+     * @param fileName 上传的云文件名称和路径 FDS方式不使用
+     * @return 返回一个云文件路径
+     */
     protected String fixCloudPath(String fileName) {
-        StringBuilder keyPathBuilder = new StringBuilder();
-        keyPathBuilder.append(DateUtil.getYear()).append("/").append(DateUtil.getMonth()).append("/").append(DateUtil.getDate()).append("/").append(RandomUtil.getRandomGUID(18)).append(".").append(FileUtil.getTypePart(fileName));
-        return keyPathBuilder.toString();
+        return DateUtil.getYear() + "/" + DateUtil.getMonth() + "/" + DateUtil.getDate() + "/" + RandomUtil.getRandomGUID(18) + "." + FileUtil.getTypePart(fileName);
     }
+
+
 }

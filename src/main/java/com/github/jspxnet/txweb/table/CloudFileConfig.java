@@ -32,6 +32,8 @@ public class CloudFileConfig extends OperateTable  {
 
     // Endpoint以杭州为例，其它Region请按实际情况填写。
     //http://oss-cn-hangzhou.aliyuncs.com
+
+    //如果为FDS方式,这里表示 http 前缀, 返回URL路径会加上这里
     @Column(caption = "endpoint", length = 250, dataType = "isLengthBetween(1,250)")
     private String endpoint = StringUtil.empty;
 
@@ -42,6 +44,7 @@ public class CloudFileConfig extends OperateTable  {
     @Column(caption = "KeySecret", length = 128)
     private  String accessKeySecret = StringUtil.empty;
 
+    //DFS 文件系统中作为分组名称使用
     @Column(caption = "bucket", length = 128)
     private  String bucket = StringUtil.empty;
 

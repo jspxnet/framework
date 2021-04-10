@@ -14,12 +14,8 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.network.oss.CloudFileClient;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.table.CloudFileConfig;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.URLUtil;
+import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -50,7 +46,7 @@ import java.util.Map;
 @Slf4j
 public class AliYunOss extends BaseCloudFile implements CloudFileClient {
     private static final Map<String, OssSts> ossStsPool = new HashMap<>();
-    private CloudFileConfig config;
+    final private CloudFileConfig config;
 
 
     public AliYunOss(CloudFileConfig config) {

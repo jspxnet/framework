@@ -3,6 +3,7 @@ package com.github.jspxnet.network.oss;
 import com.github.jspxnet.network.oss.adapter.OssSts;
 
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * Created by jspx.net
@@ -25,7 +26,6 @@ public interface CloudFileClient {
     String upload(String cloudPath, File file) throws Exception;
 
     boolean delete(String cloudPath);
-
 
     OssSts getOssSts(String roleSessionName);
 }

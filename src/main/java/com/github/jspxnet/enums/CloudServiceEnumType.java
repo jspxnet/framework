@@ -10,7 +10,9 @@ public enum CloudServiceEnumType implements EnumType {
     Ali(0, "Ali"),
 
     //1:华为云
-    HuaWei(1, "HuaWei");
+    HuaWei(1, "HuaWei"),
+
+    FastDfs(2, "fastDfs");
 
     final private int value;
     final private String name;

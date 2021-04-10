@@ -19,10 +19,11 @@ import java.io.*;
  * <p>
  * author: chenYuan
  * date: 2020/9/20 0:10
- * description: jspbox
+ * description:
+ * 华为oss支持
  **/
 public class HuaWeiObs extends BaseCloudFile implements CloudFileClient {
-    private CloudFileConfig config;
+    final private CloudFileConfig config;
 
     public  HuaWeiObs(CloudFileConfig config) {
         this.config = config;
