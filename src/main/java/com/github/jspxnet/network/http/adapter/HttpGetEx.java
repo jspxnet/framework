@@ -7,9 +7,9 @@ import java.net.URI;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/4/11 0:06
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/4/11 0:06
+ * description: 扩展支持非标准二开系统
  **/
 public class HttpGetEx  extends HttpEntityEnclosingRequestBase {
     public static final String METHOD_NAME = "GET";
