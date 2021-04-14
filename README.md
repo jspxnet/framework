@@ -114,3 +114,4 @@
 *    2021年02月：Jspx.net Framework 6.34 修复bug,完整API文档自动生成功能,线程优化,资源优化,稳定版本
 *    2021年03月：Jspx.net Framework 6.35 嵌入tomcat,整合consul,appollo
 *    2021年03月：Jspx.net Framework 6.39 bug修复版本稳定版本,支持嵌入spring使用
+*    2021年04月：Jspx.net Framework 6.40 支持嵌入java二开平台
