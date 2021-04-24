@@ -154,7 +154,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         if (!StringUtil.isNull(find)) {
             criteria = criteria.add(Expression.like("name", "%" + find + "%"));
         }
-        if (!StringUtil.isEmpty(organizeId)) {
+        if (!StringUtil.isNull(organizeId)) {
             criteria = criteria.add(Expression.eq("organizeId", organizeId));
         }
         return criteria.addOrder(Order.desc("sortDate")).addOrder(Order.desc("userType")).list(false);
@@ -166,7 +166,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         if (!StringUtil.isNull(find)) {
             criteria = criteria.add(Expression.like("name", "%" + find + "%"));
         }
-        if (!StringUtil.isEmpty(organizeId)) {
+        if (!StringUtil.isNull(organizeId)) {
             criteria = criteria.add(Expression.eq("organizeId", organizeId));
         }
         return criteria.intUniqueResult();

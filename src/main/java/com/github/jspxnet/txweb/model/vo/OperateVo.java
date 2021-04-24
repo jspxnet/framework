@@ -43,6 +43,10 @@ public class OperateVo implements Serializable {
     @Column(caption = "方法", length = 100, notNull = true)
     private String classMethod = StringUtil.empty;
 
+    //动态计算
+    @Column(caption = "当前角色是否选中", length = 100, notNull = true)
+    private boolean checked = false;
+
     @Column(caption = "转发结点", length = 200, notNull = true)
     private String actionName = StringUtil.empty;
 
