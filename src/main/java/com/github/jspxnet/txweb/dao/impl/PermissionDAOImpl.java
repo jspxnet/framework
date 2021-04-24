@@ -73,13 +73,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
      */
     @Override
     public Role getRole(String roleId) {
-        Role role = load(Role.class, roleId);
-        if (namespace != null && !namespace.equals(role.getNamespace())) {
-            return new Role();
-        }
-        role.setNamespace(namespace);
-        role.setOrganizeId(organizeId);
-        return role;
+        return load(Role.class, roleId);
     }
 
     @Override

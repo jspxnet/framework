@@ -256,7 +256,7 @@ public class PermissionManageAction extends PermissionView {
 
     @Operate(caption = "设置权限",method="save/operate")
     public void saveOperate(@Param(caption = "角色ID",  required = true, message = "角色ID不能为空") String id,
-                            @Param(caption = "操作列表", required = true, message = "角色ID不能为空") String[] oid) throws Exception {
+                            @Param(caption = "操作列表", required = true, message = "操作ID列表") String[] oid) throws Exception {
         if (isGuest()) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needLogin));
             return;
