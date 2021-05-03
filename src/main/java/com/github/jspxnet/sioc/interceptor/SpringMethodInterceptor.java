@@ -35,6 +35,7 @@ import java.util.Map;
  * author: chenYuan
  * date: 2021/3/30 22:36
  * description: jspx 嵌入 spring事务执行
+ *  是用方法看 JspxAnnotationAspect
  **/
 @Slf4j
 public class SpringMethodInterceptor implements MethodInterceptor {
