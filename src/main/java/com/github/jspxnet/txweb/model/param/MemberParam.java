@@ -2,7 +2,6 @@ package com.github.jspxnet.txweb.model.param;
 
 
 import com.github.jspxnet.json.JsonIgnore;
-import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;

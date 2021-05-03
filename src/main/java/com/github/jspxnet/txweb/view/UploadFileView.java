@@ -21,7 +21,7 @@ import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.annotation.TurnPage;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
 import com.github.jspxnet.txweb.model.dto.AttachmentDto;
-import com.github.jspxnet.txweb.model.param.PageParam;
+import com.github.jspxnet.txweb.model.param.FilePageParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.IUploadFile;
@@ -156,23 +156,24 @@ public class UploadFileView extends ActionSupport {
     public void setPid(long pid) {
         this.pid = pid;
     }
-
+    @Deprecated
     public List<IUploadFile> getList() throws Exception {
         IRole role = getRole();
         if (!isGuest() && role!= null && role.getUserType() < UserEnumType.MANAGER.getValue()) {
             IUserSession userSession = getUserSession();
-            return uploadFileDAO.getList(field, find, getTerm(), sort, userSession.getUid(), pid, getCurrentPage(), getCount());
+            return uploadFileDAO.getList(field, find,null, getTerm(), sort, userSession.getUid(), pid, getCurrentPage(), getCount());
         }
-        return uploadFileDAO.getList(field, find, getTerm(), sort, getUid(), pid, getCurrentPage(), getCount());
+        return uploadFileDAO.getList(field, find,null, getTerm(), sort, getUid(), pid, getCurrentPage(), getCount());
     }
 
+    @Deprecated
     public long getTotalCount() {
         IUserSession userSession = getUserSession();
         IRole role = userSession.getRole(uploadFileDAO.getNamespace(),uploadFileDAO.getOrganizeId());
         if (!userSession.isGuest() && role != null && role.getUserType() < UserEnumType.MANAGER.getValue()) {
-            return uploadFileDAO.getCount(field, find, term, userSession.getUid(), pid);
+            return uploadFileDAO.getCount(field, find, null,term, userSession.getUid(), pid);
         }
-        return uploadFileDAO.getCount(field, find, term, getUid(), pid);
+        return uploadFileDAO.getCount(field, find,null, term, getUid(), pid);
     }
 
     public Object getUploadFile() throws Exception {
@@ -185,18 +186,18 @@ public class UploadFileView extends ActionSupport {
      * @return 日志列表
      */
     @Operate(caption = "附件翻页列表", method = "list/page")
-    public RocResponse<List<AttachmentDto>> getList(@Param("翻页参数") PageParam param)
+    public RocResponse<List<AttachmentDto>> getList(@Param("翻页参数") FilePageParam param)
     {
         IRole role = getRole();
         if (role.getUserType() < UserEnumType.MANAGER.getValue()) {
             return RocResponse.error(ErrorEnumType.POWER);
         }
-        int totalCount = uploadFileDAO.getCount(param.getField(),param.getFind(),param.getTerm(),param.getUid(),param.getPid());
+        int totalCount = uploadFileDAO.getCount(param.getField(),param.getFind(),param.getFileTypes(),param.getTerm(),param.getUid(),param.getPid());
         if (totalCount<=0)
         {
             return RocResponse.success(new ArrayList<>(),"无数据");
         }
-        List<Object> list = uploadFileDAO.getList(param.getField(), param.getFind(), param.getTerm(),param.getSort(), param.getUid(),param.getPid(), param.getCurrentPage(), param.getCount());
+        List<Object> list = uploadFileDAO.getList(param.getField(), param.getFind(),param.getFileTypes(), param.getTerm(),param.getSort(), param.getUid(),param.getPid(), param.getCurrentPage(), param.getCount());
         RocResponse<List<AttachmentDto>> rocResponse = RocResponse.success(BeanUtil.copyList(list, AttachmentDto.class));
         rocResponse.setTotalCount(totalCount);
         return rocResponse.setCurrentPage(param.getCurrentPage()).setCount(param.getCount());

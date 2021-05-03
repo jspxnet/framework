@@ -508,7 +508,7 @@ public class UploadFileAction extends MultipartSupport {
             }
             upFile.setFileName(FileUtil.mendPath(FileUtil.getDecrease(setupPath, uf.getDir())) + uf.getFileName());
             upFile.setFileSize(uf.getFile().length());
-            upFile.setFileType(uf.getFileType());
+            upFile.setFileType(StringUtil.toLowerCase(uf.getFileType()));
             upFile.setContent(FileUtil.getNamePart(uf.getOriginal()));
             upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
             upFile.setGroupName(getString(GROUP_VAR_NAME,"未分类",true));
@@ -655,7 +655,7 @@ public class UploadFileAction extends MultipartSupport {
                 IUploadFile thumbnailUploadFile = (IUploadFile) uploadFileDAO.getClassType().newInstance();
                 thumbnailUploadFile.setHash(FileUtil.getFileGuid(thumbnailFile, hashType));
                 thumbnailUploadFile.setTitle(FileUtil.getNamePart(thumbnailImg));
-                thumbnailUploadFile.setFileType(FileUtil.getTypePart(thumbnailFile));
+                thumbnailUploadFile.setFileType(StringUtil.toLowerCase(FileUtil.getTypePart(thumbnailFile)));
                 thumbnailUploadFile.setFileName(thumbnailPath);
                 thumbnailUploadFile.setPutName(userSession.getName());
                 thumbnailUploadFile.setPutUid(userSession.getUid());
@@ -687,7 +687,7 @@ public class UploadFileAction extends MultipartSupport {
                 IUploadFile mobileUploadFile = (IUploadFile) uploadFileDAO.getClassType().newInstance();
                 mobileUploadFile.setHash(FileUtil.getFileGuid(mobileFile, hashType));
                 mobileUploadFile.setTitle(FileUtil.getNamePart(mobileImg));
-                mobileUploadFile.setFileType(FileUtil.getTypePart(mobileFile));
+                mobileUploadFile.setFileType(StringUtil.toLowerCase(FileUtil.getTypePart(mobileFile)));
                 mobileUploadFile.setFileName(mobilePath);
                 mobileUploadFile.setPutName(userSession.getName());
                 mobileUploadFile.setPutUid(userSession.getUid());
@@ -707,7 +707,6 @@ public class UploadFileAction extends MultipartSupport {
             //文档转换,为了方便安卓下编译
             String content = "";
             try {
-
                 if ("doc".equalsIgnoreCase(uf.getFileType()) || "docx".equalsIgnoreCase(uf.getFileType())) {
                     AbstractRead abstractRead = new ReadWordTextFile();
                     abstractRead.setFile(uf.getFile());

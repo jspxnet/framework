@@ -92,28 +92,6 @@ public interface UploadFileDAO extends SoberSupport {
      * @return 更新排序日期
      */
     boolean updateSortDate(Long[] ids);
-    /**
-     * @param field      字段
-     * @param find       查询条件
-     * @param term       条件
-     * @param sortString 排序
-     * @param pid        父id
-     * @param uid        用户id
-     * @param page       页数
-     * @param count      返回数量
-     * @param <T> 类型
-     * @return 返回列表
-     */
-    <T> List<T> getList(String[] field, String[] find, String term, String sortString, long uid, long pid, int page, int count);
-    /**
-     * @param field 字段
-     * @param find  查询条件
-     * @param term  条件
-     * @param uid   用户id
-     * @param pid   父id
-     * @return 得到记录条数
-     */
-    int getCount(String[] field, String[] find, String term, long uid, long pid);
 
     /**
      *
@@ -134,6 +112,29 @@ public interface UploadFileDAO extends SoberSupport {
      * @param organizeId 机构id
      */
     void setOrganizeId(String organizeId);
+    /**
+     * @param field      字段
+     * @param find       查询条件
+     * @param fileTypes 文件类型列表
+     * @param term       条件
+     * @param sortString 排序
+     * @param uid        用户id
+     * @param page       页数
+     * @param count      返回数量
+     * @return 返回列表
+     */
+    <T> List<T> getList(String[] field, String[] find, String[] fileTypes, String term, String sortString, long uid, long pid, int page, int count);
+
+    /**
+     * @param field 字段
+     * @param find  查询条件
+     * @param fileTypes 文件类型列表
+     * @param term  条件
+     * @param uid   用户id
+     * @return 得到记录条数
+     */
+    int getCount(String[] field, String[] find, String[] fileTypes, String term, long uid, long pid);
+
     /**
      *
      * @param uid 用户id

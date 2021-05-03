@@ -3,6 +3,7 @@ package com.github.jspxnet.txweb.dao.impl;
 import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.table.CloudFileConfig;
+import com.github.jspxnet.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.github.jspxnet.sober.Criteria;
@@ -11,10 +12,7 @@ import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.StringUtil;
+
 import java.util.Date;
 import java.util.List;
 
@@ -223,6 +221,7 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
     /**
      * @param field      字段
      * @param find       查询条件
+     * @param fileTypes 文件类型列表
      * @param term       条件
      * @param sortString 排序
      * @param uid        用户id
@@ -231,7 +230,7 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
      * @return 返回列表
      */
     @Override
-    public  <T> List<T> getList(String[] field, String[] find, String term, String sortString, long uid, long pid, int page, int count) {
+    public  <T> List<T> getList(String[] field, String[] find, String[] fileTypes, String term, String sortString, long uid, long pid, int page, int count) {
         if (StringUtil.isNull(sortString)) {
             sortString = "createDate:D";
         }
@@ -249,6 +248,12 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         if (uid > 0) {
             criteria = criteria.add(Expression.eq("putUid", uid));
         }
+
+        if (!ObjectUtil.isEmpty(fileTypes))
+        {
+            criteria = criteria.add(Expression.eq("putUid", uid));
+        }
+
         criteria = SSqlExpression.getTermExpression(criteria, term);
         return SSqlExpression.getSortOrder(criteria, sortString).setCurrentPage(page).setTotalCount(count).list(false);
     }
@@ -257,12 +262,13 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
     /**
      * @param field 字段
      * @param find  查询条件
+     * @param fileTypes 文件类型列表
      * @param term  条件
      * @param uid   用户id
      * @return 得到记录条数
      */
     @Override
-    public int getCount(String[] field, String[] find, String term, long uid, long pid){
+    public int getCount(String[] field, String[] find, String[] fileTypes, String term, long uid, long pid){
         Criteria criteria = createCriteria(tableClass);
         if (!ArrayUtil.isEmpty(find) && !ArrayUtil.isEmpty(field)) {
             criteria = criteria.add(Expression.find(field, find));
@@ -280,6 +286,7 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
         criteria = SSqlExpression.getTermExpression(criteria, term);
         return criteria.setProjection(Projections.rowCount()).intUniqueResult();
     }
+
 
     /**
      *
