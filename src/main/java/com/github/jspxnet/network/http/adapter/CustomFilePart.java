@@ -3,7 +3,6 @@ package com.github.jspxnet.network.http.adapter;
 import com.github.jspxnet.boot.environment.Environment;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.util.EncodingUtil;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
