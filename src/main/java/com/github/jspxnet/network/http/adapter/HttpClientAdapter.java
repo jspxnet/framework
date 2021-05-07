@@ -13,7 +13,6 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
@@ -144,9 +143,14 @@ public class HttpClientAdapter implements HttpClient {
 
     @Override
     public HttpClient build(String url) {
-        defaultHeaders.put(HttpMethodParams.CREDENTIAL_CHARSET, encode);
+
+        final String CREDENTIAL_CHARSET = "http.protocol.credential-charset";
+        final String HTTP_CONTENT_CHARSET = "http.protocol.content-charset";
+        //HttpClients.
+       // ContentType.APPLICATION_ATOM_XML
+        defaultHeaders.put(CREDENTIAL_CHARSET, encode);
         //defaultHeaders.put("Content-Type","application/json; charset=UTF-8");
-        defaultHeaders.put(HttpMethodParams.HTTP_CONTENT_CHARSET, encode);
+        defaultHeaders.put(HTTP_CONTENT_CHARSET, encode);
         defaultHeaders.put("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.146 Safari/537.36");
 
         if (useProxy) {
@@ -641,16 +645,21 @@ public class HttpClientAdapter implements HttpClient {
                     strPart.setTransferEncoding(Environment.defaultEncode);
                     parts[i]= strPart;
                     i++;
+
                     postMethod.setParameter(key,params.get(key));
                 }
             }
 
 
             // 对于MIME类型的请求，httpclient建议全用MulitPartRequestEntity进行包装
+
             MultipartRequestEntity multipartRequest = new MultipartRequestEntity(parts, postMethod.getParams());
             postMethod.setRequestEntity(multipartRequest);
             //---------------------------------------------
+
+
             org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
+
             HttpClientParams httpClientParams = client.getParams();
             httpClientParams.setContentCharset(Environment.defaultEncode);
             httpClientParams.setConnectionManagerTimeout(10000);

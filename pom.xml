@@ -142,10 +142,17 @@
             <artifactId>snakeyaml</artifactId>
             <version>1.27</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.13</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
         </dependency>
         <dependency>
             <groupId>com.caucho</groupId>
@@ -267,12 +274,12 @@
             <version>1.0</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
+   <!--     <dependency>
             <groupId>net.gplatform</groupId>
             <artifactId>Sdk4J</artifactId>
             <version>2.0</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
