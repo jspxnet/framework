@@ -1748,10 +1748,21 @@ public class FileUtil {
      * @param findFileName String 查找文件名，可带*.?进行模糊查询
      * @return 找到的文件
      */
-    public static List<File> getPatternFiles(String dir, final String findFileName) {
+    public static List<File> getPatternFiles(String dir, String findFileName) {
+        if (findFileName==null)
+        {
+            return new ArrayList<>(0);
+        }
         if (dir != null && dir.startsWith("file:/")) {
             dir = dir.substring(6);
         }
+
+        //路径里边有空格
+        if (dir!=null&&dir.contains("%20"))
+        {
+            dir = URLUtil.getUrlDecoder(dir,"UTF-8");
+        }
+
         //dir = FileUtil.mendPath(dir);
         //开始的文件夹
         String s = findFileName.replace(".", "#");

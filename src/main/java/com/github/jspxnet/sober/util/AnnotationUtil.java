@@ -10,7 +10,6 @@
 package com.github.jspxnet.sober.util;
 
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.*;

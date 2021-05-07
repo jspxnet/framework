@@ -650,6 +650,8 @@ public class HttpClientAdapter implements HttpClient {
             MultipartRequestEntity multipartRequest = new MultipartRequestEntity(parts, postMethod.getParams());
             postMethod.setRequestEntity(multipartRequest);
             //---------------------------------------------
+
+
             org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
             HttpClientParams httpClientParams = client.getParams();
             httpClientParams.setContentCharset(Environment.defaultEncode);

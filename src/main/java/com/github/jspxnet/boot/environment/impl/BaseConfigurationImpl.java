@@ -157,6 +157,11 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         }
         File file = new File(path);
         defaultPath = FileUtil.mendPath(file.getPath());
+        //路径里边有空格
+        if (defaultPath!=null&&defaultPath.contains("%20"))
+        {
+            defaultPath = URLUtil.getUrlDecoder(defaultPath,"UTF-8");
+        }
         log.info("user.dir=" + System.getProperty("user.dir"));
         log.info("defaultPath=" + defaultPath);
     }
