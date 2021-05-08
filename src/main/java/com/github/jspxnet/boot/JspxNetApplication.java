@@ -18,8 +18,10 @@ import com.github.jspxnet.cache.store.MemoryStore;
 import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.sioc.IocContext;
+import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.sioc.factory.EntryFactory;
+import com.github.jspxnet.sioc.factory.LifecycleObject;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.SystemUtil;
@@ -166,6 +168,7 @@ public final class JspxNetApplication {
         ////////////导入Ioc配置 begin
         IocContext iocContext = ConfigureContext.getInstance();
         iocContext.setConfigFile(jspxConfiguration.getIocConfigFile());
+
         EntryFactory beanFactory = (EntryFactory) com.github.jspxnet.boot.EnvFactory.getBeanFactory();
         beanFactory.setIocContext(iocContext);
 
