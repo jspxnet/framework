@@ -510,25 +510,35 @@ public class SoberMappingBean implements SoberFactory {
                 }
             }
 
-            List<String> checkList = new ArrayList<>();
+            final List<String> checkList = new ArrayList<>();
             for (File file : fileList) {
                 if (file==null) {
                     continue;
                 }
 
+                String path = file.getPath();
+                if (path.contains(Environment.SPRING_PATH_SIGN.toLowerCase()))
+                {
+                    path = StringUtil.replaceIgnoreCase(path,"/classes!/","/classes/");
+                }
+                file = new File(path);
                 String fileId = file.getName() + StringUtil.UNDERLINE + file.length();
                 if (checkList.contains(fileId))
                 {
                     continue;
+                } else
+                {
+                    checkList.add(fileId);
                 }
-                checkList.add(fileId);
-                String xmlString = IoUtil.autoReadText(file.getPath(),envTemplate.getString(Environment.encode, Environment.defaultEncode));
+
+                String xmlString = IoUtil.autoReadText(path,envTemplate.getString(Environment.encode, Environment.defaultEncode));
                 xmlString = StringUtil.trim(xmlString);
                 if (!StringUtil.isNull(xmlString))
                 {
                     SoberUtil.readSqlMap(xmlString,SQL_MAP,INIT_TABLE_MAP);
                 }
             }
+            checkList.clear();
             fileList.clear();
         }
     }

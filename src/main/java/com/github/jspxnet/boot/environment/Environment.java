@@ -635,5 +635,6 @@ public abstract class Environment {
 
     static public final String SERVER_REDISSON_SESSION_CONFIG = "server.redissonSessionConfig";
 
+    public final static String SPRING_PATH_SIGN = ".jar!/BOOT-INF/classes!";
 
 }

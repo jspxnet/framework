@@ -140,14 +140,15 @@ public final class JspxNetApplication {
     {
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         jspxConfiguration.setDefaultConfigFile(fileName);
+        String defaultPath = jspxConfiguration.getDefaultPath();
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
+        envTemplate.createPathEnv(defaultPath);
+
         envTemplate.createSystemEnv();
         envTemplate.put(Environment.useTxWeb,false);
 
         //////////////////////初始化脚本语言环境 begin
         Configurable templateConfigurable = TemplateConfigurable.getInstance();
-        String defaultPath = jspxConfiguration.getDefaultPath();
         if (defaultPath.contains(".jar!"))
         {
             templateConfigurable.setSearchPath(null);

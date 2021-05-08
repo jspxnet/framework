@@ -1809,8 +1809,6 @@ public class FileUtil {
         return filePattern(new File(dir), dir, p);
     }
 
-
-
     private static boolean isNoSearchJar(String file)
     {
         for (String tag:NO_SEARCH_JAR)
@@ -1833,8 +1831,10 @@ public class FileUtil {
             return new ArrayList<>(0);
         }
 
-        if ("jar".equals(FileUtil.getTypePart(file).toLowerCase())&&!file.getPath().endsWith("!")) {
-            try (JarInputStream zis = new JarInputStream(new FileInputStream(file.getPath()))) {
+        if (file.getPath().toLowerCase().contains(".jar!")) {
+
+            String path = StringUtil.substringBefore(file.getPath(),".jar!") + ".jar";
+            try (JarInputStream zis = new JarInputStream(new FileInputStream(path))) {
 
                 List<File> list = new ArrayList<>();
                 JarEntry e;
@@ -1844,7 +1844,7 @@ public class FileUtil {
                     }
                     Matcher fMatcher = p.matcher(FileUtil.getFileName(e.getName()));
                     if (fMatcher.matches()) {
-                        list.add(new File(file.getPath() + "!/" + e.getName()));
+                        list.add(new File(path + "!/" + e.getName()));
                     }
                 }
                 zis.closeEntry();
@@ -1861,17 +1861,17 @@ public class FileUtil {
                 Matcher fMatcherDir = p.matcher(checkName);
                 Matcher fMatcher = p.matcher(file.getName());
                 if (findDir != null && fileDir.endsWith(findDir) && fMatcher.matches() || fMatcherDir.matches()) {
-                    List<File> list = new ArrayList<File>();
+                    List<File> list = new ArrayList<>();
                     list.add(file);
                     return list;
                 }
             } else if (file.isDirectory()) {
                 File[] files = file.listFiles();
                 if (files != null && files.length > 0) {
-                    List<File> list = new ArrayList<File>();
+                    List<File> list = new ArrayList<>();
                     for (File file1 : files) {
                         List<File> pathList = filePattern(file1, dir, p);
-                        if (pathList != null) {
+                        if (!ObjectUtil.isEmpty(pathList)) {
                             list.addAll(pathList);
                         }
                     }
@@ -2357,6 +2357,7 @@ public class FileUtil {
         if (loadFile.toLowerCase().startsWith(KEY_defaultPath)) {
             loadFile = loadFile.substring(KEY_defaultPath.length());
         }
+        log.info("-1---------loadFile="+ loadFile);
 
         if (paths!=null && !loadFile.toLowerCase().contains(".jar!"))
         {
@@ -2382,8 +2383,19 @@ public class FileUtil {
                 }
             }
         }
+        else if (FileUtil.isFileExist(loadFile))
+        {
+            //jar 文件里边
+            return new File(loadFile);
+        }
+        log.info("-2---------loadFile="+ loadFile);
+        URL url =  Environment.class.getResource("/Boot-inf/classes/" + FileUtil.getFileName(loadFile));
+        if (url!=null)
+        {
+            return new File(url.getPath());
+        }
 
-        URL url =  Environment.class.getResource("/resources/" + loadFile);
+        url =  Environment.class.getResource("/resources/" + loadFile);
         if (url!=null)
         {
             return new File(url.getPath());

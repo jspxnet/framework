@@ -29,6 +29,8 @@ import java.util.List;
 @Slf4j
 public class BaseConfigurationImpl implements JspxConfiguration {
 
+
+
     private String defaultPath = null;
     private String configFilePath = null;
     final private static Date START_RUN_DATE = new Date();
@@ -58,12 +60,16 @@ public class BaseConfigurationImpl implements JspxConfiguration {
     private void loadPath() {
         String path = null;
         URL url = Environment.class.getResource("/" + defaultConfigFile);
+
         if (url != null) {
             path = url.getPath();
+
             if (!FileUtil.isFileExist(path)) {
                 path = null;
             }
         }
+
+
         if (url == null) {
             url = Environment.class.getResource(defaultConfigFile);
             if (url != null) {
@@ -89,15 +95,29 @@ public class BaseConfigurationImpl implements JspxConfiguration {
 
         if (path == null) {
             url = ClassUtil.getResource("/" + defaultConfigFile);
+
             if (url != null) {
                 path = url.getPath();
+
                 int i = path.toLowerCase().indexOf("file-inf");
                 if (i != -1) {
                     path = path.substring(0, i) + "web-inf/classes/" + defaultConfigFile;
                 }
                 if (!FileUtil.isFileExist(path)) {
                     path = null;
+                } else
+                {
+                    path = url.getPath();
+                    i = path.indexOf("BOOT-INF");
+                    if (i != -1) {
+                        path = path.substring(0, i) + "BOOT-INF/classes/" + defaultConfigFile;
+                    }
+                    if (!FileUtil.isFileExist(path)) {
+                        path = null;
+                    }
                 }
+
+
             }
         }
 
@@ -126,7 +146,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         }
 
         if (path == null) {
-            File file = new File(FileUtil.mendPath(System.getProperty(" user.dir")) + defaultConfigFile);
+            File file = new File(FileUtil.mendPath(System.getProperty("user.dir")) + defaultConfigFile);
             if (file.isFile() && file.exists()) {
                 path = file.getParentFile().getPath();
             } else {
@@ -155,12 +175,19 @@ public class BaseConfigurationImpl implements JspxConfiguration {
             defaultPath = null;
             return ;
         }
+
         File file = new File(path);
         defaultPath = FileUtil.mendPath(file.getPath());
+
         //路径里边有空格
         if (defaultPath!=null&&defaultPath.contains("%20"))
         {
-            defaultPath = URLUtil.getUrlDecoder(defaultPath,"UTF-8");
+            defaultPath = URLUtil.getUrlDecoder(defaultPath,Environment.defaultEncode);
+        }
+        //修复spring的路径方式
+        if (defaultPath!=null&&defaultPath.toLowerCase().contains(Environment.SPRING_PATH_SIGN.toLowerCase()))
+        {
+            defaultPath = StringUtil.replaceIgnoreCase(defaultPath,"/classes!/","/classes/");
         }
         log.info("user.dir=" + System.getProperty("user.dir"));
         log.info("defaultPath=" + defaultPath);
