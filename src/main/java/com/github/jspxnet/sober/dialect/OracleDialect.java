@@ -173,6 +173,8 @@ public class OracleDialect extends Dialect {
             return rs.getString(index);
         }
 
+        System.out.println("------------typeName=" + typeName);
+
         //短断整型
         if (("int".equals(typeName) && colSize < 4) || "short".equals(typeName) || "smallint".equals(typeName) || "int2".equals(typeName) || "tinyint".equals(typeName) || ("fixed".equals(typeName) && colSize < 4)) {
             return rs.getShort(index);
@@ -183,7 +185,7 @@ public class OracleDialect extends Dialect {
         }
 
         ///////长整型
-        if ("long".equals(typeName) || "bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName) && colSize > 18)) {
+        if ("number".equals(typeName) || "bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName) && colSize > 18)) {
             return rs.getLong(index);
         }
 
@@ -225,7 +227,7 @@ public class OracleDialect extends Dialect {
         }
 
         ///////短字符串
-        if ("char".equals(typeName) || "nvarchar".equals(typeName) || "varchar".equals(typeName) || "varchar2".equals(typeName) || "tinyblob".equals(typeName)) {
+        if ("char".equals(typeName) || "nvarchar".equals(typeName) || "varchar".equals(typeName)|| "long".equals(typeName) || "varchar2".equals(typeName) || "tinyblob".equals(typeName)) {
             return rs.getString(index);
         }
 
@@ -262,7 +264,6 @@ public class OracleDialect extends Dialect {
             // oracle.sql.BLOB blob = (oracle.sql.BLOB) rs.getBlob(index);
             // Clob clob = rs.getClob(index);
             // return clob.getBinaryStream();
-
             return rs.getAsciiStream(index);
         }
         return rs.getObject(index);
