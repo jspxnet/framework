@@ -39,6 +39,8 @@ import static java.util.regex.Pattern.compile;
 @Slf4j
 public class StringUtil {
     public static final char[] BR_TAG = "<BR>".toCharArray();
+
+
     public static final char SINGLE_QUOTE_TAG = '\'';
     public static final char DOUBLE_QUOTE_TAG = '\"';
     public static final char UNDERLINE = '_';
@@ -59,6 +61,8 @@ public class StringUtil {
 
     public static final String BACKSLASH = "/";
 
+    public static final String TRANSFERRED = "\\ ".trim();
+
     public static final String COMMAS = ",";
 
     public static final String EQUAL = "=";
@@ -72,6 +76,10 @@ public class StringUtil {
     public static final String TAB = "\t";
 
     public static final String CRLF = "\r\n";
+
+    //split 中需要转义的字符
+    public static final String[] SPLIT_TRANSFERRED  = {"|",".","*","+"};
+
 
     /**
      * 判断是否为空
@@ -938,9 +946,10 @@ public class StringUtil {
         if (isEmpty(source)) {
             return new String[0];
         }
-        if (!source.contains(cut))
+
+        if (ArrayUtil.contains(SPLIT_TRANSFERRED,cut))
         {
-            return new String[]{source};
+            cut = TRANSFERRED + cut;
         }
         return source.split(cut);
     }
