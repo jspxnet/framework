@@ -124,6 +124,7 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
      * @param hash hash值
      * @return 返回对象
      */
+
     @Override
     public T getForHash(String hash) {
         return createCriteria(tableClass).add(Expression.eq("hash", hash)).objectUniqueResult(false);

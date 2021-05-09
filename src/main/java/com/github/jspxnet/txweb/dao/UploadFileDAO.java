@@ -120,9 +120,11 @@ public interface UploadFileDAO extends SoberSupport {
      * @param term       条件
      * @param sortString 排序
      * @param uid        用户id
+     * @param pid 上级id
      * @param page       页数
      * @param count      返回数量
      * @return 返回列表
+     * @param <T> 类型
      */
     <T> List<T> getList(String[] field, String[] find, String[] fileTypes, String term, String sortString, long uid, long pid, int page, int count);
 
