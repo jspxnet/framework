@@ -353,6 +353,12 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 if (ignore != null && !ignore.isNull()) {
                     continue;
                 }
+                String displayKey = key;
+                JsonField jsonField = field.getAnnotation(JsonField.class);
+                if (jsonField!=null&&!StringUtil.isEmpty(jsonField.name()))
+                {
+                    displayKey = jsonField.name();
+                }
 
                 try {
                     field.setAccessible(true);
@@ -362,12 +368,12 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     }
 
                     if (result == null) {
-                        super.put(key, null);
+                        super.put(displayKey, null);
                         continue;
                     }
 
                     if (result instanceof JSONObject || result instanceof JSONArray) {
-                        super.put(key, result);
+                        super.put(displayKey, result);
                         continue;
                     }
                     if (result instanceof Map) {
@@ -380,11 +386,11 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                                 childShowField = (String[]) fieldArray.toArray(new String[fieldArray.size()]);
                             }
                         }
-                        super.put(key, new JSONObject(result, childShowField,includeSuperClass,dataField));
+                        super.put(displayKey, new JSONObject(result, childShowField,includeSuperClass,dataField));
                         continue;
                     }
                     if (result instanceof java.sql.Time) {
-                        super.put(key, result.toString());
+                        super.put(displayKey, result.toString());
                         continue;
                     }
 
@@ -394,23 +400,20 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 
                     if (result instanceof Date) {
                         //日期格式化
-                        JsonField jsonField = field.getAnnotation(JsonField.class);
-                        if (jsonField != null && !StringUtil.isNull(jsonField.name())) {
-                            key = jsonField.name();
-                        }
+
                         if (jsonField != null && !StringUtil.isNull(jsonField.format())) {
-                            super.put(key, DateUtil.toString((Date) result, jsonField.format()));
+                            super.put(displayKey, DateUtil.toString((Date) result, jsonField.format()));
                         } else {
-                            super.put(key, DateUtil.toString((Date) result, FULL_ST_FORMAT));
+                            super.put(displayKey, DateUtil.toString((Date) result, FULL_ST_FORMAT));
                         }
 
                     } else if (result.getClass().isArray() || result instanceof Collection) {
                         super.put(key, new JSONArray(result, includeSuperClass,key,dataField));
                     } else if (ClassUtil.isNumberType(result.getClass())) {
                         // 数字格式化
-                        super.put(key, result);
+                        super.put(displayKey, result);
                     } else if (ClassUtil.isStandardProperty(result.getClass())) { //Primitives, String and Wrapper
-                        super.put(key, result);
+                        super.put(displayKey, result);
                     } else {
                         Package objectPackage = result.getClass().getPackage();
                         String objectPackageName = objectPackage != null ? objectPackage.getName() : StringUtil.empty;
@@ -421,7 +424,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                         if (objectPackageName.startsWith("java.")
                                 || objectPackageName.startsWith("javax.")
                                 || result.getClass().getClassLoader() == null) {
-                            super.put(key, result);
+                            super.put(displayKey, result);
                         } else {
                             if (includeSuperClass && !ClassUtil.isStandardProperty(result.getClass())&&result instanceof Serializable) {
                                 String[] childShowField = null;
@@ -433,9 +436,9 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                                         childShowField = (String[]) fieldArray.toArray(new String[fieldArray.size()]);
                                     }
                                 }
-                                super.put(key, new JSONObject(result, childShowField,includeSuperClass,dataField));
+                                super.put(displayKey, new JSONObject(result, childShowField,includeSuperClass,dataField));
                             } else {
-                                super.put(key, result);
+                                super.put(displayKey, result);
                             }
                         }
                     }

@@ -298,7 +298,12 @@ public abstract class JdbcOperations implements SoberSupport {
                 Criteria criteria = createCriteria(soberNexus.getTargetEntity());
                 criteria = criteria.add(Expression.in(soberNexus.getTargetField(), idList));
                 if (!StringUtil.isNull(soberNexus.getTerm())) {
-                    criteria = SSqlExpression.getTermExpression(criteria, soberNexus.getTerm());
+                    String term = soberNexus.getTerm();
+                    if (term.contains("${"))
+                    {
+                        term = placeholder.processTemplate(ObjectUtil.getMap(list.get(0)), term);
+                    }
+                    criteria = SSqlExpression.getTermExpression(criteria, term);
                 }
                 criteria = criteria.setCurrentPage(1).setTotalCount(idList.size());
                 List<Object> loadObjectList = criteria.list(soberNexus.isChain());
