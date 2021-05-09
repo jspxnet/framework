@@ -7,9 +7,9 @@ import lombok.EqualsAndHashCode;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/5/3 14:47
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/5/3 14:47
+ * description: jspbox
  **/
 @EqualsAndHashCode(callSuper = true)
 @Data

@@ -52,6 +52,7 @@ public interface UploadFileDAO extends SoberSupport {
     /**
      * @return 类对象
      */
+
     Class<?> getClassType();
 
     /**

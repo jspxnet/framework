@@ -225,6 +225,7 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
      * @param term       条件
      * @param sortString 排序
      * @param uid        用户id
+     * @param pid 上级id
      * @param page       页数
      * @param count      返回数量
      * @return 返回列表
@@ -265,6 +266,7 @@ public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDA
      * @param fileTypes 文件类型列表
      * @param term  条件
      * @param uid   用户id
+     * @param pid 上级id
      * @return 得到记录条数
      */
     @Override
