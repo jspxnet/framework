@@ -134,6 +134,7 @@ public interface UploadFileDAO extends SoberSupport {
      * @param fileTypes 文件类型列表
      * @param term  条件
      * @param uid   用户id
+     * @param pid 上级id
      * @return 得到记录条数
      */
     int getCount(String[] field, String[] find, String[] fileTypes, String term, long uid, long pid);
