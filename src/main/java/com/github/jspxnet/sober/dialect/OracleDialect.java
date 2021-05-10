@@ -183,7 +183,7 @@ public class OracleDialect extends Dialect {
         }
 
         ///////长整型
-        if ("number".equals(typeName) || "bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName) && colSize > 18)) {
+        if ("number".equals(typeName) || "bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName))) {
             return rs.getLong(index);
         }
 
