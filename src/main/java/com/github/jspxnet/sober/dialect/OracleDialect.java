@@ -10,10 +10,8 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -28,7 +26,6 @@ import java.util.Date;
  * Oracle 数据库 SQL 匹配
  */
 public class OracleDialect extends Dialect {
- ;
 
     public OracleDialect() {                                                                              //number(1)
         standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
