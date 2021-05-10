@@ -173,8 +173,6 @@ public class OracleDialect extends Dialect {
             return rs.getString(index);
         }
 
-        System.out.println("------------typeName=" + typeName);
-
         //短断整型
         if (("int".equals(typeName) && colSize < 4) || "short".equals(typeName) || "smallint".equals(typeName) || "int2".equals(typeName) || "tinyint".equals(typeName) || ("fixed".equals(typeName) && colSize < 4)) {
             return rs.getShort(index);
