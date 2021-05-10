@@ -2357,7 +2357,7 @@ public class FileUtil {
         if (loadFile.toLowerCase().startsWith(KEY_defaultPath)) {
             loadFile = loadFile.substring(KEY_defaultPath.length());
         }
-        log.info("-1---------loadFile="+ loadFile);
+
 
         if (paths!=null && !loadFile.toLowerCase().contains(".jar!"))
         {
