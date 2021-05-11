@@ -44,9 +44,7 @@ public class OracleDialect extends Dialect {
         standard_SQL.put(ORACLE_CREATE_SEQ_TIGGER,"create or replace trigger ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ_TIGGER\n" +
                 "before insert on ${" + KEY_TABLE_NAME + ".toUpperCase()}\n" +
                 "for each row\r\n" +
-                "begin\r\n" +
-                "  select ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ.nextval into :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} from dual;\r\n" +
-                "end;");
+                "begin if (:new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} is null or :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()}=0) then select ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ.nextval into :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} from dual; end if; end;");
 
         standard_SQL.put(ORACLE_HAVE_SEQ,"select count(1) as num from user_sequences where sequence_name=upper('${" + KEY_TABLE_NAME + "}_SEQ')");
 

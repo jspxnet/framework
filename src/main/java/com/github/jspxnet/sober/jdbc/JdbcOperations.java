@@ -1437,24 +1437,43 @@ public abstract class JdbcOperations implements SoberSupport {
             return false;
         }
         Connection conn = null;
-        PreparedStatement statement = null;
-        try {
-            conn = getConnection(SoberEnv.READ_WRITE);
-            debugPrint(sqlText);
-            statement = conn.prepareStatement(sqlText);
-            if (params != null) {
-                for (int i = 0; i < params.length; i++) {
-                    debugPrint("prepared[" + (i + 1) + "]=" + params[i]);
-                    dialect.setPreparedStatementValue(statement, i + 1, params[i]);
-                }
+        debugPrint(sqlText);
+        //oracle 创建促发器的一个bug
+        if ((dialect instanceof OracleDialect)&&sqlText.contains(" trigger ") && ObjectUtil.isEmpty(params))
+        {
+            Statement statement =  null;
+            try {
+                conn = getConnection(SoberEnv.READ_WRITE);
+                statement = conn.createStatement();
+                return statement.execute(sqlText);
+            } catch (Exception e) {
+                log.error("SQL:" + sqlText, e);
+                throw e;
+            } finally {
+                JdbcUtil.closeStatement(statement);
+                JdbcUtil.closeConnection(conn);
             }
-            return statement.execute();
-        } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
-            throw e;
-        } finally {
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
+        }
+        else
+        {
+            PreparedStatement statement = null;
+            try {
+                conn = getConnection(SoberEnv.READ_WRITE);
+                statement = conn.prepareStatement(sqlText);
+                if (params != null) {
+                    for (int i = 0; i < params.length; i++) {
+                        debugPrint("prepared[" + (i + 1) + "]=" + params[i]);
+                        dialect.setPreparedStatementValue(statement, i + 1, params[i]);
+                    }
+                }
+                return statement.execute();
+            } catch (Exception e) {
+                log.error("SQL:" + sqlText, e);
+                throw e;
+            } finally {
+                JdbcUtil.closeStatement(statement);
+                JdbcUtil.closeConnection(conn);
+            }
         }
     }
 

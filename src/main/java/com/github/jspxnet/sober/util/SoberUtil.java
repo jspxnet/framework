@@ -388,10 +388,8 @@ public class SoberUtil {
                         }
 
                         String tiggerSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_CREATE_SEQ_TIGGER,valueMap);
-                        log.info("tiggerSql:{}",tiggerSql);
-                        //soberSupport.execute(tiggerSql);
-
-
+                        log.info("tiggerSql:\r\n{}",tiggerSql);
+                        soberSupport.execute(tiggerSql);
                     }
                 }
                 else
