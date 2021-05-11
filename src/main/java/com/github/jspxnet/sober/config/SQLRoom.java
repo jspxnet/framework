@@ -41,10 +41,7 @@ public class SQLRoom implements Serializable {
     //执行SQL表
     private final Map<String, Map<String, SqlMapConfig>> executeMap = new HashMap<>();
 
-
-
     /**
-     *
      * @return 命名空间
      */
     public String getNamespace() {

@@ -34,7 +34,7 @@ public class SoberNexus implements Serializable {
     private String targetField;
     //触发实体
     @JsonIgnore
-    private Class targetEntity;
+    private Class<?> targetEntity;
     //条件
     private String term;
     //排序
