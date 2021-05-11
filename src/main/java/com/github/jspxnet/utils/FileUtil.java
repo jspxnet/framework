@@ -1839,7 +1839,6 @@ public class FileUtil {
                 path = StringUtil.substringBefore(file.getPath(),".jar!") + ".jar";
             }
             try (JarInputStream zis = new JarInputStream(new FileInputStream(path))) {
-
                 List<File> list = new ArrayList<>();
                 JarEntry e;
                 while ((e = zis.getNextJarEntry()) != null) {
@@ -1854,7 +1853,7 @@ public class FileUtil {
                 zis.closeEntry();
                 return list;
             } catch (Exception e) {
-                log.error("file=" + file + " dir=" + dir, e);
+                log.error("path=" + path + " file=" + file, e);
             }
         } else {
             if (file.isFile()) {
