@@ -33,6 +33,10 @@ public abstract class Dialect {
     final protected static Placeholder sqlPlaceholder = EnvFactory.getSqlPlaceholder();
 
 
+    public static final String ORACLE_CREATE_SEQUENCE = "oracle_create_sequence";
+    public static final String ORACLE_CREATE_SEQ_TIGGER = "oracle_create_seq_tigger";
+    public static final String ORACLE_HAVE_SEQ = "oracle_have_seq";
+
     public static final String KEY_DATABASE_NAME = "database_name";
     public static final String KEY_TABLE_NAME = "table_name";
     public static final String KEY_TABLE_CAPTION = "table_caption";
@@ -144,6 +148,10 @@ public abstract class Dialect {
         standard_SQL.put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE serial RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
         standard_SQL.put(TABLE_MAX_ID, "SELECT max(${" + KEY_PRIMARY_KEY + "}) AS maxId FROM ${" + KEY_TABLE_NAME + "}");
         standard_SQL.put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX ${"+KEY_INDEX_NAME+"}(${"+KEY_INDEX_FIELD+"})");
+
+
+
+
     }
 
     public String getSQLText(String keys) {

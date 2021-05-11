@@ -35,10 +35,10 @@ public class PostgreSQLDialect extends Dialect {
                 " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
 
 
-        //pgsql特有
+        //oracle 和 pgsql 设置注释方式begin
         standard_SQL.put(SQL_COMMENT, "COMMENT ON COLUMN ${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
-
         standard_SQL.put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
+        //oracle 和 pgsql 设置注释方式end
 
         standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} boolean <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toBoolean()}</#if>");
         standard_SQL.put(boolean.class.getName(), "${" + COLUMN_NAME + "} boolean <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toBoolean()}</#if>");
@@ -216,18 +216,7 @@ public class PostgreSQLDialect extends Dialect {
         return rs.getObject(index);
     }
 
-/*    @Override
-    public void setPreparedStatementValue(PreparedStatement pstmt, int parameterIndex, Object obj) throws Exception {
-        ResultSetMetaData resultSetMetaData = pstmt.getMetaData();
 
-        int columnType = resultSetMetaData.getColumnType(parameterIndex);
-        //pgsql 支持boolean 类型
-        if (Types.BOOLEAN==columnType) {
-            pstmt.setBoolean(parameterIndex, ObjectUtil.toBoolean(obj));
-            return;
-        }
-        super.setPreparedStatementValue(pstmt, parameterIndex, obj);
-    }*/
 
     @Override
     public boolean supportsSequenceName() {

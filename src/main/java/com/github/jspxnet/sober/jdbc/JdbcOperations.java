@@ -22,6 +22,7 @@ import com.github.jspxnet.sober.config.SoberNexus;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.dialect.Dialect;
+import com.github.jspxnet.sober.dialect.OracleDialect;
 import com.github.jspxnet.sober.enums.MappingType;
 import com.github.jspxnet.sober.exception.ValidException;
 import com.github.jspxnet.sober.impl.CriteriaImpl;
@@ -2088,8 +2089,9 @@ public abstract class JdbcOperations implements SoberSupport {
         /////////在总体的生成SQL end
 
         if (dialect.commentPatch() && !StringUtil.isNull(commentPatchSql.toString())) {
-            return dialect.processTemplate(Dialect.SQL_CREATE_TABLE, valueMap) + StringUtil.SEMICOLON + StringUtil.CRLF + commentPatchSql.toString();
+            return dialect.processTemplate(Dialect.SQL_CREATE_TABLE, valueMap) + StringUtil.SEMICOLON + StringUtil.CRLF + commentPatchSql;
         }
+
         return dialect.processTemplate(Dialect.SQL_CREATE_TABLE, valueMap);
     }
 

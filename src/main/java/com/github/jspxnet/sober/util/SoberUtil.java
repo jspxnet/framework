@@ -14,12 +14,14 @@ import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sober.SoberSupport;
+import com.github.jspxnet.sober.annotation.IDType;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.config.BaseXmlTagNode;
 import com.github.jspxnet.sober.config.SQLRoom;
 import com.github.jspxnet.sober.config.SqlMapConfig;
 import com.github.jspxnet.sober.config.xml.*;
 import com.github.jspxnet.sober.dialect.Dialect;
+import com.github.jspxnet.sober.dialect.OracleDialect;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.XMLUtil;
@@ -356,15 +358,54 @@ public class SoberUtil {
         String sql = null;
         try {
             if (soberTable!=null&&soberTable.isCreate() && !soberSupport.tableExists(cla)) {
+
                 sql = soberSupport.getCreateTableSql(cla);
-                soberSupport.execute(sql);
+                //oracle只能一个; 一个; 的执行
+                if (soberSupport.getSoberFactory().getDialect() instanceof OracleDialect)
+                {
+                    String[] sqlLines = StringUtil.split(sql,StringUtil.SEMICOLON);
+                    for (String sqlLine:sqlLines)
+                    {
+                        if (StringUtil.isNull(sqlLine))
+                        {
+                            continue;
+                        }
+                        soberSupport.execute(sqlLine);
+                    }
+                    //创建数据库序列
+                    if (IDType.serial.equalsIgnoreCase(soberTable.getIdType()))
+                    {
+                        Map<String, Object> valueMap = new HashMap<>();
+                        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+                        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
+
+                        String haveSeqSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_HAVE_SEQ,valueMap);
+                        Object obj = soberSupport.getUniqueResult(haveSeqSql);
+                        if (ObjectUtil.toInt(obj)<=0)
+                        {
+                            String seqSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_CREATE_SEQUENCE,valueMap);
+                            soberSupport.execute(seqSql);
+                        }
+
+                        String tiggerSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_CREATE_SEQ_TIGGER,valueMap);
+                        log.info("tiggerSql:{}",tiggerSql);
+                        //soberSupport.execute(tiggerSql);
+
+
+                    }
+                }
+                else
+                {
+                    //其他数据库可以一次执行
+                    soberSupport.execute(sql);
+                }
                 if (sqlMapConfig!=null)
                 {
                     createTableIndex(cla, sqlMapConfig,  soberSupport);
                 }
             }
         } catch (Exception e) {
-            log.error("ERROR:auto create table 自动创建表错误:" + sql + " table:" + soberTable.toString() + " 原因:没有得到连接或者和数据库不兼容", e);
+            log.error("ERROR:auto create table 自动创建表错误:" + sql + " table:" + soberTable.getName() + " 原因:没有得到连接或者和数据库不兼容", e);
             e.printStackTrace();
             return null;
         }

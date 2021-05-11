@@ -31,6 +31,25 @@ public class OracleDialect extends Dialect {
         standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
+
+
+        //oracle 和 pgsql 一样
+        //oracle 和 pgsql 设置注释方式begin
+        standard_SQL.put(SQL_COMMENT, "COMMENT ON COLUMN ${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
+        standard_SQL.put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
+        //oracle 和 pgsql 设置注释方式end
+
+        //oracle
+        standard_SQL.put(ORACLE_CREATE_SEQUENCE,"create sequence ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ minvalue 1 maxvalue 99999999 increment by 1  start with 1");
+        standard_SQL.put(ORACLE_CREATE_SEQ_TIGGER,"create or replace trigger ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ_TIGGER\n" +
+                "before insert on ${" + KEY_TABLE_NAME + ".toUpperCase()}\n" +
+                "for each row\r\n" +
+                "begin\r\n" +
+                "  select ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ.nextval into :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} from dual;\r\n" +
+                "end;");
+
+        standard_SQL.put(ORACLE_HAVE_SEQ,"select count(1) as num from user_sequences where sequence_name=upper('${" + KEY_TABLE_NAME + "}_SEQ')");
+
         standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         standard_SQL.put(boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         standard_SQL.put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
@@ -53,7 +72,47 @@ public class OracleDialect extends Dialect {
         standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE \"${" + KEY_TABLE_NAME + "}\"");
         standard_SQL.put(FUN_TABLE_EXISTS, "SELECT count(1) FROM tab WHERE tname=upper('${" + KEY_TABLE_NAME + "}')");
     }
+/*
 
+  CREATE TABLE "KINGDEE"."JSPX_TRIGGER_LOG"
+   (	"ID" NUMBER(16,0) DEFAULT 0 NOT NULL ENABLE,
+	"TABLENAME" VARCHAR2(100 BYTE),
+	"OPERATETYPE" NUMBER(10,0) DEFAULT 0,
+	"OPERATEID" VARCHAR2(64 BYTE),
+	"VAROPTION" VARCHAR2(2000 BYTE),
+	"SYNCTYPE" NUMBER(10,0) DEFAULT 0,
+	"SYNCDATE" TIMESTAMP (6) DEFAULT SYSDATE,
+	"SYNCRESULT" VARCHAR2(2000 BYTE),
+	"CREATEDATE" TIMESTAMP (6) DEFAULT SYSDATE,
+	 CONSTRAINT "jspx_trigger_log_key" PRIMARY KEY ("ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "EAS_D_KINGDEE_STANDARD"  ENABLE
+   ) SEGMENT CREATION IMMEDIATE
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "EAS_D_KINGDEE_STANDARD" ;
+
+   COMMENT ON COLUMN "KINGDEE"."JSPX_TRIGGER_LOG"."ID" IS 'id';
+   COMMENT ON COLUMN "KINGDEE"."JSPX_TRIGGER_LOG"."TABLENAME" IS '表明';
+   COMMENT ON COLUMN "KINGDEE"."JSPX_TRIGGER_LOG"."OPERATETYPE" IS '操作类型';
+   COMMENT ON COLUMN "KINGDEE"."JSPX_TRIGGER_LOG"."CREATEDATE" IS '创建时间';
+   COMMENT ON TABLE "KINGDEE"."JSPX_TRIGGER_LOG"  IS '日志记录表';
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER "KINGDEE"."JSPX_TRIGGER_LOG_ID"
+BEFORE INSERT ON jspx_trigger_log FOR EACH ROW
+ WHEN (new.ID is null) begin
+select jspx_trigger_log_seq.nextval into:new.ID from dual;
+end;
+/
+ALTER TRIGGER "KINGDEE"."JSPX_TRIGGER_LOG_ID" ENABLE;
+
+ */
     @Override
     public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
         boolean isForUpdate = false;
@@ -277,7 +336,7 @@ public class OracleDialect extends Dialect {
 
     @Override
     public boolean commentPatch() {
-        return false;
+        return true;
     }
 
 }
