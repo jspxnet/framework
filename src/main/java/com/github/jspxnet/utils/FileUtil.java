@@ -1831,9 +1831,13 @@ public class FileUtil {
             return new ArrayList<>(0);
         }
 
-        if (file.getPath().toLowerCase().contains(".jar!")) {
+        if (file.getPath().toLowerCase().contains(".jar!")|| ArrayUtil.inArray(new String[]{"jar","war","zip"},FileUtil.getTypePart(file.getName()),true)) {
 
-            String path = StringUtil.substringBefore(file.getPath(),".jar!") + ".jar";
+            String path = file.getPath();
+            if (path.contains(".jar!"))
+            {
+                path = StringUtil.substringBefore(file.getPath(),".jar!") + ".jar";
+            }
             try (JarInputStream zis = new JarInputStream(new FileInputStream(path))) {
 
                 List<File> list = new ArrayList<>();
@@ -2388,7 +2392,7 @@ public class FileUtil {
             //jar 文件里边
             return new File(loadFile);
         }
-        log.info("-2---------loadFile="+ loadFile);
+
         URL url =  Environment.class.getResource("/Boot-inf/classes/" + FileUtil.getFileName(loadFile));
         if (url!=null)
         {
