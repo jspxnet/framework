@@ -115,3 +115,4 @@
 *    2021年03月：Jspx.net Framework 6.35 嵌入tomcat,整合consul,appollo
 *    2021年03月：Jspx.net Framework 6.39 bug修复版本稳定版本,支持嵌入spring使用
 *    2021年04月：Jspx.net Framework 6.40 支持嵌入java二开平台
+*    2021年04月：Jspx.net Framework 6.41-6.42 嵌入兼容性调整，oracle兼容性调整
