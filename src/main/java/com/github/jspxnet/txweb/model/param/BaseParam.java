@@ -8,9 +8,9 @@ import java.io.Serializable;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/5/11 23:32
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/5/11 23:32
+ * description: jspbox
  **/
 @Data
 public abstract class BaseParam implements Serializable {

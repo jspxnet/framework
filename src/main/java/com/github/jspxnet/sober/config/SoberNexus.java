@@ -16,7 +16,7 @@ import java.io.Serializable;
 
 /**
  * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
+ * author chenYuan (mail:39793751@qq.com)
  * date: 2007-2-6
  * Time: 9:20:43
  * 映射关系 manytoone onetomany  onttoone
@@ -81,7 +81,7 @@ public class SoberNexus implements Serializable {
         return targetEntity;
     }
 
-    public void setTargetEntity(Class targetEntity) {
+    public void setTargetEntity(Class<?> targetEntity) {
         this.targetEntity = targetEntity;
     }
 
