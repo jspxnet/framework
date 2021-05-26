@@ -33,7 +33,7 @@ import java.util.Objects;
  */
 
 public class UploadedFile implements Serializable {
-    private final static FileRenamePolicy renamePolicy = new JspxNetFileRenamePolicy();
+    private FileRenamePolicy renamePolicy = new JspxNetFileRenamePolicy();
     private final static String crcFileName = "index.tmp";
     //变量名称
     private String name;

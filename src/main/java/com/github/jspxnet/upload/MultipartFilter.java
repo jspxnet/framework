@@ -33,8 +33,8 @@ public class MultipartFilter implements Filter {
     private String dir = null;
 
     @Override
-    public void init(FilterConfig config) throws ServletException {
-        this.config = config;
+    public void init(FilterConfig conf) throws ServletException {
+        config = conf;
 
         // Determine the upload directory.  First look for an uploadDir filter
         // init parameter.  Then look for the context tempdir.
@@ -63,7 +63,6 @@ public class MultipartFilter implements Filter {
                          FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         String type = req.getHeader("Content-Type");
-
         // If this is not a multipart/form-data request continue
         if (type == null || !type.startsWith("multipart")) {
             chain.doFilter(request, response);

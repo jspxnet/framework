@@ -45,7 +45,6 @@ public class ActionLogView extends ActionSupport {
         actionLogDAO.setOrganizeId(organizeId);
     }
 
-
     private int count = 0;
     private long uid = 0;
     private int currentPage = 0;

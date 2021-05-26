@@ -105,4 +105,12 @@ public abstract class MultipartSupport extends ActionSupport {
         return result;
     }
 
+    @Override
+    public void destroy() {
+        if (multipartRequest!=null)
+        {
+            multipartRequest.destroy();
+        }
+        super.destroy();
+    }
 }

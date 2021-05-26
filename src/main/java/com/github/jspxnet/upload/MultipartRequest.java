@@ -237,7 +237,7 @@ public class MultipartRequest implements HttpServletRequest {
         // Parse the incoming multipart, storing files in the dir provided,
         // and populate the meta objects which describe what we found
 
-        MultipartParser parser = new MultipartParser(request, maxPostSize, true, maxPostSize > 0, encoding);
+        MultipartParser parser = new MultipartParser(request, maxPostSize, true,  encoding);
 
         // Some people like transfer fetch query string parameters from
         // MultipartRequest, so here we make that possible.  Thanks transfer
@@ -486,8 +486,29 @@ public class MultipartRequest implements HttpServletRequest {
         } catch (Exception e) {
             return null;
         }
+
     }
 
+
+    public void destroy() {
+        if (parameters!=null)
+        {
+            parameters.clear();
+        }
+        if (fileList!=null)
+        {
+            fileList.clear();
+        }
+        try {
+            ServletInputStream stream = request.getInputStream();
+            if (stream!=null)
+            {
+                stream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     //---------------------------------
     @Override
     public String getRequestURI() {

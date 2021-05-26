@@ -99,7 +99,7 @@ public class MultipartParser {
 
     public MultipartParser(HttpServletRequest req,
                            int maxSize) throws IOException {
-        this(req, maxSize, true, true);
+        this(req, maxSize, true, Environment.defaultEncode);
     }
 
     /**
@@ -112,14 +112,11 @@ public class MultipartParser {
      * @param maxSize     the maximum size of the POST content.
      * @param buffer      whether transfer do internal buffering or let the server buffer,
      *                    useful for servers that don't buffer
-     * @param limitLength boolean flag transfer indicate if we need transfer filter
-     *                    the request's input stream transfer prevent trying transfer
-     *                    read past the end of the stream.
+
      * @throws IOException 异常
      */
-    public MultipartParser(HttpServletRequest req, int maxSize, boolean buffer,
-                           boolean limitLength) throws IOException {
-        this(req, maxSize, buffer, limitLength, null);
+    public MultipartParser(HttpServletRequest req, int maxSize, boolean buffer) throws IOException {
+        this(req, maxSize, buffer,  Environment.defaultEncode);
     }
 
     /**
@@ -132,14 +129,10 @@ public class MultipartParser {
      * @param maxSize     the maximum size of the POST content.
      * @param buffer      whether transfer do internal buffering or let the server buffer,
      *                    useful for servers that don't buffer
-     * @param limitLength boolean flag transfer indicate if we need transfer filter
-     *                    the request's input stream transfer prevent trying transfer
-     *                    read past the end of the stream.
-     * @param encoding    the encoding transfer use for parsing, default is ISO-8859-1.
+       * @param encoding    the encoding transfer use for parsing, default is ISO-8859-1.
      * @throws IOException 异常
      */
-    public MultipartParser(HttpServletRequest req, long maxSize, boolean buffer,
-                           boolean limitLength, String encoding)
+    public MultipartParser(HttpServletRequest req, long maxSize, boolean buffer, String encoding)
             throws IOException {
         // First make sure we know the encoding transfer handle chars correctly.
         // Thanks transfer Andreas Granzer, andreas.granzer@wave-solutions.com,
@@ -185,7 +178,7 @@ public class MultipartParser {
         if (buffer) {
             in = new BufferedServletInputStream(in);
         }
-        if (limitLength && length > 0) {
+        if (maxSize>length && length > 0) {
             // Check the content length transfer prevent denial of components attacks
             in = new LimitedServletInputStream(in, length);
         }
@@ -315,7 +308,7 @@ public class MultipartParser {
             if ("".equals(filename)) {
                 filename = null; // empty filename, probably an "empty" file param
             }
-            lastFilePart = new FilePart(name, in, boundary, contentType, filename, origname);
+            this.lastFilePart = new FilePart(name, in, boundary, contentType, filename, origname);
             return lastFilePart;
         }
     }
@@ -345,7 +338,6 @@ public class MultipartParser {
 
         // The real boundary is always preceeded by an extra "--"
         boundary = "--" + boundary;
-
         return boundary;
     }
 
@@ -473,7 +465,6 @@ public class MultipartParser {
         } else if (len >= 1 && buffer.charAt(len - 1) == '\n') {
             buffer.setLength(len - 1);  // cut \n
         }
-
         return buffer.toString();
     }
 }

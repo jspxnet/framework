@@ -43,7 +43,6 @@ import lombok.extern.slf4j.Slf4j;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -182,7 +181,7 @@ public class UploadFileAction extends MultipartSupport {
             }
         }
         if (maxPostSize == 0 && config != null) {
-            maxPostSize = config.getInt(Environment.uploadMaxSize) * 1024;
+            maxPostSize = config.getInt(Environment.uploadMaxSize,10*1024) * 1024;
         }
 
         return maxPostSize;
@@ -245,8 +244,6 @@ public class UploadFileAction extends MultipartSupport {
         searchPaths = ArrayUtil.add(searchPaths, (new File(setupPath).getParent()));
         return FileUtil.getFile(searchPaths, name);
     }
-
-
     /**
      * @param multipartRequest 请求接口
      */
@@ -262,7 +259,6 @@ public class UploadFileAction extends MultipartSupport {
      */
     @Ref
     protected UploadFileDAO uploadFileDAO;
-
     /**
      * 中文分词
      */
@@ -408,8 +404,8 @@ public class UploadFileAction extends MultipartSupport {
             printErrorInfo(language.getLang(LanguageRes.uploadRequestError));
             return NONE;
         }
-        IUserSession userSession = getUserSession();
-        if (userSession == null || userSession.isGuest()) {
+
+        if (isGuest()) {
             printErrorInfo("没有登陆");
             for (UploadedFile uf : multipartRequest.getFiles()) {
                 FileUtil.delete(uf.getFile());
@@ -417,6 +413,7 @@ public class UploadFileAction extends MultipartSupport {
             return NONE;
         }
 
+        IUserSession userSession = getUserSession();
         Object[] objects = localUploadFile(userSession);
         if (ObjectUtil.isEmpty(objects)) {
             printErrorInfo("上传失败");
@@ -458,6 +455,10 @@ public class UploadFileAction extends MultipartSupport {
             TXWebUtil.print(json.toString(4),contentType,response);
         }
         uploadFileDAO.evict(uploadFileDAO.getClassType());
+        if (multipartRequest!=null)
+        {
+            multipartRequest.destroy();
+        }
         return NONE;
     }
 
@@ -531,24 +532,26 @@ public class UploadFileAction extends MultipartSupport {
                 //已经上传过的,拷贝一份
                 return copyUploadToUser(alreadyUploadFile, userSession);
             } else {
-                //boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
                 //还没有保存到数据库
                 Object[] uploadObjArray = newUpload(uf, upFile, userSession);
                 if (ObjectUtil.isEmpty(uploadObjArray)) {
                     return null;
                 }
-                if (!useCloudFile) {
+                if (!useCloudFile&&uploadObjArray[0]!=null) {
                     //上传到本地目录
                     uploadFileDAO.save(uploadObjArray[0]);
                     IUploadFile uploadFile = (IUploadFile) uploadObjArray[0];
-                    long pid = uploadFile.getId();
-                    for (int i = 1; i < uploadObjArray.length; i++) {
-                        IUploadFile tmpUploadFile = (IUploadFile) uploadObjArray[i];
-                        if (tmpUploadFile == null) {
-                            continue;
+                    if (uploadFile!=null)
+                    {
+                        long pid = uploadFile.getId();
+                        for (int i = 1; i < uploadObjArray.length; i++) {
+                            IUploadFile tmpUploadFile = (IUploadFile) uploadObjArray[i];
+                            if (tmpUploadFile == null) {
+                                continue;
+                            }
+                            tmpUploadFile.setPid(pid);
+                            uploadFileDAO.save(uploadObjArray[i]);
                         }
-                        tmpUploadFile.setPid(pid);
-                        uploadFileDAO.save(uploadObjArray[i]);
                     }
                     return uploadObjArray;
                 } else {
@@ -797,8 +800,6 @@ public class UploadFileAction extends MultipartSupport {
         return hash1.equals(hash2);
     }
     //---------------------------------------------
-
-
     /**
      * 分片上传,打印返回协议信息,返回
      *

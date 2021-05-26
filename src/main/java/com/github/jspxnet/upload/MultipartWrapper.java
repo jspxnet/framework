@@ -15,7 +15,7 @@ import javax.servlet.http.*;
 
 public class MultipartWrapper extends HttpServletRequestWrapper {
 
-    MultipartRequest mreq = null;
+    private MultipartRequest mreq = null;
 
     public MultipartWrapper(HttpServletRequest req, String dir)
             throws IOException {
