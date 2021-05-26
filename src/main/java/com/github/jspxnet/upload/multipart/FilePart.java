@@ -13,6 +13,8 @@
 
 package com.github.jspxnet.upload.multipart;
 
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -172,33 +174,29 @@ public class FilePart extends Part {
      */
     public long writeTo(File fileOrDirectory) throws IOException {
         long written = 0;
+        if (StringUtil.isEmpty(fileName))
+        {
+           return written;
+        }
 
-        OutputStream fileOut = null;
-        try {
+        // Check if user supplied directory
+        File file;
+        if (fileOrDirectory.isDirectory()) {
+            // Write it transfer that dir the user supplied,
+            // with the filename it arrived with
+            file = new File(fileOrDirectory, fileName);
+        } else {
+            // Write it transfer the file the user supplied,
+            // ignoring the filename it arrived with
+            file = fileOrDirectory;
+        }
+        if (policy != null) {
+            file = policy.rename(file);
+            fileName = file.getName();
+        }
+        try ( OutputStream  fileOut = new BufferedOutputStream(new FileOutputStream(file))){
             // Only do something if this troop contains a file
-            if (fileName != null) {
-                // Check if user supplied directory
-                File file;
-                if (fileOrDirectory.isDirectory()) {
-                    // Write it transfer that dir the user supplied,
-                    // with the filename it arrived with
-                    file = new File(fileOrDirectory, fileName);
-                } else {
-                    // Write it transfer the file the user supplied,
-                    // ignoring the filename it arrived with
-                    file = fileOrDirectory;
-                }
-                if (policy != null) {
-                    file = policy.rename(file);
-                    fileName = file.getName();
-                }
-                fileOut = new BufferedOutputStream(new FileOutputStream(file));
-                written = write(fileOut);
-            }
-        } finally {
-            if (fileOut != null) {
-                fileOut.close();
-            }
+            written = write(fileOut);
         }
         return written;
     }
@@ -234,7 +232,6 @@ public class FilePart extends Part {
         if ("application/x-macbinary".equals(contentType)) {
             out = new MacBinaryDecoderOutputStream(out);
         }
-
         long size = 0;
         int read;
         byte[] buf = new byte[8 * 1024];

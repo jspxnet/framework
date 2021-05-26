@@ -13,6 +13,8 @@
 
 package com.github.jspxnet.upload;
 
+import javax.servlet.ServletRequestListener;
+
 /**
  * A class transfer determine the current Servlet API version number, and the
  * current JDK version number.  It looks at the available classes and
@@ -69,7 +71,6 @@ public class VersionDetector {
             ver = "2.4";
         } catch (Throwable t) {
         }
-
         servletVersion = ver;
         return servletVersion;
     }
