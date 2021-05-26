@@ -1312,6 +1312,10 @@ public class ImageUtil {
         valueMap.setLineSplit(StringUtil.CRLF);
         try {
             Metadata metadata = ImageMetadataReader.readMetadata(file);
+            if (metadata==null)
+            {
+                return valueMap;
+            }
             for (Directory directory : metadata.getDirectories()) {
                 for (Tag tag : directory.getTags()) {
                     String tagName = tag.getTagName();
@@ -1324,7 +1328,7 @@ public class ImageUtil {
             }
             valueMap.put("fileSize", NumberUtil.toString(file.length()));
         } catch (Exception e) {
-            System.err.println("error 1a: " + e);
+            log.error("parsePhotoExif",e);
         }
         return valueMap;
     }

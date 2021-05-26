@@ -557,7 +557,6 @@ public class UploadFileAction extends MultipartSupport {
                     AssertException.isNull(cloudFileConfig, "云盘空间没有配置");
                     CloudFileClient cloudFileClient = CloudServiceFactory.createCloudClient(cloudFileConfig);
                     AssertException.isNull(cloudFileClient, "云盘空间没有配置正确");
-                    List<File> files = new ArrayList<>();
                     long pid = 0;
                     for (int i = 0; i < uploadObjArray.length; i++) {
                         IUploadFile tmpUploadFile = (IUploadFile) uploadObjArray[i];
@@ -571,7 +570,6 @@ public class UploadFileAction extends MultipartSupport {
                         attributeMap.put("configId",cloudFileConfig.getId()+"");
                         attributeMap.put("bucket",cloudFileConfig.getBucket());
                         tmpUploadFile.setAttributes(attributeMap.toString());
-                        files.add(localFile);
                         if (i == 0) {
                             uploadFileDAO.save(uploadObjArray[i]);
                             pid = tmpUploadFile.getPid();
