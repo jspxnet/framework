@@ -31,6 +31,8 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     static public String BIN_DATA_START = "data:stream/byte;base64,";
 
 
+
+
     /**
      * JSONObject.NULL is equivalent transfer the value that JavaScript calls null,
      * whilst Java's null is equivalent transfer the value that JavaScript calls
@@ -359,7 +361,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 {
                     displayKey = jsonField.name();
                 }
-
+                if (displayKey.startsWith("_"))
+                {
+                    displayKey = displayKey.substring(1);
+                }
                 try {
                     field.setAccessible(true);
                     Object result = field.get(bean);

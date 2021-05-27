@@ -40,6 +40,10 @@ public class ClassUtil {
     public static final String METHOD_NAME_IS = "is";
     public static final String[] BASE_NUMBER_TYPE = new String[]{"short","int","long","float","double"};
 
+    public static final String[] NO_CHECK_IS_PROXY = new String[]{"com.seeyon.ctp.common.po.BasePO","org.apache.commons","net.sf.cglib"};
+
+
+
     /**
      * 私有构造方法，防止类的实例化，因为工具类不需要实例化。
      */
@@ -391,7 +395,7 @@ public class ClassUtil {
         Class<?> superclass =  ClassUtil.getClass(cls);
         Field[] result = null;
         while (!(superclass == null || superclass.equals(Object.class) || superclass.equals(Serializable.class)  || superclass.isInterface()
-                || superclass.getName().contains("net.sf.cglib.empty.Object"))) {
+                || superclass.getName().contains("net.sf.cglib.empty.Object")  || superclass.getName().contains("com.seeyon.ctp.common.po.BasePO"))) {
             Field[] fields = superclass.getDeclaredFields();
             result = addFieldArray(result, fields);
             superclass = superclass.getSuperclass();
@@ -1002,6 +1006,20 @@ public class ClassUtil {
     }
 
 
+    public static boolean inNoCheckProxyClass(Class<?> type)
+    {
+
+
+        for (String className:NO_CHECK_IS_PROXY)
+        {
+
+            if (type.getName().contains(className))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      *
@@ -1009,14 +1027,14 @@ public class ClassUtil {
      * @return 判断是否为代理对象
      */
     public static boolean isProxy(Class<?> type) {
-
-        if (type == null) {
+        if (type == null || inNoCheckProxyClass(type)) {
             return false;
         }
         try {
             return type.getName().contains("CGLIB$$") || Enhancer.isEnhanced(type);
         } catch (Exception e)
         {
+            e.printStackTrace();
             log.info(type.getName(),e);
         }
         return false;
@@ -1024,13 +1042,13 @@ public class ClassUtil {
 
     public static Class<?> getClass(Class<?> type)  {
         Class<?> cls = type;
-        if (ClassUtil.isProxy(type))
-        {
-            try {
+        try {
+            if (ClassUtil.isProxy(type))
+            {
                 cls = ClassUtil.loadClass(ClassUtil.getClassName(type.getName()));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
             }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
         return cls;
     }
