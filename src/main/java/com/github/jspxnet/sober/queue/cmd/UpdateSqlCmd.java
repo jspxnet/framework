@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 public class UpdateSqlCmd extends BaseCmdRun {
-    public final static String name = BaseRedisStoreQueue.CMD_UPDATE_SQL;
+    public final static String NAME = BaseRedisStoreQueue.CMD_UPDATE_SQL;
 
     @Override
     public void execute() throws Exception {
@@ -34,7 +34,7 @@ public class UpdateSqlCmd extends BaseCmdRun {
         StoreQueueStatus storeQueueStatus = BeanUtil.copy(storeStatus,StoreQueueStatus.class);
         storeQueueStatus.setObjectData(sql);
         storeQueueStatus.setClassName(className);
-        storeQueueStatus.setCmd(name);
+        storeQueueStatus.setCmd(NAME);
         try {
 
             storeQueueStatus.setResult(genericDAO.update(sql));
@@ -44,7 +44,7 @@ public class UpdateSqlCmd extends BaseCmdRun {
                 genericDAO.save(storeQueueStatus);
             }
         } catch (Exception e) {
-            log.error("store queue {} error data:{},info:{}", name, sql, e.getMessage());
+            log.error("store queue {} error data:{},info:{}", NAME, sql, e.getMessage());
             //如果没有保存成功，也没用异常的情况
             storeQueueStatus.setStatus(FAIL);
             genericDAO.save(storeQueueStatus);

@@ -236,6 +236,8 @@ public class JspxCoreListener implements ServletContextListener {
     @Override
     public void contextDestroyed(javax.servlet.ServletContextEvent servletContextEvent) {
         log.info(Environment.frameworkName + " " + copyright + " shutdown start");
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        boolean forceExit = envTemplate.getBoolean(Environment.forceExit);
 
         //Evasive配置卸载begin
         EvasiveConfiguration.getInstance().shutdown();
@@ -262,12 +264,15 @@ public class JspxCoreListener implements ServletContextListener {
         log.info("JSCache shutdown");
         //关闭缓存和线程end
 
+        beanFactory.getIocContext().shutdown();
+
         try {
             DaemonThreadFactory.shutdown();
             log.info("Thread shutdown");
         } catch (Exception exception) {
             //..
         }
+
         //卸载jdbc驱动begin
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         Driver d = null;
@@ -293,6 +298,11 @@ public class JspxCoreListener implements ServletContextListener {
             //...
         }
         //关闭定时器和其他线程end
+        System.gc();
+        if (forceExit)
+        {
+            System.exit(0);
+        }
         isRun = false;
         log.info(Environment.frameworkName + " " + copyright + " dispatcher shutdown completed ");
      }

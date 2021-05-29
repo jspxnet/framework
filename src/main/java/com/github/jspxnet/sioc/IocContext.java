@@ -53,4 +53,6 @@ public interface IocContext {
     Map<String, String> getSchedulerMap();
 
     List<BeanElement> getInjectionBeanElements();
+
+    void shutdown();
 }

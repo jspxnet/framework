@@ -360,7 +360,6 @@ public class JSCacheManager implements CacheManager {
             if (scheduler != null&&scheduler.isStarted()) {
                 scheduler.stop();
             }
-
         }
         caches.clear();
     }

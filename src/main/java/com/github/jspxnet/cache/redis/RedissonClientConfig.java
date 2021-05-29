@@ -12,7 +12,6 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import java.io.File;
-import java.io.IOException;
 /**
  * threads（线程池数量）
  *

@@ -13,7 +13,7 @@ import org.redisson.api.RQueue;
 @Bean(bind = RedisStoreQueueClient.class, singleton = true)
 @Slf4j
 public class RedisStoreQueueClient extends BaseRedisStoreQueue {
-    private Gson gson = GsonUtil.createGson();
+    private final Gson gson = GsonUtil.createGson();
 
     public boolean save(Object o) {
         if (o == null) {

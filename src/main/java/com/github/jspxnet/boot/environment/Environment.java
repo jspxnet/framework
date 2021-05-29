@@ -637,4 +637,7 @@ public abstract class Environment {
 
     public final static String SPRING_PATH_SIGN = ".jar!/BOOT-INF/classes!";
 
+
+    final public static String forceExit = "forceExit";
+
 }

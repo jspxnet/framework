@@ -27,7 +27,7 @@ import java.util.Set;
  * 数据一直保持，过期周期设置长一点比较合适
  */
 public class LRUStore extends Store implements IStore {
-    private final LRUHashMap<String, CacheEntry> cacheLists = new LRUHashMap<String, CacheEntry>(4000);
+    private final LRUHashMap<String, CacheEntry> cacheLists = new LRUHashMap<>(4000);
 
     public LRUStore() {
 

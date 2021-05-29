@@ -44,7 +44,7 @@ public class ConfigureContext implements IocContext {
     //永远不清除，并且保留,这里是动态注册的bean对象数据
     private final Map<String, Map<String, BeanElement>> registerBeanMap = new HashMap<>();
 
-    private final List<BeanElement> injectionBeanElements = new ArrayList<>();
+    private final transient List<BeanElement> injectionBeanElements = new ArrayList<>();
     //永远不清除这里表示动态扫描加载的目录，如果已经扫描了的，就不在扫描加载
     private final List<String> scanPackageList = new ArrayList<>();
 
@@ -52,7 +52,7 @@ public class ConfigureContext implements IocContext {
      * 设计到定时任务的类注册
      * 放入格式，<bean名称，命名空间>
      */
-    private final Map<String, String> schedulerMap = new HashMap<>();
+    private final transient Map<String, String> schedulerMap = new HashMap<>();
 
     private final Map<String, Map<String, BeanElement>> beanElementMap = new HashMap<>();
     //总表
@@ -64,7 +64,7 @@ public class ConfigureContext implements IocContext {
 
     private final EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
     private String[] configFile;
-    private static final List<String> fileIdList = new ArrayList<>();
+    private static final List<String> FILE_ID_LIST = new ArrayList<>();
 
     public static IocContext getInstance() {
         return INSTANCE;
@@ -368,11 +368,11 @@ public class ConfigureContext implements IocContext {
             return new ArrayList<>(0);
         }
         String fileId = file.getName() + StringUtil.UNDERLINE + file.length();
-        if (fileIdList.contains(fileId))
+        if (FILE_ID_LIST.contains(fileId))
         {
             return new ArrayList<>(0);
         }
-        fileIdList.add(fileId);
+        FILE_ID_LIST.add(fileId);
 
         String defaultPath = envTemplate.getString(Environment.defaultPath);
         if (FileUtil.isPatternPath(file.getName())) {
@@ -554,4 +554,20 @@ public class ConfigureContext implements IocContext {
     public List<BeanElement> getInjectionBeanElements() {
         return injectionBeanElements;
     }
+
+    @Override
+    public void shutdown()
+    {
+        registerBeanMap.clear();
+        injectionBeanElements.clear();
+        scanPackageList.clear();
+        schedulerMap.clear();
+        beanElementMap.clear();
+        elementList.clear();
+        extendMap.clear();
+        applicationMap.clear();
+        FILE_ID_LIST.clear();
+        configFile = null;
+    }
+
 }
