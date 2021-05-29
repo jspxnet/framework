@@ -278,7 +278,6 @@ public class JspxCoreListener implements ServletContextListener {
                 log.error(String.format("Error deregistering driver %s", d));
             }
         }
-
         try {
           ClassUtil.invokeStaticMethod("com.mysql.jdbc.AbandonedConnectionCleanupThread","uncheckedShutdown",null);
         } catch (Exception e)
