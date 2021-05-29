@@ -296,7 +296,10 @@ public class JspxCoreListener implements ServletContextListener {
             log.info("Thread shutdown");
         } catch (Exception exception) {
             exception.printStackTrace();
-            System.exit(0);
+            if (forceExit)
+            {
+                System.exit(0);
+            }
         }
         if (forceExit)
         {
