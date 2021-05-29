@@ -266,12 +266,6 @@ public class JspxCoreListener implements ServletContextListener {
 
         beanFactory.getIocContext().shutdown();
 
-        try {
-            DaemonThreadFactory.shutdown();
-            log.info("Thread shutdown");
-        } catch (Exception exception) {
-            //..
-        }
 
         //卸载jdbc驱动begin
         Enumeration<Driver> drivers = DriverManager.getDrivers();
@@ -280,7 +274,6 @@ public class JspxCoreListener implements ServletContextListener {
             try {
                 d = drivers.nextElement();
                 DriverManager.deregisterDriver(d);
-                log.debug(String.format("jdbc driver %s deregister", d));
             } catch (SQLException ex) {
                 log.error(String.format("Error deregistering driver %s", d));
             }
@@ -298,7 +291,13 @@ public class JspxCoreListener implements ServletContextListener {
             //...
         }
         //关闭定时器和其他线程end
-        System.gc();
+        try {
+            DaemonThreadFactory.shutdown();
+            log.info("Thread shutdown");
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            System.exit(0);
+        }
         if (forceExit)
         {
             System.exit(0);

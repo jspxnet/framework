@@ -1,7 +1,5 @@
 package com.github.jspxnet.boot;
 
-import com.github.jspxnet.utils.DateUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
@@ -45,15 +43,13 @@ public class DaemonThreadFactory implements ThreadFactory {
     {
         for (Thread thread:THREAD_LIST)
         {
-            if (thread.isAlive()&&!thread.isInterrupted())
+            if (!thread.isInterrupted())
             {
-                thread.interrupt();
                 try {
-                    thread.join(DateUtil.SECOND);
-                } catch (InterruptedException e) {
+                    thread.interrupt();
+                } catch (Exception e) {
                     thread.stop(e);
                 }
-
             }
         }
     }

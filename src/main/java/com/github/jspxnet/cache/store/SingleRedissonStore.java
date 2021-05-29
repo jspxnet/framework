@@ -194,7 +194,6 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public void dispose() {
-        log.debug("关闭redisson");
        if (redisson!=null&&!redisson.isShutdown()) {
             redisson.shutdown();
         }
