@@ -37,4 +37,11 @@ public class FiledStream extends InputStream {
     public int read() throws IOException {
         return body[(int) skip++];
     }
+
+    @Override
+    public void close() throws IOException {
+        body = null;
+        length = 0;
+        skip = 0;
+    }
 }

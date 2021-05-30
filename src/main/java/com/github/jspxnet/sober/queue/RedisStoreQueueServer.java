@@ -99,7 +99,7 @@ public class RedisStoreQueueServer extends BaseRedisStoreQueue  {
             log.debug("存储队列queue长度:{}", queue.size());
             //有效性判断
             CmdRun cmdRun = CMD_RUN_MAP.get(cmdContainer.getCmd());
-            if (cmdRun == null) {
+            if (!(cmdRun instanceof CmdRun)) {
                 return;
             }
             cmdRun.setCmdContainer(cmdContainer);
@@ -111,6 +111,6 @@ public class RedisStoreQueueServer extends BaseRedisStoreQueue  {
             log.debug("存储队列保存数据发生异常:", e);
 
         }
-        log.debug("存储队列服务退出");
+        log.info("存储队列服务退出");
     }
 }
