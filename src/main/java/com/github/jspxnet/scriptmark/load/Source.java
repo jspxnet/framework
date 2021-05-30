@@ -133,11 +133,7 @@ public abstract class Source {
         if (endLine <= beginLine) {
             return StringUtil.empty;
         }
-        BufferedReader reader = null;
-        Reader rd = null;
-        try {
-            rd = getReader();
-            reader = new BufferedReader(rd);
+        try (Reader rd = getReader();BufferedReader reader = new BufferedReader(rd)){
             StringBuilder buf = new StringBuilder();
             String str;
             int line = 0;
@@ -152,13 +148,6 @@ public abstract class Source {
                 }
             } while (str != null);
             return buf.toString();
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
-            if (rd != null) {
-                rd.close();
-            }
         }
     }
 

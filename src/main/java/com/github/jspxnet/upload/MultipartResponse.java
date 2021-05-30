@@ -74,8 +74,8 @@ import javax.servlet.http.*;
  */
 public class MultipartResponse {
 
-    private HttpServletResponse res;
-    private ServletOutputStream out;
+    private final HttpServletResponse response;
+    private final  ServletOutputStream out;
     private boolean endedLastResponse = true;
 
     /**
@@ -87,11 +87,11 @@ public class MultipartResponse {
      */
     public MultipartResponse(HttpServletResponse response) throws IOException {
         // Save the response object and output stream
-        res = response;
-        out = res.getOutputStream();
+        this.response = response;
+        out = this.response.getOutputStream();
 
         // Set things up
-        res.setContentType("multipart/x-mixed-replace;boundary=End");
+        this.response.setContentType("multipart/x-mixed-replace;boundary=End");
         out.println();
         out.println("--End");
     }

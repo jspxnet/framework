@@ -39,17 +39,11 @@ public class ServletUtils {
     public static void returnFile(String filename, OutputStream out)
             throws FileNotFoundException, IOException {
         // A FileInputStream is for bytes
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(filename);
+        try (FileInputStream fis = new FileInputStream(filename)){
             byte[] buf = new byte[4 * 1024];  // 4K buffer
             int bytesRead;
             while ((bytesRead = fis.read(buf)) != -1) {
                 out.write(buf, 0, bytesRead);
-            }
-        } finally {
-            if (fis != null) {
-                fis.close();
             }
         }
     }

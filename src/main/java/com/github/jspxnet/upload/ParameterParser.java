@@ -13,6 +13,8 @@
 
 package com.github.jspxnet.upload;
 
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.*;
 import java.util.*;
 import javax.servlet.*;
@@ -155,18 +157,7 @@ public class ParameterParser {
     public boolean getBooleanParameter(String name)
             throws ParameterNotFoundException, NumberFormatException {
         String value = getStringParameter(name).toLowerCase();
-        if (("true".equalsIgnoreCase(value)) ||
-                ("on".equalsIgnoreCase(value)) ||
-                ("yes".equalsIgnoreCase(value))) {
-            return true;
-        } else if (("false".equalsIgnoreCase(value)) ||
-                ("off".equalsIgnoreCase(value)) ||
-                ("no".equalsIgnoreCase(value))) {
-            return false;
-        } else {
-            throw new NumberFormatException("Parameter " + name + " value " + value +
-                    " is not a boolean");
-        }
+        return StringUtil.toBoolean(value);
     }
 
     /**
@@ -409,10 +400,10 @@ public class ParameterParser {
      */
     public String[] getMissingParameters(String[] required) {
         Vector missing = new Vector();
-        for (int i = 0; i < required.length; i++) {
-            String val = getStringParameter(required[i], null);
+        for (String s : required) {
+            String val = getStringParameter(s, null);
             if (val == null) {
-                missing.addElement(required[i]);
+                missing.addElement(s);
             }
         }
         if (missing.size() == 0) {

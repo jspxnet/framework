@@ -65,15 +65,12 @@ import com.github.jspxnet.utils.StringUtil;
 @SuppressWarnings({"deprecation"})
 public class MultipartRequest implements HttpServletRequest {
     private static final int DEFAULT_MAX_POST_SIZE = 1024 * 1024 * 5;  // 2 M  eg
-    private Hashtable<String, List<String>> parameters = new Hashtable<>();  // name - Vector of values
-    private List<UploadedFile> fileList = new ArrayList<>();       // name - UploadedFile
-
-
+    private final Hashtable<String, List<String>> parameters = new Hashtable<>();  // name - Vector of values
+    private final List<UploadedFile> fileList = new ArrayList<>();       // name - UploadedFile
     public HttpServletRequest getRequest() {
         return request;
     }
-
-    private HttpServletRequest request;
+    private final HttpServletRequest request;
 
     /**
      * Constructs a new MultipartRequest transfer handle the specified request,
