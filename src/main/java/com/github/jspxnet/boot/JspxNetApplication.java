@@ -82,7 +82,7 @@ public final class JspxNetApplication {
      */
     public static void runInEmbed(String fileName)
     {
-        runInEmbed(null,fileName);
+        runInEmbed(null,fileName,null);
     }
 
     /**
@@ -90,7 +90,13 @@ public final class JspxNetApplication {
      * @param path 默认配置路径
      * @param fileName 默认配置文件
      */
-    public static void runInEmbed(String path,String fileName)
+    /**
+     * 最小嵌入方式，实用二开环境,嵌入致远OA类似系统
+     * @param path 默认配置路径
+     * @param fileName 默认配置文件
+     * @param context spring 上下文
+     */
+    public static void runInEmbed(String path,String fileName,ApplicationContext context)
     {
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         jspxConfiguration.setDefaultConfigFile(fileName);
@@ -129,8 +135,13 @@ public final class JspxNetApplication {
         EntryFactory beanFactory = (EntryFactory) com.github.jspxnet.boot.EnvFactory.getBeanFactory();
         beanFactory.setIocContext(iocContext);
 
+        if (context!=null)
+        {
+            SpringBeanContext.setApplicationContext(context);
+        }
         //载入定时任务
         beanFactory.initScheduler();
+
     }
 
 
