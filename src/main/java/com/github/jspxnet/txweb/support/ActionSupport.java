@@ -71,7 +71,6 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public void destroy() {
-
         Iterator<Map.Entry<String, Object>> iterator = this.environment.entrySet().iterator();
         while(iterator.hasNext()) {
             Map.Entry<String, Object> entry = iterator.next();
