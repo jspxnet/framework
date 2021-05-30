@@ -11,8 +11,8 @@ import java.util.concurrent.ThreadFactory;
  * date: 2021/1/23 17:15
  * description: 守护线程
  **/
-public class DaemonThreadFactory implements ThreadFactory {
-    static final private List<Thread> THREAD_LIST = new ArrayList<>();
+public final class DaemonThreadFactory implements ThreadFactory {
+    static final private transient List<Thread> THREAD_LIST = new ArrayList<>();
     private String name;
     public DaemonThreadFactory(String name)
     {
