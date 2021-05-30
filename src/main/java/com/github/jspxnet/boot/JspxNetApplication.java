@@ -18,10 +18,8 @@ import com.github.jspxnet.cache.store.MemoryStore;
 import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.sioc.IocContext;
-import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.sioc.factory.EntryFactory;
-import com.github.jspxnet.sioc.factory.LifecycleObject;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.SystemUtil;
@@ -77,14 +75,29 @@ public final class JspxNetApplication {
         }
     }
 
+
     /**
      * 最小嵌入方式，实用二开环境
-     * @param fileName 默认配置文件
+     * @param fileName 配置文件
      */
     public static void runInEmbed(String fileName)
     {
+        runInEmbed(null,fileName);
+    }
+
+    /**
+     * 最小嵌入方式，实用二开环境
+     * @param path 默认配置路径
+     * @param fileName 默认配置文件
+     */
+    public static void runInEmbed(String path,String fileName)
+    {
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         jspxConfiguration.setDefaultConfigFile(fileName);
+        if (!StringUtil.isEmpty(path))
+        {
+            jspxConfiguration.setDefaultPath(path);
+        }
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
@@ -197,7 +210,6 @@ public final class JspxNetApplication {
             }
         }
     }
-
 
     /**
      * 卸载服务

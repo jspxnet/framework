@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.42</version>
+    <version>6.43</version>
     <description>jspx framework</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -854,7 +854,6 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <outputDirectory>D:\website\webapps\root\WEB-INF\lib\</outputDirectory>
                         <archive>
                             <manifest>
                                 <mainClass>com.github.jspxnet.boot.TomcatApplication</mainClass>
