@@ -116,3 +116,4 @@
 *    2021年03月：Jspx.net Framework 6.39 bug修复版本稳定版本,支持嵌入spring使用
 *    2021年04月：Jspx.net Framework 6.40 支持嵌入java二开平台
 *    2021年04月：Jspx.net Framework 6.41-6.42 嵌入兼容性调整，oracle兼容性调整
+*    2021年05月：Jspx.net Framework 6.43 嵌入兼容性调整，json兼容致远OA的PO解析.优化调整线程关闭
