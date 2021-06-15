@@ -32,7 +32,7 @@ public class RoleParam  implements Serializable {
     @Param(caption = "描述", max = 250)
     private String description = StringUtil.empty;
 
-    @Param(caption = "用户类型", max = 20)
+    @Param(caption = "用户类型", max = 100)
     private int userType = UserEnumType.NONE.getValue();
 
     @Param(caption = "图片", max = 250)
