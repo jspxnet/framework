@@ -29,18 +29,20 @@ public class OfficeUtil {
         ExcelToHtmlConverter excelToHtmlConverter = new ExcelToHtmlConverter (DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument() );
         excelToHtmlConverter.processWorkbook(excelBook);
         Document htmlDocument =excelToHtmlConverter.getDocument();
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        DOMSource domSource = new DOMSource (htmlDocument);
-        StreamResult streamResult = new StreamResult (outStream);
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer serializer = tf.newTransformer();
-        serializer.setOutputProperty (OutputKeys.ENCODING, Environment.defaultEncode);
-        serializer.setOutputProperty (OutputKeys.INDENT, "yes");
-        serializer.setOutputProperty (OutputKeys.STANDALONE, "yes");
-        serializer.setOutputProperty (OutputKeys.METHOD, "html");
-        serializer.transform (domSource, streamResult);
-        String content = new String (outStream.toByteArray(), Environment.defaultEncode);
-        outStream.close();
+
+        String content = null;
+        try (ByteArrayOutputStream outStream = new ByteArrayOutputStream()){
+            DOMSource domSource = new DOMSource (htmlDocument);
+            StreamResult streamResult = new StreamResult (outStream);
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer serializer = tf.newTransformer();
+            serializer.setOutputProperty (OutputKeys.ENCODING, Environment.defaultEncode);
+            serializer.setOutputProperty (OutputKeys.INDENT, "yes");
+            serializer.setOutputProperty (OutputKeys.STANDALONE, "yes");
+            serializer.setOutputProperty (OutputKeys.METHOD, "html");
+            serializer.transform (domSource, streamResult);
+            content = new String (outStream.toByteArray(), Environment.defaultEncode);
+        }
 
         if (!StringUtil.isEmpty(cssPath))
         {
