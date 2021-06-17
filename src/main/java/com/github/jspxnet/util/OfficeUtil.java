@@ -24,14 +24,13 @@ import java.io.InputStream;
  **/
 public class OfficeUtil {
     public static String excelToHtml(InputStream input,String cssPath) throws Exception {
-
-        HSSFWorkbook excelBook=new HSSFWorkbook(input);
-        ExcelToHtmlConverter excelToHtmlConverter = new ExcelToHtmlConverter (DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument() );
-        excelToHtmlConverter.processWorkbook(excelBook);
-        Document htmlDocument =excelToHtmlConverter.getDocument();
-
         String content = null;
         try (ByteArrayOutputStream outStream = new ByteArrayOutputStream()){
+            HSSFWorkbook excelBook=new HSSFWorkbook(input);
+            ExcelToHtmlConverter excelToHtmlConverter = new ExcelToHtmlConverter (DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument() );
+            excelToHtmlConverter.processWorkbook(excelBook);
+            Document htmlDocument = excelToHtmlConverter.getDocument();
+
             DOMSource domSource = new DOMSource (htmlDocument);
             StreamResult streamResult = new StreamResult (outStream);
             TransformerFactory tf = TransformerFactory.newInstance();
@@ -42,6 +41,8 @@ public class OfficeUtil {
             serializer.setOutputProperty (OutputKeys.METHOD, "html");
             serializer.transform (domSource, streamResult);
             content = new String (outStream.toByteArray(), Environment.defaultEncode);
+        } finally {
+            input.close();
         }
 
         if (!StringUtil.isEmpty(cssPath))

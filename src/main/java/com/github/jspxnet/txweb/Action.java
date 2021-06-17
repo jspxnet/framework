@@ -280,6 +280,8 @@ W
 
     void setActionLogContent(Serializable value);
 
+    void setOrganizeId(Serializable value);
+
     Object getActionLogContent();
 
     ActionLog getActionLog();

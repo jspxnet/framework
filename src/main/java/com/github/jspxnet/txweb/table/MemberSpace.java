@@ -9,6 +9,7 @@
 package com.github.jspxnet.txweb.table;
 
 
+import com.github.jspxnet.enums.CongealEnumType;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Table;
@@ -16,6 +17,8 @@ import com.github.jspxnet.sober.table.OperateTable;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.Date;
 
 /**
  * Created by yuan on 14-3-1.
@@ -50,6 +53,23 @@ public class MemberSpace extends OperateTable {
 
     @Column(caption = "组织名称", length = 200, dataType = "isLengthBetween(0,200)", notNull = true)
     private String organize = StringUtil.empty;
+
+
+    @Column(caption = "部门节点", length = 32)
+    private String nodeId = StringUtil.empty;
+
+    @Column(caption = "是否被冻结", length = 2, option = "0:有效;1:冻结", notNull = true)
+    private int congealType = CongealEnumType.NO_CONGEAL.getValue();
+
+    @Column(caption = "冻结时间")
+    private Date congealDate = new Date();
+
+    @Column(caption = "原因", length = 250)
+    private String reason = StringUtil.empty;
+
+    @Column(caption = "备注", length = 250)
+    private String remark = StringUtil.empty;
+
 
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;

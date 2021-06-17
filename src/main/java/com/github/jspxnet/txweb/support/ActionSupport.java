@@ -376,6 +376,15 @@ public abstract class ActionSupport implements Action {
     }
 
     /**
+     *
+     * @param value 机构id
+     */
+    @Override
+    public void setOrganizeId(Serializable value) {
+        environment.put(ActionEnv.KEY_organizeId, value);
+    }
+
+    /**
      * @return 得到日志记录对象
      */
     @Override
@@ -927,7 +936,7 @@ public abstract class ActionSupport implements Action {
             guestRole.setNamespace(getRootNamespace());
             return guestRole;
         }
-        IRole role = userSession.getRole(getRootNamespace(),getString(ActionEnv.KEY_organizeId, StringUtil.empty,true));
+        IRole role = userSession.getRole(getRootNamespace(),getString(ActionEnv.KEY_organizeId, (String)environment.getOrDefault(ActionEnv.KEY_organizeId,StringUtil.empty),true));
         if (role==null||role.getId()==null)
         {
             Role guestRole = new Role();
