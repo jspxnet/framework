@@ -191,7 +191,8 @@ public class DefaultActionProxy implements ActionProxy {
             if (exeType.equalsIgnoreCase(RocHandle.NAME)) {
                 //ROC 普通调用
                 RocHandle.execute(this);
-            } else {
+            }
+            else {
                 //默认模版方式调用
                 ActionHandle.execute(this);
             }

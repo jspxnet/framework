@@ -23,6 +23,7 @@ import com.github.jspxnet.txweb.annotation.Redirect;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.config.ResultConfigBean;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
+import com.github.jspxnet.txweb.dispatcher.handle.CommandHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.MarkdownHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.RsaRocHandle;
@@ -37,6 +38,7 @@ import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
@@ -136,10 +138,9 @@ public class DefaultActionInvocation implements ActionInvocation {
         Object obj = BEAN_FACTORY.getBean(actionConfig.getIocBean(), namespace);
         Action action = null;
         try {
-            action = (Action)obj;
-        } catch (Exception e)
-        {
-            log.debug("ioc class "+obj+" is not action");
+            action = (Action) obj;
+        } catch (Exception e) {
+            log.debug("ioc class " + obj + " is not action");
             e.printStackTrace();
         }
 
@@ -215,11 +216,10 @@ public class DefaultActionInvocation implements ActionInvocation {
             } else {
                 requestMethodName = jsonData.getString(Environment.rocMethod);
             }
-            if (!StringUtil.isEmpty(methodName) && !methodName.startsWith(TXWebUtil.AT) && !methodName.equals(requestMethodName))
-            {
+            if (!StringUtil.isEmpty(methodName) && !methodName.startsWith(TXWebUtil.AT) && !methodName.equals(requestMethodName)) {
                 log.debug(actionConfig.toString() + " 已配置了执行方法 method:" + methodName + "不允许在调用其它未指定方法");
                 JSONObject errorJson = new JSONObject(RocResponse.error(ErrorEnumType.METHOD_NOT_FOUND.getValue(), actionConfig.getActionName() + " 已配置了执行方法 method:" + methodName + "不允许在调用其它未指定方法"));
-                TXWebUtil.errorPrint(errorJson.toString(4), null,action.getResponse(), HttpStatusType.HTTP_status_403);
+                TXWebUtil.errorPrint(errorJson.toString(4), null, action.getResponse(), HttpStatusType.HTTP_status_403);
                 return;
             }
             requestMethodName = StringUtil.hasLength(requestMethodName) ? requestMethodName : TXWebUtil.AT;
@@ -251,13 +251,11 @@ public class DefaultActionInvocation implements ActionInvocation {
         List<String> tmpList = WEB_CONFIG_MANAGER.getDefaultInterceptors(namespace);
         if (tmpList != null && !tmpList.isEmpty()) {
             //过滤重复的拦截器
-            for (String name:tmpList)
-            {
+            for (String name : tmpList) {
                 if (StringUtil.isEmpty(name)) {
                     continue;
                 }
-                if (!interceptNameList.contains(name))
-                {
+                if (!interceptNameList.contains(name)) {
                     interceptNameList.addLast(name);
                 }
             }
@@ -267,13 +265,11 @@ public class DefaultActionInvocation implements ActionInvocation {
         tmpList = actionConfig.getInterceptors();
         if (tmpList != null) {
             //过滤重复的拦截器
-            for (String name:tmpList)
-            {
+            for (String name : tmpList) {
                 if (StringUtil.isEmpty(name)) {
                     continue;
                 }
-                if (!interceptNameList.contains(name))
-                {
+                if (!interceptNameList.contains(name)) {
                     interceptNameList.addLast(name);
                 }
             }
@@ -466,6 +462,8 @@ public class DefaultActionInvocation implements ActionInvocation {
                 if (result == null) {
                     if (RocHandle.NAME.equalsIgnoreCase(actionProxy.getExeType())) {
                         result = new RocResult();
+                    } else if (CommandHandle.NAME.equalsIgnoreCase(actionProxy.getExeType())) {
+                        result = new RocResult();
                     } else if (MarkdownHandle.NAME.equalsIgnoreCase(actionProxy.getExeType())) {
                         result = new MarkdownResult();
                     } else {
@@ -491,17 +489,14 @@ public class DefaultActionInvocation implements ActionInvocation {
      */
     private void printResultError(Action action, String resultCode) throws Exception {
 
-        if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode)&&StringUtil.isNull(action.getFailureMessage()))
-        {
-            action.addFieldInfo(Environment.warningInfo,"请登陆");
+        if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode) && StringUtil.isNull(action.getFailureMessage())) {
+            action.addFieldInfo(Environment.warningInfo, "请登陆");
         }
-        if (ActionSupport.UNTITLED.equalsIgnoreCase(resultCode)&&StringUtil.isNull(action.getFailureMessage()))
-        {
-            action.addFieldInfo(Environment.warningInfo,"没有权限");
+        if (ActionSupport.UNTITLED.equalsIgnoreCase(resultCode) && StringUtil.isNull(action.getFailureMessage())) {
+            action.addFieldInfo(Environment.warningInfo, "没有权限");
         }
         if (RequestUtil.isRocRequest(action.getRequest())) {
-            if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode))
-            {
+            if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode)) {
 
                 TXWebUtil.print(new JSONObject(RocResponse.error(ErrorEnumType.NEED_LOGIN.getValue(), action.getFailureMessage())),
                         WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_401);
@@ -510,19 +505,16 @@ public class DefaultActionInvocation implements ActionInvocation {
                 TXWebUtil.print(new JSONObject(RocResponse.error(ErrorEnumType.POWER.getValue(), action.getFailureMessage())).toString(),
                         WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_403);
             }
-        } else
-        {
+        } else {
             String loginUrl = EnvFactory.getEnvironmentTemplate().getString(Environment.userLoginUrl);
-            if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode)&&!StringUtil.isEmpty(loginUrl))
-            {
+            if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode) && !StringUtil.isEmpty(loginUrl)) {
                 RedirectResult redirectResult = new RedirectResult();
                 redirectResult.setUrl(loginUrl);
                 redirectResult.execute(this);
                 return;
             }
             String untitledUrl = EnvFactory.getEnvironmentTemplate().getString(Environment.untitledUrl);
-            if (ActionSupport.UNTITLED.equalsIgnoreCase(resultCode)&&!StringUtil.isEmpty(untitledUrl))
-            {
+            if (ActionSupport.UNTITLED.equalsIgnoreCase(resultCode) && !StringUtil.isEmpty(untitledUrl)) {
                 RedirectResult redirectResult = new RedirectResult();
                 redirectResult.setUrl(untitledUrl);
                 redirectResult.execute(this);

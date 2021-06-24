@@ -15,7 +15,6 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.txweb.dispatcher.handle.*;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.evasive.Configuration;
@@ -60,6 +59,8 @@ public class Dispatcher {
         HANDLE_LIST.put(ActionHandle.NAME, new ActionHandle());
         HANDLE_LIST.put(MarkdownHandle.NAME, new MarkdownHandle());
         HANDLE_LIST.put(HessianHandle.NAME, new HessianHandle());
+        HANDLE_LIST.put(CommandHandle.NAME, new CommandHandle());
+
     }
 
     //根路径
@@ -72,10 +73,12 @@ public class Dispatcher {
     //转发次数
     private static EvasiveManager evasiveManager = null;
     private static String encode;
+    final private static String commandSuffix = "cmd";
     private static String markdownSuffix = "md";
     private static String filterSuffix = "jhtml";
     private static String apiFilterSuffix = "jwc";
     private static String templateSuffix = "ftl";
+
 
     private static boolean accessAllowOrigin = true;
 
@@ -156,7 +159,7 @@ public class Dispatcher {
             response.addHeader("Access-Control-Allow-OssSts", "true");
         }
 
-        BeanFactory beanFactory = EnvFactory.getBeanFactory();
+
         // 正常到执行
         String urlName = URLUtil.getFileName(request.getRequestURI());
         String namespace = TXWebUtil.getNamespace(request.getServletPath());
@@ -168,16 +171,20 @@ public class Dispatcher {
         String urlSuffixType = URLUtil.getFileType(request.getRequestURI());
         String suffix;
         //到要执行的方式begin
-        if (urlSuffixType.equalsIgnoreCase(markdownSuffix)) {
+        if (markdownSuffix.equalsIgnoreCase(urlSuffixType)) {
             suffix = markdownSuffix;
-        } else {
+        } else
+        if (commandSuffix.equalsIgnoreCase(urlSuffixType)) {
+            suffix = commandSuffix;
+        }
+        else {
             String requestedWith = RequestUtil.getHeader(request, RequestUtil.REQUEST_X_REQUESTED_WITH);
             String contentType = RequestUtil.getHeader(request, RequestUtil.requestContentType);
             requestedWith = requestedWith.toLowerCase();
             contentType = contentType.toLowerCase();
             if (requestedWith.contains(Environment.rocSecret)) {
                 suffix = RsaRocHandle.NAME;
-            } else if (contentType.contains(HessianHandle.HTTP_HEAND_NAME)) {
+            } else if (contentType.contains(HessianHandle.HTTP_HEARD_NAME)) {
                 suffix = HessianHandle.NAME;
             } else if (requestedWith.contains(RocHandle.NAME) || contentType.contains(RocHandle.HTTP_HEAND_NAME) || apiFilterSuffix.equalsIgnoreCase(urlSuffixType)) {
                 suffix = RocHandle.NAME;
@@ -204,8 +211,7 @@ public class Dispatcher {
         if (response.isCommitted()) {
             return;
         }
-        JSONObject errorResult = new JSONObject(RocResponse.error(-320021, ThrowableUtil.getThrowableMessage(e)));
-        TXWebUtil.print(errorResult.toString(), type, response, HttpStatusType.HTTP_status_405);
+        TXWebUtil.print(new JSONObject(RocResponse.error(-320021, ThrowableUtil.getThrowableMessage(e))).toString(), type, response, HttpStatusType.HTTP_status_405);
     }
 
     static public void init(ServletContext servletContext) {
@@ -248,8 +254,6 @@ public class Dispatcher {
             evasiveConfiguration.setFileName(envTemplate.getString(Environment.evasive_config));
             evasiveManager = EvasiveManager.getInstance();
         }
-
-
     }
 
 

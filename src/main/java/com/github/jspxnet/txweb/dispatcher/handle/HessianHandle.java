@@ -27,7 +27,7 @@ import java.util.Objects;
 public class HessianHandle extends ActionHandle {
     final public static String NAME = "hessian";
 
-    final public static String HTTP_HEAND_NAME = "hessian";
+    final public static String HTTP_HEARD_NAME = "hessian";
 
     final public static String POST = "POST";
 
