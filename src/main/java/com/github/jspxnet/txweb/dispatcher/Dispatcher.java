@@ -51,7 +51,7 @@ public class Dispatcher {
 
     private static Dispatcher instance;
 
-    private static final Map<String, ActionHandle> HANDLE_LIST = new HashMap<>(5);
+    public static final Map<String, ActionHandle> HANDLE_LIST = new HashMap<>(5);
 
     static {
         HANDLE_LIST.put(RocHandle.NAME, new RocHandle());

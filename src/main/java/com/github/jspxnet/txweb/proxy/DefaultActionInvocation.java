@@ -445,7 +445,7 @@ public class DefaultActionInvocation implements ActionInvocation {
      */
     @Override
     public void executeResult(Result result) throws Exception {
-        if (ActionSupport.NONE.equalsIgnoreCase(resultCode)) {
+        if (resultCode==null||ActionSupport.NONE.equalsIgnoreCase(resultCode)) {
             return;
         }
 

@@ -4,13 +4,15 @@ package com.github.jspxnet.boot;
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
+import com.github.jspxnet.boot.environment.Log4jConfig;
+import com.github.jspxnet.boot.environment.impl.Log4jConfigImpl;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.JspxNetListener;
 import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
 import com.github.jspxnet.utils.*;
 import com.thetransactioncompany.cors.CORSConfiguration;
 import com.thetransactioncompany.cors.CORSFilter;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.JreMemoryLeakPreventionListener;
@@ -37,8 +39,10 @@ import java.util.Properties;
  * description: tomcat启动类
  * com.github.jspxnet.boot.TomcatApplication
  **/
-@Slf4j
+
 public class TomcatApplication {
+    final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(TomcatApplication.class);
+
 
     //@Parameter(names = "-port", description = "tomcat server port")
     private static int port;
@@ -64,16 +68,18 @@ public class TomcatApplication {
     public static void main(String[] args) throws Exception{
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
-
+        Log4jConfig log4jConfig = new  Log4jConfigImpl();
+        log4jConfig.createConfig();
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!ArrayUtil.isEmpty(args)) {
-            log.debug("tomcat param:{}",args[0]);
+            log.debug("tomcat param:"+args[0]);
             jspxConfiguration.setDefaultPath(args[0]);
         }
+
         String defaultPath = jspxConfiguration.getDefaultPath();
         Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile((defaultPath==null?"":defaultPath) + "/" + Environment.jspx_properties_file));
 
-        log.debug("defaultPath:{}",defaultPath);
+        log.debug("defaultPath:"+defaultPath);
 
         if (TomcatApplication.jspxNetBootApplication!=null)
         {
@@ -92,12 +98,15 @@ public class TomcatApplication {
 
         boolean openRedis = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_SESSION_REDIS));
         String redisConfig = properties.getProperty(Environment.SERVER_REDISSON_SESSION_CONFIG);
-        log.debug("tomcat web path:{}, port:{},session share:{}",webPath, port,openRedis);
+       // log.debug("tomcat web path:{}, port:{},session share:{}",webPath, port,openRedis);
 
-        File file = new File(webPath);
-        FileUtil.makeDirectory(file);
+        if (!StringUtil.isEmpty(webPath))
+        {
+
+            FileUtil.makeDirectory(webPath);
+        }
+
         Tomcat tomcat = new Tomcat();
-
         Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
         connector.setPort(port);
         connector.setURIEncoding(Environment.defaultEncode);
@@ -149,10 +158,11 @@ public class TomcatApplication {
         standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
         standardContext.addLifecycleListener(new Tomcat.FixContextListener());
         tomcat.addServlet("", "jspxServlet", new ServletDispatcher());
+
         standardContext.addServletMappingDecoded("*.jhtml", "jspxServlet");
         standardContext.addServletMappingDecoded("*.jwc", "jspxServlet");
         standardContext.addServletMappingDecoded("*.md", "jspxServlet");
-
+        standardContext.addServletMappingDecoded("*.cmd", "jspxServlet");
 
         Dispatcher.setRealPath(webPath);
 
@@ -209,14 +219,17 @@ public class TomcatApplication {
          */
 
         StandardContext tmpContext = (StandardContext)standardContext;
-
-        tmpContext.setWorkDir(webPath);
-        File webFile = new File(file,"WEB-INF/web.xml");
-        if (webFile.exists()&&webFile.isFile())
+        if (!StringUtil.isEmpty(webPath))
         {
-            tmpContext.setDefaultWebXml(webFile.getPath());
-            log.debug("default web.xml:{}",webFile.getPath());
+            tmpContext.setWorkDir(webPath);
+            File webFile = new File(webPath,"WEB-INF/web.xml");
+            if (webFile.exists()&&webFile.isFile())
+            {
+                tmpContext.setDefaultWebXml(webFile.getPath());
+                log.debug("default web.xml:"+webFile.getPath());
+            }
         }
+
 
         //我们要把Servlet设置进去
 
@@ -276,6 +289,8 @@ public class TomcatApplication {
         Server server = tomcat.getServer();
         server.setAddress(ip);
         server.setUtilityThreads(threads);
+
+        log.info("Server "+server.getAddress()+":"+port);
         server.await();
     }
 }

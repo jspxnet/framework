@@ -15,6 +15,7 @@ import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
+import com.github.jspxnet.txweb.dispatcher.handle.CommandHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.HessianHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
@@ -102,7 +103,7 @@ public class DefaultActionProxy implements ActionProxy {
         {
             String actionName = getActionName();
             HttpMethod httpMethod = cls.getAnnotation(HttpMethod.class);
-            if (httpMethod!=null&&StringUtil.ASTERISK.equals(httpMethod.actionName())&&ActionHandle.NAME.equalsIgnoreCase(exeType)&&ValidUtil.isGoodName(actionName,1,30))
+            if (httpMethod!=null&&StringUtil.ASTERISK.equals(httpMethod.actionName())&&(ActionHandle.NAME.equalsIgnoreCase(exeType)|| CommandHandle.NAME.equalsIgnoreCase(exeType))&&ValidUtil.isGoodName(actionName,1,30))
             {
                 Method methodTmp = TXWebUtil.getExeMethod(this,cls, actionName);
                 if (methodTmp!=null&&methodTmp.getGenericReturnType().equals(Void.TYPE))

@@ -18,8 +18,8 @@
         <tomcat.version>9.0.43</tomcat.version>
         <jackson.version>2.12.0</jackson.version>
         <redisson.version>3.14.0</redisson.version>
-        <slf4j.version>1.7.30</slf4j.version>
-        <log4j2.version>2.14.0</log4j2.version>
+        <slf4j.version>1.7.31</slf4j.version>
+        <log4j2.version>2.14.1</log4j2.version>
     </properties>
     <licenses>
         <license>
@@ -570,12 +570,14 @@
         </dependency>
 
         <!--slf4j日志门面依赖开始-->
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
         <!--slf4j日志门面依赖结束-->
+
         <!--log4j2日志依赖开始-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -680,14 +682,15 @@
                     <include>**/*.properties</include>
                     <include>**/*.xml</include>
                     <include>**/*.json</include>
+                    <include>**/*.md</include>
                 </includes>
                 <filtering>false</filtering>
             </resource>
             <resource>
                 <directory>src/main/java</directory>
                 <includes>
-                    <include>**/com/*.xml</include>
-                    <include>**/com/*.properties</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
                     <include>**/*.js</include>
                     <include>**/*.txt</include>
                 </includes>
@@ -834,9 +837,14 @@
                                 <outputDirectory>${basedir}/target/classes/resources</outputDirectory>
                                 <resources>
                                     <resource>
+
+
                                         <directory>${basedir}/src/main/resources</directory>
                                         <includes>
                                             <include>**/*.xml</include>
+                                            <include>**/*.txt</include>
+                                            <include>**/*.md</include>
+                                            <include>**/*.js</include>
                                         </includes>
                                     </resource>
                                 </resources>
@@ -861,6 +869,7 @@
                         </archive>
                         <includes>
                             <include>com/github/**/*</include>
+
                         </includes>
                     </configuration>
                 </plugin>

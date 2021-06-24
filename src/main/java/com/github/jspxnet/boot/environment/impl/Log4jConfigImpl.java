@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -16,6 +16,7 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.FileUtil;
+import org.apache.log4j.varia.ExternallyRolledFileAppender;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggingEvent;
@@ -28,6 +29,7 @@ import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
+ *
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2006-11-8
  * Time: 15:23:17
@@ -54,15 +56,20 @@ public class Log4jConfigImpl implements Log4jConfig {
             }
         } else {
             createDefaultConfig();
+
         }
     }
 
     private void createDefaultConfig() {
         FileUtil.makeDirectory(new File(FileUtil.getPathPart(envTemplate.getString(Environment.logErrorFile))));
         Logger log = Logger.getRootLogger();
-        log.removeAllAppenders();
+        //Logger log = LogManager.getRootLogger();
+        log.setAdditivity(true);
+        log.setLevel(Level.ALL);
+
+        //log.removeAllAppenders();
         //不想显示的日志放在这里
-        Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http", "org.redisson", "org.jboss", "io.netty"));
+        Set<String> loggers = new HashSet<>(Arrays.asList("org.apache", "groovyx.net.http", "org.redisson", "org.jboss", "io.netty"));
         for (String httplog : loggers) {
             Logger logger = Logger.getLogger(httplog);
             logger.setLevel(Level.DEBUG);
@@ -78,6 +85,7 @@ public class Log4jConfigImpl implements Log4jConfig {
             errorAppender.setFile(envTemplate.getString(Environment.logErrorFile));
             errorAppender.setMaxFileSize("5120KB");
             errorAppender.setMaxBackupIndex(9);
+
 
 
             PatternLayout errorLayout = new PatternLayout();
@@ -148,6 +156,7 @@ public class Log4jConfigImpl implements Log4jConfig {
         //info
         if (envTemplate.getBoolean(Environment.logJspxInfo)) {
             RollingFileAppender infoAppender = new RollingFileAppender();
+            //RollingFileAppender infoAppender = new RollingFileAppender();
             infoAppender.setName(Environment.logJspxInfo);
             infoAppender.setBufferSize(128);
             infoAppender.setAppend(false);
@@ -178,7 +187,6 @@ public class Log4jConfigImpl implements Log4jConfig {
             debugLayout.setConversionPattern("%-d{yyyy-MM-dd HH:mm} %c %l\r\n%m%n");
             debugAppender.setLayout(debugLayout);
             debugAppender.addFilter(new StopFilter());
-
             debugAppender.activateOptions();
             log.addAppender(debugAppender);
             log.debug("jspx.net run in debug mode");
@@ -186,8 +194,8 @@ public class Log4jConfigImpl implements Log4jConfig {
 
     }
 
-    class JspLogFilter extends StringMatchFilter {
-        private String stringToMatch = "jspx";
+    static class JspLogFilter extends StringMatchFilter {
+        final static private String stringToMatch = "jspx";
         private Level levelMin = Level.INFO;
         private Level levelMax = Level.FATAL;
 
@@ -215,8 +223,8 @@ public class Log4jConfigImpl implements Log4jConfig {
         }
     }
 
-    class SystemLogFilter extends StringMatchFilter {
-        private String stringToMatch = "jspx";
+    static class SystemLogFilter extends StringMatchFilter {
+        final static private String stringToMatch = "jspx";
 
         private Level levelMin = Level.INFO;
         private Level levelMax = Level.FATAL;
@@ -245,7 +253,7 @@ public class Log4jConfigImpl implements Log4jConfig {
         }
     }
 
-    class StopFilter extends StringMatchFilter {
+    static class StopFilter extends StringMatchFilter {
         private final String[] stopNames = {"org.apache.http", "groovyx.net.http", "org.redisson", "org.jboss", "io.netty"};
 
         private boolean isInFilter(String name) {

@@ -1,20 +1,13 @@
 package com.github.jspxnet.txweb.dispatcher.handle;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
-import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
-import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.config.ActionConfig;
-import com.github.jspxnet.txweb.dispatcher.WebHandle;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
-import com.github.jspxnet.txweb.result.RocResult;
-import com.github.jspxnet.txweb.support.ActionSupport;
-import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import lombok.extern.slf4j.Slf4j;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -37,8 +30,10 @@ public class CommandHandle extends ActionHandle {
             throw new Exception("actionConfig  is NULL :" + envParams.toString());
         }
 
-        ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, ActionHandle.NAME, null, request, response);
+        //不需要 synchronized
+        ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
         actionInvocation.initAction();
+        actionInvocation.invoke();
         actionInvocation.executeResult(null);
         ////////////////////action end
     }

@@ -61,7 +61,7 @@ public class ActionHandle extends WebHandle {
         }
 
         //不需要 synchronized
-        ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, ActionHandle.NAME, null, request, response);
+        ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
         actionInvocation.initAction();
         actionInvocation.invoke();
         actionInvocation.executeResult(null);
