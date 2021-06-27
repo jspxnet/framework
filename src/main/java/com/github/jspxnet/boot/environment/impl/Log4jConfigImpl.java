@@ -21,8 +21,12 @@ import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.varia.StringMatchFilter;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.impl.StaticLoggerBinder;
+
 import java.io.File;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,8 +46,11 @@ public class Log4jConfigImpl implements Log4jConfig {
 
     }
 
+
     @Override
     public void createConfig() {
+
+
         String log4jPath = ENV_TEMPLATE.getString(Environment.log4jPath);
         if (!StringUtil.isNull(log4jPath) && FileUtil.isFileExist(log4jPath)) {
             if (log4jPath.endsWith("xml")) {
@@ -189,10 +196,19 @@ public class Log4jConfigImpl implements Log4jConfig {
             debugAppender.activateOptions();
             log.addAppender(debugAppender);
         }
-        log.debug("log debug");
-        log.info("log info");
-        log.error("log error");
 
+
+        if (log.getAllAppenders().hasMoreElements())
+        {
+            Enumeration<AppenderSkeleton> enumeration = log.getAllAppenders();
+            while (enumeration.hasMoreElements())
+            {
+                log.debug("log Appender:" + enumeration.nextElement().getName());
+            }
+        } else
+        {
+            BasicConfigurator.configure();
+        }
     }
 
     static class JspLogFilter extends StringMatchFilter {

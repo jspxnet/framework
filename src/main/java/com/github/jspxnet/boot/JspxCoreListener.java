@@ -86,6 +86,7 @@ public class JspxCoreListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(javax.servlet.ServletContextEvent servletContextEvent) {
+        log.info("create log4j config");
 
         boolean isAndroid = SystemUtil.isAndroid();
         //开始不能调用时间,调用了时间设置不了时区
@@ -137,13 +138,12 @@ public class JspxCoreListener implements ServletContextListener {
             return;
         }
 
-        log.info("create log4j config");
-        Log4jConfig log4jConfig = new Log4jConfigImpl();
-        log4jConfig.createConfig();
 
         log.info("create jspx.net system Environment");
         //环境配置
         envTemplate.createSystemEnv();
+
+
         //修复占位符号
         log.info("create placeholder Environment");
         try {
@@ -151,6 +151,9 @@ public class JspxCoreListener implements ServletContextListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        Log4jConfig log4jConfig = new Log4jConfigImpl();
+        log4jConfig.createConfig();
 
         if (envTemplate.getBoolean(Environment.logJspxDebug))
         {
@@ -265,7 +268,6 @@ public class JspxCoreListener implements ServletContextListener {
         //关闭缓存和线程end
 
         beanFactory.getIocContext().shutdown();
-
 
         //卸载jdbc驱动begin
         Enumeration<Driver> drivers = DriverManager.getDrivers();

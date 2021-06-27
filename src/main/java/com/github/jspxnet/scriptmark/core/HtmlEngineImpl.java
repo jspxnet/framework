@@ -10,6 +10,7 @@
 package com.github.jspxnet.scriptmark.core;
 
 
+import com.github.jspxnet.sioc.tag.LoadElement;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.scriptmark.*;
 import com.github.jspxnet.scriptmark.core.block.CallBlock;
@@ -193,17 +194,21 @@ public class HtmlEngineImpl implements HtmlEngine {
                             } else {
                                 String className = tagMap.get(tagName.toLowerCase());
                                 try {
-                                    tagNode = (TagNode) ClassUtil.newInstance(className);
+                                    Object obj = ClassUtil.newInstance(className);
+                                    tagNode = (TagNode) obj;
                                 } catch (Exception e) {
-                                    log.error("反射载入 " + className + "失败,newInstance load class error:" + className);
+                                    log.error("反射载入 " + className + "失败,newInstance load class error need extends:" + TagNode.class.getName());
                                     e.printStackTrace();
                                 }
                             }
-                            tagNode.setTagName(tagName);
-                            tagNode.setStarLength(i);
-                            tagNode.setEndLength(i);
-                            tagNode.setTemplate(templateElement);
-                            nodeTree.add(tagNode);
+                            if (tagNode!=null)
+                            {
+                                tagNode.setTagName(tagName);
+                                tagNode.setStarLength(i);
+                                tagNode.setEndLength(i);
+                                tagNode.setTemplate(templateElement);
+                                nodeTree.add(tagNode);
+                            }
                         }
                     }
                 }

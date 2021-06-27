@@ -40,7 +40,6 @@ public class ActionLogInterceptor extends InterceptorSupport {
     @Ref
     private RedisStoreQueueClient redisStoreQueueClient;
 
-
     private boolean guestLog = false;
 
     /**

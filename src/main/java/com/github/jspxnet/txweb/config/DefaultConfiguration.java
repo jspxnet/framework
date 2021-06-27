@@ -188,7 +188,7 @@ public class DefaultConfiguration implements Configuration {
             String configString = IoUtil.autoReadText(path,envTemplate.getString(Environment.encode, Environment.defaultEncode));
 
             XmlEngine xmlEngine = new XmlEngineImpl();
-            xmlEngine.putTag(LoadElement.tagName, LoadElement.class.getName());
+            xmlEngine.putTag(LoadElement.TAG_NAME, LoadElement.class.getName());
             List<TagNode> results = xmlEngine.getTagNodes(configString);
             for (TagNode tNode : results) {
                 LoadElement se = (LoadElement) tNode;

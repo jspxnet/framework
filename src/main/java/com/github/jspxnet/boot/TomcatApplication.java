@@ -4,15 +4,12 @@ package com.github.jspxnet.boot;
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
-import com.github.jspxnet.boot.environment.Log4jConfig;
-import com.github.jspxnet.boot.environment.impl.Log4jConfigImpl;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.JspxNetListener;
 import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
 import com.github.jspxnet.utils.*;
 import com.thetransactioncompany.cors.CORSConfiguration;
 import com.thetransactioncompany.cors.CORSFilter;
-
 import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.JreMemoryLeakPreventionListener;
@@ -40,6 +37,7 @@ import java.util.Properties;
  * com.github.jspxnet.boot.TomcatApplication
  **/
 
+
 public class TomcatApplication {
     final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(TomcatApplication.class);
 
@@ -66,9 +64,9 @@ public class TomcatApplication {
     }
 
     public static void main(String[] args) throws Exception{
+
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
-
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!ArrayUtil.isEmpty(args)) {
             log.debug("tomcat param:"+args[0]);
@@ -101,7 +99,6 @@ public class TomcatApplication {
 
         if (!StringUtil.isEmpty(webPath))
         {
-
             FileUtil.makeDirectory(webPath);
         }
 
@@ -276,12 +273,11 @@ public class TomcatApplication {
         standardContext.setRequestCharacterEncoding(Environment.defaultEncode);
         standardContext.setReloadable(true);
 
-        /*
-        　　defaultSessionTimeOut="3600" isWARExpanded="true"
+     /*
+    defaultSessionTimeOut="3600" isWARExpanded="true"
 　　isWARValidated="false" isInvokerEnabled="true"
 　　isWorkDirPersistent="false
-
-         */
+    */
         tomcat.start();
 
         //强制Tomcat server等待，避免main线程执行结束后关闭

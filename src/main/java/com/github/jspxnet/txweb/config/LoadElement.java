@@ -4,7 +4,7 @@ import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.utils.XMLUtil;
 
 public class LoadElement extends TagNode {
-    public final static String tagName = "load";
+    public final static String TAG_NAME = "load";
 
     public LoadElement() {
 
