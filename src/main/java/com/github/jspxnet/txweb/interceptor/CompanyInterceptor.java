@@ -140,7 +140,7 @@ public class CompanyInterceptor extends InterceptorSupport {
                 //提供给日志记录使用
                 action.put(ActionEnv.KEY_organizeId, organizeId);
                 Method method = ClassUtil.getSetMethod(action.getClass(), "setOrganizeId");
-                if (method != null) {
+                if (method != null&&organizeId!=null) {
                     BeanUtil.setSimpleProperty(action, method.getName(), organizeId);
                 }
                 //执行下一个动作,可能是下一个拦截器,也可能是action取决你的配置

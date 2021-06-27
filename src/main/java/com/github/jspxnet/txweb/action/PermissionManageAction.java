@@ -385,6 +385,9 @@ public class PermissionManageAction extends PermissionView {
         setActionLogContent(ArrayUtil.toString(uids, StringUtil.SEMICOLON) + "\r\n" + ObjectUtil.toString(roles));
     }
 
+
+
+
     //更具默认配置分配权限
     @Operate(caption = "重置权限")
     public void reset() throws Exception {
