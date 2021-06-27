@@ -68,8 +68,7 @@ public class TomcatApplication {
     public static void main(String[] args) throws Exception{
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
-        Log4jConfig log4jConfig = new  Log4jConfigImpl();
-        log4jConfig.createConfig();
+
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!ArrayUtil.isEmpty(args)) {
             log.debug("tomcat param:"+args[0]);

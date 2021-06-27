@@ -16,7 +16,6 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.FileUtil;
-import org.apache.log4j.varia.ExternallyRolledFileAppender;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggingEvent;
@@ -37,7 +36,7 @@ import java.util.Set;
  */
 
 public class Log4jConfigImpl implements Log4jConfig {
-    private static final EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+    private static final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
 
     public Log4jConfigImpl() {
 
@@ -45,7 +44,7 @@ public class Log4jConfigImpl implements Log4jConfig {
 
     @Override
     public void createConfig() {
-        String log4jPath = envTemplate.getString(Environment.log4jPath);
+        String log4jPath = ENV_TEMPLATE.getString(Environment.log4jPath);
         if (!StringUtil.isNull(log4jPath) && FileUtil.isFileExist(log4jPath)) {
             if (log4jPath.endsWith("xml")) {
                 DOMConfigurator.configure(log4jPath);
@@ -61,7 +60,7 @@ public class Log4jConfigImpl implements Log4jConfig {
     }
 
     private void createDefaultConfig() {
-        FileUtil.makeDirectory(new File(FileUtil.getPathPart(envTemplate.getString(Environment.logErrorFile))));
+        FileUtil.makeDirectory(new File(FileUtil.getPathPart(ENV_TEMPLATE.getString(Environment.logErrorFile))));
         Logger log = Logger.getRootLogger();
         //Logger log = LogManager.getRootLogger();
         log.setAdditivity(true);
@@ -76,13 +75,13 @@ public class Log4jConfigImpl implements Log4jConfig {
             logger.setAdditivity(false);
         }
 
-        if (envTemplate.getBoolean(Environment.logError)) {
+        if (ENV_TEMPLATE.getBoolean(Environment.logError)) {
             RollingFileAppender errorAppender = new RollingFileAppender();
             errorAppender.setName(Environment.logError);
             errorAppender.setBufferSize(64);
             errorAppender.setAppend(false);
-            errorAppender.setEncoding(envTemplate.getString(Environment.encode));
-            errorAppender.setFile(envTemplate.getString(Environment.logErrorFile));
+            errorAppender.setEncoding(ENV_TEMPLATE.getString(Environment.encode));
+            errorAppender.setFile(ENV_TEMPLATE.getString(Environment.logErrorFile));
             errorAppender.setMaxFileSize("5120KB");
             errorAppender.setMaxBackupIndex(9);
 
@@ -103,13 +102,13 @@ public class Log4jConfigImpl implements Log4jConfig {
         }
 
         //info
-        if (envTemplate.getBoolean(Environment.logInfo)) {
+        if (ENV_TEMPLATE.getBoolean(Environment.logInfo)) {
             RollingFileAppender infoAppender = new RollingFileAppender();
             infoAppender.setName(Environment.logInfo);
             infoAppender.setBufferSize(128);
             infoAppender.setAppend(false);
-            infoAppender.setEncoding(envTemplate.getString(Environment.encode));
-            infoAppender.setFile(envTemplate.getString(Environment.logInfoFile));
+            infoAppender.setEncoding(ENV_TEMPLATE.getString(Environment.encode));
+            infoAppender.setFile(ENV_TEMPLATE.getString(Environment.logInfoFile));
             infoAppender.setMaxFileSize("5120KB");
             infoAppender.setMaxBackupIndex(9);
 
@@ -128,13 +127,13 @@ public class Log4jConfigImpl implements Log4jConfig {
 
 
         //------------------------------jspx begin
-        if (envTemplate.getBoolean(Environment.logJspxError)) {
+        if (ENV_TEMPLATE.getBoolean(Environment.logJspxError)) {
             RollingFileAppender errorAppender = new RollingFileAppender();
             errorAppender.setName(Environment.logJspxError);
             errorAppender.setBufferSize(64);
             errorAppender.setAppend(false);
-            errorAppender.setEncoding(envTemplate.getString(Environment.encode));
-            errorAppender.setFile(envTemplate.getString(Environment.logJspxErrorFile));
+            errorAppender.setEncoding(ENV_TEMPLATE.getString(Environment.encode));
+            errorAppender.setFile(ENV_TEMPLATE.getString(Environment.logJspxErrorFile));
             errorAppender.setMaxFileSize("5120KB");
             errorAppender.setMaxBackupIndex(9);
 
@@ -154,14 +153,14 @@ public class Log4jConfigImpl implements Log4jConfig {
         }
 
         //info
-        if (envTemplate.getBoolean(Environment.logJspxInfo)) {
+        if (ENV_TEMPLATE.getBoolean(Environment.logJspxInfo)) {
             RollingFileAppender infoAppender = new RollingFileAppender();
             //RollingFileAppender infoAppender = new RollingFileAppender();
             infoAppender.setName(Environment.logJspxInfo);
             infoAppender.setBufferSize(128);
             infoAppender.setAppend(false);
-            infoAppender.setEncoding(envTemplate.getString(Environment.encode));
-            infoAppender.setFile(envTemplate.getString(Environment.logJspxInfoFile));
+            infoAppender.setEncoding(ENV_TEMPLATE.getString(Environment.encode));
+            infoAppender.setFile(ENV_TEMPLATE.getString(Environment.logJspxInfoFile));
             infoAppender.setMaxFileSize("5120KB");
             infoAppender.setMaxBackupIndex(9);
 
@@ -180,7 +179,7 @@ public class Log4jConfigImpl implements Log4jConfig {
         }
 
         //debug
-        if (envTemplate.getBoolean(Environment.logJspxDebug)) {
+        if (ENV_TEMPLATE.getBoolean(Environment.logJspxDebug)) {
             WriterAppender debugAppender = new ConsoleAppender();
             debugAppender.setName(Environment.logJspxDebug);
             PatternLayout debugLayout = new PatternLayout();
@@ -189,8 +188,10 @@ public class Log4jConfigImpl implements Log4jConfig {
             debugAppender.addFilter(new StopFilter());
             debugAppender.activateOptions();
             log.addAppender(debugAppender);
-            log.debug("jspx.net run in debug mode");
         }
+        log.debug("log debug");
+        log.info("log info");
+        log.error("log error");
 
     }
 
