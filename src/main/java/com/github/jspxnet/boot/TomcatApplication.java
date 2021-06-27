@@ -1,6 +1,5 @@
 package com.github.jspxnet.boot;
 
-
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
