@@ -45,7 +45,7 @@ public class AnnotationUtil {
      */
     public static void postgreSqlFixSeqId(TableModels soberTable,JdbcOperations jdbcOperations) {
         try {
-            jdbcOperations.update(" SELECT setval('"+soberTable.getName()+"_id_seq', (SELECT MAX(id) FROM "+soberTable.getName()+")+1)");
+            jdbcOperations.update(" SELECT setval('"+soberTable.getName()+"_id_seq', (SELECT MAX(id) FROM "+ soberTable.getName() +")+1)");
         } catch (Exception e) {
             e.printStackTrace();
         }
