@@ -18,9 +18,9 @@ import java.io.InputStream;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/6/15 23:23
- * @description: jspx-framework
+ * author: chenYuan
+ * date: 2021/6/15 23:23
+ * description: office 文档处理
  **/
 public class OfficeUtil {
     public static String excelToHtml(InputStream input,String cssPath) throws Exception {
