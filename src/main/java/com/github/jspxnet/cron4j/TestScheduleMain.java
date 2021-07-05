@@ -14,7 +14,7 @@ public class TestScheduleMain {
         Scheduler s = new Scheduler();
         // Schedule a once-a-minute task.
 
-        s.schedule("*/3 * * * * *", new Runnable() {
+        s.schedule("", new Runnable() {
             int i = 0;
             @Override
             public void run() {

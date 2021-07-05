@@ -18,6 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.utils.StringUtil;
+
 import java.util.*;
 
 /**
@@ -241,7 +243,7 @@ public class SchedulingPattern {
 	 *             If the supplied string is not a valid pattern.
 	 */
 	public SchedulingPattern(String pattern) throws InvalidPatternException {
-		if (pattern==null || " * * * * *".equalsIgnoreCase(pattern))
+		if (StringUtil.isEmpty(pattern) || "* * * * *".equalsIgnoreCase(pattern))
 		{
 			pattern = "0 */1 * * * *";
 		}
