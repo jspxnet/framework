@@ -202,32 +202,32 @@ public class SchedulingPattern {
 	/**
 	 * The ValueMatcher list for the "minute" field.
 	 */
-	protected ArrayList secondsMatchers = new ArrayList();
+	protected List secondsMatchers = new ArrayList();
 	
 	/**
 	 * The ValueMatcher list for the "minute" field.
 	 */
-	protected ArrayList minuteMatchers = new ArrayList();
+	protected List minuteMatchers = new ArrayList();
 
 	/**
 	 * The ValueMatcher list for the "hour" field.
 	 */
-	protected ArrayList hourMatchers = new ArrayList();
+	protected List hourMatchers = new ArrayList();
 
 	/**
 	 * The ValueMatcher list for the "day of month" field.
 	 */
-	protected ArrayList dayOfMonthMatchers = new ArrayList();
+	protected List dayOfMonthMatchers = new ArrayList();
 
 	/**
 	 * The ValueMatcher list for the "month" field.
 	 */
-	protected ArrayList monthMatchers = new ArrayList();
+	protected List monthMatchers = new ArrayList();
 
 	/**
 	 * The ValueMatcher list for the "day of week" field.
 	 */
-	protected ArrayList dayOfWeekMatchers = new ArrayList();
+	protected List dayOfWeekMatchers = new ArrayList();
 
 	/**
 	 * How many matcher groups in this pattern?
@@ -533,6 +533,8 @@ public class SchedulingPattern {
 	 * 
 	 * @return The pattern as a string.
 	 */
+
+	@Override
 	public String toString() {
 		return asString;
 	}
@@ -620,6 +622,7 @@ public class SchedulingPattern {
 			this.maxValue = maxValue;
 		}
 
+		@Override
 		public int parse(String value) throws Exception {
 			int i;
 			try {
@@ -633,10 +636,12 @@ public class SchedulingPattern {
 			return i;
 		}
 
+		@Override
 		public int getMinValue() {
 			return minValue;
 		}
 
+		@Override
 		public int getMaxValue() {
 			return maxValue;
 		}
@@ -706,6 +711,7 @@ public class SchedulingPattern {
 		 * @throws Exception
 		 *             if the input value is invalid
 		 */
+		@Override
 		public int parse(String value) throws Exception {
 			if (value.equalsIgnoreCase("L")) {
 				return 32;
@@ -734,6 +740,7 @@ public class SchedulingPattern {
 			super(1, 12);
 		}
 
+		@Override
 		public int parse(String value) throws Exception {
 			try {
 				// try as a simple value
@@ -763,6 +770,7 @@ public class SchedulingPattern {
 			super(0, 7);
 		}
 
+		@Override
 		public int parse(String value) throws Exception {
 			try {
 				// try as a simple value
