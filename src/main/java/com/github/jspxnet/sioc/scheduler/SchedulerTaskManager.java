@@ -2,12 +2,12 @@ package com.github.jspxnet.sioc.scheduler;
 
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.cron4j.Scheduler;
+import com.github.jspxnet.cron4j.SchedulingPattern;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.annotation.Scheduled;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
-import it.sauronsoftware.cron4j.Scheduler;
-import it.sauronsoftware.cron4j.SchedulingPattern;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Method;
 import java.util.Map;

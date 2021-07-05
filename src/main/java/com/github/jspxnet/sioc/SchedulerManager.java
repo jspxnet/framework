@@ -1,8 +1,7 @@
 package com.github.jspxnet.sioc;
 
+import com.github.jspxnet.cron4j.Scheduler;
 import com.github.jspxnet.sioc.scheduler.TaskProxy;
-import it.sauronsoftware.cron4j.Scheduler;
-
 import java.util.Set;
 
 public interface SchedulerManager {
