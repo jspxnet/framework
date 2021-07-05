@@ -4,11 +4,9 @@ import java.lang.annotation.*;
 /**
  *
  *
- * 定时任务，目前有两种框架，一个是corn4j,一个是quartz
- *
  * 这里我们分别做下介绍
  *
- * corn4j其本身不支持秒，可以通过修改其源文件重新打包来实现支持，其默认规则如下
+ * corn4j 已经升级到秒级别
  * 分：从0到59
  * 时：从0到23
  * 天：从1到31，字母L可以表示月的最后一天
@@ -22,12 +20,13 @@ import java.lang.annotation.*;
  * 除号 /：表示指定一个值的增加幅度。例如 * /5表示每隔5分钟执行一次（序列：0:00, 0:05, 0:10, 0:15 等等）。
  * 再例如3-18/5 * * * * 是指在从3到18分钟值这个范围之中每隔5分钟执行一次（序列：0:03, 0:08, 0:13, 0:18, 1:03, 1:08 等等）。
  *
+ *
  */
 @Documented
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Scheduled {
-    String cron() default "* * * * *";
+    String cron() default "0 */1 * * * *";
 
     boolean once() default false;
 
