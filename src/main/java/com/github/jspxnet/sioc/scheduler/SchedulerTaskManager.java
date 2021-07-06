@@ -46,7 +46,7 @@ public class SchedulerTaskManager implements SchedulerManager {
             return false;
         }
         if (StringUtil.isEmpty(pattern)) {
-            pattern = "* * * * *";
+            pattern = "* * * * * *";
         }
         Scheduler scheduler = new Scheduler();
         //声明线程后调用setDeamon(true)，将该线程设置为守护线程，则容器关闭后，这些守护线程会立即关闭

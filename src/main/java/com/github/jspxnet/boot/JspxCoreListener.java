@@ -14,8 +14,7 @@ import com.github.jspxnet.boot.conf.VcsBootConfig;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.boot.environment.Log4jConfig;
-import com.github.jspxnet.boot.environment.impl.Log4jConfigImpl;
+import com.github.jspxnet.boot.environment.impl.Log4jConfigUtil;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.cache.core.JSCache;
@@ -152,9 +151,7 @@ public class JspxCoreListener implements ServletContextListener {
             e.printStackTrace();
         }
 
-        Log4jConfig log4jConfig = new Log4jConfigImpl();
-        log4jConfig.createConfig();
-
+        Log4jConfigUtil.createConfig();
         if (envTemplate.getBoolean(Environment.logJspxDebug))
         {
             envTemplate.debugPrint();

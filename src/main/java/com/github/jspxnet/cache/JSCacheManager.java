@@ -96,10 +96,14 @@ public class JSCacheManager implements CacheManager {
 
     @Override
     public void registeredCache(JSCache cache) {
+        if (cache==null)
+        {
+            return;
+        }
         if (!containsKey(cache.getName())) {
-            if (cache!=null&&cache.getSecond() > 0 && cache.getStore().isUseTimer()) {
+            if (cache.getSecond() > 0 && cache.getStore().isUseTimer()) {
                 SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
-                schedulerManager.add(cache.getName(), "* * * * *", cache);
+                schedulerManager.add(cache.getName(), "* * * * * *", cache);
             }
             caches.add(cache);
         }

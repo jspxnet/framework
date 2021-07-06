@@ -11,7 +11,6 @@ package com.github.jspxnet.boot.environment.impl;
 
 
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.environment.Log4jConfig;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.utils.StringUtil;
@@ -21,7 +20,6 @@ import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.varia.StringMatchFilter;
-import org.slf4j.ILoggerFactory;
 import org.slf4j.impl.StaticLoggerBinder;
 
 import java.io.File;
@@ -39,39 +37,32 @@ import java.util.Set;
  * android.util.Log
  */
 
-public class Log4jConfigImpl implements Log4jConfig {
-    private static final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
-
-    public Log4jConfigImpl() {
-
-    }
+public class Log4jConfigUtil  {
 
 
-    @Override
-    public void createConfig() {
-
-
-        String log4jPath = ENV_TEMPLATE.getString(Environment.log4jPath);
+    public static void createConfig() {
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        FileUtil.makeDirectory(new File(FileUtil.getPathPart(envTemplate.getString(Environment.logErrorFile))));
+        String log4jPath = envTemplate.getString(Environment.log4jPath);
         if (!StringUtil.isNull(log4jPath) && FileUtil.isFileExist(log4jPath)) {
             if (log4jPath.endsWith("xml")) {
                 DOMConfigurator.configure(log4jPath);
             } else if (log4jPath.endsWith("properties")) {
                 PropertyConfigurator.configure(log4jPath);
             } else {
-                createDefaultConfig();
+                createDefaultConfig(Logger.getRootLogger());
             }
         } else {
-            createDefaultConfig();
+            createDefaultConfig(Logger.getRootLogger());
 
         }
     }
 
-    private void createDefaultConfig() {
-        FileUtil.makeDirectory(new File(FileUtil.getPathPart(ENV_TEMPLATE.getString(Environment.logErrorFile))));
-        Logger log = Logger.getRootLogger();
+    public static void createDefaultConfig(Logger log) {
         //Logger log = LogManager.getRootLogger();
         log.setAdditivity(true);
         log.setLevel(Level.ALL);
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
 
         //log.removeAllAppenders();
         //不想显示的日志放在这里
@@ -82,13 +73,13 @@ public class Log4jConfigImpl implements Log4jConfig {
             logger.setAdditivity(false);
         }
 
-        if (ENV_TEMPLATE.getBoolean(Environment.logError)) {
+        if (envTemplate.getBoolean(Environment.logError)) {
             RollingFileAppender errorAppender = new RollingFileAppender();
             errorAppender.setName(Environment.logError);
             errorAppender.setBufferSize(64);
             errorAppender.setAppend(false);
-            errorAppender.setEncoding(ENV_TEMPLATE.getString(Environment.encode));
-            errorAppender.setFile(ENV_TEMPLATE.getString(Environment.logErrorFile));
+            errorAppender.setEncoding(envTemplate.getString(Environment.encode));
+            errorAppender.setFile(envTemplate.getString(Environment.logErrorFile));
             errorAppender.setMaxFileSize("5120KB");
             errorAppender.setMaxBackupIndex(9);
 
@@ -109,13 +100,13 @@ public class Log4jConfigImpl implements Log4jConfig {
         }
 
         //info
-        if (ENV_TEMPLATE.getBoolean(Environment.logInfo)) {
+        if (envTemplate.getBoolean(Environment.logInfo)) {
             RollingFileAppender infoAppender = new RollingFileAppender();
             infoAppender.setName(Environment.logInfo);
             infoAppender.setBufferSize(128);
             infoAppender.setAppend(false);
-            infoAppender.setEncoding(ENV_TEMPLATE.getString(Environment.encode));
-            infoAppender.setFile(ENV_TEMPLATE.getString(Environment.logInfoFile));
+            infoAppender.setEncoding(envTemplate.getString(Environment.encode));
+            infoAppender.setFile(envTemplate.getString(Environment.logInfoFile));
             infoAppender.setMaxFileSize("5120KB");
             infoAppender.setMaxBackupIndex(9);
 
@@ -134,13 +125,13 @@ public class Log4jConfigImpl implements Log4jConfig {
 
 
         //------------------------------jspx begin
-        if (ENV_TEMPLATE.getBoolean(Environment.logJspxError)) {
+        if (envTemplate.getBoolean(Environment.logJspxError)) {
             RollingFileAppender errorAppender = new RollingFileAppender();
             errorAppender.setName(Environment.logJspxError);
             errorAppender.setBufferSize(64);
             errorAppender.setAppend(false);
-            errorAppender.setEncoding(ENV_TEMPLATE.getString(Environment.encode));
-            errorAppender.setFile(ENV_TEMPLATE.getString(Environment.logJspxErrorFile));
+            errorAppender.setEncoding(envTemplate.getString(Environment.encode));
+            errorAppender.setFile(envTemplate.getString(Environment.logJspxErrorFile));
             errorAppender.setMaxFileSize("5120KB");
             errorAppender.setMaxBackupIndex(9);
 
@@ -160,14 +151,14 @@ public class Log4jConfigImpl implements Log4jConfig {
         }
 
         //info
-        if (ENV_TEMPLATE.getBoolean(Environment.logJspxInfo)) {
+        if (envTemplate.getBoolean(Environment.logJspxInfo)) {
             RollingFileAppender infoAppender = new RollingFileAppender();
             //RollingFileAppender infoAppender = new RollingFileAppender();
             infoAppender.setName(Environment.logJspxInfo);
             infoAppender.setBufferSize(128);
             infoAppender.setAppend(false);
-            infoAppender.setEncoding(ENV_TEMPLATE.getString(Environment.encode));
-            infoAppender.setFile(ENV_TEMPLATE.getString(Environment.logJspxInfoFile));
+            infoAppender.setEncoding(envTemplate.getString(Environment.encode));
+            infoAppender.setFile(envTemplate.getString(Environment.logJspxInfoFile));
             infoAppender.setMaxFileSize("5120KB");
             infoAppender.setMaxBackupIndex(9);
 
@@ -186,7 +177,7 @@ public class Log4jConfigImpl implements Log4jConfig {
         }
 
         //debug
-        if (ENV_TEMPLATE.getBoolean(Environment.logJspxDebug)) {
+        if (envTemplate.getBoolean(Environment.logJspxDebug)) {
             WriterAppender debugAppender = new ConsoleAppender();
             debugAppender.setName(Environment.logJspxDebug);
             PatternLayout debugLayout = new PatternLayout();
@@ -197,15 +188,7 @@ public class Log4jConfigImpl implements Log4jConfig {
             log.addAppender(debugAppender);
         }
 
-
-        if (log.getAllAppenders().hasMoreElements())
-        {
-            Enumeration<AppenderSkeleton> enumeration = log.getAllAppenders();
-            while (enumeration.hasMoreElements())
-            {
-                log.debug("log Appender:" + enumeration.nextElement().getName());
-            }
-        } else
+        if (log.getAllAppenders()==null||!log.getAllAppenders().hasMoreElements())
         {
             BasicConfigurator.configure();
         }

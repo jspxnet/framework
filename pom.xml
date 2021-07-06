@@ -275,12 +275,12 @@
             <version>1.0</version>
             <scope>provided</scope>
         </dependency>
-   <!--     <dependency>
-            <groupId>net.gplatform</groupId>
-            <artifactId>Sdk4J</artifactId>
-            <version>2.0</version>
-            <scope>provided</scope>
-        </dependency>-->
+        <!--     <dependency>
+                 <groupId>net.gplatform</groupId>
+                 <artifactId>Sdk4J</artifactId>
+                 <version>2.0</version>
+                 <scope>provided</scope>
+             </dependency>-->
         <dependency>
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
@@ -397,10 +397,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-               <groupId>dom4j</groupId>
-               <artifactId>dom4j</artifactId>
-               <version>1.6.1</version>
-         </dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6.1</version>
+        </dependency>
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
@@ -569,6 +569,11 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

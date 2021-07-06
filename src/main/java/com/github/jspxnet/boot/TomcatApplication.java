@@ -3,12 +3,14 @@ package com.github.jspxnet.boot;
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
+import com.github.jspxnet.boot.environment.impl.Log4jConfigUtil;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.JspxNetListener;
 import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
 import com.github.jspxnet.utils.*;
 import com.thetransactioncompany.cors.CORSConfiguration;
 import com.thetransactioncompany.cors.CORSFilter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.JreMemoryLeakPreventionListener;
@@ -17,6 +19,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.jasper.servlet.JspServlet;
+import org.apache.logging.slf4j.Log4jLoggerFactory;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.apache.tomcat.util.descriptor.web.ContextResourceLink;
@@ -24,6 +27,9 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.redisson.tomcat.JndiRedissonSessionManager;
+import org.slf4j.Logger;
+import org.slf4j.impl.StaticLoggerBinder;
+
 import java.io.File;
 import java.util.Properties;
 
@@ -36,10 +42,8 @@ import java.util.Properties;
  * com.github.jspxnet.boot.TomcatApplication
  **/
 
-
+@Slf4j
 public class TomcatApplication {
-    final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(TomcatApplication.class);
-
 
     //@Parameter(names = "-port", description = "tomcat server port")
     private static int port;
@@ -74,8 +78,6 @@ public class TomcatApplication {
 
         String defaultPath = jspxConfiguration.getDefaultPath();
         Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile((defaultPath==null?"":defaultPath) + "/" + Environment.jspx_properties_file));
-
-        log.debug("defaultPath:"+defaultPath);
 
         if (TomcatApplication.jspxNetBootApplication!=null)
         {
@@ -145,9 +147,8 @@ public class TomcatApplication {
         //前面的那个步骤只是把Tomcat起起来了，但是没啥东西
         //要把class加载进来,把启动的工程加入进来了
         //StandardContext standardContext = new StandardContext();
-
         standardContext.setPath("");
-        standardContext.setPrivileged(false);
+        standardContext.setPrivileged(true);
         standardContext.setAddWebinfClassesResources(true);
 
         standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
@@ -167,10 +168,12 @@ public class TomcatApplication {
         JarScanner scanner = new StandardJarScanner();
         StandardJarScanFilter scanFilter = new StandardJarScanFilter();
         scanFilter.setDefaultPluggabilityScan(false);
-        scanFilter.setDefaultTldScan(false);
+        scanFilter.setDefaultTldScan(true);
+        scanFilter.setTldSkip("*.jar");
         scanner.setJarScanFilter(scanFilter);
         standardContext.setJarScanner(scanner);
         standardContext.setAddWebinfClassesResources(true);
+
 
         if (openRedis&&!StringUtil.isNull(redisConfig))
         {
@@ -278,6 +281,13 @@ public class TomcatApplication {
 　　isWorkDirPersistent="false
     */
         tomcat.start();
+
+      //  Log4jConfigUtil.createConfig();
+      //  StaticLoggerBinder staticLoggerBinder = StaticLoggerBinder.getSingleton();
+
+        new Log4jLoggerFactory();
+        Log4jConfigUtil.createConfig();
+        log.debug("defaultPath:"+defaultPath);
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = tomcat.getServer();
