@@ -331,7 +331,7 @@ public class JspxDataSource extends DriverManagerDataSource {
                     }
                 }
             }
-            log.debug("minPoolSize:{},连接池有效长度:{}", minPoolSize, poolSize);
+            log.debug("minPoolSize:{},maxPoolSize:{},连接池有效长度:{}", minPoolSize,maxPoolSize,poolSize);
         } catch (Exception e) {
             log.error("连接池线程异常", e);
         }
