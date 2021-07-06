@@ -42,6 +42,7 @@ class GUIDGenerator {
 	 * @return The generated GUID.
 	 */
 	public static String generate() {
+
 		StringBuffer id = new StringBuffer();
 		encode(id, MACHINE_DESCRIPTOR);
 		encode(id, Runtime.getRuntime());
@@ -99,7 +100,7 @@ class GUIDGenerator {
 		StringBuffer b = new StringBuffer();
 		while (e1.hasMoreElements()) {
 			NetworkInterface ni =  e1.nextElement();
-			StringBuffer b1 = getMACAddressDescriptor(ni);
+			StringBuffer b1 = getMacAddressDescriptor(ni);
 			StringBuffer b2 = getInetAddressDescriptor(ni);
 			StringBuffer b3 = new StringBuffer();
 			if (b1 != null) {
@@ -126,7 +127,7 @@ class GUIDGenerator {
 	 * 
 	 * @return A descriptor fragment, or null if the method fails.
 	 */
-	private static StringBuffer getMACAddressDescriptor(NetworkInterface ni) {
+	private static StringBuffer getMacAddressDescriptor(NetworkInterface ni) {
 		byte[] haddr;
 		try {
 			haddr = ni.getHardwareAddress();

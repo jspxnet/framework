@@ -19,7 +19,6 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.jasper.servlet.JspServlet;
-import org.apache.logging.slf4j.Log4jLoggerFactory;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.apache.tomcat.util.descriptor.web.ContextResourceLink;
@@ -27,9 +26,6 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.redisson.tomcat.JndiRedissonSessionManager;
-import org.slf4j.Logger;
-import org.slf4j.impl.StaticLoggerBinder;
-
 import java.io.File;
 import java.util.Properties;
 
@@ -67,7 +63,7 @@ public class TomcatApplication {
     }
 
     public static void main(String[] args) throws Exception{
-
+        Log4jConfigUtil.createConfig();
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
@@ -285,8 +281,6 @@ public class TomcatApplication {
       //  Log4jConfigUtil.createConfig();
       //  StaticLoggerBinder staticLoggerBinder = StaticLoggerBinder.getSingleton();
 
-        new Log4jLoggerFactory();
-        Log4jConfigUtil.createConfig();
         log.debug("defaultPath:"+defaultPath);
 
         //强制Tomcat server等待，避免main线程执行结束后关闭

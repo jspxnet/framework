@@ -152,11 +152,6 @@ public class JspxCoreListener implements ServletContextListener {
         }
 
         Log4jConfigUtil.createConfig();
-        if (envTemplate.getBoolean(Environment.logJspxDebug))
-        {
-            envTemplate.debugPrint();
-        }
-
         //////初始化环境变量 end
 
         log.info("default Path=" + envTemplate.getString(Environment.defaultPath));
