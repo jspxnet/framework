@@ -46,7 +46,7 @@ public class Scheduler {
 	 * The daemon flag. If true the scheduler and its spawned threads acts like
 	 * daemons.
 	 */
-	private boolean daemon = false;
+	private boolean daemon = true;
 
 	/**
 	 * The state flag. If true the scheduler is started and running, otherwise
@@ -323,7 +323,7 @@ public class Scheduler {
 			int size = listeners.size();
 			SchedulerListener[] ret = new SchedulerListener[size];
 			for (int i = 0; i < size; i++) {
-				ret[i] = (SchedulerListener) listeners.get(i);
+				ret[i] = listeners.get(i);
 			}
 			return ret;
 		}
