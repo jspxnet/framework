@@ -159,7 +159,7 @@ public class TemplateResult extends ResultSupport {
         StringWriter out = new StringWriter();
         scriptMark.process(out, valueMap);
         PrintWriter writer = response.getWriter();
-        writer.print(out.toString());
+        writer.print(out);
         writer.flush();
         writer.close();
 

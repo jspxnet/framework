@@ -19,6 +19,7 @@
 package com.github.jspxnet.cron4j;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -31,33 +32,32 @@ import java.util.ArrayList;
 class MemoryTaskCollector implements TaskCollector {
 
 	/**
-	 * Size.
-	 */
-	private int size = 0;
-
-	/**
 	 * The inner scheduling pattern list.
 	 */
-	private ArrayList patterns = new ArrayList();
+	private final List<SchedulingPattern> patterns = new ArrayList<>();
 
 	/**
 	 * The inner task list.
 	 */
-	private ArrayList tasks = new ArrayList();
+	private final List<Task> tasks = new ArrayList<>();
 
 	/**
 	 * IDs for task-pattern couples.
 	 */
-	private ArrayList ids = new ArrayList();
-
-	/**
+	private final List<String> ids = new ArrayList<>();
+/*	*//**
+	 * Size.
+	 *//*
+	private int size = 0;
+	*//**
 	 * Counts how many task are currently collected by this collector.
-	 * 
+	 *
 	 * @return The size of the currently collected task list.
-	 */
+	 *//*
 	public synchronized int size() {
+
 		return size;
-	}
+	}*/
 
 	/**
 	 * Adds a pattern and a task to the collector.
@@ -115,7 +115,7 @@ class MemoryTaskCollector implements TaskCollector {
 	public synchronized Task getTask(String id) {
 		int index = ids.indexOf(id);
 		if (index > -1) {
-			return (Task) tasks.get(index);
+			return tasks.get(index);
 		} else {
 			return null;
 		}
@@ -132,7 +132,7 @@ class MemoryTaskCollector implements TaskCollector {
 	public synchronized SchedulingPattern getSchedulingPattern(String id) {
 		int index = ids.indexOf(id);
 		if (index > -1) {
-			return (SchedulingPattern) patterns.get(index);
+			return patterns.get(index);
 		} else {
 			return null;
 		}
@@ -141,12 +141,13 @@ class MemoryTaskCollector implements TaskCollector {
 	/**
 	 * Implements {@link TaskCollector#getTasks()}.
 	 */
+	@Override
 	public synchronized TaskTable getTasks() {
 		TaskTable ret = new TaskTable();
 		int size = tasks.size();
 		for (int i = 0; i < size; i++) {
-			Task t = (Task) tasks.get(i);
-			SchedulingPattern p = (SchedulingPattern) patterns.get(i);
+			Task t = tasks.get(i);
+			SchedulingPattern p = patterns.get(i);
 			ret.add(p, t);
 		}
 		return ret;

@@ -57,90 +57,6 @@ import java.util.*;
  * Once the scheduler is started, a task will be launched when the five parts in
  * its scheduling pattern will be true at the same time.
  * </p>
- * <p>
- * Some examples:
- * </p>
- * <p>
- * <strong>5 * * * *</strong><br />
- * This pattern causes a task to be launched once every hour, at the begin of
- * the fifth minute (00:05, 01:05, 02:05 etc.).
- * </p>
- * <p>
- * <strong>* * * * *</strong><br />
- * This pattern causes a task to be launched every minute.
- * </p>
- * <p>
- * <strong>* 12 * * Mon</strong><br />
- * This pattern causes a task to be launched every minute during the 12th hour
- * of Monday.
- * </p>
- * <p>
- * <strong>* 12 16 * Mon</strong><br />
- * This pattern causes a task to be launched every minute during the 12th hour
- * of Monday, 16th, but only if the day is the 16th of the month.
- * </p>
- * <p>
- * Every sub-pattern can contain two or more comma separated values.
- * </p>
- * <p>
- * <strong>59 11 * * 1,2,3,4,5</strong><br />
- * This pattern causes a task to be launched at 11:59AM on Monday, Tuesday,
- * Wednesday, Thursday and Friday.
- * </p>
- * <p>
- * Values intervals are admitted and defined using the minus character.
- * </p>
- * <p>
- * <strong>59 11 * * 1-5</strong><br />
- * This pattern is equivalent to the previous one.
- * </p>
- * <p>
- * The slash character can be used to identify step values within a range. It
- * can be used both in the form <em>*&#47;c</em> and <em>a-b/c</em>. The
- * subpattern is matched every <em>c</em> values of the range
- * <em>0,maxvalue</em> or <em>a-b</em>.
- * </p>
- * <p>
- * <strong>*&#47;5 * * * *</strong><br />
- * This pattern causes a task to be launched every 5 minutes (0:00, 0:05, 0:10,
- * 0:15 and so on).
- * </p>
- * <p>
- * <strong>3-18&#47;5 * * * *</strong><br />
- * This pattern causes a task to be launched every 5 minutes starting from the
- * third minute of the hour, up to the 18th (0:03, 0:08, 0:13, 0:18, 1:03, 1:08
- * and so on).
- * </p>
- * <p>
- * <strong>*&#47;15 9-17 * * *</strong><br />
- * This pattern causes a task to be launched every 15 minutes between the 9th
- * and 17th hour of the day (9:00, 9:15, 9:30, 9:45 and so on... note that the
- * last execution will be at 17:45).
- * </p>
- * <p>
- * All the fresh described syntax rules can be used together.
- * </p>
- * <p>
- * <strong>* 12 10-16&#47;2 * *</strong><br />
- * This pattern causes a task to be launched every minute during the 12th hour
- * of the day, but only if the day is the 10th, the 12th, the 14th or the 16th
- * of the month.
- * </p>
- * <p>
- * <strong>* 12 1-15,17,20-25 * *</strong><br />
- * This pattern causes a task to be launched every minute during the 12th hour
- * of the day, but the day of the month must be between the 1st and the 15th,
- * the 20th and the 25, or at least it must be the 17th.
- * </p>
- * <p>
- * Finally cron4j lets you combine more scheduling patterns into one, with the
- * pipe character:
- * </p>
- * <p>
- * <strong>0 5 * * *|8 10 * * *|22 17 * * *</strong><br />
- * This pattern causes a task to be launched every day at 05:00, 10:08 and
- * 17:22.
- * </p>
  * 
  * @author Carlo Pelliccia
  * @since 2.0
@@ -197,37 +113,37 @@ public class SchedulingPattern {
 	/**
 	 * The pattern as a string.
 	 */
-	private String asString;
+	private final String asString;
 
 	/**
 	 * The ValueMatcher list for the "minute" field.
 	 */
-	protected List secondsMatchers = new ArrayList();
+	protected List<ValueMatcher> secondsMatchers = new ArrayList<>();
 	
 	/**
 	 * The ValueMatcher list for the "minute" field.
 	 */
-	protected List minuteMatchers = new ArrayList();
+	protected List<ValueMatcher> minuteMatchers = new ArrayList<>();
 
 	/**
 	 * The ValueMatcher list for the "hour" field.
 	 */
-	protected List hourMatchers = new ArrayList();
+	protected List<ValueMatcher> hourMatchers = new ArrayList<>();
 
 	/**
 	 * The ValueMatcher list for the "day of month" field.
 	 */
-	protected List dayOfMonthMatchers = new ArrayList();
+	protected List<ValueMatcher> dayOfMonthMatchers = new ArrayList<>();
 
 	/**
 	 * The ValueMatcher list for the "month" field.
 	 */
-	protected List monthMatchers = new ArrayList();
+	protected List<ValueMatcher> monthMatchers = new ArrayList<>();
 
 	/**
 	 * The ValueMatcher list for the "day of week" field.
 	 */
-	protected List dayOfWeekMatchers = new ArrayList();
+	protected List<ValueMatcher> dayOfWeekMatchers = new ArrayList<>();
 
 	/**
 	 * How many matcher groups in this pattern?
@@ -325,14 +241,15 @@ public class SchedulingPattern {
 	 */
 	private ValueMatcher buildValueMatcher(String str, ValueParser parser)
 			throws Exception {
-		if (str.length() == 1 && str.equals("*")) {
+
+		if (str.length() == 1 && str.equals(StringUtil.ASTERISK)) {
 			return new AlwaysTrueValueMatcher();
 		}
-		ArrayList values = new ArrayList();
+		List<Integer> values = new ArrayList<>();
 		StringTokenizer st = new StringTokenizer(str, ",");
 		while (st.hasMoreTokens()) {
 			String element = st.nextToken();
-			ArrayList local;
+			List<Integer> local;
 			try {
 				local = parseListElement(element, parser);
 			} catch (Exception e) {
@@ -340,8 +257,8 @@ public class SchedulingPattern {
 						+ "\", invalid element \"" + element + "\", "
 						+ e.getMessage());
 			}
-			for (Iterator i = local.iterator(); i.hasNext();) {
-				Object value = i.next();
+			for (Iterator<Integer> i = local.iterator(); i.hasNext();) {
+				Integer value = i.next();
 				if (!values.contains(value)) {
 					values.add(value);
 				}
@@ -368,14 +285,14 @@ public class SchedulingPattern {
 	 * @throws Exception
 	 *             If the supplied pattern part is not valid.
 	 */
-	private ArrayList parseListElement(String str, ValueParser parser)
+	private List<Integer> parseListElement(String str, ValueParser parser)
 			throws Exception {
 		StringTokenizer st = new StringTokenizer(str, "/");
 		int size = st.countTokens();
 		if (size < 1 || size > 2) {
 			throw new Exception("syntax error");
 		}
-		ArrayList values;
+		List<Integer> values;
 		try {
 			values = parseRange(st.nextToken(), parser);
 		} catch (Exception e) {
@@ -392,7 +309,7 @@ public class SchedulingPattern {
 			if (div < 1) {
 				throw new Exception("non positive divisor \"" + div + "\"");
 			}
-			ArrayList values2 = new ArrayList();
+			List<Integer> values2 = new ArrayList<>();
 			for (int i = 0; i < values.size(); i += div) {
 				values2.add(values.get(i));
 			}
@@ -413,12 +330,12 @@ public class SchedulingPattern {
 	 * @throws Exception
 	 *             If the supplied pattern part is not valid.
 	 */
-	private ArrayList parseRange(String str, ValueParser parser)
+	private List<Integer> parseRange(String str, ValueParser parser)
 			throws Exception {
-		if (str.equals("*")) {
+		if (str.equals(StringUtil.ASTERISK)) {
 			int min = parser.getMinValue();
 			int max = parser.getMaxValue();
-			ArrayList values = new ArrayList();
+			List<Integer> values = new ArrayList<>();
 			for (int i = min; i <= max; i++) {
 				values.add(new Integer(i));
 			}
@@ -438,7 +355,7 @@ public class SchedulingPattern {
 					+ e.getMessage());
 		}
 		if (size == 1) {
-			ArrayList values = new ArrayList();
+			List<Integer> values = new ArrayList<>();
 			values.add(new Integer(v1));
 			return values;
 		} else {
@@ -450,7 +367,7 @@ public class SchedulingPattern {
 				throw new Exception("invalid value \"" + v2Str + "\", "
 						+ e.getMessage());
 			}
-			ArrayList values = new ArrayList();
+			List<Integer> values = new ArrayList<>();
 			if (v1 < v2) {
 				for (int i = v1; i <= v2; i++) {
 					values.add(new Integer(i));

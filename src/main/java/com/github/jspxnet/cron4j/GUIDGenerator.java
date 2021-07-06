@@ -34,7 +34,7 @@ class GUIDGenerator {
 	/**
 	 * The machine descriptor, which is used to identified the underlying hardware machine.
 	 */
-	private static String MACHINE_DESCRIPTOR = getMachineDescriptor();
+	final private static String MACHINE_DESCRIPTOR = getMachineDescriptor();
 	
 	/**
 	 * Generates a GUID (48 chars).
@@ -89,7 +89,7 @@ class GUIDGenerator {
 	 * @return A descriptor fragment, or null if the method fails.
 	 */
 	private static StringBuffer buildNetworkInterfaceDescriptor() {
-		Enumeration e1;
+		Enumeration<NetworkInterface> e1;
 		try {
 			e1 = NetworkInterface.getNetworkInterfaces();
 		} catch (Throwable t) {
@@ -98,7 +98,7 @@ class GUIDGenerator {
 		}
 		StringBuffer b = new StringBuffer();
 		while (e1.hasMoreElements()) {
-			NetworkInterface ni = (NetworkInterface) e1.nextElement();
+			NetworkInterface ni =  e1.nextElement();
 			StringBuffer b1 = getMACAddressDescriptor(ni);
 			StringBuffer b2 = getInetAddressDescriptor(ni);
 			StringBuffer b3 = new StringBuffer();
@@ -157,9 +157,9 @@ class GUIDGenerator {
 	 */
 	private static StringBuffer getInetAddressDescriptor(NetworkInterface ni) {
 		StringBuffer b = new StringBuffer();
-		Enumeration e2 = ni.getInetAddresses();
+		Enumeration<InetAddress> e2 = ni.getInetAddresses();
 		while (e2.hasMoreElements()) {
-			InetAddress addr = (InetAddress) e2.nextElement();
+			InetAddress addr = e2.nextElement();
 			if (b.length() > 0) {
 				b.append(',');
 			}

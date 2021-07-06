@@ -44,6 +44,7 @@ public class ClassUtil {
 
 
 
+
     /**
      * 私有构造方法，防止类的实例化，因为工具类不需要实例化。
      */
@@ -59,7 +60,7 @@ public class ClassUtil {
     public static boolean isStandardType(Type clazz) {
         return isNumberType(clazz) || clazz.equals(Byte.class) || clazz.equals(Character.class)
                 || clazz.equals(String.class) || clazz.equals(char.class) || clazz.equals(boolean.class) || clazz.equals(Boolean.class) ||
-                clazz.equals(Date.class)|| clazz.equals(Date.class) || clazz.equals(Timestamp.class);
+                clazz.equals(Date.class) || clazz.equals(Timestamp.class);
     }
 
 
@@ -1008,12 +1009,32 @@ public class ClassUtil {
 
     public static boolean inNoCheckProxyClass(Class<?> type)
     {
-
-
+        if (type==null)
+        {
+            return true;
+        }
         for (String className:NO_CHECK_IS_PROXY)
         {
 
-            if (type.getName().contains(className))
+            if (type.getName().toLowerCase().startsWith(className.toLowerCase()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static final String[] NO_SEARCH_CLASS = new String[]{"com.seeyon.ctp.common.po.BasePO","org.apache","net.sf.cglib","com.aliyuncs"};
+    public static boolean inNoSearchClass(String clsName)
+    {
+        if (clsName==null)
+        {
+            return true;
+        }
+        for (String className:NO_SEARCH_CLASS)
+        {
+
+            if (clsName.toLowerCase().startsWith(className.toLowerCase()))
             {
                 return true;
             }

@@ -59,6 +59,7 @@ class RunnableTask extends Task {
 	 * Implements {@link Task#execute(TaskExecutionContext)}, launching the
 	 * {@link Runnable#run()} method on the wrapped object.
 	 */
+	@Override
 	public void execute(TaskExecutionContext context) {
 		runnable.run();
 	}
@@ -66,6 +67,7 @@ class RunnableTask extends Task {
 	/**
 	 * Overrides {@link Object#toString()}.
 	 */
+	@Override
 	public String toString() {
 		StringBuffer b = new StringBuffer();
 		b.append("Task[");

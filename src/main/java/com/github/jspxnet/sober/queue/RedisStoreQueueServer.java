@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 @Bean(bind = RedisStoreQueueServer.class, singleton = true)
 public class RedisStoreQueueServer extends BaseRedisStoreQueue  {
 
-    final private static Map<String, CmdRun> CMD_RUN_MAP = new HashMap<>();
+    final private static transient Map<String, CmdRun> CMD_RUN_MAP = new HashMap<>();
 
     static {
         CMD_RUN_MAP.put(BaseRedisStoreQueue.CMD_SAVE, new SaveObjectCmd());

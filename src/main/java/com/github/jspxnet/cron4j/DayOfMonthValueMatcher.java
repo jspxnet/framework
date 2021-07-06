@@ -18,7 +18,7 @@
  */
 package com.github.jspxnet.cron4j;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -31,7 +31,7 @@ import java.util.ArrayList;
  */
 class DayOfMonthValueMatcher extends IntArrayValueMatcher {
 
-	private static final int[] lastDays = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	private static final int[] LAST_DAYS = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 	/**
 	 * Builds the ValueMatcher.
@@ -42,7 +42,7 @@ class DayOfMonthValueMatcher extends IntArrayValueMatcher {
 	 *            its parameter will be one of this list or the
 	 *            last-day-of-month setting applies.
 	 */
-	public DayOfMonthValueMatcher(ArrayList integers) {
+	public DayOfMonthValueMatcher(List<Integer> integers) {
 		super(integers);
 	}
 
@@ -58,7 +58,7 @@ class DayOfMonthValueMatcher extends IntArrayValueMatcher {
 		if (isLeapYear && month == 2) {
 			return value == 29;
 		} else {
-			return value == lastDays[month - 1];
+			return value == LAST_DAYS[month - 1];
 		}
 	}
 

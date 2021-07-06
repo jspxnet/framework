@@ -19,14 +19,14 @@ import java.util.jar.JarFile;
 public class ScanningFile {
 
 
-    private Class<?> superStrategy = String.class;//接口类class 用于过滤 可以不要
+    private final Class<?> superStrategy = String.class;//接口类class 用于过滤 可以不要
 
-    private List<Class<? extends String>> eleStrategyList = new ArrayList<Class<? extends String>>();
+    private final List<Class<? extends String>> eleStrategyList = new ArrayList<>();
 
-    private ClassLoader classLoader = ScanningFile.class.getClassLoader();//默认使用的类加载器
+    private final ClassLoader classLoader = ScanningFile.class.getClassLoader();//默认使用的类加载器
 
     //扫描的结果
-    private List<String> result = new ArrayList<>();
+    private final List<String> result = new ArrayList<>();
 
 
     public static void main(String[] args) {
@@ -54,7 +54,7 @@ public class ScanningFile {
     /**
      * 本地查找
      *
-     * @param packName
+     * @param packName 包名
      */
     private void findClassLocal(final String packName) {
         URI url = null;
@@ -93,7 +93,7 @@ public class ScanningFile {
     /**
      * jar包查找
      *
-     * @param packName
+     * @param packName 包名
      */
     private void findClassJar(final String packName) {
 

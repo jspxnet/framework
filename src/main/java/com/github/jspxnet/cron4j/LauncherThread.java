@@ -32,22 +32,22 @@ class LauncherThread extends Thread {
 	/**
 	 * A GUID for this object.
 	 */
-	private String guid = GUIDGenerator.generate();
+	private final String guid = GUIDGenerator.generate();
 
 	/**
 	 * The owner scheduler.
 	 */
-	private Scheduler scheduler;
+	private final Scheduler scheduler;
 
 	/**
 	 * Task collectors, used to retrieve registered tasks.
 	 */
-	private TaskCollector[] collectors;
+	private final TaskCollector[] collectors;
 
 	/**
 	 * A reference time for task launching.
 	 */
-	private long referenceTimeInMillis;
+	private final long referenceTimeInMillis;
 
 	/**
 	 * Builds the launcher.

@@ -18,8 +18,11 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.boot.DaemonThreadFactory;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * <p>
@@ -44,32 +47,32 @@ public class TaskExecutor {
 	/**
 	 * The scheduler whose this executor belongs to.
 	 */
-	private Scheduler scheduler;
+	private final Scheduler scheduler;
 
 	/**
 	 * The executed task.
 	 */
-	private Task task;
+	private final Task task;
 
 	/**
 	 * A task execution context.
 	 */
-	private MyContext context;
+	private final MyContext context;
 
 	/**
 	 * A unique ID for this executor (used also as a lock object).
 	 */
-	private String guid = GUIDGenerator.generate();
+	private final String guid = GUIDGenerator.generate();
 
 	/**
 	 * An alternative to this (inner classes need it).
 	 */
-	private TaskExecutor myself = this;
+	private final TaskExecutor myself = this;
 
 	/**
 	 * A list of {@link TaskExecutorListener} instances.
 	 */
-	private ArrayList listeners = new ArrayList();
+	private final List<TaskExecutorListener> listeners = new ArrayList<>();
 
 	/**
 	 * A time stamp reporting the start time of this thread.
@@ -94,7 +97,7 @@ public class TaskExecutor {
 	/**
 	 * A lock object, for synchronization purposes.
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * Builds the executor.
@@ -150,7 +153,7 @@ public class TaskExecutor {
 			int size = listeners.size();
 			TaskExecutorListener[] ret = new TaskExecutorListener[size];
 			for (int i = 0; i < size; i++) {
-				ret[i] = (TaskExecutorListener) listeners.get(i);
+				ret[i] = listeners.get(i);
 			}
 			return ret;
 		}
@@ -241,9 +244,7 @@ public class TaskExecutor {
 		synchronized (lock) {
 			startTime = System.currentTimeMillis();
 			String name = "cron4j::scheduler[" + scheduler.getGuid() + "]::executor[" + guid + "]";
-			thread = new Thread(new Runner());
-			thread.setDaemon(daemon);
-			thread.setName(name);
+			thread = new DaemonThreadFactory(name).newThread(new Runner());
 			thread.start();
 		}
 	}
@@ -487,6 +488,7 @@ public class TaskExecutor {
 		/**
 		 * It implements {@link Thread#run()}, executing the wrapped task.
 		 */
+		@Override
 		public void run() {
 			Throwable error = null;
 			startTime = System.currentTimeMillis();
@@ -524,18 +526,22 @@ public class TaskExecutor {
 		 */
 		private double completeness = 0D;
 
+		@Override
 		public Scheduler getScheduler() {
 			return scheduler;
 		}
 
+		@Override
 		public TaskExecutor getTaskExecutor() {
 			return myself;
 		}
 
+		@Override
 		public boolean isStopped() {
 			return stopped;
 		}
 
+		@Override
 		public void pauseIfRequested() {
 			synchronized (lock) {
 				if (paused) {
@@ -548,6 +554,7 @@ public class TaskExecutor {
 			}
 		}
 
+		@Override
 		public void setCompleteness(double completeness) {
 			if (completeness >= 0D && completeness <= 1D) {
 				this.completeness = completeness;
@@ -555,6 +562,7 @@ public class TaskExecutor {
 			}
 		}
 
+		@Override
 		public void setStatusMessage(String message) {
 			this.message = message != null ? message : "";
 			notifyStatusMessageChanged(message);

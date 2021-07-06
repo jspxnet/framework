@@ -898,20 +898,16 @@ public class BeanUtil {
         }
         if (args == null) {
             Method method = object.getClass().getMethod(string);
-            if (method != null) {
-                if (Modifier.isStatic(method.getModifiers())) {
-                    method.invoke(null);
-                } else {
-                    method.invoke(object);
-                }
+            if (Modifier.isStatic(method.getModifiers())) {
+                method.invoke(null);
+            } else {
+                method.invoke(object);
             }
         } else {
             if (SystemUtil.isAndroid()) {
                 Class<?>[] las = ClassUtil.getClassArray(args);
                 Method method = object.getClass().getMethod(string, las);
-                if (method != null) {
-                    return method.invoke(object, args);
-                }
+                return method.invoke(object, args);
             } else {
                 java.beans.Expression expr = new java.beans.Expression(object, string, args);
                 expr.execute();

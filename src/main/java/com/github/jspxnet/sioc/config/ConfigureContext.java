@@ -164,10 +164,10 @@ public class ConfigureContext implements IocContext {
     public void sanIocBean(String className) {
         Set<Class<?>> list = ClassScannerUtils.searchClasses(className,EnvFactory.getBaseConfiguration().getDefaultPath());
         for (Class<?> cls : list) {
-            if (cls == null) {
-                continue;
-            }
             try {
+                if (cls == null) {
+                    continue;
+                }
                 registryIocBean(cls);
             } catch (Exception e) {
                 log.error("ioc scan load class dir error" + cls, e);
@@ -284,6 +284,7 @@ public class ConfigureContext implements IocContext {
                 schedulerMap.put(beanElement.getId(), beanElement.getNamespace());
             }
         } catch (ClassNotFoundException e) {
+            log.error("class not found {}",beanElement.getClassName());
             e.printStackTrace();
         }
     }

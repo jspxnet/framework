@@ -459,6 +459,7 @@ public class UploadFileAction extends MultipartSupport {
         {
             multipartRequest.destroy();
         }
+        multipartRequest = null;
         json.clear();
         return NONE;
     }

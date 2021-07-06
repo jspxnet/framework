@@ -19,33 +19,7 @@
 package com.github.jspxnet.cron4j;
 
 /**
- * <p>
- * Abstract base representation of a cron4j task.
- * </p>
- * <p>
- * Developers can extends this abstract class to build their own tasks.
- * </p>
- * <p>
- * Extending Task means, above all, implementing the
- * {@link it.sauronsoftware.cron4j.Task#execute(TaskExecutionContext)} method. Within this method the
- * task must perform its operation. If the <em>execute()</em> method returns
- * regularly then the execution is considered to be successfully completed. If
- * <em>execute()</em> dies throwing a {@link RuntimeException} then the task
- * execution is considered to be failed. The supplied parameter, which is a
- * {@link TaskExecutionContext} instance, helps the developer in integrating his
- * task with the scheduler executor. Through the context the developer can check
- * if the execution has been paused or stopped, and he can also push back some
- * status informations by calling
- * {@link TaskExecutionContext#setCompleteness(double)} and
- * {@link TaskExecutionContext#setStatusMessage(String)}.
- * </p>
- * <p>
- * If the custom task supports pausing, stopping and/or tracking, that should be
- * notified by overriding {@link it.sauronsoftware.cron4j.Task#canBePaused()},
- * {@link it.sauronsoftware.cron4j.Task#canBeStopped()}, {@link it.sauronsoftware.cron4j.Task#supportsCompletenessTracking()}
- * and/or {@link it.sauronsoftware.cron4j.Task#supportsStatusTracking()}.
- * </p>
- * 
+
  * @author Carlo Pelliccia
  * @since 2.0
  */
@@ -54,7 +28,7 @@ public abstract class Task {
 	/**
 	 * The ID for this task. Also used as an instance synchronization lock.
 	 */
-	private Object id = GUIDGenerator.generate();
+	private final Object id = GUIDGenerator.generate();
 
 	/**
 	 * Empty constructor, does nothing.
@@ -78,15 +52,7 @@ public abstract class Task {
 	 * <p>
 	 * Default implementation returns <em>false</em>.
 	 * </p>
-	 * <p>
-	 * Task developers can override this method to let it return a <em>true</em>
-	 * value, and at the same time they have to implement the
-	 * {@link it.sauronsoftware.cron4j.Task#execute(TaskExecutionContext)} method, so that pause requests
-	 * are really handled. This can be done calling regularly the
-	 * {@link TaskExecutionContext#pauseIfRequested()} method during the task
-	 * execution.
-	 * </p>
-	 * 
+	 *
 	 * @return true if this task can be paused; false otherwise.
 	 */
 	public boolean canBePaused() {
@@ -97,18 +63,7 @@ public abstract class Task {
 	 * <p>
 	 * Checks whether this task supports stop requests.
 	 * </p>
-	 * <p>
-	 * Default implementation returns <em>false</em>.
-	 * </p>
-	 * <p>
-	 * Task developers can override this method to let it return a <em>true</em>
-	 * value, and at the same time they have to implement the
-	 * {@link it.sauronsoftware.cron4j.Task#execute(TaskExecutionContext)} method, so that stop requests
-	 * are really handled. This can be done checking regularly the
-	 * {@link TaskExecutionContext#isStopped()} method during the task
-	 * execution.
-	 * </p>
-	 * 
+	 *
 	 * @return true if this task can be stopped; false otherwise.
 	 */
 	public boolean canBeStopped() {
@@ -122,13 +77,7 @@ public abstract class Task {
 	 * <p>
 	 * Default implementation returns <em>false</em>.
 	 * </p>
-	 * <p>
-	 * The task developer can override this method and returns <em>true</em>,
-	 * having care to regularly calling the
-	 * {@link TaskExecutionContext#setStatusMessage(String)} method during the
-	 * task execution.
-	 * </p>
-	 * 
+	 *
 	 * @return true if this task, during its execution, provides status message
 	 *         regularly.
 	 */

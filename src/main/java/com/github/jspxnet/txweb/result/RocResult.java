@@ -71,7 +71,7 @@ public class RocResult extends ResultSupport {
             {
                 sb.append(stackTraceElement.getLineNumber()).append(StringUtil.COLON).append(stackTraceElement.getClassName()).append(".").append(stackTraceElement.getMethodName()).append(StringUtil.CRLF);
             }
-            log.error("response 已经提交并且关闭,调用方法:{}",sb.toString());
+            log.error("response 已经提交并且关闭,调用方法:{}",sb);
             return;
         }
 

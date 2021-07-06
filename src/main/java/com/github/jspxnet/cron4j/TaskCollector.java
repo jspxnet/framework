@@ -21,10 +21,10 @@ package com.github.jspxnet.cron4j;
 /**
  * <p>
  * This interface describes a task collector. Task collectors can be registered
- * in a {@link it.sauronsoftware.cron4j.Scheduler} instance with the
- * {@link it.sauronsoftware.cron4j.Scheduler#addTaskCollector(it.sauronsoftware.cron4j.TaskCollector)} method. Any registered task
+ * in a {@link com.github.jspxnet.cron4j.Scheduler} instance with the
+ * {@link com.github.jspxnet.cron4j.Scheduler#addTaskCollector(com.github.jspxnet.cron4j.TaskCollector)} method. Any registered task
  * collector is queried by the scheduler once a minute. The developer has to
- * implement the {@link it.sauronsoftware.cron4j.TaskCollector#getTasks()} method, returning a
+ * implement the {@link com.github.jspxnet.cron4j.TaskCollector#getTasks()} method, returning a
  * {@link TaskTable} whose elements has been collected with a custom logic. In
  * example the list can be extracted from a database.
  * </p>
@@ -35,8 +35,8 @@ package com.github.jspxnet.cron4j;
 public interface TaskCollector {
 
 	/**
-	 * Once the instance has been registered on a {@link it.sauronsoftware.cron4j.Scheduler} instance,
-	 * with the {@link it.sauronsoftware.cron4j.Scheduler#addTaskCollector(it.sauronsoftware.cron4j.TaskCollector)} method, this
+	 * Once the instance has been registered on a {@link com.github.jspxnet.cron4j.Scheduler} instance,
+	 * with the {@link com.github.jspxnet.cron4j.Scheduler#addTaskCollector(com.github.jspxnet.cron4j.TaskCollector)} method, this
 	 * method will be queried once a minute. It should return a custom
 	 * {@link TaskTable} object. The scheduler instance will automatically
 	 * iterate over the returned table elements, executing any task whose
@@ -45,6 +45,6 @@ public interface TaskCollector {
 	 * @return The task table that will be automatically injected in the
 	 *         scheduler.
 	 */
-	public TaskTable getTasks();
+	TaskTable getTasks();
 
 }

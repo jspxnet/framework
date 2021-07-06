@@ -33,18 +33,18 @@ class StaticMethodTask extends Task {
 	/**
 	 * The Java class name.
 	 */
-	private String className;
+	private final String className;
 
 	/**
 	 * The name of the static method of the class that has to be launched.
 	 */
-	private String methodName;
+	private final String methodName;
 
 	/**
 	 * Arguments for the static method. The array can be empty, but it can't be
 	 * null.
 	 */
-	private String[] args;
+	private final String[] args;
 
 	/**
 	 * Builds the task.
@@ -69,9 +69,10 @@ class StaticMethodTask extends Task {
 	 * reflection to load the given class and call the given static method with
 	 * the supplied arguments.
 	 */
+	@Override
 	public void execute(TaskExecutionContext context) throws RuntimeException {
 		// Loads the class.
-		Class classObject;
+		Class<?> classObject;
 		try {
 			classObject = Class.forName(className);
 		} catch (ClassNotFoundException e) {
@@ -80,7 +81,7 @@ class StaticMethodTask extends Task {
 		// Finds the method.
 		Method methodObject;
 		try {
-			Class[] argTypes = new Class[] { String[].class };
+			Class<?>[] argTypes = new Class[] { String[].class };
 			methodObject = classObject.getMethod(methodName, argTypes);
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException("Cannot find a " + methodName

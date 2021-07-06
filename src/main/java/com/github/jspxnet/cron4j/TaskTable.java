@@ -19,6 +19,7 @@
 package com.github.jspxnet.cron4j;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -38,12 +39,12 @@ public class TaskTable {
 	/**
 	 * Pattern list.
 	 */
-	private ArrayList patterns = new ArrayList();
+	private List<SchedulingPattern> patterns = new ArrayList<>();
 
 	/**
 	 * Task list.
 	 */
-	private ArrayList tasks = new ArrayList();
+	private final List<Task> tasks = new ArrayList<>();
 
 	/**
 	 * Adds a task and an associated scheduling pattern to the table.
@@ -80,7 +81,7 @@ public class TaskTable {
 	 *             If the supplied index is out of range.
 	 */
 	public Task getTask(int index) throws IndexOutOfBoundsException {
-		return (Task) tasks.get(index);
+		return  tasks.get(index);
 	}
 
 	/**
@@ -95,7 +96,7 @@ public class TaskTable {
 	 */
 	public SchedulingPattern getSchedulingPattern(int index)
 			throws IndexOutOfBoundsException {
-		return (SchedulingPattern) patterns.get(index);
+		return patterns.get(index);
 	}
 
 	/**

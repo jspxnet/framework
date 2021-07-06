@@ -21,6 +21,7 @@ package com.github.jspxnet.cron4j;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -36,7 +37,7 @@ class FileTaskCollector implements TaskCollector {
 	/**
 	 * File list.
 	 */
-	private ArrayList files = new ArrayList();
+	private List<File> FILES = new ArrayList<>();
 
 	/**
 	 * Adds a file.
@@ -45,7 +46,7 @@ class FileTaskCollector implements TaskCollector {
 	 *            The file.
 	 */
 	public synchronized void addFile(File file) {
-		files.add(file);
+		FILES.add(file);
 	}
 
 	/**
@@ -55,7 +56,7 @@ class FileTaskCollector implements TaskCollector {
 	 *            The file.
 	 */
 	public synchronized void removeFile(File file) {
-		files.remove(file);
+		FILES.remove(file);
 	}
 
 	/**
@@ -64,10 +65,10 @@ class FileTaskCollector implements TaskCollector {
 	 * @return The file list.
 	 */
 	public synchronized File[] getFiles() {
-		int size = files.size();
+		int size = FILES.size();
 		File[] ret = new File[size];
 		for (int i = 0; i < size; i++) {
-			ret[i] = (File) files.get(i);
+			ret[i] = FILES.get(i);
 		}
 		return ret;
 	}
@@ -75,11 +76,10 @@ class FileTaskCollector implements TaskCollector {
 	/**
 	 * Implements {@link TaskCollector#getTasks()}.
 	 */
+	@Override
 	public synchronized TaskTable getTasks() {
 		TaskTable ret = new TaskTable();
-		int size = files.size();
-		for (int i = 0; i < size; i++) {
-			File f = (File) files.get(i);
+		for (File f : FILES) {
 			TaskTable aux = null;
 			try {
 				aux = CronParser.parse(f);

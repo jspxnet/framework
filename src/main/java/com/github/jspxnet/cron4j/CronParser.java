@@ -21,6 +21,7 @@ package com.github.jspxnet.cron4j;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -334,7 +335,7 @@ public class CronParser {
 		line = line.substring(pattern.length());
 		size = line.length();
 		// Splitting the line
-		ArrayList splitted = new ArrayList();
+		List splitted = new ArrayList<>();
 		StringBuffer current = null;
 		boolean quotes = false;
 		for (int i = 0; i < size; i++) {

@@ -2,6 +2,7 @@ package com.github.jspxnet.io.jar;
 
 import com.github.jspxnet.io.ScanJar;
 import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -14,6 +15,8 @@ import java.util.jar.JarFile;
 
 
 public class JarScanner implements ScanJar {
+
+
 
     @Override
     public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath) {
@@ -42,12 +45,20 @@ public class JarScanner implements ScanJar {
                                 JarEntry entry = jarEntryEnumeration.nextElement();
                                 String jarEntryName = entry.getName();
                                 //这里我们需要过滤不是class文件和不在basePack包名下的类
-                                if (jarEntryName.contains(".class") && jarEntryName.replaceAll("/", ".").startsWith(packageName)) {
+                                String tempName = jarEntryName.replaceAll("/", ".");
+                                if (tempName.endsWith("."))
+                                {
+                                    tempName = tempName.substring(0,tempName.length()-1);
+                                }
+
+                                if (tempName.contains(".class") && tempName.startsWith(packageName)&&!ClassUtil.inNoSearchClass(tempName))
+                                {
                                     String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replace("/", ".");
-                                    Class cls = ClassUtil.loadClass(className);
+                                    Class<?> cls = ClassUtil.loadClass(className);
                                     if (predicate == null || predicate.test(cls)) {
                                         classes.add(cls);
                                     }
+
                                 }
                             }
                         }

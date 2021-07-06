@@ -20,6 +20,7 @@ package com.github.jspxnet.cron4j;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 
 /**
@@ -34,7 +35,7 @@ public class Scheduler {
 	/**
 	 * A GUID for this scheduler.
 	 */
-	private String guid = GUIDGenerator.generate();
+	private final String guid = GUIDGenerator.generate();
 
 	/**
 	 * The time zone applied by the scheduler.
@@ -56,26 +57,26 @@ public class Scheduler {
 	/**
 	 * Registered {@link TaskCollector}s list.
 	 */
-	private ArrayList collectors = new ArrayList();
+	private final List<TaskCollector> collectors = new ArrayList<>();
 
 	/**
 	 * The {@link MemoryTaskCollector} used for memory stored tasks. Represented
 	 * here for convenience, it is also the first element in the
 	 * {@link Scheduler#collectors} list.
 	 */
-	private MemoryTaskCollector memoryTaskCollector = new MemoryTaskCollector();
+	private final MemoryTaskCollector memoryTaskCollector = new MemoryTaskCollector();
 
 	/**
 	 * The {@link FileTaskCollector} used for reading tasks from files.
 	 * Represented here for convenience, it is also the second element in the
 	 * {@link Scheduler#collectors} list.
 	 */
-	private FileTaskCollector fileTaskCollector = new FileTaskCollector();
+	private final FileTaskCollector fileTaskCollector = new FileTaskCollector();
 
 	/**
 	 * Registered {@link SchedulerListener}s list.
 	 */
-	private ArrayList listeners = new ArrayList();
+	private final List<SchedulerListener> listeners = new ArrayList<>();
 
 	/**
 	 * The thread checking the clock and requesting the spawning of launcher
@@ -86,17 +87,17 @@ public class Scheduler {
 	/**
 	 * Currently running {@link LauncherThread} instances.
 	 */
-	private ArrayList launchers = null;
+	private List<LauncherThread> launchers = null;
 
 	/**
 	 * Currently running {@link TaskExecutor} instances.
 	 */
-	private ArrayList executors = null;
+	private List<TaskExecutor> executors = null;
 
 	/**
 	 * Internal lock, used to synchronize status-aware operations.
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * It builds and prepares a brand new Scheduler instance.
@@ -341,11 +342,15 @@ public class Scheduler {
 	 *         {@link TaskExecutor} objects.
 	 */
 	public TaskExecutor[] getExecutingTasks() {
+		if (executors==null)
+		{
+			return null;
+		}
 		synchronized (executors) {
 			int size = executors.size();
 			TaskExecutor[] ret = new TaskExecutor[size];
 			for (int i = 0; i < size; i++) {
-				ret[i] = (TaskExecutor) executors.get(i);
+				ret[i] = executors.get(i);
 			}
 			return ret;
 		}
@@ -558,8 +563,8 @@ public class Scheduler {
 				throw new IllegalStateException("Scheduler already started");
 			}
 			// Initializes required lists.
-			launchers = new ArrayList();
-			executors = new ArrayList();
+			launchers = new ArrayList<>();
+			executors = new ArrayList<>();
 			// Starts the timer thread.
 			timer = new TimerThread(this);
 			timer.setDaemon(daemon);
@@ -698,9 +703,7 @@ public class Scheduler {
 	 */
 	void notifyTaskLaunching(TaskExecutor executor) {
 		synchronized (listeners) {
-			int size = listeners.size();
-			for (int i = 0; i < size; i++) {
-				SchedulerListener l = (SchedulerListener) listeners.get(i);
+			for (SchedulerListener l : listeners) {
 				l.taskLaunching(executor);
 			}
 		}
@@ -715,10 +718,8 @@ public class Scheduler {
 	 */
 	void notifyTaskSucceeded(TaskExecutor executor) {
 		synchronized (listeners) {
-			int size = listeners.size();
-			for (int i = 0; i < size; i++) {
-				SchedulerListener l = (SchedulerListener) listeners.get(i);
-				l.taskSucceeded(executor);
+			for (SchedulerListener listener : listeners) {
+				listener.taskSucceeded(executor);
 			}
 		}
 	}
@@ -734,10 +735,8 @@ public class Scheduler {
 	 */
 	void notifyTaskFailed(TaskExecutor executor, Throwable exception) {
 		synchronized (listeners) {
-			int size = listeners.size();
-			if (size > 0) {
-				for (int i = 0; i < size; i++) {
-					SchedulerListener l = (SchedulerListener) listeners.get(i);
+			if (listeners.size() > 0) {
+				for (SchedulerListener l : listeners) {
 					l.taskFailed(executor, exception);
 				}
 			} else {

@@ -18,6 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.boot.DaemonThreadFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,27 +41,27 @@ class StreamBridge {
 	/**
 	 * Used to trace alive instances.
 	 */
-	private static List traced = new ArrayList();
+	private static final List<StreamBridge> TRACED = new ArrayList<>();
 
 	/**
 	 * A self-referece, for inner classes.
 	 */
-	private StreamBridge myself = this;
+	private final StreamBridge myself = this;
 
 	/**
 	 * The thread executing the job.
 	 */
-	private Thread thread;
+	private final Thread thread;
 
 	/**
 	 * The stream from which the data is read.
 	 */
-	private InputStream in;
+	private final InputStream in;
 
 	/**
 	 * The stream in which the data is written.
 	 */
-	private OutputStream out;
+	private final OutputStream out;
 
 	/**
 	 * Builds the instance.
@@ -72,9 +74,9 @@ class StreamBridge {
 	public StreamBridge(InputStream in, OutputStream out) {
 		this.in = in;
 		this.out = out;
-		this.thread = new Thread(new Runner());
-		synchronized (traced) {
-			traced.add(this);
+		this.thread = new DaemonThreadFactory("cron4j_streambridge").newThread(new Runner());
+		synchronized (TRACED) {
+			TRACED.add(this);
 		}
 	}
 
@@ -200,8 +202,8 @@ class StreamBridge {
 			} catch (Throwable t) {
 				;
 			}
-			synchronized (traced) {
-				traced.remove(myself);
+			synchronized (TRACED) {
+				TRACED.remove(myself);
 			}
 		}
 

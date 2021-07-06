@@ -5,7 +5,7 @@ import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.utils.StringUtil;
 import org.redisson.api.RedissonClient;
 
-public abstract class BaseRedisStoreQueue {
+public abstract class BaseRedisStoreQueue  {
     final static public String CMD_SAVE = "save";
     final static public String CMD_UPDATE = "update";
     final static public String CMD_UPDATE_SQL = "updateSql";
@@ -14,6 +14,6 @@ public abstract class BaseRedisStoreQueue {
     final static String STORE_KEY = StringUtil.replace(BaseRedisStoreQueue.class.getName(), ".", ":") + ":data";
 
     @Ref(bind = RedissonClientConfig.class)
-    protected RedissonClient redissonClient;
+    protected transient RedissonClient redissonClient;
 
 }

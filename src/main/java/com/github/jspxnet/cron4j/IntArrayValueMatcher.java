@@ -18,7 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
-import java.util.ArrayList;
+
+import java.util.List;
 
 /**
  * <p>
@@ -33,7 +34,7 @@ class IntArrayValueMatcher implements ValueMatcher {
 	/**
 	 * The accepted values.
 	 */
-	private int[] values;
+	private final int[] values;
 
 	/**
 	 * Builds the ValueMatcher.
@@ -43,12 +44,12 @@ class IntArrayValueMatcher implements ValueMatcher {
 	 *            by the matcher. The match() method will return true only if
 	 *            its parameter will be one of this list.
 	 */
-	public IntArrayValueMatcher(ArrayList integers) {
+	public IntArrayValueMatcher(List<Integer> integers) {
 		int size = integers.size();
 		values = new int[size];
 		for (int i = 0; i < size; i++) {
 			try {
-				values[i] = ((Integer) integers.get(i)).intValue();
+				values[i] = integers.get(i);
 			} catch (Exception e) {
 				throw new IllegalArgumentException(e.getMessage());
 			}
@@ -58,9 +59,10 @@ class IntArrayValueMatcher implements ValueMatcher {
 	/**
 	 * Returns true if the given value is included in the matcher list.
 	 */
+	@Override
 	public boolean match(int value) {
-		for (int i = 0; i < values.length; i++) {
-			if (values[i] == value) {
+		for (int j : values) {
+			if (j == value) {
 				return true;
 			}
 		}

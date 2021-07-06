@@ -11,8 +11,7 @@ public class ClassScannerUtils {
         return searchClasses(packageName, null,defaultPath);
     }
 
-    public static Set<Class<?>> searchClasses(String packageName, Predicate predicate,String defaultPath) {
-        ScanExecutor scanExecutor = ScanExecutor.getInstance();
-        return scanExecutor.search(packageName, predicate,defaultPath);
+    public static Set<Class<?>> searchClasses(String packageName, Predicate<Class<?>> predicate,String defaultPath) {
+        return ScanExecutor.getInstance().search(packageName, predicate,defaultPath);
     }
 }

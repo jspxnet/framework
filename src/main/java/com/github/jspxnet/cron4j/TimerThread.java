@@ -33,7 +33,7 @@ class TimerThread extends Thread {
 	/**
 	 * A GUID for this object.
 	 */
-	private String guid = GUIDGenerator.generate();
+	private final String guid = GUIDGenerator.generate();
 
 	/**
 	 * The owner scheduler.

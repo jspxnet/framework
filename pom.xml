@@ -121,7 +121,6 @@
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
             <version>4.7.1</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.belerweb</groupId>
@@ -310,7 +309,6 @@
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-core</artifactId>
             <version>4.5.14</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.aliyun</groupId>
@@ -340,13 +338,11 @@
             <groupId>org.jxls</groupId>
             <artifactId>jxls</artifactId>
             <version>2.9.0</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jxls</groupId>
             <artifactId>jxls-poi</artifactId>
             <version>2.9.0</version>
-            <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-excelant -->
         <dependency>
@@ -450,11 +446,6 @@
             <scope>provided</scope>
         </dependency>
         <!--测试基础支持begin -->
-        <!--      <dependency>
-                  <groupId>com.intellij</groupId>
-                  <artifactId>forms_rt</artifactId>
-                  <version>7.0.3</version>
-              </dependency>-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
