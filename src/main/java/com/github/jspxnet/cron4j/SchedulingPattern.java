@@ -411,12 +411,12 @@ public class SchedulingPattern {
 		int dayOfWeek = gc.get(Calendar.DAY_OF_WEEK) - 1;
 		int year = gc.get(Calendar.YEAR);
 		for (int i = 0; i < matcherSize; i++) {
-			ValueMatcher secondsMatcher = (ValueMatcher) secondsMatchers.get(i);
-			ValueMatcher minuteMatcher = (ValueMatcher) minuteMatchers.get(i);
-			ValueMatcher hourMatcher = (ValueMatcher) hourMatchers.get(i);
-			ValueMatcher dayOfMonthMatcher = (ValueMatcher) dayOfMonthMatchers.get(i);
-			ValueMatcher monthMatcher = (ValueMatcher) monthMatchers.get(i);
-			ValueMatcher dayOfWeekMatcher = (ValueMatcher) dayOfWeekMatchers.get(i);
+			ValueMatcher secondsMatcher =  secondsMatchers.get(i);
+			ValueMatcher minuteMatcher =  minuteMatchers.get(i);
+			ValueMatcher hourMatcher =  hourMatchers.get(i);
+			ValueMatcher dayOfMonthMatcher =  dayOfMonthMatchers.get(i);
+			ValueMatcher monthMatcher =  monthMatchers.get(i);
+			ValueMatcher dayOfWeekMatcher =  dayOfWeekMatchers.get(i);
 			boolean eval = secondsMatcher.match(seconds)
 					&&minuteMatcher.match(minute)
 					&& hourMatcher.match(hour)
@@ -630,7 +630,7 @@ public class SchedulingPattern {
 		 */
 		@Override
 		public int parse(String value) throws Exception {
-			if (value.equalsIgnoreCase("L")) {
+			if ("L".equalsIgnoreCase(value)) {
 				return 32;
 			} else {
 				return super.parse(value);
@@ -647,7 +647,7 @@ public class SchedulingPattern {
 		/**
 		 * Months aliases.
 		 */
-		private static String[] ALIASES = { "jan", "feb", "mar", "apr", "may",
+		private static final String[] ALIASES = { "jan", "feb", "mar", "apr", "may",
 				"jun", "jul", "aug", "sep", "oct", "nov", "dec" };
 
 		/**
@@ -678,7 +678,7 @@ public class SchedulingPattern {
 		/**
 		 * Days of week aliases.
 		 */
-		private static String[] ALIASES = { "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
+		private static final String[] ALIASES = { "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
 
 		/**
 		 * Builds the months value parser.

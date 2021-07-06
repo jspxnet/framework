@@ -63,7 +63,7 @@ public class TaskExecutor {
 	/**
 	 * A unique ID for this executor (used also as a lock object).
 	 */
-	private final String guid = RandomUtil.getRandomGUID(32);
+	private final String guid = RandomUtil.getRandomGUID(24);
 
 	/**
 	 * An alternative to this (inner classes need it).
@@ -98,6 +98,7 @@ public class TaskExecutor {
 	/**
 	 * A lock object, for synchronization purposes.
 	 */
+
 	private final Object lock = new Object();
 
 	/**
@@ -238,10 +239,9 @@ public class TaskExecutor {
 	/**
 	 * Starts executing the task (spawns a secondary thread).
 	 * 
-	 * @param daemon
-	 *            true to spawn a daemon thread; false otherwise.
+	 * daemon true to spawn a daemon thread; false otherwise.
 	 */
-	void start(boolean daemon) {
+	void start() {
 		synchronized (lock) {
 			startTime = System.currentTimeMillis();
 			String name = "cron4j::scheduler[" + scheduler.getGuid() + "]::executor[" + guid + "]";

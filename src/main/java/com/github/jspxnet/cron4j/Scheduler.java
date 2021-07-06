@@ -89,12 +89,12 @@ public class Scheduler {
 	/**
 	 * Currently running {@link LauncherThread} instances.
 	 */
-	private List<LauncherThread> launchers = null;
+	final private List<LauncherThread> launchers = new ArrayList<>();
 
 	/**
 	 * Currently running {@link TaskExecutor} instances.
 	 */
-	private List<TaskExecutor> executors = null;
+	final private List<TaskExecutor> executors = new ArrayList<>();
 
 	/**
 	 * Internal lock, used to synchronize status-aware operations.
@@ -182,7 +182,7 @@ public class Scheduler {
 	public void setDaemon(boolean on) throws IllegalStateException {
 		synchronized (lock) {
 			if (started) {
-				throw new IllegalStateException("Scheduler already started");
+				throw new IllegalStateException("scheduler already started");
 			}
 			this.daemon = on;
 		}
@@ -564,9 +564,6 @@ public class Scheduler {
 			if (started) {
 				throw new IllegalStateException("Scheduler already started");
 			}
-			// Initializes required lists.
-			launchers = new ArrayList<>();
-			executors = new ArrayList<>();
 			// Starts the timer thread.
 			timer = new TimerThread(this);
 			timer.setDaemon(daemon);
@@ -594,34 +591,49 @@ public class Scheduler {
 			tillThreadDies(timer);
 			timer = null;
 			// Interrupts any running launcher and waits for its death.
-			for (;;) {
+			for (LauncherThread launcher:launchers)
+			{
+				launcher.interrupt();
+				tillThreadDies(launcher);
+			}
+			launchers.clear();
+			/*for (;;) {
 				LauncherThread launcher = null;
 				synchronized (launchers) {
 					if (launchers.size() == 0) {
 						break;
 					}
-					launcher = (LauncherThread) launchers.remove(0);
+					launcher = launchers.remove(0);
 				}
 				launcher.interrupt();
 				tillThreadDies(launcher);
 			}
-			launchers = null;
+			launchers.clear();*/
 			// Interrupts any running executor and waits for its death.
 			// Before exiting wait for all the active tasks end.
+			for (TaskExecutor executor:executors)
+			{
+				if (executor.canBeStopped()) {
+					executor.stop();
+				}
+				tillExecutorDies(executor);
+			}
+			executors.clear();
+			/*
 			for (;;) {
 				TaskExecutor executor = null;
 				synchronized (executors) {
 					if (executors.size() == 0) {
 						break;
 					}
-					executor = (TaskExecutor) executors.remove(0);
+					executor = executors.remove(0);
 				}
 				if (executor.canBeStopped()) {
 					executor.stop();
 				}
 				tillExecutorDies(executor);
 			}
-			executors = null;
+			executors.clear();*/
 			// Change the state of the object.
 			started = false;
 		}
@@ -642,7 +654,7 @@ public class Scheduler {
 			int size = collectors.size();
 			nowCollectors = new TaskCollector[size];
 			for (int i = 0; i < size; i++) {
-				nowCollectors[i] = (TaskCollector) collectors.get(i);
+				nowCollectors[i] = collectors.get(i);
 			}
 		}
 		LauncherThread l = new LauncherThread(this, nowCollectors,
@@ -667,7 +679,7 @@ public class Scheduler {
 		synchronized (executors) {
 			executors.add(e);
 		}
-		e.start(daemon);
+		e.start();
 		return e;
 	}
 
@@ -737,7 +749,7 @@ public class Scheduler {
 	 */
 	void notifyTaskFailed(TaskExecutor executor, Throwable exception) {
 		synchronized (listeners) {
-			if (listeners.size() > 0) {
+			if (!listeners.isEmpty()) {
 				for (SchedulerListener l : listeners) {
 					l.taskFailed(executor, exception);
 				}

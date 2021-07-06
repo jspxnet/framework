@@ -86,8 +86,9 @@ class LauncherThread extends Thread {
 	 */
 	@Override
 	public void run() {
-		outer: for (int i = 0; i < collectors.length; i++) {
-			TaskTable taskTable = collectors[i].getTasks();
+		outer:
+		for (TaskCollector collector : collectors) {
+			TaskTable taskTable = collector.getTasks();
 			int size = taskTable.size();
 			for (int j = 0; j < size; j++) {
 				if (isInterrupted()) {

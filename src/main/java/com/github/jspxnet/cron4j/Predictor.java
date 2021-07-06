@@ -182,12 +182,12 @@ public class Predictor {
 			int month = c.get(Calendar.MONTH);
 			int year = c.get(Calendar.YEAR);
 			// Gets the matchers.
-			ValueMatcher secondsMatcher = (ValueMatcher)  schedulingPattern.secondsMatchers.get(k);
-			ValueMatcher minuteMatcher = (ValueMatcher) schedulingPattern.minuteMatchers.get(k);
-			ValueMatcher hourMatcher = (ValueMatcher) schedulingPattern.hourMatchers.get(k);
-			ValueMatcher dayOfMonthMatcher = (ValueMatcher) schedulingPattern.dayOfMonthMatchers.get(k);
-			ValueMatcher dayOfWeekMatcher = (ValueMatcher) schedulingPattern.dayOfWeekMatchers.get(k);
-			ValueMatcher monthMatcher = (ValueMatcher) schedulingPattern.monthMatchers.get(k);
+			ValueMatcher secondsMatcher = schedulingPattern.secondsMatchers.get(k);
+			ValueMatcher minuteMatcher =  schedulingPattern.minuteMatchers.get(k);
+			ValueMatcher hourMatcher =  schedulingPattern.hourMatchers.get(k);
+			ValueMatcher dayOfMonthMatcher =  schedulingPattern.dayOfMonthMatchers.get(k);
+			ValueMatcher dayOfWeekMatcher =  schedulingPattern.dayOfWeekMatchers.get(k);
+			ValueMatcher monthMatcher =  schedulingPattern.monthMatchers.get(k);
 			for (;;) { // day of week
 				for (;;) { // month
 					for (;;) { // day of month

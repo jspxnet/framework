@@ -35,7 +35,7 @@ class TimerThread extends Thread {
 	/**
 	 * A GUID for this object.
 	 */
-	private final String guid = RandomUtil.getRandomGUID(32);
+	private final String guid = RandomUtil.getRandomGUID(24);
 
 	/**
 	 * The owner scheduler.
@@ -51,7 +51,7 @@ class TimerThread extends Thread {
 	public TimerThread(Scheduler scheduler) {
 		this.scheduler = scheduler;
 		// Thread name.
-		String name = "cron4j::scheduler[" + scheduler.getGuid() + "]::timer[" + guid + "]";
+		final String name = "cron4j::scheduler[" + scheduler.getGuid() + "]::timer[" + guid + "]";
 		setName(name);
 	}
 
