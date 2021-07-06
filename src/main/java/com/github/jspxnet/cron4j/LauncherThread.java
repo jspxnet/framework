@@ -18,6 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.utils.RandomUtil;
+
 /**
  * LauncherThreads are used by {@link Scheduler} instances. A LauncherThread
  * retrieves a list of task from a set of {@link TaskCollector}s. Then it
@@ -32,7 +34,7 @@ class LauncherThread extends Thread {
 	/**
 	 * A GUID for this object.
 	 */
-	private final String guid = GUIDGenerator.generate();
+	private final String guid = RandomUtil.getRandomGUID(32);
 
 	/**
 	 * The owner scheduler.

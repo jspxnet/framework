@@ -19,6 +19,7 @@
 package com.github.jspxnet.cron4j;
 
 import com.github.jspxnet.boot.DaemonThreadFactory;
+import com.github.jspxnet.utils.RandomUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -62,7 +63,7 @@ public class TaskExecutor {
 	/**
 	 * A unique ID for this executor (used also as a lock object).
 	 */
-	private final String guid = GUIDGenerator.generate();
+	private final String guid = RandomUtil.getRandomGUID(32);
 
 	/**
 	 * An alternative to this (inner classes need it).

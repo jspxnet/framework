@@ -18,6 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.utils.RandomUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +71,7 @@ class MemoryTaskCollector implements TaskCollector {
 	 * @return An ID for the scheduled operation.
 	 */
 	public synchronized String add(SchedulingPattern pattern, Task task) {
-		String id = GUIDGenerator.generate();
+		String id = RandomUtil.getRandomGUID(32);
 		patterns.add(pattern);
 		tasks.add(task);
 		ids.add(id);

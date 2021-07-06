@@ -18,6 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.utils.RandomUtil;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +37,7 @@ public class Scheduler {
 	/**
 	 * A GUID for this scheduler.
 	 */
-	private final String guid = GUIDGenerator.generate();
+	private final String guid = RandomUtil.getRandomGUID(32);
 
 	/**
 	 * The time zone applied by the scheduler.

@@ -18,6 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.utils.RandomUtil;
+
 /**
  * <p>
  * TimeThreads are used by {@link Scheduler} instances. A TimerThread spends
@@ -33,7 +35,7 @@ class TimerThread extends Thread {
 	/**
 	 * A GUID for this object.
 	 */
-	private final String guid = GUIDGenerator.generate();
+	private final String guid = RandomUtil.getRandomGUID(32);
 
 	/**
 	 * The owner scheduler.

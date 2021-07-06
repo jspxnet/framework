@@ -40,14 +40,14 @@ public interface TaskExecutionContext {
 	 * 
 	 * @return The scheduler.
 	 */
-	public Scheduler getScheduler();
+	Scheduler getScheduler();
 
 	/**
 	 * Returns the task executor.
 	 * 
 	 * @return The task executor.
 	 */
-	public TaskExecutor getTaskExecutor();
+	TaskExecutor getTaskExecutor();
 
 	/**
 	 * Sets the current status tracking message, that has to be something about
@@ -57,7 +57,7 @@ public interface TaskExecutionContext {
 	 *            A message representing the current execution status. Null
 	 *            messages will be blanked.
 	 */
-	public void setStatusMessage(String message);
+	void setStatusMessage(String message);
 
 	/**
 	 * Sets the completeness tracking value, that has to be between 0 and 1.
@@ -66,7 +66,7 @@ public interface TaskExecutionContext {
 	 *            A completeness value, between 0 and 1. Values out of range
 	 *            will be ignored.
 	 */
-	public void setCompleteness(double completeness);
+	void setCompleteness(double completeness);
 
 	/**
 	 * If the task execution has been paused, stops until the operation is
@@ -77,7 +77,7 @@ public interface TaskExecutionContext {
 	 * paused only if the task {@link Task#canBePaused()} method returns
 	 * <em>true</em>.
 	 */
-	public void pauseIfRequested();
+	void pauseIfRequested();
 
 	/**
 	 * Checks whether the task execution has been demanded to be stopped. If the
@@ -89,6 +89,6 @@ public interface TaskExecutionContext {
 	 * @return <em>true</em> if the current task execution has been demanded to
 	 *         be stopped; <em>false</em> otherwise.
 	 */
-	public boolean isStopped();
+	boolean isStopped();
 
 }

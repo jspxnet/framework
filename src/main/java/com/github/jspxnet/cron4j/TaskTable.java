@@ -39,7 +39,7 @@ public class TaskTable {
 	/**
 	 * Pattern list.
 	 */
-	private List<SchedulingPattern> patterns = new ArrayList<>();
+	private final List<SchedulingPattern> patterns = new ArrayList<>();
 
 	/**
 	 * Task list.

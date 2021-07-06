@@ -37,7 +37,7 @@ class FileTaskCollector implements TaskCollector {
 	/**
 	 * File list.
 	 */
-	private List<File> FILES = new ArrayList<>();
+	private final List<File> FILES = new ArrayList<>();
 
 	/**
 	 * Adds a file.

@@ -32,7 +32,7 @@ class RunnableTask extends Task {
 	/**
 	 * The wrapped runnable object.
 	 */
-	private Runnable runnable;
+	private final Runnable runnable;
 
 	/**
 	 * Builds the task.
