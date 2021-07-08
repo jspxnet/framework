@@ -73,7 +73,7 @@ public class ConnectionInvocationHandler implements InvocationHandler {
             }
             try {
                 if (!StringUtil.isNull(checkSql)) {
-                    target.prepareStatement(checkSql).executeQuery().close();
+                    target.createStatement().executeQuery(checkSql).close();
                 }
             } catch (Exception e) {
                 log.debug("checkSql:{}",checkSql);
@@ -90,8 +90,8 @@ public class ConnectionInvocationHandler implements InvocationHandler {
         //--------------------------------------------------------------------------------------------------------------
         if (methodSetMaxConnectionTime.equals(method.getName())) {
             maxConnectionTime = (Integer) args[0];
-            if (maxConnectionTime < DateUtil.MINUTE) {
-                maxConnectionTime = DateUtil.MINUTE;
+            if (maxConnectionTime < DateUtil.HOUR) {
+                maxConnectionTime = DateUtil.HOUR;
             }
             return null;
         }

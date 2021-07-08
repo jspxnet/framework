@@ -75,10 +75,11 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
             return targetClass;
         }
         Method exeMethod = targetClass.getMethod(method.getName(),method.getParameterTypes());
-        Transaction transaction = exeMethod.getAnnotation(Transaction.class);
+
         Object result;
         SqlMap sqlMap = exeMethod.getAnnotation(SqlMap.class);
         com.github.jspxnet.sober.Transaction invokeTransaction = null;
+        Transaction transaction = exeMethod.getAnnotation(Transaction.class);
         if (transaction!=null)
         {
             invokeTransaction = getTransactionBegin(transaction,exeMethod);
@@ -114,6 +115,10 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
 
     private static com.github.jspxnet.sober.Transaction getTransactionBegin(Transaction transaction,Method exeMethod) throws Throwable {
         //没有配置的情况,直接提示执行返回begin
+        if (transaction==null)
+        {
+            return null;
+        }
         BeanFactory beanFactory = EnvFactory.getBeanFactory();
         TransactionController transactionController = beanFactory.getBean(TransactionController.class, Sioc.global);
         if (transactionController==null)
@@ -123,8 +128,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
         }
         //没有配置的情况,直接提示执行返回end
         //这里开始事务处理
-        com.github.jspxnet.sober.Transaction invokeTransaction = null;
-        invokeTransaction = transactionController.createTransaction();
+        com.github.jspxnet.sober.Transaction invokeTransaction = transactionController.createTransaction();
         if (PropagationEnumType.NEW.equals(transaction.propagation())) {
             invokeTransaction.reset();
         }
