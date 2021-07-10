@@ -10,7 +10,6 @@ import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
 import com.github.jspxnet.utils.*;
 import com.thetransactioncompany.cors.CORSConfiguration;
 import com.thetransactioncompany.cors.CORSFilter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.JreMemoryLeakPreventionListener;
@@ -26,6 +25,9 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.redisson.tomcat.JndiRedissonSessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.util.Properties;
 
@@ -37,10 +39,8 @@ import java.util.Properties;
  * description: tomcat启动类
  * com.github.jspxnet.boot.TomcatApplication
  **/
-
-@Slf4j
 public class TomcatApplication {
-
+    private static final Logger log = LoggerFactory.getLogger(TomcatApplication.class);
     //@Parameter(names = "-port", description = "tomcat server port")
     private static int port;
     //@Parameter(names = "-webPath", description = "web path")

@@ -10,9 +10,11 @@
 package com.github.jspxnet.sober.transaction;
 
 
+
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.exception.TransactionException;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.sql.Savepoint;
 import java.sql.SQLException;
@@ -23,8 +25,8 @@ import java.sql.SQLException;
  * date: 2008-8-5
  * Time: 16:09:48
  */
-@Slf4j
 public class JDBCTransaction extends AbstractTransaction {
+    protected static final Logger log = LoggerFactory.getLogger(JDBCTransaction.class);
     public JDBCTransaction(DataSource dataSource) {
         setDataSource(dataSource);
     }

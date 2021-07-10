@@ -24,17 +24,17 @@ public class ValidateIdCard {
     public static final int CHINA_ID_TWHKMK_LENGTH = 10;
 
     /** 省、直辖市代码表 */
-    public static final String CITY_CODE[] = { "11", "12", "13", "14", "15",
+    public static final String[] CITY_CODE = { "11", "12", "13", "14", "15",
             "21", "22", "23", "31", "32", "33", "34", "35", "36", "37", "41",
             "42", "43", "44", "45", "46", "50", "51", "52", "53", "54", "61",
             "62", "63", "64", "65", "71", "81", "82", "91" };
 
     /** 每位加权因子 */
-    public static final int power[] = { 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9,
+    public static final int[] power = { 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9,
             10, 5, 8, 4, 2 };
 
     /** 第18位校检码 */
-    public static final String verifyCode[] = { "1", "0", "X", "9", "8", "7",
+    public static final String[] verifyCode = { "1", "0", "X", "9", "8", "7",
             "6", "5", "4", "3", "2" };
     /** 最低年限 */
     public static final int MIN = 1930;
@@ -680,7 +680,7 @@ public class ValidateIdCard {
             return "";
         }
 
-        String sSX[] = { "猪", "鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗" };
+        String[] sSX = { "猪", "鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗" };
         int year = getYearByIdCard(idCard);
         int end = 3;
         int x = (year - end) % 12;
@@ -707,8 +707,8 @@ public class ValidateIdCard {
             return "";
         }
 
-        String sTG[] = { "癸", "甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "任" };
-        String sDZ[] = { "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌" };
+        String[] sTG = { "癸", "甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "任" };
+        String[] sDZ = { "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌" };
 
         int year = ValidateIdCard.getYearByIdCard(idCard);
         int i = (year - 3) % 10;
@@ -784,7 +784,7 @@ public class ValidateIdCard {
         return validateCard(idCard);
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         boolean b = ValidateIdCard.validateCard("P673423(9)");
         System.out.println("Hello World1="+ b);
         System.out.println("Hello World2="+ checkIdCard("P673423(9)"));

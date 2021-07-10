@@ -7,10 +7,12 @@ import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.utils.StringUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 /**
  * threads（线程池数量）
@@ -23,8 +25,8 @@ import java.io.File;
  * 默认值: 当前处理核数量 * 2
  */
 @Bean(singleton = true)
-@Slf4j
 public class RedissonClientConfig {
+    private static final Logger log = LoggerFactory.getLogger(RedissonClientConfig.class);
     private static RedissonClient redisson = null;
     private String config = StringUtil.empty;
     private Config redisConfig = null;

@@ -11,7 +11,8 @@ package com.github.jspxnet.sober.transaction;
 
 
 import com.github.jspxnet.util.ThreadHashMap;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,9 +22,9 @@ import lombok.extern.slf4j.Slf4j;
  * 事务池
  * @author chenYuan
  */
-@Slf4j
-public class TransactionManager extends ThreadHashMap<String, AbstractTransaction> {
 
+public class TransactionManager extends ThreadHashMap<String, AbstractTransaction> {
+    private static final Logger log = LoggerFactory.getLogger(TransactionManager.class);
     /**
      * 单列方式运行,这个类对于外部没有意义,内核使用.
      */

@@ -18,20 +18,20 @@ package com.github.jspxnet.io.zip;
  * @version 0.8
  */
 
-import com.github.jspxnet.utils.FileUtil;
 
+import com.github.jspxnet.utils.FileUtil;
 import java.io.*;
 import java.util.*;
 import java.util.zip.*;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 压缩文件工具类。
  * 此类完成一般的新建、增加、导出、删除操作以及完成对压缩文件的内容的解析。
  */
-@Slf4j
 public class ZipFile {
-
+    private static final Logger log = LoggerFactory.getLogger(ZipFile.class);
 
     private boolean isScaned = false;
     private boolean isChanged = false;

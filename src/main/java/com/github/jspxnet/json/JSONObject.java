@@ -5,7 +5,9 @@ import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.util.TypeReference;
 import com.github.jspxnet.utils.*;
 import com.google.gson.Gson;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -21,16 +23,14 @@ import java.util.*;
 Information:java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
 ConcurrentHashMap
  */
-@Slf4j
 public class JSONObject extends LinkedHashMap<String, Object> {
+    private static final Logger log = LoggerFactory.getLogger(JSONObject.class);
     final static private String KEY_DATA = "data";
     //final static private String KEY_ROOT = "root";
 
     static public String FULL_ST_FORMAT = DateUtil.FULL_ST_FORMAT;
     static public String CLASS_NAME = "@class";
     static public String BIN_DATA_START = "data:stream/byte;base64,";
-
-
 
 
     /**

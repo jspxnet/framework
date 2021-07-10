@@ -24,7 +24,9 @@ import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,10 +42,9 @@ import java.util.Map;
  * Time: 20:41:00
  * Ibatis 的 SqlMapClient 方式扩展
  */
-@Slf4j
 public class SqlMapClientImpl implements SqlMapClient {
 
-
+    private static final Logger log = LoggerFactory.getLogger(SqlMapClientImpl.class);
     private final SoberFactory soberFactory;
     private final JdbcOperations jdbcOperations;
 

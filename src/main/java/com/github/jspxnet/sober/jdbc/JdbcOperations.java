@@ -10,6 +10,7 @@
 package com.github.jspxnet.sober.jdbc;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.TomcatApplication;
 import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
@@ -32,7 +33,9 @@ import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.io.Serializable;
 import java.sql.*;
@@ -46,9 +49,9 @@ import java.util.*;
  * JDBC 数据库操作
  * date: 2019-9-10 数据尽量采用泛型方式
  */
-@Slf4j
-public abstract class JdbcOperations implements SoberSupport {
 
+public abstract class JdbcOperations implements SoberSupport {
+    private static final Logger log = LoggerFactory.getLogger(JdbcOperations.class);
     private Dialect dialect = null;
     private SoberFactory soberFactory;
 
@@ -948,7 +951,6 @@ public abstract class JdbcOperations implements SoberSupport {
             conn.setAutoCommit(false);
             sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
             debugPrint(sqlText);
-
             if (!soberTable.isAutoId() && dialect.isSupportsGetGeneratedKeys() && soberTable.isSerial()) {
                 statement = conn.prepareStatement(sqlText, Statement.RETURN_GENERATED_KEYS);
             } else {

@@ -20,7 +20,6 @@ import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.component.zhex.spell.ChineseUtil;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Date;

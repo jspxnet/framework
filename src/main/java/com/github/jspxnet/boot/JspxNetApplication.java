@@ -23,7 +23,6 @@ import com.github.jspxnet.sioc.factory.EntryFactory;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.SystemUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import java.util.Date;
 
@@ -33,8 +32,6 @@ import java.util.Date;
  * date: 2007-5-25
  * Time: 16:31:31
  */
-
-@Slf4j
 public final class JspxNetApplication {
     private JspxNetApplication()
     {

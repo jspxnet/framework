@@ -9,8 +9,11 @@
  */
 package com.github.jspxnet.sioc.factory;
 
+import com.github.jspxnet.boot.conf.AppolloBootConfig;
 import com.github.jspxnet.boot.environment.Environment;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -25,6 +28,7 @@ import java.util.Map;
 
 @Data
 public class LifecycleObject implements Serializable {
+
     private Map<String, Object> paramMap = new HashMap<String, Object>();
     private long createDate = System.currentTimeMillis();
     private String create;

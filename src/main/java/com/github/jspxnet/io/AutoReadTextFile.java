@@ -14,7 +14,8 @@ import com.github.jspxnet.network.http.HttpClient;
 import com.github.jspxnet.network.http.HttpClientFactory;
 import com.github.jspxnet.utils.CharacterUtil;
 import com.github.jspxnet.utils.FileUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.jar.JarInputStream;
 import java.util.zip.Adler32;
@@ -28,9 +29,8 @@ import java.util.zip.ZipInputStream;
  * date: 2007-1-6
  * Time: 14:11:46
  */
-@Slf4j
 public class AutoReadTextFile extends AbstractRead {
-
+    private static final Logger log = LoggerFactory.getLogger(AutoReadTextFile.class);
     private Reader isr = null;
     private ZipInputStream zis = null;
 
