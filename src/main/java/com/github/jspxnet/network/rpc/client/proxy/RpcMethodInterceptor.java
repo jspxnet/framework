@@ -16,6 +16,7 @@ import com.github.jspxnet.network.rpc.model.transfer.IocResponse;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.util.HessianSerializableUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -104,7 +105,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         iocRequest.setRequest(request);
         iocRequest.setResponse(response);
         iocRequest.setUrl(url);
-        command.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(iocRequest)));
+        command.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(iocRequest)));
 
         if (StringUtil.isEmpty(serviceName))
         {
@@ -152,7 +153,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         if (INetCommand.RPC.equalsIgnoreCase(reply.getAction()) && INetCommand.TYPE_BASE64.equals(reply.getType())) {
             IocResponse iocResponse;
             try {
-                iocResponse = ObjectUtil.getUnSerializable(EncryptUtil.getBase64Decode(reply.getData()));
+                iocResponse = HessianSerializableUtil.getUnSerializable(EncryptUtil.getBase64Decode(reply.getData()));
             } catch (Throwable e) {
                 log.debug("iocRequest={},error:{}",ObjectUtil.toString(iocRequest),e.getMessage());
                 e.printStackTrace();

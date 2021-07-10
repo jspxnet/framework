@@ -6,8 +6,8 @@ import com.caucho.services.server.AbstractSkeleton;
 import com.caucho.services.server.ServiceContext;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.util.ParamUtil;
+import com.github.jspxnet.util.HessianSerializableUtil;
 import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -121,8 +121,8 @@ public class HessianSkeleton extends AbstractSkeleton {
                 throw new IllegalStateException(header + " is an unknown Hessian call");
         }
 
-        in.setSerializerFactory(ObjectUtil.getSerializerFactory());
-        out.setSerializerFactory(ObjectUtil.getSerializerFactory());
+        in.setSerializerFactory(HessianSerializableUtil.getSerializerFactory());
+        out.setSerializerFactory(HessianSerializableUtil.getSerializerFactory());
 
         try {
             invoke(_service, in, out);

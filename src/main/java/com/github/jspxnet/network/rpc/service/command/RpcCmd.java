@@ -17,6 +17,7 @@ import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.result.RpcResult;
 import com.github.jspxnet.txweb.util.TXWebUtil;
+import com.github.jspxnet.util.HessianSerializableUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -55,13 +56,13 @@ public class RpcCmd extends INetCommand {
         //解码
         if (INetCommand.TYPE_BASE64.equals(command.getType())) {
             try {
-                iocRequest = ObjectUtil.getUnSerializable(EncryptUtil.getBase64Decode(command.getData()));
+                iocRequest = HessianSerializableUtil.getUnSerializable(EncryptUtil.getBase64Decode(command.getData()));
             } catch (Throwable e) {
                 e.printStackTrace();
                 IocResponse rpcResponse = new IocResponse();
                 rpcResponse.setError(e);
                 try {
-                    reply.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(rpcResponse)));
+                    reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(rpcResponse)));
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -74,7 +75,7 @@ public class RpcCmd extends INetCommand {
             IocResponse rpcResponse = new IocResponse();
             rpcResponse.setError(new Exception("不存在的请求对象"));
             try {
-                reply.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(rpcResponse)));
+                reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(rpcResponse)));
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
@@ -85,7 +86,7 @@ public class RpcCmd extends INetCommand {
             IocResponse rpcResponse = new IocResponse();
             rpcResponse.setError(new Exception("不存在的请求方法"));
             try {
-                reply.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(rpcResponse)));
+                reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(rpcResponse)));
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
@@ -115,7 +116,7 @@ public class RpcCmd extends INetCommand {
             IocResponse rpcResponse = new IocResponse();
             rpcResponse.setError(new Exception("class not found.找不到执行对象,检查actionName"));
             try {
-                reply.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(rpcResponse)));
+                reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(rpcResponse)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -144,7 +145,7 @@ public class RpcCmd extends INetCommand {
             t.printStackTrace();
         }
         try {
-            reply.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(response)));
+            reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(response)));
         } catch (IOException e) {
             e.printStackTrace();
             response.setError(e);

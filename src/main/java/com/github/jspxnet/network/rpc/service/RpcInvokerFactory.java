@@ -7,6 +7,7 @@ import com.github.jspxnet.network.rpc.model.cmd.ICmd;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.service.command.*;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.util.HessianSerializableUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
@@ -60,7 +61,7 @@ public class RpcInvokerFactory {
             IocResponse rpcResponse = new IocResponse();
             rpcResponse.setError(new Exception("未知的action命令名称"));
             try {
-                reply.setData(EncryptUtil.getBase64Encode(ObjectUtil.getSerializable(rpcResponse)));
+                reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(rpcResponse)));
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
