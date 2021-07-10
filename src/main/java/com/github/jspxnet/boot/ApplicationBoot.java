@@ -11,7 +11,6 @@ package com.github.jspxnet.boot;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
-import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
