@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.39</version>
+    <version>6.46</version>
 </dependency>
 ```
     
@@ -117,3 +117,4 @@
 *    2021年04月：Jspx.net Framework 6.40 支持嵌入java二开平台
 *    2021年04月：Jspx.net Framework 6.41-6.42 嵌入兼容性调整，oracle兼容性调整
 *    2021年05月：Jspx.net Framework 6.43 嵌入兼容性调整，json兼容致远OA的PO解析.优化调整线程关闭,里程碑版本
+*    2021年07月：Jspx.net Framework 6.43-6.46 定时认为支持到秒，为了兼容嵌入到老系统，调整部分日子的输出方式，测试长时间高并发优化
