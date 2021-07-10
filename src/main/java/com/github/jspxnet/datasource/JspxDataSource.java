@@ -317,13 +317,10 @@ public class JspxDataSource extends DriverManagerDataSource {
                         continue;
                     }
                 }
-
-                if (conn != null) {
-                    if (conn.isOvertime()&&!conn.isConnect()||!conn.isClosed() && conn.isOvertime()) {
-                        //周期比较长,有就直接关闭
-                        JdbcUtil.closeConnection(conn, true);
-                        connectionPool[i] = null;
-                    }
+                if (conn != null && (conn.isOvertime()&&!conn.isConnect()||!conn.isClosed() && conn.isOvertime())) {
+                    //周期比较长,有就直接关闭
+                    JdbcUtil.closeConnection(conn, true);
+                    connectionPool[i] = null;
                 }
             }
             log.debug("minPoolSize:{},maxPoolSize:{},连接池有效长度:{}", minPoolSize, maxPoolSize, poolSize);

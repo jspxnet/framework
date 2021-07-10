@@ -1,6 +1,7 @@
 package com.github.jspxnet.datasource;
 
 import com.github.jspxnet.network.mail.core.SendEmailAdapter;
+import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Proxy;
@@ -15,7 +16,7 @@ import java.util.logging.Logger;
 @Slf4j
 public class LimitDataSource extends DriverManagerDataSource {
 
-    final private transient com.github.jspxnet.datasource.ConnectionProxy[] connectionPool = new com.github.jspxnet.datasource.ConnectionProxy[3];
+    final private transient com.github.jspxnet.datasource.ConnectionProxy[] connectionPool = new com.github.jspxnet.datasource.ConnectionProxy[8];
     final private int maxPoolSize = connectionPool.length;
     private int maxConnectionTime = DateUtil.MINUTE;  //8小时
     private String checkSql = "SELECT 1";
@@ -142,7 +143,7 @@ public class LimitDataSource extends DriverManagerDataSource {
                 if (conn == null) {
                     connectionPool[i] = createConnectionProxy();
                 } else if (conn.isOvertime() || !conn.isConnect()) {
-                    conn.release();
+                    JdbcUtil.closeConnection(conn,true);
                     connectionPool[i] = createConnectionProxy();
                 }
             }
