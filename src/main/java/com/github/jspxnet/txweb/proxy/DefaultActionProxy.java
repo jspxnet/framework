@@ -106,7 +106,8 @@ public class DefaultActionProxy implements ActionProxy {
             if (httpMethod!=null&&StringUtil.ASTERISK.equals(httpMethod.actionName())&&(ActionHandle.NAME.equalsIgnoreCase(exeType)|| CommandHandle.NAME.equalsIgnoreCase(exeType))&&ValidUtil.isGoodName(actionName,1,30))
             {
                 Method methodTmp = TXWebUtil.getExeMethod(this,cls, actionName);
-                if (methodTmp!=null&&methodTmp.getGenericReturnType().equals(Void.TYPE))
+               // if (methodTmp!=null&&methodTmp.getGenericReturnType().equals(Void.TYPE))
+                if (methodTmp!=null)
                 {
                     this.method  = methodTmp;
                 }

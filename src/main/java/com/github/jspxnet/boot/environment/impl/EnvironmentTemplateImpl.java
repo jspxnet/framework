@@ -152,9 +152,12 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             //修复路径支持本级下
             File file = new File(tempDir);
             String[] files = file.list();
-            if (ArrayUtil.isEmpty(files) && FileUtil.isDirectory(new File(defaultPath, "template/").getAbsolutePath())) {
-                tempDir = new File(defaultPath, "template/").getAbsolutePath();
+            if (ArrayUtil.isEmpty(files) && FileUtil.isDirectory(new File(defaultPath, "template/").getPath())) {
+                tempDir = new File(defaultPath, "template/").getPath();
+            } else if (ArrayUtil.isEmpty(files) && FileUtil.isDirectory(new File(defaultPath, "resources/template/").getPath())) {
+                tempDir = new File(defaultPath, "resources/template/").getPath();
             }
+
             if (!VALUE_MAP.containsKey(Environment.templatePath)) {
                 VALUE_MAP.put(Environment.templatePath, tempDir);
             }

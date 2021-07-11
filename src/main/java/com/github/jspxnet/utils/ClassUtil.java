@@ -17,6 +17,8 @@ import com.github.jspxnet.txweb.interceptor.InterceptorSupport;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;
+import org.springframework.instrument.classloading.tomcat.TomcatLoadTimeWeaver;
+
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -263,7 +265,6 @@ public class ClassUtil {
     public static Class<?> loadClass(String className) throws ClassNotFoundException {
         return Class.forName(StringUtil.trim(className), true, getClassLoader());
     }
-
 
     /**
      * @param resource 载入资源

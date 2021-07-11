@@ -14,6 +14,9 @@ import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.JreMemoryLeakPreventionListener;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.loader.WebappClassLoader;
+import org.apache.catalina.loader.WebappLoader;
+import org.apache.catalina.security.SecurityClassLoad;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.coyote.http11.Http11NioProtocol;
@@ -100,6 +103,10 @@ public class TomcatApplication {
         }
 
         Tomcat tomcat = new Tomcat();
+
+
+
+
         Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
         connector.setPort(port);
         connector.setURIEncoding(Environment.defaultEncode);
@@ -137,6 +144,8 @@ public class TomcatApplication {
         standardRoot.setCacheMaxSize(maxCacheSize);
         standardRoot.setCacheObjectMaxSize(1024);
         standardRoot.setCachingAllowed(true);
+        standardRoot.setAllowLinking(true);
+
 
         standardContext.setResources(standardRoot);
 
@@ -285,10 +294,21 @@ public class TomcatApplication {
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = tomcat.getServer();
+
+        server.getParentClassLoader().setDefaultAssertionStatus(true);
+        Thread.currentThread().setContextClassLoader(server.getParentClassLoader());
+        SecurityClassLoad.securityClassLoad(server.getParentClassLoader());
+
         server.setAddress(ip);
         server.setUtilityThreads(threads);
 
-        log.info("Server "+server.getAddress()+":"+port);
+        if (log.isInfoEnabled())
+        {
+            log.info("Server "+server.getAddress()+":"+port);
+        } else
+        {
+            log.debug("Server "+server.getAddress()+":"+port);
+        }
         server.await();
     }
 }
