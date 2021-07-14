@@ -65,7 +65,7 @@ public class TomcatApplication {
     }
 
     public static void main(String[] args) throws Exception{
-
+        Log4jConfigUtil.createConfig();
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
@@ -132,7 +132,7 @@ public class TomcatApplication {
         host.setName("localhost");
         host.setCreateDirs(false);
         //host.setAppBase(FileUtil.mendPath(file.getParent()));
-        //host.setAppBase("d:/website/webapps");
+        host.setAppBase(webPath);
         Context standardContext = tomcat.addWebapp("",webPath);
         final int maxCacheSize = 40 * 1024;
         StandardRoot standardRoot = new StandardRoot();
@@ -258,7 +258,7 @@ public class TomcatApplication {
         tmpContext.setValidateClientProvidedNewSessionId(true);
         tmpContext.setSessionTimeout(60);
         tmpContext.setSessionCookiePathUsesTrailingSlash(false);
-        tmpContext.setOverride(true);
+        tmpContext.setOverride(false);
         tmpContext.setDistributable(true);
         tmpContext.setSessionCookiePath("/");
         tmpContext.setSkipMemoryLeakChecksOnJvmShutdown(true);
@@ -278,20 +278,28 @@ public class TomcatApplication {
 　　isWARValidated="false" isInvokerEnabled="true"
 　　isWorkDirPersistent="false
     */
-        Log4jConfigUtil.createConfig();
+
         tomcat.start();
 
 
         //  StaticLoggerBinder staticLoggerBinder = StaticLoggerBinder.getSingleton();
 
-        log.debug("defaultPath:"+defaultPath);
+
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = tomcat.getServer();
         server.setAddress(ip);
         server.setUtilityThreads(threads);
+        if (log.isInfoEnabled())
+        {
+            log.info("defaultPath:"+defaultPath);
+            log.info("Server "+server.getAddress()+":"+port);
+        } else
+        {
+            System.out.println("defaultPath:"+defaultPath);
+            System.out.println("Server "+server.getAddress()+":"+port);
+        }
 
-        log.info("Server "+server.getAddress()+":"+port);
         server.await();
     }
 }
