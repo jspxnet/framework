@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -31,16 +31,14 @@ public class MapUtil {
 
     }
 
-    public static boolean isNotEmpty(Map map) {
-        return !(map == null || map.isEmpty());
-    }
+
 
     /**
      * 哈西表中对象用字符串输出
      * @param map map对象
      * @return 字符串
      */
-    public static String toString(Map map) {
+    public static String toString(Map<?,?> map) {
         if (map == null || map.isEmpty()) {
             return StringUtil.empty;
         }
@@ -50,14 +48,28 @@ public class MapUtil {
         return new JSONObject(map).toString();
     }
 
+
+    /**
+     * StringMap 单元封装
+     * @param mapStr map字符串
+     * @param key  要得到的key
+     * @return  返回配置的值
+     */
+    public static String getStringMapValue(String mapStr, String key) {
+        StringMap<String,String> map = new StringMap<>();
+        map.setKeySplit(StringUtil.COLON);
+        map.setLineSplit(StringUtil.SEMICOLON);
+        map.setString(mapStr);
+        return map.getString(key);
+    }
     /**
      * @param map map对象
      * @param keySplit 值描述分割 符号
      * @param lineSplit  行分割符号
      * @return 字符串
      */
-    public static String toString(Map map,String keySplit,String lineSplit) {
-        StringMap stringMap = new StringMap();
+    public static String toString(Map<?,?> map,String keySplit,String lineSplit) {
+        StringMap<String,String> stringMap = new StringMap<>();
         stringMap.setLineSplit(lineSplit);
         stringMap.setKeySplit(keySplit);
         for (Object key:map.keySet())
@@ -72,12 +84,12 @@ public class MapUtil {
      * @param map map
      * @return 转换为
      */
-    public static String toQueryString(Map map) {
+    public static String toQueryString(Map<String,?> map) {
         if (map == null || map.isEmpty()) {
             return StringUtil.empty;
         }
         StringBuilder result = new StringBuilder();
-        for (Object key : map.keySet()) {
+        for (String key : map.keySet()) {
             String value = (String) map.get(key);
             result.append(key).append("=").append(URLUtil.getUrlEncoder(value, Environment.defaultEncode)).append("&");
         }
@@ -160,7 +172,7 @@ public class MapUtil {
      * @return 创建签名字符串
      */
     public static String createLinkStringWithKeyAndValue(Map<String, ?> params) {
-        List<String> keys = new ArrayList(params.keySet());
+        List<String> keys = new ArrayList<>(params.keySet());
         Collections.sort(keys);
         String prestr = "";
         for (String s : keys) {
@@ -179,9 +191,9 @@ public class MapUtil {
     }
 
     public static String createLinkStringWithKeyAndValueWithoutSignType(Map<String, Object> params) {
-        List<String> keys = new ArrayList(params.keySet());
+        List<String> keys = new ArrayList<>(params.keySet());
         Collections.sort(keys);
-        String prestr = "";
+        StringBuilder prestr = new StringBuilder();
 
         for(int i = 0; i < keys.size(); ++i) {
             if (!"sign".equals(keys.get(i)) && !"signature".equals(keys.get(i)) && !"sign_type".equals(keys.get(i))) {
@@ -189,19 +201,19 @@ public class MapUtil {
                 if (!ObjectUtil.isEmpty(params.get(key))) {
                     String value = params.get(key).toString();
                     if (i == keys.size() - 1) {
-                        prestr = prestr + key + "=" + value;
+                        prestr.append(key).append("=").append(value);
                     } else {
-                        prestr = prestr + key + "=" + value + "&";
+                        prestr.append(key).append("=").append(value).append("&");
                     }
                 }
             }
         }
 
-        if (prestr.endsWith("&")) {
-            prestr = prestr.substring(0, prestr.length() - 1);
+        if (prestr.toString().endsWith("&")) {
+            prestr = new StringBuilder(prestr.substring(0, prestr.length() - 1));
         }
 
-        return prestr;
+        return prestr.toString();
     }
 
 

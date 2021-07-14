@@ -14,9 +14,6 @@ import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.JreMemoryLeakPreventionListener;
 import org.apache.catalina.core.StandardContext;
-import org.apache.catalina.loader.WebappClassLoader;
-import org.apache.catalina.loader.WebappLoader;
-import org.apache.catalina.security.SecurityClassLoad;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.coyote.http11.Http11NioProtocol;
@@ -42,6 +39,8 @@ import java.util.Properties;
  * description: tomcat启动类
  * com.github.jspxnet.boot.TomcatApplication
  **/
+
+
 public class TomcatApplication {
     private static final Logger log = LoggerFactory.getLogger(TomcatApplication.class);
     //@Parameter(names = "-port", description = "tomcat server port")
@@ -53,7 +52,7 @@ public class TomcatApplication {
     //@Parameter(names = "-cors", description = "boolean is website cors")
     private static boolean cors;
 
-   // @Parameter(names = "-threads", description = "threads tomcat start threads")
+    // @Parameter(names = "-threads", description = "threads tomcat start threads")
     private static int threads;
 
     //@Parameter(names = "-config", description = "application config path")
@@ -66,7 +65,7 @@ public class TomcatApplication {
     }
 
     public static void main(String[] args) throws Exception{
-        Log4jConfigUtil.createConfig();
+
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
@@ -95,7 +94,7 @@ public class TomcatApplication {
 
         boolean openRedis = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_SESSION_REDIS));
         String redisConfig = properties.getProperty(Environment.SERVER_REDISSON_SESSION_CONFIG);
-       // log.debug("tomcat web path:{}, port:{},session share:{}",webPath, port,openRedis);
+        // log.debug("tomcat web path:{}, port:{},session share:{}",webPath, port,openRedis);
 
         if (!StringUtil.isEmpty(webPath))
         {
@@ -103,10 +102,6 @@ public class TomcatApplication {
         }
 
         Tomcat tomcat = new Tomcat();
-
-
-
-
         Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
         connector.setPort(port);
         connector.setURIEncoding(Environment.defaultEncode);
@@ -144,8 +139,6 @@ public class TomcatApplication {
         standardRoot.setCacheMaxSize(maxCacheSize);
         standardRoot.setCacheObjectMaxSize(1024);
         standardRoot.setCachingAllowed(true);
-        standardRoot.setAllowLinking(true);
-
 
         standardContext.setResources(standardRoot);
 
@@ -236,7 +229,7 @@ public class TomcatApplication {
 
         //我们要把Servlet设置进去
 
-       if (cors)
+        if (cors)
         {
             FilterDef filterDef = new FilterDef();
             CORSFilter corsFilter = new CORSFilter();
@@ -285,30 +278,20 @@ public class TomcatApplication {
 　　isWARValidated="false" isInvokerEnabled="true"
 　　isWorkDirPersistent="false
     */
+        Log4jConfigUtil.createConfig();
         tomcat.start();
 
-      //  Log4jConfigUtil.createConfig();
-      //  StaticLoggerBinder staticLoggerBinder = StaticLoggerBinder.getSingleton();
+
+        //  StaticLoggerBinder staticLoggerBinder = StaticLoggerBinder.getSingleton();
 
         log.debug("defaultPath:"+defaultPath);
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = tomcat.getServer();
-
-        server.getParentClassLoader().setDefaultAssertionStatus(true);
-        Thread.currentThread().setContextClassLoader(server.getParentClassLoader());
-        SecurityClassLoad.securityClassLoad(server.getParentClassLoader());
-
         server.setAddress(ip);
         server.setUtilityThreads(threads);
 
-        if (log.isInfoEnabled())
-        {
-            log.info("Server "+server.getAddress()+":"+port);
-        } else
-        {
-            log.debug("Server "+server.getAddress()+":"+port);
-        }
+        log.info("Server "+server.getAddress()+":"+port);
         server.await();
     }
 }
