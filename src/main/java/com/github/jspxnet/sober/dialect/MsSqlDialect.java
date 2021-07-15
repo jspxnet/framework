@@ -95,7 +95,7 @@ public class MsSqlDialect extends Dialect {
 
     @Override
     public boolean supportsLimit() {
-        return true;
+        return false;
     }
 
     @Override

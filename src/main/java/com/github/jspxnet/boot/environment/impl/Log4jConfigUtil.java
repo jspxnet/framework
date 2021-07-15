@@ -66,18 +66,18 @@ public class Log4jConfigUtil  {
 
         //log.removeAllAppenders();
         //不想显示的日志放在这里
-        Set<String> loggers = new HashSet<>(Arrays.asList("org.apache", "groovyx.net.http", "org.redisson", "org.jboss", "io.netty"));
+      /*  Set<String> loggers = new HashSet<>(Arrays.asList("org.apache", "groovyx.net.http", "org.redisson", "org.jboss", "io.netty"));
         for (String httplog : loggers) {
             Logger logger = Logger.getLogger(httplog);
             logger.setLevel(Level.DEBUG);
             logger.setAdditivity(false);
-        }
+        }*/
 
         if (envTemplate.getBoolean(Environment.logError)) {
             RollingFileAppender errorAppender = new RollingFileAppender();
             errorAppender.setName(Environment.logError);
             errorAppender.setBufferSize(64);
-            errorAppender.setAppend(false);
+            errorAppender.setAppend(true);
             errorAppender.setEncoding(envTemplate.getString(Environment.encode));
             errorAppender.setFile(envTemplate.getString(Environment.logErrorFile));
             errorAppender.setMaxFileSize("5120KB");
@@ -118,7 +118,7 @@ public class Log4jConfigUtil  {
             infoLevel.setLevelMax(Level.INFO);
             infoLevel.setLevelMin(Level.INFO);
             infoAppender.addFilter(infoLevel);
-            infoAppender.addFilter(new StopFilter());
+           // infoAppender.addFilter(new StopFilter());
             infoAppender.activateOptions();
             log.addAppender(infoAppender);
         }
@@ -144,7 +144,7 @@ public class Log4jConfigUtil  {
             errorLogFilter.setLevelMin(Level.ERROR);
 
             errorAppender.addFilter(errorLogFilter);
-            errorAppender.addFilter(new StopFilter());
+            //errorAppender.addFilter(new StopFilter());
             errorAppender.activateOptions();
             log.addAppender(errorAppender);
 
@@ -171,7 +171,7 @@ public class Log4jConfigUtil  {
             classLogFilter.setLevelMin(Level.INFO);
 
             infoAppender.addFilter(classLogFilter);
-            infoAppender.addFilter(new StopFilter());
+           // infoAppender.addFilter(new StopFilter());
             infoAppender.activateOptions();
             log.addAppender(infoAppender);
         }
@@ -183,7 +183,7 @@ public class Log4jConfigUtil  {
             PatternLayout debugLayout = new PatternLayout();
             debugLayout.setConversionPattern("%-d{yyyy-MM-dd HH:mm} %c %l\r\n%m%n");
             debugAppender.setLayout(debugLayout);
-            debugAppender.addFilter(new StopFilter());
+            //debugAppender.addFilter(new StopFilter());
             debugAppender.activateOptions();
             log.addAppender(debugAppender);
         }

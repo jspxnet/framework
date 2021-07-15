@@ -3,7 +3,7 @@ package com.github.jspxnet.boot;
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
-import com.github.jspxnet.boot.environment.impl.Log4jConfigUtil;
+
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.JspxNetListener;
 import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
@@ -65,7 +65,7 @@ public class TomcatApplication {
     }
 
     public static void main(String[] args) throws Exception{
-        Log4jConfigUtil.createConfig();
+
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();

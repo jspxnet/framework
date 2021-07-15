@@ -3159,6 +3159,14 @@ public class StringUtil {
      * @return 转换到cvs格式
      */
     public static String csvString(String str){
+        if (str==null||"null".equals(str))
+        {
+            return empty;
+        }
+        if (str.startsWith("+")||str.startsWith("-"))
+        {
+            str = "\'" + str;
+        }
         if(str.contains(",")){
             str = str.replace("\"","\"\"");
             str ="\"" + str + "\"";
