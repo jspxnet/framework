@@ -41,20 +41,27 @@ public class Log4jConfigUtil  {
 
 
     public static void createConfig() {
+
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        FileUtil.makeDirectory(new File(FileUtil.getPathPart(envTemplate.getString(Environment.logErrorFile))));
-        String log4jPath = envTemplate.getString(Environment.log4jPath);
-        if (!StringUtil.isNull(log4jPath) && FileUtil.isFileExist(log4jPath)) {
-            if (log4jPath.endsWith("xml")) {
-                DOMConfigurator.configure(log4jPath);
-            } else if (log4jPath.endsWith("properties")) {
-                PropertyConfigurator.configure(log4jPath);
+        File file = new File(envTemplate.getString(Environment.defaultPath),"log.xml");
+        if (FileUtil.isFileExist(file))
+        {
+            DOMConfigurator.configure(file.getPath());
+        } else
+        {
+            FileUtil.makeDirectory(new File(FileUtil.getPathPart(envTemplate.getString(Environment.logErrorFile))));
+            String log4jPath = envTemplate.getString(Environment.log4jPath);
+            if (!StringUtil.isNull(log4jPath) && FileUtil.isFileExist(log4jPath)) {
+                if (log4jPath.endsWith("xml")) {
+                    DOMConfigurator.configure(log4jPath);
+                } else if (log4jPath.endsWith("properties")) {
+                    PropertyConfigurator.configure(log4jPath);
+                } else {
+                    createDefaultConfig(Logger.getRootLogger());
+                }
             } else {
                 createDefaultConfig(Logger.getRootLogger());
             }
-        } else {
-            createDefaultConfig(Logger.getRootLogger());
-
         }
     }
 
