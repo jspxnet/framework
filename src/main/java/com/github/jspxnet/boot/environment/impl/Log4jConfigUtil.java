@@ -10,6 +10,10 @@
 package com.github.jspxnet.boot.environment.impl;
 
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
@@ -20,6 +24,7 @@ import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.varia.StringMatchFilter;
+import org.slf4j.LoggerFactory;
 import org.slf4j.impl.StaticLoggerBinder;
 
 import java.io.File;
@@ -43,10 +48,20 @@ public class Log4jConfigUtil  {
     public static void createConfig() {
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        File file = new File(envTemplate.getString(Environment.defaultPath),"log.xml");
+        File file = new File(envTemplate.getString(Environment.defaultPath),"logback.xml");
         if (FileUtil.isFileExist(file))
         {
-            DOMConfigurator.configure(file.getPath());
+            LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(lc);
+            lc.reset();
+            try {
+                configurator.doConfigure(file);
+            } catch (JoranException e) {
+                e.printStackTrace();
+            }
+            StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
         } else
         {
             FileUtil.makeDirectory(new File(FileUtil.getPathPart(envTemplate.getString(Environment.logErrorFile))));
