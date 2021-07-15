@@ -43,8 +43,6 @@ import java.util.Set;
  */
 
 public class Log4jConfigUtil  {
-
-
     public static void createConfig() {
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
@@ -52,10 +50,8 @@ public class Log4jConfigUtil  {
         if (FileUtil.isFileExist(file))
         {
             LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(lc);
-            lc.reset();
             try {
                 configurator.doConfigure(file);
             } catch (JoranException e) {
@@ -72,15 +68,15 @@ public class Log4jConfigUtil  {
                 } else if (log4jPath.endsWith("properties")) {
                     PropertyConfigurator.configure(log4jPath);
                 } else {
-                    createDefaultConfig(Logger.getRootLogger());
+                    createDefault4JConfig(Logger.getRootLogger());
                 }
             } else {
-                createDefaultConfig(Logger.getRootLogger());
+                createDefault4JConfig(Logger.getRootLogger());
             }
         }
     }
 
-    public static void createDefaultConfig(Logger log) {
+    public static void createDefault4JConfig(Logger log) {
         //Logger log = LogManager.getRootLogger();
         log.setAdditivity(true);
         log.setLevel(Level.ALL);
