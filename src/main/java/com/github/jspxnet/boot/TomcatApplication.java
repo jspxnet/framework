@@ -14,10 +14,14 @@ import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.JreMemoryLeakPreventionListener;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.loader.ParallelWebappClassLoader;
+import org.apache.catalina.loader.WebappClassLoaderBase;
+import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.jasper.servlet.JspServlet;
+import org.apache.tomcat.JarScanType;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.apache.tomcat.util.descriptor.web.ContextResourceLink;
@@ -73,7 +77,7 @@ public class TomcatApplication {
             log.debug("tomcat param:"+args[0]);
             jspxConfiguration.setDefaultPath(args[0]);
         }
-
+        System.setProperty("log4j.ignoreTCL","true");
         String defaultPath = jspxConfiguration.getDefaultPath();
         Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile((defaultPath==null?"":defaultPath) + "/" + Environment.jspx_properties_file));
 
@@ -149,7 +153,9 @@ public class TomcatApplication {
         standardContext.setPrivileged(true);
         standardContext.setAddWebinfClassesResources(true);
 
-        standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
+        //这个没必要
+        //standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
+
         standardContext.addLifecycleListener(new Tomcat.FixContextListener());
         tomcat.addServlet("", "jspxServlet", new ServletDispatcher());
 
@@ -163,13 +169,18 @@ public class TomcatApplication {
         tomcat.addServlet("", "jsp", new JspServlet());
         standardContext.addServletMappingDecoded("*.jsp", "jsp");
 
-        JarScanner scanner = new StandardJarScanner();
+
         StandardJarScanFilter scanFilter = new StandardJarScanFilter();
         scanFilter.setDefaultPluggabilityScan(false);
         scanFilter.setDefaultTldScan(true);
         scanFilter.setTldSkip("*.jar");
+
+
+        //scanner.setJarScanFilter(scanFilter);
+        JarScanner scanner = new StandardJarScanner();
         scanner.setJarScanFilter(scanFilter);
         standardContext.setJarScanner(scanner);
+
         standardContext.setAddWebinfClassesResources(true);
 
 
@@ -272,22 +283,31 @@ public class TomcatApplication {
         standardContext.setResponseCharacterEncoding(Environment.defaultEncode);
         standardContext.setRequestCharacterEncoding(Environment.defaultEncode);
         standardContext.setReloadable(true);
-
-     /*
-    defaultSessionTimeOut="3600" isWARExpanded="true"
-　　isWARValidated="false" isInvokerEnabled="true"
-　　isWorkDirPersistent="false
-    */
+        if (standardContext.getLoader()==null)
+        {
+            WebappLoader webappLoader = new WebappLoader();
+            webappLoader.setDelegate(true);
+            webappLoader.setLoaderClass(ParallelWebappClassLoader.class.getName());
+            webappLoader.setLoaderInstance(new ParallelWebappClassLoader());
+            standardContext.setLoader(webappLoader);
+        }
 
         tomcat.start();
 
 
-        //  StaticLoggerBinder staticLoggerBinder = StaticLoggerBinder.getSingleton();
-
-
-
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = tomcat.getServer();
+        ClassLoader classLoader = server.getParentClassLoader();
+        if (classLoader!=null)
+        {
+            classLoader.setDefaultAssertionStatus(true);
+        }
+        else
+        {
+            ParallelWebappClassLoader webappLoader = new ParallelWebappClassLoader();
+            webappLoader.setDelegate(true);
+            server.setParentClassLoader(webappLoader);
+        }
         server.setAddress(ip);
         server.setUtilityThreads(threads);
         if (log.isInfoEnabled())

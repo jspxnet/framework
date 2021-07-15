@@ -561,6 +561,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--slf4j日志门面依赖结束-->
 
@@ -580,17 +586,13 @@
             <artifactId>log4j-api</artifactId>
             <version>${log4j2.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-web</artifactId>
-            <version>${log4j2.version}</version>
-        </dependency>
+
         <!--log4j2日志依赖结束-->
-        <dependency><!--提供商是log4j官方，这个是log4j和slf4j的桥接器，spring是通过slf4j输出日志的，依赖桥接器的实现-->
+ <!--       <dependency>&lt;!&ndash;提供商是log4j官方，这个是log4j和slf4j的桥接器，spring是通过slf4j输出日志的，依赖桥接器的实现&ndash;&gt;
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j2.version}</version><!--版本这里尤为重要，必须与log4j的依赖版版本一致-->
-        </dependency>
+            <version>${log4j2.version}</version>&lt;!&ndash;版本这里尤为重要，必须与log4j的依赖版版本一致&ndash;&gt;
+        </dependency>-->
 
         <!--需要使用log4j2的AsyncLogger需要包含disruptor-->
         <dependency>

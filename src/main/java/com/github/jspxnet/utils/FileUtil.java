@@ -19,12 +19,17 @@ package com.github.jspxnet.utils;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.file.MultiFile;
+import com.github.jspxnet.io.zip.ZipFile;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
+import com.sun.nio.zipfs.JarFileSystemProvider;
+import com.sun.nio.zipfs.ZipFileSystemProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -934,41 +939,72 @@ public class FileUtil {
             return false;
         }
 
-        Path apkFile = Paths.get(jarFileName);
-        try {
-            FileSystem fs = FileSystems.newFileSystem(apkFile, null);
-            Path dexFile = fs.getPath(entryName);
-            return Files.exists(dexFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-       /* JarFile jarFile = null;
-        try {
-            jarFile = new JarFile(jarFileName);
-            Enumeration<JarEntry> fileEnum = jarFile.entries();
-            while (fileEnum.hasMoreElements()) {
-                JarEntry entry = fileEnum.nextElement();
-                if (entryName.equalsIgnoreCase(entry.getName())) {
-                    return true;
-                }
-            }
-
-        } catch (IOException e) {
+        InputStream in = null;
+        try  {
+            URL url = new URL("jar:file:///" +jarFileName+ "!" + entryName);
+            in = url.openStream();
+            return true;
+        } catch (Exception e)
+        {
             e.printStackTrace();
             return false;
         } finally {
-            if (jarFile != null) {
-                try {
-                    jarFile.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+            try {
+                if (in!=null)
+                {
+                    in.close();
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
+
+       /*
+
+        try {
+
+            Path apkFile = Paths.get(jarFileName);
+            log.info("1---------Paths.get(jarFileName),jarFileName:{}",jarFileName);
+            ZipFileSystemProvider jarFileSystemProvider = new ZipFileSystemProvider();
+            FileSystem fs = jarFileSystemProvider.newFileSystem(apkFile,null);
+
+            //FileSystem fs = FileSystems.newFileSystem(apkFile, jarFileSystemProvider);
+            log.info("2---------Paths.get(jarFileName),fs:{}",fs);
+            Path dexFile = fs.getPath(entryName);
+            log.info("3---------Paths.get(jarFileName),dexFile:{}",dexFile);
+            return Files.exists(dexFile);
+        } catch (Throwable e) {
+            log.error("Paths.get(jarFileName),jarFileName:{}",jarFileName);
+            e.printStackTrace();
         }*/
-        return false;
+
     }
 
+    public static void main(String[] args) {
+        String fileJar = "d:\\syncapp\\WEB-INF\\lib\\sync-tigger.jar";
+
+        InputStream in = null;
+        try  {
+            URL url = new URL("jar:file:///" +fileJar+ "!/jspx.properties");
+            in = url.openStream();
+            System.out.println("-------ok");
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            System.out.println("-------no");
+        } finally {
+            try {
+                if (in!=null)
+                {
+                    in.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
     /**
      * 创建指定的目录。
      * 如果指定的目录的父目录不存在则创建其目录书上所有需要的父目录。

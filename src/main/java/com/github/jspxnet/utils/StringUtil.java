@@ -445,7 +445,8 @@ public class StringUtil {
             list.add(str.substring(start, end));
             pos = end + closeLen;
         }
-        return list.toArray(new String[list.size()]);
+        final  int length = list.size();
+        return list.toArray(new String[length]);
     }
 
     /**
@@ -3163,9 +3164,9 @@ public class StringUtil {
         {
             return empty;
         }
-        if (str.startsWith("+")||str.startsWith("-"))
+        if (str.startsWith("+")||str.startsWith("-")||str.startsWith("@"))
         {
-            str = "\'" + str;
+            str = " " + str;
         }
         if(str.contains(",")){
             str = str.replace("\"","\"\"");
