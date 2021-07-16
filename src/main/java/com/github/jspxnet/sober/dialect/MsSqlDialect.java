@@ -10,7 +10,9 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
+
 import com.github.jspxnet.utils.ObjectUtil;
+
 
 import java.io.InputStream;
 import java.sql.PreparedStatement;
@@ -72,15 +74,8 @@ public class MsSqlDialect extends Dialect {
 
     @Override
     public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
-        int length = end - begin;
-        if (length < 0) {
-            length = 0;
-        }
-        if (sql.toLowerCase().contains(" order "))
-        {
-            return sql + " offset " + begin + " rows fetch next " + length + " rows only";
-        }
-        return sql + "order by " + soberTable.getPrimary() +" offset " + begin + " rows fetch next " + length + " rows only";
+
+        return sql;
     }
 
     @Override
