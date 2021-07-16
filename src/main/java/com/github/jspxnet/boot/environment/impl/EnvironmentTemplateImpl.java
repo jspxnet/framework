@@ -236,6 +236,9 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         VALUE_MAP.put(Environment.logJspxDebugFile, logPath + Environment.log_jspx_debug_file);
 
         VALUE_MAP.put(Environment.logJspxErrorFile, logPath + Environment.log_jspx_error_file);
+
+        System.out.println("log---------------------路径配置");
+        Log4jConfigUtil.createConfig();
     }
 
     private String getEncode() {
