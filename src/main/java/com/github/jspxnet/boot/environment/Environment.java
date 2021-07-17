@@ -177,12 +177,6 @@ public abstract class Environment {
 
     final public static String log_error_file = "sys_error.log";
 
-    final public static String log_jspx_info_file = "jspx_info.log";
-
-    final public static String log_jspx_debug_file = "jspx_debug.log";
-
-    final public static String log_jspx_error_file = "jspx_error.log";
-
     final public static String jspxProperties = "jspxProperties";
 
     final public static String jspx_properties_file = "jspx.properties";
