@@ -37,7 +37,7 @@ import java.util.*;
  * android.util.Log
  */
 
-public class Log4jConfigUtil  {
+public class LogBackConfigUtil {
     public static void createConfig() {
 
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -46,7 +46,7 @@ public class Log4jConfigUtil  {
         configurator.setContext(lc);
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        File file = new File(envTemplate.getString(Environment.defaultPath),"logback.xml");
+        File file = new File(envTemplate.getString(Environment.defaultPath),Environment.DEFAULT_LOAD_LOG_NAME);
         String defaultConfigTxt = null;
         if (FileUtil.isFileExist(file))
         {
@@ -58,7 +58,7 @@ public class Log4jConfigUtil  {
         }
         if (StringUtil.isEmpty(defaultConfigTxt))
         {
-            InputStream stream = Log4jConfigUtil.class.getResourceAsStream("defaultlog.xml");
+            InputStream stream = LogBackConfigUtil.class.getResourceAsStream(Environment.DEFAULT_LOG_NAME);
             byte[] bytes = FileUtil.getBytesFromInputStream(stream);
             if (bytes==null)
             {
@@ -70,17 +70,21 @@ public class Log4jConfigUtil  {
                 e.printStackTrace();
             }
         }
-
+        if (StringUtil.isNull(defaultConfigTxt))
+        {
+            System.err.println("LogBack defaultConfigTxt:" + defaultConfigTxt);
+        }
         Map<String, Object> valueMap = envTemplate.getVariableMap();
         if (!valueMap.containsKey("logMaxHistory"))
         {
             valueMap.put("logMaxHistory",60);
         }
-        String cinfigTxt = EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt);
-        org.xml.sax.InputSource inputSource = new InputSource(new StringReader(cinfigTxt));
+        String confTxt = EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt);
+        org.xml.sax.InputSource inputSource = new InputSource(new StringReader(confTxt));
         try {
             configurator.doConfigure(inputSource);
         } catch (JoranException e) {
+            System.err.println("默认路径是否配置错误");
             e.printStackTrace();
         }
         StatusPrinter.printInCaseOfErrorsOrWarnings(lc);

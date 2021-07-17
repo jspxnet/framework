@@ -94,6 +94,11 @@ public abstract class Environment {
 
     final public static String libPath = "libPath";
 
+    final public static String DEFAULT_LOAD_LOG_NAME = "logback.xml";
+
+    final public static String DEFAULT_LOG_NAME = "defaultlog.xml";
+
+
     final public static String webInfPath = "webInfPath";
 
     final public static String tempPath = "tempPath";

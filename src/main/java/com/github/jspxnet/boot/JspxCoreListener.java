@@ -14,7 +14,7 @@ import com.github.jspxnet.boot.conf.VcsBootConfig;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.boot.environment.impl.Log4jConfigUtil;
+import com.github.jspxnet.boot.environment.impl.LogBackConfigUtil;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.cache.core.JSCache;
@@ -151,12 +151,11 @@ public class JspxCoreListener implements ServletContextListener {
             e.printStackTrace();
         }
 
-        Log4jConfigUtil.createConfig();
+        LogBackConfigUtil.createConfig();
         //////初始化环境变量 end
 
         log.info("default Path=" + envTemplate.getString(Environment.defaultPath));
         log.info("template Path=" + envTemplate.getString(Environment.templatePath));
-        log.info("java.library.path=" + System.getProperty("java.library.path"));
 
         //////////////////////初始化脚本语言环境 begin
         Configurable templateConfigurable = TemplateConfigurable.getInstance();

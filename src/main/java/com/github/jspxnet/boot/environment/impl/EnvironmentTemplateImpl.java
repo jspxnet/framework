@@ -35,9 +35,7 @@ import java.util.*;
 @Slf4j
 public class EnvironmentTemplateImpl implements EnvironmentTemplate {
     private static final Map<String, Object> VALUE_MAP = new Hashtable<>();
-
     public EnvironmentTemplateImpl() {
-
 
     }
 
@@ -231,7 +229,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
         VALUE_MAP.put(Environment.logErrorFile, logPath + Environment.log_error_file);
 
-        Log4jConfigUtil.createConfig();
+        LogBackConfigUtil.createConfig();
     }
 
     private String getEncode() {
