@@ -16,7 +16,6 @@ import com.github.jspxnet.sober.table.OperateTable;
 import com.github.jspxnet.txweb.enums.ImageSysEnumType;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.ImageUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,10 +32,10 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public abstract class IUploadFile extends OperateTable {
-    final static private String[] imageFileType = {"jpg", "gif", "bmp", "png", "jpeg"};
-    final static private String[] msOfficeFileType = {"doc", "docx", "ppt", "pptx", "xls", "xlsx"};
-    final static private String[] wpsOfficeFileType = {"wps", "wpt", "et", "dpt"};
-    final static private String[] flashFileType = {"swf"};
+    final static private String[] IMAGE_FILE_TYPE = {"jpg", "gif", "bmp", "png", "jpeg"};
+    final static private String[] MS_OFFICE_FILE_TYPE = {"doc", "docx", "ppt", "pptx", "xls", "xlsx"};
+    final static private String[] WPS_OFFICE_FILE_TYPE = {"wps", "wpt", "et", "dpt"};
+    final static private String[] FLASH_FILE_TYPE = {"swf"};
 
     @Id
     @Column(caption = "ID", notNull = true)
@@ -97,20 +96,21 @@ public abstract class IUploadFile extends OperateTable {
     @Column(caption = "编辑历史", length = 600, notNull = true)
     private String history = StringUtil.empty;
 
-    @JsonIgnore
     @Column(caption = "机构ID", length = 32)
     private String organizeId = StringUtil.empty;
     //临时文件保存目录
     @JsonIgnore
     private String tempFilePath = StringUtil.empty;
 
+    @Column(caption = "命名空间", length = 32)
+    private String namespace = StringUtil.empty;
 
     public boolean isImage() {
-        return ArrayUtil.inArray(imageFileType, fileType, true);
+        return ArrayUtil.inArray(IMAGE_FILE_TYPE, fileType, true);
     }
 
     public boolean isFlash() {
-        return ArrayUtil.inArray(flashFileType, fileType, true);
+        return ArrayUtil.inArray(FLASH_FILE_TYPE, fileType, true);
     }
 
     public String[] getTagsArray() {

@@ -22,8 +22,8 @@ import java.util.Date;
  * Time: 11:29:08
  * MS SQL 2000 数据库 SQL 匹配
  */
-public class MsSqlDialect extends Dialect {
-    public MsSqlDialect() {
+public class MsSqlHeightDialect extends Dialect {
+    public MsSqlHeightDialect() {
         standard_SQL.put(SQL_CREATE_TABLE, "<#assign primary_length=" + KEY_PRIMARY_KEY + ".length />" +
                 "CREATE TABLE [dbo].[${" + KEY_TABLE_NAME + "}] \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column} <#if where=column.substring(1,primary_length)==" + KEY_PRIMARY_KEY + ">PRIMARY KEY</#if><#if where=column_has_next>,</#if>\n</#list>" +
@@ -71,7 +71,15 @@ public class MsSqlDialect extends Dialect {
 
     @Override
     public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
-        return sql;
+        int length = end - begin;
+        if (length < 0) {
+            length = 0;
+        }
+        if (sql.toLowerCase().contains(" order "))
+        {
+            return sql + " offset " + begin + " rows fetch next " + length + " rows only";
+        }
+        return sql + "order by " + soberTable.getPrimary() +" offset " + begin + " rows fetch next " + length + " rows only";
     }
 
     @Override

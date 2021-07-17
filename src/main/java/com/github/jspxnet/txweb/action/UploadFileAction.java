@@ -520,6 +520,7 @@ public class UploadFileAction extends MultipartSupport {
             upFile.setIp(getRemoteAddr());
             upFile.setOrganizeId(getOrganizeId());
             upFile.setHash(hashCode);
+            upFile.setNamespace(uploadFileDAO.getNamespace());
             Object alreadyUploadFile = null;
             if (useFastUpload && fileEquals(hashCode, upFile.getHash())) {
                 alreadyUploadFile = uploadFileDAO.getForHash(hashCode);
@@ -670,6 +671,7 @@ public class UploadFileAction extends MultipartSupport {
                 thumbnailUploadFile.setSysType(ImageSysEnumType.THUMBNAIL.getValue());
                 thumbnailUploadFile.setTempFilePath(thumbnailFile.getPath());
                 thumbnailUploadFile.setOrganizeId(getOrganizeId());
+                thumbnailUploadFile.setNamespace(uploadFileDAO.getNamespace());
                 result[1] = thumbnailUploadFile;
             }
 
@@ -701,6 +703,7 @@ public class UploadFileAction extends MultipartSupport {
                 mobileUploadFile.setCreateDate(new Date());
                 mobileUploadFile.setSysType(ImageSysEnumType.MOBILE.getValue());
                 mobileUploadFile.setOrganizeId(getOrganizeId());
+                mobileUploadFile.setNamespace(uploadFileDAO.getNamespace());
                 mobileUploadFile.setTempFilePath(mobileFile.getPath());
                 result[2] = mobileUploadFile;
             }
@@ -764,6 +767,7 @@ public class UploadFileAction extends MultipartSupport {
         copySaveUploadFile.setGroupName(getString(GROUP_VAR_NAME,"未分类",true));
         copySaveUploadFile.setSortType(0);
         copySaveUploadFile.setId(0);
+        copySaveUploadFile.setNamespace(uploadFileDAO.getNamespace());
         uploadFileDAO.save(copyUploadFile);
         long newPid = copySaveUploadFile.getId();
 
@@ -788,6 +792,7 @@ public class UploadFileAction extends MultipartSupport {
             childUploadFile.setSortType(0);
             childUploadFile.setPid(newPid);
             childUploadFile.setId(0);
+            childUploadFile.setNamespace(uploadFileDAO.getNamespace());
             uploadFileDAO.save(childUploadFile);
             objects[i + 1] = childList.get(i);
         }

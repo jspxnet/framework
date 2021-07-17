@@ -3,25 +3,22 @@ package com.github.jspxnet.boot;
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
-
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.JspxNetListener;
 import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
 import com.github.jspxnet.utils.*;
 import com.thetransactioncompany.cors.CORSConfiguration;
 import com.thetransactioncompany.cors.CORSFilter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.core.JreMemoryLeakPreventionListener;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.loader.ParallelWebappClassLoader;
-import org.apache.catalina.loader.WebappClassLoaderBase;
 import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.jasper.servlet.JspServlet;
-import org.apache.tomcat.JarScanType;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.apache.tomcat.util.descriptor.web.ContextResourceLink;
@@ -29,9 +26,6 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.redisson.tomcat.JndiRedissonSessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.util.Properties;
 
@@ -44,9 +38,9 @@ import java.util.Properties;
  * com.github.jspxnet.boot.TomcatApplication
  **/
 
-
+@Slf4j
 public class TomcatApplication {
-    private static final Logger log = LoggerFactory.getLogger(TomcatApplication.class);
+
     //@Parameter(names = "-port", description = "tomcat server port")
     private static int port;
     //@Parameter(names = "-webPath", description = "web path")
@@ -319,7 +313,6 @@ public class TomcatApplication {
             System.out.println("defaultPath:"+defaultPath);
             System.out.println("Server "+server.getAddress()+":"+port);
         }
-
         server.await();
     }
 }

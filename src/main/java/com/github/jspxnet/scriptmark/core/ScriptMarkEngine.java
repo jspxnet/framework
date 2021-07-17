@@ -23,7 +23,7 @@ import java.util.HashMap;
  * User: chenYuan
  * date: 2008-11-16
  * Time: 15:18:28
- * 脚本引擎
+ * 脚本引擎 com.github.jspxnet.scriptmark.core.ScriptMarkEngine
  */
 
 public class ScriptMarkEngine implements ScriptMark {

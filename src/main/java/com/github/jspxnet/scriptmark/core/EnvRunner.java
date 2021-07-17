@@ -29,7 +29,7 @@ import java.io.*;
  * User: chenYuan
  * date: 2008-11-16
  * Time: 15:33:04
- * js引擎封装
+ * js引擎封装 com.github.jspxnet.scriptmark.core.EnvRunner
  */
 @Slf4j
 public class EnvRunner {

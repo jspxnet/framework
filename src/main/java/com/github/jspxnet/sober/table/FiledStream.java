@@ -21,7 +21,7 @@ public class FiledStream extends InputStream {
     }
 
     @Override
-    public long skip(long n) throws IOException {
+    public long skip(long n)  {
 
         skip = n;
         if (skip < 0) {

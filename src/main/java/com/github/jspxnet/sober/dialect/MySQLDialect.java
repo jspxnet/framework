@@ -77,8 +77,6 @@ public class MySQLDialect extends Dialect {
         //创建索引,一个一个
         standard_SQL.put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX `${"+KEY_INDEX_NAME+"}`(${"+KEY_INDEX_FIELD+"})");
 
-
-
     }
 
     @Override
