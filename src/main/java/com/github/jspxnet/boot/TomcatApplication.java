@@ -276,7 +276,7 @@ public class TomcatApplication {
         standardContext.setSessionCookiePathUsesTrailingSlash(true);
         standardContext.setResponseCharacterEncoding(Environment.defaultEncode);
         standardContext.setRequestCharacterEncoding(Environment.defaultEncode);
-        standardContext.setReloadable(true);
+        standardContext.setReloadable(false);
         if (standardContext.getLoader()==null)
         {
             WebappLoader webappLoader = new WebappLoader();
