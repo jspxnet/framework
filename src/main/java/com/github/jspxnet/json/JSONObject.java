@@ -402,7 +402,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 
                     if (result instanceof Date) {
                         //日期格式化
-
                         if (jsonField != null && !StringUtil.isNull(jsonField.format())) {
                             super.put(displayKey, DateUtil.toString((Date) result, jsonField.format()));
                         } else {
@@ -413,7 +412,12 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                         super.put(key, new JSONArray(result, includeSuperClass,key,dataField));
                     } else if (ClassUtil.isNumberType(result.getClass())) {
                         // 数字格式化
-                        super.put(displayKey, result);
+                        if (!StringUtil.isNull(jsonField.format())) {
+                            super.put(displayKey, NumberUtil.format( result, jsonField.format()));
+                        } else {
+                            super.put(displayKey, result);
+                        }
+
                     } else if (ClassUtil.isStandardProperty(result.getClass())) { //Primitives, String and Wrapper
                         super.put(displayKey, result);
                     } else {
@@ -514,7 +518,11 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                         super.put(key, new JSONArray(result, includeSuperClass,key,dataField));
                     } else if (ClassUtil.isNumberType(result.getClass())) {
                         // 数字格式化
-                        super.put(key, result);
+                        if (!StringUtil.isNull(jsonField.format())) {
+                            super.put(key, NumberUtil.format( result, jsonField.format()));
+                        } else {
+                            super.put(key, result);
+                        }
                     } else if (ClassUtil.isStandardProperty(result.getClass())) { //Primitives, String and Wrapper
                         super.put(key, result);
                     } else {
