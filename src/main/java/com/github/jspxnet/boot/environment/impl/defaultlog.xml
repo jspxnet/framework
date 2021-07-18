@@ -97,17 +97,15 @@
     <!-- root级别   DEBUG -->
     <root level="INFO">
         <!-- 控制台输出 -->
-        <#if where="debug">
-        <appender-ref ref="STDOUT" />
-        </#if>
-        <!-- 文件输出 -->
-       <#if where="error">
+        <if where="debug">
+           <appender-ref ref="STDOUT" />
+        </if>
+       <if where="error">
         <appender-ref ref="ERROR" />
-       </#if>
-
-        <#if where="info">
+       </if>
+        <if where="info">
         <appender-ref ref="INFO" />
-        </#if>
+        </if>
         <appender-ref ref="WARN" />
         <appender-ref ref="TRACE" />
     </root>

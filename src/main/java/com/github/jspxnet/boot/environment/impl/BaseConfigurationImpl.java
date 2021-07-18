@@ -28,9 +28,6 @@ import java.util.List;
 
 @Slf4j
 public class BaseConfigurationImpl implements JspxConfiguration {
-
-
-
     private String defaultPath = null;
     private String configFilePath = null;
     final private static Date START_RUN_DATE = new Date();

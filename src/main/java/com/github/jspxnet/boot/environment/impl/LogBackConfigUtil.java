@@ -80,6 +80,7 @@ public class LogBackConfigUtil {
             valueMap.put("logMaxHistory",60);
         }
         String confTxt = EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt);
+        System.out.println(confTxt);
         org.xml.sax.InputSource inputSource = new InputSource(new StringReader(confTxt));
         try {
             configurator.doConfigure(inputSource);
