@@ -301,8 +301,6 @@ public class TomcatApplication {
         }
         server.setAddress(ip);
         server.setUtilityThreads(threads);
-
-
         server.await();
     }
 }
