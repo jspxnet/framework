@@ -231,9 +231,7 @@ public class TomcatApplication {
             }
         }
 
-
         //我们要把Servlet设置进去
-
         if (cors)
         {
             FilterDef filterDef = new FilterDef();
@@ -255,7 +253,6 @@ public class TomcatApplication {
 
             standardContext.addFilterDef(filterDef);
         }
-
 
         //Tomcat跑起来
         //设置Tomcat的端口tomcat.setPort(9091)。两种写法都可以设置端口
