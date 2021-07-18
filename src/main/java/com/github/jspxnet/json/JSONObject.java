@@ -300,13 +300,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (ClassUtil.isProxy(bean.getClass())) {
             bean = ReflectUtil.getValueMap(bean);
         }
-
-/*        if (bean instanceof JSONObject)
-        {
-            JSONObject json = (JSONObject)bean;
-            super.putAll(json.toMap());
-            return;
-        }*/
         if (bean instanceof Map) {
             Map map = (Map) bean;
             for (Object key : map.keySet()) {
@@ -319,6 +312,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 if (v==null)
                 {
                     super.put((String) key, null);
+                } else
+                if (ClassUtil.isCollection(v))
+                {
+                    super.put((String) key, new JSONArray(v,includeSuperClass));
                 } else
                 if (!ClassUtil.isStandardProperty(v.getClass())&&!(v instanceof JSONObject)) {
                     super.put((String) key, new JSONObject(v, includeSuperClass,dataField));
@@ -452,7 +449,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 }
             }
         }
-
         //-------------------------------方法需要输出的注释
 
         Method[] methods = ClassUtil.getDeclaredReturnMethods(lass, 0);
@@ -536,7 +532,8 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                                     JSONArray fieldArray = dataField.getJSONArray(key);
                                     if (fieldArray!=null&&!fieldArray.isEmpty())
                                     {
-                                        childShowField = (String[]) fieldArray.toArray(new String[fieldArray.size()]);
+                                        final  int size = fieldArray.size();
+                                        childShowField = (String[]) fieldArray.toArray(new String[size]);
                                     }
                                 }
                                 super.put(key, new JSONObject(result, childShowField,includeSuperClass,dataField));
