@@ -412,7 +412,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                         super.put(key, new JSONArray(result, includeSuperClass,key,dataField));
                     } else if (ClassUtil.isNumberType(result.getClass())) {
                         // 数字格式化
-                        if (!StringUtil.isNull(jsonField.format())) {
+                        if (jsonField != null &&!StringUtil.isNull(jsonField.format())) {
                             super.put(displayKey, NumberUtil.format( result, jsonField.format()));
                         } else {
                             super.put(displayKey, result);
@@ -468,14 +468,15 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 if (method.getParameterTypes().length > 1) {
                     continue;
                 }
-
+                String key = ClassUtil.getMethodFiledName(method.getName());
                 JsonField jsonField = method.getAnnotation(JsonField.class);
-                if (jsonField == null) {
+                if (jsonField==null)
+                {
                     continue;
                 }
-                String key = jsonField.name();
-                if (StringUtil.isNull(key)) {
-                    key = ClassUtil.getMethodFiledName(method.getName());
+                if (!StringUtil.isNull(jsonField.name()))
+                {
+                    key = jsonField.name();
                 }
                 if (!ArrayUtil.isEmpty(showField)&&!ArrayUtil.contains(showField,key))
                 {
@@ -483,7 +484,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 }
                 try {
                     Object result = method.invoke(bean, (Object[]) null);
-
                     if (result == null) {
                         super.put(key, null);
                         continue;
@@ -509,7 +509,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 
                     if (result instanceof Date) {
                         //日期格式化
-                        if (!StringUtil.isNull(jsonField.format())) {
+                        if ( !StringUtil.isNull(jsonField.format())) {
                             super.put(key, DateUtil.toString((Date) result, jsonField.format()));
                         } else {
                             super.put(key, DateUtil.toString((Date) result, FULL_ST_FORMAT));

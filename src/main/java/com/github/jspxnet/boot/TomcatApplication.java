@@ -282,9 +282,9 @@ public class TomcatApplication {
             webappLoader.setLoaderInstance(new ParallelWebappClassLoader());
             standardContext.setLoader(webappLoader);
         }
-
+        System.out.println("defaultPath:"+defaultPath);
+        System.out.println("config server:" +ip+":"+port);
         tomcat.start();
-
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = tomcat.getServer();
@@ -301,15 +301,8 @@ public class TomcatApplication {
         }
         server.setAddress(ip);
         server.setUtilityThreads(threads);
-        if (log.isInfoEnabled())
-        {
-            log.info("defaultPath:"+defaultPath);
-            log.info("Server "+server.getAddress()+":"+port);
-        } else
-        {
-            System.out.println("defaultPath:"+defaultPath);
-            System.out.println("Server "+server.getAddress()+":"+port);
-        }
+
+
         server.await();
     }
 }

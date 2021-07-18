@@ -30,6 +30,7 @@
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -50,6 +51,7 @@
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -71,6 +73,7 @@
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -91,21 +94,25 @@
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
     <!-- root级别   DEBUG -->
-    <root level="INFO">
+    <root level="${debug=='true'?'DEBUG':'INFO'}">
         <!-- 控制台输出 -->
-        <if where="debug">
-           <appender-ref ref="STDOUT" />
-        </if>
-       <if where="error">
-        <appender-ref ref="ERROR" />
-       </if>
-        <if where="info">
-        <appender-ref ref="INFO" />
-        </if>
+        <#if where="debug=='true'">
+              <!-- this only enable in local -->
+              <appender-ref ref="STDOUT"/>
+        </#if>
+        <#if where="error=='true'">
+             <!-- this only enable in local -->
+             <appender-ref ref="ERROR"/>
+        </#if>
+        <#if where="info=='true'">
+        <!-- this only enable in local -->
+            <appender-ref ref="INFO"/>
+        </#if>
         <appender-ref ref="WARN" />
         <appender-ref ref="TRACE" />
     </root>

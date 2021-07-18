@@ -72,7 +72,7 @@ public class LogBackConfigUtil {
         }
         if (StringUtil.isNull(defaultConfigTxt))
         {
-            System.err.println("LogBack defaultConfigTxt:" + defaultConfigTxt);
+            System.err.println("LogBack defaultConfig:" + defaultConfigTxt);
         }
         Map<String, Object> valueMap = envTemplate.getVariableMap();
         if (!valueMap.containsKey("logMaxHistory"))
@@ -80,15 +80,14 @@ public class LogBackConfigUtil {
             valueMap.put("logMaxHistory",60);
         }
         String confTxt = EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt);
-        System.out.println(confTxt);
         org.xml.sax.InputSource inputSource = new InputSource(new StringReader(confTxt));
         try {
             configurator.doConfigure(inputSource);
         } catch (JoranException e) {
             System.err.println("默认路径是否配置错误");
             e.printStackTrace();
+            StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
         }
-        StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
     }
 
 
