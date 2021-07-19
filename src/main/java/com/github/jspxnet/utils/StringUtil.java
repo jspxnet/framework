@@ -71,6 +71,8 @@ public class StringUtil {
 
     public static final String DOT = ".";
 
+    public static final String AND = "&";
+
     public static final String CR = "\n";
 
     public static final String TAB = "\t";

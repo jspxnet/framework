@@ -763,7 +763,7 @@ public abstract class ActionSupport implements Action {
         for (String value : array) {
             sb.append(name).append("=").append(URLUtil.getUrlEncoder(value, Dispatcher.getEncode())).append("&");
         }
-        if (sb.toString().endsWith("&")) {
+        if (sb.toString().endsWith(StringUtil.AND)) {
             sb.setLength(sb.length() - 1);
         }
         return sb.toString();
@@ -816,9 +816,9 @@ public abstract class ActionSupport implements Action {
             level = SafetyEnumType.NONE.getValue();
         }
         String url = request.getRequestURI();
-        String[] paths = StringUtil.split(url, "/");
+        String[] paths = StringUtil.split(url, StringUtil.BACKSLASH);
         if (paths.length >= level) {
-            if (paths[level].endsWith("." + getEnv(Environment.filterSuffix))) {
+            if (paths[level].endsWith(StringUtil.DOT + getEnv(Environment.filterSuffix))) {
                 return FileUtil.getNamePart(paths[level]);
             }
             return paths[level];
