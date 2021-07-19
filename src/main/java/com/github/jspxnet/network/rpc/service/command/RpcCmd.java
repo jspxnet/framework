@@ -13,7 +13,9 @@ import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
+import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.result.RpcResult;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -133,7 +135,8 @@ public class RpcCmd extends INetCommand {
 
         IocResponse response = new IocResponse();
         try {
-            ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, TXWebUtil.createEnvironment(), "roc", json, new RequestTo((Map) iocRequest.getRequest()), new ResponseTo((Map) iocRequest.getResponse()));
+            ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, TXWebUtil.createEnvironment(), RocHandle.NAME,
+                    json, new RequestTo((Map) iocRequest.getRequest()), new ResponseTo((Map) iocRequest.getResponse()));
             actionInvocation.initAction();
             actionInvocation.invoke();
             RpcResult rpcResult = new RpcResult();

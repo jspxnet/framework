@@ -134,6 +134,10 @@ public class DefaultActionInvocation implements ActionInvocation {
         this.namespace = (StringUtil.isNull(actionConfig.getNamespace()) || Sioc.global.equals(actionConfig.getNamespace())) ? (String) params.get(ActionEnv.Key_Namespace) : actionConfig.getNamespace();
         this.actionProxy.setExeType(exeType);
         this.actionProxy.setNamespace(this.namespace);
+        if (!params.containsKey(ActionEnv.Key_Namespace)) {
+            params.put(ActionEnv.Key_Namespace,this.namespace);
+        }
+
         /////////创建bean对象 begin
         Object obj = BEAN_FACTORY.getBean(actionConfig.getIocBean(), namespace);
         Action action = null;
