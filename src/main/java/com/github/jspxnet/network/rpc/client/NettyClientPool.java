@@ -33,7 +33,7 @@ public class NettyClientPool {
      * volatile保持线程之间的可见性，连接池的创建是单例，在这里可加可不加
      */
     private static NettyClientPool nettyClientPool;
-    private ChannelPoolMap<SocketAddress,FixedChannelPool> pools;
+    private static ChannelPoolMap<SocketAddress,FixedChannelPool> pools;
     private final Bootstrap bootstrap = new Bootstrap();
     private final NioEventLoopGroup workersGroup;
 

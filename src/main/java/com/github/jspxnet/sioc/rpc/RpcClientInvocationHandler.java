@@ -71,6 +71,10 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 {
                     targetObject = NettyRpcProxy.create(target,rpcClient.url(),rpcClient.groupName());
                 }
+                if (targetObject==null)
+                {
+                    throw new Exception(targetObject + " Rpc 创建远程调用对象失败,确认远程服务器已经启动");
+                }
                 return method.invoke(targetObject, args);
             }
             if (RpcProtocolEnumType.HTTP.equals(rpcClient.protocol())) {
