@@ -98,6 +98,8 @@
         </encoder>
     </appender>
     <logger name="org.redisson.connection.DNSMonitor" level="INFO" />
+    <logger name="org.redisson.command.RedisExecutor" level="INFO" />
+    <logger name="org.redisson.connection.ClientConnectionsEntry" level="INFO" />
     <logger name="org.hibernate" level="ERROR" />
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />
     <!-- root级别   DEBUG -->
