@@ -32,7 +32,7 @@ public class NettyClientPool {
     /**
      * volatile保持线程之间的可见性，连接池的创建是单例，在这里可加可不加
      */
-    private static NettyClientPool nettyClientPool;
+    private static NettyClientPool instance;
     private static ChannelPoolMap<SocketAddress,FixedChannelPool> pools;
     private final Bootstrap bootstrap = new Bootstrap();
     private final NioEventLoopGroup workersGroup;
@@ -62,15 +62,14 @@ public class NettyClientPool {
      * @return 单例
      */
     public static NettyClientPool getInstance(){
-        if(nettyClientPool == null) {
+        if(instance == null) {
             synchronized (NettyClientPool.class) {
-                if(nettyClientPool == null) {
-                    nettyClientPool = new NettyClientPool();
+                if(instance == null) {
+                    instance = new NettyClientPool();
                 }
             }
         }
-
-        return nettyClientPool;
+        return instance;
     }
 
     /**
@@ -104,7 +103,11 @@ public class NettyClientPool {
     }
 
     @SuppressWarnings("all")
-    public void close() {
+    public void shutdown() {
+        if (pools==null)
+        {
+            return;
+        }
         AbstractChannelPoolMap poolMap = (AbstractChannelPoolMap) pools;
         for (Map.Entry<InetSocketAddress, FixedChannelPool> inetSocketAddressFixedChannelPoolEntry : (Iterable<Map.Entry<InetSocketAddress, FixedChannelPool>>) poolMap) {
             inetSocketAddressFixedChannelPoolEntry.getValue().close();

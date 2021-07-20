@@ -34,12 +34,17 @@ public class RpcClientInvocationHandler implements InvocationHandler {
     private HttpServletResponse response;
     public RpcClientInvocationHandler(Class<?> target)
     {
+
         this.target = target;
     }
 
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (target==null)
+        {
+            throw new Exception("target 调用类对象不允许为空");
+        }
         if ("getTarge".equals(method.getName())||"getClass".equals(method.getName())) {
             return target;
         }

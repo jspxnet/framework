@@ -58,7 +58,7 @@ public class NettyRpcProxy {
      * @param <T> 类型
      * @return 代理对象
      */
-    static  public <T>T create(Class<T>  target,String url, RequestTo requestTo, ResponseTo responseTo, String serviceName)
+    static  public <T>T create(Class<T> target,String url, RequestTo requestTo, ResponseTo responseTo, String serviceName)
     {
         RpcMethodInterceptor clientInvocationHandler = new RpcMethodInterceptor();
         clientInvocationHandler.setUrl(url);

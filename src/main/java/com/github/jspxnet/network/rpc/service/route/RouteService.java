@@ -349,7 +349,7 @@ public class RouteService implements Runnable {
 
     public void shutdown() {
         isRun = false;
-        NettyClientPool.getInstance().close();
+        NettyClientPool.getInstance().shutdown();
     }
 
 }
