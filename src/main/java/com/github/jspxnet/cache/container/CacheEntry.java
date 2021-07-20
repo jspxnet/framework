@@ -12,8 +12,7 @@ package com.github.jspxnet.cache.container;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 
 /**
@@ -22,9 +21,9 @@ import java.io.Serializable;
  * date: 2007-4-12
  * Time: 18:11:09
  */
-
+@Slf4j
 public class CacheEntry implements Serializable, Cloneable {
-    private  final Logger log = LoggerFactory.getLogger(CacheEntry.class);
+
     private static final int ONE_SECOND = DateUtil.SECOND;
     private static final int MAX_KEY_LENGTH = 250;
 

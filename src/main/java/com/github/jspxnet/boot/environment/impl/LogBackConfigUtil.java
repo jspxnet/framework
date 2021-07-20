@@ -20,6 +20,9 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.FileUtil;
+import org.apache.log4j.*;
+import org.apache.log4j.varia.LevelRangeFilter;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import java.io.File;
@@ -40,7 +43,21 @@ import java.util.*;
 public class LogBackConfigUtil {
     public static void createConfig() {
 
-        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+        if (loggerFactory instanceof ch.qos.logback.classic.LoggerContext)
+        {
+            LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+            createLogBackConfig(lc);
+        } else
+        {
+            createLog4JConfig();
+        }
+    }
+
+    public static void createLogBackConfig(LoggerContext lc)
+    {
+
+
         lc.reset();
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
@@ -88,6 +105,75 @@ public class LogBackConfigUtil {
             e.printStackTrace();
             StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
         }
+    }
+
+
+    public static void createLog4JConfig() {
+        Logger log = LogManager.getRootLogger();
+        log.setAdditivity(true);
+        log.setLevel(Level.ALL);
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+
+        //log.removeAllAppenders();
+        //不想显示的日志放在这里
+      /*  Set<String> loggers = new HashSet<>(Arrays.asList("org.apache", "groovyx.net.http", "org.redisson", "org.jboss", "io.netty"));
+        for (String httplog : loggers) {
+            Logger logger = Logger.getLogger(httplog);
+            logger.setLevel(Level.DEBUG);
+            logger.setAdditivity(false);
+        }*/
+
+        if (envTemplate.getBoolean(Environment.logError)) {
+            RollingFileAppender errorAppender = new RollingFileAppender();
+            errorAppender.setName(Environment.logError);
+            errorAppender.setBufferSize(64);
+            errorAppender.setAppend(true);
+            errorAppender.setEncoding(envTemplate.getString(Environment.encode));
+            errorAppender.setFile(envTemplate.getString(Environment.logErrorFile));
+            errorAppender.setMaxFileSize("5120KB");
+            errorAppender.setMaxBackupIndex(9);
+
+
+
+            PatternLayout errorLayout = new PatternLayout();
+            errorLayout.setConversionPattern("%d{yyyy-MM-dd HH:mm} %t %p %c %l - %m%n");
+            errorAppender.setLayout(errorLayout);
+
+
+            LevelRangeFilter errorLevel = new LevelRangeFilter();
+
+            errorLevel.setLevelMax(Level.FATAL);
+            errorLevel.setLevelMin(Level.ERROR);
+            errorAppender.addFilter(errorLevel);
+            errorAppender.activateOptions();
+            log.addAppender(errorAppender);
+        }
+
+        //info
+        if (envTemplate.getBoolean(Environment.logInfo)) {
+            RollingFileAppender infoAppender = new RollingFileAppender();
+            infoAppender.setName(Environment.logInfo);
+            infoAppender.setBufferSize(128);
+            infoAppender.setAppend(false);
+            infoAppender.setEncoding(envTemplate.getString(Environment.encode));
+            infoAppender.setFile(envTemplate.getString(Environment.logInfoFile));
+            infoAppender.setMaxFileSize("5120KB");
+            infoAppender.setMaxBackupIndex(9);
+
+            PatternLayout infoLayout = new PatternLayout();
+            infoLayout.setConversionPattern("%d{yyyy-MM-dd HH:mm} %t %p %c %l - %m%n");
+            infoAppender.setLayout(infoLayout);
+
+            LevelRangeFilter infoLevel = new LevelRangeFilter();
+            infoLevel.setLevelMax(Level.INFO);
+            infoLevel.setLevelMin(Level.INFO);
+            infoAppender.addFilter(infoLevel);
+            // infoAppender.addFilter(new StopFilter());
+            infoAppender.activateOptions();
+            log.addAppender(infoAppender);
+        }
+
+
     }
 
 

@@ -97,7 +97,9 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
-
+    <logger name="org.redisson.connection.DNSMonitor" level="INFO" />
+    <logger name="org.hibernate" level="ERROR" />
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />
     <!-- root级别   DEBUG -->
     <root level="${debug=='true'?'DEBUG':'INFO'}">
         <!-- 控制台输出 -->

@@ -37,17 +37,23 @@ public class ActionLogUtil {
             String[] ids = action.getArray("id", false);
             id = ArrayUtil.toString(ids, ";");
         }
-        actionLog.setObjectId(id);
+        if (!StringUtil.isNull(id))
+        {
+            actionLog.setObjectId(id);
+        }
         actionLog.setClassName(action.getClass().getName());
         actionLog.setObjectType(StringUtil.substringBefore(actionLog.getClassName(), "Action"));
         actionLog.setTitle(action.getActionLogTitle());
         Object logObject = action.getActionLogContent();
-        if (logObject instanceof String) {
-            actionLog.setContent((String) logObject);
-        } else if (logObject instanceof Boolean || logObject instanceof StringBuilder || logObject instanceof StringBuffer || logObject instanceof Long || logObject instanceof Integer) {
-            actionLog.setContent(logObject.toString());
-        } else {
-            actionLog.setContent(ScriptConverter.toXml(logObject));
+        if (logObject!=null)
+        {
+            if (logObject instanceof String) {
+                actionLog.setContent((String) logObject);
+            } else if (logObject instanceof Boolean || logObject instanceof StringBuilder || logObject instanceof StringBuffer || logObject instanceof Long || logObject instanceof Integer) {
+                actionLog.setContent(logObject.toString());
+            } else {
+                actionLog.setContent(ScriptConverter.toXml(logObject));
+            }
         }
         actionLog.setActionResult(action.getActionResult());
         actionLog.setIp(action.getRemoteAddr());
@@ -60,8 +66,11 @@ public class ActionLogUtil {
         actionLog.setUrl(action.getRequest().getRequestURI());
 
         IUserSession userSession = action.getUserSession();
-        actionLog.setPutName(userSession.getName());
-        actionLog.setPutUid(userSession.getUid());
+        if (userSession!=null)
+        {
+            actionLog.setPutName(userSession.getName());
+            actionLog.setPutUid(userSession.getUid());
+        }
 
         actionLog.setNamespace(action.getRootNamespace());
         return actionLog;
