@@ -1,6 +1,8 @@
 package com.github.jspxnet.network.rpc.model.transfer;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.ObjectUtil;
@@ -37,7 +39,7 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public String getAuthType() {
-        return null;
+        return INetCommand.RPC;
     }
 
     @Override
@@ -340,12 +342,12 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public void setAttribute(String s, Object o) {
-
+        super.put(s,o);
     }
 
     @Override
     public void removeAttribute(String s) {
-
+        super.remove(s);
     }
 
     @Override

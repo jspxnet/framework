@@ -57,7 +57,6 @@ public class LogBackConfigUtil {
     public static void createLogBackConfig(LoggerContext lc)
     {
 
-
         lc.reset();
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
@@ -65,7 +64,7 @@ public class LogBackConfigUtil {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         File file = new File(envTemplate.getString(Environment.defaultPath),Environment.DEFAULT_LOAD_LOG_NAME);
         String defaultConfigTxt = null;
-        if (FileUtil.isFileExist(file))
+        if (file.isFile())
         {
             try {
                 defaultConfigTxt = IoUtil.autoReadText(file.getPath(),Environment.defaultEncode);

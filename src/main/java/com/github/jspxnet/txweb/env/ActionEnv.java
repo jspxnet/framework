@@ -39,6 +39,8 @@ public class ActionEnv {
     static public final String Key_Response = "response";
     static public final String Key_RealPath = "RealPath";
 
+    static public final String Key_REMOTE_TYPE = "RemoteType";
+
     static public final String Key_ActionName = "ActionName";
     static public final String Key_This = "action";
     static public final String Key_Namespace = "Namespace";

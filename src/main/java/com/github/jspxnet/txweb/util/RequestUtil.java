@@ -23,6 +23,7 @@ import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -1097,6 +1098,11 @@ public class RequestUtil {
      */
     public static Map<String, Object> getTransferMap(HttpServletRequest request) {
         Map<String, Object> resultMap = new HashMap<>();
+        if (request==null)
+        {
+            log.error("getTransferMap 方法出现 空 request");
+            return resultMap;
+        }
         Enumeration<String> requestParams = request.getParameterNames();
         while (requestParams.hasMoreElements()) {
             String key = requestParams.nextElement();
@@ -1117,7 +1123,13 @@ public class RequestUtil {
         resultMap.put(HEADER+".protocol",request.getProtocol());
         resultMap.put(HEADER+".remoteaddr",request.getRemoteAddr());
         resultMap.put(HEADER+".remotehost",request.getRemoteHost());
-        resultMap.put(SESSION+".id",request.getSession().getId());
+        resultMap.put(HEADER+".authtype",request.getAuthType());
+        HttpSession httpSession = request.getSession();
+        if (httpSession==null)
+        {
+            httpSession = request.getSession(true);
+        }
+        resultMap.put(SESSION+".id",httpSession.getId());
         return resultMap;
     }
 

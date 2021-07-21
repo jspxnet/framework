@@ -18,6 +18,7 @@ import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
@@ -195,6 +196,11 @@ public class PermissionInterceptor extends InterceptorSupport {
         }
         //没有角色权限自动载入 end
 
+        if (INetCommand.RPC.equals(action.getRequest().getAttribute(ActionEnv.Key_REMOTE_TYPE)))
+        {
+            //如果是RPC调用不拦截，RPC调用的安全使用通讯密钥方式来确保
+            return actionInvocation.invoke();
+        }
 
         //屏蔽的URL游客
         String checkUrl = StringUtil.replace(StringUtil.BACKSLASH + pathNamespace + StringUtil.BACKSLASH + actionInvocation.getActionName(), "//", StringUtil.BACKSLASH);

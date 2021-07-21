@@ -62,9 +62,6 @@ public class RpcConfig {
     //127.0.0.1IP自动转内网ip
     final static private String LOCAL_IP_AUTO_PUBLIC_IP = "localIpAutoPublicIp";
 
-
-
-
     final static private RpcConfig INSTANCE = new RpcConfig();
 
     public static RpcConfig getInstance() {
@@ -181,7 +178,6 @@ public class RpcConfig {
      */
     public List<RouteSession> getConfigRouteSessionList()
     {
-
         List<RouteSession> result = new ArrayList<>();
         //初始化默认的路由表,就是自己的IP地址
         String[] groupNames = getLocalGroupList();
