@@ -1129,7 +1129,10 @@ public class RequestUtil {
         {
             httpSession = request.getSession(true);
         }
-        resultMap.put(SESSION+".id",httpSession.getId());
+        if (httpSession!=null)
+        {
+            resultMap.put(SESSION+".id",httpSession.getId());
+        }
         return resultMap;
     }
 
