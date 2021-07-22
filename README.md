@@ -117,4 +117,5 @@
 *    2021年04月：Jspx.net Framework 6.40 支持嵌入java二开平台
 *    2021年04月：Jspx.net Framework 6.41-6.42 嵌入兼容性调整，oracle兼容性调整
 *    2021年05月：Jspx.net Framework 6.43 嵌入兼容性调整，json兼容致远OA的PO解析.优化调整线程关闭,里程碑版本
-*    2021年07月：Jspx.net Framework 6.43-6.46 定时认为支持到秒，为了兼容嵌入到老系统，调整部分日子的输出方式，测试长时间高并发优化
+*    2021年07月：Jspx.net Framework 6.43-6.45 定时认为支持到秒，为了兼容嵌入到老系统，调整部分日子的输出方式，测试长时间高并发优化
+*    2021年07月：Jspx.net Framework 6.46 日志统一slf4j,rpc分布式调用默认不进行权限判断,细节调整优化,修复类型转换bug和UTC日期转换bug
