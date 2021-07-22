@@ -63,7 +63,7 @@ public class AuthenticationAction extends AuthenticationView {
         this.cookieDate = cookieDate;
     }
 
-    @Operate(caption = "手机验证码登录")
+    @Operate(caption = "手机验证码登录",method = "phonelogin")
     public RocResponse<JSONObject> phoneLogin(@Param(caption = "手机号", required = true, max = 15 ,message = "错误的手机号") String mobile,
                                   @Param(caption = "验证码",max = 10) String validate) throws Exception {
         int loginTimes = validateCodeCache.getTimes(mobile);
@@ -148,7 +148,7 @@ public class AuthenticationAction extends AuthenticationView {
      * @param loginName 登陆名称
      * @return 得到登陆session
      */
-    @Operate(caption = "远程登录接口")
+    @Operate(caption = "远程登录接口",method = "remotelogin")
     public RocResponse<?> remoteLogin(
             @Param(caption = "用户名类型", required = true,max = 64, message = "用户名必须填写") String field,
             @Param(caption = "用户名", required = true,max = 64, message = "用户名必须填写") String loginId,
@@ -250,7 +250,7 @@ public class AuthenticationAction extends AuthenticationView {
      * 远程登陆,第三方登陆必须先得到公密
      * @return 返回公密
      */
-    @Operate(caption = "公密")
+    @Operate(caption = "公密",method = "publickey")
     public RocResponse<String> publicKey()  {
         String publicKeyHost = StringUtil.trim(config.getString(Environment.publicKeyHost));
         if (!StringUtil.isNull(publicKeyHost)&&!IpUtil.interiorly(publicKeyHost, getRemoteAddr())) {
@@ -265,7 +265,7 @@ public class AuthenticationAction extends AuthenticationView {
         return RocResponse.success(publicKey);
     }
 
-    @Operate(caption = "判断在线", post = false)
+    @Operate(caption = "判断在线", post = false,method = "checksession")
     public RocResponse<Integer> checkSession()
     {
         IUserSession userSession = onlineManager.getUserSession(this);
