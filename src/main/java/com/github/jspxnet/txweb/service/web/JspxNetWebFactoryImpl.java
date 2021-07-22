@@ -1,6 +1,8 @@
 package com.github.jspxnet.txweb.service.web;
 
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.cache.DefaultCache;
+import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.action.AuthenticationAction;
@@ -22,7 +24,6 @@ import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.txweb.service.WebBeanFactory;
-import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.*;
 import javax.annotation.Resource;
 import javax.jws.WebMethod;
@@ -134,25 +135,15 @@ public class JspxNetWebFactoryImpl extends AuthenticationAction implements WebBe
         if (!IpUtil.interiorly(publicKeyHost, getRemoteAddr())) {
             return language.getLang(LanguageRes.notAllowedIpLimits);
         }
-        int publicKeyHour = config.getInt(Environment.publicKeyHour, 1);
-        if (publicKeyHour <= 0) {
-            publicKeyHour = 2;
-            try {
-                config.save(Environment.publicKeyHour, publicKeyHour + StringUtil.empty);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+        String publicKey = (String)JSCacheManager.get(DefaultCache.class,TXWeb.APP_PUBLIC_KEY);
+        if (StringUtil.isNull(publicKey)) {
+
+            publicKey = EncryptUtil.getMd5(System.currentTimeMillis() + RandomUtil.getRandomNumeric(32));
+            JSCacheManager.put(DefaultCache.class,TXWeb.APP_PUBLIC_KEY,publicKey);
         }
-        if (StringUtil.isNull(TXWeb.publicKey) || System.currentTimeMillis() - TXWeb.publicKeyCreateTimeMillis > DateUtil.HOUR * publicKeyHour) {
-            TXWeb.publicKey = EncryptUtil.getMd5(System.currentTimeMillis() + RandomUtil.getRandomNumeric(32));
-            TXWeb.publicKeyCreateTimeMillis = System.currentTimeMillis();
-            try {
-                config.flush();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return TXWeb.publicKey;
+
+        return publicKey;
     }
 
     /**

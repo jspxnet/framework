@@ -11,15 +11,21 @@ public enum UserEnumType implements EnumType {
 
     //作者
     ChenYuan(100, "作者"),
+
     //超级管理员
-    ADMINISTRATOR(40, "超级管理员"),
+    ADMINISTRATOR(99, "超级管理员"),
+
+    RESET_ADMIN(95, "对接账号"),
 
     //普通管理员
     MANAGER(11, "普通管理员"),
+
     INTENDANT(10, "操作人员"),
 
     VIP(2, "VIP用户"),
+
     USER(1, "普通用户"),
+
     NONE(0, "游客");
 
 

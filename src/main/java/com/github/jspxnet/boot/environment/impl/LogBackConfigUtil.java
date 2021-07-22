@@ -22,6 +22,7 @@ import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.FileUtil;
 import org.apache.log4j.*;
 import org.apache.log4j.varia.LevelRangeFilter;
+import org.redisson.connection.DNSMonitor;
 import org.slf4j.ILoggerFactory;
 
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,6 @@ public class LogBackConfigUtil {
 
     public static void createLogBackConfig(LoggerContext lc)
     {
-
         lc.reset();
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
@@ -105,6 +105,7 @@ public class LogBackConfigUtil {
             e.printStackTrace();
             StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
         }
+        lc.setPackagingDataEnabled(true);
     }
 
 

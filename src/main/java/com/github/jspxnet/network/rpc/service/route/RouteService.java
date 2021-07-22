@@ -223,7 +223,7 @@ public class RouteService implements Runnable {
                 ROUTE_CHANNEL_MANAGE.cleanOffRoute();
                 refreshLinkRoute();
                 MasterSocketAddress.getInstance().flushAddress();
-                if (System.currentTimeMillis() - lastRelevancyTimeMillis > rpcConfig.getRoutesSecond() * DateUtil.SECOND * 4 && rpcConfig.isDebug()) {
+                if (System.currentTimeMillis() - lastRelevancyTimeMillis > rpcConfig.getRoutesSecond() * DateUtil.SECOND * 10 && rpcConfig.isDebug()) {
                     log.debug("当前路由表:\r\n{}", RouteChannelManage.getInstance().getSendRouteTable());
                 }
                 Thread.sleep(rpcConfig.getRoutesSecond() * DateUtil.SECOND);

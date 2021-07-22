@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ResultHashMap extends ConcurrentHashMap<String, ArrayBlockingQueue<SendCmd>>
 {
     final private static ResultHashMap INSTANCE = new ResultHashMap();
-    synchronized public static ResultHashMap getInstance(){
+    public static ResultHashMap getInstance(){
         return INSTANCE;
     }
 

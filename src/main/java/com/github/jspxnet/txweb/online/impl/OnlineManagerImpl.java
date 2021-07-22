@@ -64,7 +64,7 @@ import java.util.Map;
 @Slf4j
 public class OnlineManagerImpl implements OnlineManager {
 
-    final private static int DEFAULT_COOKIE_SECOND = 60 * 60;
+    final private static int DEFAULT_COOKIE_SECOND = DateUtil.SECOND*60*60;
     static private final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     final private static String GUI_PASSWORD_KEY = "gui:password";
     //上一次清空超时时间，清空超时是全局性的，放这里比较合适

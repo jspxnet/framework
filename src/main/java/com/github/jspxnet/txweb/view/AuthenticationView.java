@@ -11,6 +11,8 @@ package com.github.jspxnet.txweb.view;
 
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.txweb.dao.PermissionDAO;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.StringMap;
 
@@ -28,6 +30,7 @@ public abstract class AuthenticationView extends ActionSupport {
     public static final String KEY_password = "password";
     public static final String KEY_publicKey = "publicKey";
     public static final String KEY_privateKey = "privateKey";
+
 
 
     /**

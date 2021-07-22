@@ -97,11 +97,11 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
-    <logger name="org.redisson.connection.DNSMonitor" level="INFO" />
-    <logger name="org.redisson.command.RedisExecutor" level="INFO" />
-    <logger name="org.redisson.connection.ClientConnectionsEntry" level="INFO" />
-    <logger name="org.hibernate" level="ERROR" />
-    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />
+    <logger name="org.redisson.connection" level="WARN" />
+    <logger name="org.redisson.command.RedisExecutor" level="WARN" />
+    <logger name="org.redisson.connection.ClientConnectionsEntry" level="WARN" />
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.hibernate.type.descriptor.sql" level="TRACE" />
     <!-- root级别   DEBUG -->
     <root level="${debug=='true'?'DEBUG':'INFO'}">
         <!-- 控制台输出 -->

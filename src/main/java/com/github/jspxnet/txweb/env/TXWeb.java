@@ -106,9 +106,9 @@ public abstract class TXWeb {
 
     static public final String COOKIE_TICKET = "jspxCookieTicket"; //加密
 
-    //全局高速唯一变量  放在config中,因为有缓存,会不稳定 begin
-    static public String publicKey = StringUtil.empty;
-    static public long publicKeyCreateTimeMillis = 0;
+    //全局高速唯一变量  放在config中,因为有缓存,正式改放到缓存中
+
+    final static public String APP_PUBLIC_KEY = "appPublicKey";
     //全局高速唯一变量  end
     //-----------------------------
 

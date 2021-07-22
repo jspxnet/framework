@@ -50,7 +50,8 @@ public class NettyClientPool {
             @Override
             protected FixedChannelPool newPool(SocketAddress key) {
 
-                return new FixedChannelPool(bootstrap.remoteAddress(key),new NettyChannelPoolHandler(), ChannelHealthChecker.ACTIVE, FixedChannelPool.AcquireTimeoutAction.NEW, RpcConfig.getInstance().getTimeout()* DateUtil.SECOND, 100, 2147483647, true, false);
+                //lastRecentUsed: true就是后进先出，false 就是先进先出
+                return new FixedChannelPool(bootstrap.remoteAddress(key),new NettyChannelPoolHandler(), ChannelHealthChecker.ACTIVE, FixedChannelPool.AcquireTimeoutAction.NEW, RpcConfig.getInstance().getTimeout()* DateUtil.SECOND, 30, 2147483647, true, false);
             }
 
 
@@ -81,11 +82,15 @@ public class NettyClientPool {
      */
     public SendCmd send(SocketAddress address, SendCmd command) throws Exception {
         final FixedChannelPool pool = pools.get(address);
-        final Channel channel = pool.acquire().get();
+        Channel channel = null;
         try {
+            channel = pool.acquire().get();
             return send(channel, command);
         } finally {
-            pool.release(channel);
+            if (channel!=null)
+            {
+                pool.release(channel);
+            }
         }
     }
 

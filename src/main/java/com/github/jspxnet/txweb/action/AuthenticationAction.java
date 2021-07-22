@@ -12,8 +12,11 @@ package com.github.jspxnet.txweb.action;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.boot.sign.LoginField;
+import com.github.jspxnet.cache.DefaultCache;
+import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.enums.ErrorEnumType;
+import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Ref;
@@ -21,8 +24,10 @@ import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.dao.PermissionDAO;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.result.RocResponse;
+import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.txweb.table.UserSession;
 import com.github.jspxnet.txweb.view.AuthenticationView;
 import com.github.jspxnet.utils.*;
@@ -43,6 +48,9 @@ public class AuthenticationAction extends AuthenticationView {
     public AuthenticationAction() {
         setActionResult(ROC);
     }
+
+    @Ref
+    protected PermissionDAO permissionDAO;
 
     @Ref
     protected ValidateCodeCache validateCodeCache;
@@ -129,16 +137,26 @@ public class AuthenticationAction extends AuthenticationView {
     }
 
 
-
-    //这个接口和上边的区别就是不会使用验证码,直接的加密验证
+    /**
+     * 绑定账号登陆
+     * 这个接口和上边的区别就是不会使用验证码,直接的加密验证
+     * @param field 登陆命名类型
+     * @param loginId 用户登陆名称
+     * @param password 密码
+     * @param timeMillis 当前时间搓
+     * @param verify 签名验证  签名算法不包含 loginName
+     * @param loginName 登陆名称
+     * @return 得到登陆session
+     */
     @Operate(caption = "远程登录接口")
     public RocResponse<?> remoteLogin(
             @Param(caption = "用户名类型", required = true,max = 64, message = "用户名必须填写") String field,
             @Param(caption = "用户名", required = true,max = 64, message = "用户名必须填写") String loginId,
             @Param(caption = "密码", required = true,max = 64,  message = "密码必须填写") String password,
             @Param(caption = "时间", required = true, message = "时间") long timeMillis,
-            @Param(caption = "校验码", required = true,max = 10,  message = "校验码必须填写") String verify
-    ) throws Exception {
+            @Param(caption = "校验码", required = true,max = 10,  message = "校验码必须填写") String verify,
+            @Param(caption = "绑定登陆的用户名", max = 64,  message = "绑定登陆的用户名") String loginName
+    )  {
 
         if (!config.getBoolean(Environment.userRemoteLogin)) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.interfaceClosed));
@@ -149,7 +167,11 @@ public class AuthenticationAction extends AuthenticationView {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.notInputValidate));
         }
 
-        String makeVerify = getMakeVerify(field, loginId, password, TXWeb.publicKey, config.getString(Environment.privateKey), timeMillis);
+        //公密,通过下边的公密接口得到
+        String publicKey = (String)JSCacheManager.get(DefaultCache.class,TXWeb.APP_PUBLIC_KEY);
+        //此验证码为参数校验
+
+        String makeVerify = getMakeVerify(field, loginId, password, publicKey, config.getString(Environment.privateKey), timeMillis);
         //getMakeVerify 必须先设置参数
         if (!verify.equals(makeVerify)) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.validationFailure));
@@ -172,7 +194,12 @@ public class AuthenticationAction extends AuthenticationView {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.validationFailureLimitTimes) + loginTimes);
         }
 
-        Map<String, String> loginInfo = onlineManager.login(this, field, loginId, password,  getInt("cookieSecond", 0));
+        Map<String, String> loginInfo = null;
+        try {
+            loginInfo = onlineManager.login(this, field, loginId, password,  getInt("cookieSecond", 0));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (!loginInfo.isEmpty()) {
             Iterator<String> iterator = loginInfo.keySet().iterator();
             if (iterator.hasNext()) {
@@ -180,36 +207,61 @@ public class AuthenticationAction extends AuthenticationView {
             }
         }
 
+        //--------------
         boolean isLogin = loginInfo.isEmpty();
         if (isLogin) {
+            //已经登陆
+            userSession = onlineManager.getUserSession(this);
+            Role role = permissionDAO.getComposeRole(userSession.getUid());
+            if (role==null||role.getUserType()!= UserEnumType.RESET_ADMIN.getValue())
+            {
+                //只允许 reset_admin登陆
+                return RocResponse.error(ErrorEnumType.POWER);
+            }
+            onlineManager.exit(userSession.getUid());
+            //切换账号和用户信息
+            try {
+                loginInfo = onlineManager.login(this,LoginField.Name, loginName, onlineManager.getGuiPassword(),  getInt("cookieSecond", 0));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (!loginInfo.isEmpty()) {
+                Iterator<String> iterator = loginInfo.keySet().iterator();
+                if (iterator.hasNext()) {
+                    return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), loginInfo.get(iterator.next()));
+                }
+            }
+            userSession = onlineManager.getUserSession(this);
+
             JSONObject json = new JSONObject();
             json.put(TXWeb.token, userSession.getId());
+            json.put("userSession", userSession);
             json.put(Environment.message, language.getLang(LanguageRes.loginSuccess));
             return RocResponse.success(json);
-
         } else {
             validateCodeCache.updateTimes(EncryptUtil.getMd5(userSession.getId()));
         }
         return RocResponse.error(ErrorEnumType.NO_DATA.getValue(), getFieldInfo());
     }
 
+
+    /**
+     * 远程登陆,第三方登陆必须先得到公密
+     * @return 返回公密
+     */
     @Operate(caption = "公密")
-    public RocResponse<String> publicKey() throws Exception {
+    public RocResponse<String> publicKey()  {
         String publicKeyHost = StringUtil.trim(config.getString(Environment.publicKeyHost));
         if (!IpUtil.interiorly(publicKeyHost, getRemoteAddr())) {
             return RocResponse.error(ErrorEnumType.CONFIG.getValue(), language.getLang(LanguageRes.notAllowedIpLimits));
         }
-        int publicKeyHour = config.getInt(Environment.publicKeyHour, 1);
-        if (publicKeyHour <= 0) {
-            publicKeyHour = 2;
-            config.save(Environment.publicKeyHour, publicKeyHour + StringUtil.empty);
+        String publicKey = (String)JSCacheManager.get(DefaultCache.class,TXWeb.APP_PUBLIC_KEY);
+        if (StringUtil.isNull(publicKey)) {
+
+            publicKey = EncryptUtil.getMd5(System.currentTimeMillis() + RandomUtil.getRandomNumeric(32));
+            JSCacheManager.put(DefaultCache.class,TXWeb.APP_PUBLIC_KEY,publicKey);
         }
-        if (StringUtil.isNull(TXWeb.publicKey) || System.currentTimeMillis() - TXWeb.publicKeyCreateTimeMillis > DateUtil.HOUR * publicKeyHour) {
-            TXWeb.publicKey = EncryptUtil.getMd5(System.currentTimeMillis() + RandomUtil.getRandomNumeric(32));
-            TXWeb.publicKeyCreateTimeMillis = System.currentTimeMillis();
-            config.flush();
-        }
-        return RocResponse.success(TXWeb.publicKey);
+        return RocResponse.success(publicKey);
     }
 
     @Operate(caption = "判断在线", post = false)

@@ -323,10 +323,6 @@ public abstract class Environment {
     final static public String publicKeyHost = "publicKeyHost";
 
 
-    final static public String publicKeyHour = "publicKeyHour";
-
-    final static public String publicKeyCreateTimeMillis = "publicKeyCreateTimeMillis";
-
     final static public String authIpExpression = "authIpExpression";
 
     //远程登陆验证配置end-----------------------------------------------------------------------------------------------
