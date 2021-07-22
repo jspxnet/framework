@@ -10,10 +10,11 @@
 package com.github.jspxnet.ui;
 
 import com.github.jspxnet.utils.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 import com.github.jspxnet.ui.menu.PhotoPopupMenu;
 import com.github.jspxnet.utils.SwingUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,8 +31,8 @@ import java.io.UnsupportedEncodingException;
  * Time: 下午4:27
  * 系统托盘图标实现 必须jdk1.5以上版本才支持,简单封装显示，演示了用法
  */
+@Slf4j
 public class SysTrayIcon extends TrayIcon {
-    final static private Logger log = LoggerFactory.getLogger(SysTrayIcon.class);
     //PopupMenu 只支持GBK编码才能显示中文 JPopupMenu可以显示UTF-8
     private JPopupMenu popupMenu = null;
     private boolean show = false;

@@ -9,8 +9,9 @@ import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.XMLUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
+
 import java.io.File;
 import java.net.URL;
 import java.util.*;
@@ -18,8 +19,8 @@ import java.util.*;
 /**
  * Created by ChenYuan on 2017/6/14.
  */
+@Slf4j
 public class EvasiveConfiguration implements Configuration {
-    final static private Logger log = LoggerFactory.getLogger(EvasiveConfiguration.class);
     final private List<EvasiveRule> evasiveRuleList = new ArrayList<EvasiveRule>();
     private List<ResultConfigBean> resultConfigList = new ArrayList<ResultConfigBean>();
     private String[] whiteList = null;

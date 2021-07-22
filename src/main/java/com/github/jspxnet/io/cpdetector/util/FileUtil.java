@@ -22,8 +22,10 @@
 package com.github.jspxnet.io.cpdetector.util;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -50,8 +52,8 @@ import java.util.StringTokenizer;
  * @author Achim Westermann
  * @version 1.1
  */
-public final class FileUtil extends Object {
-    private final static Logger log = LoggerFactory.getLogger(FileUtil.class);
+@Slf4j
+public class FileUtil extends Object {
 
     /**
      * The singleton instance of this class.

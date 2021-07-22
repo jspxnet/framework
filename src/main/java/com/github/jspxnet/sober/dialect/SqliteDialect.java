@@ -9,11 +9,12 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.utils.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
 import java.sql.*;
@@ -36,9 +37,8 @@ import java.util.Date;
  * ,[namespace] varchar(20)
  * , UNIQUE([id])
  */
+@Slf4j
 public class SqliteDialect extends Dialect {
-    private Logger log = LoggerFactory.getLogger(SqliteDialect.class.getName());
-
     public SqliteDialect() {
         standard_SQL.put(SQL_CREATE_TABLE, "<#assign primary_length=" + KEY_PRIMARY_KEY + ".length />" +
                 "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +

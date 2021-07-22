@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.utils;
 
+import com.github.jspxnet.OwnerDO;
 import com.github.jspxnet.util.StringMap;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
@@ -1891,9 +1892,10 @@ public class StringUtil {
         }
         date = fullToHalf(date);
         String format = null;
-        if (date.length() > 23 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains("T") && date.contains("Z")) {
+        if (date.length() > 22 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains("T")) {
             //2014-06-25T05:01:04.595Z
             format = DateUtil.UTC_ST_FORMAT;
+
         } else if (date.length() > 14 && date.length() <= 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2) {
             format = DateUtil.FULL_ST_FORMAT;
         } else if (date.length() > 14 && date.length() <= 17 && countMatches(date, "-") == 2 && countMatches(date, ":") == 1) {
@@ -3050,15 +3052,21 @@ public class StringUtil {
         return result;
     }
 
+
     /**
-     * 驼峰格式字符串转换为下划线格式字符串
      *
-     * @param param 字符串
-     * @return 驼峰格式字符串转换为下划线格式字符串
+     * @param value 字符串
+     * @param lower 统一小写
+     * @return  驼峰格式字符串转换为下划线格式字符串
      */
-    public static String camelToUnderline(String param) {
-        if (StringUtil.isNull(param)) {
+    public static String camelToUnderline(String value,boolean lower) {
+        if (StringUtil.isNull(value)) {
             return empty;
+        }
+        String param = value;
+        if (lower)
+        {
+            param = value.toLowerCase();
         }
         int len = param.length();
         StringBuilder sb = new StringBuilder(len);
@@ -3073,17 +3081,30 @@ public class StringUtil {
         }
         return sb.toString();
     }
-
     /**
-     * 下划线格式字符串转换为驼峰格式字符串
+     * 驼峰格式字符串转换为下划线格式字符串
      *
      * @param param 字符串
-     * @return 下划线格式字符串转换为驼峰格式字符串
+     * @return 驼峰格式字符串转换为下划线格式字符串
      */
-    public static String underlineToCamel(String param) {
+    public static String camelToUnderline(String param) {
         if (StringUtil.isNull(param)) {
             return empty;
         }
+        return camelToUnderline(param,true);
+
+    }
+    /**
+     * 下划线格式字符串转换为驼峰格式字符串
+     *
+     * @param value 字符串
+     * @return 下划线格式字符串转换为驼峰格式字符串
+     */
+    public static String underlineToCamel(String value) {
+        if (isNull(value)) {
+            return empty;
+        }
+        String param= value.toLowerCase();
         int len = param.length();
         StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
@@ -3200,6 +3221,18 @@ public class StringUtil {
             return null;
         }
         return str.toLowerCase();
+    }
+
+
+    public static void main(String[] args) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("id","222");
+        map.put("idCard","idCarddsfs");
+        map.put("modifyTime","2021-06-28T16:49:35.087");
+        OwnerDO ownerDO = BeanUtil.copy(map,OwnerDO.class);
+        System.out.println(ObjectUtil.toString(ownerDO));
+
+
     }
 
 }

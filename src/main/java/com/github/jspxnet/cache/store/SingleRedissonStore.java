@@ -8,10 +8,11 @@ import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.cache.redis.RedissonClientConfig;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,8 +22,8 @@ import java.util.concurrent.TimeUnit;
  * 但缓存下是用,分布式多缓存下是用 RedisStore
  */
 //@Bean(bind = SingleRedissonStore.class)
+@Slf4j
 public class SingleRedissonStore extends Store implements IStore {
-    private static final Logger log = LoggerFactory.getLogger(SingleRedissonStore.class);
     private static RedissonClient redisson = null;
     private static  boolean useCache;
 

@@ -14,9 +14,9 @@ import com.github.jspxnet.txweb.Action;
 import com.itextpdf.text.pdf.BaseFont;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.HtmlUtil;
-import org.slf4j.Logger;
+
 import com.github.jspxnet.boot.environment.Environment;
-import org.slf4j.LoggerFactory;
+
 import com.github.jspxnet.scriptmark.ScriptMark;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.scriptmark.core.ScriptMarkEngine;
@@ -25,6 +25,7 @@ import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import javax.servlet.ServletOutputStream;
@@ -49,12 +50,11 @@ import java.util.*;
  * //并且加载字体
  * fontResolver.addFont("D:\\website\\webapps\\root\\WEB-INF\\fonts\\simsun.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
  */
+@Slf4j
 public class HtmlPdfResult extends ResultSupport {
-    private static final Logger log = LoggerFactory.getLogger(HtmlPdfResult.class);
     private final static TemplateConfigurable configurable = new TemplateConfigurable();
-
-    private static String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
-    private static String fontsPath = ENV_TEMPLATE.getString(Environment.fontsPath);
+    private static final String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
+    private static final String fontsPath = ENV_TEMPLATE.getString(Environment.fontsPath);
 
     static {
         configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));

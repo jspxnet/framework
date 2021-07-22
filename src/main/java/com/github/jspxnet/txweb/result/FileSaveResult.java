@@ -22,9 +22,7 @@ import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import lombok.extern.slf4j.Slf4j;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -41,11 +39,11 @@ import java.util.Map;
  * 将页面执行后的结果保存为文件，文件名使用 变量 saveFile 保存中环境中
  * 文件保存将会直接覆盖，所以是比较危险的，有重要文件最好先备份
  */
+@Slf4j
 public class FileSaveResult extends ResultSupport {
-    private final static Logger log = LoggerFactory.getLogger(FileSaveResult.class);
     private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
 
-    private static String TEMPLATE_PATH = ENV_TEMPLATE.getString(Environment.templatePath);
+    private static final String TEMPLATE_PATH = ENV_TEMPLATE.getString(Environment.templatePath);
     public static final String SAVE_FILE = "saveFile";
 
     static {

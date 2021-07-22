@@ -22,9 +22,9 @@ import com.github.jspxnet.txweb.table.DownloadFileClient;
 import com.github.jspxnet.txweb.table.IpLocation;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
+
 import com.github.jspxnet.boot.environment.Environment;
-import org.slf4j.LoggerFactory;
+
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.action.UploadFileAction;
 import com.github.jspxnet.txweb.annotation.HttpMethod;

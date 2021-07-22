@@ -10,6 +10,7 @@
 package com.github.jspxnet.network.mail.core;
 
 import com.github.jspxnet.utils.NumberUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.*;
 import java.util.Properties;
@@ -20,11 +21,11 @@ import java.util.Properties;
  * date: 2007-9-19
  * Time: 12:35:29
  */
+@Slf4j
 public class YahooRecieveMailAdapter extends AbstractRecivevMail {
     public YahooRecieveMailAdapter() {
         port = 110;
     }
-
 
     public Message[] getMessages() {
 

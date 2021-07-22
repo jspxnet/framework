@@ -1,13 +1,14 @@
 package com.github.jspxnet.io;
 
 import com.github.jspxnet.boot.environment.Environment;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.ooxml.extractor.POIXMLTextExtractor;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 
 import java.io.FileInputStream;
 
@@ -19,9 +20,8 @@ import java.io.FileInputStream;
  * date: 2020/10/22 20:32
  * description: jspbox
  **/
-
+@Slf4j
 public class ReadWordTextFile extends AbstractRead {
-    private static final Logger log = LoggerFactory.getLogger(ReadWordTextFile.class);
     public final static String[] FILE_TYPE =  new String[]{"doc","docx"};
     public ReadWordTextFile() {
         encode = Environment.defaultEncode;

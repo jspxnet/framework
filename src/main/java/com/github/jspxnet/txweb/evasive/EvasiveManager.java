@@ -16,8 +16,8 @@ import com.github.jspxnet.txweb.evasive.condition.*;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,10 +28,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by ChenYuan on 2017/6/15.
  * 回避管理器
  */
+@Slf4j
 public class EvasiveManager {
 
     static protected boolean debug = false;
-    private static final Logger log = LoggerFactory.getLogger(EvasiveManager.class);
     //private List<EvasiveRule> evasiveRuleList = Collections.synchronizedList(new ArrayList<EvasiveRule>());
     //private List<QueryBlack> queryBlackRuleList = Collections.synchronizedList(new  ArrayList<QueryBlack>());
 

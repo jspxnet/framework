@@ -5,8 +5,8 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Scheduled;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 import javax.xml.ws.Endpoint;
 import java.util.HashMap;
@@ -23,9 +23,9 @@ import java.util.Map;
  * 需要，tomcat的扩展包支持
  * http://mirrors.hust.edu.cn/apache/tomcat/tomcat-8/v8.5.35/bin/extras/catalina-ws.jar
  */
+@Slf4j
 @Bean
 public class RunEndpointPublishServices {
-    private static final Logger log = LoggerFactory.getLogger(RunEndpointPublishServices.class);
     private static boolean isRun = false;
 
     private Map<String, String> serviceMap = new HashMap<String, String>();

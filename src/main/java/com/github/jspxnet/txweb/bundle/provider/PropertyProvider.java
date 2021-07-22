@@ -15,13 +15,15 @@ import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.io.AbstractWrite;
 import com.github.jspxnet.io.WriteFile;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.io.*;
 import java.net.URL;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,8 +31,8 @@ import org.slf4j.LoggerFactory;
  * date: 2005-6-30
  * Time: 16:23:41
  */
+@Slf4j
 public class PropertyProvider extends BundleProvider {
-    private static final Logger log = LoggerFactory.getLogger(PropertyProvider.class);
 
     // private String exname = ".properties";
     private File file = null;

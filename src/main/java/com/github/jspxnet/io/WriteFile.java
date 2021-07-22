@@ -11,8 +11,8 @@ package com.github.jspxnet.io;
 
 
 import com.github.jspxnet.utils.FileUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 import java.io.*;
 
@@ -23,8 +23,8 @@ import java.io.*;
  * Time: 22:03:32
  * 写文件
  */
+@Slf4j
 public class WriteFile extends AbstractWrite {
-    private static final Logger log = LoggerFactory.getLogger(WriteFile.class);
     private static final byte[] bomData = new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
     private FileOutputStream fos = null;
     private Writer out = null;

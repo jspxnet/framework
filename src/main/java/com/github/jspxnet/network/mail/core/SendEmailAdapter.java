@@ -10,8 +10,8 @@
 package com.github.jspxnet.network.mail.core;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 
 import javax.mail.*;
 import javax.mail.internet.MimeMessage;
@@ -28,6 +28,7 @@ import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.network.mail.MailAuthenticator;
 import com.github.jspxnet.boot.environment.Environment;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Created by IntelliJ IDEA.
@@ -35,8 +36,8 @@ import com.github.jspxnet.boot.environment.Environment;
  * date: 2007-9-17
  * Time: 16:17:15
  */
+@Slf4j
 public class SendEmailAdapter {
-    private static final Logger log = LoggerFactory.getLogger(SendEmailAdapter.class);
     private static final String SMTP_HOST = "mail.smtp.host";
     private static final String SMTP_AUTH = "mail.smtp.auth";
     private static final String PROTOCOL = "mail.transport.protocol";

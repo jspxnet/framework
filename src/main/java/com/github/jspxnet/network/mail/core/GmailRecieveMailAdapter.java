@@ -15,8 +15,8 @@ import javax.mail.*;
 import java.util.Properties;
 import java.security.Security;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 
 /**
@@ -26,9 +26,8 @@ import org.slf4j.helpers.MessageFormatter;
  * Time: 16:35:02
  * YahooRecieveMailAdapter
  */
-
+@Slf4j
 public class GmailRecieveMailAdapter extends AbstractRecivevMail {
-    private static final Logger log = LoggerFactory.getLogger(GmailRecieveMailAdapter.class);
     final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
 
     public GmailRecieveMailAdapter() {

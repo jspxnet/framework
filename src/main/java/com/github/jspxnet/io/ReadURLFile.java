@@ -10,13 +10,14 @@
 package com.github.jspxnet.io;
 
 import com.github.jspxnet.utils.FileUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.io.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,8 +25,8 @@ import org.slf4j.LoggerFactory;
  * date: 2001-1-1
  * Time: 17:29:39
  */
+@Slf4j
 public class ReadURLFile extends AbstractRead {
-    private static final Logger log = LoggerFactory.getLogger(ReadURLFile.class);
     private InputStream in = null;
     private HttpURLConnection con = null;
     final private ByteArrayOutputStream message = new ByteArrayOutputStream();

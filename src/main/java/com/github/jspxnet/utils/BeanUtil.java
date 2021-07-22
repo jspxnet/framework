@@ -677,7 +677,7 @@ public class BeanUtil {
         }
         if (getData instanceof Map) {
             Map map = (Map) getData;
-            Class getClass = oldData.getClass();
+            Class<?> getClass = oldData.getClass();
             for (Object keyObj : map.keySet()) {
                 if (keyObj == null) {
                     continue;
@@ -692,7 +692,7 @@ public class BeanUtil {
                 }
                 try {
                     field.setAccessible(true);
-                    field.set(oldData, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
+                    field.set(oldData, TypeUtil.getTypeValue(field.getType().getSimpleName(), map.get(key)));
                 } catch (Exception e) {
                     e.printStackTrace();
                     log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);

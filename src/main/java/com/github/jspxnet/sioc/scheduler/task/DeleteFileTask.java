@@ -11,10 +11,11 @@ package com.github.jspxnet.sioc.scheduler.task;
 
 import com.github.jspxnet.sioc.annotation.Scheduled;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 
@@ -24,8 +25,8 @@ import java.io.File;
  * date: 12-10-28
  * Time: 下午5:24
  */
+@Slf4j
 public class DeleteFileTask {
-    final private static Logger log = LoggerFactory.getLogger(ShellAutoRun.class.getName());
     private String folder = StringUtil.empty;
     private int day = 60;
     private String types;

@@ -13,6 +13,7 @@ import com.github.jspxnet.network.TransmitListener;
 import com.github.jspxnet.network.download.HttpDownloadThread;
 import com.github.jspxnet.boot.sign.DownStateType;
 import com.github.jspxnet.utils.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.HostnameVerifier;
@@ -22,8 +23,8 @@ import java.net.HttpURLConnection;
 import java.io.*;
 import java.util.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,8 +32,8 @@ import org.slf4j.LoggerFactory;
  * date: 2006-8-4
  * Time: 21:47:32
  */
+@Slf4j
 public class MultiThreadImpl extends Thread implements HttpDownloadThread {
-    private static final Logger log = LoggerFactory.getLogger(MultiThreadImpl.class);
     private SiteInfoBean siteInfoBean = null; //文件信息Bean
     private long[] nStartPos; //开始位置
     private long[] nEndPos; //结束位置
@@ -43,8 +44,8 @@ public class MultiThreadImpl extends Thread implements HttpDownloadThread {
     private String downStateId = StringUtil.empty;    //是 DownState 的ID
     private int splitter = 1;
     private URL url;
-    private Date createDate = new Date();
-    private Map<String, String> valueMap = new HashMap<String, String>();
+    private final Date createDate = new Date();
+    private final Map<String, String> valueMap = new HashMap<String, String>();
     private String namespace = StringUtil.empty;
     private int bufferSize = 1024;
     private Collection<TransmitListener> listeners = new LinkedList<TransmitListener>();

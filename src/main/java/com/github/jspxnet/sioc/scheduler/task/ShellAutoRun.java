@@ -9,10 +9,11 @@
  */
 package com.github.jspxnet.sioc.scheduler.task;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,9 +25,8 @@ import com.github.jspxnet.utils.SystemUtil;
  * startShell=start.bat 启动时候要执行的命令
  * stopShell=start.bat 停止时候要执行的命令
  */
-
+@Slf4j
 public class ShellAutoRun {
-    final private static Logger log = LoggerFactory.getLogger(ShellAutoRun.class.getName());
     private String startShell;
     private String stopShell;
     private boolean enable = true;

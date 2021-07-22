@@ -9,8 +9,8 @@
  */
 package com.github.jspxnet.network.mail.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
  * Time: 15:44:15
  * 接收邮件
  */
+@Slf4j
 public abstract class AbstractRecivevMail {
-    protected static final Logger log = LoggerFactory.getLogger(AbstractRecivevMail.class);
     static final public String POP_HOST = "pop3.smtp.host";
     static final public String POP_AUTH = "pop3.smtp.auth";
     protected String popHost = "mail.gzec.com.cn";

@@ -47,8 +47,9 @@
  */
 package com.github.jspxnet.io.cpdetector.reflect;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
+
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -70,12 +71,11 @@ import java.lang.reflect.Modifier;
  * This class is in turn a singleton as it only contains procedural code. For possible desireable future configuration
  * requirements, the single public method is not declared static but bound transfer the singleton instance.
  */
+@Slf4j
 public final class SingletonLoader {
-    private static final Logger log = LoggerFactory.getLogger(SingletonLoader.class);
+    private static final SingletonLoader INSTANCE = new SingletonLoader();
 
-    private static SingletonLoader instance = new SingletonLoader();
-
-    private Object[] dummyParameters = new Object[0];
+    private final Object[] dummyParameters = new Object[0];
 
     /**
      * Singleton retrieval
@@ -85,7 +85,7 @@ public final class SingletonLoader {
     }
 
     public static SingletonLoader getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     /**
@@ -96,7 +96,7 @@ public final class SingletonLoader {
      * @throws InstantiationException 异常
      * @throws IllegalAccessException 异常
      */
-    public Object newInstance(Class c) throws InstantiationException, IllegalAccessException {
+    public Object newInstance(Class<?> c) throws InstantiationException, IllegalAccessException {
         Object ret = null;
         Method[] methods = c.getDeclaredMethods();
         Method m;

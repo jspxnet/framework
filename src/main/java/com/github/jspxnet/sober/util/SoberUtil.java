@@ -323,12 +323,12 @@ public class SoberUtil {
                 if (tableModels.containsField(name))
                 {
                     //postgresql 不能直接是用字段名称,不然会相互影响冲突,需要带上表明
-                    name = StringUtil.camelToUnderline(tableModels.getName()) + "_" + name +"_idx";
+                    name = StringUtil.camelToUnderline(tableModels.getName(),true) + "_" + name +"_idx";
                 }
                 field = StringUtil.substringBetween(line,"(",")");
             } else
             {
-                name = StringUtil.camelToUnderline(tableModels.getName())+ "_" + line +"_idx";
+                name = StringUtil.camelToUnderline(tableModels.getName(),true)+ "_" + line +"_idx";
                 field = line;
             }
             if (name==null&&field==null)

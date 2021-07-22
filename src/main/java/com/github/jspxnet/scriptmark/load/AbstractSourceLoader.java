@@ -9,12 +9,12 @@
  */
 package com.github.jspxnet.scriptmark.load;
 
-import org.slf4j.Logger;
+
 import com.github.jspxnet.scriptmark.SourceLoader;
-import org.slf4j.LoggerFactory;
+
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;
-
+import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.Locale;
@@ -26,9 +26,8 @@ import java.net.MalformedURLException;
  * date: 2008-12-13
  * Time: 13:48:12
  */
-
+@Slf4j
 public abstract class AbstractSourceLoader implements SourceLoader {
-    final static private Logger log = LoggerFactory.getLogger(AbstractSourceLoader.class.getName());
 
     static private String defaultEncoding = SystemUtil.encode;
     //当前路径

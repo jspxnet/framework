@@ -14,8 +14,8 @@ import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.utils.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 import java.io.*;
 import java.sql.*;
@@ -29,9 +29,8 @@ import java.util.Map;
  * Time: 18:05:33
  * 通用SQL转换器
  */
-
+@Slf4j
 public abstract class Dialect {
-    protected static final Logger log = LoggerFactory.getLogger(Dialect.class);
     final protected static Placeholder placeholder = EnvFactory.getPlaceholder();
     final protected static Placeholder sqlPlaceholder = EnvFactory.getSqlPlaceholder();
 

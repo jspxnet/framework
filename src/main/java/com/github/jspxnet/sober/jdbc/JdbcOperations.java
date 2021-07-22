@@ -33,8 +33,8 @@ import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -49,9 +49,8 @@ import java.util.*;
  * JDBC 数据库操作
  * date: 2019-9-10 数据尽量采用泛型方式
  */
-
+@Slf4j
 public abstract class JdbcOperations implements SoberSupport {
-    private static final Logger log = LoggerFactory.getLogger(JdbcOperations.class);
     private Dialect dialect = null;
     private SoberFactory soberFactory;
 

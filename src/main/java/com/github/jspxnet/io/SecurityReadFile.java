@@ -2,15 +2,14 @@ package com.github.jspxnet.io;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.security.symmetry.Encrypt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 /**
  * Created by yuan on 2014/9/10 0010.
  */
+@Slf4j
 public class SecurityReadFile extends AutoReadTextFile {
-    final private static Logger log = LoggerFactory.getLogger(SecurityWriteFile.class);
-
     public SecurityReadFile() {
 
     }

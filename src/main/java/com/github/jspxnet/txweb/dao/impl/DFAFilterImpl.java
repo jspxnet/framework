@@ -2,8 +2,8 @@ package com.github.jspxnet.txweb.dao.impl;
 
 import com.github.jspxnet.sioc.annotation.Init;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.txweb.dao.DFAFilter;
 import com.github.jspxnet.utils.StringUtil;

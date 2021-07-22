@@ -10,8 +10,8 @@
 package com.github.jspxnet.util;
 
 import com.github.jspxnet.utils.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 import java.io.*;
 import java.util.ArrayList;
@@ -24,8 +24,8 @@ import java.util.List;
  * Time: 3:48:18
  * http://zeroliu.javaeye.com/blog/26489
  */
+@Slf4j
 public class DiskSpace {
-    private static final Logger log = LoggerFactory.getLogger(DiskSpace.class);
     public static final String CRLF = System.getProperty("line.separator");
     private static boolean initJini = true;
 

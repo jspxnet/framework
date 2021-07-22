@@ -45,9 +45,8 @@
  */
 package com.github.jspxnet.io.cpdetector.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
@@ -61,8 +60,9 @@ import java.util.Map;
  * @author Achim.Westermann@gmx.de
  * @version $Revision: 1.3 $
  */
+
+@Slf4j
 public class StringUtil {
-    private static final Logger log = LoggerFactory.getLogger(StringUtil.class);
     /**
      * Singleton instance.
      */

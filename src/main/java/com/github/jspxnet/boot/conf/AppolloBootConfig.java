@@ -12,13 +12,13 @@ import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.enums.PropertyChangeType;
 import com.ctrip.framework.apollo.model.ConfigChange;
 import com.ctrip.framework.apollo.model.ConfigChangeEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import java.util.Properties;
 import java.util.Set;
 
+@Slf4j
 public class AppolloBootConfig {
-    private static final Logger log = LoggerFactory.getLogger(AppolloBootConfig.class);
+
     public void bind(Properties properties)
     {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();

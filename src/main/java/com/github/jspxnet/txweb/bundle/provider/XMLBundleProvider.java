@@ -18,8 +18,8 @@ import java.util.*;
 import java.io.*;
 import java.net.URL;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.Attributes;
@@ -30,8 +30,8 @@ import org.xml.sax.Attributes;
  * date: 2005-6-24
  * Time: 15:37:33
  */
+@Slf4j
 public class XMLBundleProvider extends BundleProvider {
-    private static final Logger log = LoggerFactory.getLogger(XMLBundleProvider.class);
     //  private String exname = ".properties.xml";
     private File file = null;
 

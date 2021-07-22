@@ -189,7 +189,7 @@ public final class TypeUtil {
      * @param cla 类
      * @return String   得到类型表示字符
      */
-    public static String getTypeString(Class cla) {
+    public static String getTypeString(Class<?> cla) {
         TypeSerializer typeSerializer = typeMap.get(cla.getName());
         if (typeSerializer == null) {
             typeSerializer = new BeanXmlType();
@@ -198,15 +198,19 @@ public final class TypeUtil {
     }
 
     /**
-     * 类型转换
-     *
-     * @param types  类型
+     * 类型转换,只支持基本的java类型
+     * @param type  类型
      * @param object XML 对象XML
      * @return Object   对象
      */
-    public static Object getTypeValue(String types, Object object) {
+    public static Object getTypeValue(String type, Object object) {
         if (object == null) {
             return null;
+        }
+        String types = type;
+        if (type.contains(StringUtil.DOT))
+        {
+            types = StringUtil.substringAfterLast(type,StringUtil.DOT);
         }
         for (TypeSerializer typeSerializer : typeMap.values()) {
             if (typeSerializer.getTypeString().equalsIgnoreCase(types)) {

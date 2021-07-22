@@ -12,8 +12,9 @@ package com.github.jspxnet.sober.transaction;
 
 import com.github.jspxnet.sober.Transaction;
 import com.github.jspxnet.utils.DateUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -24,8 +25,8 @@ import java.sql.SQLException;
  * date: 2008-8-18
  * Time: 14:03:08
  */
+@Slf4j
 public abstract class AbstractTransaction implements Transaction {
-    private static final Logger log = LoggerFactory.getLogger(AbstractTransaction.class);
     //事务管理器
     final static transient TransactionManager TRANSACTION_MANAGER = TransactionManager.getInstance();
     protected Connection connection = null;

@@ -979,31 +979,6 @@ public class FileUtil {
 
     }
 
-    public static void main(String[] args) {
-        String fileJar = "d:\\syncapp\\WEB-INF\\lib\\sync-tigger.jar";
-
-        InputStream in = null;
-        try  {
-            URL url = new URL("jar:file:///" +fileJar+ "!/jspx.properties");
-            in = url.openStream();
-            System.out.println("-------ok");
-
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-            System.out.println("-------no");
-        } finally {
-            try {
-                if (in!=null)
-                {
-                    in.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
     /**
      * 创建指定的目录。
      * 如果指定的目录的父目录不存在则创建其目录书上所有需要的父目录。

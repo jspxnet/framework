@@ -4,7 +4,8 @@ import com.github.jspxnet.comm.service.SerialConfig;
 import com.github.jspxnet.comm.service.SerialStatus;
 import com.github.jspxnet.utils.StringUtil;
 import gnu.io.*;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,9 +22,8 @@ import static com.github.jspxnet.comm.PortObserver.CanSendNotification;
  * http://utf8.sms.webchinese.cn/?Uid=本站用户名&Key=接口安全秘钥&smsMob=手机号码&smsText=验证码:8888
  * }</pre>
  */
+@Slf4j
 public abstract class HttpComm extends Observable implements SerialPortEventListener {
-    final static private org.slf4j.Logger log = LoggerFactory.getLogger(HttpComm.class);
-
     public String name = StringUtil.empty;
     protected String portName = StringUtil.empty;
     protected String encoding = "UTF-8";

@@ -9,8 +9,7 @@
  */
 package com.github.jspxnet.filter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.utils.URLUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -30,23 +29,23 @@ import java.util.Hashtable;
  * Time: 9:44:01
  * com.github.jspxnet.dispatcher.JspxSupportServlet
  */
+@Slf4j
 public class JspxFilterDispatcher implements Filter {
-    private static final Logger log = LoggerFactory.getLogger(JspxFilterDispatcher.class);
-    private Map<String, Filter> filterMap = new Hashtable<String, Filter>();
+    final static private Map<String, Filter> FILTER_MAP = new Hashtable<>();
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        Enumeration enumeration = filterConfig.getInitParameterNames();
+        Enumeration<String> enumeration = filterConfig.getInitParameterNames();
         if (enumeration != null) {
             while (enumeration.hasMoreElements()) {
-                String className = (String) enumeration.nextElement();
+                String className =  enumeration.nextElement();
                 String param = filterConfig.getInitParameter(className);
                 try {
                     Filter childFilter = (Filter) ClassUtil.newInstance(className);
                     childFilter.init(filterConfig);
                     String[] fileNamType = StringUtil.split(param, "/");
                     for (String type : fileNamType) {
-                        filterMap.put(type.toLowerCase(), childFilter);
+                        FILTER_MAP.put(type.toLowerCase(), childFilter);
                     }
                 } catch (Exception e) {
                     log.error(className, e);
@@ -66,7 +65,7 @@ public class JspxFilterDispatcher implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
         String fileType = getFileType(servletRequest);
-        Filter childFilter = filterMap.get(fileType);
+        Filter childFilter = FILTER_MAP.get(fileType);
         if (childFilter != null) {
             childFilter.doFilter(servletRequest, servletResponse, filterChain);
         } else {
@@ -76,7 +75,7 @@ public class JspxFilterDispatcher implements Filter {
 
     @Override
     public void destroy() {
-        for (Filter childFilter : filterMap.values()) {
+        for (Filter childFilter : FILTER_MAP.values()) {
             if (childFilter != null) {
                 childFilter.destroy();
             }

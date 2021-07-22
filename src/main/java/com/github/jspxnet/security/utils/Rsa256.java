@@ -2,11 +2,8 @@ package com.github.jspxnet.security.utils;
 
 
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.security.asymmetric.AsyEncrypt;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,13 +22,12 @@ import java.security.spec.X509EncodedKeySpec;
  * date: 2020/1/20 16:59
  * description: jspxpro
  */
+@Slf4j
 public class Rsa256   {
 
     static final String SIGN_ALGORITHMS = "SHA256WithRSA";
     public static final String NAME = "RSA256";
     public static final String RSA_NAME = "RSA";
-
-    final Logger logger = LoggerFactory.getLogger(this.getClass());
     private String encode = Environment.defaultEncode;
 
     public String sign(String data, String key) {
@@ -51,7 +47,7 @@ public class Rsa256   {
 
             return EncryptUtil.getBase64Encode(signed,Base64.DEFAULT);
         } catch (Exception e) {
-            logger.error(e.getMessage(),e);
+            log.error(e.getMessage(),e);
         }
 
         return null;
@@ -72,7 +68,7 @@ public class Rsa256   {
             signature.update(data.getBytes(encode));
             return signature.verify(Base64.decode(sign,Base64.DEFAULT));
         } catch (Exception e) {
-            logger.error(e.getMessage(),e);
+            log.error(e.getMessage(),e);
         }
 
         return false;

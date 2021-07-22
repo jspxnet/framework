@@ -5,15 +5,14 @@ import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 /**
  * Created by ChenYuan on 2017/6/15.
  */
+@Slf4j
 public class SqlDecide extends AbstractDecide {
-    final static private Logger log = LoggerFactory.getLogger(SqlDecide.class);
-
     @Override
     public boolean execute() {
         if (StringUtil.isNull(content) || !content.toLowerCase().contains("select")) {

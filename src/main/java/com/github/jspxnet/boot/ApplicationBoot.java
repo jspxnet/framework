@@ -14,8 +14,7 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -28,9 +27,8 @@ import org.slf4j.LoggerFactory;
  * 这里是exe4j直接调用，不涉及其他aop方式
  *
  */
-
+@Slf4j
 public class ApplicationBoot {
-    private static final Logger log = LoggerFactory.getLogger(ApplicationBoot.class);
     private static String appBeanId = StringUtil.empty;
 
     public static void main(String[] args) throws Exception {

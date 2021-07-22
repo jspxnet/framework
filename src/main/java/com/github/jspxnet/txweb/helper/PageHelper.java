@@ -1,10 +1,10 @@
 package com.github.jspxnet.txweb.helper;
 
 import com.github.jspxnet.boot.EnvFactory;
-import org.slf4j.Logger;
+
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
-import org.slf4j.LoggerFactory;
+
 import com.github.jspxnet.io.AutoReadTextFile;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.scriptmark.XmlEngine;
@@ -14,6 +14,8 @@ import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
 import com.github.jspxnet.txweb.helper.tag.HelpElement;
 import com.github.jspxnet.txweb.helper.tag.HelperElement;
 import com.github.jspxnet.utils.*;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -23,9 +25,8 @@ import java.util.List;
  * Created by chenyuan on 15-3-30.
  * 页面帮助提示
  */
+@Slf4j
 public class PageHelper implements Helper, Serializable {
-
-    private static final Logger log = LoggerFactory.getLogger(PageHelper.class);
     private String configFile = "help.xml";
     public static final String none = "none";
     public static final String Tag_HELP = "help";

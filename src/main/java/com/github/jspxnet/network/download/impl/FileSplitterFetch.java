@@ -24,13 +24,13 @@ import javax.net.ssl.SSLSession;
 import java.io.*;
 import java.net.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 import com.github.jspxnet.utils.SystemUtil;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 public class FileSplitterFetch extends Thread {
-    private static final Logger log = LoggerFactory.getLogger(FileSplitterFetch.class);
     private URL url; //File URL
 
     public long getCompleted() {

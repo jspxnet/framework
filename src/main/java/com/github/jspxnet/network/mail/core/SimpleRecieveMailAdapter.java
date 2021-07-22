@@ -10,6 +10,7 @@
 package com.github.jspxnet.network.mail.core;
 
 import com.github.jspxnet.utils.NumberUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.*;
 import java.util.Properties;
@@ -21,6 +22,7 @@ import java.util.Properties;
  * Time: 16:01:12
  * GmailRecieveMailAdapter
  */
+@Slf4j
 public class SimpleRecieveMailAdapter extends AbstractRecivevMail {
     public SimpleRecieveMailAdapter() {
         port = 110;

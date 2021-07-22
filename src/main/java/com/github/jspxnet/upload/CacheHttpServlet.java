@@ -13,10 +13,11 @@
 
 package com.github.jspxnet.upload;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.BeanUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.*;
@@ -58,9 +59,8 @@ import javax.servlet.http.*;
  * @author [b]Jason Hunter[/B], Copyright &#169; 1999
  * @version 0.90, 99/12/19
  */
-
+@Slf4j
 public abstract class CacheHttpServlet extends HttpServlet {
-    private static final Logger log = LoggerFactory.getLogger(CacheHttpServlet.class);
     CacheHttpServletResponse cacheResponse;
     long cacheLastMod = -1;
     String cacheQueryString = null;
@@ -129,10 +129,8 @@ public abstract class CacheHttpServlet extends HttpServlet {
         return s1 == null && s2 == null || !(s1 == null || s2 == null) && s1.equals(s2);
     }
 }
-
+@Slf4j
 class CacheHttpServletResponse implements HttpServletResponse {
-    private static final Logger log = LoggerFactory.getLogger(CacheHttpServlet.class);
-
     public void disable() {
         enable = false;
     }

@@ -12,8 +12,8 @@ package com.github.jspxnet.network.mail.util;
 
 
 import com.sun.mail.util.ASCIIUtility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 
 import javax.mail.Address;
 import javax.mail.Flags;
@@ -22,6 +22,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.UnsupportedEncodingException;
 import java.io.File;
@@ -33,9 +34,8 @@ import java.io.FileOutputStream;
  * date: 2007-9-18
  * Time: 15:49:20
  */
+@Slf4j
 public class MailUtil {
-    private static final Logger log = LoggerFactory.getLogger(MailUtil.class);
-
     private MailUtil() {
     }
 

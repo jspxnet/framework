@@ -42,9 +42,7 @@ SOFTWARE.
 */
 
 import com.github.jspxnet.utils.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Array;
@@ -98,8 +96,8 @@ import java.util.*;
  * </ul>
  */
 //CopyOnWriteArrayList
-public class JSONArray extends ArrayList {
-    private static final Logger log = LoggerFactory.getLogger(JSONArray.class);
+@Slf4j
+public class JSONArray extends ArrayList<Object> {
     public static JSONArray parse(String str) {
         if (str==null)
         {

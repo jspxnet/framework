@@ -4,14 +4,15 @@ import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.table.CloudFileConfig;
 import com.github.jspxnet.utils.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
 import com.github.jspxnet.sober.Criteria;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
 import java.util.List;
@@ -20,8 +21,8 @@ import java.util.List;
  * Created by yuan on 2014/7/13 0013.
  * 上传DAO
  */
+@Slf4j
 public class UploadFileDAOImpl<T> extends JdbcOperations implements UploadFileDAO {
-    private static final Logger log = LoggerFactory.getLogger(UploadFileDAOImpl.class);
 
     private String organizeId = StringUtil.empty;
     private Class<T> tableClass;
