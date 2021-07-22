@@ -48,6 +48,7 @@ public class AnnotationUtil {
             jdbcOperations.update(" SELECT setval('"+soberTable.getName()+"_id_seq', (SELECT MAX(id) FROM "+ soberTable.getName() +")+1)");
         } catch (Exception e) {
             e.printStackTrace();
+            log.error("注意：{}你的字段类型，关键字配置",soberTable.getName());
         }
     }
 

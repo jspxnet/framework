@@ -19,6 +19,7 @@ import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
+import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
@@ -37,6 +38,8 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.Date;
 
@@ -195,8 +198,8 @@ public class PermissionInterceptor extends InterceptorSupport {
             onlineManager.updateUserSessionCache(userSession);
         }
         //没有角色权限自动载入 end
-
-        if (INetCommand.RPC.equals(action.getRequest().getAttribute(ActionEnv.Key_REMOTE_TYPE)))
+        HttpServletRequest requestTmp = action.getRequest();
+        if (requestTmp instanceof RequestTo || INetCommand.RPC.equals(requestTmp.getAttribute(ActionEnv.Key_REMOTE_TYPE)))
         {
             //如果是RPC调用不拦截，RPC调用的安全使用通讯密钥方式来确保
             return actionInvocation.invoke();

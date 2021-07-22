@@ -1016,19 +1016,16 @@ public class RequestUtil {
         return URLUtil.getHostUrl(request.getRequestURL().toString());
     }
 
+    /**
+     * 返回域名
+     * @param request 请求
+     * @return  返回域名名称部分代http的 例如:www.jspx.net:8080
+     */
     static public String getDomain(HttpServletRequest request) {
         if (request == null) {
             return StringUtil.empty;
         }
-        String host = request.getHeader(Host);
-        System.out.println("1-------host=" + host);
-
-        System.out.println("2-------getServerName=" + request.getServerName());
-
-        String xx = StringUtil.substringAfter(getHostUrl(request),"//");
-        System.out.println("3-------getServerName=" + xx);
-
-        return host;
+        return StringUtil.substringAfter(getHostUrl(request),"//");
     }
 
 
