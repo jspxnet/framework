@@ -20,7 +20,6 @@ public class ScriptmarkEnv {
 
     }
 
-
     //模板更新时间
     public static final String Template_update_delay = "template_update_delay";
     //模板更新时间

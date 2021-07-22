@@ -19,8 +19,6 @@ public interface ValidateCodeCache {
 
     int getTimes(String id);
 
-
-
     String querySms(String mobile);
 
     void updateTimes(String id);

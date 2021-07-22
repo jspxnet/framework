@@ -14,7 +14,6 @@ import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
-import com.github.jspxnet.txweb.dao.MemberDAO;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.RandomUtil;
@@ -25,12 +24,10 @@ import java.util.Date;
 @HttpMethod(caption = "阿里云短信")
 @Slf4j
 public class AliySmsValidAction extends ActionSupport {
-    @Ref
-    protected MemberDAO memberDAO;
+
 
     private String accessKeyId = StringUtil.empty;
     private String secret = StringUtil.empty;
-
     private String signName = StringUtil.empty;
 
     // 验证码字符个数
