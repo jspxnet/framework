@@ -153,7 +153,7 @@ public class AuthenticationAction extends AuthenticationView {
             @Param(caption = "用户名类型", required = true,max = 64, message = "用户名必须填写") String field,
             @Param(caption = "用户名", required = true,max = 64, message = "用户名必须填写") String loginId,
             @Param(caption = "密码", required = true,max = 64,  message = "密码必须填写") String password,
-            @Param(caption = "时间", required = true, message = "时间") long timeMillis,
+            @Param(caption = "时间", required = true, message = "时间必须填写") long timeMillis,
             @Param(caption = "校验码", required = true,max = 10,  message = "校验码必须填写") String verify,
             @Param(caption = "绑定登陆的用户名", max = 64,  message = "绑定登陆的用户名") String loginName
     )  {

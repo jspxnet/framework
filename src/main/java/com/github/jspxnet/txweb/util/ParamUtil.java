@@ -127,7 +127,7 @@ public class ParamUtil {
      * @param level     安全级别 1:基本到安全，判断是否有特殊符号 IncertitudeChars 2:sql，判断是否有sql符号 sqlKeys 3:url 安全过滤 safetyUrlKeys
      * @return 是否安全
      */
-    public static boolean isSafe(String str, int minLength, long maxLength, SafetyEnumType level) {
+    public static boolean isSafe(String str, long minLength, long maxLength, SafetyEnumType level) {
         if (StringUtil.isNull(str) || SafetyEnumType.NONE.equals(level)) {
             return true;
         }
@@ -843,7 +843,10 @@ public class ParamUtil {
             return;
         }
 
-        if (theParam.intValue() < param.min() || theParam.intValue() > param.max()) {
+        System.out.println("1-------"+theParam.compareTo(new BigDecimal(param.min())));
+        System.out.println("2-------"+theParam.compareTo(new BigDecimal(param.max())));
+
+        if (theParam.compareTo(new BigDecimal(param.min()))<0 || theParam.compareTo(new BigDecimal(param.max()))>0) {
             String message = StringUtil.isEmpty(param.message()) ? (paramName + " ,参数不在允许范围") : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
         }

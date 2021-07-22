@@ -19,7 +19,7 @@ public @interface Param {
     String caption() default StringUtil.empty;
 
     //只对integer long 类型有效
-    int min() default -1;
+    long min() default -1;
 
     //只对integer long 类型有效
     long max() default Long.MAX_VALUE;
