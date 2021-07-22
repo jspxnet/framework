@@ -844,16 +844,21 @@ public abstract class JdbcOperations implements SoberSupport {
 
             return result;
         } catch (Exception e) {
-            String msg = e.getMessage();
-            if (msg!=null&&soberTable.isAutoId()&&soberTable.isAutoId()&&msg.contains("Duplicate")&&msg.contains("PRIMARY"))
+            SoberColumn soberColumn = soberTable.getColumn(soberTable.getPrimary());
+            if (soberTable.isAutoId()&&soberColumn!=null&&ClassUtil.isNumberType(soberColumn.getClassType()))
             {
-                //关键字重复了,这些去修复一下
-                AnnotationUtil.fixIdCacheMax(soberTable,object,this);
-            }
-            if (SoberEnv.POSTGRESQL.equalsIgnoreCase(soberFactory.getDatabaseName())&&msg!=null&&msg.contains("duplicate key value"))
-            {
-                //手工修改了数据库的seq,这里尝试修复
-                AnnotationUtil.postgreSqlFixSeqId(soberTable,this);
+                String msg = e.getMessage();
+                if (msg!=null&&msg.contains("Duplicate")&&msg.contains("PRIMARY"))
+                {
+                    //关键字重复了,这些去修复一下
+                    AnnotationUtil.fixIdCacheMax(soberTable,object,this);
+
+                    if (SoberEnv.POSTGRESQL.equalsIgnoreCase(soberFactory.getDatabaseName())&&msg.contains("duplicate key value"))
+                    {
+                        //手工修改了数据库的seq,这里尝试修复
+                        AnnotationUtil.postgreSqlFixSeqId(soberTable,this);
+                    }
+                }
             }
             log.error(sqlText, e);
             //在事务中不能关闭连接,关闭了会滚会失败

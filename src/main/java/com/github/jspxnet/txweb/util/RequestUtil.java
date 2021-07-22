@@ -20,6 +20,7 @@ import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import lombok.extern.slf4j.Slf4j;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +47,7 @@ public class RequestUtil {
     final public static String AUTHORIZATION_KEY = "Authorization";
     final public static String HEADER = "header";
     final public static String SESSION = "session";
+    final public static String Host = "Host";
     final public static String requestUserAgent = "User-Agent";
     final public static String requestAcceptLanguage = "Accept-Language";
     final public static String requestReferer = "Referer";
@@ -1013,6 +1015,22 @@ public class RequestUtil {
         }
         return URLUtil.getHostUrl(request.getRequestURL().toString());
     }
+
+    static public String getDomain(HttpServletRequest request) {
+        if (request == null) {
+            return StringUtil.empty;
+        }
+        String host = request.getHeader(Host);
+        System.out.println("1-------host=" + host);
+
+        System.out.println("2-------getServerName=" + request.getServerName());
+
+        String xx = StringUtil.substringAfter(getHostUrl(request),"//");
+        System.out.println("3-------getServerName=" + xx);
+
+        return host;
+    }
+
 
     static public String getHeader(HttpServletRequest request, String key) {
         if (request == null) {
