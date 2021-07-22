@@ -20,7 +20,6 @@ import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import lombok.extern.slf4j.Slf4j;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,7 +46,6 @@ public class RequestUtil {
     final public static String AUTHORIZATION_KEY = "Authorization";
     final public static String HEADER = "header";
     final public static String SESSION = "session";
-    final public static String Host = "Host";
     final public static String requestUserAgent = "User-Agent";
     final public static String requestAcceptLanguage = "Accept-Language";
     final public static String requestReferer = "Referer";
@@ -220,14 +218,19 @@ public class RequestUtil {
      * @param request 请求
      * @return 参数map, 不错误默认页面执行过程，只在传递参数的时候使用,这样能提高速度
      */
+    @SuppressWarnings("unchecked")
     public static Map<String, Object> getRequestMap(HttpServletRequest request)  {
-        Map result = new RequestMap(request);
+        Map<String,Object> result = new RequestMap(request);
         if (request == null || isRocRequest(request)) {
             return result;
         }
-        Enumeration enu = (Enumeration) BeanUtil.getProperty(request, "getParameterNames");
+        Enumeration<String> enu = (Enumeration<String>) BeanUtil.getProperty(request, "getParameterNames");
+        if (enu==null)
+        {
+            return null;
+        }
         while (enu.hasMoreElements()) {
-            String name = (String) enu.nextElement();
+            String name = enu.nextElement();
             Object values = BeanUtil.getProperty(request, "getParameterValues", new Object[]{name}, false);
             if (values != null && values.getClass().isArray() && ArrayUtil.getLength(values) > 1) {
                 if (REPAIR_ENCODE && ("*".equals(REPAIR_REQUEST_METHOD) || StringUtil.indexIgnoreCaseOf(REPAIR_REQUEST_METHOD, request.getMethod()) != -1)) {
