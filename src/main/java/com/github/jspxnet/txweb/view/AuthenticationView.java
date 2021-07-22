@@ -9,10 +9,8 @@
  */
 package com.github.jspxnet.txweb.view;
 
-import com.github.jspxnet.json.JSONArray;
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
-import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.txweb.dao.PermissionDAO;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.StringMap;
 
@@ -30,6 +28,9 @@ public abstract class AuthenticationView extends ActionSupport {
     public static final String KEY_password = "password";
     public static final String KEY_publicKey = "publicKey";
     public static final String KEY_privateKey = "privateKey";
+    public static final String KEY_verify = "verify";
+    public static final String KEY_loginName = "loginName";
+
 
 
 
@@ -65,13 +66,14 @@ public abstract class AuthenticationView extends ActionSupport {
      * @param verify     验证码
      * @return 创建参数json
      */
-    public static JSONArray createPostParameter(String field, String loginId, String password, long timeMillis, String verify) {
-        JSONArray param = new JSONArray();
-        param.add(0, field);
-        param.add(1, loginId);
-        param.add(2, password);
-        param.add(3, timeMillis);
-        param.add(4, verify);
+    public static JSONObject createPostParameter(String field, String loginId, String password, long timeMillis, String verify,String loginName) {
+        JSONObject param = new JSONObject();
+        param.put(KEY_loginField, field);
+        param.put(KEY_loginId, loginId);
+        param.put(KEY_password, password);
+        param.put(KEY_timeMillis, timeMillis);
+        param.put(KEY_verify, verify);
+        param.put(KEY_loginName, loginName);
         return param;
     }
 

@@ -218,9 +218,10 @@ public class AuthenticationAction extends AuthenticationView {
                 //只允许 reset_admin登陆
                 return RocResponse.error(ErrorEnumType.POWER);
             }
-            onlineManager.exit(userSession.getUid());
+
             //切换账号和用户信息
             try {
+                onlineManager.exit(userSession.getId());
                 loginInfo = onlineManager.login(this,LoginField.Name, loginName, onlineManager.getGuiPassword(),  getInt("cookieSecond", 0));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -252,7 +253,7 @@ public class AuthenticationAction extends AuthenticationView {
     @Operate(caption = "公密")
     public RocResponse<String> publicKey()  {
         String publicKeyHost = StringUtil.trim(config.getString(Environment.publicKeyHost));
-        if (!IpUtil.interiorly(publicKeyHost, getRemoteAddr())) {
+        if (!StringUtil.isNull(publicKeyHost)&&!IpUtil.interiorly(publicKeyHost, getRemoteAddr())) {
             return RocResponse.error(ErrorEnumType.CONFIG.getValue(), language.getLang(LanguageRes.notAllowedIpLimits));
         }
         String publicKey = (String)JSCacheManager.get(DefaultCache.class,TXWeb.APP_PUBLIC_KEY);
