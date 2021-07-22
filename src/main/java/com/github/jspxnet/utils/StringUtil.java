@@ -9,12 +9,10 @@
  */
 package com.github.jspxnet.utils;
 
-import com.github.jspxnet.OwnerDO;
 import com.github.jspxnet.util.StringMap;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -24,7 +22,6 @@ import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static java.util.regex.Pattern.compile;
 
 
@@ -3223,16 +3220,5 @@ public class StringUtil {
         return str.toLowerCase();
     }
 
-
-    public static void main(String[] args) {
-        Map<String,Object> map = new HashMap<>();
-        map.put("id","222");
-        map.put("idCard","idCarddsfs");
-        map.put("modifyTime","2021-06-28T16:49:35.087");
-        OwnerDO ownerDO = BeanUtil.copy(map,OwnerDO.class);
-        System.out.println(ObjectUtil.toString(ownerDO));
-
-
-    }
 
 }
