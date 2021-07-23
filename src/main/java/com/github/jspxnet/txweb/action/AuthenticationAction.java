@@ -65,7 +65,7 @@ public class AuthenticationAction extends AuthenticationView {
 
     @Operate(caption = "手机验证码登录",method = "phonelogin")
     public RocResponse<JSONObject> phoneLogin(@Param(caption = "手机号", required = true, max = 15 ,message = "错误的手机号") String mobile,
-                                  @Param(caption = "验证码",max = 10) String validate) throws Exception {
+                                  @Param(caption = "验证码",max = 10) String validate)  {
         int loginTimes = validateCodeCache.getTimes(mobile);
         if (loginTimes > 10) {
             return RocResponse.error(ErrorEnumType.CONGEAL.getValue(), language.getLang(LanguageRes.validationTimesFailure));
@@ -74,15 +74,24 @@ public class AuthenticationAction extends AuthenticationView {
         if (!validateCodeCache.validateSms(mobile, validate)) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.validationFailure));
         }
-        Map<String, String> loginInfo = onlineManager.login(this, LoginField.Sms, mobile, onlineManager.getGuiPassword(),  cookieDate);
-        if (!loginInfo.isEmpty()) {
+        Map<String, String> loginInfo = null;
+        try {
+            loginInfo = onlineManager.login(this, LoginField.Sms, mobile, onlineManager.getGuiPassword(),  cookieDate);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (loginInfo==null||!loginInfo.isEmpty()) {
             RocResponse<JSONObject> rocResponse = RocResponse.error(ErrorEnumType.WARN.getValue(), loginInfo);
             JSONObject json = new JSONObject();
             json.put(Environment.LOGIN_TIMES, loginTimes);
             rocResponse.setData(json);
             return rocResponse;
         }
-        Thread.sleep(500);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         UserSession userSession = onlineManager.getUserSession(this);
         if (userSession == null || userSession.isGuest()) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.validationFailure));
@@ -146,8 +155,10 @@ public class AuthenticationAction extends AuthenticationView {
      * @param timeMillis 当前时间搓
      * @param verify 签名验证  签名算法不包含 loginName
      * @param loginName 登陆名称
+     * @param cookieSecond 有效期,单位秒
      * @return 得到登陆session
      */
+
     @Operate(caption = "远程登录接口",method = "remotelogin")
     public RocResponse<?> remoteLogin(
             @Param(caption = "用户名类型", required = true,max = 64, message = "用户名必须填写") String field,
