@@ -1887,7 +1887,7 @@ public class StringUtil {
         if (StringUtil.isNull(date)) {
             return defaultDate;
         }
-        date = fullToHalf(date);
+        date = trim(fullToHalf(date));
         String format = null;
         if (countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains("T")) {
             //2014-06-25T05:01:04.595Z
