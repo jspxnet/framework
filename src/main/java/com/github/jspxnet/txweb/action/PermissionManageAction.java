@@ -524,7 +524,7 @@ public class PermissionManageAction extends PermissionView {
             ArrayUtil.sort(manageOperates, "/", true);
             role.setOperates(ArrayUtil.toString(manageOperates, StringUtil.CRLF));
             role.setImages("/share/pimg/usertype/0006.gif");
-            role.setName("RESET对接账号");
+            role.setName("RESET对接角色");
             //得到简拼begin
             role.setSpelling(ChineseUtil.getFullSpell(role.getName(), ""));
             role.setSpelling(py);
