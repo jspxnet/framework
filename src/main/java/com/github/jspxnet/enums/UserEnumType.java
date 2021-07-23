@@ -16,7 +16,7 @@ public enum UserEnumType implements EnumType {
     //超级管理员
     ADMINISTRATOR(90, "超级管理员"),
 
-    RESET_ADMIN(80, "对接账号"),
+    RESET_ADMIN(80, "对接角色"),
 
     //机构管理员
     ORG_ADMIN(10, "机构管理员"),

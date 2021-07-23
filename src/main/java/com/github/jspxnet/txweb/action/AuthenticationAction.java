@@ -234,7 +234,6 @@ public class AuthenticationAction extends AuthenticationView {
                 }
             }
             userSession = onlineManager.getUserSession(this);
-
             JSONObject json = new JSONObject();
             json.put(TXWeb.token, userSession.getId());
             json.put("userSession", userSession);

@@ -354,6 +354,7 @@ public class OnlineManagerImpl implements OnlineManager {
         return resultInfo;
     }
 
+
     /**
      * 判断是否可以登录
      *
@@ -362,7 +363,8 @@ public class OnlineManagerImpl implements OnlineManager {
      * @return 判断是否可以登录
      */
     @Override
-    public Map<String, String> login(ActionSupport action, String isId, String loginId, String password, int cookieSecond) throws Exception {
+    public Map<String, String> login(ActionSupport action, String isId, String loginId, String password, int cookieSecond) throws Exception
+    {
         String lan = RequestUtil.getLanguage(action.getRequest());
         Bundle language = action.getLanguage();
         if (language==null)
