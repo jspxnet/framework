@@ -843,9 +843,6 @@ public class ParamUtil {
             return;
         }
 
-        System.out.println("1-------"+theParam.compareTo(new BigDecimal(param.min())));
-        System.out.println("2-------"+theParam.compareTo(new BigDecimal(param.max())));
-
         if (theParam.compareTo(new BigDecimal(param.min()))<0 || theParam.compareTo(new BigDecimal(param.max()))>0) {
             String message = StringUtil.isEmpty(param.message()) ? (paramName + " ,参数不在允许范围") : param.message();
             action.addFieldInfo(Environment.warningInfo, message);

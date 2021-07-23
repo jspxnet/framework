@@ -517,6 +517,24 @@ public class PermissionManageAction extends PermissionView {
             role.setUploadFileTypes(StringUtil.ASTERISK);
             role.setNamespace(permissionDAO.getNamespace());
             permissionDAO.save(role);
+
+
+            role = new Role();
+            role.setUserType(UserEnumType.RESET_ADMIN.getValue());
+            ArrayUtil.sort(manageOperates, "/", true);
+            role.setOperates(ArrayUtil.toString(manageOperates, StringUtil.CRLF));
+            role.setImages("/share/pimg/usertype/0006.gif");
+            role.setName("RESET管理");
+            //得到简拼begin
+            role.setSpelling(ChineseUtil.getFullSpell(role.getName(), ""));
+            role.setSpelling(py);
+
+            //得到简拼end
+            role.setUseUpload(YesNoEnumType.YES.getValue());
+            role.setUploadFileTypes(StringUtil.ASTERISK);
+            role.setNamespace(permissionDAO.getNamespace());
+            permissionDAO.save(role);
+
             addActionMessage(language.getLang(LanguageRes.operationSuccess));
         }
     }

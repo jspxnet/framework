@@ -184,7 +184,8 @@ public class AuthenticationAction extends AuthenticationView {
 
         //判断IP范围
         String ip = getRemoteAddr();
-        if (!IpUtil.interiorly(config.get(Environment.authIpExpression), ip)) {
+        String authIpExpression= config.get(Environment.authIpExpression);
+        if (!StringUtil.isNull(authIpExpression)&& !authIpExpression.equals(StringUtil.ASTERISK)&&!IpUtil.interiorly(config.get(Environment.authIpExpression), ip)) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.notAllowedIpLimits));
         }
 

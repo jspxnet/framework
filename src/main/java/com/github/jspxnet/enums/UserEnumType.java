@@ -5,6 +5,7 @@ package com.github.jspxnet.enums;
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2020-1-12
  * Time: 10:20:34
+ * 权值
  */
 
 public enum UserEnumType implements EnumType {
@@ -13,21 +14,23 @@ public enum UserEnumType implements EnumType {
     ChenYuan(100, "作者"),
 
     //超级管理员
-    ADMINISTRATOR(99, "超级管理员"),
+    ADMINISTRATOR(90, "超级管理员"),
 
-    RESET_ADMIN(95, "对接账号"),
+    RESET_ADMIN(80, "对接账号"),
+
+    //机构管理员
+    ORG_ADMIN(10, "机构管理员"),
 
     //普通管理员
-    MANAGER(11, "普通管理员"),
+    MANAGER(6, "普通管理员"),
 
-    INTENDANT(10, "操作人员"),
+    INTENDANT(4, "操作人员"),
 
     VIP(2, "VIP用户"),
 
     USER(1, "普通用户"),
 
     NONE(0, "游客");
-
 
     /**
      * 0:游客
@@ -37,8 +40,8 @@ public enum UserEnumType implements EnumType {
      * 10:超级管理员
      */
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     UserEnumType(int value, String name) {
         this.value = value;
