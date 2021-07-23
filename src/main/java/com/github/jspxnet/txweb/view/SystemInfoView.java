@@ -62,7 +62,7 @@ public class SystemInfoView extends ActionSupport {
 
 
         result.put("realPath", getEnv(ActionEnv.Key_RealPath));
-        result.put("coreVersion", Environment.version);
+        result.put("coreVersion", Environment.VERSION);
         result.put("runDay", JspxNetApplication.runDay());
         result.put(Environment.startRunDate, JspxNetApplication.getRunDate());
         result.put("coreCheckRun", JspxNetApplication.checkRun());

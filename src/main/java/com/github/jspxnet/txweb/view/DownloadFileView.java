@@ -237,7 +237,7 @@ public class DownloadFileView extends ActionSupport {
         }
         response.reset();
 
-        response.setHeader("framework", Environment.frameworkName + " " + Environment.version);
+        response.setHeader("framework", Environment.frameworkName + " " + Environment.VERSION);
         response.setContentType(contentType);
         response.setBufferSize(BUFFER_SIZE);
         response.setCharacterEncoding(config.get("encode", Environment.defaultEncode));

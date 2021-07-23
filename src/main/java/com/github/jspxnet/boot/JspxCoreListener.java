@@ -89,7 +89,7 @@ public class JspxCoreListener implements ServletContextListener {
 
         boolean isAndroid = SystemUtil.isAndroid();
         //开始不能调用时间,调用了时间设置不了时区
-        copyright = Environment.frameworkName + " " + Environment.version + " " + Environment.licenses + " Powered By chenYuan ";
+        copyright = Environment.frameworkName + " " + Environment.VERSION + " " + Environment.licenses + " Powered By chenYuan ";
         log.info("-" + copyright + " start-" + startTimes++);
         //////初始化环境变量 begin
         log.info("开始载入org.bouncycastle.jce.provider.BouncyCastleProvider");

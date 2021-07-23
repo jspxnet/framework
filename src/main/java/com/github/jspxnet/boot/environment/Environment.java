@@ -133,12 +133,6 @@ public abstract class Environment {
 
     final public static String evasiveExcludeFilter = "evasiveExcludeFilter";
 
-    final static public String useJspxPay = "useJspxPay";
-
-    final static public String useQQLogin = "useQQLogin";
-
-    final static public String softName = "softName";
-
     final static public String locale = "locale";
 
     final static public String localeIP = "127.0.0.1";
@@ -146,7 +140,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String version = "6.45";
+    final static public String VERSION = "6.46";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
