@@ -32,6 +32,7 @@ public class DateUtil {
 
     final static public String UTC_FTP_FORMAT = "yyyyMMddHHmmss";
     final static public String UTC_ST_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    final static public String UTC_SHORT_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     final static public String FULL_ST_FORMAT = "yyyy-MM-dd HH:mm:ss";
     final static public String FULL_J_FORMAT = "yyyy/MM/dd HH:mm:ss";
     final static public String CURRENCY_ST_FORMAT = "yyyy-MM-dd HH:mm";

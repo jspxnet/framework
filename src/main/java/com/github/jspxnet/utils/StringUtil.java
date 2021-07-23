@@ -1889,11 +1889,18 @@ public class StringUtil {
         }
         date = fullToHalf(date);
         String format = null;
-        if (date.length() > 22 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains("T")) {
+        if (countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains("T")) {
             //2014-06-25T05:01:04.595Z
-            format = DateUtil.UTC_ST_FORMAT;
-
-        } else if (date.length() > 14 && date.length() <= 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2) {
+            if (date.length() > 20 && date.contains(DOT))
+            {
+                format = DateUtil.UTC_ST_FORMAT;
+            } else
+            {
+                //2014-06-25T05:01:04
+                format = DateUtil.UTC_SHORT_FORMAT;
+            }
+        }
+        else if (date.length() > 14 && date.length() <= 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2) {
             format = DateUtil.FULL_ST_FORMAT;
         } else if (date.length() > 14 && date.length() <= 17 && countMatches(date, "-") == 2 && countMatches(date, ":") == 1) {
             format = DateUtil.CURRENCY_ST_FORMAT;
@@ -3218,6 +3225,12 @@ public class StringUtil {
             return null;
         }
         return str.toLowerCase();
+    }
+
+    public static void main(String[] args) {
+        Date data = StringUtil.getDate("2006-09-01T00:00:01.099 Z");
+        System.out.println(DateUtil.toString(data,DateUtil.FULL_ST_FORMAT));
+
     }
 
 
