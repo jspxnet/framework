@@ -89,7 +89,7 @@ public class AuthenticationAction extends AuthenticationView {
         }
         JSONObject json = new JSONObject();
         json.put(TXWeb.token, userSession.getId());
-        json.put("userSession", userSession);
+        json.put(Environment.USER_SESSION, userSession);
         json.put(Environment.message, language.getLang(LanguageRes.loginSuccess));
         return RocResponse.success(json);
     }
@@ -131,7 +131,7 @@ public class AuthenticationAction extends AuthenticationView {
 
         JSONObject json = new JSONObject();
         json.put(TXWeb.token, userSession.getId());
-        json.put("userSession", userSession);
+        json.put(Environment.USER_SESSION, userSession);
         json.put(Environment.message, language.getLang(LanguageRes.loginSuccess));
         return RocResponse.success(json);
     }
@@ -155,7 +155,9 @@ public class AuthenticationAction extends AuthenticationView {
             @Param(caption = "密码", required = true,max = 64,  message = "密码必须填写") String password,
             @Param(caption = "时间", required = true, message = "时间必须填写") long timeMillis,
             @Param(caption = "校验码", required = true,max = 10,  message = "校验码必须填写") String verify,
-            @Param(caption = "绑定登陆的用户名", max = 64,  message = "绑定登陆的用户名") String loginName
+            @Param(caption = "绑定登陆的用户名", max = 64,  message = "绑定登陆的用户名") String loginName,
+            @Param(caption = "有效期单位秒", max = 100000,value = "0", message = "有效期单位秒") int cookieSecond
+
     )  {
 
         if (!config.getBoolean(Environment.userRemoteLogin)) {
@@ -197,7 +199,7 @@ public class AuthenticationAction extends AuthenticationView {
 
         Map<String, String> loginInfo = null;
         try {
-            loginInfo = onlineManager.login(this, field, loginId, password,  getInt("cookieSecond", 0));
+            loginInfo = onlineManager.login(this, field, loginId, password,  cookieSecond);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -223,7 +225,7 @@ public class AuthenticationAction extends AuthenticationView {
             //切换账号和用户信息
             try {
                 onlineManager.exit(userSession.getId());
-                loginInfo = onlineManager.login(this,LoginField.Name, loginName, onlineManager.getGuiPassword(),  getInt("cookieSecond", 0));
+                loginInfo = onlineManager.login(this,LoginField.Name, loginName, onlineManager.getGuiPassword(),  cookieSecond);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -236,7 +238,8 @@ public class AuthenticationAction extends AuthenticationView {
             userSession = onlineManager.getUserSession(this);
             JSONObject json = new JSONObject();
             json.put(TXWeb.token, userSession.getId());
-            json.put("userSession", userSession);
+
+            json.put(Environment.USER_SESSION, userSession);
             json.put(Environment.message, language.getLang(LanguageRes.loginSuccess));
             return RocResponse.success(json);
         } else {

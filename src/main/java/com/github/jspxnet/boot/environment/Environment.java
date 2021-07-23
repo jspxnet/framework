@@ -635,4 +635,6 @@ public abstract class Environment {
 
     final public static String forceExit = "forceExit";
 
+    final public static String USER_SESSION = "userSession";
+
 }
