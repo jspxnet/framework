@@ -64,6 +64,7 @@ public abstract class AuthenticationView extends ActionSupport {
      * @param password   密码
      * @param timeMillis 记忆有效期
      * @param verify     验证码
+     * @param loginName  绑定的登陆名称
      * @return 创建参数json
      */
     public static JSONObject createPostParameter(String field, String loginId, String password, long timeMillis, String verify,String loginName) {
