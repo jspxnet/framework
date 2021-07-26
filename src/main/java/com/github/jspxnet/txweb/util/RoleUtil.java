@@ -31,7 +31,7 @@ public  class RoleUtil {
      * @param roleList 角色列表
      * @return 合并角色
      */
-    static public Role mergeRole(List<Role> roleList)
+    static public Role mergeRole(List<Role> roleList,String organizeId)
     {
         if (ObjectUtil.isEmpty(roleList))
         {
@@ -56,8 +56,9 @@ public  class RoleUtil {
         int uploadVideoSize = 0;
         StringBuilder uploadFileTypes = new StringBuilder();
         String namespace = null;
-        String organizeId = null;
+
         String roleId = null;
+        String organizeIdSelf = organizeId;
 
 
         for (Role roleTmp:roleList)
@@ -97,9 +98,9 @@ public  class RoleUtil {
             {
                 namespace = roleTmp.getNamespace();
             }
-            if (StringUtil.isNull(organizeId))
+            if (StringUtil.isNull(organizeIdSelf))
             {
-                organizeId = roleTmp.getOrganizeId();
+                organizeIdSelf = roleTmp.getOrganizeId();
             }
         }
         String[] lines = StringUtil.split(StringUtil.replace(operateList.toString(),"\r\n","\n"),"\n");
@@ -134,7 +135,7 @@ public  class RoleUtil {
         role.setOperates(ArrayUtil.toString(lines,"\r\n"));
         role.setUploadFileTypes(updateFileType);
         role.setNamespace(namespace);
-        role.setOrganizeId(organizeId);
+        role.setOrganizeId(organizeIdSelf);
         return role;
     }
 
@@ -143,7 +144,7 @@ public  class RoleUtil {
      * @param roleList 角色列表
      * @return 合并角色
      */
-    static  public List<Role> mergeRoleList(List<Role> roleList)
+/*    static  public List<Role> mergeRoleList(List<Role> roleList)
     {
         Map<String,List<Role>> groupRoleList = new HashMap<>();
         for (Role roleTmp:roleList)
@@ -160,11 +161,11 @@ public  class RoleUtil {
         {
             if (!ObjectUtil.isEmpty(list))
             {
-                result.add(mergeRole(list));
+                result.add(mergeRole(list,));
             }
         }
         return result;
-    }
+    }*/
 
 
 }

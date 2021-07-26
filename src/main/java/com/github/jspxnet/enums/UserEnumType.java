@@ -14,21 +14,25 @@ public enum UserEnumType implements EnumType {
     ChenYuan(100, "作者"),
 
     //超级管理员
-    ADMINISTRATOR(90, "超级管理员"),
+    ADMINISTRATOR(35, "超级管理员"),
 
-    RESET_ADMIN(80, "对接角色"),
+    RESET_ADMIN(34, "对接角色"),
 
     //机构管理员
-    ORG_ADMIN(10, "机构管理员"),
+    ADMIN(30, "系统管理员"),
+
+    //机构管理员
+    ORG_ADMIN(20, "机构管理员"),
 
     //普通管理员
-    MANAGER(6, "普通管理员"),
+    MANAGER(15, "子站管理员"),
 
-    INTENDANT(4, "操作人员"),
 
-    VIP(2, "VIP用户"),
+    INTENDANT(10, "子站操作人员"),
 
-    USER(1, "普通用户"),
+    VIP(5, "VIP用户"),
+
+    USER(3, "普通用户"),
 
     NONE(0, "游客");
 

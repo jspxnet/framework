@@ -24,10 +24,8 @@ import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.txweb.util.RoleUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -82,7 +80,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.eq("organizeId", organizeId));
         }
-        return (MemberRole) criteria.objectUniqueResult(true);
+        return criteria.objectUniqueResult(true);
     }
 
     /**
@@ -127,8 +125,16 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         {
             return null;
         }
-        List<Role> roles = BeanUtil.copyFieldList(memberRoleList,"role");
-        return RoleUtil.mergeRole(roles);
+        List<Role> roles = new ArrayList<>();
+        for (MemberRole memberRole:memberRoleList)
+        {
+            Role role = memberRole.getRole();
+            if (StringUtil.isEmpty(role.getOrganizeId()))
+            {
+                role.setOrganizeId(memberRole.getOrganizeId());
+            }
+        }
+        return RoleUtil.mergeRole(roles,organizeId);
     }
 
 
