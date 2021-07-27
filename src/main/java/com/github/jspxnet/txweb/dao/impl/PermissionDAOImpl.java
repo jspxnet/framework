@@ -133,6 +133,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
             {
                 role.setOrganizeId(memberRole.getOrganizeId());
             }
+            roles.add(role);
         }
         return RoleUtil.mergeRole(roles,organizeId);
     }

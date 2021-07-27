@@ -45,7 +45,6 @@ public class MemberRole extends OperateTable {
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;
 
-    @JsonIgnore
     @Column(caption = "机构ID", length = 32)
     private String organizeId = StringUtil.empty;
 
