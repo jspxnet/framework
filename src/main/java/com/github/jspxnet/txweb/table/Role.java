@@ -117,7 +117,6 @@ public class Role extends OperateTable implements IRole {
     @Column(caption = "排序时间", notNull = true)
     private Date sortDate = new Date();
 
-    @JsonIgnore
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;
 
