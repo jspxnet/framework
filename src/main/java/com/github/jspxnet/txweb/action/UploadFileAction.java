@@ -265,15 +265,8 @@ public class UploadFileAction extends MultipartSupport {
     @Ref
     private ChineseAnalyzer chineseAnalyzer;
 
-    private String hash = StringUtil.empty;
-
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
-
-    //language.getLang(LanguageRes.uploadRequestError)
     @Operate(caption = "hash验证")
-    public void hasHash() {
+    public void hasHash(@Param(caption = "hash",required = true) String hash) {
         JSONObject json = new JSONObject();
         json.put("OK", 0);
         json.put("success", false);
@@ -309,7 +302,7 @@ public class UploadFileAction extends MultipartSupport {
     }
 
     @Operate(caption = "秒传")
-    public void fastUpload() throws Exception {
+    public void fastUpload(@Param(caption = "hash",required = true) String hash) throws Exception {
         JSONObject json = new JSONObject();
         json.put("OK", 0);
         json.put("success", false);

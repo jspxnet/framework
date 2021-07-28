@@ -144,7 +144,7 @@ public  class RoleUtil {
      * @param roleList 角色列表
      * @return 合并角色
      */
-/*    static  public List<Role> mergeRoleList(List<Role> roleList)
+  static  public List<Role> mergeRoleList(List<Role> roleList)
     {
         Map<String,List<Role>> groupRoleList = new HashMap<>();
         for (Role roleTmp:roleList)
@@ -161,11 +161,11 @@ public  class RoleUtil {
         {
             if (!ObjectUtil.isEmpty(list))
             {
-                result.add(mergeRole(list,));
+                result.add(mergeRole(list,null));
             }
         }
         return result;
-    }*/
+    }
 
 
 }

@@ -80,7 +80,30 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.eq("organizeId", organizeId));
         }
-        return criteria.objectUniqueResult(true);
+        List<MemberRole> memberRoles = criteria.list(true);
+        //多个返回权值最大的一个
+        if (ObjectUtil.isEmpty(memberRoles))
+        {
+            return null;
+        }
+        if (memberRoles.size()==1)
+        {
+            return memberRoles.get(0);
+        }
+
+        MemberRole memberRole =  memberRoles.get(0);
+        for (MemberRole mr:memberRoles)
+        {
+            if (mr==null)
+            {
+                continue;
+            }
+            if (mr.getRole().getUserType()>memberRole.getRole().getUserType())
+            {
+                memberRole = mr;
+            }
+        }
+        return memberRole;
     }
 
     /**

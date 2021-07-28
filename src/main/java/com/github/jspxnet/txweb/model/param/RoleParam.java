@@ -93,5 +93,4 @@ public class RoleParam  implements Serializable {
 
     @Param(caption = "机构ID", max = 32)
     private String organizeId = StringUtil.empty;
-
 }
