@@ -51,6 +51,8 @@ public class ActionConfigBean implements ActionConfig, Serializable {
     private boolean secret = false;
     @Column(caption = "动态载入", notNull = true)
     private boolean register = false;
+
+
     private Map<String, Object> param = new HashMap<String, Object>();
     private List<String> interceptors = new LinkedList<String>();
     private List<ResultConfigBean> resultConfigs = new ArrayList<ResultConfigBean>();
@@ -60,6 +62,7 @@ public class ActionConfigBean implements ActionConfig, Serializable {
     public ActionConfigBean() {
 
     }
+
 
     @Override
     public String getCaption() {

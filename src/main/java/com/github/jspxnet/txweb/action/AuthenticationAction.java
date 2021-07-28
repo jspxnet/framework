@@ -46,7 +46,7 @@ import java.util.Map;
 public class AuthenticationAction extends AuthenticationView {
 
     public AuthenticationAction() {
-
+        setActionResult(ROC);
     }
 
     @Ref
@@ -296,8 +296,5 @@ public class AuthenticationAction extends AuthenticationView {
         setActionResult(SUCCESS);
     }
 
-    @Override
-    public String execute() throws Exception {
-        return ROC;
-    }
+
 }

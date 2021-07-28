@@ -522,16 +522,20 @@ public class TxWebConfigManager implements WebConfigManager {
      */
     @Override
     public Map<String, ActionConfigBean> getActionMap(String namespace)  {
-
         String nameKey = StringUtil.isNull(namespace) ? TXWeb.global : StringUtil.fixedNamespace(namespace);
         Map<String, Map<String, ActionConfigBean>> fullConfigTable = getConfigTable();
         Map<String, ActionConfigBean> elementMap = fullConfigTable.get(nameKey);
+
         //多接一级命名空间方便 动态域名空间方式  begin
         int x = nameKey.lastIndexOf(StringUtil.BACKSLASH);
         if (elementMap == null && x > 1) {
             //子扩展
-            nameKey = nameKey.substring(0, x);
-            elementMap = fullConfigTable.get(nameKey);
+            String childNameKey = nameKey.substring(0, x);
+            //有继承关系的才去取子列表,兼容老系统
+            if (nameKey.equalsIgnoreCase(extendMap.get(childNameKey)))
+            {
+                elementMap = fullConfigTable.get(childNameKey);
+            }
         }
         return elementMap;
     }
@@ -630,10 +634,7 @@ public class TxWebConfigManager implements WebConfigManager {
                             operateVO.setClassName(actionBean.getIocBean());
                         }
                         result.add(operateVO);
-
                     }
-
-
                     continue;
                 }
                 //手动配置部分 end
@@ -677,9 +678,9 @@ public class TxWebConfigManager implements WebConfigManager {
         //为了区分分布式多处部署
         String cacheKey = namespace + "_" + IpUtil.getIpEnd();
         List<OperateVo> list = (List<OperateVo>) JSCacheManager.get(OperateVo.class, cacheKey);
-        if (!ObjectUtil.isEmpty(list)) {
+    /*    if (!ObjectUtil.isEmpty(list)) {
             return list;
-        }
+        }*/
         Map<String, OperateVo> checkMap = new HashMap<>();
         String[] spaceList = StringUtil.split(namespace, StringUtil.SEMICOLON);
         for (String space : spaceList) {
