@@ -470,16 +470,14 @@ public abstract class Dialect {
      * 		"columnName": "city"
      *  }
      */
-    public SoberColumn getJavaType(Map<String,Object> map) throws SQLException
+    public SoberColumn getJavaType(Map<String,Object> map)
     {
         if (ObjectUtil.isEmpty(map)) {
             return null;
         }
-        System.out.println(ObjectUtil.toString(map));
         DataMap<String,Object> rs = new DataMap<>();
         rs.putAll(map);
         SoberColumn column = new SoberColumn();
-
         String typeName = rs.getValue("typeName");
 
         int colSize = rs.getInt("columnSize");
