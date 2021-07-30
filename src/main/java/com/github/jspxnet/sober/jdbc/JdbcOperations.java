@@ -204,6 +204,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 载入对应, 一次一个对象
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T loadColumnsValue(Class<T> tClass, ResultSet resultSet) throws Exception {
         T result = null;
         if (Map.class.isAssignableFrom(tClass)||HashMap.class.isAssignableFrom(tClass))

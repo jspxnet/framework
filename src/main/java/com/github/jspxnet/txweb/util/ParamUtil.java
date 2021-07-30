@@ -128,7 +128,7 @@ public class ParamUtil {
      * @return 是否安全
      */
     public static boolean isSafe(String str, long minLength, long maxLength, SafetyEnumType level) {
-        if (StringUtil.isNull(str) || SafetyEnumType.NONE.equals(level)) {
+        if (StringUtil.isEmpty(str)&&minLength<=0 || SafetyEnumType.NONE.equals(level)) {
             return true;
         }
         if (str.length() > maxLength) {
@@ -801,8 +801,8 @@ public class ParamUtil {
             return;
         }
 
-        if (StringUtil.isEmpty(theParam)&&!isSafe(theParam, param.min(), param.max(), param.level())) {
-             String message = StringUtil.isEmpty(param.message()) ? (param.caption() + " " + paramName + ",参数不在允许范围," + param.caption()) : param.message();
+        if (!isSafe(theParam, param.min(), param.max(), param.level())) {
+            String message = StringUtil.isEmpty(param.message()) ? (param.caption() + " " + paramName + ",参数不在允许范围," + param.caption()) : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
         }
     }

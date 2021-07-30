@@ -12,6 +12,7 @@ package com.github.jspxnet.sober.config;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import lombok.Data;
@@ -64,9 +65,27 @@ public class SoberColumn implements Serializable {
     }
 
 
-
     @JsonField
     public String getJavaType() {
         return classType.getName();
     }
+
+
+    @JsonField
+    public String getBeanField() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("@Column(caption = \"").append(caption).append("\", length = ").append(length).append(",notNull = ").append(notNull).append(")").append("\r\n");
+        //StringUtil.empty
+        if (ClassUtil.isNumberType(classType))
+        {
+            sb.append("private ").append(classType.getSimpleName()).append(" ").append(name).append(" = 0;");
+        } else
+        {
+            sb.append("private ").append(classType.getSimpleName()).append(" ").append(name).append(" = StringUtil.empty;");
+        }
+        return sb.toString();
+    }
+
+
+
 }
