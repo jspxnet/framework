@@ -18,6 +18,7 @@ import com.github.jspxnet.sioc.util.TypeUtil;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -80,6 +81,11 @@ public class SoberColumn implements Serializable {
         {
             sb.append("private ").append(classType.getSimpleName()).append(" ").append(name).append(" = 0;");
         } else
+        if (classType.equals(Date.class) )
+        {
+            sb.append("private ").append(classType.getSimpleName()).append(" ").append(name).append(" = new Date();");
+        }
+        else
         {
             sb.append("private ").append(classType.getSimpleName()).append(" ").append(name).append(" = StringUtil.empty;");
         }

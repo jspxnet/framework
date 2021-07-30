@@ -478,7 +478,7 @@ public abstract class Dialect {
         DataMap<String,Object> rs = new DataMap<>();
         rs.putAll(map);
         SoberColumn column = new SoberColumn();
-        String typeName = rs.getValue("typeName");
+        String typeName = StringUtil.toLowerCase(rs.getValue("typeName"));
 
         int colSize = rs.getInt("columnSize");
         column.setLength(colSize);
@@ -521,13 +521,13 @@ public abstract class Dialect {
         }
 
         ///////日期
-        if ("date".equals(typeName) || "datetime".equals(typeName)) {
+        if (typeName.contains("date")) {
             column.setClassType(java.util.Date.class);
             return column;
         }
 
         ///////日期时间java.sql.Timestamp
-        if (typeName.toLowerCase().contains("timestamp")) {
+        if (typeName.contains("timestamp")) {
             column.setClassType(java.util.Date.class);
             return column;
         }
