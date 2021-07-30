@@ -13,11 +13,13 @@ package com.github.jspxnet.sober.dialect;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 
-
 import java.io.*;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +33,8 @@ import java.util.Map;
  */
 @Slf4j
 public abstract class Dialect {
-    final protected static Placeholder placeholder = EnvFactory.getPlaceholder();
-    final protected static Placeholder sqlPlaceholder = EnvFactory.getSqlPlaceholder();
+    final protected static Placeholder PLACEHOLDER = EnvFactory.getPlaceholder();
+    final protected static Placeholder SQL_PLACEHOLDER = EnvFactory.getSqlPlaceholder();
 
 
     public static final String ORACLE_CREATE_SEQUENCE = "oracle_create_sequence";
@@ -192,9 +194,9 @@ public abstract class Dialect {
         try {
             if (sql.contains("<#"))
             {
-                return placeholder.processTemplate(valueMap, sql);
+                return PLACEHOLDER.processTemplate(valueMap, sql);
             }
-            return sqlPlaceholder.processTemplate(valueMap, sql);
+            return SQL_PLACEHOLDER.processTemplate(valueMap, sql);
         } catch (Exception e) {
             log.error(sql + "  " + MapUtil.toString(valueMap), e);
             throw e;
@@ -203,7 +205,7 @@ public abstract class Dialect {
 
     public String processTemplate(String sqlKey, Map<String, Object> valueMap) {
         try {
-            return placeholder.processTemplate(valueMap, getSQLText(sqlKey));
+            return PLACEHOLDER.processTemplate(valueMap, getSQLText(sqlKey));
         } catch (Throwable e) {
             log.error("sql:{},keys:{},Throwable:{}", sqlKey, getSQLText(sqlKey), e.getMessage());
             for (String key : valueMap.keySet()) {
@@ -434,9 +436,112 @@ public abstract class Dialect {
     }
     //能够自动获取的配置数据begin
 
+
+
     /**
-     * 是否支持事务点
+     * @param map    数据
+     * @return 返回查询结果
+     * @throws SQLException 异常
+     *
+     * {
+     * 		"numPrecRadix": 10,
+     * 		"sourceDataType": 0,
+     * 		"isAutoincrement": "NO",
+     * 		"nullable": 0,
+     * 		"dataType": 12,
+     * 		"tableCat": null,
+     * 		"typeName": "varchar",
+     * 		"ordinalPosition": 5,
+     * 		"scopeTable": null,
+     * 		"tableName": "jbbs_journey",
+     * 		"scopeCatalog": null,
+     * 		"tableSchem": "public",
+     * 		"sqlDataType": 0,
+     * 		"charOctetLength": "200",
+     * 		"sqlDatetimeSub": 0,
+     * 		"columnSize": 200,
+     * 		"isNullable": "NO",
+     * 		"bufferLength": null,
+     * 		"isGeneratedcolumn": "",
+     * 		"decimalDigits": 0,
+     * 		"columnDef": null,
+     * 		"scopeSchema": null,
+     * 		"remarks": "城市",
+     * 		"columnName": "city"
+     *  }
      */
+    public SoberColumn getJavaType(Map<String,Object> map) throws SQLException
+    {
+        if (ObjectUtil.isEmpty(map)) {
+            return null;
+        }
+        System.out.println(ObjectUtil.toString(map));
+        DataMap<String,Object> rs = new DataMap<>();
+        rs.putAll(map);
+        SoberColumn column = new SoberColumn();
+
+        String typeName = rs.getValue("typeName");
+
+        int colSize = rs.getInt("columnSize");
+        column.setLength(colSize);
+        column.setCaption(rs.getValue("remarks"));
+        column.setName(rs.getValue("columnName"));
+        column.setNotNull(!ObjectUtil.toBoolean(rs.getValue("isNullable")));
+
+        //短断整型
+        if (("int".equals(typeName) && colSize < 4) || "short".equals(typeName) || "smallint".equals(typeName) || "int2".equals(typeName) || "tinyint".equals(typeName) || ("fixed".equals(typeName) && colSize < 4)) {
+            column.setClassType(Short.class);
+            return column;
+        }
+
+        ///////长整型
+        if ("bigserial".equals(typeName) || "long".equals(typeName) || "bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName) && colSize > 18)) {
+            column.setClassType(Long.class);
+            return column;
+        }
+
+        //////////整型
+        if ("integer".equals(typeName) || "serial".equals(typeName) || typeName.toLowerCase().contains("int") || ("number".equals(typeName) && colSize < 8) || ("fixed".equals(typeName) && colSize < 19)) {
+            column.setClassType(Integer.class);
+            return column;
+        }
+
+        ///////单精度
+        if ("money".equals(typeName) || "float".equals(typeName) || "real".equals(typeName) || "binary_float".equals(typeName)) {
+            column.setClassType(Float.class);
+            return column;
+        }
+        ///////大数值
+        if ("decimal".equals(typeName)) {
+            column.setClassType(BigDecimal.class);
+            return column;
+        }
+        ///////双精度
+        if ("double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
+            column.setClassType(Double.class);
+            return column;
+        }
+
+        ///////日期
+        if ("date".equals(typeName) || "datetime".equals(typeName)) {
+            column.setClassType(java.util.Date.class);
+            return column;
+        }
+
+        ///////日期时间java.sql.Timestamp
+        if (typeName.toLowerCase().contains("timestamp")) {
+            column.setClassType(java.util.Date.class);
+            return column;
+        }
+
+        ////////////时间
+        if ("time".equals(typeName)) {
+            column.setClassType(Time.class);
+            return column;
+        }
+        column.setClassType(String.class);
+        return column;
+    }
 
 
     private boolean supportsSavePoints = false;

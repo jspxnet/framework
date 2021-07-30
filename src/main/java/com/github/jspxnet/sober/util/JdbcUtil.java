@@ -15,12 +15,16 @@ import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.GeneralDialect;
+import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -254,5 +258,107 @@ public abstract class JdbcUtil {
             BeanUtil.setFieldValue(result, field.getName(), value);
         }
         return result;
+    }
+
+
+    /**
+     * 将表对象转换为实体对象，用于辅助代码
+     * @param jdbcOperations jdbc 操作对象
+     * @param table 表名
+     * @return 字段列表
+     */
+    public static List<SoberColumn> getTableColumns(JdbcOperations jdbcOperations, String table)  {
+            Dialect dialect = jdbcOperations.getSoberFactory().getDialect();
+
+            List<SoberColumn> columnList = new ArrayList<>();
+            Connection conn = null;
+            try {
+                conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
+                if (SoberEnv.ORACLE.equalsIgnoreCase(jdbcOperations.getSoberFactory().getDatabaseName()))
+                {
+                    table = table.toUpperCase();
+                }
+                ResultSet rs = conn.getMetaData().getColumns(null, "%",table, "%");
+                while (rs.next())
+                {
+                    columnList.add(dialect.getJavaType(jdbcOperations.loadColumnsValue(Map.class,rs)));
+                }
+
+                /*
+                while(rs.next()){
+                    dialect.getResultSetValue(rs)
+                    rs.getMetaData()
+
+                    System.out.println("字段名："+rs.getString("COLUMN_NAME")+"--字段注释："+rs.getString("REMARKS")+"--字段数据类型："+rs.getString("TYPE_NAME"));
+                    Map map = new HashMap();
+                    String colName = rs.getString("COLUMN_NAME");
+                    map.put("code", colName);
+
+                    String remarks = rs.getString("REMARKS");
+                    if(remarks == null || remarks.equals("")){
+                        remarks = colName;
+                    }
+                    map.put("name",remarks);
+
+                    String dbType = rs.getString("TYPE_NAME");
+                    map.put("dbType",dbType);
+
+                    map.put("valueType", dbType);
+                    columnList.add(map);
+                }*/
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }finally{
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println("-------------\r\n" + ObjectUtil.toString(columnList));
+
+
+        /*
+        Dialect dialect = jdbcOperations.getSoberFactory().getDialect();
+        List<SoberColumn> columnList = new ArrayList<>();
+        Connection connection = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            statement.setMaxRows(1);
+            ResultSet resultSet = statement.executeQuery(String.format("SELECT * FROM %s",tableName));
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int count = metaData.getColumnCount();
+            for (int i = 1; i <= count; i++) {
+                SoberColumn column = dialect.getJavaType(resultSet,i);
+                columnList.add(column);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            JdbcUtil.closeConnection(connection);
+        }
+
+         */
+        return columnList;
+
+
+    }
+
+    //其他数据库不需要这个方法 oracle和db2需要
+    private static String getSchema(Connection conn) throws Exception {
+        String schema;
+        schema = conn.getMetaData().getUserName();
+        if ((schema == null) || (schema.length() == 0)) {
+            throw new Exception("ORACLE数据库模式不允许为空");
+        }
+        return schema.toUpperCase();
+
+    }
+
+    public static void main(String[] args) {
+        System.out.println(StringUtil.toBoolean("YES"));
     }
 }

@@ -41,7 +41,7 @@ public class StringTreeView extends ActionSupport {
 
     }
 
-    private StringMap<String, String> map = new StringMap();
+    private final StringMap<String, String> map = new StringMap<>();
 
     public String getFileName() {
         return map.getFileName();

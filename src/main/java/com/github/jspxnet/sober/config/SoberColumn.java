@@ -62,4 +62,11 @@ public class SoberColumn implements Serializable {
     public String getType() {
         return TypeUtil.getTypeString(classType);
     }
+
+
+
+    @JsonField
+    public String getJavaType() {
+        return classType.getName();
+    }
 }

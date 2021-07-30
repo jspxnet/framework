@@ -63,7 +63,6 @@ public class BeanElement extends IocTagNode {
             cls = ClassUtil.loadClass(getClassName());
         } catch (Exception e) {
             log.error("bean 配置错误 className:{},source:{},error:{}",className,getSource(),e.getMessage());
-            e.printStackTrace();
             return null;
         }
         return AnnotationUtil.getBeanId(cls);

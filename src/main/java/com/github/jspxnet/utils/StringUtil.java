@@ -1735,7 +1735,7 @@ public class StringUtil {
         if (str == null) {
             return false;
         }
-        return ("TRUE".equalsIgnoreCase(str.toUpperCase()) || "yes".equalsIgnoreCase(str) || "on".equalsIgnoreCase(str) || "y".equalsIgnoreCase(str) || "T".equalsIgnoreCase(str) || "是".equalsIgnoreCase(str) || "ok".equalsIgnoreCase(str)) || (ValidUtil.isNumber(str) && toInt(str) > 0) || !(StringUtil.isNull(str) || ("FALSE".equalsIgnoreCase(str.toUpperCase()) || "no".equalsIgnoreCase(str) || "undefined".equalsIgnoreCase(str) || "f".equalsIgnoreCase(str) || "否".equalsIgnoreCase(str) || "不".equalsIgnoreCase(str)) || (ValidUtil.isNumber(str) && toInt(str) <= 0));
+        return ("TRUE".equalsIgnoreCase(str) || "YES".equalsIgnoreCase(str) || "on".equalsIgnoreCase(str) || "y".equalsIgnoreCase(str) || "T".equalsIgnoreCase(str) || "是".equalsIgnoreCase(str) || "ok".equalsIgnoreCase(str)) || (ValidUtil.isNumber(str) && toInt(str) > 0) || !(StringUtil.isNull(str) || ("FALSE".equalsIgnoreCase(str) || "no".equalsIgnoreCase(str) || "undefined".equalsIgnoreCase(str) || "f".equalsIgnoreCase(str) || "否".equalsIgnoreCase(str) || "不".equalsIgnoreCase(str)) || (ValidUtil.isNumber(str) && toInt(str) <= 0));
     }
 
 

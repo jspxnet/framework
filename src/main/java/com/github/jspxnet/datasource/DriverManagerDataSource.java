@@ -223,6 +223,11 @@ public abstract class DriverManagerDataSource implements ReadWriteDataSource {
      */
     protected Connection getConnectionFromDriverManager(String url, Properties props)
             throws SQLException {
+        //mysql
+        props.put("useInformationSchema","true"); //表注释
+
+        //oracle
+        props.put("remarksReporting", "true");
         return DriverManager.getConnection(url, props);
     }
 

@@ -145,7 +145,7 @@ public class TomcatApplication {
         //StandardContext standardContext = new StandardContext();
         standardContext.setPath("");
         standardContext.setPrivileged(true);
-        standardContext.setAddWebinfClassesResources(true);
+        standardContext.setAddWebinfClassesResources(false);
 
         //这个没必要
         //standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
@@ -174,8 +174,6 @@ public class TomcatApplication {
         JarScanner scanner = new StandardJarScanner();
         scanner.setJarScanFilter(scanFilter);
         standardContext.setJarScanner(scanner);
-
-        standardContext.setAddWebinfClassesResources(true);
 
 
         if (openRedis&&!StringUtil.isNull(redisConfig))

@@ -450,7 +450,22 @@ public interface SoberSupport extends Serializable {
     Criteria createCriteria(Class<?> cla);
 
     //-----------------------------------------------------------------
+    /**
+     * 创建索引
+     * @param tableName 表名
+     * @param name 索引名称
+     * @param field 字段
+     * @return 是否创建成功
+     * @throws Exception 异常
+     */
     boolean createIndex(String tableName, String name, String field) throws Exception;
+
+    /**
+     * 将表对象转换为实体对象，用于辅助代码
+     * @param tableName 表名
+     * @return 字段列表
+     */
+    List<SoberColumn>  getTableColumns(String tableName);
 
     /**
      * sql map 查询器

@@ -201,24 +201,39 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param tClass    类型
      * @param resultSet jdbc数据集合
      * @param <T>       类型
-     * @return 载入对应
+     * @return 载入对应, 一次一个对象
      */
     @Override
     public <T> T loadColumnsValue(Class<T> tClass, ResultSet resultSet) throws Exception {
-        TableModels soberTable = getSoberTable(tClass);
-        T result = tClass.newInstance();
-        ResultSetMetaData metaData = resultSet.getMetaData();
-        int count = metaData.getColumnCount();
-        for (int i = 1; i <= count; i++) {
-            String dbFiled = metaData.getColumnLabel(i);
-            SoberColumn soberColumn = soberTable.getColumn(dbFiled);
-            if (soberColumn != null) {
-                Object obj = dialect.getResultSetValue(resultSet, i);
-                BeanUtil.setFieldValue(result, soberColumn.getName(), obj);
-            } else if (ClassUtil.getDeclaredField(result.getClass(), dbFiled) != null) {
-                BeanUtil.setFieldValue(result, dbFiled, dialect.getResultSetValue(resultSet, i));
+        T result = null;
+        if (Map.class.isAssignableFrom(tClass)||HashMap.class.isAssignableFrom(tClass))
+        {
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            Map<String, Object> beanMap = new HashMap<>();
+            for (int n = 1; n <= metaData.getColumnCount(); n++) {
+                String field = StringUtil.underlineToCamel(metaData.getColumnLabel(n));
+                Object value = dialect.getResultSetValue(resultSet, n);
+                beanMap.put(field, value);
+            }
+            result = (T)beanMap;
+        } else
+        {
+            TableModels soberTable = getSoberTable(tClass);
+            result = tClass.newInstance();
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int count = metaData.getColumnCount();
+            for (int i = 1; i <= count; i++) {
+                String dbFiled = metaData.getColumnLabel(i);
+                SoberColumn soberColumn = soberTable.getColumn(dbFiled);
+                if (soberColumn != null) {
+                    Object obj = dialect.getResultSetValue(resultSet, i);
+                    BeanUtil.setFieldValue(result, soberColumn.getName(), obj);
+                } else if (ClassUtil.getDeclaredField(result.getClass(), dbFiled) != null) {
+                    BeanUtil.setFieldValue(result, dbFiled, dialect.getResultSetValue(resultSet, i));
+                }
             }
         }
+
         return result;
     }
 
@@ -2516,6 +2531,15 @@ public abstract class JdbcOperations implements SoberSupport {
     }
 
     //-----------------------------------------------------------------
+
+    /**
+     * 创建索引
+     * @param tableName 表名
+     * @param name 索引名称
+     * @param field 字段
+     * @return 是否创建成功
+     * @throws Exception 异常
+     */
     @Override
     public boolean createIndex(String tableName, String name, String field) throws Exception {
         Map<String, Object> valueMap = new HashMap<>();
@@ -2532,6 +2556,17 @@ public abstract class JdbcOperations implements SoberSupport {
 
         String sqlText = dialect.processTemplate(Dialect.SQL_CREATE_TABLE_INDEX, valueMap);
         return execute(sqlText);
+    }
+
+
+    /**
+     * 将表对象转换为实体对象，用于辅助代码
+     * @param tableName 表名
+     * @return 字段列表
+     */
+    @Override
+    public  List<SoberColumn>  getTableColumns(String tableName) {
+        return JdbcUtil.getTableColumns(this,tableName);
     }
     //-----------------------------------------------------------------
     /**
@@ -2623,6 +2658,8 @@ public abstract class JdbcOperations implements SoberSupport {
             JSCacheManager.put(cla,cacheKey,data);
         }
     }
+
+
 
 
 }
