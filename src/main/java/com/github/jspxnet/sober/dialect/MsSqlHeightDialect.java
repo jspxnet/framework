@@ -55,8 +55,6 @@ public class MsSqlHeightDialect extends Dialect {
         standard_SQL.put(char.class.getName(), "[${" + COLUMN_NAME + "}] char(2) NOT NULL");
         standard_SQL.put(SQL_DROP_TABLE, "drop table [dbo].[${" + KEY_TABLE_NAME + "}]");
         standard_SQL.put(FUN_TABLE_EXISTS, "SELECT * FROM sysobjects WHERE name='${" + KEY_TABLE_NAME + "}'");
-
-
     }
 
     @Override
