@@ -22,6 +22,8 @@ public class SoberEnv {
 
     static public final String ORACLE = "Oracle";
 
+    static public final String DM = "Dm";
+
     static public final String POSTGRESQL = "PostgreSQL";
 
     static public final String INTERBASE = "Interbase";

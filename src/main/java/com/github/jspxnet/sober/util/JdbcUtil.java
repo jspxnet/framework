@@ -16,16 +16,12 @@ import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.GeneralDialect;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
-import com.github.jspxnet.util.TypeReference;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -206,6 +202,9 @@ public abstract class JdbcUtil {
 
         if (driverName.contains("oracle")) {
             return SoberEnv.ORACLE;
+        }
+        if (driverName.contains("dm")) {
+            return SoberEnv.DM;
         }
         if (driverName.contains("postgresql") || dbName.contains("pql") || dbName.contains("pgql")) {
             return SoberEnv.POSTGRESQL;
