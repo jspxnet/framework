@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class XADataSourceProxy implements DataSource, Serializable {
 
-    private XADataSource dataSource;
+    private final XADataSource dataSource;
 
     public XADataSourceProxy(XADataSource dataSource) {
         this.dataSource = dataSource;
