@@ -18,6 +18,7 @@ import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.config.SoberNexus;
 import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.dialect.Dialect;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -93,7 +94,14 @@ public class AnnotationUtil {
         }
         else
         {
-            value = ObjectUtil.toLong(jdbcOperations.getUniqueResult("SELECT count(1) FROM " + soberTable.getName()));
+            if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(soberTable.getDatabaseName())))
+            {
+                value = ObjectUtil.toLong(jdbcOperations.getUniqueResult("SELECT count(1) FROM " + soberTable.getDatabaseName() + "." + soberTable.getName()));
+            }
+            else
+            {
+                value = ObjectUtil.toLong(jdbcOperations.getUniqueResult("SELECT count(1) FROM " + soberTable.getName()));
+            }
         }
         SequenceFactory sequenceFactory = EnvFactory.getBeanFactory().getBean(SequenceFactory.class);
         sequenceFactory.fixCache(object.getClass().getName(),value);

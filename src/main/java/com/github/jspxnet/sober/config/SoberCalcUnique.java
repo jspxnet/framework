@@ -21,7 +21,7 @@ public class SoberCalcUnique implements Serializable {
     private String caption;
     private String sql;
     private String name;
-    private Class[] entity;//() default NullEntity.class;
+    private Class<?>[] entity;//() default NullEntity.class;
     private String[] value;
 
     public String getCaption() {
@@ -48,11 +48,11 @@ public class SoberCalcUnique implements Serializable {
         this.name = name;
     }
 
-    public Class[] getEntity() {
+    public Class<?>[] getEntity() {
         return entity;
     }
 
-    public void setEntity(Class[] entity) {
+    public void setEntity(Class<?>[] entity) {
         this.entity = entity;
     }
 

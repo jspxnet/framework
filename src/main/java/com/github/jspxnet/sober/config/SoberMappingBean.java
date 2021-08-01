@@ -571,10 +571,8 @@ public class SoberMappingBean implements SoberFactory {
         {
             log.error("严重异常,必须尽快排除:{} 表创建失败",cla);
         }
-
         return soberTable;
     }
-
 
 
     @Override

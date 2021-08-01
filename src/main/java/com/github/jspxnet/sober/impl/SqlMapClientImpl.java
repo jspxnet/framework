@@ -254,6 +254,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         valueMap.put("beginRow", beginRow);
         valueMap.put("endRow", endRow);
         valueMap.put("namespace", namespace);
+
         String sqlText  = dialect.processSql(sqlRoom.getReplenish(mapSql.getContext()), valueMap);
         if (StringUtil.isNull(sqlText)) {
             throw new Exception("ERROR SQL IS NULL");

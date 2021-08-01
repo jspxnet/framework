@@ -11,7 +11,6 @@ package com.github.jspxnet.sober.jdbc;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Placeholder;
-import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.scriptmark.ScriptRunner;
 import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
@@ -19,7 +18,6 @@ import com.github.jspxnet.sober.*;
 import com.github.jspxnet.sober.config.SoberCalcUnique;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.config.SoberNexus;
-import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.dialect.Dialect;
@@ -141,6 +139,11 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public String getTableName(Class<?> cla) {
+        TableModels tableModels = soberFactory.getTableModels(cla, this);
+        if (tableModels!=null)
+        {
+            return tableModels.getName();
+        }
         return AnnotationUtil.getTableName(cla);
     }
 
@@ -157,7 +160,6 @@ public abstract class JdbcOperations implements SoberSupport {
         TableModels tableModels = getSoberTable(cla);
         return tableModels.containsField(field);
     }
-
 
     /**
      *
@@ -616,7 +618,11 @@ public abstract class JdbcOperations implements SoberSupport {
 
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
+
+
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+
+
         valueMap.put(Dialect.KEY_FIELD_NAME, field);
 
         String sqlText = StringUtil.empty;
@@ -2556,7 +2562,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @throws Exception 异常
      */
     @Override
-    public boolean createIndex(String databaseName,String tableName, String name, String field) throws Exception {
+    public boolean createIndex(String databaseName, String tableName, String name, String field) throws Exception {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, databaseName);
         valueMap.put(Dialect.KEY_TABLE_NAME, tableName);
