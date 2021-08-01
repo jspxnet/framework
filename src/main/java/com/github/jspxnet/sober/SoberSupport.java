@@ -453,13 +453,14 @@ public interface SoberSupport extends Serializable {
     //-----------------------------------------------------------------
     /**
      * 创建索引
+     * @param databaseName 库名
      * @param tableName 表名
      * @param name 索引名称
      * @param field 字段
      * @return 是否创建成功
      * @throws Exception 异常
      */
-    boolean createIndex(String tableName, String name, String field) throws Exception;
+    boolean createIndex(String databaseName, String tableName, String name, String field) throws Exception;
 
     /**
      * 将表对象转换为实体对象，用于辅助代码

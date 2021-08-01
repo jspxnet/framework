@@ -615,6 +615,7 @@ public abstract class JdbcOperations implements SoberSupport {
         ResultSet resultSet = null;
 
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_FIELD_NAME, field);
 
@@ -756,6 +757,7 @@ public abstract class JdbcOperations implements SoberSupport {
 
         Object idValue = BeanUtil.getFieldValue(object, soberTable.getPrimary(),false);
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
 
         String sqlText = StringUtil.empty;
@@ -941,6 +943,7 @@ public abstract class JdbcOperations implements SoberSupport {
 
         Object idValue = BeanUtil.getProperty(checkObj, soberTable.getPrimary());
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
 
         String[] fieldArray;
@@ -1204,6 +1207,7 @@ public abstract class JdbcOperations implements SoberSupport {
         fieldArray = ArrayUtil.delete(fieldArray, soberTable.getPrimary(), true);
 
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
         valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
@@ -1307,6 +1311,7 @@ public abstract class JdbcOperations implements SoberSupport {
         Connection conn = null;
         PreparedStatement statement = null;
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_FIELD_LIST, updateFiled);
         valueMap.put(Dialect.KEY_FIELD_COUNT, updateFiled.length);
@@ -1424,6 +1429,7 @@ public abstract class JdbcOperations implements SoberSupport {
         if (valueMap == null) {
             valueMap = new HashMap<>();
         }
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         assert params instanceof Object[];
@@ -1527,6 +1533,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return -2;
         }
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
         valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
@@ -1623,6 +1630,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return -2;
         }
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
         valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
@@ -1710,6 +1718,7 @@ public abstract class JdbcOperations implements SoberSupport {
         ResultSet resultSet = null;
         List<T> result = new ArrayList<>();
         Map<String, Object> valueMap = new HashMap<>(5);
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         try {
@@ -1886,6 +1895,7 @@ public abstract class JdbcOperations implements SoberSupport {
     public Object getUniqueResult(Class<?> cla, String sql, Object o) {
         Map<String, Object> valueMap = ObjectUtil.getMap(o);
         TableModels soberTable = getSoberTable(cla);
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         return getUniqueResult(sql, valueMap);
@@ -1902,6 +1912,7 @@ public abstract class JdbcOperations implements SoberSupport {
         if (o != null) {
             valueMap = ObjectUtil.getMap(o);
             TableModels soberTable = getSoberTable(o.getClass());
+            valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
             valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
             valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         }
@@ -2033,6 +2044,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return false;
         }
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
         valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
@@ -2070,8 +2082,8 @@ public abstract class JdbcOperations implements SoberSupport {
     public String getCreateTableSql(Class<?> createClass, TableModels soberTable) {
 
         Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
+        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(),"'",""));
 
         /////////先创建每一个字段
@@ -2106,12 +2118,14 @@ public abstract class JdbcOperations implements SoberSupport {
         if (dialect.commentPatch()) {
 
             for (SoberColumn soberColumn : soberTable.getColumns()) {
+                valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
                 valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
                 valueMap.put(Dialect.COLUMN_NAME, soberColumn.getName());
                 valueMap.put(Dialect.COLUMN_CAPTION, soberColumn.getCaption());
                 commentPatchSql.append(dialect.processTemplate(Dialect.SQL_COMMENT, valueMap)).append(StringUtil.SEMICOLON).append(StringUtil.CRLF);
                 valueMap.clear();
             }
+            valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
             valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
             valueMap.put(Dialect.SQL_TABLE_COMMENT, soberTable.getCaption());
             valueMap.put(Dialect.KEY_TABLE_CAPTION, soberTable.getCaption());
@@ -2121,6 +2135,7 @@ public abstract class JdbcOperations implements SoberSupport {
         ///修补建表注释主要是pgsql   end
 
         /////////在总体的生成SQL begin
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(),"'",""));
         valueMap.put(Dialect.KEY_COLUMN_LIST, columns);
@@ -2149,6 +2164,7 @@ public abstract class JdbcOperations implements SoberSupport {
         TableModels soberTable = getSoberTable(cla);
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.COLUMN_NAME, soberTable.getPrimary());
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         if (soberFactory.isUseCache() && soberTable.isUseCache()) {
             JSCacheManager.removeAll(cla);
@@ -2168,8 +2184,8 @@ public abstract class JdbcOperations implements SoberSupport {
             return false;
         }
         Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
+        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.COLUMN_NAME, soberTable.getPrimary());
         Object o = getUniqueResult(dialect.processTemplate(Dialect.FUN_TABLE_EXISTS, valueMap));
         return o instanceof String && soberTable.getName().equalsIgnoreCase((String) o) || ObjectUtil.toBoolean(o);
@@ -2183,6 +2199,7 @@ public abstract class JdbcOperations implements SoberSupport {
     public long getTableMaxId(Class<?> cla) {
         TableModels soberTable = getSoberTable(cla);
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         return ObjectUtil.toLong(getUniqueResult(dialect.processTemplate(Dialect.TABLE_MAX_ID, valueMap)));
@@ -2249,6 +2266,7 @@ public abstract class JdbcOperations implements SoberSupport {
         }
         TableModels soberTable = getSoberTable(cla);
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         Object o = getUniqueResult(dialect.processTemplate(Dialect.SEQUENCE_NAME, valueMap));
@@ -2268,6 +2286,7 @@ public abstract class JdbcOperations implements SoberSupport {
         }
         TableModels soberTable = getSoberTable(cla);
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         valueMap.put(Dialect.SERIAL_NAME, getSequenceName(cla));
@@ -2537,8 +2556,9 @@ public abstract class JdbcOperations implements SoberSupport {
      * @throws Exception 异常
      */
     @Override
-    public boolean createIndex(String tableName, String name, String field) throws Exception {
+    public boolean createIndex(String databaseName,String tableName, String name, String field) throws Exception {
         Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, databaseName);
         valueMap.put(Dialect.KEY_TABLE_NAME, tableName);
         valueMap.put(Dialect.KEY_INDEX_NAME, name);
         valueMap.put(Dialect.KEY_INDEX_FIELD, field);

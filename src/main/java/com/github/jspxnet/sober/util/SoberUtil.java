@@ -339,7 +339,7 @@ public class SoberUtil {
                 continue;
             }
             try {
-                soberSupport.createIndex(tableModels.getName(),name,field);
+                soberSupport.createIndex(tableModels.getDatabaseName(),tableModels.getName(),name,field);
             } catch (Exception e) {
                 e.printStackTrace();
                 log.info( "检查sqlMap配置,中初始化配置init中索引配置错误:table={},index={},创建索引异常",tableModels.getName(),line);
