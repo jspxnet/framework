@@ -48,7 +48,6 @@ public abstract class BaseXmlTagNode extends TagNode {
         return XMLUtil.deleteQuote(getStringAttribute("database"));
     }
 
-
     public String getQuote()
     {
         return XMLUtil.deleteQuote(getStringAttribute("quote"));

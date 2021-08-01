@@ -13,9 +13,9 @@ import java.util.Date;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/7/31 2:17
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/7/31 2:17
+ * description: 达梦数据库支持
  **/
 public class DmDialect extends Dialect {
 

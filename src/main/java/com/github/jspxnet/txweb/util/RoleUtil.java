@@ -26,9 +26,11 @@ public  class RoleUtil {
 
     }
 
+
     /**
      *
      * @param roleList 角色列表
+     * @param organizeId 机构id,如果有机构id,按照机构id合并,如果没有就按照命名空间合并
      * @return 合并角色
      */
     static public Role mergeRole(List<Role> roleList,String organizeId)
