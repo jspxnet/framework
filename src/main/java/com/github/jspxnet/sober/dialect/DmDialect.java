@@ -22,7 +22,7 @@ public class DmDialect extends Dialect {
     public DmDialect() {                                                                              //number(1)
         put(SQL_CREATE_TABLE, "CREATE TABLE \"${"+ KEY_DATABASE_NAME +"}\".\"${" + KEY_TABLE_NAME + "}\" \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
-                " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
+                " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (\"${" + KEY_PRIMARY_KEY + "}\")\n)");
 
 
         //oracle 和 pgsql 一样

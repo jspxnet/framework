@@ -23,7 +23,9 @@ import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.config.SqlMapConfig;
 import com.github.jspxnet.sober.config.xml.*;
 import com.github.jspxnet.sober.dialect.Dialect;
+import com.github.jspxnet.sober.dialect.DmDialect;
 import com.github.jspxnet.sober.dialect.OracleDialect;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.XMLUtil;
@@ -372,14 +374,15 @@ public class SoberUtil {
                 JdbcUtil.closeConnection(connection);
             }
         }
+        DatabaseEnumType[] oracleDatabaseEnumType = new DatabaseEnumType[]{DatabaseEnumType.ORACLE,DatabaseEnumType.DB2,DatabaseEnumType.DM};
 
         String sql = null;
         try {
-            if (soberTable!=null&&soberTable.isCreate()&& !soberSupport.tableExists(soberTable)) {
+            if (soberTable.isCreate()&& !soberSupport.tableExists(soberTable)) {
 
                 sql = soberSupport.getCreateTableSql(cla,soberTable);
                 //oracle只能一个; 一个; 的执行
-                if (soberSupport.getSoberFactory().getDialect() instanceof OracleDialect)
+                if (DatabaseEnumType.inArray(oracleDatabaseEnumType,soberSupport.getSoberFactory().getDatabaseType()))
                 {
                     String[] sqlLines = StringUtil.split(sql,StringUtil.SEMICOLON);
                     for (String sqlLine:sqlLines)
@@ -394,6 +397,7 @@ public class SoberUtil {
                     if (IDType.serial.equalsIgnoreCase(soberTable.getIdType()))
                     {
                         Map<String, Object> valueMap = new HashMap<>();
+                        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
                         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
                         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
 

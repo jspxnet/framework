@@ -2418,7 +2418,7 @@ public abstract class JdbcOperations implements SoberSupport {
                 result.add(ReflectUtil.createDynamicBean(beanMap));
             }
         } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
+            log.error("检查 SQL:" + sqlText, e);
             e.printStackTrace();
             throw new IllegalArgumentException("SQL:" + sqlText);
         } finally {
