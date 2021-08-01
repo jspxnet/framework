@@ -112,7 +112,7 @@ public class RocResult extends ResultSupport {
             }
             TXWebUtil.print("<?xml version=\"1.0\" encoding=\"" + Dispatcher.getEncode() + "\"?>\r\n" + result,WebOutEnumType.XML.getValue(), response);
         } else {
-            String result = DEBUG ? json.toString(4) : json.toString();
+            String result = json.toString(4);
             if (1!=json.getInt(ActionSupport.SUCCESS))
             {
                 if (json.containsKey("code")&&ErrorEnumType.NEED_LOGIN.getValue()==json.getInt("code"))

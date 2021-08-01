@@ -1,5 +1,6 @@
 package com.github.jspxnet.txweb.view;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.sober.annotation.Column;
@@ -38,4 +39,9 @@ public class DatabaseToolsView  extends ActionSupport {
         return RocResponse.success(sb.toString());
     }
 
+    @Operate(caption = "测试查询", method = "sql",post = false)
+    public RocResponse<List<?>> sql(@Param(caption = "sql",min = 2,max = 500, required = true) String sql)
+    {
+        return RocResponse.success(genericDAO.prepareQuery(sql,null));
+    }
 }

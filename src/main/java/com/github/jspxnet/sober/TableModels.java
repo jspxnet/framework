@@ -28,6 +28,8 @@ public interface TableModels extends Serializable {
 
     String getCaption();
 
+    String getDatabaseName();
+
     boolean isCreate();
 
     boolean isUseCache();

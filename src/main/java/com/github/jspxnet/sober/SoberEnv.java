@@ -20,30 +20,6 @@ public class SoberEnv {
 
     }
 
-    static public final String ORACLE = "Oracle";
-
-    static public final String DM = "Dm";
-
-    static public final String POSTGRESQL = "PostgreSQL";
-
-    static public final String INTERBASE = "Interbase";
-
-    static public final String MSSQL = "MsSql";
-
-    static public final String MYSQL = "MySQL";
-
-    static public final String HSQL = "HSQL";
-
-    static public final String DB2 = "DB2";
-
-    static public final String Firebird = "Firebird";
-
-    static public final String Sqlite = "Sqlite";
-
-    static public final String Smalldb = "SmallDB";
-
-    static public final String General = "General";
-
 
     //////////替代关键字,sql 处使用
 

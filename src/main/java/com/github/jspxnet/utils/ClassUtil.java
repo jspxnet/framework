@@ -40,7 +40,7 @@ public class ClassUtil {
     public static final String METHOD_NAME_IS = "is";
     public static final String[] BASE_NUMBER_TYPE = new String[]{"short","int","long","float","double"};
 
-    public static final String[] NO_CHECK_IS_PROXY = new String[]{"com.seeyon.ctp.common.po.BasePO","org.apache.commons","net.sf.cglib"};
+    public static final String[] NO_CHECK_IS_PROXY = new String[]{"com.seeyon.ctp.common.po.BasePO","org.apache.commons"};
 
 
 
@@ -52,7 +52,7 @@ public class ClassUtil {
     }
 
     public static boolean isNumberType(Type cla) {
-        return cla.equals(long.class) || cla.equals(Long.class) || cla.equals(int.class) || cla.equals(Integer.class) ||
+        return cla.equals(long.class) || cla.equals(Long.class) || cla.equals(int.class) || cla.equals(Integer.class) || cla.equals(Short.class) ||
                 cla.equals(float.class) || cla.equals(Float.class) || cla.equals(double.class) || cla.equals(Double.class) ||
                 cla.equals(BigDecimal.class);
     }

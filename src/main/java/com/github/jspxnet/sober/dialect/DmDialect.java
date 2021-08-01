@@ -60,7 +60,7 @@ public class DmDialect extends Dialect {
         standard_SQL.put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
         standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
         standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE \"${" + KEY_TABLE_NAME + "}\"");
-        standard_SQL.put(FUN_TABLE_EXISTS, "SELECT count(1) FROM tab WHERE tname=upper('${" + KEY_TABLE_NAME + "}')");
+        standard_SQL.put(FUN_TABLE_EXISTS, " SELECT COUNT(1)  FROM all_tables WHERE OWNER='${"+KEY_DATABASE_NAME+"}' AND TABLE_NAME='${" + KEY_TABLE_NAME + "}'");
     }
 
     @Override

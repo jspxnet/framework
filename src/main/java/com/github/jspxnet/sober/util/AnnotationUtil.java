@@ -332,7 +332,7 @@ public class AnnotationUtil {
      * @param cls 实体对象
      * @return SoberTable
      */
-    public static TableModels getSoberTable(Class<?> cls) {
+    public static SoberTable getSoberTable(Class<?> cls) {
         if (cls==null)
         {
             return null;

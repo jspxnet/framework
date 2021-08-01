@@ -184,7 +184,7 @@ public abstract class JdbcUtil {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return new HashMap<String, SoberColumn>(0);
+            return new HashMap<>(0);
         }
         return result;
     }
@@ -195,11 +195,10 @@ public abstract class JdbcUtil {
      * @return String 得到数据库名
      * @throws SQLException 连接错误
      */
-    public static String getDatabaseName(Connection con) throws SQLException {
+    public static String getDatabaseType(Connection con) throws SQLException {
         DatabaseMetaData metaData = con.getMetaData();
         String dbName = metaData.getDatabaseProductName().toLowerCase();
         String driverName = metaData.getDriverName().toLowerCase();
-
         if (driverName.contains("oracle")) {
             return SoberEnv.ORACLE;
         }

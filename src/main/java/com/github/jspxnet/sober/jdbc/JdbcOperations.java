@@ -20,6 +20,7 @@ import com.github.jspxnet.sober.*;
 import com.github.jspxnet.sober.config.SoberCalcUnique;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.config.SoberNexus;
+import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.dialect.Dialect;
@@ -2168,13 +2169,30 @@ public abstract class JdbcOperations implements SoberSupport {
         if (DefaultCache.class.equals(cla)) {
             return false;
         }
-        TableModels soberTable = AnnotationUtil.getSoberTable(cla);
+        SoberTable soberTable = AnnotationUtil.getSoberTable(cla);
         if (soberTable==null)
         {
             return false;
         }
+
+        if (StringUtil.isEmpty(soberTable.getDatabaseName()))
+        {
+
+            Connection connection = null;
+            try {
+                connection = getConnection(SoberEnv.READ_ONLY);
+                soberTable.setDatabaseName(connection.getMetaData().getSchemaTerm());
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            } finally {
+                JdbcUtil.closeConnection(connection);
+            }
+        }
+
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.COLUMN_NAME, soberTable.getPrimary());
         Object o = getUniqueResult(dialect.processTemplate(Dialect.FUN_TABLE_EXISTS, valueMap));
         return o instanceof String && soberTable.getName().equalsIgnoreCase((String) o) || ObjectUtil.toBoolean(o);

@@ -24,6 +24,9 @@ import java.util.*;
  * Time: 23:07:57
  */
 public class SoberTable implements TableModels {
+    //数据库名
+    private String databaseName = StringUtil.empty;
+
     //数据库表名
     private String name = StringUtil.empty;
     //表别名
@@ -218,6 +221,15 @@ public class SoberTable implements TableModels {
 
     public void setUseCache(boolean useCache) {
         this.useCache = useCache;
+    }
+
+    @Override
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
     }
 
     @Override
