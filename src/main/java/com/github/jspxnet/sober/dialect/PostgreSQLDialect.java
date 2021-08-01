@@ -30,55 +30,55 @@ public class PostgreSQLDialect extends Dialect {
 
 
     public PostgreSQLDialect() {
-        standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE IF NOT EXISTS ${" + KEY_TABLE_NAME + "} \n(\n" +
+        put(SQL_CREATE_TABLE, "CREATE TABLE IF NOT EXISTS ${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
 
 
         //oracle 和 pgsql 设置注释方式begin
-        standard_SQL.put(SQL_COMMENT, "COMMENT ON COLUMN ${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
+        put(SQL_COMMENT, "COMMENT ON COLUMN ${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
+        put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
         //oracle 和 pgsql 设置注释方式end
 
-        standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} boolean <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toBoolean()}</#if>");
-        standard_SQL.put(boolean.class.getName(), "${" + COLUMN_NAME + "} boolean <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toBoolean()}</#if>");
+        put(Boolean.class.getName(), "${" + COLUMN_NAME + "} boolean <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toBoolean()}</#if>");
+        put(boolean.class.getName(), "${" + COLUMN_NAME + "} boolean <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toBoolean()}</#if>");
 
-        standard_SQL.put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&lt;255>varchar(${" + COLUMN_LENGTH + "})<#else>text</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&lt;255>varchar(${" + COLUMN_LENGTH + "})<#else>text</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
-        standard_SQL.put(Integer.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
-        standard_SQL.put("int", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+        put(Integer.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+        put("int", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
 
-        standard_SQL.put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">BIGSERIAL<#else>BIGINT</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
-        standard_SQL.put("long", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">BIGSERIAL<#else>BIGINT</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+        put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">BIGSERIAL<#else>BIGINT</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+        put("long", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">BIGSERIAL<#else>BIGINT</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
 
-        standard_SQL.put(Double.class.getName(), "${" + COLUMN_NAME + "} double precision <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        standard_SQL.put("double", "${" + COLUMN_NAME + "} double precision <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put(Double.class.getName(), "${" + COLUMN_NAME + "} double precision <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("double", "${" + COLUMN_NAME + "} double precision <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
-        standard_SQL.put(Float.class.getName(), "${" + COLUMN_NAME + "} real <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        standard_SQL.put("float", "${" + COLUMN_NAME + "} real <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put(Float.class.getName(), "${" + COLUMN_NAME + "} real <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("float", "${" + COLUMN_NAME + "} real <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
-        standard_SQL.put(Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
+        put(Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
 
-        standard_SQL.put(Time.class.getName(), "${" + COLUMN_NAME + "} time <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(Time.class.getName(), "${" + COLUMN_NAME + "} time <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '${" + COLUMN_DEFAULT + "}'</#if>");
 
-        standard_SQL.put(byte[].class.getName(), "${" + COLUMN_NAME + "} bytea");
-        standard_SQL.put(InputStream.class.getName(), "${" + COLUMN_NAME + "} bytea");
-        standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
+        put(byte[].class.getName(), "${" + COLUMN_NAME + "} bytea");
+        put(InputStream.class.getName(), "${" + COLUMN_NAME + "} bytea");
+        put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
 
-        standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
+        put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
 
-        standard_SQL.put(FUN_TABLE_EXISTS, "SELECT (count(*)>0) FROM pg_class WHERE relname ILIKE '${" + KEY_TABLE_NAME + "}'");
+        put(FUN_TABLE_EXISTS, "SELECT (count(*)>0) FROM pg_class WHERE relname ILIKE '${" + KEY_TABLE_NAME + "}'");
 
         //修改系列开始
-        standard_SQL.put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE ${" + SERIAL_NAME + "} RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
+        put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE ${" + SERIAL_NAME + "} RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
 
-        standard_SQL.put(SQL_TABLE_NAMES, "SELECT tablename FROM pg_tables WHERE tablename NOT LIKE 'pg%' AND tablename NOT LIKE 'sql_%' ORDER   BY tablename");
+        put(SQL_TABLE_NAMES, "SELECT tablename FROM pg_tables WHERE tablename NOT LIKE 'pg%' AND tablename NOT LIKE 'sql_%' ORDER   BY tablename");
 
-        standard_SQL.put(DATABASE_SIZE, "SELECT pg_database_size('${" + KEY_TABLE_NAME + "}'");
+        put(DATABASE_SIZE, "SELECT pg_database_size('${" + KEY_TABLE_NAME + "}'");
 
-        standard_SQL.put(SEQUENCE_NAME, "SELECT adsrc FROM pg_attrdef WHERE adsrc like 'nextval(_${" + KEY_TABLE_NAME + "}_${" + KEY_PRIMARY_KEY + "}_seq%::regclass)'");
+        put(SEQUENCE_NAME, "SELECT adsrc FROM pg_attrdef WHERE adsrc like 'nextval(_${" + KEY_TABLE_NAME + "}_${" + KEY_PRIMARY_KEY + "}_seq%::regclass)'");
 
-        standard_SQL.put(SQL_CREATE_TABLE_INDEX, "CREATE <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX IF NOT EXISTS ${"+KEY_INDEX_NAME+"} ON ${" + KEY_TABLE_NAME + "} (${" + KEY_INDEX_FIELD +"})");
+        put(SQL_CREATE_TABLE_INDEX, "CREATE <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX IF NOT EXISTS ${"+KEY_INDEX_NAME+"} ON ${" + KEY_TABLE_NAME + "} (${" + KEY_INDEX_FIELD +"})");
     }
 
     @Override

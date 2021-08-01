@@ -25,27 +25,27 @@ import java.util.Date;
 public class SmallDBDialect extends Dialect {
     public SmallDBDialect() {
 
-        standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
+        put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nPRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
-        standard_SQL.put(SQL_CRITERIA_QUERY, "SELECT top ${" + SQL_RESULT_END_ROW + "} * FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
-        standard_SQL.put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
-        standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        standard_SQL.put(boolean.class.getName(), "${" + COLUMN_NAME + "} smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        standard_SQL.put(Integer.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">COUNTER<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
-        standard_SQL.put("int", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">COUNTER<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
-        standard_SQL.put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">COUNTER<#else>bigint</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
-        standard_SQL.put("long", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">COUNTER<#else>bigint</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
-        standard_SQL.put(Double.class.getName(), "${" + COLUMN_NAME + "} double <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
-        standard_SQL.put("double", "${" + COLUMN_NAME + "} double <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
-        standard_SQL.put(Float.class.getName(), "${" + COLUMN_NAME + "} float <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
-        standard_SQL.put("float", "${" + COLUMN_NAME + "} float <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
-        standard_SQL.put(Date.class.getName(), "${" + COLUMN_NAME + "} datetime NOT NULL default now()");
-        standard_SQL.put(byte[].class.getName(), "${" + COLUMN_NAME + "} LONGvarbinary");
-        standard_SQL.put(InputStream.class.getName(), "${" + COLUMN_NAME + "} LONGvarbinary");
-        standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
-        standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
-        standard_SQL.put(FUN_TABLE_EXISTS, "exists table ${" + KEY_TABLE_NAME + "}");
+        put(SQL_CRITERIA_QUERY, "SELECT top ${" + SQL_RESULT_END_ROW + "} * FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
+        put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
+        put(Boolean.class.getName(), "${" + COLUMN_NAME + "} smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put(boolean.class.getName(), "${" + COLUMN_NAME + "} smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put(Integer.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">COUNTER<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
+        put("int", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">COUNTER<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
+        put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">COUNTER<#else>bigint</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
+        put("long", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">COUNTER<#else>bigint</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
+        put(Double.class.getName(), "${" + COLUMN_NAME + "} double <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
+        put("double", "${" + COLUMN_NAME + "} double <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
+        put(Float.class.getName(), "${" + COLUMN_NAME + "} float <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
+        put("float", "${" + COLUMN_NAME + "} float <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=" + COLUMN_DEFAULT + "==''>'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
+        put(Date.class.getName(), "${" + COLUMN_NAME + "} datetime NOT NULL default now()");
+        put(byte[].class.getName(), "${" + COLUMN_NAME + "} LONGvarbinary");
+        put(InputStream.class.getName(), "${" + COLUMN_NAME + "} LONGvarbinary");
+        put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
+        put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
+        put(FUN_TABLE_EXISTS, "exists table ${" + KEY_TABLE_NAME + "}");
     }
 
     /**

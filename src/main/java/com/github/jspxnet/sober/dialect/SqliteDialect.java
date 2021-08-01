@@ -40,38 +40,38 @@ import java.util.Date;
 @Slf4j
 public class SqliteDialect extends Dialect {
     public SqliteDialect() {
-        standard_SQL.put(SQL_CREATE_TABLE, "<#assign primary_length=" + KEY_PRIMARY_KEY + ".length />" +
+        put(SQL_CREATE_TABLE, "<#assign primary_length=" + KEY_PRIMARY_KEY + ".length />" +
                 "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column} <#if where=column_has_next>,</#if>\n</#list>" +
                 " \n)");
 
-        standard_SQL.put(SQL_INSERT, "INSERT INTO ${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">${field}<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
-        standard_SQL.put(SQL_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#ifwhere= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
-        standard_SQL.put(SQL_DELETE_IN, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "} IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=fvalue_has_next>,</#if></#list>)");
-        standard_SQL.put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_INSERT, "INSERT INTO ${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">${field}<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
+        put(SQL_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#ifwhere= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_DELETE_IN, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "} IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=fvalue_has_next>,</#if></#list>)");
+        put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
 
-        standard_SQL.put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
-        standard_SQL.put(Integer.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
-        standard_SQL.put("int", "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
-        standard_SQL.put(Long.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
-        standard_SQL.put("long", "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
+        put(Integer.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
+        put("int", "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
+        put(Long.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
+        put("long", "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
 
-        standard_SQL.put(Double.class.getName(), "${" + COLUMN_NAME + "} REAL default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        standard_SQL.put("double", "${" + COLUMN_NAME + "} REAL default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        standard_SQL.put(Float.class.getName(), "${" + COLUMN_NAME + "} REAL <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
-        standard_SQL.put("float", "${" + COLUMN_NAME + "} REAL <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
+        put(Double.class.getName(), "${" + COLUMN_NAME + "} REAL default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("double", "${" + COLUMN_NAME + "} REAL default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put(Float.class.getName(), "${" + COLUMN_NAME + "} REAL <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
+        put("float", "${" + COLUMN_NAME + "} REAL <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if>");
 
-        standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>");
-        standard_SQL.put(boolean.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>");
+        put(Boolean.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>");
+        put(boolean.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>");
 
-        standard_SQL.put(Date.class.getName(), "${" + COLUMN_NAME + "} datetime DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime'))");
-        standard_SQL.put(byte[].class.getName(), "${" + COLUMN_NAME + "} integer");
-        standard_SQL.put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
-        standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(Date.class.getName(), "${" + COLUMN_NAME + "} datetime DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime'))");
+        put(byte[].class.getName(), "${" + COLUMN_NAME + "} integer");
+        put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
+        put(char.class.getName(), "${" + COLUMN_NAME + "} char <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
-        standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
-        standard_SQL.put(FUN_TABLE_EXISTS, "SELECT COUNT(1) AS NUM FROM sqlite_master WHERE type='table' AND name='${" + KEY_TABLE_NAME + "}'");
+        put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
+        put(FUN_TABLE_EXISTS, "SELECT COUNT(1) AS NUM FROM sqlite_master WHERE type='table' AND name='${" + KEY_TABLE_NAME + "}'");
     }
 
     @Override

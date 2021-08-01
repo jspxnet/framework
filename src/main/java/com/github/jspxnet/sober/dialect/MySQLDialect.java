@@ -28,54 +28,54 @@ public class MySQLDialect extends Dialect {
 
     public MySQLDialect() {
         //ENGINE=MyISAM
-        standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE `${" + KEY_TABLE_NAME + "}` \n(\n" +
+        put(SQL_CREATE_TABLE, "CREATE TABLE `${" + KEY_TABLE_NAME + "}` \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nPRIMARY KEY  (`${" + KEY_PRIMARY_KEY + "}`)\n) COMMENT = '${"+ KEY_TABLE_CAPTION +"}';"); //DEFAULT CHARSET=UTF8
 
-        standard_SQL.put(SQL_INSERT, "INSERT INTO ${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">`${field}`<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
-        standard_SQL.put(SQL_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE `${" + KEY_FIELD_NAME + "}`=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#ifwhere= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
-        standard_SQL.put(SQL_DELETE_IN, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE `${" + KEY_FIELD_NAME + "}` IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=fvalue_has_next>,</#if></#list>)");
-        standard_SQL.put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">`${field}`=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_INSERT, "INSERT INTO ${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">`${field}`<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
+        put(SQL_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE `${" + KEY_FIELD_NAME + "}`=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#ifwhere= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_DELETE_IN, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE `${" + KEY_FIELD_NAME + "}` IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=fvalue_has_next>,</#if></#list>)");
+        put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">`${field}`=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
 
-        standard_SQL.put(String.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "&gt;512\"><#if where=\"" + COLUMN_LENGTH + "&lt;30000\" >text<#else>mediumtext</#else></#if><#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(String.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "&gt;512\"><#if where=\"" + COLUMN_LENGTH + "&lt;30000\" >text<#else>mediumtext</#else></#if><#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
-        //standard_SQL.put(Integer.class.getName(), "`${" + COLUMN_NAME + "}` integer <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        //standard_SQL.put("int", "`${" + COLUMN_NAME + "}` integer <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(Integer.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "!=0&&"+ COLUMN_LENGTH +"&lt;4\">tinyint(${" + COLUMN_LENGTH + "})<#else>integer</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">0<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put("int", "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "!=0&&"+ COLUMN_LENGTH +"&lt;4\">tinyint(${" + COLUMN_LENGTH + "})<#else>integer</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">0<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        //put(Integer.class.getName(), "`${" + COLUMN_NAME + "}` integer <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        //put("int", "`${" + COLUMN_NAME + "}` integer <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(Integer.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "!=0&&"+ COLUMN_LENGTH +"&lt;4\">tinyint(${" + COLUMN_LENGTH + "})<#else>integer</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">0<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put("int", "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "!=0&&"+ COLUMN_LENGTH +"&lt;4\">tinyint(${" + COLUMN_LENGTH + "})<#else>integer</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">0<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
-        standard_SQL.put(Long.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;16>bigint(${" + COLUMN_LENGTH + "})<#else>bigint(16)</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put("long", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;16>bigint(${" + COLUMN_LENGTH + "})<#else>bigint(16)</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">0<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(Double.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;15>decimal(${" + COLUMN_LENGTH + "},3)<#else>decimal(15,3)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put("double", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;15>decimal(${" + COLUMN_LENGTH + "},3)<#else>decimal(15,3)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(Float.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;9>decimal(${" + COLUMN_LENGTH + "},2)<#else>decimal(10,2)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put("float", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;9>decimal(${" + COLUMN_LENGTH + "},2)<#else>decimal(9,2)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(Long.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;16>bigint(${" + COLUMN_LENGTH + "})<#else>bigint(16)</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put("long", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;16>bigint(${" + COLUMN_LENGTH + "})<#else>bigint(16)</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">0<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(Double.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;15>decimal(${" + COLUMN_LENGTH + "},3)<#else>decimal(15,3)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put("double", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;15>decimal(${" + COLUMN_LENGTH + "},3)<#else>decimal(15,3)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(Float.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;9>decimal(${" + COLUMN_LENGTH + "},2)<#else>decimal(10,2)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put("float", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;9>decimal(${" + COLUMN_LENGTH + "},2)<#else>decimal(9,2)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
-        standard_SQL.put(Boolean.class.getName(), "`${" + COLUMN_NAME + "}` int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>  COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(boolean.class.getName(), "`${" + COLUMN_NAME + "}` int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>  COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(Boolean.class.getName(), "`${" + COLUMN_NAME + "}` int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>  COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(boolean.class.getName(), "`${" + COLUMN_NAME + "}` int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>  COMMENT '${" + COLUMN_CAPTION + "}'");
 
-        standard_SQL.put(Date.class.getName(), "`${" + COLUMN_NAME + "}` datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT now()</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(Time.class.getName(), "`${" + COLUMN_NAME + "}` time <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(Date.class.getName(), "`${" + COLUMN_NAME + "}` datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT now()</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(Time.class.getName(), "`${" + COLUMN_NAME + "}` time <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
-        standard_SQL.put(byte[].class.getName(), "`${" + COLUMN_NAME + "}` LONGBLOB COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(InputStream.class.getName(), "`${" + COLUMN_NAME + "}` LONGBLOB COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(char.class.getName(), "`${" + COLUMN_NAME + "}` char(2) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE IF EXISTS ${" + KEY_TABLE_NAME + "}");
-        standard_SQL.put(FUN_TABLE_EXISTS, "show tables like '${" + KEY_TABLE_NAME + "}'");
+        put(byte[].class.getName(), "`${" + COLUMN_NAME + "}` LONGBLOB COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(InputStream.class.getName(), "`${" + COLUMN_NAME + "}` LONGBLOB COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(char.class.getName(), "`${" + COLUMN_NAME + "}` char(2) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(SQL_DROP_TABLE, "DROP TABLE IF EXISTS ${" + KEY_TABLE_NAME + "}");
+        put(FUN_TABLE_EXISTS, "show tables like '${" + KEY_TABLE_NAME + "}'");
 
 
         //修改系列开始
         //ALTER SEQUENCE ${" + SERIAL_NAME + "} RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}
-        standard_SQL.put(ALTER_SEQUENCE_RESTART, "Alter Table ${" + KEY_TABLE_NAME + "} Auto_increment=${" + KEY_SEQUENCE_RESTART + "}");
+        put(ALTER_SEQUENCE_RESTART, "Alter Table ${" + KEY_TABLE_NAME + "} Auto_increment=${" + KEY_SEQUENCE_RESTART + "}");
 
-        standard_SQL.put(SQL_TABLE_NAMES, "SHOW TABLES");
+        put(SQL_TABLE_NAMES, "SHOW TABLES");
 
-        standard_SQL.put(DATABASE_SIZE, "SELECT SUM(data_length) + SUM(index_length) as size FROM information_schema.tables where table_schema = '${" + KEY_TABLE_NAME + "}'");
+        put(DATABASE_SIZE, "SELECT SUM(data_length) + SUM(index_length) as size FROM information_schema.tables where table_schema = '${" + KEY_TABLE_NAME + "}'");
 
-        standard_SQL.put(SEQUENCE_NAME, "SHOW TABLE STATUS LIKE '${" + KEY_TABLE_NAME + "}'");
+        put(SEQUENCE_NAME, "SHOW TABLE STATUS LIKE '${" + KEY_TABLE_NAME + "}'");
 
         //创建索引,一个一个
-        standard_SQL.put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX `${"+KEY_INDEX_NAME+"}`(${"+KEY_INDEX_FIELD+"})");
+        put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX `${"+KEY_INDEX_NAME+"}`(${"+KEY_INDEX_FIELD+"})");
 
     }
 

@@ -15,7 +15,7 @@ import java.util.Date;
 public class MySQLLowDialect extends MySQLDialect {
 
     public MySQLLowDialect() {
-        standard_SQL.put(Date.class.getName(), "`${" + COLUMN_NAME + "}` datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '0000-00-00 00:00:00'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(Date.class.getName(), "`${" + COLUMN_NAME + "}` datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '0000-00-00 00:00:00'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
     }
 
     @Override

@@ -20,71 +20,63 @@ import java.util.Date;
 public class DmDialect extends Dialect {
 
     public DmDialect() {                                                                              //number(1)
-        standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} \n(\n" +
+        put(SQL_CREATE_TABLE, "CREATE TABLE ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
 
 
         //oracle 和 pgsql 一样
         //oracle 和 pgsql 设置注释方式begin
-        standard_SQL.put(SQL_COMMENT, "COMMENT ON COLUMN ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
-        standard_SQL.put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
+        put(SQL_COMMENT, "COMMENT ON COLUMN ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
+        put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
         //oracle 和 pgsql 设置注释方式end
 
         //oracle
-        standard_SQL.put(ORACLE_CREATE_SEQUENCE,"create sequence ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ minvalue 1 maxvalue 99999999 increment by 1  start with 1");
-        standard_SQL.put(ORACLE_CREATE_SEQ_TIGGER,"create or replace trigger ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ_TIGGER\n" +
+        put(ORACLE_CREATE_SEQUENCE,"create sequence ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ minvalue 1 maxvalue 99999999 increment by 1  start with 1");
+        put(ORACLE_CREATE_SEQ_TIGGER,"create or replace trigger ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ_TIGGER\n" +
                 "before insert on ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + ".toUpperCase()}\n" +
                 "for each row\r\n" +
                 "begin if (:new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} is null or :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()}=0) then select ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ.nextval into :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} from dual; end if; end;");
 
-        standard_SQL.put(ORACLE_HAVE_SEQ,"select count(1) as num from user_sequences where sequence_name=upper(' ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "}_SEQ')");
+        put(ORACLE_HAVE_SEQ,"select count(1) as num from user_sequences where sequence_name=upper(' ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "}_SEQ')");
 
 
+        put(SQL_QUERY_ONE_FIELD, "SELECT * FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=?");
+        put(SQL_INSERT, "INSERT INTO ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">${field}<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
+        put(SQL_DELETE, "DELETE FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#ifwhere= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_DELETE_IN, "DELETE FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "} IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=fvalue_has_next>,</#if></#list>)");
+        put(SQL_UPDATE, "UPDATE ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_HAVE, "SELECT count(1) FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_CRITERIA_UNIQUERESULT, "SELECT ${" + KEY_FIELD_PROJECTION + "} FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
+        put(SQL_CRITERIA_QUERY, "SELECT * FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
 
-        standard_SQL.put(SQL_QUERY_ONE_FIELD, "SELECT * FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=?");
-        standard_SQL.put(SQL_INSERT, "INSERT INTO ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">${field}<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
-        standard_SQL.put(SQL_DELETE, "DELETE FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#ifwhere= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
-        standard_SQL.put(SQL_DELETE_IN, "DELETE FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "} IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=fvalue_has_next>,</#if></#list>)");
-        standard_SQL.put(SQL_UPDATE, "UPDATE ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
-        standard_SQL.put(SQL_HAVE, "SELECT count(1) FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
-        standard_SQL.put(SQL_CRITERIA_UNIQUERESULT, "SELECT ${" + KEY_FIELD_PROJECTION + "} FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
-        standard_SQL.put(SQL_CRITERIA_QUERY, "SELECT * FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
+        put(SQL_CRITERIA_GROUP_QUERY, "SELECT ${" + KEY_FIELD_GROUPBY + "} FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
 
-        standard_SQL.put(SQL_CRITERIA_GROUP_QUERY, "SELECT ${" + KEY_FIELD_GROUPBY + "} FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
-
-        standard_SQL.put(SQL_CRITERIA_DELETE, "DELETE FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if>");
-        standard_SQL.put(SQL_CRITERIA_UPDATE, "UPDATE ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if>");
-
-        standard_SQL.put(FUN_TABLE_EXISTS, "desc ${" + KEY_TABLE_NAME + "}");
-        standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE IF EXISTS ${" + KEY_TABLE_NAME + "}");
-        standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(" +
-                " <#list column=" + KEY_COLUMN_LIST + ">${column}<#if column_has_next>,\n</#if></#list>" +
-                "  PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
+        put(SQL_CRITERIA_DELETE, "DELETE FROM ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if>");
+        put(SQL_CRITERIA_UPDATE, "UPDATE ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if>");
 
 
+        put(Boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
+        put(boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
+        put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(Integer.class.getName(), "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+        put("int", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>NUMBER(10)</#else></#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
 
-        standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
-        standard_SQL.put(boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
-        standard_SQL.put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
-        standard_SQL.put(Integer.class.getName(), "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
-        standard_SQL.put("int", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>NUMBER(10)</#else></#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+        put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("long", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
-        standard_SQL.put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        standard_SQL.put("long", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put(Double.class.getName(), "${" + COLUMN_NAME + "} BINARY_DOUBLE default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("double", "${" + COLUMN_NAME + "} BINARY_DOUBLE default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
-        standard_SQL.put(Double.class.getName(), "${" + COLUMN_NAME + "} BINARY_DOUBLE default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        standard_SQL.put("double", "${" + COLUMN_NAME + "} BINARY_DOUBLE default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put(Float.class.getName(), "${" + COLUMN_NAME + "} BINARY_FLOAT default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("float", "${" + COLUMN_NAME + "} BINARY_FLOAT default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
-        standard_SQL.put(Float.class.getName(), "${" + COLUMN_NAME + "} BINARY_FLOAT default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        standard_SQL.put("float", "${" + COLUMN_NAME + "} BINARY_FLOAT default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-
-        standard_SQL.put(Date.class.getName(), "${" + COLUMN_NAME + "} TIMESTAMP default SYSDATE");
-        standard_SQL.put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
-        standard_SQL.put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
-        standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
-        standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE  ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "}");
-        standard_SQL.put(FUN_TABLE_EXISTS, " SELECT COUNT(1)  FROM all_tables WHERE OWNER='${"+KEY_DATABASE_NAME+"}' AND TABLE_NAME='${" + KEY_TABLE_NAME + "}'");
+        put(Date.class.getName(), "${" + COLUMN_NAME + "} TIMESTAMP default SYSDATE");
+        put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
+        put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
+        put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
+        put(SQL_DROP_TABLE, "DROP TABLE  ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "}");
+        put(FUN_TABLE_EXISTS, " SELECT COUNT(1)  FROM all_tables WHERE OWNER='${"+KEY_DATABASE_NAME+"}' AND TABLE_NAME='${" + KEY_TABLE_NAME + "}'");
     }
 
     @Override

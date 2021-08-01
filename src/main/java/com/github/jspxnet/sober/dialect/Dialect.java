@@ -32,7 +32,7 @@ import java.util.Map;
  * 通用SQL转换器
  */
 @Slf4j
-public abstract class Dialect {
+public abstract class Dialect extends HashMap<String,String> {
     final protected static Placeholder PLACEHOLDER = EnvFactory.getPlaceholder();
     final protected static Placeholder SQL_PLACEHOLDER = EnvFactory.getSqlPlaceholder();
 
@@ -113,53 +113,49 @@ public abstract class Dialect {
 
     public static final String SQL_CRITERIA_GROUP_QUERY = "sql_criteria_group_query";
 
-    public final Map<String, String> standard_SQL = new HashMap<>(100);
+//    public final Map<String, String> standard_SQL = new HashMap<>(100);
 
     public Dialect() {
-        standard_SQL.put(SQL_QUERY_ONE_FIELD, "SELECT * FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=?");
-        standard_SQL.put(SQL_INSERT, "INSERT INTO ${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">${field}<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
-        standard_SQL.put(SQL_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#ifwhere= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
-        standard_SQL.put(SQL_DELETE_IN, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "} IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=fvalue_has_next>,</#if></#list>)");
-        standard_SQL.put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
-        standard_SQL.put(SQL_HAVE, "SELECT count(1) FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
-        standard_SQL.put(SQL_CRITERIA_UNIQUERESULT, "SELECT ${" + KEY_FIELD_PROJECTION + "} FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
-        standard_SQL.put(SQL_CRITERIA_QUERY, "SELECT * FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
+        put(SQL_QUERY_ONE_FIELD, "SELECT * FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=?");
+        put(SQL_INSERT, "INSERT INTO ${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">${field}<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
+        put(SQL_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#ifwhere= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_DELETE_IN, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "} IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=fvalue_has_next>,</#if></#list>)");
+        put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_HAVE, "SELECT count(1) FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_CRITERIA_UNIQUERESULT, "SELECT ${" + KEY_FIELD_PROJECTION + "} FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
+        put(SQL_CRITERIA_QUERY, "SELECT * FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
 
-        standard_SQL.put(SQL_CRITERIA_GROUP_QUERY, "SELECT ${" + KEY_FIELD_GROUPBY + "} FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
+        put(SQL_CRITERIA_GROUP_QUERY, "SELECT ${" + KEY_FIELD_GROUPBY + "} FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
 
-        standard_SQL.put(SQL_CRITERIA_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if>");
-        standard_SQL.put(SQL_CRITERIA_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if>");
+        put(SQL_CRITERIA_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if>");
+        put(SQL_CRITERIA_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if>");
 
-        standard_SQL.put(FUN_TABLE_EXISTS, "desc ${" + KEY_TABLE_NAME + "}");
-        standard_SQL.put(SQL_DROP_TABLE, "DROP TABLE IF EXISTS ${" + KEY_TABLE_NAME + "}");
-        standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(" +
+        put(FUN_TABLE_EXISTS, "desc ${" + KEY_TABLE_NAME + "}");
+        put(SQL_DROP_TABLE, "DROP TABLE IF EXISTS ${" + KEY_TABLE_NAME + "}");
+        put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column}<#if column_has_next>,\n</#if></#list>" +
                 "  PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
 
-        standard_SQL.put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255 >text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
+        put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255 >text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
 
-        standard_SQL.put(Integer.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
-        standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
-        standard_SQL.put(boolean.class.getName(), "${" + COLUMN_NAME + "} int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
-        standard_SQL.put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>bigint(${" + COLUMN_LENGTH + "})<#else>bigint(16)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
-        standard_SQL.put(Double.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;15>double(${" + COLUMN_LENGTH + "},3)<#else>double(15,3)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
-        standard_SQL.put(Float.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;9>float(${" + COLUMN_LENGTH + "},3)<#else>float(9,3)</#if></#else><#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
-        standard_SQL.put(Date.class.getName(), "${" + COLUMN_NAME + "} datetime NOT NULL default '0000-00-00 00:00:00'");
-        standard_SQL.put(Time.class.getName(), "${" + COLUMN_NAME + "} time DEFAULT <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
-        standard_SQL.put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
-        standard_SQL.put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
-        standard_SQL.put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
-        standard_SQL.put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE serial RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
-        standard_SQL.put(TABLE_MAX_ID, "SELECT max(${" + KEY_PRIMARY_KEY + "}) AS maxId FROM ${" + KEY_TABLE_NAME + "}");
-        standard_SQL.put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX ${"+KEY_INDEX_NAME+"}(${"+KEY_INDEX_FIELD+"})");
-
-
+        put(Integer.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
+        put(Boolean.class.getName(), "${" + COLUMN_NAME + "} int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
+        put(boolean.class.getName(), "${" + COLUMN_NAME + "} int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
+        put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>bigint(${" + COLUMN_LENGTH + "})<#else>bigint(16)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
+        put(Double.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;15>double(${" + COLUMN_LENGTH + "},3)<#else>double(15,3)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
+        put(Float.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;9>float(${" + COLUMN_LENGTH + "},3)<#else>float(9,3)</#if></#else><#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
+        put(Date.class.getName(), "${" + COLUMN_NAME + "} datetime NOT NULL default '0000-00-00 00:00:00'");
+        put(Time.class.getName(), "${" + COLUMN_NAME + "} time DEFAULT <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
+        put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
+        put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
+        put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
+        put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE serial RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
+        put(TABLE_MAX_ID, "SELECT max(${" + KEY_PRIMARY_KEY + "}) AS maxId FROM ${" + KEY_TABLE_NAME + "}");
+        put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX ${"+KEY_INDEX_NAME+"}(${"+KEY_INDEX_FIELD+"})");
 
 
-    }
 
-    public String getSQLText(String keys) {
-        return standard_SQL.get(keys);
+
     }
 
     public abstract boolean supportsSequenceName();
@@ -205,9 +201,9 @@ public abstract class Dialect {
 
     public String processTemplate(String sqlKey, Map<String, Object> valueMap) {
         try {
-            return PLACEHOLDER.processTemplate(valueMap, getSQLText(sqlKey));
+            return PLACEHOLDER.processTemplate(valueMap, get(sqlKey));
         } catch (Throwable e) {
-            log.error("sql:{},keys:{},Throwable:{}", sqlKey, getSQLText(sqlKey), e.getMessage());
+            log.error("sql:{},keys:{},Throwable:{}", sqlKey, get(sqlKey), e.getMessage());
             for (String key : valueMap.keySet()) {
                 log.error(key + "=" + valueMap.get(key));
             }
@@ -441,7 +437,6 @@ public abstract class Dialect {
     /**
      * @param map    数据
      * @return 返回查询结果
-     * @throws SQLException 异常
      *
      * {
      * 		"numPrecRadix": 10,
