@@ -113,7 +113,7 @@ public abstract class Dialect {
 
     public static final String SQL_CRITERIA_GROUP_QUERY = "sql_criteria_group_query";
 
-    public final Map<String, String> standard_SQL = new HashMap<>(100);
+    public Map<String, String> standard_SQL = new HashMap<>(100);
 
     public Dialect() {
         standard_SQL.put(SQL_QUERY_ONE_FIELD, "SELECT * FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=?");

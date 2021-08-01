@@ -19,7 +19,9 @@ import java.util.Date;
  **/
 public class DmDialect extends Dialect {
 
-    public DmDialect() {                                                                              //number(1)
+    public DmDialect() {
+
+        //number(1)
         standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${"+ KEY_DATABASE_NAME +"}.${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
@@ -61,7 +63,6 @@ public class DmDialect extends Dialect {
         standard_SQL.put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column}<#if column_has_next>,\n</#if></#list>" +
                 "  PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
-
 
 
         standard_SQL.put(Boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
