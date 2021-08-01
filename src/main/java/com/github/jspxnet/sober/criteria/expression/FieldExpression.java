@@ -2,6 +2,8 @@ package com.github.jspxnet.sober.criteria.expression;
 
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
+import com.github.jspxnet.utils.StringUtil;
 
 /**
  * Created by chenyuan on 15-5-5.
@@ -20,7 +22,14 @@ public class FieldExpression implements Criterion {
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
         StringBuilder sb = new StringBuilder();
-        sb.append(field1).append(compare).append(field2);
+        if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
+        {
+            sb.append(StringUtil.quote(field1,true)).append(compare).append(StringUtil.quote(field2,true));
+        }
+        else
+        {
+            sb.append(field1).append(compare).append(field2);
+        }
         return sb.toString();
     }
 

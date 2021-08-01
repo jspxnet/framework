@@ -12,6 +12,7 @@ package com.github.jspxnet.sober.criteria.expression;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
+import com.github.jspxnet.utils.StringUtil;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,7 +34,14 @@ public class NullExpression implements Criterion {
     public String toSqlString(TableModels soberTable, String databaseName) {
         if (DatabaseEnumType.inArray(noNullDb,databaseName))
         {
-            return "(" + propertyName + " IS NULL OR " + propertyName + "='')";
+            if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
+            {
+                return "(" + StringUtil.quote(propertyName,true) + " IS NULL OR " + StringUtil.quote(propertyName,true) + "='')";
+            } else
+            {
+                return "(" + propertyName + " IS NULL OR " + propertyName + "='')";
+            }
+
         }
         return propertyName + " IS NULL";
     }

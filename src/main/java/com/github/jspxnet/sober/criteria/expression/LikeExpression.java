@@ -11,7 +11,9 @@ package com.github.jspxnet.sober.criteria.expression;
 
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.util.JdbcUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,6 +33,10 @@ public class LikeExpression implements Criterion {
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
+        if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
+        {
+            return StringUtil.quote(propertyName,true)+ " " + Restrictions.KEY_LIKE + " ?";
+        }
         return propertyName + " " + Restrictions.KEY_LIKE + " ?";
     }
 

@@ -12,6 +12,7 @@ package com.github.jspxnet.sober.criteria.expression;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
+import com.github.jspxnet.utils.StringUtil;
 
 /**
  * Created by IntelliJ IDEA.
@@ -34,7 +35,14 @@ public class NotNullExpression implements Criterion {
     public String toSqlString(TableModels soberTable, String databaseName) {
         if (DatabaseEnumType.inArray(noNullDb,databaseName))
         {
-            return "(" + propertyName + " IS NOT NULL AND " + propertyName + "<>'')";
+            if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
+            {
+                return "(" + StringUtil.quote(propertyName,true) + " IS NOT NULL AND " + StringUtil.quote(propertyName,true) + "<>'')";
+            } else
+            {
+                return "(" + propertyName + " IS NOT NULL AND " + propertyName + "<>'')";
+            }
+
         }
         return propertyName + " IS NOT NULL";
     }

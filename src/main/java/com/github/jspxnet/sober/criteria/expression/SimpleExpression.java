@@ -11,7 +11,9 @@ package com.github.jspxnet.sober.criteria.expression;
 
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.util.JdbcUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 /**
  * Created by IntelliJ IDEA.
@@ -38,7 +40,14 @@ public class SimpleExpression implements Criterion {
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
         StringBuilder sb = new StringBuilder();
-        sb.append(propertyName).append(op).append("? ");
+        if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
+        {
+            sb.append(StringUtil.quote(propertyName,true)).append(op).append("? ");
+        }
+        else
+        {
+            sb.append(propertyName).append(op).append("? ");
+        }
         return sb.toString();
     }
 

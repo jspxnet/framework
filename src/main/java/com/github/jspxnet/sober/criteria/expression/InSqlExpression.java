@@ -10,6 +10,7 @@ package com.github.jspxnet.sober.criteria.expression;
 
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.utils.StringUtil;
 
 /**
@@ -20,7 +21,7 @@ import com.github.jspxnet.utils.StringUtil;
  * 特殊 in(sql)
  */
 public class InSqlExpression implements Criterion {
-    private String propertyName;
+    private final String propertyName;
     private String sql = StringUtil.empty;
 
     public InSqlExpression(String propertyName, String values) {
@@ -35,6 +36,10 @@ public class InSqlExpression implements Criterion {
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
+        if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
+        {
+            return StringUtil.quote(propertyName,true) + " IN (" + sql + ") ";
+        }
         return propertyName + " IN (" + sql + ") ";
     }
 
