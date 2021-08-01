@@ -7,9 +7,9 @@ import java.util.Date;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/7/31 1:42
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/7/31 1:42
+ * description: 老版本mysql支持
  **/
 @Slf4j
 public class MySQLLowDialect extends MySQLDialect {
