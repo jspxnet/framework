@@ -3227,40 +3227,67 @@ public class StringUtil {
         return str.toLowerCase();
     }
 
-    public static String getJdbcUrlDbName(String url) {
+    public static String getJdbcUrlDataBaseName(String url) {
+        if (url==null)
+        {
+            return null;
+        }
         Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+).*");
         Matcher m = p.matcher(url);
+        String checkUrl = url;
         if(m.find()) {
-            return m.group("db");
+            String port = m.group("port");
+            if (!StringUtil.isEmpty(port))
+            {
+                checkUrl = StringUtil.substringAfter(checkUrl,port);
+            }
+        } else
+        {
+            //没有写端口号的情况
+            if (checkUrl.contains("/"))
+            {
+                checkUrl = StringUtil.substringAfterLast(checkUrl,"/");
+            }
+            if (checkUrl.contains(":"))
+            {
+                checkUrl = StringUtil.substringAfter(checkUrl,":");
+            }
         }
-        return null;
-    }
-
-    public static String getJdbcUrlHost(String url) {
-        Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+).*");
-        Matcher m = p.matcher(url);
-        if(m.find()) {
-            return m.group("host");
+        if (checkUrl.startsWith(":")||checkUrl.startsWith("/") ||checkUrl.startsWith(";") ||checkUrl.startsWith(","))
+        {
+            checkUrl = checkUrl.substring(1);
         }
-        return null;
-    }
-
-    public static String getJdbcUrlPort(String url) {
-        Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+).*");
-        Matcher m = p.matcher(url);
-        if(m.find()) {
-            return m.group("port");
+        if (checkUrl.contains("?"))
+        {
+            checkUrl = StringUtil.substringBefore(checkUrl,"?");
         }
-        return null;
+        if (checkUrl.toLowerCase().contains("databasename="))
+        {
+            checkUrl = StringUtil.substringAfter(checkUrl,"=");
+        }
+        return checkUrl;
     }
-
 
     public static void main(String[] args) {
-        Date data = StringUtil.getDate("2006-09-01T00:00:01.099 Z");
-        System.out.println(DateUtil.toString(data,DateUtil.FULL_ST_FORMAT));
+
+        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:microsoft:sqlserver://127.0.0.1;DatabaseName=databaseName"));
+
+
+        //jdbc:dm://192.168.0.48:5236:g6n
+        String url = "jdbc:postgresql://192.168.0.115:5432/posql";
+        System.out.println("---" + getJdbcUrlDataBaseName( url));
+
+
+        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:microsoft:sqlserver://127.0.0.1:1433;DatabaseName=databaseName"));
+
+        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:oracle:thin:@localhost:1521:dbName"));
+
+        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:dm://192.168.0.48:5236:g6n"));
+
+        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:mysql://192.168.0.115:3306/jspxnet?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useAffectedRows=true&useSSL=false"));
+
+
 
     }
-
-
 
 }

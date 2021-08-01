@@ -2067,10 +2067,11 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param createClass 生成表创建sql
      */
     @Override
-    public String getCreateTableSql(Class<?> createClass) {
-        TableModels soberTable = AnnotationUtil.getSoberTable(createClass);
+    public String getCreateTableSql(Class<?> createClass, TableModels soberTable) {
+
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(),"'",""));
 
         /////////先创建每一个字段
@@ -2158,44 +2159,14 @@ public abstract class JdbcOperations implements SoberSupport {
     /**
      * 表是否存在
      *
-     * @param cla bean对象是否存在表
+     * @param soberTable bean对象是否存在表
      * @return 返回是否存在
      */
     @Override
-    public boolean tableExists(Class<?> cla) {
-        if (DefaultCache.class.equals(cla)) {
+    public boolean tableExists(TableModels soberTable) {
+        if (soberTable==null) {
             return false;
         }
-        SoberTable soberTable = AnnotationUtil.getSoberTable(cla);
-        if (soberTable==null)
-        {
-            return false;
-        }
-
-        if (StringUtil.isEmpty(soberTable.getDatabaseName()))
-        {
-
-            Connection connection = null;
-            try {
-                connection = getConnection(SoberEnv.READ_ONLY);
-                ResultSet rs = connection.getMetaData().getSchemas();
-                while (rs.next())
-                {
-                    Map schemasMap = loadColumnsValue(Map.class,rs);
-                    System.out.println("----connection.getMetaData().getSchemas()=" + ObjectUtil.toString(schemasMap));
-                }
-
-                System.out.println("----connection.dbname=" + StringUtil.getJdbcUrlDbName(connection.getMetaData().getURL()));
-                System.out.println("----connection.getMetaData().getSchemaTerm()=" + connection.getMetaData().getSchemaTerm());
-                soberTable.setDatabaseName(connection.getMetaData().getSchemaTerm());
-            } catch (Exception e) {
-                e.printStackTrace();
-
-            } finally {
-                JdbcUtil.closeConnection(connection);
-            }
-        }
-
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());

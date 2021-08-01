@@ -13,11 +13,13 @@ import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.sober.SoberEnv;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.annotation.IDType;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.config.BaseXmlTagNode;
 import com.github.jspxnet.sober.config.SQLRoom;
+import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.config.SqlMapConfig;
 import com.github.jspxnet.sober.config.xml.*;
 import com.github.jspxnet.sober.dialect.Dialect;
@@ -29,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.utils.StringUtil;
 import java.io.Serializable;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -60,7 +63,7 @@ public class SoberUtil {
      * @param fields     字段
      * @return 字段安全检测 true 表示继续运行，false 表示过滤这个字段条件，应为这个字段不存在
      */
-    public static boolean containsFields(TableModels soberTable, String[] fields) {
+    public static boolean containsField(TableModels soberTable, String[] fields) {
         if (fields == null || soberTable == null) {
             return false;
         }
@@ -354,12 +357,27 @@ public class SoberUtil {
      */
     public static TableModels createTableAndIndex(Class<?> cla,SqlMapConfig sqlMapConfig, SoberSupport soberSupport)
     {
-        TableModels soberTable = AnnotationUtil.getSoberTable(cla);
+        //&& !soberSupport.tableExists(cla)
+        SoberTable soberTable = AnnotationUtil.getSoberTable(cla);
+        if (StringUtil.isEmpty(soberTable.getDatabaseName()))
+        {
+            Connection connection = null;
+            try {
+                connection = soberSupport.getSoberFactory().getConnection(SoberEnv.READ_ONLY,SoberEnv.NOT_TRANSACTION);
+                String jdbcDbName = StringUtil.getJdbcUrlDataBaseName(connection.getMetaData().getURL());
+                soberTable.setDatabaseName(jdbcDbName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtil.closeConnection(connection);
+            }
+        }
+
         String sql = null;
         try {
-            if (soberTable!=null&&soberTable.isCreate() && !soberSupport.tableExists(cla)) {
+            if (soberTable!=null&&soberTable.isCreate()&& !soberSupport.tableExists(soberTable)) {
 
-                sql = soberSupport.getCreateTableSql(cla);
+                sql = soberSupport.getCreateTableSql(cla,soberTable);
                 //oracle只能一个; 一个; 的执行
                 if (soberSupport.getSoberFactory().getDialect() instanceof OracleDialect)
                 {

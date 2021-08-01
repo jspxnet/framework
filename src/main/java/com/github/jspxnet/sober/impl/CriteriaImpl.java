@@ -182,7 +182,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
-            if (criterionEntry.getCriterion().getFields()!=null&&!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
+            if (criterionEntry.getCriterion().getFields()!=null&&!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
@@ -206,7 +206,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         StringBuilder orderText = new StringBuilder();
         for (int i = 0; i < orderEntries.size(); i++) {
             OrderEntry orderEntry = orderEntries.get(i);
-            if (!SoberUtil.containsFields(soberTable, orderEntry.getOrder().getFields())) {
+            if (!SoberUtil.containsField(soberTable, orderEntry.getOrder().getFields())) {
                 continue;
             }
 
@@ -309,7 +309,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
-            if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
+            if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
@@ -372,7 +372,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         StringBuilder termText = new StringBuilder();
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
-            if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
+            if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
@@ -456,7 +456,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
 
-            if (!(criterionEntry.getCriterion() instanceof LogicalExpression)&& !SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
+            if (!(criterionEntry.getCriterion() instanceof LogicalExpression)&& !SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
@@ -478,7 +478,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         StringBuilder orderText = new StringBuilder();
         for (int i = 0; i < orderEntries.size(); i++) {
             OrderEntry orderEntry = orderEntries.get(i);
-            if (!SoberUtil.containsFields(soberTable, orderEntry.getOrder().getFields())) {
+            if (!SoberUtil.containsField(soberTable, orderEntry.getOrder().getFields())) {
                 continue;
             }
             orderText.append(orderEntry.getOrder().toSqlString(databaseType));
@@ -520,7 +520,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             StringBuilder termKey = new StringBuilder();
             for (int i = 0; i < criterionEntries.size(); i++) {
                 CriterionEntry criterionEntry = criterionEntries.get(i);
-                if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
+                if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                     continue;
                 }
                 termKey.append(criterionEntry.getCriterion().termString());
@@ -623,7 +623,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
-            if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
+            if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
@@ -645,7 +645,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         StringBuilder orderText = new StringBuilder();
         for (int i = 0; i < orderEntries.size(); i++) {
             OrderEntry orderEntry = orderEntries.get(i);
-            if (!SoberUtil.containsFields(soberTable, orderEntry.getOrder().getFields())) {
+            if (!SoberUtil.containsField(soberTable, orderEntry.getOrder().getFields())) {
                 continue;
             }
             orderText.append(orderEntry.getOrder().toSqlString(databaseType));
@@ -690,7 +690,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
             for (int i = 0; i < criterionEntries.size(); i++) {
                 CriterionEntry criterionEntry = criterionEntries.get(i);
-                if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
+                if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                     continue;
                 }
                 termKey.append(criterionEntry.getCriterion().termString());
@@ -802,7 +802,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         StringBuilder termKey = new StringBuilder();
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
-            if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
+            if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
             termKey.append(criterionEntry.getCriterion().termString());

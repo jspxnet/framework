@@ -642,8 +642,9 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
     @Override
     public boolean deleteOvertimeSession(long overtime) {
         long delTime = System.currentTimeMillis() - overtime;
+
         try {
-            if (tableExists(UserSession.class)) {
+            if (tableExists(getSoberTable(UserSession.class))) {
                 return createCriteria(UserSession.class).add(Expression.lt("lastRequestTime", delTime)).delete(false) > 0;
             }
         } catch (Exception e) {

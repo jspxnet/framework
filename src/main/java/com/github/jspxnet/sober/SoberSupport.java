@@ -10,6 +10,7 @@
 package com.github.jspxnet.sober;
 
 import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.exception.ValidException;
 import java.io.Serializable;
 import java.util.Collection;
@@ -474,19 +475,14 @@ public interface SoberSupport extends Serializable {
      */
     SqlMapClient buildSqlMap();
 
+
     /**
-     *
+     *  有些数据库建表要带上库名
      * @param createClass 生成表创建sql
+     * @param soberTable 库名等信息
      * @return 得到创建表的SQL
      */
-    String getCreateTableSql(Class<?> createClass);
-    /**
-     * 表是否存在
-     *
-     * @param cla bean对象是否存在表
-     * @return 返回是否存在
-     */
-    boolean tableExists(Class<?> cla);
+    String getCreateTableSql(Class<?> createClass, TableModels soberTable);
 
     /**
      * 删除表
@@ -552,6 +548,14 @@ public interface SoberSupport extends Serializable {
     int getExpressionCount(Class<?> aClass, String term);
 
     //--------------------
+    /**
+     * 表是否存在
+     *
+     * @param soberTable bean对象是否存在表
+     * @return 返回是否存在
+     */
+    boolean tableExists(TableModels soberTable);
+
     /**
      * @param cla 得到最大ID
      * @return ID数
