@@ -317,6 +317,8 @@ public abstract class JdbcUtil {
         return schema.toUpperCase();
     }
 
+
+
     public static void main(String[] args) {
         System.out.println(StringUtil.toBoolean("YES"));
     }

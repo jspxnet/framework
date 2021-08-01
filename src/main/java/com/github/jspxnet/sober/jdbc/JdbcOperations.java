@@ -2178,6 +2178,15 @@ public abstract class JdbcOperations implements SoberSupport {
             Connection connection = null;
             try {
                 connection = getConnection(SoberEnv.READ_ONLY);
+                ResultSet rs = connection.getMetaData().getSchemas();
+                while (rs.next())
+                {
+                    Map schemasMap = loadColumnsValue(Map.class,rs);
+                    System.out.println("----connection.getMetaData().getSchemas()=" + ObjectUtil.toString(schemasMap));
+                }
+
+                System.out.println("----connection.dbname=" + StringUtil.getJdbcUrlDbName(connection.getMetaData().getURL()));
+                System.out.println("----connection.getMetaData().getSchemaTerm()=" + connection.getMetaData().getSchemaTerm());
                 soberTable.setDatabaseName(connection.getMetaData().getSchemaTerm());
             } catch (Exception e) {
                 e.printStackTrace();

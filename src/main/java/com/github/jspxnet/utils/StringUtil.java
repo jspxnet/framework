@@ -3227,11 +3227,40 @@ public class StringUtil {
         return str.toLowerCase();
     }
 
+    public static String getJdbcUrlDbName(String url) {
+        Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+).*");
+        Matcher m = p.matcher(url);
+        if(m.find()) {
+            return m.group("db");
+        }
+        return null;
+    }
+
+    public static String getJdbcUrlHost(String url) {
+        Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+).*");
+        Matcher m = p.matcher(url);
+        if(m.find()) {
+            return m.group("host");
+        }
+        return null;
+    }
+
+    public static String getJdbcUrlPort(String url) {
+        Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+).*");
+        Matcher m = p.matcher(url);
+        if(m.find()) {
+            return m.group("port");
+        }
+        return null;
+    }
+
+
     public static void main(String[] args) {
         Date data = StringUtil.getDate("2006-09-01T00:00:01.099 Z");
         System.out.println(DateUtil.toString(data,DateUtil.FULL_ST_FORMAT));
 
     }
+
 
 
 }
