@@ -2,41 +2,39 @@ package com.github.jspxnet.sober.enums;
 
 import com.github.jspxnet.enums.EnumType;
 
-public class DatabaseEnumType   implements EnumType {
-/*
-
-    static public final String ORACLE = "Oracle";
-
-    static public final String DM = "Dm";
-
-    static public final String POSTGRESQL = "PostgreSQL";
-
-    static public final String INTERBASE = "Interbase";
-
-    static public final String MSSQL = "MsSql";
-
-    static public final String MYSQL = "MySQL";
-
-    static public final String HSQL = "HSQL";
-
-    static public final String DB2 = "DB2";
-
-    static public final String Firebird = "Firebird";
-
-    static public final String Sqlite = "Sqlite";
-
-    static public final String Smalldb = "SmallDB";
-
-    static public final String General = "General";
-
+/**
+ * 数据库类型
  */
-    //查询
-    ORACLE(1, "QUERY"),
-    //更新
-    UPDATE(1, "UPDATE"),
-    //执行
-    EXECUTE(2, "EXECUTE");
+public enum  DatabaseEnumType implements EnumType {
 
+    //枚举
+    UNKNOWN(0,"General"),
+
+    MYSQL(1,"MySQL"),
+
+    POSTGRESQL(2,"PostgreSQL"),
+
+    ORACLE(3,"Oracle"),
+
+    DM(4,"Dm"),
+
+    INTERBASE(5,"Interbase"),
+
+    INFORMIX(5,"Informix"),
+
+    MSSQL(6,"MsSql"),
+
+    HSQL(7,"HSQL"),
+
+    DB2(8,"DB2"),
+
+    FIREBIRD(9,"Firebird"),
+
+    SQLITE(10,"Sqlite"),
+
+    SMALLDB(11,"Smalldb"),
+
+    GENERAL(100,"General");
 
     final private int value;
     final private String name;
@@ -47,12 +45,36 @@ public class DatabaseEnumType   implements EnumType {
     }
 
     static public DatabaseEnumType find(int value) {
-        DatabaseEnumType            if (c.value == value) {
+        for (DatabaseEnumType c : DatabaseEnumType.values()) {
+            if (c.value == value) {
                 return c;
             }
         }
-        return ExecuteEnumType.QUERY;
+        return DatabaseEnumType.UNKNOWN;
     }
+
+    static public DatabaseEnumType find(String name) {
+        for (DatabaseEnumType c : DatabaseEnumType.values()) {
+            if (c.name.equalsIgnoreCase(name)) {
+                return c;
+            }
+        }
+        return DatabaseEnumType.UNKNOWN;
+    }
+
+    static public boolean inArray(DatabaseEnumType[] enumTypes,String name) {
+        if (name==null)
+        {
+            return false;
+        }
+        for (DatabaseEnumType c : enumTypes) {
+            if (c.name.equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public int getValue() {

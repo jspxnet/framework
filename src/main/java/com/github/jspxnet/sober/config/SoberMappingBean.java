@@ -85,8 +85,10 @@ public class SoberMappingBean implements SoberFactory {
     private String userTransaction = null;
     //jdni数据源绑定
     private String dataSourceLoop = null;
+
     //Sioc数据库名
-    private String databaseName;
+    private String databaseType;
+
     //保存的时候是否要验证
     private boolean valid = false;
     //判断是否为JTA方式事务
@@ -146,8 +148,8 @@ public class SoberMappingBean implements SoberFactory {
         this.context = context;
     }
 
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public void setDatabaseType(String databaseName) {
+        this.databaseType = databaseType;
     }
 
     @Override
@@ -213,8 +215,8 @@ public class SoberMappingBean implements SoberFactory {
     }
 
     @Override
-    public String getDatabaseName() {
-        return databaseName;
+    public String getDatabaseType() {
+        return databaseType;
     }
 
     @Override
@@ -256,7 +258,7 @@ public class SoberMappingBean implements SoberFactory {
      */
     public void setDataSource(String dataSourceLoop) throws Exception {
         this.dataSourceLoop = dataSourceLoop;
-        checkConnection(getConnection(SoberEnv.READ_WRITE, SoberEnv.notTransaction));
+        checkConnection(getConnection(SoberEnv.READ_WRITE, SoberEnv.NOT_TRANSACTION));
     }
 
     /**
@@ -266,7 +268,7 @@ public class SoberMappingBean implements SoberFactory {
     public void setDataSource(DataSource dataSource) throws Exception {
         jta = false;
         this.dataSource = dataSource;
-        checkConnection(getConnection(SoberEnv.READ_WRITE, SoberEnv.notTransaction));
+        checkConnection(getConnection(SoberEnv.READ_WRITE, SoberEnv.NOT_TRANSACTION));
     }
 
     /**
@@ -276,7 +278,7 @@ public class SoberMappingBean implements SoberFactory {
     public void setDataSource(XADataSource dataSource) throws Exception {
         jta = true;
         this.dataSource = new XADataSourceProxy(dataSource);
-        checkConnection(getConnection(SoberEnv.READ_WRITE, SoberEnv.notTransaction));
+        checkConnection(getConnection(SoberEnv.READ_WRITE, SoberEnv.NOT_TRANSACTION));
     }
 
     /**
@@ -344,11 +346,11 @@ public class SoberMappingBean implements SoberFactory {
                 log.error("database dataSource not get JDBC Connection，数据库配置错误");
                 throw new SQLException("database dataSource not get JDBC Connection,数据库配置错误");
             }
-            if (StringUtil.isNull(databaseName) || Environment.auto.equalsIgnoreCase(databaseName)) {
-                this.databaseName = JdbcUtil.getDatabaseName(conn);
-                this.dialect = DialectFactory.createDialect(databaseName);
+            if (StringUtil.isNull(databaseType) || Environment.auto.equalsIgnoreCase(databaseType)) {
+                this.databaseType = JdbcUtil.getDatabaseType(conn).getName();
+                this.dialect = DialectFactory.createDialect(databaseType);
             } else {
-                this.dialect = DialectFactory.createDialect(databaseName);
+                this.dialect = DialectFactory.createDialect(databaseType);
             }
             DatabaseMetaData databaseMetaData = conn.getMetaData();
             this.dialect.setSupportsSavePoints(databaseMetaData.supportsSavepoints());
@@ -369,7 +371,7 @@ public class SoberMappingBean implements SoberFactory {
     public Connection getConnection(final int type,final String tid) throws SQLException
     {
         //默认方式加入当前事务连接
-        if (!SoberEnv.notTransaction.equals(tid) && SoberEnv.THREAD_LOCAL!=type) {
+        if (!SoberEnv.NOT_TRANSACTION.equals(tid) && SoberEnv.THREAD_LOCAL!=type) {
             AbstractTransaction trans = TRANSACTION_MANAGER.get(tid);
             if (trans != null && !trans.isClosed() && trans.getConnection() != null) {
                  return trans.getConnection();

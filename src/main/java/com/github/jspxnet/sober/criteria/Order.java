@@ -30,7 +30,7 @@ public class Order implements Serializable {
         return propertyName + " " + (ascending ? "asc" : "desc");
     }
 
-    public String toSqlString(String databaseName)
+    public String toSqlString(String databaseType)
     {
         return propertyName + " " + (ascending ? "asc" : "desc");
     }

@@ -29,7 +29,7 @@ public interface SoberFactory extends Serializable {
 
     void setMaxRows(int maxRows);
 
-    String getDatabaseName();
+    String getDatabaseType();
 
     Dialect getDialect();
 

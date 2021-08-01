@@ -18,8 +18,7 @@ import com.github.jspxnet.utils.ClassUtil;
  * Time: 22:10:21
  */
 public class DialectFactory {
-    public static Dialect createDialect(String databaseName) throws Exception {
-        return (Dialect) ClassUtil.newInstance("com.github.jspxnet.sober.dialect." + databaseName + "Dialect");
+    public static Dialect createDialect(String databaseType) throws Exception {
+        return (Dialect) ClassUtil.newInstance("com.github.jspxnet.sober.dialect." + databaseType + "Dialect");
     }
-
 }

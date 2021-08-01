@@ -10,7 +10,6 @@
 package com.github.jspxnet.sober.jdbc;
 
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.TomcatApplication;
 import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
@@ -25,6 +24,7 @@ import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.OracleDialect;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.enums.MappingType;
 import com.github.jspxnet.sober.exception.ValidException;
 import com.github.jspxnet.sober.impl.CriteriaImpl;
@@ -35,8 +35,6 @@ import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
-
 import java.io.InputStream;
 import java.io.Serializable;
 import java.sql.*;
@@ -868,8 +866,7 @@ public abstract class JdbcOperations implements SoberSupport {
                 {
                     //关键字重复了,这些去修复一下
                     AnnotationUtil.fixIdCacheMax(soberTable,object,this);
-
-                    if (SoberEnv.POSTGRESQL.equalsIgnoreCase(soberFactory.getDatabaseName())&&msg.contains("duplicate key value"))
+                    if (DatabaseEnumType.find(soberFactory.getDatabaseType()).equals(DatabaseEnumType.POSTGRESQL)&&msg.contains("duplicate key value"))
                     {
                         //手工修改了数据库的seq,这里尝试修复
                         AnnotationUtil.postgreSqlFixSeqId(soberTable,this);

@@ -173,7 +173,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             return null;
         }
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
-        String databaseName = soberFactory.getDatabaseName();
+        String databaseName = soberFactory.getDatabaseType();
         if (soberTable == null) {
             return null;
         }
@@ -229,7 +229,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         String cacheKey = null;
        if (soberFactory.isUseCache() && soberTable.isUseCache()) {
             StringBuilder termKey = new StringBuilder();
-            termKey.append("_").append(termText.toString()).append("_p_").append(projection == null ? "" : projection.toSqlString(soberFactory.getDatabaseName())).append("_g_").append(groupText.toString()).append("_o_").append(orderText.toString());
+            termKey.append("_").append(termText.toString()).append("_p_").append(projection == null ? "" : projection.toSqlString(soberFactory.getDatabaseType())).append("_g_").append(groupText.toString()).append("_o_").append(orderText.toString());
             if (objectArray != null) {
                 for (Object po : objectArray) {
                     termKey.append(ObjectUtil.toString(po));
@@ -303,7 +303,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      */
     private int delete() {
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
-        String databaseName = soberFactory.getDatabaseName();
+        String databaseType = soberFactory.getDatabaseType();
         Dialect dialect = soberFactory.getDialect();
         StringBuilder termText = new StringBuilder();
         Object[] objectArray = null;
@@ -312,7 +312,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
-            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
+            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
             termText.append(term);
             if (i != (criterionEntries.size() - 1) && !StringUtil.isNull(StringUtil.trim(term))) {
                 termText.append(" AND ");
@@ -357,7 +357,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             return -1;
         }
         Dialect dialect = soberFactory.getDialect();
-        String databaseName = soberFactory.getDatabaseName();
+        String databaseType = soberFactory.getDatabaseType();
 
         Object[] objectArray = null;
         String[] fieldList = null;
@@ -375,7 +375,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
-            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
+            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
             termText.append(term);
             if (i != (criterionEntries.size() - 1) && !StringUtil.isNull(StringUtil.trim(term))) {
                 termText.append(" AND ");
@@ -450,7 +450,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         }
 
         Dialect dialect = soberFactory.getDialect();
-        String databaseName = soberFactory.getDatabaseName();
+        String databaseType = soberFactory.getDatabaseType();
         StringBuilder termText = new StringBuilder();
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
@@ -459,7 +459,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!(criterionEntry.getCriterion() instanceof LogicalExpression)&& !SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
-            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
+            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
             termText.append(term);
             if (i != (criterionEntries.size() - 1) && !StringUtil.isNull(StringUtil.trim(term))) {
                 termText.append(" AND ");
@@ -481,7 +481,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!SoberUtil.containsFields(soberTable, orderEntry.getOrder().getFields())) {
                 continue;
             }
-            orderText.append(orderEntry.getOrder().toSqlString(databaseName));
+            orderText.append(orderEntry.getOrder().toSqlString(databaseType));
             if (i != (orderEntries.size() - 1)) {
                 orderText.append(",");
             }
@@ -618,7 +618,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             log.error("no fond sober Config :" + criteriaClass.getName());
         }
         Dialect dialect = soberFactory.getDialect();
-        String databaseName = soberFactory.getDatabaseName();
+        String databaseType = soberFactory.getDatabaseType();
         StringBuilder termText = new StringBuilder();
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
@@ -626,7 +626,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!SoberUtil.containsFields(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
-            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
+            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
             termText.append(term);
             if (i != (criterionEntries.size() - 1) && !StringUtil.isNull(StringUtil.trim(term))) {
                 termText.append(" AND ");
@@ -648,7 +648,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!SoberUtil.containsFields(soberTable, orderEntry.getOrder().getFields())) {
                 continue;
             }
-            orderText.append(orderEntry.getOrder().toSqlString(databaseName));
+            orderText.append(orderEntry.getOrder().toSqlString(databaseType));
             if (i != (orderEntries.size() - 1)) {
                 orderText.append(",");
             }

@@ -12,7 +12,6 @@ public interface ValidateCodeCache {
 
     boolean validateImg(String sessionId, String code, boolean delete);
 
-
     boolean addGeneralCode(String type, String id, String code);
 
     boolean validateGeneralCheck(String type, String id, String code);

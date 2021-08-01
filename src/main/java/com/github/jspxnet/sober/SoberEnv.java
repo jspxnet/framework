@@ -33,6 +33,6 @@ public class SoberEnv {
     final public static int THREAD_LOCAL = 3;
     //读写分离，支持负载均衡  end
 
-    final public static String notTransaction = "-1";
+    final public static String NOT_TRANSACTION = "-1";
 
 }

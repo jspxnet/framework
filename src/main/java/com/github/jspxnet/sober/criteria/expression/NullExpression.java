@@ -11,7 +11,7 @@ package com.github.jspxnet.sober.criteria.expression;
 
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
-import com.github.jspxnet.sober.SoberEnv;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,8 +20,10 @@ import com.github.jspxnet.sober.SoberEnv;
  * Time: 11:22:06
  */
 public class NullExpression implements Criterion {
-
-    private String propertyName;
+    private final DatabaseEnumType[] noNullDb = new DatabaseEnumType[]{
+            DatabaseEnumType.POSTGRESQL,DatabaseEnumType.MYSQL,DatabaseEnumType.MSSQL,DatabaseEnumType.ORACLE
+    };
+    private final String propertyName;
 
     public NullExpression(String propertyName) {
         this.propertyName = propertyName;
@@ -29,7 +31,8 @@ public class NullExpression implements Criterion {
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
-        if (SoberEnv.POSTGRESQL.equalsIgnoreCase(databaseName) || SoberEnv.MYSQL.equalsIgnoreCase(databaseName) || SoberEnv.MSSQL.equalsIgnoreCase(databaseName) || SoberEnv.ORACLE.equalsIgnoreCase(databaseName)) {
+        if (DatabaseEnumType.inArray(noNullDb,databaseName))
+        {
             return "(" + propertyName + " IS NULL OR " + propertyName + "='')";
         }
         return propertyName + " IS NULL";

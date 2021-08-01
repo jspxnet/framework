@@ -21,9 +21,9 @@ import com.github.jspxnet.sober.util.JdbcUtil;
  */
 public class SimpleExpression implements Criterion {
 
-    private String propertyName;
-    private Object value;
-    private String op;
+    private final String propertyName;
+    private final Object value;
+    private final String op;
 
     public SimpleExpression(String propertyName, Object value, String op) {
         this.propertyName = propertyName;

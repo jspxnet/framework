@@ -11,7 +11,7 @@ package com.github.jspxnet.sober.criteria.expression;
 
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
-import com.github.jspxnet.sober.SoberEnv;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,8 +20,11 @@ import com.github.jspxnet.sober.SoberEnv;
  * Time: 11:23:21
  */
 public class NotNullExpression implements Criterion {
+    private final DatabaseEnumType[] noNullDb = new DatabaseEnumType[]{
+            DatabaseEnumType.POSTGRESQL,DatabaseEnumType.MYSQL,DatabaseEnumType.MSSQL,DatabaseEnumType.ORACLE
+    };
 
-    private String propertyName;
+    private final String propertyName;
 
     public NotNullExpression(String propertyName) {
         this.propertyName = propertyName;
@@ -29,14 +32,11 @@ public class NotNullExpression implements Criterion {
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
-        if (SoberEnv.POSTGRESQL.equalsIgnoreCase(databaseName) || SoberEnv.MYSQL.equalsIgnoreCase(databaseName) || SoberEnv.MSSQL.equalsIgnoreCase(databaseName) || SoberEnv.ORACLE.equalsIgnoreCase(databaseName)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("(").append(propertyName).append(" IS NOT NULL AND ").append(propertyName).append("<>'')");
-            return sb.toString();
+        if (DatabaseEnumType.inArray(noNullDb,databaseName))
+        {
+            return "(" + propertyName + " IS NOT NULL AND " + propertyName + "<>'')";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(propertyName).append(" IS NOT NULL");
-        return sb.toString();
+        return propertyName + " IS NOT NULL";
     }
 
     @Override
@@ -51,9 +51,7 @@ public class NotNullExpression implements Criterion {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(propertyName).append(" IS NOT NULL");
-        return sb.toString();
+        return propertyName + " IS NOT NULL";
     }
 
     @Override

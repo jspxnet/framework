@@ -23,7 +23,7 @@ public interface Criterion extends Serializable {
 
     String[] getFields();
 
-    String toSqlString(TableModels soberTable, String databaseName);
+    String toSqlString(TableModels soberTable, String databaseType);
 
     Object[] getParameter(TableModels soberTable);
 

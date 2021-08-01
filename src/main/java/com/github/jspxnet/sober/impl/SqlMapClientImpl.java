@@ -91,7 +91,7 @@ public class SqlMapClientImpl implements SqlMapClient {
     @Override
     public Object getUniqueResult(String namespace, String exeId, Map<String, Object> valueMap) {
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
-        SqlMapConfig mapSql = sqlRoom.getQueryMapSql(exeId,soberFactory.getDatabaseName());
+        SqlMapConfig mapSql = sqlRoom.getQueryMapSql(exeId,soberFactory.getDatabaseType());
         if (mapSql == null) {
             return null;
         }
@@ -242,7 +242,7 @@ public class SqlMapClientImpl implements SqlMapClient {
             return new ArrayList<>();
         }
         Dialect dialect = soberFactory.getDialect();
-        SqlMapConfig mapSql = sqlRoom.getQueryMapSql(exeId,soberFactory.getDatabaseName());
+        SqlMapConfig mapSql = sqlRoom.getQueryMapSql(exeId,soberFactory.getDatabaseType());
         if (mapSql == null) {
              log.error("ERROR:not get sql map namespace " + namespace + " query id " + exeId + ",此命名空间中不能够找到sql,检查你的sql配置 ");
             return new ArrayList<>();
@@ -366,12 +366,12 @@ public class SqlMapClientImpl implements SqlMapClient {
             return 0;
         }
         Dialect dialect = soberFactory.getDialect();
-        SqlMapConfig mapSql = sqlRoom.getQueryMapSql(exeId,soberFactory.getDatabaseName());
+        SqlMapConfig mapSql = sqlRoom.getQueryMapSql(exeId,soberFactory.getDatabaseType());
         if (mapSql == null) {
             log.error("ERROR:not get sql map namespace " + namespace + " query id " + exeId + ",此命名空间中不能够找到sql");
             return 0;
         }
-        valueMap.put("databaseName", soberFactory.getDatabaseName());
+        valueMap.put("databaseName", soberFactory.getDatabaseType());
         valueMap.put("currentPage", 1);
         valueMap.put("totalCount", 1);
         valueMap.put("loadChild", false);
@@ -413,7 +413,7 @@ public class SqlMapClientImpl implements SqlMapClient {
     public boolean execute(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
         Dialect dialect = soberFactory.getDialect();
-        SqlMapConfig mapSql = sqlRoom.getExecuteMapSql(exeId,soberFactory.getDatabaseName());
+        SqlMapConfig mapSql = sqlRoom.getExecuteMapSql(exeId,soberFactory.getDatabaseType());
         if (mapSql == null) {
             return false;
         }
@@ -445,7 +445,7 @@ public class SqlMapClientImpl implements SqlMapClient {
     public int update(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
         Dialect dialect = soberFactory.getDialect();
-        SqlMapConfig mapSql = sqlRoom.getUpdateMapSql(exeId,soberFactory.getDatabaseName());
+        SqlMapConfig mapSql = sqlRoom.getUpdateMapSql(exeId,soberFactory.getDatabaseType());
         if (mapSql == null) {
             log.error("ERROR SQL map not config SQL update id :" + exeId + "  namespace:" + namespace);
             return -3;

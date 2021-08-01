@@ -15,6 +15,7 @@ import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.GeneralDialect;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
@@ -191,45 +192,53 @@ public abstract class JdbcUtil {
 
 
     /**
+     *
      * @param con 连接
-     * @return String 得到数据库名
-     * @throws SQLException 连接错误
+     * @return String 得到数据库类型,枚举和适配器对应
      */
-    public static String getDatabaseType(Connection con) throws SQLException {
-        DatabaseMetaData metaData = con.getMetaData();
-        String dbName = metaData.getDatabaseProductName().toLowerCase();
-        String driverName = metaData.getDriverName().toLowerCase();
-        if (driverName.contains("oracle")) {
-            return SoberEnv.ORACLE;
+    public static DatabaseEnumType getDatabaseType(Connection con) {
+
+        String dbName;
+        String driverName;
+        try {
+            DatabaseMetaData metaData = con.getMetaData();
+            dbName = metaData.getDatabaseProductName().toLowerCase();
+            driverName = metaData.getDriverName().toLowerCase();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return DatabaseEnumType.UNKNOWN;
         }
-        if (driverName.contains("dm")) {
-            return SoberEnv.DM;
+        if (driverName.contains(DatabaseEnumType.ORACLE.getName().toLowerCase())) {
+            return DatabaseEnumType.ORACLE;
         }
-        if (driverName.contains("postgresql") || dbName.contains("pql") || dbName.contains("pgql")) {
-            return SoberEnv.POSTGRESQL;
+        if (driverName.contains(DatabaseEnumType.DM.getName().toLowerCase())) {
+            return DatabaseEnumType.DM;
         }
-        if (driverName.contains("interbase") || dbName.contains("interbase")) {
-            return SoberEnv.INTERBASE;
+        if (driverName.contains(DatabaseEnumType.POSTGRESQL.getName().toLowerCase()) || dbName.contains("pql") || dbName.contains("pgql")) {
+            return DatabaseEnumType.POSTGRESQL;
+        }
+        if (driverName.contains(DatabaseEnumType.INTERBASE.getName().toLowerCase())) {
+            return DatabaseEnumType.INTERBASE;
         }
         if (driverName.contains("sqlserver") || driverName.contains("sql server")) {
-            return SoberEnv.MSSQL;
+            return DatabaseEnumType.MSSQL;
         }
         if (driverName.contains("mysql") || dbName.contains("mysql")) {
-            return SoberEnv.MYSQL;
+            return DatabaseEnumType.MYSQL;
         }
         if (driverName.contains("db2") || dbName.contains("db2")) {
-            return SoberEnv.DB2;
+            return DatabaseEnumType.DB2;
         }
         if (driverName.contains("firebird") || dbName.contains("firebird")) {
-            return SoberEnv.Firebird;
+            return DatabaseEnumType.FIREBIRD;
         }
-        if (driverName.contains("sqlite")) {
-            return SoberEnv.Sqlite;
+        if (driverName.contains(DatabaseEnumType.SQLITE.getName().toLowerCase())) {
+            return DatabaseEnumType.SQLITE;
         }
         if (driverName.contains("smalldb") || dbName.contains("smalldb") || dbName.contains("smallsql")) {
-            return SoberEnv.Smalldb;
+            return DatabaseEnumType.SMALLDB;
         }
-        return SoberEnv.General;
+        return DatabaseEnumType.GENERAL;
     }
 
     /**
@@ -280,7 +289,7 @@ public abstract class JdbcUtil {
         try {
             conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
             ResultSet rs = null;
-            if (SoberEnv.ORACLE.equalsIgnoreCase(jdbcOperations.getSoberFactory().getDatabaseName())||SoberEnv.DB2.equalsIgnoreCase(jdbcOperations.getSoberFactory().getDatabaseName()))
+            if (DatabaseEnumType.find(jdbcOperations.getSoberFactory().getDatabaseType()).equals(DatabaseEnumType.ORACLE)||DatabaseEnumType.find(jdbcOperations.getSoberFactory().getDatabaseType()).equals(DatabaseEnumType.DB2))
             {
                 rs = conn.getMetaData().getColumns(null, getSchema(conn), table.toUpperCase(), "%");
             }
