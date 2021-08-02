@@ -59,6 +59,10 @@ public class PermissionInterceptor extends InterceptorSupport {
     private static String[] guestStopUrl = null;
     private static String[] ruleOutUrl = null;
 
+    private String adminUrlFile = "adminurl.properties";
+    private static String[] adminRuleUrl = null;
+    private static String[] adminRuleOutUrl = null;
+
     public PermissionInterceptor() {
 
     }
@@ -113,14 +117,13 @@ public class PermissionInterceptor extends InterceptorSupport {
         try {
             if (guestUrlFile != null && !guestUrlFile.startsWith("http")) {
                 file = EnvFactory.getFile(guestUrlFile);
-                if (file==null) {
+                if (file == null) {
                     log.error(guestUrlFile + "没有找到");
                 }
             }
-            log.info("载入guestUrlFile:{}",guestUrlFile);
+            log.info("载入guestUrlFile:{}", guestUrlFile);
 
-            if (file!=null)
-            {
+            if (file != null) {
                 String txt = IoUtil.autoReadText(file);
                 String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
                 for (String str : array) {
@@ -139,6 +142,39 @@ public class PermissionInterceptor extends InterceptorSupport {
             e.printStackTrace();
         }
 
+        //---------------------------
+
+        if (!ArrayUtil.isEmpty(adminRuleUrl)) {
+            return;
+        }
+
+        try {
+            if (adminUrlFile != null && !adminUrlFile.startsWith("http")) {
+                file = EnvFactory.getFile(adminUrlFile);
+                if (file == null) {
+                    log.error(guestUrlFile + "没有找到");
+                }
+            }
+            log.info("adminUrlFile:{}", guestUrlFile);
+
+            if (file != null) {
+                String txt = IoUtil.autoReadText(file);
+                String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
+                for (String str : array) {
+                    if (str == null) {
+                        continue;
+                    }
+                    if (str.startsWith("!")) {
+                        adminRuleOutUrl = ArrayUtil.add(adminRuleOutUrl, StringUtil.substringAfter(str, "!"));
+                    } else {
+                        adminRuleUrl = ArrayUtil.add(adminRuleUrl, str);
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -148,30 +184,35 @@ public class PermissionInterceptor extends InterceptorSupport {
         //这里是不需要验证的action
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         Action action = actionProxy.getAction();
-        if (onlineManager==null)
-        {
-            action.addFieldInfo(Environment.warningInfo,"onlineManager 为空,检查ioc配置是否正确");
+        if (onlineManager == null) {
+            action.addFieldInfo(Environment.warningInfo, "onlineManager 为空,检查ioc配置是否正确");
             log.error("onlineManager 为空,检查ioc配置是否正确");
             return ActionSupport.ERROR;
         }
         UserSession userSession = onlineManager.getUserSession(action);
 
         String method = actionProxy.getMethod().getName();
-        String pathNamespace =  action.getEnv(ActionEnv.Key_Namespace);
-        if (StringUtil.isNull(pathNamespace))
-        {
-            pathNamespace= actionProxy.getNamespace();
+        String pathNamespace = action.getEnv(ActionEnv.Key_Namespace);
+        if (StringUtil.isNull(pathNamespace)) {
+            pathNamespace = actionProxy.getNamespace();
         }
         //String actionName = actionInvocation.getActionName();
+        String checkUrl = StringUtil.replace(StringUtil.BACKSLASH + pathNamespace + StringUtil.BACKSLASH + actionInvocation.getActionName(), "//", StringUtil.BACKSLASH);
 
-        String organizeId = action.getString(ActionEnv.KEY_organizeId, true);
-        if (autoOrganizeId && !StringUtil.isEmpty(organizeId)) {
+        String organizeId = null;
+        if (autoOrganizeId){
+            organizeId = action.getString(ActionEnv.KEY_organizeId, true);
+        }
+        //is admin url
+        if (isAdminRuleUrl(checkUrl)) {
+            permissionDAO.setOrganizeId(null);
+        } else {
             permissionDAO.setOrganizeId(organizeId);
         }
 
         IRole role = userSession.getRole(permissionDAO.getNamespace(), permissionDAO.getOrganizeId());
         //自动分配调试权限 begin
-        if (role==null&&!permission && (Environment.SYSTEM_ID == userSession.getUid() || userSession.getUid() == 1)) {
+        if (role == null && !permission && (Environment.SYSTEM_ID == userSession.getUid() || userSession.getUid() == 1)) {
             //调试模式
             Role debugRole = createDebugRole();
             debugRole.setNamespace(permissionDAO.getNamespace());
@@ -182,7 +223,6 @@ public class PermissionInterceptor extends InterceptorSupport {
             role = debugRole;
             onlineManager.updateUserSessionCache(userSession);
         }
-
 
         if (action.isGuest() && role == null) {
             userSession.setRole(permissionDAO.getRole(config.getString(Environment.guestRole)));
@@ -199,14 +239,13 @@ public class PermissionInterceptor extends InterceptorSupport {
         }
         //没有角色权限自动载入 end
         HttpServletRequest requestTmp = action.getRequest();
-        if (requestTmp instanceof RequestTo || INetCommand.RPC.equals(requestTmp.getAttribute(ActionEnv.Key_REMOTE_TYPE)))
-        {
+        if (requestTmp instanceof RequestTo || INetCommand.RPC.equals(requestTmp.getAttribute(ActionEnv.Key_REMOTE_TYPE))) {
             //如果是RPC调用不拦截，RPC调用的安全使用通讯密钥方式来确保
             return actionInvocation.invoke();
         }
 
         //屏蔽的URL游客
-        String checkUrl = StringUtil.replace(StringUtil.BACKSLASH + pathNamespace + StringUtil.BACKSLASH + actionInvocation.getActionName(), "//", StringUtil.BACKSLASH);
+
         if (userSession.isGuest() && ArrayUtil.inArray(guestStopUrl, checkUrl, true)) {
 
             //如果都载入为空，那么载入游客权限 begin
@@ -217,8 +256,7 @@ public class PermissionInterceptor extends InterceptorSupport {
         }
 
         //登陆入口，直接放行
-        if (useGuestUrl)
-        {
+        if (useGuestUrl) {
             boolean isRule = isRuleOutUrl(checkUrl);
             if (isRule) {
                 log.debug("ruleOutUrl checkUrl={},isRule={}", checkUrl, isRule);
@@ -289,7 +327,7 @@ public class PermissionInterceptor extends InterceptorSupport {
                 }*/
 
                 //配置的权限,判断是否可执行
-                if (!role.checkOperate(pathNamespace,action.getClass().getName(), method)) {
+                if (!role.checkOperate(pathNamespace, action.getClass().getName(), method)) {
                     //会员进入后，正常模式，完全通过后台权限判断是否能够操作
                     action.addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needPermission) + ", role name :" + role.getName() + " for " + role.getNamespace());
                     return ActionSupport.UNTITLED;
@@ -308,7 +346,7 @@ public class PermissionInterceptor extends InterceptorSupport {
         //也可以 return Action.ERROR; 终止action的运行
     }
 
-    public static boolean isRuleOutUrl(String url) {
+    private static boolean isRuleOutUrl(String url) {
         if (url == null) {
             return true;
         }
@@ -320,6 +358,22 @@ public class PermissionInterceptor extends InterceptorSupport {
                 return true;
             }
         }
+        return false;
+    }
+
+    private static boolean isAdminRuleUrl(String url) {
+        if (url == null) {
+            return true;
+        }
+        if (ObjectUtil.isEmpty(adminRuleUrl)) {
+            return false;
+        }
+        for (String ruleUrl : adminRuleUrl) {
+            if (ruleUrl.equals(url) || StringUtil.getPatternFind(url, ruleUrl)) {
+                return true;
+            }
+        }
+
         return false;
     }
 

@@ -41,6 +41,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
     private String namespace = StringUtil.empty; //软件名称
     private String organizeId = StringUtil.empty;
 
+    final static private String ADMIN_ORGANIZE_ID = "10000";
     public PermissionDAOImpl() {
 
     }
@@ -78,7 +79,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
     public MemberRole getMemberRole(long uid) {
         Criteria criteria = createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.eq("uid", uid));
         if (!StringUtil.isEmpty(organizeId)) {
-            criteria = criteria.add(Expression.eq("organizeId", organizeId));
+            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
         }
         List<MemberRole> memberRoles = criteria.list(true);
         //多个返回权值最大的一个
@@ -126,7 +127,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
     public List<MemberRole> getMemberRoles(long uid,boolean load) {
         Criteria criteria = createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.eq("uid", uid));
         if (!StringUtil.isEmpty(organizeId)) {
-            criteria = criteria.add(Expression.eq("organizeId", organizeId));
+            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
         }
         return criteria.list(load);
     }
@@ -141,7 +142,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
     {
         Criteria criteria = createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.eq("uid", uid));
         if (!StringUtil.isEmpty(organizeId)) {
-            criteria = criteria.add(Expression.eq("organizeId", organizeId));
+            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
         }
         List<MemberRole> memberRoleList = criteria.list(true);
         if (ObjectUtil.isEmpty(memberRoleList))
@@ -179,7 +180,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
             criteria = criteria.add(Expression.like("name", "%" + find + "%"));
         }
         if (!StringUtil.isNull(organizeId)) {
-            criteria = criteria.add(Expression.eq("organizeId", organizeId));
+            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
         }
         return criteria.addOrder(Order.desc("sortDate")).addOrder(Order.desc("userType")).list(false);
     }
@@ -191,12 +192,10 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
             criteria = criteria.add(Expression.like("name", "%" + find + "%"));
         }
         if (!StringUtil.isNull(organizeId)) {
-            criteria = criteria.add(Expression.eq("organizeId", organizeId));
+            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
         }
         return criteria.intUniqueResult();
     }
-
-
 
     /**
      * 得到本软件的角色列表
@@ -210,7 +209,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
             criteria = criteria.add(Expression.like("name", "%" + find + "%"));
         }
         if (!StringUtil.isEmpty(organizeId)) {
-            criteria = criteria.add(Expression.eq("organizeId", organizeId));
+            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
         }
         return criteria.addOrder(Order.desc("sortDate")).addOrder(Order.desc("userType")).setTotalCount(count).setCurrentPage(page)
                 .list(false);
@@ -239,9 +238,16 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
     @Override
     public boolean deleteRoles(String[] ids) {
         //删除 MemberRole 的映射关系后在删除角色
+
+
         if (!StringUtil.isEmpty(organizeId)) {
-            createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.in("roleId", ids)).add(Expression.eq("organizeId", organizeId)).delete(false);
-            createCriteria(Role.class).add(Expression.eq("namespace", namespace)).add(Expression.in("id", ids)).add(Expression.eq("organizeId", organizeId)).delete(false);
+            List<MemberRole> memberRoles = createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.in("roleId", ids)).add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID))).list(false);
+            List<String> roleIds = BeanUtil.copyFieldList(memberRoles,"roleId");
+            if (!ObjectUtil.isEmpty(roleIds))
+            {
+                createCriteria(Role.class).add(Expression.eq("namespace", namespace)).add(Expression.in("id", roleIds)).delete(false);
+                delete(memberRoles);
+            }
         } else {
             createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.in("roleId", ids)).delete(false);
             createCriteria(Role.class).add(Expression.eq("namespace", namespace)).add(Expression.in("id", ids)).delete(false);
