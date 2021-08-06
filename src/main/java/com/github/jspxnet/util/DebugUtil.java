@@ -2,15 +2,17 @@ package com.github.jspxnet.util;
 
 
 import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 public class DebugUtil {
     /** 每条 Log 的 tag 输出的最大长度, 超过部分将被截断 */
-    private static final int TAG_MAX_LENGTH = 20;
+    private static final int TAG_MAX_LENGTH = 50;
 
     /** 每条 Log 的 message 输出的最大长度, 超过部分将被截断 */
-    private static final int MESSAGE_MAX_LENGTH = 1024;
+    private static final int MESSAGE_MAX_LENGTH = 1024*10;
 
     /** 日志当前的输出级别, 默认为 INFO 级别 */
     private static Level logOutLevel = Level.INFO;
@@ -105,10 +107,10 @@ public class DebugUtil {
                     " " +
                     level.getTag() +
                     "/" +
-                    checkTextLengthLimit(tag, TAG_MAX_LENGTH) +
-                    ": " +
-                    checkTextLengthLimit(message, MESSAGE_MAX_LENGTH);
+                    StringUtil.cut(tag,TAG_MAX_LENGTH,"...")  +
 
+                    ": " +
+                    StringUtil.cut(message,MESSAGE_MAX_LENGTH,"...");
             if (isOutToConsole) {
                 outLogToConsole(isOutToErr, log);
             }
@@ -138,12 +140,6 @@ public class DebugUtil {
         }
     }
 
-    private static String checkTextLengthLimit(String text, int maxLength) {
-        if ((text != null) && (text.length() >  maxLength)) {
-            text = text.substring(0, maxLength - 3) + "...";
-        }
-        return text;
-    }
 
     private static void closeStream(Closeable stream) {
         if (stream != null) {

@@ -29,6 +29,9 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 
     final static private String KEY_DATA = "data";
     //final static private String KEY_ROOT = "root";
+    static public String[] NO_JSON_PACKAGE = new String[]{
+            "java.lang.Package","com.seeyon.ctp.common.po.BasePO","org.apache.commons","org.apache.logging.log4j.message"
+    };
 
     static public String FULL_ST_FORMAT = DateUtil.FULL_ST_FORMAT;
     static public String CLASS_NAME = "@class";
@@ -388,7 +391,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                             if (fieldArray!=null&&!fieldArray.isEmpty())
                             {
                                 final int size = fieldArray.size();
-                                childShowField = (String[]) fieldArray.toArray(new String[size]);
+                                childShowField = fieldArray.toArray(new String[size]);
                             }
                         }
                         super.put(displayKey, new JSONObject(result, childShowField,includeSuperClass,dataField));
@@ -426,7 +429,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     } else {
                         Package objectPackage = result.getClass().getPackage();
                         String objectPackageName = objectPackage != null ? objectPackage.getName() : StringUtil.empty;
-                        if (objectPackageName.equals("java/lang/Package"))
+                        if (ArrayUtil.containsChildIgnore(NO_JSON_PACKAGE,objectPackageName))
                         {
                             continue;
                         }
@@ -442,9 +445,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                                     JSONArray fieldArray = dataField.getJSONArray(key);
                                     if (fieldArray!=null&&!fieldArray.isEmpty())
                                     {
-                                        childShowField = (String[]) fieldArray.toArray(new String[fieldArray.size()]);
+                                        childShowField =  fieldArray.toArray(new String[fieldArray.size()]);
                                     }
                                 }
+                                System.out.println("------result=" + result);
                                 super.put(displayKey, new JSONObject(result, childShowField,includeSuperClass,dataField));
                             } else {
                                 super.put(displayKey, result);
@@ -860,7 +864,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return this.
      * @throws JSONException 异常
      */
-    public JSONObject put(String key, Collection value) throws JSONException {
+    public JSONObject put(String key, Collection<?> value) throws JSONException {
         super.put(key, value);
         return this;
     }
@@ -1398,7 +1402,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     public Writer write(Writer writer) throws Exception {
         try {
             boolean b = false;
-            Iterator keys = super.keySet().iterator();
+            Iterator<String> keys = super.keySet().iterator();
             writer.write('{');
             while (keys.hasNext()) {
                 if (b) {

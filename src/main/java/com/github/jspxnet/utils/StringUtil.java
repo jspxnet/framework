@@ -1899,6 +1899,8 @@ public class StringUtil {
                 //2014-06-25T05:01:04
                 format = DateUtil.UTC_SHORT_FORMAT;
             }
+        } else if (date.length() > 14 && date.length() > 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains(".")) {
+            format = DateUtil.UTC_ST_MILLISECOND_FORMAT;
         }
         else if (date.length() > 14 && date.length() <= 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2) {
             format = DateUtil.FULL_ST_FORMAT;
@@ -1923,12 +1925,10 @@ public class StringUtil {
         } else if (date.length() == DateUtil.UTC_FTP_FORMAT.length() && countMatches(date, "-") == 0 && countMatches(date, ":") == 0) {
             format = DateUtil.UTC_FTP_FORMAT;
         }
-
         if (StringUtil.isNull(format) && (countMatches(date, "-") == 1 || countMatches(date, ".") == 1)) {
             date = replace(replace(date, ".", "-") + "-01", "--", "-");
             format = "yyyy-MM-dd";
         }
-
         if (!StringUtil.isNull(format)) {
             Date result = getDate(date, format);
             return result == null ? defaultDate : result;
@@ -3267,27 +3267,15 @@ public class StringUtil {
         }
         return checkUrl;
     }
-
+/*
     public static void main(String[] args) {
 
-        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:microsoft:sqlserver://127.0.0.1;DatabaseName=databaseName"));
+        String str = "1969-02-21 01:02:03.0";
+
+        Date date = getDate(str);
+        System.out.println("---" + DateUtil.toString(date,DateUtil.FULL_ST_FORMAT));
 
 
-        //jdbc:dm://192.168.0.48:5236:g6n
-        String url = "jdbc:postgresql://192.168.0.115:5432/posql";
-        System.out.println("---" + getJdbcUrlDataBaseName( url));
-
-
-        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:microsoft:sqlserver://127.0.0.1:1433;DatabaseName=databaseName"));
-
-        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:oracle:thin:@localhost:1521:dbName"));
-
-        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:dm://192.168.0.48:5236:g6n"));
-
-        System.out.println("---" + getJdbcUrlDataBaseName( "jdbc:mysql://192.168.0.115:3306/jspxnet?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useAffectedRows=true&useSSL=false"));
-
-
-
-    }
+    }*/
 
 }

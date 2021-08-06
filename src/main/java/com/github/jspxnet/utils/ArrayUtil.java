@@ -903,7 +903,7 @@ public class ArrayUtil {
      *                              size 1 array of this type.
      * @return A new copy of the array of size 1 greater than the input.
      */
-    private static Object copyArrayGrow1(Object array, Class newArrayComponentType) {
+    private static Object copyArrayGrow1(Object array, Class<?> newArrayComponentType) {
         if (array != null) {
             int arrayLength = Array.getLength(array);
             Object newArray = Array.newInstance(array.getClass().getComponentType(), arrayLength + 1);
@@ -942,7 +942,7 @@ public class ArrayUtil {
      *                                   (index 小于 0 || index 大于 array.length).
      */
     public static Object[] add(Object[] array, int index, Object element) {
-        Class clss;
+        Class<?> clss;
         if (array != null) {
             clss = array.getClass().getComponentType();
         } else if (element != null) {
@@ -1515,6 +1515,24 @@ public class ArrayUtil {
      */
     public static boolean contains(Object[] array, Object objectToFind) {
         return indexOf(array, objectToFind) != INDEX_NOT_FOUND;
+    }
+
+    /**
+     * 不区分大小写比较数组中contain是否存在字符串
+     * @param objects 字符串
+     * @param str  查找字符串
+     * @return 是 否
+     */
+    public static boolean containsChildIgnore(String[] objects, String str) {
+        if (objects == null) {
+            return false;
+        }
+        for (String object : objects) {
+            if (object!=null&&object.toLowerCase().contains(str.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // long IndexOf
@@ -2791,6 +2809,7 @@ public class ArrayUtil {
         }
         return -1;
     }
+
 
     /**
      * 将原数组的值拷贝到目标数组。

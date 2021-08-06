@@ -1,6 +1,7 @@
 package com.github.jspxnet.io.jar;
 
 import com.github.jspxnet.io.ScanJar;
+import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 
@@ -15,6 +16,8 @@ import java.util.jar.JarFile;
 
 
 public class JarScanner implements ScanJar {
+    public static final String[] NO_SEARCH_CLASS = new String[]{"com.seeyon.ctp.common.po.BasePO","org.apache","net.sf.cglib","com.aliyuncs"};
+
 
 
 
@@ -50,8 +53,7 @@ public class JarScanner implements ScanJar {
                                 {
                                     tempName = tempName.substring(0,tempName.length()-1);
                                 }
-
-                                if (tempName.contains(".class") && tempName.startsWith(packageName)&&!ClassUtil.inNoSearchClass(tempName))
+                                if (tempName.contains(".class") && tempName.startsWith(packageName)&&!ArrayUtil.containsChildIgnore(NO_SEARCH_CLASS,packageName))
                                 {
                                     String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replace("/", ".");
                                     Class<?> cls = ClassUtil.loadClass(className);
