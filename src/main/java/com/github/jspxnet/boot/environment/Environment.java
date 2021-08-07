@@ -140,7 +140,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.46";
+    final static public String VERSION = "6.47";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -164,13 +164,6 @@ public abstract class Environment {
 
     final public static String logFatalFile = "logFatalFile";
 
-    final public static String logJspxInfoFile = "logJspxInfoFile";
-
-    final public static String logJspxDebugFile = "logJspxDebugFile";
-
-    final public static String logJspxErrorFile = "logJspxErrorFile";
-
-    final public static String logJspxFatalFile = "logJspxFatalFile";
 
     final public static String log_info_file = "sys_info.log";
 
