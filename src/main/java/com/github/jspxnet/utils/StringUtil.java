@@ -22,6 +22,8 @@ import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.util.regex.Pattern.*;
 import static java.util.regex.Pattern.compile;
 
 
@@ -3148,7 +3150,7 @@ public class StringUtil {
         s = s.replace("?", "#");
         s = s.replaceAll("#", ".?");
         s = "^" + s + "$";
-        return Pattern.matches(s, url);
+        return matches(s, url);
     }
 
     public static String deleteAny(String inString, String charsToDelete) {
@@ -3232,7 +3234,7 @@ public class StringUtil {
         {
             return null;
         }
-        Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+).*");
+        Pattern p = compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+).*");
         Matcher m = p.matcher(url);
         String checkUrl = url;
         if(m.find()) {

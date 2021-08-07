@@ -288,9 +288,9 @@ public class ValidateIdCard {
         { // 台湾
             info[0] = "台湾";
             String char2 = idCard.substring(1, 2);
-            if (char2.equals("1")) {
+            if ("1".equals(char2)) {
                 info[1] = "M";
-            } else if (char2.equals("2")) {
+            } else if ("2".equals(char2)) {
                 info[1] = "F";
             } else {
                 info[1] = "N";
@@ -367,15 +367,15 @@ public class ValidateIdCard {
         char[] chars = mid.toCharArray();
         Integer iflag = 7;
         for (char c : chars) {
-            sum = sum + Integer.valueOf(c + "") * iflag;
+            sum = sum + Integer.parseInt(c + "") * iflag;
             iflag--;
         }
-        if (end.toUpperCase().equals("A")) {
+        if ("A".equals(end.toUpperCase())) {
             sum = sum + 10;
         } else {
-            sum = sum + Integer.valueOf(end);
+            sum = sum + Integer.parseInt(end);
         }
-        return (sum % 11 == 0) ? true : false;
+        return sum % 11 == 0;
     }
 
     /**

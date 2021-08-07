@@ -25,6 +25,7 @@ import java.io.File;
  * 切屏代码
  */
 public class CaptureScreen extends JPanel implements ActionListener, MouseListener, MouseMotionListener {
+    //枚举
     enum States {
         NORTH_WEST(new Cursor(Cursor.NW_RESIZE_CURSOR)),//表示西北角
         NORTH(new Cursor(Cursor.N_RESIZE_CURSOR)),
@@ -36,7 +37,7 @@ public class CaptureScreen extends JPanel implements ActionListener, MouseListen
         WEST(new Cursor(Cursor.W_RESIZE_CURSOR)),
         MOVE(new Cursor(Cursor.MOVE_CURSOR)),
         DEFAULT(new Cursor(Cursor.DEFAULT_CURSOR));
-        private Cursor cs;
+        private final Cursor cs;
 
         States(Cursor cs) {
             this.cs = cs;

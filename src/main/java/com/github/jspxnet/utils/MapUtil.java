@@ -174,20 +174,20 @@ public class MapUtil {
     public static String createLinkStringWithKeyAndValue(Map<String, ?> params) {
         List<String> keys = new ArrayList<>(params.keySet());
         Collections.sort(keys);
-        String prestr = "";
+        StringBuilder prestr = new StringBuilder();
         for (String s : keys) {
             if (!"sign".equals(s) && !"signature".equals(s) && !"userInfo".equals(s) && !"ext".equals(s) && !"payPassword".equals(s)) {
 
                 if (!ObjectUtil.isEmpty(params.get(s))) {
                     String value = params.get(s).toString();
-                    prestr = prestr + s + "=" + value + "&";
+                    prestr.append(s).append("=").append(value).append("&");
                 }
             }
         }
         if ("&".equals(prestr.substring(prestr.length() - 1))) {
-            prestr = prestr.substring(0, prestr.length() - 1);
+            prestr = new StringBuilder(prestr.substring(0, prestr.length() - 1));
         }
-        return prestr;
+        return prestr.toString();
     }
 
     public static String createLinkStringWithKeyAndValueWithoutSignType(Map<String, Object> params) {

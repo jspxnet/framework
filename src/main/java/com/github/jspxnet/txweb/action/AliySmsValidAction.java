@@ -179,7 +179,7 @@ public class AliySmsValidAction extends ActionSupport {
             CommonResponse commonResponse = client.getCommonResponse(request);
             JSONObject json = new JSONObject(commonResponse.getData());
             json.put("validateSecond", config.getInt("validateSecond", 80));
-            if ("OK".equalsIgnoreCase(json.getString("Code"))) {
+            if (json.getBoolean("Code")) {
                 addActionMessage("发送成功");
             } else {
                 log.error(json.toString(4));

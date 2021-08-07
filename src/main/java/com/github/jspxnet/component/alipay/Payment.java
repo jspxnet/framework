@@ -162,11 +162,11 @@ public class Payment {
         params.put("_input_charset", input_charset);
 
 
-        String parameter = paygateway;
+        StringBuilder parameter = new StringBuilder(paygateway);
         List<String> keys = new ArrayList<>(params.keySet());
         for (String key1 : keys) {
             try {
-                parameter = parameter + key1 + "=" + URLEncoder.encode(params.get(key1), input_charset) + "&";
+                parameter.append(key1).append("=").append(URLEncoder.encode(params.get(key1), input_charset)).append("&");
             } catch (UnsupportedEncodingException e) {
 
                 e.printStackTrace();
