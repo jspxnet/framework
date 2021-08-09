@@ -15,8 +15,8 @@ public enum KpiEnumType implements EnumType {
     //否
     MEDIUM(0, "中");
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     KpiEnumType(int value, String name) {
         this.value = value;

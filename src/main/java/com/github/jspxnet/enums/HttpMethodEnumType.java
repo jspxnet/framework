@@ -35,8 +35,8 @@ public enum  HttpMethodEnumType implements EnumType {
 
     ;
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
 
     HttpMethodEnumType(int value, String name) {

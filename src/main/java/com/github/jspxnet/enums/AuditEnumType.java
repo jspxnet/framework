@@ -18,8 +18,8 @@ public enum AuditEnumType implements EnumType {
     //未知
     NO(2, "不过");
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     AuditEnumType(int value, String name) {
         this.value = value;

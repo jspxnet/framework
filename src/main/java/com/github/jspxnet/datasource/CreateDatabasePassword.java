@@ -9,17 +9,25 @@ import com.github.jspxnet.utils.ArrayUtil;
  */
 public class CreateDatabasePassword extends JspxDataSource {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args)  {
 
-        JspxNetApplication.autoRun();
+  /*      JspxNetApplication.autoRun();
         if (ArrayUtil.isEmpty(args)) {
             args = new String[1];
             args[0] = "";
-        }
+        }*/
 
         CreateDatabasePassword createDatabasePassword = new CreateDatabasePassword();
-        String ps = createDatabasePassword.makePassword(args[0]);
+        String ps = createDatabasePassword.makePassword("pw519420");
         System.out.println(ps);
     }
+/*
 
+    public static void main(String[] args) {
+        JspxDataSource dataSource = new JspxDataSource();
+        dataSource.setPassword("key:bDlqM21iajFrZGw0bWJqMGtkbWFrMWpk");
+        System.out.println("-------dataSource.getPassword()=" + dataSource.getPassword());
+    }
+
+ */
 }

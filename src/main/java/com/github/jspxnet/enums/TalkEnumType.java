@@ -33,9 +33,9 @@ public enum TalkEnumType implements EnumType {
     IM(9, "IM私人消息");
 
 
-    private int value;
+    private final int value;
 
-    private String name;
+    private final String name;
 
     TalkEnumType(int value, String name) {
         this.value = value;

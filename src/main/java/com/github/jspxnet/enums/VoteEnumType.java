@@ -17,8 +17,8 @@ public enum VoteEnumType implements EnumType {
     //单选
     SINGLE(0, "单选");
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     VoteEnumType(int value, String name) {
         this.value = value;

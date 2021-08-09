@@ -16,8 +16,8 @@ public enum RecycleEnumType implements EnumType {
     //否
     NO_RECYCLE(0, "否");
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     RecycleEnumType(int value, String name) {
         this.value = value;

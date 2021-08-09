@@ -16,8 +16,8 @@ public enum CongealEnumType implements EnumType {
     //否
     NO_CONGEAL(0, "正常");
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     CongealEnumType(int value, String name) {
         this.value = value;

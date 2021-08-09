@@ -20,8 +20,8 @@ public enum SortEnumType implements EnumType {
     //下沉
     DOWN(-1, "下沉");
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     SortEnumType(int value, String name) {
         this.value = value;

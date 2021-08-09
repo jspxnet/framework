@@ -21,8 +21,8 @@ public enum SexEnumType implements EnumType {
     static public final int unknown = -1;
 */
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     SexEnumType(int value, String name) {
         this.value = value;

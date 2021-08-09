@@ -17,8 +17,8 @@ public enum  PayWaysEnumType implements EnumType {
 
     MONEY(9,"现金");
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     PayWaysEnumType(int value, String name) {
         this.value = value;

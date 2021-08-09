@@ -23,8 +23,8 @@ public enum FontEnumType implements EnumType {
 
     //0:默认;1:粗体;2:斜体;3:粗斜体
  */
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     FontEnumType(int value, String name) {
         this.value = value;

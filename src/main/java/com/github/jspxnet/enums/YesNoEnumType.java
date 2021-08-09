@@ -16,8 +16,8 @@ public enum YesNoEnumType implements EnumType {
     //否
     NO(0, "否");
 
-    private int value;
-    private String name;
+    private final int value;
+    private final String name;
 
     YesNoEnumType(int value, String name) {
         this.value = value;

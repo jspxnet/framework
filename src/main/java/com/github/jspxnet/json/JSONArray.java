@@ -207,8 +207,6 @@ public class JSONArray extends ArrayList<Object> {
             JSONArray((JSONTokener) array);
             return;
         }
-
-
         if (array.getClass().isArray()) {
             int length = Array.getLength(array);
             for (int i = 0; i < length; i += 1) {
@@ -222,26 +220,27 @@ public class JSONArray extends ArrayList<Object> {
                 }
             }
         } else if (array instanceof Collection) {
-            Collection collection = new ArrayList((Collection) array);
+            Collection<?> collection = new ArrayList<>((Collection) array);
             for (Object o : collection) {
                 if (o == null) {
                     super.add(null);
-                } else if (ClassUtil.isStandardProperty(o.getClass())) {
+                } else if (ClassUtil.isStandardType(o.getClass())|| o instanceof JSONObject||o instanceof JSONArray||o instanceof InetAddress||o instanceof SocketAddress) {
                     super.add(o);
-                } else if (o instanceof JSONObject||o instanceof InetAddress||o instanceof SocketAddress) {
-                    super.add(o);
+                } else if (o instanceof Collection || ClassUtil.isArrayType(o.getClass()) || ClassUtil.isCollection(o.getClass())) {
+                    super.add(new JSONArray(o,includeSuperClass));
                 }
-                else {
+                else
+                {
                     String[] childShowField = null;
                     if (!StringUtil.isEmpty(showKey)&&dataField!=null&&!dataField.isEmpty())
                     {
                         JSONArray fieldArray = dataField.getJSONArray(showKey);
                         if (fieldArray!=null&&!fieldArray.isEmpty())
                         {
-                            childShowField = (String[]) fieldArray.toArray(new String[fieldArray.size()]);
+                            childShowField = fieldArray.toArray(new String[fieldArray.size()]);
                         }
                     }
-                   super.add(new JSONObject(o, childShowField,includeSuperClass,dataField));
+                    super.add(new JSONObject(o, childShowField,includeSuperClass,dataField));
                 }
             }
         } else {
@@ -301,8 +300,15 @@ public class JSONArray extends ArrayList<Object> {
      */
     public JSONArray getJSONArray(int index) throws JSONException {
         Object o = get(index);
+        if (o==null)
+        {
+            return null;
+        }
         if (o instanceof JSONArray) {
             return (JSONArray) o;
+        }
+        if (o instanceof String || ClassUtil.isArrayType(o.getClass()) || ClassUtil.isCollection(o.getClass())) {
+            return new JSONArray(o);
         }
         return null;
     }
@@ -346,7 +352,12 @@ public class JSONArray extends ArrayList<Object> {
      * @throws JSONException If there is no value for the index.
      */
     public String getString(int index) {
-        return (String) get(index);
+        Object obj = get(index);
+        if (obj instanceof  Number)
+        {
+            return (String)obj;
+        }
+        return obj.toString();
     }
 
 
@@ -844,4 +855,5 @@ public class JSONArray extends ArrayList<Object> {
         }
         return list;
     }
+
 }

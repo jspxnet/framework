@@ -12,10 +12,9 @@ public enum  ValidateCodeEnumType implements EnumType {
     IMG(1, "img","图片验证"),
     general(0, "general","通用");
 
-    private int value;
-    private String key;
-
-    private String name;
+    private final int value;
+    private final String key;
+    private final String name;
 
     ValidateCodeEnumType(int value,String key, String name) {
         this.value = value;
