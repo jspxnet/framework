@@ -775,37 +775,37 @@ public class DateUtil {
         if ((mm == 3 && dd >= 21) || (mm == 4 && dd <= 19)) {
             return 1;
         }
-        if ((mm == 4 && dd >= 20) || (mm == 5 && dd <= 20)) {
+        if (mm == 4 || mm == 5 && dd <= 20) {
             return 2;
         }
-        if ((mm == 5 && dd >= 21) || (mm == 6 && dd <= 21)) {
+        if (mm == 5 || mm == 6 && dd <= 21) {
             return 3;
         }
-        if ((mm == 6 && dd >= 22) || (mm == 7 && dd <= 22)) {
+        if (mm == 6 || mm == 7 && dd <= 22) {
             return 4;
         }
-        if ((mm == 7 && dd >= 23) || (mm == 8 && dd <= 22)) {
+        if (mm == 7 || mm == 8 && dd <= 22) {
             return 5;
         }
-        if ((mm == 8 && dd >= 23) || (mm == 9 && dd <= 22)) {
+        if (mm == 8 || mm == 9 && dd <= 22) {
             return 6;
         }
-        if ((mm == 9 && dd >= 23) || (mm == 10 && dd <= 23)) {
+        if (mm == 9 || mm == 10 && dd <= 23) {
             return 7;
         }
-        if ((mm == 10 && dd >= 24) || (mm == 11 && dd <= 21)) {
+        if (mm == 10 || mm == 11 && dd <= 21) {
             return 8;
         }
-        if ((mm == 11 && dd >= 22) || (mm == 12 && dd <= 21)) {
+        if (mm == 11 || mm == 12 && dd <= 21) {
             return 9;
         }
-        if ((mm == 12 && dd >= 22) || (mm == 1 && dd <= 19)) {
+        if (mm == 12 || mm == 1 && dd <= 19) {
             return 10;
         }
-        if ((mm == 1 && dd >= 20) || (mm == 2 && dd <= 18)) {
+        if (mm == 1 || mm == 2 && dd <= 18) {
             return 11;
         }
-        if ((mm == 2 && dd >= 19) || (mm == 3 && dd <= 20)) {
+        if (mm == 2 || mm == 3) {
             return 12;
         }
         return 0;

@@ -3,8 +3,6 @@ package com.github.jspxnet.io.jar;
 import com.github.jspxnet.io.ScanJar;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.StringUtil;
-
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
