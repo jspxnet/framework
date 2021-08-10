@@ -74,7 +74,7 @@ public class DeleteFileTask {
     }
 
     //每天23:59执行一次
-    @Scheduled(cron = "59 23 * * *")
+    @Scheduled(cron = "* 59 23 * * *")
     public void run() {
         if (enable && !StringUtil.isNull(folder)) {
             try {

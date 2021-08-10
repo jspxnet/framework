@@ -40,7 +40,7 @@ public class RunEndpointPublishServices {
         this.host = host;
     }
 
-    @Scheduled(cron = "* * * * *", once = true)
+    @Scheduled(once = true)
     public String run() {
         if (isRun) {
             return Environment.none;

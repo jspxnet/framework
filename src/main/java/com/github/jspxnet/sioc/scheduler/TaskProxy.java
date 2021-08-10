@@ -43,7 +43,6 @@ public class TaskProxy implements Runnable {
     }
 
 
-
     public String getPattern() {
         return pattern;
     }

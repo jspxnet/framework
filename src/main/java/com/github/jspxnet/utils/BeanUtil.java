@@ -875,7 +875,7 @@ public class BeanUtil {
      * @return 对象转换位字符串
      */
     public static String toString(Object o) {
-        Map map = ObjectUtil.getMap(o);
+        Map<String,Object> map = ObjectUtil.getMap(o);
         StringBuilder sb = new StringBuilder();
         for (Object obj : map.values()) {
             sb.append(obj).append(" ");
@@ -892,29 +892,27 @@ public class BeanUtil {
      * @throws Exception 运行错误
      */
     public static Object invoke(Object object, String string, Object... args) throws Exception {
-
         if (object == null || string == null) {
             return null;
         }
-        if (args == null) {
-            Method method = object.getClass().getMethod(string);
-            if (Modifier.isStatic(method.getModifiers())) {
-                method.invoke(null);
+        Method method = null;
+        if (args==null)
+        {
+            method = object.getClass().getMethod(string);
+            if (Modifier.isStatic(method.getModifiers()))
+            {
+                return ClassUtil.invokeStaticMethod(object.getClass().getName(),method.getName(),null);
             } else {
-                method.invoke(object);
-            }
-        } else {
-            if (SystemUtil.isAndroid()) {
-                Class<?>[] las = ClassUtil.getClassArray(args);
-                Method method = object.getClass().getMethod(string, las);
-                return method.invoke(object, args);
-            } else {
-                java.beans.Expression expr = new java.beans.Expression(object, string, args);
-                expr.execute();
-                return expr.getValue();
+                return method.invoke(object);
             }
         }
-        return null;
+        method = ClassUtil.getDeclaredMethod(object.getClass(),string,args.length);
+        if (Modifier.isStatic(method.getModifiers()))
+        {
+            return ClassUtil.invokeStaticMethod(object.getClass().getName(),method.getName(),args);
+        } else {
+            return method.invoke(object,string,args);
+        }
     }
 
 

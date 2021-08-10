@@ -70,9 +70,7 @@ public class SchedulerTaskManager implements SchedulerManager {
         if (methods == null) {
             return -1;
         }
-
         Map<String, Object> valueMap = EnvFactory.getEnvironmentTemplate().getVariableMap();
-
         for (Method method : methods) {
             Scheduled scheduled = method.getAnnotation(Scheduled.class);
             if (scheduled == null) {
@@ -133,7 +131,7 @@ public class SchedulerTaskManager implements SchedulerManager {
             cron = EnvFactory.getPlaceholder().processTemplate(valueMap,cron);
             if (StringUtil.isEmpty(cron))
             {
-                cron = "* * * * *";
+                cron = "* * * * * *";
             }
         }
         scheduler.schedule(cron, taskProxy);

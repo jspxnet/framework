@@ -257,8 +257,7 @@ public class SchedulingPattern {
 						+ "\", invalid element \"" + element + "\", "
 						+ e.getMessage());
 			}
-			for (Iterator<Integer> i = local.iterator(); i.hasNext();) {
-				Integer value = i.next();
+			for (Integer value : local) {
 				if (!values.contains(value)) {
 					values.add(value);
 				}

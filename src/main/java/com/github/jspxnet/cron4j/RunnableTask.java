@@ -69,12 +69,11 @@ class RunnableTask extends Task {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer b = new StringBuffer();
-		b.append("Task[");
-		b.append("runnable=");
-		b.append(runnable);
-		b.append("]");
-		return b.toString();
+		String b = "Task[" +
+				"runnable=" +
+				runnable +
+				"]";
+		return b;
 	}
 
 }
