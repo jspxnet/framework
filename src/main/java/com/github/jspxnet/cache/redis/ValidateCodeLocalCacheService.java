@@ -1,20 +1,24 @@
 package com.github.jspxnet.cache.redis;
 
-import com.github.jspxnet.cache.container.StringEntry;
 import com.github.jspxnet.cache.ValidateCodeCache;
+import com.github.jspxnet.cache.container.CacheEntry;
+import com.github.jspxnet.cache.store.LRUStore;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Bean;
-import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
-import org.redisson.api.RMap;
-import org.redisson.api.RedissonClient;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * Created by jspx.net
+ *
+ * @author: chenYuan
+ * @date: 2021/8/11 20:47
+ * @description: jspbox
+ **/
 @Slf4j
 @Bean(singleton = true)
-public class ValidateCodeCacheService implements ValidateCodeCache {
+public class ValidateCodeLocalCacheService implements ValidateCodeCache {
 
     /**
      * 短信验证
@@ -34,18 +38,14 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
     final static String VALIDATE_TIMES_KEY = "jspx:validate:times:%s";
 
 
-    @Ref(bind = RedissonClientConfig.class)
-    static RedissonClient redissonClient;
+
+   private final static LRUStore CACHE = new LRUStore();
 
     /**
      * 默认为3分钟
      */
     private int smsTimeOutSecond = 900;
     private int imgTimeOutSecond = 600;
-    /**
-     * 默认时间
-     */
-    private final int generalTimeOutSecond = 900;
 
     public int getSmsTimeOutSecond() {
         return smsTimeOutSecond;
@@ -76,13 +76,17 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
      */
     @Override
     public boolean addSmsCode(String mobile, String code) {
-
-        StringEntry entry = new StringEntry();
-        entry.setKey(mobile);
-        entry.setValue(code);
-        RMap<String, StringEntry> map = redissonClient.getMap(SMS_STORE_KEY);
-        map.put(entry.getKey(), entry);
-        return map.expire(smsTimeOutSecond, TimeUnit.SECONDS);
+        CacheEntry entry = new CacheEntry();
+        try {
+            entry.setKey(mobile);
+            entry.setValue(code);
+            entry.setTimeToLive(smsTimeOutSecond* DateUtil.SECOND);
+            CACHE.put(entry);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
 
@@ -98,19 +102,17 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         String timeKey = getTimesKey(mobile);
         boolean result = validateSmsCheck(mobile, code);
         if (result) {
-            RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
-            if (bucket != null) {
-                bucket.delete();
-            }
+            CACHE.remove(mobile);
         } else {
-            RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
-            Integer times = bucket.get();
+            CacheEntry entry  = CACHE.get(timeKey);
+            Integer times = (Integer)entry.getValue();
             if (times == null) {
                 times = 1;
             }
             times++;
-            bucket.set(times);
-            bucket.expire(10, TimeUnit.MINUTES);
+            entry.setValue(times);
+            entry.setTimeToLive(10 * DateUtil.MINUTE);
+            CACHE.put(entry);
         }
         return result;
     }
@@ -123,12 +125,11 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
     @Override
     public String querySms(String mobile)
     {
-        RMap<String, StringEntry> map = redissonClient.getMap(SMS_STORE_KEY);
-        StringEntry entry = map.get(mobile);
+        CacheEntry entry = CACHE.get(SMS_STORE_KEY);
         if (entry == null) {
             return StringUtil.empty;
         }
-        return entry.getValue();
+        return (String)entry.getValue();
     }
     /**
      * 正式的验证
@@ -140,15 +141,14 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         if (StringUtil.isEmpty(code)) {
             return false;
         }
-        RMap<String, StringEntry> map = redissonClient.getMap(SMS_STORE_KEY);
-        StringEntry entry = map.remove(mobile);
+        CacheEntry entry = CACHE.remove(mobile);
         if (entry == null) {
             return false;
         }
-        if (entry.isExpired(smsTimeOutSecond)) {
+        if (entry.isExpired()) {
             return false;
         }
-        String value = entry.getValue();
+        String value = (String)entry.getValue();
         if (StringUtil.isNull(value))
         {
             return false;
@@ -157,7 +157,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         {
             return code.equalsIgnoreCase(StringUtil.substringBetween(value,"[","]"));
         }
-        return code.equalsIgnoreCase(entry.getValue());
+        return code.equalsIgnoreCase(value);
     }
 
     /**
@@ -173,12 +173,16 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         {
             return false;
         }
-        StringEntry entry = new StringEntry();
-        entry.setKey(sessionId);
+        CacheEntry entry = new CacheEntry();
+        try {
+            entry.setKey(sessionId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         entry.setValue(code);
-        RMap<String, StringEntry> map = redissonClient.getMap(IMG_STORE_KEY);
-        map.put(entry.getKey(), entry);
-        return map.expire(imgTimeOutSecond, TimeUnit.SECONDS);
+        entry.setTimeToLive(imgTimeOutSecond*DateUtil.SECOND);
+        CACHE.put(entry);
+        return true;
     }
 
     /**
@@ -209,34 +213,39 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         if (!delete)
         {
             //注册的时候只验证不删除
-            RMap<String, StringEntry> map = redissonClient.getMap(IMG_STORE_KEY);
-            StringEntry entry = map.get(sessionId);
+            CacheEntry entry = CACHE.get(sessionId);
             if (entry == null) {
                 return false;
             }
-            if (entry.isExpired(imgTimeOutSecond)) {
+            if (entry.isExpired()) {
                 return false;
             }
-            return code.equalsIgnoreCase(entry.getValue());
+            return code.equalsIgnoreCase((String)entry.getValue());
         } else
         {
-
             String timeKey = getTimesKey(sessionId);
             boolean result = validateImgCheck(sessionId, code);
             if (result) {
-                RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
-                if (bucket != null) {
-                    bucket.delete();
-                }
+                CACHE.remove(timeKey);
             } else {
-                RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
-                Integer times = bucket.get();
+                CacheEntry entry = CACHE.get(timeKey);
+                if (entry==null)
+                {
+                    entry = new CacheEntry();
+                    try {
+                        entry.setKey(timeKey);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                Integer times = (Integer)entry.getValue();
                 if (times == null) {
                     times = 1;
                 }
                 times++;
-                bucket.set(times);
-                bucket.expire(10, TimeUnit.MINUTES);
+                entry.setValue(times);
+                entry.setTimeToLive(10*DateUtil.MINUTE);
+                CACHE.put(entry);
             }
             return result;
         }
@@ -247,15 +256,14 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         if (StringUtil.isEmpty(code)) {
             return false;
         }
-        RMap<String, StringEntry> map = redissonClient.getMap(IMG_STORE_KEY);
-        StringEntry entry = map.remove(sessionId);
+        CacheEntry entry = CACHE.get(sessionId);
         if (entry == null) {
             return false;
         }
-        if (entry.isExpired(imgTimeOutSecond)) {
+        if (entry.isExpired()) {
             return false;
         }
-        return code.equalsIgnoreCase(entry.getValue());
+        return code.equalsIgnoreCase((String)entry.getValue());
     }
 
     @Override
@@ -265,12 +273,20 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
             return false;
         }
         String key = EncryptUtil.getMd5(type+id);
-        StringEntry entry = new StringEntry();
-        entry.setKey(key);
+        CacheEntry entry = new CacheEntry();
+        try {
+            entry.setKey(key);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         entry.setValue(code);
-        RMap<String, StringEntry> map = redissonClient.getMap(GENERAL_VERIFY_KEY);
-        map.put(entry.getKey(), entry);
-        return map.expire(generalTimeOutSecond, TimeUnit.SECONDS);
+        /**
+         * 默认时间
+         */
+        int generalTimeOutSecond = 900;
+        entry.setTimeToLive(generalTimeOutSecond *DateUtil.SECOND);
+        CACHE.put(entry);
+        return true;
     }
 
     @Override
@@ -280,16 +296,14 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
             return false;
         }
         String key = EncryptUtil.getMd5(type+id);
-
-        RMap<String, StringEntry> map = redissonClient.getMap(GENERAL_VERIFY_KEY);
-        StringEntry entry = map.remove(key);
+        CacheEntry entry = CACHE.get(GENERAL_VERIFY_KEY + key);
         if (entry == null) {
             return false;
         }
-        if (entry.isExpired(generalTimeOutSecond)) {
+        if (entry.isExpired()) {
             return false;
         }
-        String value = entry.getValue();
+        String value = (String)entry.getValue();
         if (StringUtil.isNull(value))
         {
             return false;
@@ -298,7 +312,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         {
             return code.equalsIgnoreCase(StringUtil.substringBetween(value,"[","]"));
         }
-        boolean check = code.equalsIgnoreCase(entry.getValue());
+        boolean check = code.equalsIgnoreCase(value);
         if (!check)
         {
             log.info("code验证失败1:{}\r\n2:{}",code,entry.getValue());
@@ -309,29 +323,49 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
     @Override
     public int getTimes(String id) {
         String timeKey = getTimesKey(id);
-        RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
-        Integer times = bucket.get();
+        CacheEntry entry = CACHE.get(timeKey);
+        if (entry==null)
+        {
+             entry = new CacheEntry();
+            try {
+                entry.setKey(timeKey);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Integer times = (Integer)entry.getValue();
         if (times == null) {
             times = 0;
-            bucket.set(times);
-            bucket.expire(10, TimeUnit.MINUTES);
+            entry.setTimeToLive(10*DateUtil.MINUTE);
+            CACHE.put(entry);
         }
         return times;
     }
 
-   /**
+    /**
      * @param id 更新次数
      */
     @Override
     public void updateTimes(String id) {
         String timeKey = getTimesKey(id);
-        RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
-        Integer value = bucket.get();
+        CacheEntry entry = CACHE.get(timeKey);
+        if (entry==null)
+        {
+            entry = new CacheEntry();
+            try {
+                entry.setKey(timeKey);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Integer value = (Integer)entry.getValue();
         if (value==null)
         {
             value = 0;
         }
-        bucket.set(value + 1,10, TimeUnit.MINUTES);
+        entry.setValue(value + 1);
+        entry.setTimeToLive(10*DateUtil.MINUTE);
+        CACHE.put(entry);
     }
 
 

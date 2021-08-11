@@ -19,7 +19,7 @@ public class StringEntry implements Serializable, Cloneable {
     /**
      * 创建时间
      */
-    private long createTime = System.currentTimeMillis();
+    private final long createTime = System.currentTimeMillis();
 
     public String getKey() {
         return key;

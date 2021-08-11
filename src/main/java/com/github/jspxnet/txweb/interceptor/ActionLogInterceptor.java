@@ -31,16 +31,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Bean
 public class ActionLogInterceptor extends InterceptorSupport {
-    /**
-     * 载入在线管理
-     */
-    @Ref
-    private OnlineManager onlineManager;
+        /**
+         * 载入在线管理
+         */
+        @Ref
+        private OnlineManager onlineManager;
 
-    @Ref
-    private RedisStoreQueueClient redisStoreQueueClient;
+        @Ref
+        private RedisStoreQueueClient redisStoreQueueClient;
 
-    private boolean guestLog = false;
+        private boolean guestLog = false;
 
     /**
      *
