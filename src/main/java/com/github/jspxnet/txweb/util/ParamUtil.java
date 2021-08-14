@@ -88,9 +88,9 @@ public class ParamUtil {
                     boolean isSafe = ParamUtil.isSafe(value, 0, 200, level);
                     if (value != null && isSafe) {
                         if (i != 0) {
-                            queryString.append("&");
+                            queryString.append(StringUtil.AND);
                         }
-                        queryString.append(key).append("=").append(java.net.URLEncoder.encode(ParamUtil.getSafeFilter(value, 200, level), request.getCharacterEncoding()));
+                        queryString.append(key).append(StringUtil.EQUAL).append(java.net.URLEncoder.encode(ParamUtil.getSafeFilter(value, 200, level), request.getCharacterEncoding()));
                         i++;
                     }
                 }
@@ -108,9 +108,9 @@ public class ParamUtil {
                     boolean isSafe = ParamUtil.isSafe(value, 0, 200, level);
                     if (value != null & isSafe) {
                         if (i != 0) {
-                            queryString.append("&");
+                            queryString.append(StringUtil.AND);
                         }
-                        queryString.append(key).append("=").append(java.net.URLEncoder.encode(ParamUtil.getSafeFilter(value, 200, level), request.getCharacterEncoding()));
+                        queryString.append(key).append(StringUtil.EQUAL).append(java.net.URLEncoder.encode(ParamUtil.getSafeFilter(value, 200, level), request.getCharacterEncoding()));
                         i++;
                     }
                 }
@@ -616,7 +616,7 @@ public class ParamUtil {
                         }
                         Map<String, Object> valueMap = new HashMap<>();
                         String varName = StringUtil.substringBetween(paths[i], variableBegin, variableEnd);
-                        if (!StringUtil.isEmpty(varName) && !varName.contains("+") && !varName.contains("-") && !varName.contains("*") && !varName.contains(StringUtil.BACKSLASH) && !varName.contains("(")) {
+                        if (!StringUtil.isEmpty(varName) && !varName.contains("+") && !varName.contains("-") && !varName.contains(StringUtil.ASTERISK) && !varName.contains(StringUtil.BACKSLASH) && !varName.contains("(")) {
                             valueMap.put(varName, values[i]);
                         }
                         paramObj[i] = BeanUtil.getTypeValue(EnvFactory.getPlaceholder().processTemplate(valueMap, paths[i]), pType);

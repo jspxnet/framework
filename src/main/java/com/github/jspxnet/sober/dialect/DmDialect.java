@@ -173,7 +173,7 @@ public class DmDialect extends Dialect {
         String typeName = rs.getMetaData().getColumnTypeName(index).toLowerCase();
         int colSize = rs.getMetaData().getColumnDisplaySize(index);
         ///////大数值
-        if ("ROWID".equals(typeName)) {
+        if ("ROWID".equalsIgnoreCase(typeName)) {
             return rs.getString(index);
         }
 

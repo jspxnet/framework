@@ -191,7 +191,7 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public void setName(String name) {
-        cacheKey = StringUtil.replace(name, ".", ":");
+        cacheKey = StringUtil.replace(name, StringUtil.DOT, ":");
         super.setName(name);
     }
 

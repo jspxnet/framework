@@ -235,7 +235,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                     termKey.append(ObjectUtil.toString(po));
                 }
             }
-            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), "=", "_"),orderText.toString(),1,1, false);
+            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),orderText.toString(),1,1, false);
             result = JSCacheManager.get(criteriaClass, cacheKey);
             if (result != null) {
                 return result;
@@ -537,7 +537,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (termKey.toString().endsWith("_")) {
                 termKey.setLength(termKey.length() - 1);
             }
-            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), "=", "_"),orderText.toString(),iBegin,iEnd, loadChild);
+            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),orderText.toString(),iBegin,iEnd, loadChild);
             resultList = (List<T>) JSCacheManager.get(criteriaClass, cacheKey);
             if (resultList!=null) {
                 return resultList;
@@ -707,7 +707,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (termKey.toString().endsWith("_")) {
                 termKey.setLength(termKey.length() - 1);
             }
-            cacheKey = SoberUtil.getListKey(soberTable.getEntity(), StringUtil.replace(termText.toString(), "=", "_"),orderText.toString(),iBegin,iEnd,false);
+            cacheKey = SoberUtil.getListKey(soberTable.getEntity(), StringUtil.replace(termText.toString(), StringUtil.EQUAL, "_"),orderText.toString(),iBegin,iEnd,false);
             resultList = (List) JSCacheManager.get(criteriaClass, cacheKey);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
@@ -819,7 +819,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
          if (termKey.toString().endsWith("_")) {
             termKey.setLength(termKey.length() - 1);
         }
-        return StringUtil.substringBefore(SoberUtil.getListKey(soberTable.getEntity(), StringUtil.replace(termKey.toString(), "=", "_"),StringUtil.empty,1,1,false),"_T_")+"*";
+        return StringUtil.substringBefore(SoberUtil.getListKey(soberTable.getEntity(), StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),StringUtil.empty,1,1,false),"_T_")+StringUtil.ASTERISK;
     }
 
 }

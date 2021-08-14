@@ -49,7 +49,7 @@ import javax.swing.*;
  */
 
 @Slf4j
-public class ImageUtil {
+public final  class ImageUtil {
 
     public static final String[] EXIF_TAGS = {"Compression Type", "Data Precision", "Image Height", "Image Width",
             "Make", "Model", "Orientation", "X Resolution", "Y Resolution", "Resolution Unit", "Software", "Date/Time", "YCbCr Positioning", "Exposure Time", "F-Number", "ISO Speed Ratings",

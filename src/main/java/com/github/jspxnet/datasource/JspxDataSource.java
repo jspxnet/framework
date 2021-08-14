@@ -80,7 +80,6 @@ public class JspxDataSource extends DriverManagerDataSource {
     private String mailPassword = ""; //111111
     private String mailSendTo = ""; //39793751@qq.com
     private boolean isRun = true;
-  //  private static final Lock lock = new ReentrantLock(true);
 
     public JspxDataSource() {
     }
@@ -331,5 +330,4 @@ public class JspxDataSource extends DriverManagerDataSource {
             log.error("连接池线程异常", e);
         }
     }
-
 }

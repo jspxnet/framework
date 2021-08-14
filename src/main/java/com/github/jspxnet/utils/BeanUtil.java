@@ -28,7 +28,7 @@ import java.util.*;
  * com.jspx.jspx.test.utils.BeanUtil
  */
 @Slf4j
-public class BeanUtil {
+public final class BeanUtil {
     private final static LRUHashMap<String,BeanCopier> BEAN_COPIER_MAP = new LRUHashMap<>(30);
     private BeanUtil() {
 
@@ -59,8 +59,8 @@ public class BeanUtil {
             list.addAll((List) obj);
             return;
         }
-        if (methodName.contains(".")) {
-            methodName = methodName.substring(methodName.lastIndexOf("."));
+        if (methodName.contains(StringUtil.DOT)) {
+            methodName = methodName.substring(methodName.lastIndexOf(StringUtil.DOT));
         }
         if (methodName.startsWith("void")) {
             methodName = methodName.substring(5).trim();
@@ -94,7 +94,7 @@ public class BeanUtil {
                     (new java.beans.Expression(object, methodName, pObject)).execute();
                 }*/
             } catch (Exception e) {
-                log.error(object.getClass().getName() + "." + methodName + " setProperty  type=" + aType + " value=" + obj, e);
+                log.error(object.getClass().getName() + StringUtil.DOT + methodName + " setProperty  type=" + aType + " value=" + obj, e);
                 e.printStackTrace();
             }
         } else
@@ -142,7 +142,7 @@ public class BeanUtil {
                 field.set(object, pObject);
             }
         } catch (Exception e) {
-            log.error(object.getClass().getName() + "." + fieldName + " setValue  type=" + aType + " value=" + obj, e);
+            log.error(object.getClass().getName() + StringUtil.DOT + fieldName + " setValue  type=" + aType + " value=" + obj, e);
             e.printStackTrace();
         }
     }

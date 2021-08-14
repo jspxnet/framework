@@ -87,7 +87,7 @@ public abstract class JdbcOperations implements SoberSupport {
         if (iClass == null) {
             iClass = cls;
         }
-        return iClass.getName() + "." + stackTraceElement.getMethodName();
+        return iClass.getName() + StringUtil.DOT + stackTraceElement.getMethodName();
     }
 
     public JdbcOperations() {
@@ -2114,7 +2114,7 @@ public abstract class JdbcOperations implements SoberSupport {
             valueMap.put(Dialect.COLUMN_CAPTION, soberColumn.getCaption());
             String columnData = dialect.processTemplate(soberColumn.getClassType().getName(), valueMap);
             if (StringUtil.isEmpty(columnData) || columnData.length() < 4) {
-                log.error(soberTable.getName() + "." + soberColumn.getName() + "表结构定义有异常");
+                log.error(soberTable.getName() + StringUtil.DOT + soberColumn.getName() + "表结构定义有异常");
             }
             columns = ArrayUtil.add(columns, columnData);
             valueMap.clear();
@@ -2323,7 +2323,7 @@ public abstract class JdbcOperations implements SoberSupport {
         Object key = BeanUtil.getFieldValue(obj,soberTable.getPrimary(),false);
         SoberColumn soberColumn = soberTable.getColumn(soberTable.getPrimary());
         boolean isNum = ClassUtil.isNumberType(soberColumn.getClassType());
-        String sql = "UPDATE " + soberTable.getName() + " SET "+field+"=" + field + "+"+ num +" WHERE " + soberTable.getPrimary() + "="+(isNum?key:StringUtil.quoteSql((String)key));
+        String sql = "UPDATE " + soberTable.getName() + " SET "+field+StringUtil.EQUAL + field + "+"+ num +" WHERE " + soberTable.getPrimary() + StringUtil.EQUAL+(isNum?key:StringUtil.quoteSql((String)key));
         int x = update(sql);
         if (soberTable.isUseCache())
         {
@@ -2473,7 +2473,7 @@ public abstract class JdbcOperations implements SoberSupport {
                 if (expression.startsWith(" ")) {
                     expression = expression.trim();
                 } else {
-                    expression = soberColumn.getName() + "." + expression;
+                    expression = soberColumn.getName() + StringUtil.DOT + expression;
                 }
                 if (!expression.endsWith(")")) {
                     expression = expression + "()";
@@ -2618,7 +2618,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public void evict(Class<?> cla) {
         if (soberFactory.isUseCache()) {
-            JSCacheManager.queryRemove(cla, cla.getName() + "*");
+            JSCacheManager.queryRemove(cla, cla.getName() + StringUtil.ASTERISK);
         }
     }
 
@@ -2630,7 +2630,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public void evictList(Class<?> cla) {
         if (soberFactory.isUseCache()) {
-            JSCacheManager.queryRemove(cla, cla.getName() + SoberUtil.CACHE_TREM_LIST + "*");
+            JSCacheManager.queryRemove(cla, cla.getName() + SoberUtil.CACHE_TREM_LIST + StringUtil.ASTERISK);
         }
     }
 
@@ -2641,7 +2641,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public void evictLoad(Class<?> cla) {
         if (soberFactory.isUseCache()) {
-            JSCacheManager.queryRemove(cla, cla.getName() + SoberUtil.CACHE_TREM_LOAD + "*");
+            JSCacheManager.queryRemove(cla, cla.getName() + SoberUtil.CACHE_TREM_LOAD + StringUtil.ASTERISK);
         }
     }
 
@@ -2656,7 +2656,7 @@ public abstract class JdbcOperations implements SoberSupport {
     public void evictLoad(Class<?> cla, String field, Serializable id) {
         if (soberFactory.isUseCache()) {
             String cacheKey = SoberUtil.getLoadKey(cla, field, id, true);
-            cacheKey = StringUtil.substringBefore(cacheKey,SoberUtil.CACHE_TREM_CHILD) + "*";
+            cacheKey = StringUtil.substringBefore(cacheKey,SoberUtil.CACHE_TREM_CHILD) + StringUtil.ASTERISK;
             JSCacheManager.queryRemove(cla, cacheKey);
         }
     }

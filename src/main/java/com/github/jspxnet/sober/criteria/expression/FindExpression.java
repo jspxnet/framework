@@ -469,7 +469,7 @@ public class FindExpression implements Criterion {
                 }
             } else {
                 if (ClassUtil.isNumberType(value[i].getClass())) {
-                    sb.append(propertyName[i]).append("=").append(find);
+                    sb.append(propertyName[i]).append(StringUtil.EQUAL).append(find);
                     if (or) {
                         sb.append(" OR ");
                     } else {

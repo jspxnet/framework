@@ -20,7 +20,11 @@ import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.net.ServerSocket;
 
-public class SystemUtil {
+public final class SystemUtil {
+    private SystemUtil()
+    {
+
+    }
     /**
      * Operating system state flag for error.
      */
@@ -269,7 +273,7 @@ public class SystemUtil {
         if (!hexStr.startsWith("cafebabe")) {
             return 0;
         }
-        return StringUtil.toInt(Integer.parseInt(hexStr.substring(8, 16), 16) + "." + minor_version);
+        return StringUtil.toInt(Integer.parseInt(hexStr.substring(8, 16), 16) + StringUtil.DOT + minor_version);
     }
 
     /**

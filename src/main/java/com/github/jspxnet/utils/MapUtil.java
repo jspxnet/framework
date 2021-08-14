@@ -91,9 +91,9 @@ public class MapUtil {
         StringBuilder result = new StringBuilder();
         for (String key : map.keySet()) {
             String value = (String) map.get(key);
-            result.append(key).append("=").append(URLUtil.getUrlEncoder(value, Environment.defaultEncode)).append("&");
+            result.append(key).append(StringUtil.EQUAL).append(URLUtil.getUrlEncoder(value, Environment.defaultEncode)).append(StringUtil.AND);
         }
-        if (result.toString().endsWith("&")) {
+        if (result.toString().endsWith(StringUtil.AND)) {
             result.setLength(result.length() - 1);
         }
         return result.toString();
@@ -153,7 +153,7 @@ public class MapUtil {
         }
         Arrays.sort(key);
         for (String s : key) {
-            sb += s + "=" + map.get(s) + "&";
+            sb += s + StringUtil.EQUAL + map.get(s) + StringUtil.AND;
         }
         sb = sb.substring(0, sb.length() - 1);
         // 将得到的字符串进行处理得到目标格式的字符串
@@ -162,7 +162,7 @@ public class MapUtil {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }// 使用常见的UTF-8编码
-        return sb.replace("%3D", "=").replace("%26", "&");
+        return sb.replace("%3D", StringUtil.EQUAL).replace("%26", StringUtil.AND);
     }
 
     /**
@@ -180,11 +180,11 @@ public class MapUtil {
 
                 if (!ObjectUtil.isEmpty(params.get(s))) {
                     String value = params.get(s).toString();
-                    prestr.append(s).append("=").append(value).append("&");
+                    prestr.append(s).append(StringUtil.EQUAL).append(value).append(StringUtil.AND);
                 }
             }
         }
-        if ("&".equals(prestr.substring(prestr.length() - 1))) {
+        if (StringUtil.AND.equals(prestr.substring(prestr.length() - 1))) {
             prestr = new StringBuilder(prestr.substring(0, prestr.length() - 1));
         }
         return prestr.toString();
@@ -201,15 +201,15 @@ public class MapUtil {
                 if (!ObjectUtil.isEmpty(params.get(key))) {
                     String value = params.get(key).toString();
                     if (i == keys.size() - 1) {
-                        prestr.append(key).append("=").append(value);
+                        prestr.append(key).append(StringUtil.EQUAL).append(value);
                     } else {
-                        prestr.append(key).append("=").append(value).append("&");
+                        prestr.append(key).append(StringUtil.EQUAL).append(value).append(StringUtil.AND);
                     }
                 }
             }
         }
 
-        if (prestr.toString().endsWith("&")) {
+        if (prestr.toString().endsWith(StringUtil.AND)) {
             prestr = new StringBuilder(prestr.substring(0, prestr.length() - 1));
         }
 
@@ -230,7 +230,7 @@ public class MapUtil {
             name = iter.next();
             String value = String.valueOf(map.get(name));
             if (!"sign".equalsIgnoreCase(name) && StringUtils.isNotBlank(name) && StringUtils.isNotBlank(value)) {
-                sb.append(name).append("=").append(value).append("&");
+                sb.append(name).append(StringUtil.EQUAL).append(value).append(StringUtil.AND);
             }
         }
 

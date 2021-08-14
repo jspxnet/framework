@@ -21,7 +21,7 @@ import java.io.ByteArrayInputStream;
  * date: 2004-9-1
  * Time: 18:09:17
  */
-public class FontUtil {
+public final  class FontUtil {
     private FontUtil() {
 
     }

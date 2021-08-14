@@ -41,6 +41,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.github.jspxnet.utils.StringUtil;
+
 /**
  * Convert a web browser cookie specification transfer a JSONObject and back.
  * JSON and Cookies are both notations for name/value pairs.
@@ -140,7 +142,7 @@ public class Cookie {
         StringBuilder sb = new StringBuilder();
 
         sb.append(escape(jo.getString("name")));
-        sb.append("=");
+        sb.append(StringUtil.EQUAL);
         sb.append(escape(jo.getString("value")));
         if (jo.has("expires")) {
             sb.append(";expires=");

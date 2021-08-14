@@ -366,7 +366,7 @@ public class ScriptMarkUtil {
 
     public static final String PARENT_PATH = "..";
 
-    public static final String CURRENT_PATH = ".";
+    public static final String CURRENT_PATH = StringUtil.DOT;
 
     /**
      * 清理相对路径. 处理"../"和"./"相对于根目录"/"的正确路径.

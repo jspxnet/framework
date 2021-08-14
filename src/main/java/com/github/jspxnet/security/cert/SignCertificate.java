@@ -34,6 +34,7 @@ import java.security.*;
 import java.util.*;
 
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.utils.StringUtil;
 import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
 import sun.security.x509.X500Name;
@@ -92,16 +93,16 @@ public class SignCertificate {
 
         byte[] encoded = caCert.getEncoded();
         X509CertImpl caCertImpl = new X509CertImpl(encoded);
-        X509CertInfo caCertInfo = (X509CertInfo) caCertImpl.get(X509CertImpl.NAME + "." + X509CertImpl.INFO);
+        X509CertInfo caCertInfo = (X509CertInfo) caCertImpl.get(X509CertImpl.NAME + StringUtil.DOT + X509CertImpl.INFO);
 
-        X500Name issuer = (X500Name) caCertInfo.get(X509CertInfo.SUBJECT + "." + CertificateIssuerName.DN_NAME);
+        X500Name issuer = (X500Name) caCertInfo.get(X509CertInfo.SUBJECT + StringUtil.DOT + CertificateIssuerName.DN_NAME);
 
         //得到用CA签名的证书
         java.security.cert.Certificate cert = keyStore.getCertificate(certToSignAlias);
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(certToSignAlias, certPassword);
         encoded = cert.getEncoded();
         X509CertImpl certImpl = new X509CertImpl(encoded);
-        X509CertInfo certInfo = (X509CertInfo) certImpl.get(X509CertImpl.NAME + "." + X509CertImpl.INFO);
+        X509CertInfo certInfo = (X509CertInfo) certImpl.get(X509CertImpl.NAME + StringUtil.DOT + X509CertImpl.INFO);
 
 
         Date firstDate = new Date();
@@ -114,10 +115,10 @@ public class SignCertificate {
         certInfo.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber((int) (firstDate.getTime() / 1000)));
 
         // 发行者
-        certInfo.set(X509CertInfo.ISSUER + "." + CertificateSubjectName.DN_NAME, issuer);
+        certInfo.set(X509CertInfo.ISSUER + StringUtil.DOT + CertificateSubjectName.DN_NAME, issuer);
 
         AlgorithmId algorithm = new AlgorithmId(AlgorithmId.md5WithRSAEncryption_oid);
-        certInfo.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algorithm);
+        certInfo.set(CertificateAlgorithmId.NAME + StringUtil.DOT + CertificateAlgorithmId.ALGORITHM, algorithm);
         X509CertImpl newCert = new X509CertImpl(certInfo);
 
         // 签名此证书

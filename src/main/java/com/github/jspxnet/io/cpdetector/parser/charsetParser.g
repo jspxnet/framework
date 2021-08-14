@@ -160,7 +160,7 @@ XML_ENCODING_DECL options{ignore=SPACING;}
     	// -> VersionInfo
     	"version"! 
     	// <-> Eq
-    	"="!
+    	StringUtil.EQUAL!
     	// <- VersionInfo
     	// -> VersionNum
     	// <- VersionInfo
@@ -174,7 +174,7 @@ XML_ENCODING_DECL options{ignore=SPACING;}
      // -> EncodingDecl
      "encoding"! 
      // <-> Eq
-     "="! 
+     StringUtil.EQUAL!
      // <-> EncName
     (
       "'"! IDENTIFIER "'"!

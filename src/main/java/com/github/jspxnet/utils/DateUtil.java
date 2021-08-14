@@ -22,7 +22,7 @@ import java.sql.Time;
  * Time: 18:03:15
  * 日期处理单元
  */
-public class DateUtil {
+public final  class DateUtil {
     public static final int SECOND = 1000;
     public static final int MINUTE = SECOND * 60;
     public static final int HOUR = MINUTE * 60;

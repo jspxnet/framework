@@ -104,7 +104,7 @@ public class FormatParsing {
                 continue;
             }
             if (lines[i].startsWith("AT+CMGR=")) {
-                int messageId = StringUtil.toInt(StringUtil.trim(StringUtil.substringAfter(lines[i], "=")));
+                int messageId = StringUtil.toInt(StringUtil.trim(StringUtil.substringAfter(lines[i], StringUtil.EQUAL)));
                 smsMessageIn.setMessageId(messageId);
             } else if (lines[i].startsWith("+CMGR")) {
                 String[] headLines = StringUtil.split(StringUtil.substringAfter(lines[i], ":"), ",");

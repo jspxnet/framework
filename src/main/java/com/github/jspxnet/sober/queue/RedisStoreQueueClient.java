@@ -9,7 +9,9 @@ import org.redisson.api.RQueue;
 
 /**
  * 这里将需要保存到数据库的数据保存的redis
+ * 不建议是用这个,最好还是是用消息队列
  */
+@Deprecated
 @Bean(bind = RedisStoreQueueClient.class, singleton = true)
 @Slf4j
 public class RedisStoreQueueClient extends BaseRedisStoreQueue {

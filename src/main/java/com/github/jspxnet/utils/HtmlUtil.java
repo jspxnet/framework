@@ -34,7 +34,7 @@ import static java.util.regex.Pattern.compile;
  * date: 2007-4-27
  * Time: 16:49:17
  */
-public class HtmlUtil {
+public final class HtmlUtil {
 
     final private static String[] extType =
             {
@@ -117,7 +117,7 @@ public class HtmlUtil {
         int skip = 0;
         do {
             continueLoop = false;
-            i = source.indexOf("&", skip);
+            i = source.indexOf(StringUtil.AND, skip);
             if (i > -1) {
                 j = source.indexOf(";", i);
                 if (j > i && j - i < 9) {
@@ -175,9 +175,9 @@ public class HtmlUtil {
             if (title == null && line.contains("[") && line.contains("]")) {
                 title = StringUtil.substringBetween(line, "[", "]");
             } else {
-                String name = StringUtil.substringBefore(line, "=");
-                String testValue = StringUtil.substringAfter(line, "=");
-                if (testValue != null && testValue.contains(".")) {
+                String name = StringUtil.substringBefore(line, StringUtil.EQUAL);
+                String testValue = StringUtil.substringAfter(line, StringUtil.EQUAL);
+                if (testValue != null && testValue.contains(StringUtil.DOT)) {
                     decimal = 2;
                 }
                 dataMap.put(StringUtil.trim(name), StringUtil.toFloat(testValue));
@@ -220,7 +220,7 @@ public class HtmlUtil {
     public String[] getFileTypeArray(String html) {
         String[] result = null;
         for (String type : extType) {
-            if (getHaveType(html, "." + type) != -1) {
+            if (getHaveType(html, StringUtil.DOT + type) != -1) {
                 result = ArrayUtil.add(result, type);
             }
         }

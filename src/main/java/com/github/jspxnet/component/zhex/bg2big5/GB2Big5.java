@@ -113,7 +113,7 @@ public class GB2Big5 {
      */
     private GB2Big5() throws NullPointerException {
         twZhUesdMap = new StringMap<>();
-        twZhUesdMap.setKeySplit("=");
+        twZhUesdMap.setKeySplit(StringUtil.EQUAL);
         twZhUesdMap.setLineSplit("\r\n");
 
         InputStream inputStream = GB2Big5.class.getResourceAsStream(zhtwusedFile);

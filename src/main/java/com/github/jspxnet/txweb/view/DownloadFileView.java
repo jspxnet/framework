@@ -244,14 +244,14 @@ public class DownloadFileView extends ActionSupport {
         //下载时候需要的文件名方式
         //以id方式命名
         if (NAME_TYPE_ID.equalsIgnoreCase(nameType)) {
-            response.setHeader(RequestUtil.requestContentDisposition, "attachment;filename=" + uploadFile.getId() + "." + fileType);
+            response.setHeader(RequestUtil.requestContentDisposition, "attachment;filename=" + uploadFile.getId() + StringUtil.DOT + fileType);
         } else
             //以文件名方式命名
             if (NAME_TYPE_NAME.equalsIgnoreCase(nameType)) {
-                response.setHeader(RequestUtil.requestContentDisposition, "attachment;filename=" + URLEncoder.encode(uploadFile.getTitle(), "UTF-8") + "." + fileType);
+                response.setHeader(RequestUtil.requestContentDisposition, "attachment;filename=" + URLEncoder.encode(uploadFile.getTitle(), "UTF-8") + StringUtil.DOT + fileType);
             } else {
                 //以hash方式
-                response.setHeader(RequestUtil.requestContentDisposition, "attachment;filename=" + uploadFile.getHash() + "." + fileType);
+                response.setHeader(RequestUtil.requestContentDisposition, "attachment;filename=" + uploadFile.getHash() + StringUtil.DOT + fileType);
             }
         //-----------------------------------------------------
         downloadUser++;

@@ -208,7 +208,7 @@ public class UploadFileView extends ActionSupport {
         if (uploadFileDAO == null || uploadFileDAO.getClassType() == null) {
             log.error("配置类对象uploadFileDAO不存在,请检查是否有重复的配置，或者配置不存在");
         }
-        String classname = StringUtil.uncapitalize(StringUtil.substringAfterLast(uploadFileDAO.getClassType().getName(), "."));
+        String classname = StringUtil.uncapitalize(StringUtil.substringAfterLast(uploadFileDAO.getClassType().getName(), StringUtil.DOT));
         put(classname, getUploadFile());
         put("namespace", uploadFileDAO.getNamespace());
         put("role", getRole());

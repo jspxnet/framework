@@ -3,6 +3,7 @@ package com.github.jspxnet.network.oss.adapter;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.RandomUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -23,7 +24,7 @@ public abstract class BaseCloudFile {
      * @return 返回一个云文件路径
      */
     protected String fixCloudPath(String fileName) {
-        return DateUtil.getYear() + "/" + DateUtil.getMonth() + "/" + DateUtil.getDate() + "/" + RandomUtil.getRandomGUID(18) + "." + FileUtil.getTypePart(fileName);
+        return DateUtil.getYear() + "/" + DateUtil.getMonth() + "/" + DateUtil.getDate() + "/" + RandomUtil.getRandomGUID(18) + StringUtil.DOT + FileUtil.getTypePart(fileName);
     }
 
 

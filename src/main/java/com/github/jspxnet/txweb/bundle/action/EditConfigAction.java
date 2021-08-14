@@ -61,9 +61,9 @@ public class EditConfigAction extends ConfigView {
                 String value = getString(key);
                 if (value != null) {
                     isSave = config.save(key, value, encrypt);
-                    sb.append(key).append("=").append(value).append(StringUtil.CRLF);
+                    sb.append(key).append(StringUtil.EQUAL).append(value).append(StringUtil.CRLF);
                     if (!isSave) {
-                        addFieldInfo(key, language.getLang(LanguageRes.saveFailure) + ":" + key + "=" + value);
+                        addFieldInfo(key, language.getLang(LanguageRes.saveFailure) + ":" + key + StringUtil.EQUAL + value);
                         break;
                     }
                 }

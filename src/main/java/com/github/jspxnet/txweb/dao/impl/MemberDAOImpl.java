@@ -413,8 +413,8 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
         }
         LoginLog loginLog0 = list.get(0);
         LoginLog loginLog1 = list.get(1);
-        String a = StringUtil.substringBeforeLast(loginLog0.getIp(), ".");
-        String b = StringUtil.substringBeforeLast(loginLog1.getIp(), ".");
+        String a = StringUtil.substringBeforeLast(loginLog0.getIp(), StringUtil.DOT);
+        String b = StringUtil.substringBeforeLast(loginLog1.getIp(), StringUtil.DOT);
         return !a.equalsIgnoreCase(b);
     }
 
@@ -800,7 +800,7 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
                         sb.append(role.getUploadFolder()).append("/").append(member.getId()).append("/");
                     }
                     String userName = member.getName();
-                    userName = StringUtil.replace(userName, ".", "_");
+                    userName = StringUtil.replace(userName, StringUtil.DOT, "_");
                     userName = StringUtil.replace(userName, ",", "-");
                     p.setProperty("ftp.server.user." + userName, StringUtil.replace(StringUtil.convertCR(sb.toString()), StringUtil.CR, ""));
                 }

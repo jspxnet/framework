@@ -47,7 +47,7 @@ public class FileScanner implements ScanJar {
                 //文件夹我们就递归
                 File[] files = file.listFiles();
                 if (!flag) {
-                    packageName = packageName + "." + file.getName();
+                    packageName = packageName + StringUtil.DOT + file.getName();
                 }
 
                 assert files != null;
@@ -60,7 +60,7 @@ public class FileScanner implements ScanJar {
                     //如果是class文件我们就放入我们的集合中。
                     try {
 
-                        String className = packageName + "." + file.getName().substring(0, file.getName().lastIndexOf("."));
+                        String className = packageName + StringUtil.DOT + file.getName().substring(0, file.getName().lastIndexOf(StringUtil.DOT));
                         Class<?> clazz = Class.forName(className);
                         if (predicate == null || predicate.test(clazz)) {
                             classPaths.add(clazz);
@@ -79,7 +79,7 @@ public class FileScanner implements ScanJar {
     public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath) {
         //先把包名转换为路径,首先得到项目的classpath
         //然后把我们的包名basPack转换为路径名
-        String basePackPath = packageName.replace(".", File.separator);
+        String basePackPath = packageName.replace(StringUtil.DOT, File.separator);
         return new ClassSearcher().doPath(new File(defaultPath,basePackPath), packageName, predicate, true);
     }
 

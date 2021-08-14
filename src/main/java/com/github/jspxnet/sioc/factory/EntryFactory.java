@@ -423,7 +423,7 @@ public final class EntryFactory implements BeanFactory {
                     if (val.value().startsWith("$")) {
                         String[] varNames = StringUtil.getFreeMarkerVar(val.value());
                         //有点的会被当成子对象
-                        if (varNames[0].contains("."))
+                        if (varNames[0].contains(StringUtil.DOT))
                         {
                             valueStr = (String) valueMap.get(varNames[0]);
                         }

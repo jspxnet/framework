@@ -628,6 +628,9 @@ public class EncryptUtil {
                 case 'F':
                     result.append("1111");
                     break;
+                default:{
+                    break;
+                }
             }
         }
         return result.toString();

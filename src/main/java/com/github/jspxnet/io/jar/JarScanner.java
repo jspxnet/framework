@@ -3,6 +3,8 @@ package com.github.jspxnet.io.jar;
 import com.github.jspxnet.io.ScanJar;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
@@ -25,7 +27,7 @@ public class JarScanner implements ScanJar {
         Set<Class<?>> classes = new HashSet<>();
         try {
             //通过当前线程得到类加载器从而得到URL的枚举
-            Enumeration<URL> urlEnumeration = Thread.currentThread().getContextClassLoader().getResources(packageName.replace(".", "/"));
+            Enumeration<URL> urlEnumeration = Thread.currentThread().getContextClassLoader().getResources(packageName.replace(StringUtil.DOT, StringUtil.BACKSLASH));
             while (urlEnumeration.hasMoreElements()) {
                 URL url = urlEnumeration.nextElement();//得到的结果大概是：jar:file:/C:/Users/ibm/.m2/repository/junit/junit/4.12/junit-4.12.jar!/org/junit
                 String protocol = url.getProtocol();//大概是jar
@@ -46,14 +48,14 @@ public class JarScanner implements ScanJar {
                                 JarEntry entry = jarEntryEnumeration.nextElement();
                                 String jarEntryName = entry.getName();
                                 //这里我们需要过滤不是class文件和不在basePack包名下的类
-                                String tempName = jarEntryName.replaceAll("/", ".");
-                                if (tempName.endsWith("."))
+                                String tempName = jarEntryName.replaceAll("/", StringUtil.DOT);
+                                if (tempName.endsWith(StringUtil.DOT))
                                 {
                                     tempName = tempName.substring(0,tempName.length()-1);
                                 }
                                 if (tempName.contains(".class") && tempName.startsWith(packageName)&&!ArrayUtil.containsChildIgnore(NO_SEARCH_CLASS,packageName))
                                 {
-                                    String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replace("/", ".");
+                                    String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(StringUtil.DOT)).replace("/", StringUtil.DOT);
                                     Class<?> cls = ClassUtil.loadClass(className);
                                     if (predicate == null || predicate.test(cls)) {
                                         classes.add(cls);
@@ -65,7 +67,7 @@ public class JarScanner implements ScanJar {
                     }
                 } else if ("file".equalsIgnoreCase(protocol)) {
                     FileScanner fileScanner = new FileScanner();
-                    classes.addAll(fileScanner.search(packageName, predicate, url.getPath().replace(packageName.replace(".", "/"), "")));
+                    classes.addAll(fileScanner.search(packageName, predicate, url.getPath().replace(packageName.replace(StringUtil.DOT, "/"), "")));
                 }
             }
         } catch (Exception e) {

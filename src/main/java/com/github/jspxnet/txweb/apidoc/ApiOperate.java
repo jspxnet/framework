@@ -67,7 +67,7 @@ public class ApiOperate implements Serializable {
                             jsonParam.put(apiParam.getName(), apiParam.getCaption());
                         } else
                         {
-                            if (apiParam.getFiledType().equalsIgnoreCase("JSONObject"))
+                            if ("JSONObject".equalsIgnoreCase(apiParam.getFiledType()))
                             {
                                 jsonParam.put(apiParam.getName(), apiParam.getCaption());
                             } else
@@ -93,7 +93,7 @@ public class ApiOperate implements Serializable {
                             jsonParam.put(apiParam.getName(), apiParam.getCaption());
                         } else
                         {
-                            if (apiParam.getFiledType().equalsIgnoreCase("JSONObject"))
+                            if ("JSONObject".equalsIgnoreCase(apiParam.getFiledType()))
                             {
                                 jsonParam.put(apiParam.getName(), apiParam.getCaption());
                             } else
@@ -121,7 +121,7 @@ public class ApiOperate implements Serializable {
                     paramJson.put(apiParam.getName(), apiParam.getCaption());
                 } else
                 {
-                    if (apiParam.getFiledType().equalsIgnoreCase("JSONObject"))
+                    if ("JSONObject".equalsIgnoreCase(apiParam.getFiledType()))
                     {
                         paramJson.put(apiParam.getName(), apiParam.getCaption());
                     } else

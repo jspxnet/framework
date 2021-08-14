@@ -142,7 +142,7 @@ public class SSqlExpression {
             }
             String lastV = value.substring(sb.length() + 1);
             return Expression.between(field, sb.toString(), lastV);
-        } else if ("=".equalsIgnoreCase(expression) || "eq".equalsIgnoreCase(expression)) {
+        } else if (StringUtil.EQUAL.equalsIgnoreCase(expression) || "eq".equalsIgnoreCase(expression)) {
             return Expression.eq(field, fValue);
         } else if (">".equalsIgnoreCase(expression) || "gt".equalsIgnoreCase(expression)) {
             return Expression.gt(field, fValue);

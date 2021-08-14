@@ -11,7 +11,6 @@ package com.github.jspxnet.utils;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.security.utils.EncryptUtil;
-
 import java.io.*;
 import java.util.zip.*;
 
@@ -19,7 +18,7 @@ import java.util.zip.*;
 /**
  * Provides useful methods dealing with zip compression
  */
-public class ZipUtil {
+public final class ZipUtil {
 
     /**
      * Compresses data

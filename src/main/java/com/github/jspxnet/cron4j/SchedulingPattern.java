@@ -184,7 +184,7 @@ public class SchedulingPattern {
 			} catch (Exception e) {
 				throw new InvalidPatternException("invalid pattern \""
 						+ localPattern + "\". Error parsing minutes field: "
-						+ e.getMessage() + ".");
+						+ e.getMessage() + StringUtil.DOT);
 			}
 			
 			try {
@@ -192,14 +192,14 @@ public class SchedulingPattern {
 			} catch (Exception e) {
 				throw new InvalidPatternException("invalid pattern \""
 						+ localPattern + "\". Error parsing minutes field: "
-						+ e.getMessage() + ".");
+						+ e.getMessage() + StringUtil.DOT);
 			}
 			try {
 				hourMatchers.add(buildValueMatcher(st2.nextToken(), HOUR_VALUE_PARSER));
 			} catch (Exception e) {
 				throw new InvalidPatternException("invalid pattern \""
 						+ localPattern + "\". Error parsing hours field: "
-						+ e.getMessage() + ".");
+						+ e.getMessage() + StringUtil.DOT);
 			}
 			try {
 				dayOfMonthMatchers.add(buildValueMatcher(st2.nextToken(), DAY_OF_MONTH_VALUE_PARSER));
@@ -207,14 +207,14 @@ public class SchedulingPattern {
 				throw new InvalidPatternException("invalid pattern \""
 						+ localPattern
 						+ "\". Error parsing days of month field: "
-						+ e.getMessage() + ".");
+						+ e.getMessage() + StringUtil.DOT);
 			}
 			try {
 				monthMatchers.add(buildValueMatcher(st2.nextToken(), MONTH_VALUE_PARSER));
 			} catch (Exception e) {
 				throw new InvalidPatternException("invalid pattern \""
 						+ localPattern + "\". Error parsing months field: "
-						+ e.getMessage() + ".");
+						+ e.getMessage() + StringUtil.DOT);
 			}
 			try {
 				dayOfWeekMatchers.add(buildValueMatcher(st2.nextToken(), DAY_OF_WEEK_VALUE_PARSER));
@@ -222,7 +222,7 @@ public class SchedulingPattern {
 				throw new InvalidPatternException("invalid pattern \""
 						+ localPattern
 						+ "\". Error parsing days of week field: "
-						+ e.getMessage() + ".");
+						+ e.getMessage() + StringUtil.DOT);
 			}
 			matcherSize++;
 		}

@@ -115,13 +115,13 @@ public class ValidateExpImgView extends ActionSupport {
         String viewCode = "";
         if (A > B) {
             C = A - B;
-            viewCode = NumberUtil.toString(A) + "-" + NumberUtil.toString(B) + "=";
+            viewCode = NumberUtil.toString(A) + "-" + NumberUtil.toString(B) + StringUtil.EQUAL;
         } else if (A < 9 && B < 9 || A.equals(B)) {
             C = A * B;
-            viewCode = NumberUtil.toString(A) + "X" + NumberUtil.toString(B) + "=";
+            viewCode = NumberUtil.toString(A) + "X" + NumberUtil.toString(B) + StringUtil.EQUAL;
         } else {
             C = A + B;
-            viewCode = NumberUtil.toString(A) + "+" + NumberUtil.toString(B) + "=";
+            viewCode = NumberUtil.toString(A) + "+" + NumberUtil.toString(B) + StringUtil.EQUAL;
         }
 
         PhotoString validateCode = new PhotoString(width, height, new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(bgColor, "#", "")), 16)), StringUtil.isNull(color) ? null : new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(color, "#", "")), 16)), viewCode);

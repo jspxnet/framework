@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  * date: 2005-9-22
  * Time: 10:26:32
  */
-public class URLUtil {
+public final class URLUtil {
     private URLUtil() {
 
     }
@@ -92,10 +92,10 @@ public class URLUtil {
      */
     static public String getFileType(String url) {
         String fileName = getFileName(url);
-        if (!url.contains(".")) {
+        if (!url.contains(StringUtil.DOT)) {
             return StringUtil.empty;
         }
-        return fileName.substring(fileName.lastIndexOf(".") + 1);
+        return fileName.substring(fileName.lastIndexOf(StringUtil.DOT) + 1);
     }
 
     /**
@@ -156,10 +156,10 @@ public class URLUtil {
         if (null == fileName) {
             return StringUtil.empty;
         }
-        if (!fileName.contains(".")) {
+        if (!fileName.contains(StringUtil.DOT)) {
             return fileName;
         }
-        return fileName.substring(0, fileName.lastIndexOf("."));
+        return fileName.substring(0, fileName.lastIndexOf(StringUtil.DOT));
     }
 
     /**
@@ -244,10 +244,10 @@ public class URLUtil {
         }
 
         result = StringUtil.replace(result, "?", ",");
-        result = StringUtil.replace(result, "=", "_");
-        result = StringUtil.replace(result, "&", ";");
-        result = StringUtil.replace(result, ".", "-");
-        return result + "." + fileType;
+        result = StringUtil.replace(result, StringUtil.EQUAL, "_");
+        result = StringUtil.replace(result, StringUtil.AND, ";");
+        result = StringUtil.replace(result, StringUtil.DOT, "-");
+        return result + StringUtil.DOT + fileType;
     }
 
     /**
@@ -259,13 +259,13 @@ public class URLUtil {
         if (urlFileName == null) {
             return StringUtil.empty;
         }
-        if (!urlFileName.endsWith("." + fileType)) {
+        if (!urlFileName.endsWith(StringUtil.DOT + fileType)) {
             return urlFileName;
         }
         String result = urlFileName.substring(0, urlFileName.length() - 5);
-        result = StringUtil.replace(result, "-", ".");
-        result = StringUtil.replace(result, ";", "&");
-        result = StringUtil.replace(result, "_", "=");
+        result = StringUtil.replace(result, "-", StringUtil.DOT);
+        result = StringUtil.replace(result, ";", StringUtil.AND);
+        result = StringUtil.replace(result, "_", StringUtil.EQUAL);
         return StringUtil.replace(result, ",", "?");
     }
 

@@ -561,7 +561,7 @@ final public class NumberUtil {
             while (s.endsWith("0")) {
                 s = s.substring(0, s.length() - 1);
             }
-            if (s.endsWith(".")) {
+            if (s.endsWith(StringUtil.DOT)) {
                 s = s.substring(0, s.length() - 1);
             }
         }
@@ -578,7 +578,7 @@ final public class NumberUtil {
             while (s.endsWith("0")) {
                 s = s.substring(0, s.length() - 1);
             }
-            if (s.endsWith(".")) {
+            if (s.endsWith(StringUtil.DOT)) {
                 s = s.substring(0, s.length() - 1);
             }
         }
@@ -596,7 +596,7 @@ final public class NumberUtil {
             return 0;
         }
         String string = bigDecimal.stripTrailingZeros().toPlainString();
-        int index = string.indexOf(".");
+        int index = string.indexOf(StringUtil.DOT);
         return index < 0 ? 0 : string.length() - index - 1;
     }
 

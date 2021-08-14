@@ -140,7 +140,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
         String exeId = sqlMap.id();
         if (StringUtil.isNull(exeId))
         {
-            exeId = ClassUtil.getImplements(targetClass).getName() + "." +exeMethod.getName();
+            exeId = ClassUtil.getImplements(targetClass).getName() + StringUtil.DOT +exeMethod.getName();
         }
         proxy.invokeSuper(obj, arg);
 

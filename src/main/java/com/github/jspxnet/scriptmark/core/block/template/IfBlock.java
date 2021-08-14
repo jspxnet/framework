@@ -70,7 +70,7 @@ public class IfBlock extends TagNode implements BaseIfBlock {
             return null;
         }
         return ScriptMarkUtil.deleteQuote(s.replaceAll(" lt ", "<").replaceAll(" le ", "<=").replaceAll(" gt ", ">").replaceAll(" ge ", ">=")).replaceAll("&lt;", "<")
-                .replaceAll("&gt;", ">").replaceAll("&amp;", "&").replaceAll(" and ", "&&").replaceAll(" or ", "||");
+                .replaceAll("&gt;", ">").replaceAll("&amp;", StringUtil.AND).replaceAll(" and ", "&&").replaceAll(" or ", "||");
     }
 
     @Override

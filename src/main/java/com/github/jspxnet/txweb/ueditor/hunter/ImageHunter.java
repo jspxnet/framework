@@ -12,6 +12,7 @@ import com.github.jspxnet.txweb.ueditor.define.State;
 import com.github.jspxnet.txweb.ueditor.StorageManager;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 /**
  * 图片抓取器
@@ -77,7 +78,7 @@ public class ImageHunter {
                 return new BaseState(false, AppInfo.MAX_SIZE);
             }
 
-            File file = new File(saveDirectory, filename + "." + suffix);
+            File file = new File(saveDirectory, filename + StringUtil.DOT + suffix);
             State state = StorageManager.saveFileByInputStream(connection.getInputStream(), file.getPath(), maxSize);
             if (state.isSuccess()) {
                 String showUrl = FileUtil.getDecrease(saveDirectory, file.getPath());

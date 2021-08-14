@@ -21,7 +21,7 @@ import java.util.UUID;
  * date: 2007-4-1
  * Time: 19:20:55
  */
-public class RandomUtil {
+public final  class RandomUtil {
     private static final Random RANDOM = new Random();
 
     private RandomUtil() {

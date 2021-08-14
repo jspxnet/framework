@@ -94,6 +94,7 @@ public class TaskProxy implements Runnable {
             log.error(bean + "method" + methodName, e);
             e.printStackTrace();
         }
+
         if (once) {
             SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
             String scheduledId = getScheduledId();

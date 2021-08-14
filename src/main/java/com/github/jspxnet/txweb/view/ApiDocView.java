@@ -145,11 +145,11 @@ public class ApiDocView extends ActionSupport {
                     if (beanElement == null) {
                         continue;
                     }
-                    String className = StringUtil.substringBeforeLast(beanElement.getClassName(), ".");
+                    String className = StringUtil.substringBeforeLast(beanElement.getClassName(), StringUtil.DOT);
                     if (className.endsWith("action") || className.endsWith("view") || className.endsWith("controller")) {
-                        while (StringUtil.countMatches(className, ".") > 1) {
-                            className = StringUtil.substringBeforeLast(className, ".");
-                            if (StringUtil.countMatches(className, ".") <= 0) {
+                        while (StringUtil.countMatches(className, StringUtil.DOT) > 1) {
+                            className = StringUtil.substringBeforeLast(className, StringUtil.DOT);
+                            if (StringUtil.countMatches(className, StringUtil.DOT) <= 0) {
                                 break;
                             }
                         }

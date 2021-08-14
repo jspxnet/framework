@@ -53,12 +53,12 @@ import java.util.regex.Pattern;
  * To change this template use | Settings | File Templates.
  */
 @Slf4j
-public class FileUtil {
+public final class FileUtil {
     static final private String[] zipFiles = new String[]{".zip!", ".jar!", ".apk!", ".war!", ".jzb!"};
 
     static final private String[] zipEx = new String[]{"zip", "jar", "apk", "war", "jzb"};
     //路径通配符
-    static final private String[] pathMarks = {"#", "*", "?"};
+    static final private String[] pathMarks = {"#", StringUtil.ASTERISK, "?"};
     //缩图文件名称
     final public static String THUMBNAIL_FILE_TYPE = "_s";
 
@@ -541,7 +541,7 @@ public class FileUtil {
         if (StringUtil.isNull(fileName)) {
             return StringUtil.empty;
         }
-        int point = fileName.lastIndexOf(".");
+        int point = fileName.lastIndexOf(StringUtil.DOT);
         if (point != -1) {
             String typePart = fileName.substring(point + 1);
             if (typePart.contains("!")) {
@@ -570,7 +570,7 @@ public class FileUtil {
      */
     static public String getNamePart(String fileName) {
         String result = getFileNamePart(fileName);
-        int point = result.lastIndexOf(".");
+        int point = result.lastIndexOf(StringUtil.DOT);
         if (point != -1 && result.length() >= point) {
             return result.substring(0, point);
         }
@@ -734,7 +734,7 @@ public class FileUtil {
         if (StringUtil.isNull(fileName)) {
             return StringUtil.empty;
         }
-        int index = fileName.lastIndexOf(".");
+        int index = fileName.lastIndexOf(StringUtil.DOT);
         if (index != -1) {
             return fileName.substring(0, index);
         } else {
@@ -1686,13 +1686,13 @@ public class FileUtil {
      * @return 扫描包路径
      */
     public static String[] scanClass(String dir) {
-        URL url = ClassUtil.getResource(StringUtil.replace(dir, ".", "/"));
+        URL url = ClassUtil.getResource(StringUtil.replace(dir, StringUtil.DOT, "/"));
         String path = "";
         if (url != null) {
             path = url.getPath();
         }
         if (StringUtil.isNull(path)) {
-            url = ClassUtil.getResource(StringUtil.replace(dir, ".", "/"));
+            url = ClassUtil.getResource(StringUtil.replace(dir, StringUtil.DOT, "/"));
         }
         if (url != null) {
             path = url.getPath();
@@ -1732,7 +1732,7 @@ public class FileUtil {
                 }
                 tempName = StringUtil.substringBeforeLast(tempName, ".class");
             }
-            tempName = StringUtil.replace(tempName, "\\", ".");
+            tempName = StringUtil.replace(tempName, "\\", StringUtil.DOT);
             list.add(tempName);
         }
         return list.toArray(new String[0]);
@@ -1775,7 +1775,7 @@ public class FileUtil {
 
         //dir = FileUtil.mendPath(dir);
         //开始的文件夹
-        String s = findFileName.replace(".", "#");
+        String s = findFileName.replace(StringUtil.DOT, "#");
         s = s.replaceAll("#", "\\\\.");
         s = s.replace('*', '#');
         s = s.replaceAll("#", ".*");
@@ -2175,9 +2175,9 @@ public class FileUtil {
         while (result.exists()) {
             String name = FileUtil.getNamePart(file.getName());
             name = name.contains("_") ? StringUtil.substringAfter(name, "_") : "";
-            name = name.contains(".") ? StringUtil.substringAfter(name, ".") : "";
+            name = name.contains(StringUtil.DOT) ? StringUtil.substringAfter(name, StringUtil.DOT) : "";
             name = FileUtil.getNamePart(file.getName()) + (StringUtil.getNumber(name) + 1);
-            result = new File(file.getParent(), name + "." + FileUtil.getTypePart(file.getName()).toLowerCase());
+            result = new File(file.getParent(), name + StringUtil.DOT + FileUtil.getTypePart(file.getName()).toLowerCase());
         }
 
         return result;
@@ -2257,7 +2257,7 @@ public class FileUtil {
             return name;
         }
         String newFileName = namePart + THUMBNAIL_FILE_TYPE;
-        return getParentPath(name) + newFileName + "." + getTypePart(name);
+        return getParentPath(name) + newFileName + StringUtil.DOT + getTypePart(name);
     }
 
     /**
@@ -2278,10 +2278,10 @@ public class FileUtil {
         if (namePart.endsWith(THUMBNAIL_FILE_TYPE)) {
             String baseNamePart = namePart.substring(0, namePart.length() - THUMBNAIL_FILE_TYPE.length());
             String newFileName = baseNamePart + PHONE_FILE_TYPE;
-            return getParentPath(name) + newFileName + "." + getTypePart(name);
+            return getParentPath(name) + newFileName + StringUtil.DOT + getTypePart(name);
         }
         String newFileName = namePart + PHONE_FILE_TYPE;
-        return getParentPath(name) + newFileName + "." + getTypePart(name);
+        return getParentPath(name) + newFileName + StringUtil.DOT + getTypePart(name);
     }
 
     /**
@@ -2462,7 +2462,7 @@ public class FileUtil {
             int i;
             for (i = pathArray.length - 1; i >= 0; --i) {
                 String element = pathArray[i];
-                if (!".".equals(element)) {
+                if (!StringUtil.DOT.equals(element)) {
                     if ("..".equals(element)) {
                         ++tops;
                     } else if (tops > 0) {

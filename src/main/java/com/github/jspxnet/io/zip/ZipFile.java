@@ -20,6 +20,7 @@ package com.github.jspxnet.io.zip;
 
 
 import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -37,7 +38,7 @@ public class ZipFile {
     private boolean isScaned = false;
     private boolean isChanged = false;
     private File selfFile;
-    private static File workDirectory = new File(".");
+    private static File workDirectory = new File(StringUtil.DOT);
     private static boolean haveSetWorkDirectory = false;
     private List<ZipFileRecord> entries = new ArrayList<>();
     private List<String> entryNames = new ArrayList<>();
@@ -506,7 +507,7 @@ public class ZipFile {
         ZipInputStream zin = null;
         File tmpzip = null;
         try {
-            tmpzip = File.createTempFile("zip", ".tmp", new File("."));
+            tmpzip = File.createTempFile("zip", ".tmp", new File(StringUtil.DOT));
             zin = new ZipInputStream(new FileInputStream(selfFile));
             zout = new ZipOutputStream(new FileOutputStream(tmpzip));
             ZipEntry ze;
@@ -548,7 +549,7 @@ public class ZipFile {
         ZipInputStream zin = null;
         File tmpzip = null;
         try {
-            tmpzip = File.createTempFile("zip", ".tmp", new File("."));
+            tmpzip = File.createTempFile("zip", ".tmp", new File(StringUtil.DOT));
             zin = new ZipInputStream(new FileInputStream(selfFile));
             zout = new ZipOutputStream(new FileOutputStream(tmpzip));
             ZipEntry ze;

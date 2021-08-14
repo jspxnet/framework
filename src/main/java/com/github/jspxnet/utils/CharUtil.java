@@ -15,7 +15,7 @@ package com.github.jspxnet.utils;
  * date: 2007-4-1
  * Time: 19:15:06
  */
-public class CharUtil {
+public final class CharUtil {
     private static final String CHAR_STRING =
             "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007" +
                     "\b\t\n\u000b\f\r\u000e\u000f" +

@@ -10,8 +10,8 @@ public abstract class BaseRedisStoreQueue  {
     final static public String CMD_UPDATE = "update";
     final static public String CMD_UPDATE_SQL = "updateSql";
 
-    final static String LOCK_SERVER_KEY = StringUtil.replace(BaseRedisStoreQueue.class.getName(), ".", ":") + ":lock";
-    final static String STORE_KEY = StringUtil.replace(BaseRedisStoreQueue.class.getName(), ".", ":") + ":data";
+    final static String LOCK_SERVER_KEY = StringUtil.replace(BaseRedisStoreQueue.class.getName(), StringUtil.DOT, ":") + ":lock";
+    final static String STORE_KEY = StringUtil.replace(BaseRedisStoreQueue.class.getName(), StringUtil.DOT, ":") + ":data";
 
     @Ref(bind = RedissonClientConfig.class)
     protected transient RedissonClient redissonClient;

@@ -236,7 +236,7 @@ public class TomcatApplication {
             CORSFilter corsFilter = new CORSFilter();
 
             Properties props = new Properties();
-            props.setProperty("cors.allowOrigin","*");
+            props.setProperty("cors.allowOrigin",StringUtil.ASTERISK);
             props.setProperty("cors.supportedMethods","GET, POST, HEAD, PUT, DELETE");
             props.setProperty("cors.supportedHeaders","Accept, Origin, X-Requested-With,Authorization,Content-Type, Last-Modified");
             props.setProperty("cors.exposedHeaders","Set-Cookie");

@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.bundle.action;
 
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
@@ -47,10 +48,10 @@ public class EditLanguageAction extends ActionSupport {
                 try {
                     isSave = language.save(key, value);
                 } catch (Exception e) {
-                    log.error(key + "=" + value, e);
+                    log.error(key + StringUtil.EQUAL + value, e);
                 }
                 if (!isSave) {
-                    addFieldInfo(key, "保存失败:" + key + "=" + value);
+                    addFieldInfo(key, "保存失败:" + key + StringUtil.EQUAL + value);
                     break;
                 }
             }

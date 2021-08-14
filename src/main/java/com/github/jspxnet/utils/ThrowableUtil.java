@@ -7,7 +7,7 @@ package com.github.jspxnet.utils;
  * date: 2020/7/10 22:23
  * description: jspbox
  **/
-public class ThrowableUtil {
+public final class ThrowableUtil {
     private ThrowableUtil()
     {
 

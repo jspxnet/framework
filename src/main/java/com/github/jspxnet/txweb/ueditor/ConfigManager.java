@@ -190,7 +190,7 @@ public final class ConfigManager {
             return new String[0];
         }
         for (int i = 0; i < fileType.length; i++) {
-            fileType[i] = StringUtil.trim(StringUtil.replace(fileType[i], ".", ""));
+            fileType[i] = StringUtil.trim(StringUtil.replace(fileType[i], StringUtil.DOT, ""));
         }
         return fileType;
     }

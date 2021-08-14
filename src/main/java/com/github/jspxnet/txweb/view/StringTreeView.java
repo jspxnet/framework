@@ -49,14 +49,14 @@ public class StringTreeView extends ActionSupport {
 
     @Param(caption = "文件名")
     public void setFileName(String fileName) throws Exception {
-        map.setKeySplit("=");
+        map.setKeySplit(StringUtil.EQUAL);
         map.setLineSplit(StringUtil.CRLF);
         map.loadFile(fileName);
     }
 
     @Param(caption = "字符串", max = 10000)
     public void setString(String text) {
-        map.setKeySplit("=");
+        map.setKeySplit(StringUtil.EQUAL);
         map.setLineSplit(StringUtil.CRLF);
         map.setString(text);
     }

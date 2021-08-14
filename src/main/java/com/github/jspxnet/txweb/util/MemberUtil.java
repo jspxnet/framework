@@ -34,12 +34,12 @@ public class MemberUtil {
      * @return 升级后的密码加密保存格式,创建一个数据库密码
      */
     public static String createPasswordSaveFormat(String password,String hashAlgorithmKey) {
-        if (password!=null&&password.startsWith("[")&&password.contains(".")&&password.contains("]"))
+        if (password!=null&&password.startsWith("[")&&password.contains(StringUtil.DOT)&&password.contains("]"))
         {
             //已经格式过的就不格式了
             return password;
         }
-        return "[" + EnvFactory.getHashAlgorithm() + "." + hashAlgorithmKey + "]" + getPasswordHashEncode(password,hashAlgorithmKey);
+        return "[" + EnvFactory.getHashAlgorithm() + StringUtil.DOT + hashAlgorithmKey + "]" + getPasswordHashEncode(password,hashAlgorithmKey);
     }
 
     /**
@@ -50,10 +50,10 @@ public class MemberUtil {
      */
     public static boolean verifyPassword(String password,String storePassword)
     {
-        if (storePassword!=null&&storePassword.startsWith("[")&&storePassword.contains(".")&&storePassword.contains("]"))
+        if (storePassword!=null&&storePassword.startsWith("[")&&storePassword.contains(StringUtil.DOT)&&storePassword.contains("]"))
         {
-            String hashAlgorithm = StringUtil.substringBetween(storePassword,"[",".");
-            String hashAlgorithmKey = StringUtil.substringBetween(storePassword,".","]");
+            String hashAlgorithm = StringUtil.substringBetween(storePassword,"[",StringUtil.DOT);
+            String hashAlgorithmKey = StringUtil.substringBetween(storePassword,StringUtil.DOT,"]");
             String passwordHash = StringUtil.substringAfter(storePassword,"]");
             if (EncryptUtil.getHashEncode(password + hashAlgorithmKey, hashAlgorithm).equalsIgnoreCase(passwordHash))
             {
@@ -73,7 +73,7 @@ public class MemberUtil {
      * @return 加密的md5 hash
      */
     public static String getPasswordHash(String storePassword) {
-        if (storePassword!=null&&storePassword.startsWith("[")&&storePassword.contains(".")&&storePassword.contains("]"))
+        if (storePassword!=null&&storePassword.startsWith("[")&&storePassword.contains(StringUtil.DOT)&&storePassword.contains("]"))
         {
             return StringUtil.substringAfter(storePassword,"]");
         }
@@ -86,9 +86,9 @@ public class MemberUtil {
      * @return 得到密码的密钥
      */
     public static String getHashAlgorithmKey(String storePassword) {
-        if (storePassword!=null&&storePassword.startsWith("[")&&storePassword.contains(".")&&storePassword.contains("]"))
+        if (storePassword!=null&&storePassword.startsWith("[")&&storePassword.contains(StringUtil.DOT)&&storePassword.contains("]"))
         {
-            return StringUtil.substringBetween(storePassword,".","]");
+            return StringUtil.substringBetween(storePassword,StringUtil.DOT,"]");
         }
         return StringUtil.empty;
     }

@@ -139,7 +139,7 @@ public class JFTPClient extends FTPClient implements IFTPClient {
             hashType = "AUTO";
         }
         if (StringUtil.isNull(pathName)) {
-            pathName = ".";
+            pathName = StringUtil.DOT;
         }
         if (sendCommand("HLIST " + hashType, pathName) == 213) {
             String reply = getReplyString();

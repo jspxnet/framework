@@ -272,7 +272,7 @@ public class MultipartRequest implements HttpServletRequest {
                         fileName = getParameter("name");
                         type = FileUtil.getTypePart(fileName);
                     }
-                    if (ArrayUtil.isEmpty(fileTypes) || ArrayUtil.inArray(fileTypes, "*", true) || ArrayUtil.inArray(fileTypes, type, true)) {
+                    if (ArrayUtil.isEmpty(fileTypes) || ArrayUtil.inArray(fileTypes, StringUtil.ASTERISK, true) || ArrayUtil.inArray(fileTypes, type, true)) {
                         filePart.setRenamePolicy(policy);  // null policy is OK
                         long length = filePart.writeTo(dir);
                         UploadedFile yesUploadedFile = new UploadedFile(name, dir.toString(), filePart.getFileName(), fileName, filePart.getContentType(), type);
@@ -342,7 +342,7 @@ public class MultipartRequest implements HttpServletRequest {
         }
         Map<String, String[]> ht = new Hashtable<String, String[]>();
         StringBuffer sb = new StringBuffer();
-        StringTokenizer st = new StringTokenizer(s, "&");
+        StringTokenizer st = new StringTokenizer(s, StringUtil.AND);
         while (st.hasMoreTokens()) {
             String pair = st.nextToken();
             int pos = pair.indexOf('=');

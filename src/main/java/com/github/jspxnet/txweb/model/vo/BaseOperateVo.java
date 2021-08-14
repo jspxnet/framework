@@ -21,7 +21,8 @@ public abstract class BaseOperateVo implements Serializable {
     protected Date createDate = new Date();
 
     public void setIp(String ip) {
-        if (ip != null && ip.startsWith("/")) {
+
+        if (ip != null && ip.startsWith(StringUtil.BACKSLASH)) {
             ip = ip.substring(1);
         }
         this.ip = ip;

@@ -18,7 +18,7 @@ package com.github.jspxnet.utils;
 
 import java.awt.*;
 
-public class GraphicsUtil {
+public final class GraphicsUtil {
     //----------------------------------------------------
 
     /**

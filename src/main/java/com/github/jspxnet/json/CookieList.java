@@ -40,6 +40,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
+import com.github.jspxnet.utils.StringUtil;
+
 /**
  * Convert a web browser cookie list string transfer a JSONObject and back.
  *
@@ -95,7 +97,7 @@ public class CookieList {
                     sb.append(';');
                 }
                 sb.append(Cookie.escape(key));
-                sb.append("=");
+                sb.append(StringUtil.EQUAL);
                 sb.append(Cookie.escape(value.toString()));
                 b = true;
             }

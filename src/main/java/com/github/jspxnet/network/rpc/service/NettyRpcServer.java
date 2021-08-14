@@ -38,7 +38,7 @@ public class NettyRpcServer implements Runnable {
     }
 
     public String getId() {
-        return StringUtil.replace(StringUtil.replace(IpUtil.getOnlyIp(socketAddress),".","") + "-" + socketAddress.getPort() + "-" +  name,"/","-");
+        return StringUtil.replace(StringUtil.replace(IpUtil.getOnlyIp(socketAddress),StringUtil.DOT,"") + "-" + socketAddress.getPort() + "-" +  name,"/","-");
     }
 
     public String getName() {

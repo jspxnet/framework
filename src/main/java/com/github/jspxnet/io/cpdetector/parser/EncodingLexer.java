@@ -21,6 +21,7 @@ import antlr.NoViableAltForCharException;
 import antlr.TokenStream;
 import antlr.LexerSharedInputState;
 import antlr.collections.impl.BitSet;
+import com.github.jspxnet.utils.StringUtil;
 
 public class EncodingLexer extends antlr.CharScanner implements EncodingParserTokenTypes, TokenStream {
     public EncodingLexer(InputStream in) {
@@ -977,7 +978,7 @@ public class EncodingLexer extends antlr.CharScanner implements EncodingParserTo
                         }
                     }
                     _saveIndex = text.length();
-                    match("=");
+                    match(StringUtil.EQUAL);
                     text.setLength(_saveIndex);
                     {
                         switch (LA(1)) {
@@ -1289,7 +1290,7 @@ public class EncodingLexer extends antlr.CharScanner implements EncodingParserTo
             }
         }
         _saveIndex = text.length();
-        match("=");
+        match(StringUtil.EQUAL);
         text.setLength(_saveIndex);
         {
             switch (LA(1)) {

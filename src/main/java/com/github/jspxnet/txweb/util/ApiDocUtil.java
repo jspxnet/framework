@@ -245,8 +245,8 @@ public class ApiDocUtil {
                 methodParam.setName(parameter.getName());
                 methodParam.setRequired(true);
                 String typeName = parameter.getType().getTypeName();
-                if (typeName.contains(".")) {
-                    methodParam.setFiledType(StringUtil.substringAfterLast(typeName, "."));
+                if (typeName.contains(StringUtil.DOT)) {
+                    methodParam.setFiledType(StringUtil.substringAfterLast(typeName, StringUtil.DOT));
                 } else {
                     methodParam.setFiledType(typeName);
                 }
@@ -428,7 +428,7 @@ public class ApiDocUtil {
             apiMethod.setName(exeMethod.getName());
         }
         if (!StringUtil.isNull(operate.method())) {
-            if (url.endsWith("*")) {
+            if (url.endsWith(StringUtil.ASTERISK)) {
                 String tmpUrl = url.substring(0, url.length() - 1);
                 if (tmpUrl.endsWith("/") && exeMethod.getName().startsWith("/")) {
                     apiOperate.setUrl(tmpUrl.substring(0, tmpUrl.length() - 1) + exeMethod.getName());
@@ -518,7 +518,7 @@ public class ApiDocUtil {
         }
 
         //修复路径方式表述
-        if (!StringUtil.isNull(apiMethod.getName()) && apiOperate.getUrl().endsWith("*")) {
+        if (!StringUtil.isNull(apiMethod.getName()) && apiOperate.getUrl().endsWith(StringUtil.ASTERISK)) {
             String tmpUrl = apiOperate.getUrl().substring(0, apiOperate.getUrl().length() - 1);
             if (tmpUrl.endsWith("/") && apiMethod.getName().startsWith("/")) {
                 apiOperate.setUrl(tmpUrl.substring(0, tmpUrl.length() - 1) + apiMethod.getName());

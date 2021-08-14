@@ -381,6 +381,9 @@ public class JSONTokener {
             case '(':
                 back();
                 return new JSONArray(this);
+            default:{
+                break;
+            }
         }
 
         /*

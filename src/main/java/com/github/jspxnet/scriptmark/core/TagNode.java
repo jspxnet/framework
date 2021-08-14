@@ -195,7 +195,7 @@ public abstract class TagNode implements Serializable {
             }
             if (start != -1 && yf == 0 && yh == 0 && ys % 2 == 0 && yd % 2 == 0 && '=' == c && '=' != old) {
                 String sTmp = xml.substring(start, j).trim();
-                if ("=".equals(sTmp)) {
+                if (StringUtil.EQUAL.equals(sTmp)) {
                     j++;
                     continue;
                 }

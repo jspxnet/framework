@@ -82,10 +82,10 @@ public class GuiCamera {
 
             //根据文件前缀变量和文件格式变量，自动生成文件名
 
-            File f = new File(fileName, serialNum + "." + imageFormat);
+            File f = new File(fileName, serialNum + StringUtil.DOT + imageFormat);
             while (f.isFile() && f.exists()) {
                 serialNum++;
-                f = new File(fileName, serialNum + "." + imageFormat);
+                f = new File(fileName, serialNum + StringUtil.DOT + imageFormat);
             }
             //将screenshot对象写入图像文件
             FileUtil.makeDirectory(f.getPath());

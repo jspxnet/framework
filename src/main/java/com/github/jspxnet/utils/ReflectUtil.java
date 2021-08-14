@@ -18,7 +18,11 @@ import java.util.Map;
  *  Object testBean1 = ReflectUtil.createDynamicBean(testBean,properties);
  *  }</pre>
  */
-public class ReflectUtil {
+public final  class ReflectUtil {
+    private ReflectUtil()
+    {
+
+    }
     /**
      * @param propertyMap 属性 map
      * @return 根据属性生成对象

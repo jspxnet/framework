@@ -515,7 +515,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 continue;
             }
             if (o != null) {
-                sb.append(key).append("=").append(o).append("\r\n");
+                sb.append(key).append(StringUtil.EQUAL).append(o).append("\r\n");
             }
         }
         log.debug(sb.toString());

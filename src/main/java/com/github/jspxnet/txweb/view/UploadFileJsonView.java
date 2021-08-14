@@ -140,7 +140,7 @@ public class UploadFileJsonView extends ActionSupport {
                     hash.put("is_photo", false);
                     hash.put("filetype", "");
                 } else if (file.isFile()) {
-                    String fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+                    String fileExt = fileName.substring(fileName.lastIndexOf(StringUtil.DOT) + 1).toLowerCase();
                     hash.put("is_dir", false);
                     hash.put("has_file", false);
                     hash.put("filesize", file.length());

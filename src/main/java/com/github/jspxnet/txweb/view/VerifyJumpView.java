@@ -38,7 +38,7 @@ public class VerifyJumpView extends ActionSupport {
     public String execute() throws Exception {
         session.setAttribute(KEY_VERIFY_CODE, verifyCode);
         if (!StringUtil.isNull(link)) {
-            response.sendRedirect(link + "?" + KEY_VERIFY_CODE + "=" + verifyCode);
+            response.sendRedirect(link + "?" + KEY_VERIFY_CODE + StringUtil.EQUAL + verifyCode);
         }
         return NONE;
     }

@@ -166,7 +166,7 @@ public class TemplateScriptEngine implements ScriptRunner {
         String value = o.toString();
         if (ScriptTypeConverter.isArray(value) && value.indexOf("..") > 0) {
             try {
-                eval("var " + name + "=" + ScriptTypeConverter.toString(ScriptTypeConverter.toArray(value)) + StringUtil.SEMICOLON, 0);
+                eval("var " + name + StringUtil.EQUAL + ScriptTypeConverter.toString(ScriptTypeConverter.toArray(value)) + StringUtil.SEMICOLON, 0);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new ScriptRunException(null, value);
@@ -179,7 +179,7 @@ public class TemplateScriptEngine implements ScriptRunner {
             if (StringUtil.isJsonArray(noQuoteStr)||StringUtil.isJsonObject(noQuoteStr))
             {
                 try {
-                    eval("var " + name + "=" + noQuoteStr + StringUtil.SEMICOLON, 0);
+                    eval("var " + name + StringUtil.EQUAL + noQuoteStr + StringUtil.SEMICOLON, 0);
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new ScriptRunException(null, value);
@@ -188,7 +188,7 @@ public class TemplateScriptEngine implements ScriptRunner {
             else
             {
                 try {
-                    eval("var " + name + "=" + value + StringUtil.SEMICOLON, 0);
+                    eval("var " + name + StringUtil.EQUAL + value + StringUtil.SEMICOLON, 0);
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new ScriptRunException(null, value);

@@ -6,6 +6,8 @@ import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
@@ -54,7 +56,7 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public String getHeader(String s) {
-        Object value = super.get(RequestUtil.HEADER + "."+s.toLowerCase());
+        Object value = super.get(RequestUtil.HEADER + StringUtil.DOT+s.toLowerCase());
         if (value==null)
         {
             return null;

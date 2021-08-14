@@ -205,7 +205,7 @@ public abstract class Dialect extends HashMap<String,String> {
         } catch (Throwable e) {
             log.error("sql:{},keys:{},Throwable:{}", sqlKey, get(sqlKey), e.getMessage());
             for (String key : valueMap.keySet()) {
-                log.error(key + "=" + valueMap.get(key));
+                log.error(key + StringUtil.EQUAL + valueMap.get(key));
             }
         }
         return null;
@@ -384,7 +384,7 @@ public abstract class Dialect extends HashMap<String,String> {
                     out.close();
                     bodyReader.close();
                 } catch (Exception e) {
-                    log.error(typeName + "=" + index, e);
+                    log.error(typeName + StringUtil.EQUAL + index, e);
                 }
                 return out.toString();
             }

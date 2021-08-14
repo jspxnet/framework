@@ -94,7 +94,7 @@ public class PropertyProvider extends BundleProvider {
         StringBuilder sb = new StringBuilder();
         for (String keys : cache.keySet()) {
             if (keys != null) {
-                sb.append(keys).append("=").append(getString(keys)).append(StringUtil.CRLF);
+                sb.append(keys).append(StringUtil.EQUAL).append(getString(keys)).append(StringUtil.CRLF);
             }
         }
         return sb.toString();
@@ -185,7 +185,7 @@ public class PropertyProvider extends BundleProvider {
                 if (inputLine.contains(":")) {
                     fen = ":";
                 } else {
-                    fen = "=";
+                    fen = StringUtil.EQUAL;
                 }
                 if (!inputLine.contains(fen)) {
                     cache.put(inputLine, inputLine);

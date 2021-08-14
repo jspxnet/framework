@@ -26,7 +26,7 @@ import java.util.HashMap;
  * date: 2008-9-5
  * Time: 10:34:50
  */
-public class FileSuffixUtil {
+public final  class FileSuffixUtil {
     private static final Map<String, String> headTypes = new HashMap<String, String>();
 
     static {

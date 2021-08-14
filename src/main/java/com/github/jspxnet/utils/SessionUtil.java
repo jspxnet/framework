@@ -4,7 +4,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Enumeration;
 
-public class SessionUtil {
+public final class SessionUtil {
+    private SessionUtil()
+    {
+
+    }
     public static void add(HttpServletRequest request, String key, Object value) {
         request.getSession().setAttribute(key, value);
     }
@@ -46,7 +50,7 @@ public class SessionUtil {
         String str = session.getId();
         if (str!=null&&str.contains(StringUtil.DOT))
         {
-            return StringUtil.substringBefore(str,".");
+            return StringUtil.substringBefore(str,StringUtil.DOT);
         }
         return str;
     }

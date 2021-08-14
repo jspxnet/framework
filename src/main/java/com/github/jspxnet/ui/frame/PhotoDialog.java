@@ -431,6 +431,9 @@ public class PhotoDialog extends JDialog {
                     r.x += point.x - origin.x;
                     r.y += point.y - origin.y;
                     break;
+                default:{
+                    break;
+                }
             }
             //重新设定可见区域
             SwingUtil.setVisibleRegion(frame, r.width, r.height, side);

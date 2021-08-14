@@ -4,6 +4,8 @@ import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.DFAFilter;
 import com.github.jspxnet.txweb.support.ActionSupport;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.util.Set;
 
 /**
@@ -43,7 +45,7 @@ public class WordFilterView extends ActionSupport {
     }
 
     public String replace() {
-        return filter.replace(text, matchType, "*");
+        return filter.replace(text, matchType, StringUtil.ASTERISK);
     }
 
 

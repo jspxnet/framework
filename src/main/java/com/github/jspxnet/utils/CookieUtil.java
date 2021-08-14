@@ -20,7 +20,7 @@ import java.util.Date;
  * date: 2007-3-12
  * Time: 10:07:36
  */
-public class CookieUtil {
+public final  class CookieUtil {
     private CookieUtil() {
 
     }
@@ -145,7 +145,7 @@ public class CookieUtil {
             if (aCookieList == null) {
                 continue;
             }
-            sb.append(aCookieList.getName()).append("=").append(aCookieList.getValue()).append("<br/>");
+            sb.append(aCookieList.getName()).append(StringUtil.EQUAL).append(aCookieList.getValue()).append("<br/>");
         }
         return sb.toString();
     }

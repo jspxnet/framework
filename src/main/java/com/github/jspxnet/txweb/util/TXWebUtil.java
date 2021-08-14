@@ -123,7 +123,7 @@ public class TXWebUtil {
             int iMaxPostSize = StringUtil.toInt(maxPostSize);
 
             String[] fileTypes = null;
-            if (!StringUtil.isNull(fileType) && !"*".equals(fileType)) {
+            if (!StringUtil.isNull(fileType) && !StringUtil.ASTERISK.equals(fileType)) {
                 fileTypes = StringUtil.split(StringUtil.replace(fileType, StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON);
             }
             MultipartRequest multipartRequest = new MultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, mulRequest.covering().getRenamePolicy(), fileTypes);
@@ -949,7 +949,7 @@ public class TXWebUtil {
 
         //验证防止重复提交 begin
         if (operate.repeat() > 0) {
-            String keyValue = ClassUtil.getClass(action.getClass()).getName() + "." + exeMethod.getName() + "." + action.getUserSession().getId();
+            String keyValue = ClassUtil.getClass(action.getClass()).getName() + StringUtil.DOT + exeMethod.getName() + StringUtil.DOT + action.getUserSession().getId();
             keyValue = EncryptUtil.getMd5(keyValue);
             String key = String.format(REPEAT_VERIFY_KEY, keyValue);
             RedissonClient redissonClient = (RedissonClient) beanFactory.getBean(RedissonClientConfig.class);
@@ -1047,7 +1047,7 @@ public class TXWebUtil {
 
             StringBuilder sb = new StringBuilder();
             for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
-                sb.append(stackTraceElement.getLineNumber()).append(StringUtil.COLON).append(stackTraceElement.getClassName()).append(".").append(stackTraceElement.getMethodName()).append(StringUtil.CRLF);
+                sb.append(stackTraceElement.getLineNumber()).append(StringUtil.COLON).append(stackTraceElement.getClassName()).append(StringUtil.DOT).append(stackTraceElement.getMethodName()).append(StringUtil.CRLF);
             }
             log.error("response 已经提交并且关闭,又输出信息:{},调用方法:{}", string, sb.toString());
             return;

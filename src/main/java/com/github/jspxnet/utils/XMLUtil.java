@@ -33,7 +33,7 @@ import java.util.TreeMap;
  * @version 1.0
  */
 @Slf4j
-public class XMLUtil {
+public final class XMLUtil {
 
     private static char[] LT_ENCODE = "&lt;".toCharArray();
     private static char[] GT_ENCODE = "&gt;".toCharArray();
@@ -89,7 +89,7 @@ public class XMLUtil {
      * @return 得到文件类型
      */
     static public String getFileTypeHtml(String fileName, String typePath) {
-        if (!fileName.contains(".")) {
+        if (!fileName.contains(StringUtil.DOT)) {
             fileName = "folder";
         }
         return "<img src=" + typePath + FileUtil.getTypePart(fileName) + ".gif" + " border=0 />";
@@ -317,7 +317,7 @@ public class XMLUtil {
         if (string == null) {
             return StringUtil.empty;
         }
-        string = StringUtil.replace(string, "&amp;", "&");
+        string = StringUtil.replace(string, "&amp;", StringUtil.AND);
         string = StringUtil.replace(string, "&lt;", "<");
         string = StringUtil.replace(string, "&gt;", ">");
         string = StringUtil.replace(string, "&quot;", "\"");
@@ -426,7 +426,7 @@ public class XMLUtil {
         if (escapeVariable == ' ') {
             escapeVariable = '\\';
         }
-        String sk = name + "=";
+        String sk = name + StringUtil.EQUAL;
         int i = StringUtil.indexIgnoreCaseOf(xml, sk);
         if (i - 1 >= 0) {
             char f = xml.charAt(i - 1);
@@ -500,7 +500,7 @@ public class XMLUtil {
         if (escapeVariable == ' ') {
             escapeVariable = '\\';
         }
-        String sk = name + "=";
+        String sk = name + StringUtil.EQUAL;
         int i = StringUtil.indexIgnoreCaseOf(xml, sk);
         if (i - 1 >= 0) {
             char f = xml.charAt(i - 1);

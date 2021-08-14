@@ -20,7 +20,7 @@ import java.util.Map;
  * Time: 15:44:12
  * 色彩单元
  */
-public class ColorUtil {
+public final  class ColorUtil {
     private final static String[] deepColors = new String[]{"#FF0000", "#00FF00", "#0000FF", "#6600CC", "#AFD8F8", "#F6BD0F", "#8BBA00", "#FF8E46", "#008E8E", "#D64646", "#8E468E", "#588526", "#B3AA00", "#008ED6", "#9D080D", "#A186BE", "#000000"};
     //private final static String[] shallowColors = new String[]{"#666666","#0099FF","#00FFFF","#FF00FF","#006600","#660000", "#F6BD0F", "#CC99FF","#FF66FF","#E1E9F4"};
     private final static Map<String, String> zhColorMap = new HashMap<String, String>();

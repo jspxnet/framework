@@ -39,7 +39,7 @@ public class ScanningFile {
      * 获取包下所有实现了superStrategy的类并加入list
      */
     private List<String> scanClass(String path) {
-        URL url = classLoader.getResource(path.replace(".", "/"));
+        URL url = classLoader.getResource(path.replace(StringUtil.DOT, "/"));
         String protocol = url.getProtocol();
         if ("file".equals(protocol)) {
             // 本地自己可见的代码
@@ -59,7 +59,7 @@ public class ScanningFile {
     private void findClassLocal(final String packName) {
         URI url = null;
         try {
-            url = classLoader.getResource(packName.replace(".", "/")).toURI();
+            url = classLoader.getResource(packName.replace(StringUtil.DOT, "/")).toURI();
         } catch (URISyntaxException e1) {
             throw new RuntimeException("未找到策略资源");
         }
@@ -70,12 +70,12 @@ public class ScanningFile {
             @Override
             public boolean accept(File chiFile) {
                 if (chiFile.isDirectory()) {
-                    findClassLocal(packName + "." + chiFile.getName());
+                    findClassLocal(packName + StringUtil.DOT + chiFile.getName());
                 }
                 if (chiFile.getName().endsWith(".class")) {
                     Class<?> clazz = null;
                     try {
-                        clazz = classLoader.loadClass(packName + "." + chiFile.getName().replace(".class", StringUtil.empty));
+                        clazz = classLoader.loadClass(packName + StringUtil.DOT + chiFile.getName().replace(".class", StringUtil.empty));
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
@@ -97,7 +97,7 @@ public class ScanningFile {
      */
     private void findClassJar(final String packName) {
 
-        String pathName = packName.replace(".", "/");
+        String pathName = packName.replace(StringUtil.DOT, "/");
         JarFile jarFile = null;
         try {
             URL url = classLoader.getResource(pathName);
@@ -115,8 +115,8 @@ public class ScanningFile {
             if (jarEntryName.contains(pathName) && !jarEntryName.equals(pathName + "/")) {
                 //递归遍历子目录
                 if (jarEntry.isDirectory()) {
-                    String clazzName = jarEntry.getName().replace("/", ".");
-                    int endIndex = clazzName.lastIndexOf(".");
+                    String clazzName = jarEntry.getName().replace("/", StringUtil.DOT);
+                    int endIndex = clazzName.lastIndexOf(StringUtil.DOT);
                     String prefix = null;
                     if (endIndex > 0) {
                         prefix = clazzName.substring(0, endIndex);
@@ -126,7 +126,7 @@ public class ScanningFile {
                 if (jarEntry.getName().endsWith(".class")) {
                     Class<?> clazz = null;
                     try {
-                        clazz = classLoader.loadClass(jarEntry.getName().replace("/", ".").replace(".class", StringUtil.empty));
+                        clazz = classLoader.loadClass(jarEntry.getName().replace("/", StringUtil.DOT).replace(".class", StringUtil.empty));
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }

@@ -63,7 +63,7 @@ public class RequestUtil {
 
     private static final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     private static final boolean REPAIR_ENCODE = ENV_TEMPLATE.getBoolean(Environment.repairEncode);
-    private static final String REPAIR_REQUEST_METHOD = ENV_TEMPLATE.getString(Environment.repairRequestMethod, "*");
+    private static final String REPAIR_REQUEST_METHOD = ENV_TEMPLATE.getString(Environment.repairRequestMethod, StringUtil.ASTERISK);
     private static final String[] mobileKeywords = new String[]{"mobile",
             "android", "symbianos", "iphone", "wp\\d*", "windows phone", "mqqbrowser", "nokia", "midp-2", "untrusted/1.0", "windows ce", "blackberry", "ucweb", "brew", "j2me", "yulong",
             "coolpad", "tianyu", "ty-", "k-touch", "haier", "dopod", "lenovo", "huaqin", "aigo-", "ctc/1.0", "ctc/2.0", "cmcc", "daxian", "mot-", "sonyericsson", "gionee", "htc",
@@ -233,7 +233,7 @@ public class RequestUtil {
             String name = enu.nextElement();
             Object values = BeanUtil.getProperty(request, "getParameterValues", new Object[]{name}, false);
             if (values != null && values.getClass().isArray() && ArrayUtil.getLength(values) > 1) {
-                if (REPAIR_ENCODE && ("*".equals(REPAIR_REQUEST_METHOD) || StringUtil.indexIgnoreCaseOf(REPAIR_REQUEST_METHOD, request.getMethod()) != -1)) {
+                if (REPAIR_ENCODE && (StringUtil.ASTERISK.equals(REPAIR_REQUEST_METHOD) || StringUtil.indexIgnoreCaseOf(REPAIR_REQUEST_METHOD, request.getMethod()) != -1)) {
                     int max = ArrayUtil.getLength(values);
                     String[] tempArray = new String[max];
                     for (int i = 0; i < max; i++) {
@@ -387,7 +387,7 @@ public class RequestUtil {
             if (!StringUtil.hasLength(s)) {
                 return def;
             }
-            if (REPAIR_ENCODE && ("*".equals(REPAIR_REQUEST_METHOD) || StringUtil.indexIgnoreCaseOf(REPAIR_REQUEST_METHOD, request.getMethod()) != -1)) {
+            if (REPAIR_ENCODE && (StringUtil.ASTERISK.equals(REPAIR_REQUEST_METHOD) || StringUtil.indexIgnoreCaseOf(REPAIR_REQUEST_METHOD, request.getMethod()) != -1)) {
                 s = new String(s.getBytes(StandardCharsets.ISO_8859_1), Dispatcher.getEncode());
             }
         } catch (Exception e) {
@@ -422,7 +422,7 @@ public class RequestUtil {
         String[] s = null;
         try {
             s = request.getParameterValues(name);
-            if (REPAIR_ENCODE && ("*".equals(REPAIR_REQUEST_METHOD) || StringUtil.indexIgnoreCaseOf(REPAIR_REQUEST_METHOD, request.getMethod()) != -1)) {
+            if (REPAIR_ENCODE && (StringUtil.ASTERISK.equals(REPAIR_REQUEST_METHOD) || StringUtil.indexIgnoreCaseOf(REPAIR_REQUEST_METHOD, request.getMethod()) != -1)) {
                 int max = ArrayUtil.getLength(s);
                 String[] tempArray = new String[max];
                 for (int i = 0; i < max; i++) {
@@ -681,11 +681,13 @@ public class RequestUtil {
                 param.put(name, getString(request, name, false));
             }
         }
+
         StringBuilder result = new StringBuilder();
         for (String key : param.keySet()) {
-            result.append(key).append("=").append(URLUtil.getUrlEncoder(param.get(key), Environment.defaultEncode)).append("&");
+            result.append(key).append(StringUtil.EQUAL).append(URLUtil.getUrlEncoder(param.get(key), Environment.defaultEncode)).append(StringUtil.AND);
         }
-        if (result.toString().endsWith("&")) {
+
+        if (result.toString().endsWith(StringUtil.AND)) {
             result.setLength(result.length() - 1);
         }
         return result.toString();
@@ -1131,7 +1133,7 @@ public class RequestUtil {
         while (enumeration.hasMoreElements())
         {
             String key = enumeration.nextElement();
-            resultMap.put(HEADER+"."+key.toLowerCase(),request.getHeader(key));
+            resultMap.put(HEADER+StringUtil.DOT+key.toLowerCase(),request.getHeader(key));
         }
         //header 中key 全部小写
         String token = getToken(request);

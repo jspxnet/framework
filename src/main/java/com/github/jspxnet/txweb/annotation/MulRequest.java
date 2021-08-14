@@ -10,8 +10,6 @@
 package com.github.jspxnet.txweb.annotation;
 
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
-import com.github.jspxnet.utils.StringUtil;
-
 import java.lang.annotation.*;
 
 /**

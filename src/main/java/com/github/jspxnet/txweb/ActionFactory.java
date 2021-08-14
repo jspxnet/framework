@@ -126,8 +126,8 @@ public class ActionFactory {
         if (arguments.size() >= 2) {
             for (int i = 2; i < arguments.size(); i++) {
                 termData = arguments.get(i).toString();
-                if (termData != null && termData.contains("=")) {
-                    String vName = StringUtil.substringBefore(termData, "=");
+                if (termData != null && termData.contains(StringUtil.EQUAL)) {
+                    String vName = StringUtil.substringBefore(termData, StringUtil.EQUAL);
                     String vValue = termData.substring(vName.length() + 1);
                     Object value = vValue;
                     if (vValue.startsWith(TXWebUtil.AT)) {

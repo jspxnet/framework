@@ -29,7 +29,7 @@ import java.util.*;
  * Time: 8:50:52
  */
 @Slf4j
-public class ObjectUtil {
+public final  class ObjectUtil {
 
     private ObjectUtil() {
 

@@ -24,7 +24,7 @@ import java.util.ArrayList;
  * 数组操作工具类，提供常见的数组操作需要的方法。
  * @author chenYuan
  */
-public class ArrayUtil {
+public final class ArrayUtil {
     public static final String[] emptyString = new String[0];
 
     //public static final int[] emptyInt = new int[0];
@@ -3720,7 +3720,7 @@ public class ArrayUtil {
             type = "like";
         }
         if (StringUtil.isNull(type)) {
-            type = "=";
+            type = StringUtil.EQUAL;
         }
         if (fields == null || fields.length < 1) {
             return StringUtil.empty;
@@ -3736,7 +3736,7 @@ public class ArrayUtil {
                     continue;
                 }
                 sb.append("AND ").append(StringUtil.checkSql(fields[i])).append(" LIKE '%").append(StringUtil.checkSql(terms[i])).append("%' ");
-            } else if ("=".equalsIgnoreCase(type)) {
+            } else if (StringUtil.EQUAL.equalsIgnoreCase(type)) {
                 sb.append("AND ").append(StringUtil.checkSql(fields[i])).append("='").append(StringUtil.checkSql(terms[i])).append("' ");
             }
         }
@@ -4277,6 +4277,75 @@ public class ArrayUtil {
         Collections.addAll(list, array);
         return list;
     }
+    /**
+     * If the given Object is no Array, it's toString - method is invoked.
+     * Primitive type - Arrays and Object - Arrays are introspected using
+     * java.lang.reflect.Array. Convention for creation fo String -
+     * representation:
+     *
+     * @param isArr The Array transfer represent as String.
+     * @return a String-representation of the Object.
+     */
+    public static String arrayToString(Object isArr) {
+        return arrayToString(isArr, ",");
+    }
 
+    /**
+     * If the given Object is no Array, it's toString - method is invoked.
+     * Primitive type - Arrays and Object - Arrays are introspected using
+     * java.lang.reflect.Array. Convention for creation for String -
+     * representation: <br>
+     * <p>
+     * [code]
+     * // Primitive arrays:
+     * &quot;[&quot;+isArr[0]+&quot;&lt;separator&gt;&quot;+isArr[1]+.. ..+isArr[isArr.length-1]+&quot;]&quot;
+     * <p>
+     * //Object arrays :
+     * &quot;[&quot;+isArr[0].toString()+&quot;&lt;separator&gt;&quot;+.. ..+isArr[isArr.length-1].toString+&quot;]&quot;
+     * // Two or three - dimensional Arrays are not supported
+     * //(should be reflected in a special output method, e.g.as a field)
+     * <p>
+     * // other Objects:
+     * toString()
+     * [/code]
+     *
+     * @param separator put in-between each array element in the resulting string.
+     * @param isArr     The Array transfer represent as String.
+     * @return a String-representation of the Object.
+     */
+    public static String arrayToString(Object isArr, String separator) {
+        String result;
+        if (isArr == null) {
+            result = "null";
+        } else {
+            Object element;
+            StringBuilder tmp = new StringBuilder();
+            try {
+                int length = Array.getLength(isArr);
+                tmp.append("[");
+                for (int i = 0; i < length; i++) {
+                    element = Array.get(isArr, i);
+                    if (element == null) {
+                        tmp.append("null");
+                    } else {
+                        tmp.append(element.toString());
+                    }
+                    if (i < length - 1) {
+                        tmp.append(separator);
+                    }
+                }
+                tmp.append("]");
+                result = tmp.toString();
+            } catch (ArrayIndexOutOfBoundsException bound) {
+                // programming mistake or bad Array.getLength(obj).
+                tmp.append("]");
+                result = tmp.toString();
+
+            } catch (IllegalArgumentException noarr) {
+                result = isArr.toString();
+            }
+        }
+        return result;
+    }
 
 }

@@ -21,7 +21,7 @@ import java.io.CharArrayWriter;
  * Time: 20:30:51
  * 读取基本的XML
  */
-public class BaseXML extends DefaultHandler {
+public  class BaseXML extends DefaultHandler {
     private String result;
     private String attributesResult;
     private String Key;

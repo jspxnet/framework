@@ -10,6 +10,7 @@
 package com.github.jspxnet.component.alipay;
 
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 import java.util.*;
 
@@ -36,7 +37,7 @@ public class SignatureHelper {
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             String value = properties.get(key);
-            content.append(i == 0 ? "" : "&").append(key).append("=").append(value);
+            content.append(i == 0 ? "" : StringUtil.AND).append(key).append(StringUtil.EQUAL).append(value);
         }
         return content.toString();
     }

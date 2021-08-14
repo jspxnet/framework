@@ -1,13 +1,16 @@
 package com.github.jspxnet.txweb.ueditor;
 
 /**
- * Created by chenyuan on 2015-8-6.
+ * Created by chenyuan
+ * on 2015-8-6.
  */
+
 
 import com.github.jspxnet.txweb.ueditor.define.AppInfo;
 import com.github.jspxnet.txweb.ueditor.define.BaseState;
 import com.github.jspxnet.txweb.ueditor.define.State;
 import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -82,7 +85,7 @@ public class StorageManager {
 
     private static File getTmpFile() {
         File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-        String tmpFileName = (Math.random() * 100000 + "").replace(".", "");
+        String tmpFileName = (Math.random() * 100000 + "").replace(StringUtil.DOT, StringUtil.empty);
         return new File(tmpDir, tmpFileName);
     }
 

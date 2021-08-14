@@ -24,17 +24,17 @@ import java.util.Map;
  * 字符编码
  */
 
-public class CharacterUtil {
-    final private static com.github.jspxnet.io.cpdetector.CodePageDetectorProxy detector = com.github.jspxnet.io.cpdetector.CodePageDetectorProxy.getInstance();
-    private static com.github.jspxnet.io.cpdetector.ByteOrderMarkDetector byteOrderMarkDetector = new com.github.jspxnet.io.cpdetector.ByteOrderMarkDetector();
-    final private static com.github.jspxnet.io.cpdetector.ParsingDetector parsingDetector = new com.github.jspxnet.io.cpdetector.ParsingDetector(false);
+public final class CharacterUtil {
+    final private static com.github.jspxnet.io.cpdetector.CodePageDetectorProxy DETECTOR = com.github.jspxnet.io.cpdetector.CodePageDetectorProxy.getInstance();
+    private static final com.github.jspxnet.io.cpdetector.ByteOrderMarkDetector BYTE_ORDER_MARK_DETECTOR = new com.github.jspxnet.io.cpdetector.ByteOrderMarkDetector();
+    final private static com.github.jspxnet.io.cpdetector.ParsingDetector PARSING_DETECTOR = new com.github.jspxnet.io.cpdetector.ParsingDetector(false);
 
     static {
-        detector.add(com.github.jspxnet.io.cpdetector.JChardetFacade.getInstance());
-        detector.add(ASCIIDetector.getInstance());
-        detector.add(byteOrderMarkDetector);
-        detector.add(parsingDetector);
-        detector.add(com.github.jspxnet.io.cpdetector.UnicodeDetector.getInstance());
+        DETECTOR.add(com.github.jspxnet.io.cpdetector.JChardetFacade.getInstance());
+        DETECTOR.add(ASCIIDetector.getInstance());
+        DETECTOR.add(BYTE_ORDER_MARK_DETECTOR);
+        DETECTOR.add(PARSING_DETECTOR);
+        DETECTOR.add(com.github.jspxnet.io.cpdetector.UnicodeDetector.getInstance());
 
 
     }
@@ -102,7 +102,7 @@ public class CharacterUtil {
         String fileCharacterEnding = defaultEncode;
         Charset charset = null;
         try {
-            charset = detector.detectCodepage(file.toURI().toURL());
+            charset = DETECTOR.detectCodepage(file.toURI().toURL());
         } catch (Exception e) {
             e.printStackTrace();
             return defaultEncode;
@@ -118,7 +118,7 @@ public class CharacterUtil {
         String fileCharacterEnding = defaultEncode;
         Charset charset = null;
         try {
-            charset = detector.detectCodepage(inputStream, size);
+            charset = DETECTOR.detectCodepage(inputStream, size);
         } catch (Exception e) {
             e.printStackTrace();
             return defaultEncode;
@@ -134,7 +134,7 @@ public class CharacterUtil {
         Charset charset = null;
         try {
             ByteArrayInputStream byteArrIn = new ByteArrayInputStream(str, 0, str.length);
-            charset = detector.detectCodepage(byteArrIn, str.length);
+            charset = DETECTOR.detectCodepage(byteArrIn, str.length);
         } catch (Exception e) {
             e.printStackTrace();
             return defaultEncode;

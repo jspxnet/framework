@@ -373,7 +373,6 @@ public class PermissionInterceptor extends InterceptorSupport {
                 return true;
             }
         }
-
         return false;
     }
 

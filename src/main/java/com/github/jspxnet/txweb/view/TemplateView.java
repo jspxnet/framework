@@ -153,7 +153,7 @@ public class TemplateView extends ActionSupport {
 
     @Override
     public String execute() throws Exception {
-        String className = StringUtil.uncapitalize(StringUtil.substringAfterLast(templateDAO.getClassType().getName(), "."));
+        String className = StringUtil.uncapitalize(StringUtil.substringAfterLast(templateDAO.getClassType().getName(), StringUtil.DOT));
         put(className, templateDAO.load(id));
         return getActionResult();
     }

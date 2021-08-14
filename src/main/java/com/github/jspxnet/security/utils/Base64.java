@@ -667,6 +667,9 @@ public class Base64 {
                         tailLen = 0;
                     }
                     break;
+                default:{
+                    break;
+                }
             }
 
             if (v != -1) {

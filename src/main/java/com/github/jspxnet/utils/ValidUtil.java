@@ -15,7 +15,7 @@ import static java.util.regex.Pattern.compile;
  * date: 2020/3/4 14:00
  * description: 统一的验证单元
  */
-public class ValidUtil {
+public final class ValidUtil {
     private ValidUtil()
     {
 
@@ -28,7 +28,7 @@ public class ValidUtil {
      * param str 用户名
      * return 判断是否为合法的用户名
      */
-    final static char[] incertitudeChars = {
+    final static char[] INCERTITUDE_CHARS = {
             '\\', '/', '$', '\'', '#', '!', '\"', '<', '>', '!', '!', '~', ';', '^', ';', '*', '(', ')', '[', ']', '{', '}'
     };
 
@@ -70,7 +70,7 @@ public class ValidUtil {
      * @return 是否为邮箱
      */
     public static boolean isMail(String str) {
-        return !(str == null || str.length() < 2) && str.contains("@") && str.contains(".");
+        return !(str == null || str.length() < 2) && str.contains("@") && str.contains(StringUtil.DOT);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ValidUtil {
         {
             return false;
         }
-        for (char c : incertitudeChars) {
+        for (char c : INCERTITUDE_CHARS) {
             if (str.indexOf(c) != -1) {
                 return false;
             }

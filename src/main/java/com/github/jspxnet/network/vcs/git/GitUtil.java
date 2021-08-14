@@ -112,7 +112,7 @@ public class GitUtil {
     public static Iterable<PushResult> upload(Git git, CredentialsProvider credentialsProvider, String message) throws Exception
     {
         //添加文件
-        DirCache dirCache = git.add().addFilepattern(".").call();
+        DirCache dirCache = git.add().addFilepattern(StringUtil.DOT).call();
         if (dirCache.lock())
         {
             dirCache.unlock();
@@ -130,7 +130,7 @@ public class GitUtil {
         String localDir = "D:/tmp/git_test";
         Git git = getGit(credentialsProvider,uri, localDir);
         pull(git, credentialsProvider);
-        push(git, credentialsProvider, ".", "提交文件");
+        push(git, credentialsProvider, StringUtil.DOT, "提交文件");
 
     }
 */

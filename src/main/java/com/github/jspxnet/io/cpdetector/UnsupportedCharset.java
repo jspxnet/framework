@@ -67,16 +67,13 @@ import java.util.Map;
 public class UnsupportedCharset
         extends Charset {
 
-    /**
-     * The name of this unsupported charset.
-     */
-    private String m_name;
+
 
     /**
      * Singleton cache for the unsupported charsets (no need transfer instanciate the same unsupported
      * charset again and again).
      */
-    private static Map<String, Charset> singletons = new HashMap<String, Charset>();
+    private static final Map<String, Charset> singletons = new HashMap<String, Charset>();
 
     /**
      * Singleton constructor.
@@ -121,7 +118,10 @@ public class UnsupportedCharset
         throw new UnsupportedOperationException(
                 "This is no real Charset but a flag you should testaio for!");
     }
-
+    /**
+     * The name of this unsupported charset.
+     */
+    private String m_name;
     /**
      * @see java.nio.charset.Charset#displayName()
      */

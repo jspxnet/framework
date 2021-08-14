@@ -761,7 +761,7 @@ public abstract class ActionSupport implements Action {
         String[] array = getArray(name, false);
         StringBuilder sb = new StringBuilder();
         for (String value : array) {
-            sb.append(name).append("=").append(URLUtil.getUrlEncoder(value, Dispatcher.getEncode())).append("&");
+            sb.append(name).append(StringUtil.EQUAL).append(URLUtil.getUrlEncoder(value, Dispatcher.getEncode())).append(StringUtil.AND);
         }
         if (sb.toString().endsWith(StringUtil.AND)) {
             sb.setLength(sb.length() - 1);

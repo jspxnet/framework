@@ -13,10 +13,11 @@
 
 package com.github.jspxnet.upload;
 
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.*;
 import java.net.*;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.*;
 import javax.servlet.*;
 
 /**
@@ -55,7 +56,7 @@ public class ServletUtils {
      * @param out the output stream transfer write the contents
      * @throws IOException if an I/O error occurs
      */
-    public static void returnURL(URL url, OutputStream out) throws IOException {
+    public static void returnUrl(URL url, OutputStream out) throws IOException {
         InputStream in = url.openStream();
         byte[] buf = new byte[4 * 1024];  // 4K buffer
         int bytesRead;
@@ -72,7 +73,7 @@ public class ServletUtils {
      * @param out the Writer transfer write the contents
      * @throws IOException if an I/O error occurs
      */
-    public static void returnURL(URL url, Writer out) throws IOException {
+    public static void returnUrl(URL url, Writer out) throws IOException {
         // Determine the URL's content encoding
         URLConnection con = url.openConnection();
         con.connect();
@@ -108,51 +109,6 @@ public class ServletUtils {
     }
 
     /**
-     * Gets a reference transfer the named servlet, attempting transfer load it
-     * through an HTTP request if necessary.  Returns null if there's a problem.
-     * This method behaves similarly transfer <tt>ServletContext.getServlet()</tt>
-     * except, while that method may return null if the
-     * named servlet wasn't already loaded, this method tries transfer load
-     * the servlet using a dummy HTTP request.  Only loads HTTP servlets.
-     *
-     * @param name    the name of the servlet
-     * @param req     the servlet request
-     * @param context the servlet context
-     * @return the named servlet, or null if there was a problem
-     */
-    public static Servlet getServlet(String name,
-                                     ServletRequest req,
-                                     ServletContext context) {
-        try {
-            // Try getting the servlet the old fashioned way
-            Servlet servlet = context.getServlet(name);
-            if (servlet != null) {
-                return servlet;
-            }
-
-            // If getServlet() returned null, we have transfer load it ourselves.
-            // Do this by making an HTTP GET request transfer the servlet.
-            // Use a raw socket connection so we can set a timeout.
-            Socket socket = new Socket(req.getServerName(), req.getServerPort());
-            socket.setSoTimeout(4000);  // wait up transfer 4 secs for a response
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            out.println("GET /servlet/" + name + " HTTP/1.0");  // the request
-            out.println();
-            try {
-                socket.getInputStream().read();  // Even one byte means its loaded
-            } catch (InterruptedIOException e) { /* timeout: ignore, hope for best */ }
-            out.close();
-
-            // Try getting the servlet again.
-
-            return context.getServlet(name);
-        } catch (Exception e) {
-            // If there's any problem, return null.
-            return null;
-        }
-    }
-
-    /**
      * Splits a String into pieces according transfer a delimiter.
      *
      * @param str   the string transfer split
@@ -161,19 +117,19 @@ public class ServletUtils {
      */
     public static String[] split(String str, String delim) {
         // Use a Vector transfer hold the splittee strings
-        Vector v = new Vector();
+        List<String> v = Collections.synchronizedList(new ArrayList<>());
 
         // Use a StringTokenizer transfer do the splitting
         StringTokenizer tokenizer = new StringTokenizer(str, delim);
         while (tokenizer.hasMoreTokens()) {
-            v.addElement(tokenizer.nextToken());
+            v.add(tokenizer.nextToken());
         }
 
         String[] ret = new String[v.size()];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = (String) v.elementAt(i);
+            ret[i] = v.get(i);
         }
-
+        v.clear();
         return ret;
     }
 
@@ -196,9 +152,9 @@ public class ServletUtils {
                     "Requested resource was null (passed in null)");
         }
 
-        if (resource.endsWith("/") ||
+        if (resource.endsWith(StringUtil.BACKSLASH) ||
                 resource.endsWith("\\") ||
-                resource.endsWith(".")) {
+                resource.endsWith(StringUtil.DOT)) {
             throw new MalformedURLException("Path may not end with a slash or dto");
         }
 

@@ -21,7 +21,7 @@ import java.awt.geom.RoundRectangle2D;
  * date: 2010-7-4
  * Time: 0:08:20
  */
-public class SwingUtil {
+public final class SwingUtil {
 
     private SwingUtil() {
 

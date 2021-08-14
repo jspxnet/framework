@@ -11,6 +11,7 @@ package com.github.jspxnet.sober.criteria.expression;
 
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -37,7 +38,7 @@ public class Restrictions {
     public static final String GE = ">=";
     public static final String LE = "<=";
     public static final String LT = "<";
-    public static final String EQ = "=";
+    public static final String EQ = StringUtil.EQUAL;
 
 
     /**
@@ -48,7 +49,7 @@ public class Restrictions {
      * @return Criterion
      */
     public static SimpleExpression eq(String propertyName, Object value) {
-        return new SimpleExpression(propertyName, value, "=");
+        return new SimpleExpression(propertyName, value, StringUtil.EQUAL);
     }
 
     /**

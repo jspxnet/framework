@@ -55,7 +55,7 @@ public class StringUtil {
 
     public static final String AT = "@";
 
-    public static final String ASTERISK = "*";
+    public static final String ASTERISK = StringUtil.ASTERISK;
 
     public static final String SEMICOLON = ";";
 
@@ -65,7 +65,7 @@ public class StringUtil {
 
     public static final String COMMAS = ",";
 
-    public static final String EQUAL = "=";
+    public static final String EQUAL = StringUtil.EQUAL;
 
     public static final String COLON = ":";
 
@@ -80,7 +80,7 @@ public class StringUtil {
     public static final String CRLF = "\r\n";
 
     //split 中需要转义的字符
-    public static final String[] SPLIT_TRANSFERRED  = {"|",".","*","+"};
+    public static final String[] SPLIT_TRANSFERRED  = {"|",StringUtil.DOT,StringUtil.ASTERISK,"+"};
 
 
     /**
@@ -1778,7 +1778,7 @@ public class StringUtil {
         if (!isStandardNumber(value)) {
             return nint;
         }
-        if (value.contains(".")) {
+        if (value.contains(StringUtil.DOT)) {
             try {
                 return (int) Double.parseDouble(replace(value, ",", ""));
             } catch (NumberFormatException e) {
@@ -1901,7 +1901,7 @@ public class StringUtil {
                 //2014-06-25T05:01:04
                 format = DateUtil.UTC_SHORT_FORMAT;
             }
-        } else if (date.length() > 14 && date.length() > 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains(".")) {
+        } else if (date.length() > 14 && date.length() > 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains(StringUtil.DOT)) {
             format = DateUtil.UTC_ST_MILLISECOND_FORMAT;
         }
         else if (date.length() > 14 && date.length() <= 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2) {
@@ -1920,15 +1920,15 @@ public class StringUtil {
             format = DateUtil.DAY_FORMAT;
         } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "/") == 2) {
             format = "yyyy/MM/dd";
-        } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, ".") == 2) {
+        } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, StringUtil.DOT) == 2) {
             format = "yyyy.MM.dd";
         } else if (date.length() > 5 && date.length() < 9 && countMatches(date, "-") == 2) {
             format = DateUtil.SHORT_DATE_FORMAT;
         } else if (date.length() == DateUtil.UTC_FTP_FORMAT.length() && countMatches(date, "-") == 0 && countMatches(date, ":") == 0) {
             format = DateUtil.UTC_FTP_FORMAT;
         }
-        if (StringUtil.isNull(format) && (countMatches(date, "-") == 1 || countMatches(date, ".") == 1)) {
-            date = replace(replace(date, ".", "-") + "-01", "--", "-");
+        if (StringUtil.isNull(format) && (countMatches(date, "-") == 1 || countMatches(date, StringUtil.DOT) == 1)) {
+            date = replace(replace(date, StringUtil.DOT, "-") + "-01", "--", "-");
             format = "yyyy-MM-dd";
         }
         if (!StringUtil.isNull(format)) {
@@ -2151,9 +2151,6 @@ public class StringUtil {
             return txt;
         }
         int startPos = txt.length() - length;
-        if (startPos < 0) {
-            return empty;
-        }
         String out = csubstring(txt, startPos, txt.length());
         int vLen = length - send.length();
         if (length > 0 && vLen > 0) {
@@ -2175,7 +2172,7 @@ public class StringUtil {
             start = empty;
         }
         if (center == null) {
-            return ".";
+            return StringUtil.DOT;
         }
         if (end == null) {
             return empty;
@@ -2700,8 +2697,8 @@ public class StringUtil {
                 String link = substringBetween(value, "[link=", "]");
                 String title = substringBetween(value, "]", "[/link]");
                 result.put("[" + link + "]", title);
-            } else if (value.contains("=") && ValidUtil.isNumber(substringBefore(value, "="))) {
-                result.put(substringBefore(value, "="), substringAfter(value, "="));
+            } else if (value.contains(StringUtil.EQUAL) && ValidUtil.isNumber(substringBefore(value, StringUtil.EQUAL))) {
+                result.put(substringBefore(value, StringUtil.EQUAL), substringAfter(value, StringUtil.EQUAL));
             }
         }
         return result;
@@ -2720,7 +2717,7 @@ public class StringUtil {
             if (StringUtil.isNull(trim(value))) {
                 continue;
             }
-            if (value.startsWith("[link=") && value.endsWith("[/link]") || value.contains("=") && ValidUtil.isNumber(substringBefore(value, "="))) {
+            if (value.startsWith("[link=") && value.endsWith("[/link]") || value.contains(StringUtil.EQUAL) && ValidUtil.isNumber(substringBefore(value, StringUtil.EQUAL))) {
                 //...
 
             } else {
@@ -2744,8 +2741,8 @@ public class StringUtil {
                     return title;
                 }
             } else {
-                if (value.contains("=") && ValidUtil.isNumber(substringBefore(value, "="))) {
-                    String title = substringAfter(value, "=");
+                if (value.contains(StringUtil.EQUAL) && ValidUtil.isNumber(substringBefore(value, StringUtil.EQUAL))) {
+                    String title = substringAfter(value, StringUtil.EQUAL);
                     if (!StringUtil.isNull(title)) {
                         return title;
                     }
@@ -3143,7 +3140,7 @@ public class StringUtil {
         {
             return true;
         }
-        String s = find.replace(".", "#");
+        String s = find.replace(StringUtil.DOT, "#");
         s = s.replaceAll("#", "\\\\.");
         s = s.replace('*', '#');
         s = s.replaceAll("#", ".*");
@@ -3265,19 +3262,21 @@ public class StringUtil {
         }
         if (checkUrl.toLowerCase().contains("databasename="))
         {
-            checkUrl = StringUtil.substringAfter(checkUrl,"=");
+            checkUrl = StringUtil.substringAfter(checkUrl,StringUtil.EQUAL);
         }
         return checkUrl;
     }
-/*
+
+
+
     public static void main(String[] args) {
 
-        String str = "1969-02-21 01:02:03.0";
+        String str = "1969-02-21 01:02:03.20";
 
         Date date = getDate(str);
         System.out.println("---" + DateUtil.toString(date,DateUtil.FULL_ST_FORMAT));
 
 
-    }*/
+    }
 
 }

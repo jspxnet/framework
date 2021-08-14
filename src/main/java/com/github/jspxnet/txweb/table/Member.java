@@ -287,7 +287,7 @@ public class Member extends OperateTable implements IMember {
             if (StringUtil.isNull(value) || !value.contains(StringUtil.EQUAL)) {
                 continue;
             }
-            result.put(StringUtil.substringBefore(value, "="), StringUtil.substringAfter(value, "="));
+            result.put(StringUtil.substringBefore(value, StringUtil.EQUAL), StringUtil.substringAfter(value, StringUtil.EQUAL));
         }
         return result;
     }

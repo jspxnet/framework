@@ -166,7 +166,7 @@ public class Payment {
         List<String> keys = new ArrayList<>(params.keySet());
         for (String key1 : keys) {
             try {
-                parameter.append(key1).append("=").append(URLEncoder.encode(params.get(key1), input_charset)).append("&");
+                parameter.append(key1).append(StringUtil.EQUAL).append(URLEncoder.encode(params.get(key1), input_charset)).append(StringUtil.AND);
             } catch (UnsupportedEncodingException e) {
 
                 e.printStackTrace();
@@ -186,9 +186,9 @@ public class Payment {
             String key = keys.get(i);
             String value = params.get(key);
             if (i == keys.size() - 1) {
-                prestr.append(key).append("=").append(value);
+                prestr.append(key).append(StringUtil.EQUAL).append(value);
             } else {
-                prestr.append(key).append("=").append(value).append("&");
+                prestr.append(key).append(StringUtil.EQUAL).append(value).append(StringUtil.AND);
             }
         }
         return prestr + privateKey;

@@ -10,7 +10,6 @@
 package com.github.jspxnet.utils;
 
 import com.github.jspxnet.json.JSONObject;
-
 import java.util.*;
 
 /**
@@ -19,7 +18,7 @@ import java.util.*;
  * date: 2004-7-19
  * Time: 21:54:27
  */
-public class ListUtil {
+public final class ListUtil {
     public static final List<?> EMPTY = new ArrayList<>(0);
     private ListUtil() {
 
@@ -85,4 +84,5 @@ public class ListUtil {
         }
         return result;
     }
+
 }

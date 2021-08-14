@@ -798,8 +798,8 @@ public class ScriptConverter {
         Object object = ClassUtil.newInstance(src);
         for (int i = 1; i < arguments.length; i++) {
             String termData = arguments[i].toString();
-            if (termData != null && termData.contains("=")) {
-                String mName = StringUtil.substringBefore(termData, "=");
+            if (termData != null && termData.contains(StringUtil.EQUAL)) {
+                String mName = StringUtil.substringBefore(termData, StringUtil.EQUAL);
                 String vName = termData.substring(mName.length() + 1);
                 BeanUtil.setSimpleProperty(object, "set" + StringUtil.capitalize(mName), vName);
             }
@@ -827,8 +827,8 @@ public class ScriptConverter {
 
         for (int i = 1; i < arguments.length; i++) {
             String termData = arguments[i].toString();
-            if (termData != null && termData.contains("=")) {
-                String mName = StringUtil.substringBefore(termData, "=");
+            if (termData != null && termData.contains(StringUtil.EQUAL)) {
+                String mName = StringUtil.substringBefore(termData, StringUtil.EQUAL);
                 String vName = termData.substring(mName.length() + 1);
                 BeanUtil.setSimpleProperty(object, "set" + StringUtil.capitalize(mName), vName);
             }

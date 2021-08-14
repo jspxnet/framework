@@ -56,7 +56,7 @@ import java.io.InputStream;
  * @author <a href="mailto:Achim.Westermann@gmx.de">Achim Westermann</a>
  */
 public class InputStreamDebug extends InputStream {
-    private InputStream m_delegate;
+    private final InputStream m_delegate;
 
     public InputStreamDebug(InputStream delegate) {
         this.m_delegate = delegate;

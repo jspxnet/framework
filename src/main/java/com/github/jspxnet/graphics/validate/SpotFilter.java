@@ -263,7 +263,7 @@ public class SpotFilter {
         flt.getBrighten();
         bi = flt.getProcessedImg();
 
-        //     String pname=args[0].substring(0,args[0].lastIndexOf("."));
+        //     String pname=args[0].substring(0,args[0].lastIndexOf(StringUtil.DOT));
         File file = new File("e:\\b.jpg");
         ImageIO.write(bi, "jpg", file);
     }

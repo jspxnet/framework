@@ -99,7 +99,7 @@ public class TemplateResult extends ResultSupport {
             }
         } else {
             String actionName = action.getEnv(ActionEnv.Key_ActionName);
-            String fileType = StringUtil.substringAfterLast(actionName, ".");
+            String fileType = StringUtil.substringAfterLast(actionName, StringUtil.DOT);
             if (StringUtil.hasLength(fileType)) {
                 response.setContentType( MimeTypesUtil.getContentType(fileType,Dispatcher.getEncode()));
             } else {

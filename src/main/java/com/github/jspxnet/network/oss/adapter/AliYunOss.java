@@ -131,7 +131,7 @@ public class AliYunOss extends BaseCloudFile implements CloudFileClient {
         if (url != null) {
             return URLUtil.deleteQueryString(url.toString());
         }
-        return "https://" + config.getBucket() + "." + config.getEndpoint().replaceFirst("http://", "") + "/" + cloudPath;
+        return "https://" + config.getBucket() + StringUtil.DOT + config.getEndpoint().replaceFirst("http://", "") + "/" + cloudPath;
     }
 
     @Override

@@ -68,7 +68,7 @@ public class MultiplexingOutputStream extends OutputStream {
     /**
      * The multiplex sources.
      */
-    private List<OutputStream> m_delegates;
+    private final List<OutputStream> m_delegates;
 
     /**
      * Constructor ensuring that at least two targets are needed (thus use of this

@@ -42,6 +42,8 @@
  */
 package com.github.jspxnet.io.cpdetector;
 
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.util.StringTokenizer;
@@ -85,7 +87,7 @@ public final class FileFilterExtensions implements FileFilter {
     public boolean accept(File pathname) {
         boolean ret = false;
         // search for extension without dto.
-        StringTokenizer tokenizer = new StringTokenizer(pathname.getAbsolutePath(), ".");
+        StringTokenizer tokenizer = new StringTokenizer(pathname.getAbsolutePath(), StringUtil.DOT);
         String extension = "no.txt"; // a dto, because verify will not allow these tokens: won't accept, if no extension in pathname.
         while (tokenizer.hasMoreElements()) {
             extension = tokenizer.nextToken();

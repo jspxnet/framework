@@ -12,9 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Created by jspx.net
  *
- * @author: chenYuan
- * @date: 2021/8/11 20:47
- * @description: jspbox
+ * author: chenYuan
+ * date: 2021/8/11 20:47
+ * description: 单机的时备用
  **/
 @Slf4j
 @Bean(singleton = true)
@@ -39,7 +39,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
 
 
 
-   private final static LRUStore CACHE = new LRUStore();
+    private final static LRUStore CACHE = new LRUStore();
 
     /**
      * 默认为3分钟
@@ -326,7 +326,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
         CacheEntry entry = CACHE.get(timeKey);
         if (entry==null)
         {
-             entry = new CacheEntry();
+            entry = new CacheEntry();
             try {
                 entry.setKey(timeKey);
             } catch (Exception e) {
@@ -337,6 +337,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
         if (times == null) {
             times = 0;
             entry.setTimeToLive(10*DateUtil.MINUTE);
+            entry.setValue(times);
             CACHE.put(entry);
         }
         return times;
@@ -367,6 +368,5 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
         entry.setTimeToLive(10*DateUtil.MINUTE);
         CACHE.put(entry);
     }
-
 
 }

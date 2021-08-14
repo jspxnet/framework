@@ -24,6 +24,7 @@ package com.github.jspxnet.io.cpdetector.util;
 
 import com.github.jspxnet.boot.DaemonThreadFactory;
 import com.github.jspxnet.io.cpdetector.MultiplexingOutputStream;
+import com.github.jspxnet.utils.ArrayUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -107,22 +108,22 @@ public final class ExceptionUtil {
         /**
          * The input stream transfer search for occurrence of word.
          */
-        private InputStream m_streamToTrace;
+        private final InputStream m_streamToTrace;
 
         /**
          * The string that is tried transfer be matched.
          */
-        private String m_match;
+        private final String m_match;
 
         /**
          * The encoding of the input stream transfer use for detecting the match.
          */
-        private Charset m_charset;
+        private final Charset m_charset;
 
         /**
          * If true the output was matched.
          */
-        private boolean m_matched;
+        private boolean mMatched;
 
         /**
          * Returns true if the expected String was matched in the input stream.
@@ -133,7 +134,7 @@ public final class ExceptionUtil {
          * @return true if the expected String was matched in the input stream.
          */
         public boolean isMatched() {
-            return this.m_matched;
+            return this.mMatched;
         }
 
         public InputStreamTracer(final InputStream toTrace, final String match, final Charset charset) {
@@ -155,7 +156,7 @@ public final class ExceptionUtil {
                 do {
                     line = reader.readLine();
                     if (line != null && line.contains(this.m_match)) {
-                        this.m_matched = true;
+                        this.mMatched = true;
                         break;
                     }
                 } while (line != null);
@@ -173,8 +174,9 @@ public final class ExceptionUtil {
      * @see Thread#getStackTrace()
      */
     public static void dumpThreadStack(PrintStream outprint) {
+
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        String stackTraceString = StringUtil.arrayToString(stackTrace, "\n");
+        String stackTraceString = ArrayUtil.arrayToString(stackTrace, "\n");
         outprint.println(stackTraceString);
     }
 

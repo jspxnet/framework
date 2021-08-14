@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.util;
 
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.Serializable;
 
 /**
@@ -83,11 +85,11 @@ public class Range implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("id").append("=").append(id).append("\r\n");
-        sb.append("pack").append("=").append(pack).append("\r\n");
-        sb.append("readLength").append("=").append(readLength).append("\r\n");
-        sb.append("length").append("=").append(length).append("\r\n");
-        sb.append("seek").append("=").append(seek).append("\r\n");
+        sb.append("id").append(StringUtil.EQUAL).append(id).append("\r\n");
+        sb.append("pack").append(StringUtil.EQUAL).append(pack).append("\r\n");
+        sb.append("readLength").append(StringUtil.EQUAL).append(readLength).append("\r\n");
+        sb.append("length").append(StringUtil.EQUAL).append(length).append("\r\n");
+        sb.append("seek").append(StringUtil.EQUAL).append(seek).append("\r\n");
         return sb.toString();
     }
 

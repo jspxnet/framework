@@ -21,7 +21,7 @@ import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
  * <p>
  * 脚本执行
  */
-public class JScriptUtil {
+public final class JScriptUtil {
     private final static ScriptRunner scriptRunner = new TemplateScriptEngine();
 
     public static String cleanWordTag(String html) {

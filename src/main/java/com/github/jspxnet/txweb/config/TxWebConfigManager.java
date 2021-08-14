@@ -586,7 +586,7 @@ public class TxWebConfigManager implements WebConfigManager {
                         boolean addExecute = true;
                         for (Operate operate : operateMap.keySet()) {
                             String tempAction = null;
-                            if ("*".equals(actionName) && !StringUtil.isEmpty(operate.method()) && !operate.method().contains("${") && !operate.method().contains("}") && !"@".equals(operate.method())) {
+                            if (StringUtil.ASTERISK.equals(actionName) && !StringUtil.isEmpty(operate.method()) && !operate.method().contains("${") && !operate.method().contains("}") && !"@".equals(operate.method())) {
                                 tempAction = operate.method();
                             } else {
                                 tempAction = actionName;
@@ -647,7 +647,7 @@ public class TxWebConfigManager implements WebConfigManager {
                 }
                 for (Operate operate : operateMap.keySet()) {
                     String tempAction = null;
-                    if ("*".equals(actionName) && !StringUtil.isEmpty(operate.method()) && !operate.method().contains("${") && !operate.method().contains("}") && !"@".equals(operate.method())) {
+                    if (StringUtil.ASTERISK.equals(actionName) && !StringUtil.isEmpty(operate.method()) && !operate.method().contains("${") && !operate.method().contains("}") && !"@".equals(operate.method())) {
                         tempAction = operate.method();
                     } else {
                         tempAction = actionName;

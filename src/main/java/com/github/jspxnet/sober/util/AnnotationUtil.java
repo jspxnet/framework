@@ -96,7 +96,7 @@ public class AnnotationUtil {
         {
             if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(soberTable.getDatabaseName())))
             {
-                value = ObjectUtil.toLong(jdbcOperations.getUniqueResult("SELECT count(1) FROM " + soberTable.getDatabaseName() + "." + soberTable.getName()));
+                value = ObjectUtil.toLong(jdbcOperations.getUniqueResult("SELECT count(1) FROM " + soberTable.getDatabaseName() + StringUtil.DOT + soberTable.getName()));
             }
             else
             {

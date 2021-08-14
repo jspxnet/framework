@@ -4,6 +4,7 @@ import com.github.jspxnet.util.RandomGenerator;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.RandomUtil;
+import com.github.jspxnet.utils.StringUtil;
 
 import java.io.File;
 import java.util.Date;
@@ -18,7 +19,7 @@ public class DateRandomNamePolicy extends FileRenamePolicy {
     public File rename(File f) {
         String ext = FileUtil.getTypePart(f.getName());
         String name = DateUtil.toString(new Date(), DateUtil.DATE_GUID) + RandomUtil.getRandomGUID(4);
-        f = new File(f.getParent(), name + "." + ext);
+        f = new File(f.getParent(), name + StringUtil.DOT + ext);
         int count = 0;
         while (!createNewFile(f) && count < 9999) {
             count++;

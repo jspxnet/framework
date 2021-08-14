@@ -89,7 +89,7 @@ public class SequenceFactory {
         }
         long keyValue  = generate(tableSequences.getName());
         TableModels sequencesTable = jdbcOperations.getSoberTable(Sequences.class);
-        String sql = "UPDATE " + sequencesTable.getName() + " SET keyValue="+keyValue+" WHERE " + sequencesTable.getPrimary() + "=" + StringUtil.quoteSql(tableSequences.getName());
+        String sql = "UPDATE " + sequencesTable.getName() + " SET keyValue="+keyValue+" WHERE " + sequencesTable.getPrimary() + StringUtil.EQUAL + StringUtil.quoteSql(tableSequences.getName());
         if (useSchedule&&redisStoreQueueClient!=null&&redisStoreQueueClient.useRedisson()&&tableSequences.getKeyValue()>=idf.min())
         {
             redisStoreQueueClient.updateSql(sql);

@@ -99,7 +99,7 @@ public class RedisStoreQueueServer extends BaseRedisStoreQueue  {
             log.debug("存储队列queue长度:{}", queue.size());
             //有效性判断
             CmdRun cmdRun = CMD_RUN_MAP.get(cmdContainer.getCmd());
-            if (!(cmdRun instanceof CmdRun)) {
+            if (cmdRun == null) {
                 return;
             }
             cmdRun.setCmdContainer(cmdContainer);

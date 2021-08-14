@@ -26,7 +26,7 @@ public class HelperView extends HelperAction {
             return NONE;
         }
         url = StringUtil.substringAfter(url, "/");
-        url = StringUtil.substringBetween(StringUtil.substringAfter(url, "/"), "/", "." + getEnv(Environment.filterSuffix));
+        url = StringUtil.substringBetween(StringUtil.substringAfter(url, "/"), "/", StringUtil.DOT + getEnv(Environment.filterSuffix));
         super.setId(url);
         return super.execute();
     }

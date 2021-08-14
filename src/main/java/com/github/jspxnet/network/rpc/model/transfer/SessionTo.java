@@ -1,6 +1,8 @@
 package com.github.jspxnet.network.rpc.model.transfer;
 
 import com.github.jspxnet.txweb.util.RequestUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
@@ -61,12 +63,12 @@ public class SessionTo extends HashMap<String,Object> implements HttpSession, Se
 
     @Override
     public Object getAttribute(String s) {
-        return super.get(RequestUtil.SESSION+"." + s);
+        return super.get(RequestUtil.SESSION+ StringUtil.DOT + s);
     }
 
     @Override
     public Object getValue(String s) {
-        return super.get(RequestUtil.SESSION+"." + s);
+        return super.get(RequestUtil.SESSION+StringUtil.DOT + s);
     }
 
     @Override
@@ -93,17 +95,17 @@ public class SessionTo extends HashMap<String,Object> implements HttpSession, Se
 
     @Override
     public void setAttribute(String s, Object o) {
-        super.put(RequestUtil.SESSION+"."+s,o);
+        super.put(RequestUtil.SESSION+StringUtil.DOT+s,o);
     }
 
     @Override
     public void putValue(String s, Object o) {
-        super.put(RequestUtil.SESSION+"."+s,o);
+        super.put(RequestUtil.SESSION+StringUtil.DOT+s,o);
     }
 
     @Override
     public void removeAttribute(String s) {
-        super.remove(RequestUtil.SESSION+"."+s);
+        super.remove(RequestUtil.SESSION+StringUtil.DOT+s);
     }
 
     @Override

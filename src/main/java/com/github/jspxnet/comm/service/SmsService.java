@@ -49,7 +49,8 @@ public class SmsService extends Thread {
             if (StringUtil.isNull(serialModem)) {
                 serialModem = "Default";
             }
-            if (!serialModem.contains(".")) {
+
+            if (!serialModem.contains(StringUtil.DOT)) {
                 serialModem = "com.jspx.comm.modem.Handler" + serialModem;
             }
             //加到路由表

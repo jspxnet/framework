@@ -136,7 +136,7 @@ public class SpringMethodInterceptor implements MethodInterceptor {
         String exeId = sqlMap.id();
         if (StringUtil.isNull(exeId))
         {
-            exeId = ClassUtil.getImplements(targetClass).getName() + "." +exeMethod.getName();
+            exeId = ClassUtil.getImplements(targetClass).getName() + StringUtil.DOT +exeMethod.getName();
         }
         exeMethod.invoke(obj,arg);
 

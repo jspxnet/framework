@@ -317,7 +317,7 @@ public class ClassUtil {
             throw new IllegalArgumentException("Class was not loaded from a directory");
         }
         String className = aClass.getName();
-        String basename = className.substring(className.lastIndexOf(".") + 1);
+        String basename = className.substring(className.lastIndexOf(StringUtil.DOT) + 1);
 
         File file = new File(directory, basename + ".class");
 
@@ -342,10 +342,10 @@ public class ClassUtil {
         if (StringUtil.isNull(className)) {
             return null;
         }
-        if (!className.startsWith("/")) {
-            className = "/" + className;
+        if (!className.startsWith(StringUtil.BACKSLASH)) {
+            className = StringUtil.BACKSLASH + className;
         }
-        className = className.replace('.', '/');
+        className = className.replace(StringUtil.DOT, StringUtil.BACKSLASH);
         className = className + ".class";
         java.net.URL classUrl = ClassUtil.class.getResource(className);
         if (classUrl != null) {

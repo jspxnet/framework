@@ -14,6 +14,7 @@
 package com.github.jspxnet.upload;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.utils.StringUtil;
 
 import java.io.*;
 import java.net.*;
@@ -231,9 +232,9 @@ public class HttpMessage {
         }
         String existingCookies = (String) headers.get("Cookie");
         if (existingCookies == null) {
-            setHeader("Cookie", name + "=" + value);
+            setHeader("Cookie", name + StringUtil.EQUAL + value);
         } else {
-            setHeader("Cookie", existingCookies + "; " + name + "=" + value);
+            setHeader("Cookie", existingCookies + "; " + name + StringUtil.EQUAL + value);
         }
     }
 
@@ -260,12 +261,12 @@ public class HttpMessage {
             String name = (String) names.nextElement();
             String value = args.getProperty(name);
             try {
-                buf.append(URLEncoder.encode(name, Environment.defaultEncode)).append("=").append(URLEncoder.encode(value, Environment.defaultEncode));
+                buf.append(URLEncoder.encode(name, Environment.defaultEncode)).append(StringUtil.EQUAL).append(URLEncoder.encode(value, Environment.defaultEncode));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
             if (names.hasMoreElements()) {
-                buf.append("&");
+                buf.append(StringUtil.AND);
             }
         }
         return buf.toString();

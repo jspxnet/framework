@@ -285,12 +285,12 @@ public class DataTypeValidator implements Validator {
                 if (field.contains(StringUtil.SEMICOLON)) {
                     field = StringUtil.quote(field, false) + ".toArray(';')";
                 }
-                expression = field + "." + expression;
+                expression = field + StringUtil.DOT + expression;
                 if (expression.contains("$(")) {
                     //web界面的验证，跳过
                     continue;
                 }
-                if (!expression.trim().endsWith(")") && !StringUtil.indexOfArray(expression, new String[]{">", "<", "=", "+", "-", StringUtil.ASTERISK, "/"})) {
+                if (!expression.trim().endsWith(")") && !StringUtil.indexOfArray(expression, new String[]{">", "<", StringUtil.EQUAL, "+", "-", StringUtil.ASTERISK, "/"})) {
                     expression = expression.trim() + "()";
                 }
                 boolean b = ObjectUtil.toBoolean(scriptRunner.eval(expression, 0));

@@ -97,7 +97,7 @@ public class LoadLanguageAction extends ActionSupport {
 
         StringMap<String, String> map = new StringMap<>();
         map.setEncode(Environment.defaultEncode);
-        map.setKeySplit("=");
+        map.setKeySplit(StringUtil.EQUAL);
         map.setLineSplit(StringUtil.CRLF);
         map.loadFile(fileName);
         if (StringUtil.isNull(map.get("language"))) {

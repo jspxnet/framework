@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  * println("bindip.interiorly()=" + bindip.interiorly(ipaddress));
  */
 @Slf4j
-public class IpUtil {
+public final class IpUtil {
     final static private char[] ExpChar = new char[]{'@', '#', '$', '%', '^', '<', '>', '&', '+', '\\', '\'', '\"'};
 
     private IpUtil() {
@@ -152,7 +152,7 @@ public class IpUtil {
         if ("localhost".equalsIgnoreCase(aIpAddress)) {
             aIpAddress = "127.0.0.1";
         }
-        if (!aIpAddress.contains(".")) {
+        if (!aIpAddress.contains(StringUtil.DOT)) {
             return 0;
         }
         if (aIpAddress.contains(":")) {
@@ -175,7 +175,7 @@ public class IpUtil {
      * @return String representing an ip address
      */
     public static String getIPForLong(long aIpAddress) {
-        return (aIpAddress >> 24 & 255) + "." + (aIpAddress >> 16 & 255) + "." + (aIpAddress >> 8 & 255) + "." + (aIpAddress & 255);
+        return (aIpAddress >> 24 & 255) + StringUtil.DOT + (aIpAddress >> 16 & 255) + StringUtil.DOT + (aIpAddress >> 8 & 255) + StringUtil.DOT + (aIpAddress & 255);
     }
 
     public static String getIp(InetAddress address) {

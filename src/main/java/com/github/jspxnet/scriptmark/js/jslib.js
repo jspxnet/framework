@@ -154,7 +154,7 @@ String.prototype.toInt = function () {
 String.prototype.toNumber = function (dec) {
     var f = this;
     if (dec <= 0) return parseInt(this);
-    var result = parseInt(this) + (dec == 0 ? "" : ".");
+    var result = parseInt(this) + (dec == 0 ? "" : StringUtil.DOT);
     f -= parseInt(f);
     if (f == 0)
         for (var i = 0; i < dec; i++) result += '0';

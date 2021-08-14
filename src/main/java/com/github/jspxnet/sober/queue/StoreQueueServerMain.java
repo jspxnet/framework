@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 这里是分布式存储链表的启动程序
+ * 这里需要去掉,
  */
 @Slf4j
 public class StoreQueueServerMain {

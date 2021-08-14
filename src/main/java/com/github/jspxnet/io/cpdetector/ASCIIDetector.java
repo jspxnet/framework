@@ -7,8 +7,6 @@
  */
 package com.github.jspxnet.io.cpdetector;
 
-import com.github.jspxnet.io.cpdetector.util.FileUtil;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,11 +66,36 @@ public final class ASCIIDetector
         } else {
             localin = in;
         }
-        if (FileUtil.isAllASCII(localin)) {
+        if (isAllASCII(localin)) {
             ret = StandardCharsets.US_ASCII;
         }
         return ret;
+    }
 
+    /**
+     * Tests wether the given input stream only contains ASCII characters if
+     * interpreted by reading bytes (16 bit).
+     * <p>
+     * This does not mean that the underlying content is really an ASCII text
+     * file. It just might be viewed with an editor showing only valid ASCII
+     * characters.
+     *
+     * @param in the stream transfer testaio.
+     * @return true if all bytes in the given input stream are in the ASCII range.
+     * @throws IOException on a bad day.
+     */
+    public static boolean isAllASCII(final InputStream in) throws IOException {
+        boolean ret = true;
+        int read = -1;
+        do {
+            read = in.read();
+            if (read > 0x7F) {
+                ret = false;
+                break;
+            }
+
+        } while (read != -1);
+        return ret;
     }
 
 }
