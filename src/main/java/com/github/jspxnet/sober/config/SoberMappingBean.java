@@ -563,13 +563,16 @@ public class SoberMappingBean implements SoberFactory {
         if (soberTable != null) {
             return soberTable;
         }
-        soberTable = SoberUtil.createTableAndIndex(cla,null,soberSupport);
-        if (soberTable!=null)
+        synchronized (this)
         {
-            TABLE_MAP.put(cla, soberTable);
-        } else
-        {
-            log.error("严重异常,必须尽快排除:{} 表创建失败",cla);
+            soberTable = SoberUtil.createTableAndIndex(cla,null,soberSupport);
+            if (soberTable!=null)
+            {
+                TABLE_MAP.put(cla, soberTable);
+            } else
+            {
+                log.error("严重异常,必须尽快排除:{} 表创建失败",cla);
+            }
         }
         return soberTable;
     }

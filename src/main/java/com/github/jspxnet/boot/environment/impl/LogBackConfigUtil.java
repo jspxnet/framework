@@ -22,9 +22,7 @@ import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.FileUtil;
 import org.apache.log4j.*;
 import org.apache.log4j.varia.LevelRangeFilter;
-import org.redisson.connection.DNSMonitor;
 import org.slf4j.ILoggerFactory;
-
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import java.io.File;
@@ -52,7 +50,7 @@ public class LogBackConfigUtil {
             createLogBackConfig(lc);
         } else
         {
-            createLog4JConfig();
+            createLog4jConfig();
         }
     }
 
@@ -76,15 +74,18 @@ public class LogBackConfigUtil {
         if (StringUtil.isEmpty(defaultConfigTxt))
         {
             InputStream stream = LogBackConfigUtil.class.getResourceAsStream(Environment.DEFAULT_LOG_NAME);
-            byte[] bytes = FileUtil.getBytesFromInputStream(stream);
-            if (bytes==null)
+            if (stream!=null)
             {
-                bytes = new byte[0];
-            }
-            try {
-                defaultConfigTxt = new String(bytes,Environment.defaultEncode);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                byte[] bytes = FileUtil.getBytesFromInputStream(stream);
+                if (bytes==null)
+                {
+                    bytes = new byte[0];
+                }
+                try {
+                    defaultConfigTxt = new String(bytes,Environment.defaultEncode);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
             }
         }
         if (StringUtil.isNull(defaultConfigTxt))
@@ -101,7 +102,7 @@ public class LogBackConfigUtil {
         try {
             configurator.doConfigure(inputSource);
         } catch (JoranException e) {
-            System.err.println("默认路径是否配置错误");
+            System.err.println("1.默认路径是否配置错误;2.检查defaultlog.xml文件是否存在");
             e.printStackTrace();
             StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
         }
@@ -109,7 +110,7 @@ public class LogBackConfigUtil {
     }
 
 
-    public static void createLog4JConfig() {
+    public static void createLog4jConfig() {
         Logger log = LogManager.getRootLogger();
         log.setAdditivity(true);
         log.setLevel(Level.ALL);

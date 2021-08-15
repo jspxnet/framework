@@ -19,8 +19,8 @@ import java.nio.channels.FileChannel;
  * date: 2008-12-13
  * Time: 13:25:01
  */
-public class ReadFileUtil {
-    private static int bufferSize = 2048;
+public final class ReadFileUtil {
+    final private static int BUFFER_SIZE = 2048;
 
     private ReadFileUtil() {
 
@@ -40,7 +40,7 @@ public class ReadFileUtil {
         // 获取输入输出通道
         FileChannel fcin = fin.getChannel();
         // 创建缓冲区
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+        ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
         while (true) {
             // clear方法重设缓冲区，使它可以接受读入的数据
             buffer.clear();
@@ -56,7 +56,7 @@ public class ReadFileUtil {
             fout.write(buffer.array());
         }
         fin.close();
-        return fout.toString("UTF-8");
+        return fout.toString( "UTF-8");
     }
 
     public static String readToString(File file) throws IOException {
@@ -93,7 +93,7 @@ public class ReadFileUtil {
 
     public static String readToString(Reader reader) throws IOException {
         StringBuilder buffer = new StringBuilder();
-        char[] buf = new char[bufferSize];
+        char[] buf = new char[BUFFER_SIZE];
         int len;
         while ((len = reader.read(buf)) != -1) {
             buffer.append(buf, 0, len);
@@ -104,7 +104,7 @@ public class ReadFileUtil {
 
     public static char[] readToChars(Reader reader) throws IOException {
         StringBuilder buffer = new StringBuilder();
-        char[] buf = new char[bufferSize];
+        char[] buf = new char[BUFFER_SIZE];
         int len;
         while ((len = reader.read(buf)) != -1) {
             buffer.append(buf, 0, len);
@@ -118,7 +118,7 @@ public class ReadFileUtil {
 
     public static byte[] readToBytes(Reader reader) throws IOException {
         StringBuilder buffer = new StringBuilder();
-        char[] buf = new char[bufferSize];
+        char[] buf = new char[BUFFER_SIZE];
         int len;
         while ((len = reader.read(buf)) != -1) {
             buffer.append(buf, 0, len);

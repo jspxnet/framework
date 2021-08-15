@@ -896,7 +896,7 @@ public final class BeanUtil {
             return null;
         }
         Method method = null;
-        if (args==null)
+        if (args==null || args.length==0)
         {
             method = object.getClass().getMethod(string);
             if (Modifier.isStatic(method.getModifiers()))
