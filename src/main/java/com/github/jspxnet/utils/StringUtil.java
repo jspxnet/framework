@@ -3243,16 +3243,17 @@ public class StringUtil {
         } else
         {
             //没有写端口号的情况
-            if (checkUrl.contains("/"))
+            if (checkUrl.contains(StringUtil.BACKSLASH))
             {
-                checkUrl = StringUtil.substringAfterLast(checkUrl,"/");
+                checkUrl = StringUtil.substringAfterLast(checkUrl,StringUtil.BACKSLASH);
             }
-            if (checkUrl.contains(":"))
+            if (checkUrl.contains(StringUtil.COLON))
             {
-                checkUrl = StringUtil.substringAfter(checkUrl,":");
+                checkUrl = StringUtil.substringAfter(checkUrl,StringUtil.COLON);
             }
         }
-        if (checkUrl.startsWith(":")||checkUrl.startsWith("/") ||checkUrl.startsWith(";") ||checkUrl.startsWith(","))
+
+        if (checkUrl.startsWith(StringUtil.COLON)||checkUrl.startsWith(StringUtil.BACKSLASH) ||checkUrl.startsWith(StringUtil.SEMICOLON) ||checkUrl.startsWith(StringUtil.COMMAS))
         {
             checkUrl = checkUrl.substring(1);
         }
