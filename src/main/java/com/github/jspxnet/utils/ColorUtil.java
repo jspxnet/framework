@@ -21,25 +21,25 @@ import java.util.Map;
  * 色彩单元
  */
 public final  class ColorUtil {
-    private final static String[] deepColors = new String[]{"#FF0000", "#00FF00", "#0000FF", "#6600CC", "#AFD8F8", "#F6BD0F", "#8BBA00", "#FF8E46", "#008E8E", "#D64646", "#8E468E", "#588526", "#B3AA00", "#008ED6", "#9D080D", "#A186BE", "#000000"};
+    private final static String[] DEEP_COLORS = new String[]{"#FF0000", "#00FF00", "#0000FF", "#6600CC", "#AFD8F8", "#F6BD0F", "#8BBA00", "#FF8E46", "#008E8E", "#D64646", "#8E468E", "#588526", "#B3AA00", "#008ED6", "#9D080D", "#A186BE", "#000000"};
     //private final static String[] shallowColors = new String[]{"#666666","#0099FF","#00FFFF","#FF00FF","#006600","#660000", "#F6BD0F", "#CC99FF","#FF66FF","#E1E9F4"};
-    private final static Map<String, String> zhColorMap = new HashMap<String, String>();
+    private final static Map<String, String> ZH_COLOR_MAP = new HashMap<String, String>();
 
     static {
-        zhColorMap.put("黑", "#000000");
-        zhColorMap.put("白", "#FFFFFF");
-        zhColorMap.put("红", "#FF0000");
-        zhColorMap.put("绿", "#00FF00");
-        zhColorMap.put("蓝", "#0000FF");
-        zhColorMap.put("黄", "#FFFF00");
-        zhColorMap.put("紫", "#6600CC");
-        zhColorMap.put("灰", "#666666");
-        zhColorMap.put("淡蓝", "#0099FF");
-        zhColorMap.put("冰绿", "#00FFFF");
-        zhColorMap.put("粉红", "#FF00FF");
-        zhColorMap.put("草绿", "#006600");
-        zhColorMap.put("枣红", "#660000");
-        zhColorMap.put("淡紫", "#CC99FF");
+        ZH_COLOR_MAP.put("黑", "#000000");
+        ZH_COLOR_MAP.put("白", "#FFFFFF");
+        ZH_COLOR_MAP.put("红", "#FF0000");
+        ZH_COLOR_MAP.put("绿", "#00FF00");
+        ZH_COLOR_MAP.put("蓝", "#0000FF");
+        ZH_COLOR_MAP.put("黄", "#FFFF00");
+        ZH_COLOR_MAP.put("紫", "#6600CC");
+        ZH_COLOR_MAP.put("灰", "#666666");
+        ZH_COLOR_MAP.put("淡蓝", "#0099FF");
+        ZH_COLOR_MAP.put("冰绿", "#00FFFF");
+        ZH_COLOR_MAP.put("粉红", "#FF00FF");
+        ZH_COLOR_MAP.put("草绿", "#006600");
+        ZH_COLOR_MAP.put("枣红", "#660000");
+        ZH_COLOR_MAP.put("淡紫", "#CC99FF");
     }
 
     private ColorUtil() {
@@ -47,7 +47,7 @@ public final  class ColorUtil {
     }
 
     static public String toColorForZh(String zh) {
-        return zhColorMap.get(zh);
+        return ZH_COLOR_MAP.get(zh);
     }
 
     public static Color[] getColorArray(int num) {
@@ -61,8 +61,8 @@ public final  class ColorUtil {
 
     public static Color getRandomColor() {
 
-        int i = RandomUtil.getRandomInt(0, deepColors.length - 1);
-        return new Color(Integer.parseInt(HtmlUtil.deleteHtml(deepColors[i].replace("#", ""), 6, "").trim(), 16));
+        int i = RandomUtil.getRandomInt(0, DEEP_COLORS.length - 1);
+        return new Color(Integer.parseInt(HtmlUtil.deleteHtml(DEEP_COLORS[i].replace("#", ""), 6, "").trim(), 16));
     }
 
     /**
@@ -75,10 +75,10 @@ public final  class ColorUtil {
         String[] result = new String[num];
         int i;
         result[0] = getRandomWebColor();
-        for (i = 1; i < num && i < deepColors.length; i++) {
-            result[i] = deepColors[i - 1];
+        for (i = 1; i < num && i < DEEP_COLORS.length; i++) {
+            result[i] = DEEP_COLORS[i - 1];
         }
-        if (num > deepColors.length) {
+        if (num > DEEP_COLORS.length) {
             while (i < num) {
                 String nColor = getRandomWebColor();
                 if (!ArrayUtil.inArray(result, nColor, true)) {
