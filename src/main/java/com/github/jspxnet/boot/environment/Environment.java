@@ -13,6 +13,8 @@ package com.github.jspxnet.boot.environment;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -177,11 +179,7 @@ public abstract class Environment {
 
     final public static String logError = "error";
 
-    final public static String logJspxInfo = "jspxInfo";
-
     final public static String logJspxDebug = "jspxDebug";
-
-    final public static String logJspxError = "jspxError";
 
     final public static String LOGIN_TIMES = "loginTimes";
 
@@ -194,9 +192,6 @@ public abstract class Environment {
     //static public final String uploadFileDAO = "uploadFileDAO";
 
     static public final String UserBundleDAO = "userBundleDAO";
-
-
-
 
 
 

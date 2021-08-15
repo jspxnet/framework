@@ -14,6 +14,7 @@
 package com.github.jspxnet.upload;
 
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -77,7 +78,7 @@ public class LocaleNegotiator {
         // Specify default values:
         //   English language, ISO-8859-1 (Latin-1) charset, English bundle
         Locale defaultLocale = new Locale("zh", "CN");
-        String defaultCharset = "UTF-8";
+        String defaultCharset = StandardCharsets.UTF_8.name();
         ResourceBundle defaultBundle = null;
         try {
             defaultBundle = ResourceBundle.getBundle(bundleName, defaultLocale);

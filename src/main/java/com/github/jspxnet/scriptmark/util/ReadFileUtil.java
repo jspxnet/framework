@@ -12,6 +12,7 @@ package com.github.jspxnet.scriptmark.util;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by IntelliJ IDEA.
@@ -56,7 +57,7 @@ public final class ReadFileUtil {
             fout.write(buffer.array());
         }
         fin.close();
-        return fout.toString( "UTF-8");
+        return fout.toString( StandardCharsets.UTF_8.name());
     }
 
     public static String readToString(File file) throws IOException {

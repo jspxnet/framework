@@ -3,25 +3,27 @@ package com.github.jspxnet.network.http;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.network.http.adapter.HttpClientAdapter;
 import com.github.jspxnet.network.http.adapter.HttpsClientAdapter;
+
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class HttpClientFactory {
     public static final String HTTPS = "https";
     public static final String HTTP = "http";
-    static private final Map<String, String> rocHeaders = new HashMap<>();
-    static private final Map<String, String> rocSecretHeaders = new HashMap<>();
+    static private final Map<String, String> ROC_HEADERS = new HashMap<>();
+    static private final Map<String, String> ROC_SECRET_HEADERS = new HashMap<>();
 
     static {
-        rocHeaders.put("Charset", "UTF-8");
-        rocHeaders.put("Content-Type", "application/json; charset=UTF-8");
-        rocHeaders.put("X-Requested-With", Environment.jspxNetRoc);
-        rocHeaders.put("accept", "application/json");
+        ROC_HEADERS.put("Charset", StandardCharsets.UTF_8.name());
+        ROC_HEADERS.put("Content-Type", "application/json; charset=UTF-8");
+        ROC_HEADERS.put("X-Requested-With", Environment.jspxNetRoc);
+        ROC_HEADERS.put("accept", "application/json");
 
-        rocSecretHeaders.put("Charset", "UTF-8");
-        rocSecretHeaders.put("Content-Type", "application/json; charset=UTF-8");
-        rocSecretHeaders.put("X-Requested-With", "jspx.net-" + Environment.rocSecret);
-        rocSecretHeaders.put("accept", "application/json");
+        ROC_SECRET_HEADERS.put("Charset", StandardCharsets.UTF_8.name());
+        ROC_SECRET_HEADERS.put("Content-Type", "application/json; charset=UTF-8");
+        ROC_SECRET_HEADERS.put("X-Requested-With", "jspx.net-" + Environment.rocSecret);
+        ROC_SECRET_HEADERS.put("accept", "application/json");
 
     }
 
@@ -40,7 +42,7 @@ public abstract class HttpClientFactory {
             client = new HttpClientAdapter().build(url);
         }
 
-        client.setHeaders(rocHeaders);
+        client.setHeaders(ROC_HEADERS);
         return client;
     }
 
@@ -52,7 +54,7 @@ public abstract class HttpClientFactory {
             client = new HttpClientAdapter().build(url);
         }
         client.cleanHeaders();
-        client.setHeaders(rocSecretHeaders);
+        client.setHeaders(ROC_SECRET_HEADERS);
         return client;
     }
 

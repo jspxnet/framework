@@ -13,6 +13,7 @@
 
 package com.github.jspxnet.upload;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -26,52 +27,53 @@ import java.util.*;
  */
 public class LocaleToCharsetMap {
 
-    private static Map<String, String> map = new Hashtable<String, String>();
+    private static final Map<String, String> MAP = new Hashtable<String, String>();
 
     static {
-        map.put("ar", "ISO-8859-6");
-        map.put("be", "ISO-8859-5");
-        map.put("bg", "ISO-8859-5");
-        map.put("ca", "ISO-8859-1");
-        map.put("cs", "ISO-8859-2");
-        map.put("da", "ISO-8859-1");
-        map.put("de", "ISO-8859-1");
-        map.put("el", "ISO-8859-7");
-        map.put("en", "ISO-8859-1");
-        map.put("es", "ISO-8859-1");
-        map.put("et", "ISO-8859-1");
-        map.put("fi", "ISO-8859-1");
-        map.put("fr", "ISO-8859-1");
-        map.put("hr", "ISO-8859-2");
-        map.put("hu", "ISO-8859-2");
-        map.put("is", "ISO-8859-1");
-        map.put("it", "ISO-8859-1");
-        map.put("iw", "ISO-8859-8");
-        map.put("ja", "Shift_JIS");
-        map.put("ko", "EUC-KR");     // Requires JDK 1.1.6
-        map.put("lt", "ISO-8859-2");
-        map.put("lv", "ISO-8859-2");
-        map.put("mk", "ISO-8859-5");
-        map.put("nl", "ISO-8859-1");
-        map.put("no", "ISO-8859-1");
-        map.put("pl", "ISO-8859-2");
-        map.put("pt", "ISO-8859-1");
-        map.put("ro", "ISO-8859-2");
-        map.put("ru", "ISO-8859-5");
-        map.put("sh", "ISO-8859-5");
-        map.put("sk", "ISO-8859-2");
-        map.put("sl", "ISO-8859-2");
-        map.put("sq", "ISO-8859-2");
-        map.put("sr", "ISO-8859-5");
-        map.put("sv", "ISO-8859-1");
-        map.put("tr", "ISO-8859-9");
-        map.put("uk", "ISO-8859-5");
-        map.put("zh", "GB2312");
-        map.put("zh", "UTF-8");
-        map.put("zh-CN", "UTF-8");
-        map.put("zh_TW", "Big5");
-        map.put("en_US", "UTF-8");
-        map.put("zh-CN_UTF8", "UTF-8");
+        MAP.put("ar", "ISO-8859-6");
+        MAP.put("be", "ISO-8859-5");
+        MAP.put("bg", "ISO-8859-5");
+        MAP.put("ca", "ISO-8859-1");
+        MAP.put("cs", "ISO-8859-2");
+        MAP.put("da", "ISO-8859-1");
+        MAP.put("de", "ISO-8859-1");
+        MAP.put("el", "ISO-8859-7");
+        MAP.put("en", "ISO-8859-1");
+        MAP.put("es", "ISO-8859-1");
+        MAP.put("et", "ISO-8859-1");
+        MAP.put("fi", "ISO-8859-1");
+        MAP.put("fr", "ISO-8859-1");
+        MAP.put("hr", "ISO-8859-2");
+        MAP.put("hu", "ISO-8859-2");
+        MAP.put("is", "ISO-8859-1");
+        MAP.put("it", "ISO-8859-1");
+        MAP.put("iw", "ISO-8859-8");
+        MAP.put("ja", "Shift_JIS");
+        MAP.put("ko", "EUC-KR");     // Requires JDK 1.1.6
+        MAP.put("lt", "ISO-8859-2");
+        MAP.put("lv", "ISO-8859-2");
+        MAP.put("mk", "ISO-8859-5");
+        MAP.put("nl", "ISO-8859-1");
+        MAP.put("no", "ISO-8859-1");
+        MAP.put("pl", "ISO-8859-2");
+        MAP.put("pt", "ISO-8859-1");
+        MAP.put("ro", "ISO-8859-2");
+        MAP.put("ru", "ISO-8859-5");
+        MAP.put("sh", "ISO-8859-5");
+        MAP.put("sk", "ISO-8859-2");
+        MAP.put("sl", "ISO-8859-2");
+        MAP.put("sq", "ISO-8859-2");
+        MAP.put("sr", "ISO-8859-5");
+        MAP.put("sv", "ISO-8859-1");
+        MAP.put("tr", "ISO-8859-9");
+        MAP.put("uk", "ISO-8859-5");
+        MAP.put("zh_GB2312", "GB2312");
+        MAP.put("zh_GBK", "GBK");
+        MAP.put("zh", StandardCharsets.UTF_8.name());
+        MAP.put("zh-CN", StandardCharsets.UTF_8.name());
+        MAP.put("zh_TW", "Big5");
+        MAP.put("en_US", StandardCharsets.UTF_8.name());
+        MAP.put("zh-CN_UTF8", StandardCharsets.UTF_8.name());
     }
 
     /**
@@ -84,11 +86,11 @@ public class LocaleToCharsetMap {
     public static String getCharset(Locale loc) {
 
         String charset;
-        charset = map.get(loc.toString());
+        charset = MAP.get(loc.toString());
         if (charset != null) {
             return charset;
         }
-        charset = map.get(loc.getLanguage());
+        charset = MAP.get(loc.getLanguage());
         return charset;  // may be null
     }
 }

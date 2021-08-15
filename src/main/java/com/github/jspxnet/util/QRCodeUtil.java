@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
 import java.util.Map;
 import javax.imageio.ImageIO;
@@ -34,13 +35,13 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
  * user: Rex  chenyuan
  * date: 2016年12月29日  上午12:31:29
  */
-public class QRCodeUtil {
+public final class QRCodeUtil {
 
     private QRCodeUtil() {
 
     }
 
-    private static final String CHARSET = "UTF-8";
+    private static final String CHARSET = StandardCharsets.UTF_8.name();
     private static final String FORMAT_NAME = "jpg";
     // 二维码尺寸
     private static final int QRCODE_SIZE = 200;

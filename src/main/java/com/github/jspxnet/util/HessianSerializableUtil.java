@@ -11,8 +11,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public abstract class HessianSerializableUtil {
+public final class HessianSerializableUtil {
 
+    private HessianSerializableUtil()
+    {
+
+    }
 
     public static HessianProxyFactory factory = new HessianProxyFactory();
 

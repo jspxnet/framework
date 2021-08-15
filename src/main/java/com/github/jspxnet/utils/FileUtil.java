@@ -35,6 +35,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
@@ -1770,7 +1771,7 @@ public final class FileUtil {
         //路径里边有空格
         if (dir!=null&&dir.contains("%20"))
         {
-            dir = URLUtil.getUrlDecoder(dir,"UTF-8");
+            dir = URLUtil.getUrlDecoder(dir, StandardCharsets.UTF_8.name());
         }
 
         //dir = FileUtil.mendPath(dir);

@@ -7,7 +7,11 @@ import com.github.jspxnet.utils.StringUtil;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-public class DebugUtil {
+public final class DebugUtil {
+    private DebugUtil()
+    {
+
+    }
     /** 每条 Log 的 tag 输出的最大长度, 超过部分将被截断 */
     private static final int TAG_MAX_LENGTH = 50;
 
@@ -91,7 +95,7 @@ public class DebugUtil {
             printOut = new PrintStream(bytesBufOut);
             e.printStackTrace(printOut);
             printOut.flush();
-            error(tag, bytesBufOut.toString("UTF-8"));
+            error(tag, bytesBufOut.toString(StandardCharsets.UTF_8.name()));
 
         } catch (Exception e1) {
             e1.printStackTrace();

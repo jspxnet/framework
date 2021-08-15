@@ -27,64 +27,64 @@ import java.util.HashMap;
  * Time: 10:34:50
  */
 public final  class FileSuffixUtil {
-    private static final Map<String, String> headTypes = new HashMap<String, String>();
+    private static final Map<String, String> HEAD_TYPES = new HashMap<String, String>();
 
     static {
-        headTypes.put("jpg", "ff");
-        headTypes.put("png", "89");
-        headTypes.put("gif", "47");
-        headTypes.put("bmp", "42");
-        headTypes.put("ncb", "4d");
-        headTypes.put("suo", "d0");
-        headTypes.put("swf", "43");
-        headTypes.put("ini", "5b");
-        headTypes.put("torrent", "64");
-        headTypes.put("rar", "52");
-        headTypes.put("avi", "52");
-        headTypes.put("ico", "00");
-        headTypes.put("jar", "50");
-        headTypes.put("zip", "50");
-        headTypes.put("a", "21");
-        headTypes.put("ini", "ff");
-        headTypes.put("iso", "00");
-        headTypes.put("exe", "4d");
-        headTypes.put("com", "66");
-        headTypes.put("pyc", "b3");
-        headTypes.put("swftools", "25");
-        headTypes.put("zip", "50");
-        headTypes.put("dll", "4d");
-        headTypes.put("msi", "d0");
-        headTypes.put("pl", "23");
-        headTypes.put("lib", "21");
-        headTypes.put("doc", "d0");
-        headTypes.put("docx", "d0");
-        headTypes.put("xls", "d0");
-        headTypes.put("url", "5b");
+        HEAD_TYPES.put("jpg", "ff");
+        HEAD_TYPES.put("png", "89");
+        HEAD_TYPES.put("gif", "47");
+        HEAD_TYPES.put("bmp", "42");
+        HEAD_TYPES.put("ncb", "4d");
+        HEAD_TYPES.put("suo", "d0");
+        HEAD_TYPES.put("swf", "43");
+        HEAD_TYPES.put("ini", "5b");
+        HEAD_TYPES.put("torrent", "64");
+        HEAD_TYPES.put("rar", "52");
+        HEAD_TYPES.put("avi", "52");
+        HEAD_TYPES.put("ico", "00");
+        HEAD_TYPES.put("jar", "50");
+        HEAD_TYPES.put("zip", "50");
+        HEAD_TYPES.put("a", "21");
+        HEAD_TYPES.put("ini", "ff");
+        HEAD_TYPES.put("iso", "00");
+        HEAD_TYPES.put("exe", "4d");
+        HEAD_TYPES.put("com", "66");
+        HEAD_TYPES.put("pyc", "b3");
+        HEAD_TYPES.put("swftools", "25");
+        HEAD_TYPES.put("zip", "50");
+        HEAD_TYPES.put("dll", "4d");
+        HEAD_TYPES.put("msi", "d0");
+        HEAD_TYPES.put("pl", "23");
+        HEAD_TYPES.put("lib", "21");
+        HEAD_TYPES.put("doc", "d0");
+        HEAD_TYPES.put("docx", "d0");
+        HEAD_TYPES.put("xls", "d0");
+        HEAD_TYPES.put("url", "5b");
     }
 
-    public static final String[] imageTypes = {"jpg", "jpeg", "gif", "png", "bmp"};
-    public static final String[] zipTypes = {"rar", "zip", "7z", "gz", "bz2", "cab", "iso", "ace", "gzip", "jzb", "arj", "uue"};
-    public static final String[] videoTypes = {"flv", "swf", "mkv", "avi", "asf", "rm", "rmvb", "mpeg", "mpg", "ogg", "mp4", "wmv", "m4v", "mp3", "wav", "vob", "ram", "mid", "mod", "cpk", "3gp", "vob", "mov", "3g2", "asf", "xvid", "divx"};
-    public static final String[] officeTypes = {"doc", "docx", "xls", "xlsx", "ppt", "pptx", "mdb", "one", "pdf", "gd", "wps", "dps", "et", "ett", "rtf", "chm"};
+    public static final String[] IMAGE_TYPES = {"jpg", "jpeg", "gif", "png", "bmp"};
+    public static final String[] ZIP_TYPES = {"rar", "zip", "7z", "gz", "bz2", "cab", "iso", "ace", "gzip", "jzb", "arj", "uue"};
+    public static final String[] VIDEO_TYPES = {"flv", "swf", "mkv", "avi", "asf", "rm", "rmvb", "mpeg", "mpg", "ogg", "mp4", "wmv", "m4v", "mp3", "wav", "vob", "ram", "mid", "mod", "cpk", "3gp", "vob", "mov", "3g2", "asf", "xvid", "divx"};
+    public static final String[] OFFICE_TYPES = {"doc", "docx", "xls", "xlsx", "ppt", "pptx", "mdb", "one", "pdf", "gd", "wps", "dps", "et", "ett", "rtf", "chm"};
 
     private FileSuffixUtil() {
 
     }
 
     static public boolean isImageSuffix(String extendName) {
-        return ArrayUtil.inArray(imageTypes, extendName, true);
+        return ArrayUtil.inArray(IMAGE_TYPES, extendName, true);
     }
 
     static public boolean isZipSuffix(String extendName) {
-        return ArrayUtil.inArray(zipTypes, extendName, true);
+        return ArrayUtil.inArray(ZIP_TYPES, extendName, true);
     }
 
     static public boolean isVideoSuffix(String extendName) {
-        return ArrayUtil.inArray(videoTypes, extendName, true);
+        return ArrayUtil.inArray(VIDEO_TYPES, extendName, true);
     }
 
     static public boolean isOfficeSuffix(String extendName) {
-        return ArrayUtil.inArray(officeTypes, extendName, true);
+        return ArrayUtil.inArray(OFFICE_TYPES, extendName, true);
     }
 
     /**
@@ -96,7 +96,7 @@ public final  class FileSuffixUtil {
         if (fileType != null) {
             fileType = fileType.toLowerCase().trim();
         }
-        return !headTypes.containsKey(fileType) || headTypes.get(fileType).equals(getFileHeadHex(fileName, 1));
+        return !HEAD_TYPES.containsKey(fileType) || HEAD_TYPES.get(fileType).equals(getFileHeadHex(fileName, 1));
     }
 
     /**

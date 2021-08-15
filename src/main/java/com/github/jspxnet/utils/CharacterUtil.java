@@ -13,6 +13,7 @@ import com.github.jspxnet.io.cpdetector.ASCIIDetector;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -149,8 +150,8 @@ public final class CharacterUtil {
     public static boolean isGBK(String str) {
         char[] chars = str.toCharArray();
         boolean isGBK = false;
-        for (int i = 0; i < chars.length; i++) {
-            byte[] bytes = ("" + chars[i]).getBytes();
+        for (char aChar : chars) {
+            byte[] bytes = ("" + aChar).getBytes();
             if (bytes.length == 2) {
                 int[] ints = new int[2];
                 ints[0] = bytes[0] & 0xff;
@@ -165,50 +166,50 @@ public final class CharacterUtil {
         return isGBK && java.nio.charset.Charset.forName("GBK").newEncoder().canEncode(str);
     }
 
-    final static public Map<String, String> CharSetMap = new HashMap<String, String>();
+    final static public Map<String, String> CHAR_SET_MAP = new HashMap<String, String>();
 
     static {
 
-        CharSetMap.put("usa7", "US-ASCII");
-        CharSetMap.put("big5", "Big5");
-        CharSetMap.put("gbk", "GBK");
-        CharSetMap.put("sjis", "SJIS");
-        CharSetMap.put("gb2312", "EUC_CN");
-        CharSetMap.put("ujis", "EUC_JP");
-        CharSetMap.put("euc_kr", "EUC_KR");
-        CharSetMap.put("latin1", "ISO8859_1");
-        CharSetMap.put("latin1_de", "ISO8859_1");
-        CharSetMap.put("german1", "ISO8859_1");
-        CharSetMap.put("danish", "ISO8859_1");
-        CharSetMap.put("latin2", "ISO8859_2");
-        CharSetMap.put("czech", "ISO8859_2");
-        CharSetMap.put("hungarian", "ISO8859_2");
-        CharSetMap.put("croat", "ISO8859_2");
-        CharSetMap.put("greek", "ISO8859_7");
-        CharSetMap.put("hebrew", "ISO8859_8");
-        CharSetMap.put("latin5", "ISO8859_9");
-        CharSetMap.put("latvian", "ISO8859_13");
-        CharSetMap.put("latvian1", "ISO8859_13");
-        CharSetMap.put("estonia", "ISO8859_13");
-        CharSetMap.put("dos", "Cp437");
-        CharSetMap.put("pclatin2", "Cp852");
-        CharSetMap.put("cp866", "Cp866");
-        CharSetMap.put("koi8_ru", "KOI8_R");
-        CharSetMap.put("tis620", "TIS620");
-        CharSetMap.put("win1250", "Cp1250");
-        CharSetMap.put("win1250ch", "Cp1250");
-        CharSetMap.put("win1251", "Cp1251");
-        CharSetMap.put("cp1251", "Cp1251");
-        CharSetMap.put("win1251ukr", "Cp1251");
-        CharSetMap.put("cp1257", "Cp1257");
-        CharSetMap.put("macroman", "MacRoman");
-        CharSetMap.put("macce", "MacCentralEurope");
-        CharSetMap.put("utf8", "UTF-8");
-        CharSetMap.put("utf-8", "UTF-8");
-        CharSetMap.put("ucs2", "UnicodeBig");
+        CHAR_SET_MAP.put("usa7", "US-ASCII");
+        CHAR_SET_MAP.put("big5", "Big5");
+        CHAR_SET_MAP.put("gbk", "GBK");
+        CHAR_SET_MAP.put("sjis", "SJIS");
+        CHAR_SET_MAP.put("gb2312", "EUC_CN");
+        CHAR_SET_MAP.put("ujis", "EUC_JP");
+        CHAR_SET_MAP.put("euc_kr", "EUC_KR");
+        CHAR_SET_MAP.put("latin1", "ISO8859_1");
+        CHAR_SET_MAP.put("latin1_de", "ISO8859_1");
+        CHAR_SET_MAP.put("german1", "ISO8859_1");
+        CHAR_SET_MAP.put("danish", "ISO8859_1");
+        CHAR_SET_MAP.put("latin2", "ISO8859_2");
+        CHAR_SET_MAP.put("czech", "ISO8859_2");
+        CHAR_SET_MAP.put("hungarian", "ISO8859_2");
+        CHAR_SET_MAP.put("croat", "ISO8859_2");
+        CHAR_SET_MAP.put("greek", "ISO8859_7");
+        CHAR_SET_MAP.put("hebrew", "ISO8859_8");
+        CHAR_SET_MAP.put("latin5", "ISO8859_9");
+        CHAR_SET_MAP.put("latvian", "ISO8859_13");
+        CHAR_SET_MAP.put("latvian1", "ISO8859_13");
+        CHAR_SET_MAP.put("estonia", "ISO8859_13");
+        CHAR_SET_MAP.put("dos", "Cp437");
+        CHAR_SET_MAP.put("pclatin2", "Cp852");
+        CHAR_SET_MAP.put("cp866", "Cp866");
+        CHAR_SET_MAP.put("koi8_ru", "KOI8_R");
+        CHAR_SET_MAP.put("tis620", "TIS620");
+        CHAR_SET_MAP.put("win1250", "Cp1250");
+        CHAR_SET_MAP.put("win1250ch", "Cp1250");
+        CHAR_SET_MAP.put("win1251", "Cp1251");
+        CHAR_SET_MAP.put("cp1251", "Cp1251");
+        CHAR_SET_MAP.put("win1251ukr", "Cp1251");
+        CHAR_SET_MAP.put("cp1257", "Cp1257");
+        CHAR_SET_MAP.put("macroman", "MacRoman");
+        CHAR_SET_MAP.put("macce", "MacCentralEurope");
+        CHAR_SET_MAP.put("utf8", StandardCharsets.UTF_8.name());
+        CHAR_SET_MAP.put("utf-8", StandardCharsets.UTF_8.name());
+        CHAR_SET_MAP.put("ucs2", "UnicodeBig");
     }
 
     public static boolean haveEncode(String encode) {
-        return encode != null && CharSetMap.containsKey(encode.toLowerCase());
+        return encode != null && CHAR_SET_MAP.containsKey(encode.toLowerCase());
     }
 }

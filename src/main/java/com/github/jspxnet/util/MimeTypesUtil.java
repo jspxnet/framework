@@ -4,6 +4,7 @@ import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import javax.activation.MimetypesFileTypeMap;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by jspx.net
@@ -12,7 +13,7 @@ import javax.activation.MimetypesFileTypeMap;
  * date: 2020/12/25 18:09
  * description: 得到http的 ContentType
  **/
-public class MimeTypesUtil {
+public final class MimeTypesUtil {
     public static final String[] XML_FILE_TYPES = new String[]{"xml","dcd", "dtd", "ent", "fo", "mml","mtx","plg","rdf","spp",
             "svg","tld","vml","tsd","vxml","xql","xsd","xslt","xdr"
             ,"xq","xquery","xsl","xsd","xslt","xdr"};
@@ -27,7 +28,7 @@ public class MimeTypesUtil {
     {
         if (encode==null)
         {
-            encode = "UTF-8";
+            encode = StandardCharsets.UTF_8.name();
         }
         if ("js".equalsIgnoreCase(fileType)) {
             return ("text/javascript; charset=" + encode);

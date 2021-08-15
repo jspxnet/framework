@@ -35,12 +35,11 @@ import java.util.TreeMap;
 @Slf4j
 public final class XMLUtil {
 
-    private static char[] LT_ENCODE = "&lt;".toCharArray();
-    private static char[] GT_ENCODE = "&gt;".toCharArray();
-    private static char[] AMP_ENCODE = "&amp;".toCharArray();
-    private static char[] QUOT_ENCODE = "&quot;".toCharArray();
+    final private static char[] LT_ENCODE = "&lt;".toCharArray();
+    final private static char[] GT_ENCODE = "&gt;".toCharArray();
+    final private static char[] AMP_ENCODE = "&amp;".toCharArray();
+    final private static char[] QUOT_ENCODE = "&quot;".toCharArray();
     final private static String XML_KEY_ENCODING = "encoding";
-
     final public static String CDATA_START_KEY = "<![CDATA[";
     final public static String CDATA_END_KEY = "]]>";
 

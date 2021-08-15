@@ -12,6 +12,7 @@ package com.github.jspxnet.scriptmark.load;
 import java.io.Reader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,7 +26,7 @@ public class StringSource extends Source implements java.io.Serializable {
 
     private final long lastModified;
 
-    private static final String STRING_ENCODING = "UTF-8";
+    private static final String STRING_ENCODING = StandardCharsets.UTF_8.name();
 
     public StringSource(String source) {
         this.source = source;

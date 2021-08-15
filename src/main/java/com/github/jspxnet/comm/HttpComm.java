@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -26,7 +27,7 @@ import static com.github.jspxnet.comm.PortObserver.CanSendNotification;
 public abstract class HttpComm extends Observable implements SerialPortEventListener {
     public String name = StringUtil.empty;
     protected String portName = StringUtil.empty;
-    protected String encoding = "UTF-8";
+    protected String encoding = StandardCharsets.UTF_8.name();
     protected String urlTemplate = " http://utf8.sms.webchinese.cn";
     private Map<String, Object> params = new HashMap<String, Object>();
     private String response = StringUtil.empty;

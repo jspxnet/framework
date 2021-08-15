@@ -41,6 +41,7 @@
 package com.github.jspxnet.io.chardet;
 
 import java.lang.*;
+import java.nio.charset.StandardCharsets;
 
 public class nsUTF8Verifier extends nsVerifier {
 
@@ -137,7 +138,7 @@ public class nsUTF8Verifier extends nsVerifier {
         states[25] = ((((((eError) << 4) | (eError)) << 8) | (((eError) << 4) | (eError))) << 16) | (((((eError) << 4) | (eError)) << 8) | (((eError) << 4) | (eError)));
 
 
-        charset = "UTF-8";
+        charset = StandardCharsets.UTF_8.name();
         stFactor = 16;
 
     }

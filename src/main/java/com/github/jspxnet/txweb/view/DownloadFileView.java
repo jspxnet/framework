@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -248,7 +249,7 @@ public class DownloadFileView extends ActionSupport {
         } else
             //以文件名方式命名
             if (NAME_TYPE_NAME.equalsIgnoreCase(nameType)) {
-                response.setHeader(RequestUtil.requestContentDisposition, "attachment;filename=" + URLEncoder.encode(uploadFile.getTitle(), "UTF-8") + StringUtil.DOT + fileType);
+                response.setHeader(RequestUtil.requestContentDisposition, "attachment;filename=" + URLEncoder.encode(uploadFile.getTitle(), StandardCharsets.UTF_8.name()) + StringUtil.DOT + fileType);
             } else {
                 //以hash方式
                 response.setHeader(RequestUtil.requestContentDisposition, "attachment;filename=" + uploadFile.getHash() + StringUtil.DOT + fileType);

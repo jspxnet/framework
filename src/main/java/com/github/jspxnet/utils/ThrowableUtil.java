@@ -1,5 +1,8 @@
 package com.github.jspxnet.utils;
 
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+
 /**
  * Created by jspx.net
  *
@@ -19,6 +22,7 @@ public final class ThrowableUtil {
      */
     public static String getThrowableMessage(Throwable e)
     {
+
         if (e==null)
         {
             return StringUtil.empty;

@@ -39,7 +39,7 @@ import java.util.Map;
  * <p>
  * 这里是一个 jax-ws 方式的WebService 调用接口
  * sun-jaxws.xml 配置如下
- * [?xml version="1.0" encoding="UTF-8"?]
+ * [?xml version="1.0" encoding=StandardCharsets.UTF_8.name()?]
  * [endpoints  xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime"  version="2.0"]
  * [endpoint name="JspxNetWebFactory"
  * implementation="com.github.jspxnet.txweb.service.web.JspxNetWebFactoryImpl"

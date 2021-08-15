@@ -37,6 +37,7 @@ import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.servlet.ServletContextListener;
+import java.nio.charset.StandardCharsets;
 import java.security.Provider;
 import java.security.Security;
 import java.sql.Driver;
@@ -189,7 +190,7 @@ public class JspxCoreListener implements ServletContextListener {
         //系统默认超时时间end
 
         //jdk java.sdk.security 文件中添加配置        sdk.security.provider.11=org.bouncycastle.jce.provider.BouncyCastleProvider
-        SystemUtil.encode = envTemplate.getString(Environment.systemEncode, SystemUtil.OS == SystemUtil.WINDOWS ? "GBK" : "UTF-8");
+        SystemUtil.encode = envTemplate.getString(Environment.systemEncode, SystemUtil.OS == SystemUtil.WINDOWS ? "GBK" : StandardCharsets.UTF_8.name());
         ////////////////////////AOP begin
         if (!isAndroid) {
             log.info("repairEncode=" + envTemplate.getString(Environment.repairEncode));

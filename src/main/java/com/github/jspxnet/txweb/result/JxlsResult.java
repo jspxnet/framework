@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -68,9 +69,9 @@ public class JxlsResult extends ResultSupport {
         {
             in = ClassUtil.getResourceAsStream(tempFile);
         }
-        response.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType("application/x-msdownload");
-        response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(tempName+".xlsx", "UTF-8"));
+        response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(tempName+".xlsx", StandardCharsets.UTF_8.name()));
         try (OutputStream out = response.getOutputStream())
         {
             JxlsUtil.exportExcel(in, out, (Map)obj);

@@ -248,10 +248,10 @@ public class Role extends OperateTable implements IRole {
     public String getJsonUploadTypes(String type) {
         String[] uploadTypes = new String[0];
         if (StringUtil.ASTERISK.equalsIgnoreCase(uploadFileTypes)) {
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.imageTypes);
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.zipTypes);
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.videoTypes);
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.officeTypes);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.IMAGE_TYPES);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.ZIP_TYPES);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.VIDEO_TYPES);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.OFFICE_TYPES);
         } else {
             uploadTypes = StringUtil.split(StringUtil.replace(uploadFileTypes, StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON);
         }
@@ -263,7 +263,7 @@ public class Role extends OperateTable implements IRole {
 
             StringBuilder types = new StringBuilder();
             for (String t : uploadTypes) {
-                if (ArrayUtil.inArray(FileSuffixUtil.imageTypes, t, true)) {
+                if (ArrayUtil.inArray(FileSuffixUtil.IMAGE_TYPES, t, true)) {
                     types.append(t).append(StringUtil.COMMAS);
                     uploadTypes = ArrayUtil.delete(uploadTypes, t, true);
                 }
@@ -282,7 +282,7 @@ public class Role extends OperateTable implements IRole {
 
             StringBuilder types = new StringBuilder();
             for (String t : uploadTypes) {
-                if (ArrayUtil.inArray(FileSuffixUtil.zipTypes, t, true)) {
+                if (ArrayUtil.inArray(FileSuffixUtil.ZIP_TYPES, t, true)) {
                     types.append(t).append(StringUtil.COMMAS);
                     uploadTypes = ArrayUtil.delete(uploadTypes, t, true);
                 }
@@ -302,7 +302,7 @@ public class Role extends OperateTable implements IRole {
 
             StringBuilder types = new StringBuilder();
             for (String t : uploadTypes) {
-                if (ArrayUtil.inArray(FileSuffixUtil.videoTypes, t, true)) {
+                if (ArrayUtil.inArray(FileSuffixUtil.VIDEO_TYPES, t, true)) {
                     types.append(t).append(StringUtil.COMMAS);
                     uploadTypes = ArrayUtil.delete(uploadTypes, t, true);
                 }
@@ -323,7 +323,7 @@ public class Role extends OperateTable implements IRole {
 
             StringBuilder types = new StringBuilder();
             for (String t : uploadTypes) {
-                if (ArrayUtil.inArray(FileSuffixUtil.officeTypes, t, true)) {
+                if (ArrayUtil.inArray(FileSuffixUtil.OFFICE_TYPES, t, true)) {
                     types.append(t).append(StringUtil.COMMAS);
                     uploadTypes = ArrayUtil.delete(uploadTypes, t, true);
                 }
@@ -369,10 +369,10 @@ public class Role extends OperateTable implements IRole {
     public String getOptionUploadTypes(boolean cut) {
         String[] uploadTypes = new String[0];
         if (StringUtil.ASTERISK.equalsIgnoreCase(uploadFileTypes)) {
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.imageTypes);
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.zipTypes);
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.videoTypes);
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.officeTypes);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.IMAGE_TYPES);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.ZIP_TYPES);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.VIDEO_TYPES);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.OFFICE_TYPES);
         } else {
             uploadTypes = StringUtil.split(StringUtil.replace(uploadFileTypes, StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON);
         }
@@ -384,7 +384,7 @@ public class Role extends OperateTable implements IRole {
             option.append("Image File").append(StringUtil.COLON);
             StringBuilder types = new StringBuilder();
             for (String t : uploadTypes) {
-                if (ArrayUtil.inArray(FileSuffixUtil.imageTypes, t, true)) {
+                if (ArrayUtil.inArray(FileSuffixUtil.IMAGE_TYPES, t, true)) {
                     types.append(t).append(StringUtil.COMMAS);
                     uploadTypes = ArrayUtil.delete(uploadTypes, t, true);
                     i++;
@@ -406,7 +406,7 @@ public class Role extends OperateTable implements IRole {
             i = 0;
             StringBuilder types = new StringBuilder();
             for (String t : uploadTypes) {
-                if (ArrayUtil.inArray(FileSuffixUtil.zipTypes, t, true)) {
+                if (ArrayUtil.inArray(FileSuffixUtil.ZIP_TYPES, t, true)) {
                     types.append(t).append(StringUtil.COMMAS);
                     uploadTypes = ArrayUtil.delete(uploadTypes, t, true);
                     i++;
@@ -429,7 +429,7 @@ public class Role extends OperateTable implements IRole {
             i = 0;
             StringBuilder types = new StringBuilder();
             for (String t : uploadTypes) {
-                if (ArrayUtil.inArray(FileSuffixUtil.videoTypes, t, true)) {
+                if (ArrayUtil.inArray(FileSuffixUtil.VIDEO_TYPES, t, true)) {
                     types.append(t).append(StringUtil.COMMAS);
                     uploadTypes = ArrayUtil.delete(uploadTypes, t, true);
                     i++;
@@ -452,7 +452,7 @@ public class Role extends OperateTable implements IRole {
             i = 0;
             StringBuilder types = new StringBuilder();
             for (String t : uploadTypes) {
-                if (ArrayUtil.inArray(FileSuffixUtil.officeTypes, t, true)) {
+                if (ArrayUtil.inArray(FileSuffixUtil.OFFICE_TYPES, t, true)) {
                     types.append(t).append(StringUtil.COMMAS);
                     uploadTypes = ArrayUtil.delete(uploadTypes, t, true);
                     i++;

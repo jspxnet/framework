@@ -24,6 +24,8 @@ import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.SystemUtil;
 import org.springframework.context.ApplicationContext;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
@@ -204,7 +206,7 @@ public final class JspxNetApplication {
         SpringBeanContext.setApplicationContext(context);
 
         //jdk java.sdk.security 文件中添加配置        sdk.security.provider.11=org.bouncycastle.jce.provider.BouncyCastleProvider
-        SystemUtil.encode = envTemplate.getString(Environment.systemEncode, SystemUtil.OS == SystemUtil.WINDOWS ? "GBK" : "UTF-8");
+        SystemUtil.encode = envTemplate.getString(Environment.systemEncode, SystemUtil.OS == SystemUtil.WINDOWS ? "GBK" : StandardCharsets.UTF_8.name());
 
         if (cacheList!=null)
         {

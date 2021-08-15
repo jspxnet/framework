@@ -20,6 +20,7 @@ package com.github.jspxnet.cron4j;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -264,7 +265,7 @@ public class CronParser {
 	 *             I/O error.
 	 */
 	public static TaskTable parse(InputStream stream) throws IOException {
-		return parse(new InputStreamReader(stream, "UTF-8"));
+		return parse(new InputStreamReader(stream, StandardCharsets.UTF_8.name()));
 	}
 
 	/**

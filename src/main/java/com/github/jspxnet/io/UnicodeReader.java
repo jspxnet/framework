@@ -10,6 +10,7 @@
 package com.github.jspxnet.io;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Generic unicode textreader, which will use BOM mark
@@ -76,13 +77,13 @@ public class UnicodeReader extends Reader {
             unread = n - 4;
         } else if ((bom[0] == (byte) 0xEF) && (bom[1] == (byte) 0xBB) &&
                 (bom[2] == (byte) 0xBF)) {
-            encoding = "UTF-8";
+            encoding = StandardCharsets.UTF_8.name();
             unread = n - 3;
         } else if ((bom[0] == (byte) 0xFE) && (bom[1] == (byte) 0xFF)) {
-            encoding = "UTF-16BE";
+            encoding = StandardCharsets.UTF_16BE.name();
             unread = n - 2;
         } else if ((bom[0] == (byte) 0xFF) && (bom[1] == (byte) 0xFE)) {
-            encoding = "UTF-16LE";
+            encoding = StandardCharsets.UTF_16LE.name();
             unread = n - 2;
         } else {
             // Unicode BOM mark not found, unread all bytes

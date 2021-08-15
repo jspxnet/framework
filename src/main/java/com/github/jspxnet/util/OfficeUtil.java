@@ -22,7 +22,10 @@ import java.io.InputStream;
  * date: 2021/6/15 23:23
  * description: office 文档处理
  **/
-public class OfficeUtil {
+public final class OfficeUtil {
+    private OfficeUtil()
+    {}
+
     public static String excelToHtml(InputStream input,String cssPath) throws Exception {
         String content = null;
         try (ByteArrayOutputStream outStream = new ByteArrayOutputStream()){

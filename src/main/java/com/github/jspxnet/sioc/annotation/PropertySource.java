@@ -1,9 +1,7 @@
 package com.github.jspxnet.sioc.annotation;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.utils.StringUtil;
 import java.lang.annotation.*;
-
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -15,5 +13,5 @@ public @interface PropertySource {
     boolean ignore() default true; //没有找到文件是否报错
 
     //默认编码
-    String encoding() default Environment.defaultEncode;
+    String encoding() default "UTF-8";
 }

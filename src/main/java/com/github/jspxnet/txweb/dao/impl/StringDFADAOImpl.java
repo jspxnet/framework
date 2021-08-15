@@ -8,6 +8,7 @@ import com.github.jspxnet.io.AutoReadTextFile;
 import com.github.jspxnet.txweb.dao.StringDFADAO;
 import com.github.jspxnet.utils.StringUtil;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -95,7 +96,7 @@ public class StringDFADAOImpl extends DFAFilterImpl implements StringDFADAO {
                 continue;
             }
             AbstractRead abstractRead = new AutoReadTextFile();
-            abstractRead.setEncode("UTF-8");
+            abstractRead.setEncode(StandardCharsets.UTF_8.name());
             abstractRead.setFile(file);
             String text = abstractRead.getContent();
             String[] lines = StringUtil.split(StringUtil.replace(text, "\r\n", "\n"), "\n");

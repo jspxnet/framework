@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -144,7 +145,7 @@ public class MapUtil {
 
     public static String phpKSort(Map<String, Object> map) {
 
-        String sb = "";
+        StringBuilder sb = new StringBuilder();
         String[] key = new String[map.size()];
         int index = 0;
         for (String k : map.keySet()) {
@@ -153,16 +154,16 @@ public class MapUtil {
         }
         Arrays.sort(key);
         for (String s : key) {
-            sb += s + StringUtil.EQUAL + map.get(s) + StringUtil.AND;
+            sb.append(s).append(StringUtil.EQUAL).append(map.get(s)).append(StringUtil.AND);
         }
-        sb = sb.substring(0, sb.length() - 1);
+        sb = new StringBuilder(sb.substring(0, sb.length() - 1));
         // 将得到的字符串进行处理得到目标格式的字符串
         try {
-            sb = URLEncoder.encode(sb, "UTF-8");
+            sb = new StringBuilder(URLEncoder.encode(sb.toString(), StandardCharsets.UTF_8.name()));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }// 使用常见的UTF-8编码
-        return sb.replace("%3D", StringUtil.EQUAL).replace("%26", StringUtil.AND);
+        return sb.toString().replace("%3D", StringUtil.EQUAL).replace("%26", StringUtil.AND);
     }
 
     /**

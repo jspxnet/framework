@@ -27,9 +27,9 @@ import java.net.URL;
  * Time: 10:57:33
  *
  * <pre>{@code
- * <#include file="xxxx.ftl" encoding="UTF-8"/> //文件代码方式读取
+ * <#include file="xxxx.ftl" encoding=StandardCharsets.UTF_8.name()/> //文件代码方式读取
  *
- * <#include file="http://xxxx.ftl" encoding="UTF-8" varName="表达式"  caption="模块说明"/>  //URL方式读取
+ * <#include file="http://xxxx.ftl" encoding=StandardCharsets.UTF_8.name() varName="表达式"  caption="模块说明"/>  //URL方式读取
  *
  * }</pre>
  */

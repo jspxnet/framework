@@ -64,7 +64,7 @@ import java.util.Map;
  */
 @Slf4j
 public class UploadFileAction extends MultipartSupport {
-    final static public String[] OFFICE_FILE_TYPES = FileSuffixUtil.officeTypes;
+    final static public String[] OFFICE_FILE_TYPES = FileSuffixUtil.OFFICE_TYPES;
     final static public String[] STOP_EXS = new String[]{"php", "jsp", "ftl", "html", "htm", "exe", "com", "bat", "asp", "aspx", "sh", "jar", "js", "dll"};
 
     //分组变量名称
@@ -159,10 +159,10 @@ public class UploadFileAction extends MultipartSupport {
         }
         if (StringUtil.ASTERISK.equalsIgnoreCase(fileTypes)) {
             String[] uploadTypes = new String[0];
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.imageTypes);
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.zipTypes);
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.videoTypes);
-            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.officeTypes);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.IMAGE_TYPES);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.ZIP_TYPES);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.VIDEO_TYPES);
+            uploadTypes = ArrayUtil.join(uploadTypes, FileSuffixUtil.OFFICE_TYPES);
             fileTypes = ArrayUtil.toString(uploadTypes, StringUtil.COMMAS);
         }
         return StringUtil.replace(fileTypes, StringUtil.COMMAS, StringUtil.SEMICOLON);

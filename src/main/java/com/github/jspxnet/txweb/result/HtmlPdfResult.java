@@ -32,6 +32,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -103,7 +104,7 @@ public class HtmlPdfResult extends ResultSupport {
         //请求编码begin
         response.setCharacterEncoding(Dispatcher.getEncode());
         response.setContentType("application/pdf");
-        response.setHeader("Content-disposition", "attachment;filename=" + java.net.URLEncoder.encode(cacheKey + ".pdf", "UTF-8"));// 设定输出文件头
+        response.setHeader("Content-disposition", "attachment;filename=" + java.net.URLEncoder.encode(cacheKey + ".pdf", StandardCharsets.UTF_8.name()));// 设定输出文件头
         //请求编码end
 
         ServletOutputStream outputStream = response.getOutputStream();
