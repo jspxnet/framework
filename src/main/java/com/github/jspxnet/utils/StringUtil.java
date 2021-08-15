@@ -55,7 +55,9 @@ public class StringUtil {
 
     public static final String AT = "@";
 
-    public static final String ASTERISK = StringUtil.ASTERISK;
+    public static final String ASTERISK = "*";
+
+    public static final String QUESTION = "?";
 
     public static final String SEMICOLON = ";";
 
@@ -3201,22 +3203,6 @@ public class StringUtil {
         return str;
     }
 
-    /**
-     *
-     * @param str 字符串
-     * @return 判断是否为浮点数
-     */
-    public static boolean isFloat(String str)
-    {
-        if (str==null)
-        {
-            return false;
-        }
-        String reg = "^[0-9]+(.[0-9]+)?$";
-        return str.matches(reg);
-    }
-
-
     public static String toLowerCase(String str)
     {
         if (str==null)
@@ -3226,6 +3212,11 @@ public class StringUtil {
         return str.toLowerCase();
     }
 
+    /**
+     * 通过jdbc得到数据库名
+     * @param url jdbc url
+     * @return 数据库名
+     */
     public static String getJdbcUrlDataBaseName(String url) {
         if (url==null)
         {
@@ -3243,23 +3234,23 @@ public class StringUtil {
         } else
         {
             //没有写端口号的情况
-            if (checkUrl.contains(StringUtil.BACKSLASH))
+            if (checkUrl.contains(BACKSLASH))
             {
-                checkUrl = StringUtil.substringAfterLast(checkUrl,StringUtil.BACKSLASH);
+                checkUrl = StringUtil.substringAfterLast(checkUrl,BACKSLASH);
             }
-            if (checkUrl.contains(StringUtil.COLON))
+            if (checkUrl.contains(COLON))
             {
-                checkUrl = StringUtil.substringAfter(checkUrl,StringUtil.COLON);
+                checkUrl = StringUtil.substringAfter(checkUrl,COLON);
             }
         }
 
-        if (checkUrl.startsWith(StringUtil.COLON)||checkUrl.startsWith(StringUtil.BACKSLASH) ||checkUrl.startsWith(StringUtil.SEMICOLON) ||checkUrl.startsWith(StringUtil.COMMAS))
+        if (checkUrl.startsWith(COLON)||checkUrl.startsWith(BACKSLASH) ||checkUrl.startsWith(SEMICOLON) ||checkUrl.startsWith(COMMAS))
         {
             checkUrl = checkUrl.substring(1);
         }
         if (checkUrl.contains("?"))
         {
-            checkUrl = StringUtil.substringBefore(checkUrl,"?");
+            checkUrl = StringUtil.substringBefore(checkUrl,QUESTION);
         }
         if (checkUrl.toLowerCase().contains("databasename="))
         {

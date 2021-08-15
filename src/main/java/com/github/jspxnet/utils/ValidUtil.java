@@ -67,6 +67,21 @@ public final class ValidUtil {
     /**
      *
      * @param str 字符串
+     * @return 判断是否为浮点数
+     */
+    public static boolean isFloat(String str)
+    {
+        if (str==null)
+        {
+            return false;
+        }
+        String reg = "^[0-9]+(.[0-9]+)?$";
+        return str.matches(reg);
+    }
+
+    /**
+     *
+     * @param str 字符串
      * @return 是否为邮箱
      */
     public static boolean isMail(String str) {
