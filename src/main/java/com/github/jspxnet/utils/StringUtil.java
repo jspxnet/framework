@@ -67,7 +67,7 @@ public class StringUtil {
 
     public static final String COMMAS = ",";
 
-    public static final String EQUAL = StringUtil.EQUAL;
+    public static final String EQUAL = "=";
 
     public static final String COLON = ":";
 
