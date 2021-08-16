@@ -2319,6 +2319,8 @@ public final class FileUtil {
      * @return 得到文件，如果为空，表示没有找到文件
      */
     static public File scanFile(String[] paths, String loadFile) {
+        log.debug("scanFile-------------paths=" + ObjectUtil.toString(paths));
+        log.debug("scanFile-------------" + loadFile);
 
         //找文件路径 begin
         if (loadFile.toLowerCase().startsWith(KEY_classPath)) {

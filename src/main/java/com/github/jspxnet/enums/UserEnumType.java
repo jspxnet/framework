@@ -27,7 +27,6 @@ public enum UserEnumType implements EnumType {
     //普通管理员
     MANAGER(15, "子站管理员"),
 
-
     INTENDANT(10, "子站操作人员"),
 
     VIP(5, "VIP用户"),
