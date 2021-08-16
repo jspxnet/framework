@@ -19,17 +19,11 @@ package com.github.jspxnet.utils;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.file.MultiFile;
-import com.github.jspxnet.io.zip.ZipFile;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
-import com.sun.nio.zipfs.JarFileSystemProvider;
-import com.sun.nio.zipfs.ZipFileSystemProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-
 import java.io.*;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -1764,6 +1758,7 @@ public final class FileUtil {
         {
             return new ArrayList<>(0);
         }
+
         if (dir != null && dir.startsWith("file:/")) {
             dir = dir.substring(6);
         }
@@ -2319,9 +2314,10 @@ public final class FileUtil {
      * @return 得到文件，如果为空，表示没有找到文件
      */
     static public File scanFile(String[] paths, String loadFile) {
-        log.debug("scanFile-------------paths=" + ObjectUtil.toString(paths));
-        log.debug("scanFile-------------" + loadFile);
-
+        if (FileUtil.isFileExist(loadFile))
+        {
+            return new File(loadFile);
+        }
         //找文件路径 begin
         if (loadFile.toLowerCase().startsWith(KEY_classPath)) {
             String tempPath = loadFile.substring(KEY_classPath.length());
@@ -2499,7 +2495,7 @@ public final class FileUtil {
         } else if (delimiter == null) {
             return new String[]{str};
         } else {
-            List<String> result = new ArrayList();
+            List<String> result = new ArrayList<>();
             int pos;
             if ("".equals(delimiter)) {
                 for (pos = 0; pos < str.length(); ++pos) {

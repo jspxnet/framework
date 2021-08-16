@@ -193,6 +193,10 @@ public class EnvFactory {
      * @return 得到文件，如果为空，表示没有找到文件
      */
     static public File getFile(String loadFile) {
+        if (FileUtil.isFileExist(loadFile))
+        {
+            return new File(loadFile);
+        }
         String[]  findDirs = new String[]{ENV_TEMPLATE.getString(Environment.defaultPath), ENV_TEMPLATE.getString(Environment.templatePath), ENV_TEMPLATE.getString(Environment.resPath)};
         return FileUtil.scanFile(findDirs, loadFile);
     }
