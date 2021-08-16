@@ -28,6 +28,9 @@
             <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
         </license>
     </licenses>
+<!--
+mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=compile
+-->
     <scm>
         <developerConnection>scm:git:git@github.com:jspxnet/framework.git</developerConnection>
         <url>https://github.com/jspxnet/framework</url>
@@ -488,12 +491,6 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>2.12.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -543,11 +540,7 @@
             <version>1.78</version>
             <scope>provided</scope>
         </dependency>
-         <dependency>
-            <groupId>xml-apis</groupId>
-            <artifactId>xml-apis</artifactId>
-            <version>1.4.01</version>
-        </dependency>
+
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>

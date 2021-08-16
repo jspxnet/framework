@@ -1024,7 +1024,7 @@ public class StringUtil {
             source = substringAfter(source, "?");
         }
         String[] ls = split(source, "/");
-        if (ls == null) {
+        if (ls == null || ls.length==0) {
             return empty;
         }
         return source.substring(0, source.length() - ls[ls.length - 1].length());

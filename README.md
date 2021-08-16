@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.46</version>
+    <version>6.47</version>
 </dependency>
 ```
     
