@@ -2437,25 +2437,25 @@ public final class FileUtil {
         if (path == null) {
             return null;
         } else {
-            String pathToUse = StringUtil.replace(path, "\\", "/");
+            String pathToUse = StringUtil.replace(path, "\\", StringUtil.BACKSLASH);
             int prefixIndex = pathToUse.indexOf(":");
             String prefix = "";
             if (prefixIndex != -1) {
                 prefix = pathToUse.substring(0, prefixIndex + 1);
-                if (prefix.contains("/")) {
+                if (prefix.contains(StringUtil.BACKSLASH)) {
                     prefix = "";
                 } else {
                     pathToUse = pathToUse.substring(prefixIndex + 1);
                 }
             }
 
-            if (pathToUse.startsWith("/")) {
-                prefix = prefix + "/";
+            if (pathToUse.startsWith(StringUtil.BACKSLASH)) {
+                prefix = prefix + StringUtil.BACKSLASH;
                 pathToUse = pathToUse.substring(1);
             }
 
-            String[] pathArray = delimitedListToStringArray(pathToUse, "/");
-            LinkedList<String> pathElements = new LinkedList<String>();
+            String[] pathArray = delimitedListToStringArray(pathToUse, StringUtil.BACKSLASH);
+            LinkedList<String> pathElements = new LinkedList<>();
             int tops = 0;
 
             int i;
@@ -2476,7 +2476,7 @@ public final class FileUtil {
                 pathElements.add(0, "..");
             }
 
-            return prefix + collectionToDelimitedString(pathElements, "/");
+            return prefix + collectionToDelimitedString(pathElements, StringUtil.BACKSLASH);
         }
     }
 
@@ -2484,8 +2484,8 @@ public final class FileUtil {
         return delimitedListToStringArray(str, delimiter, null);
     }
 
-    private static String collectionToDelimitedString(Collection<?> coll, String delim) {
-        return collectionToDelimitedString(coll, delim, "", "");
+    private static String collectionToDelimitedString(Collection<String> coll, String delim) {
+        return collectionToDelimitedString(coll, delim, StringUtil.empty, StringUtil.empty);
     }
 
 
@@ -2511,16 +2511,17 @@ public final class FileUtil {
                     result.add(StringUtil.deleteAny(str.substring(pos), charsToDelete));
                 }
             }
-            return result.toArray(new String[result.size()]);
+            final int size  = result.size();
+            return result.toArray(new String[size]);
         }
     }
 
-    private static String collectionToDelimitedString(Collection<?> coll, String delim, String prefix, String suffix) {
+    private static String collectionToDelimitedString(Collection<String> coll, String delim, String prefix, String suffix) {
         if (ObjectUtil.isEmpty(coll)) {
             return "";
         } else {
             StringBuilder sb = new StringBuilder();
-            Iterator it = coll.iterator();
+            Iterator<String> it = coll.iterator();
             while (it.hasNext()) {
                 sb.append(prefix).append(it.next()).append(suffix);
                 if (it.hasNext()) {
