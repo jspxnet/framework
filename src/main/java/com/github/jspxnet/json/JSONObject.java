@@ -448,7 +448,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                                         childShowField =  fieldArray.toArray(new String[fieldArray.size()]);
                                     }
                                 }
-                                System.out.println("------result=" + result);
                                 super.put(displayKey, new JSONObject(result, childShowField,includeSuperClass,dataField));
                             } else {
                                 super.put(displayKey, result);
