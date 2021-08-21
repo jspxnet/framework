@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.47</version>
+    <version>6.48</version>
 </dependency>
 ```
     
@@ -120,3 +120,4 @@
 *    2021年07月：Jspx.net Framework 6.43-6.45 定时认为支持到秒，为了兼容嵌入到老系统，调整部分日子的输出方式，测试长时间高并发优化
 *    2021年07月：Jspx.net Framework 6.46 日志统一slf4j,rpc分布式调用默认不进行权限判断,细节调整优化,修复类型转换bug和UTC日期转换bug
 *    2021年07月：Jspx.net Framework 6.47 添加对达梦数据库支持,优化多数据库支持
+*    2021年08月：Jspx.net Framework 6.48 json兼容致远OA调整.sql功能升级支持变量直接映射到xml,sql配置.

@@ -5,7 +5,6 @@ import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.table.OperateTable;
-
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,13 +15,11 @@ import java.util.Date;
  * Created by chenyuan on 2015-8-14.
  * 短消息接收后将合并后保存在这里，并且会删除设备上的短信信息
  */
-@EqualsAndHashCode(callSuper = true)
+
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Table(name = "talk_sms_receive", caption = "短信接收库")
 public class SmsReceive extends OperateTable {
-    public SmsReceive() {
-
-    }
 
     @Id
     @Column(caption = "ID", notNull = true)

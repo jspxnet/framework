@@ -98,8 +98,11 @@ public class TomcatApplication {
         {
             FileUtil.makeDirectory(webPath);
         }
-
+        System.setProperty("catalina.home",webPath);
+        System.setProperty("catalina.base",webPath);
+        System.setProperty("user.dir",new File(webPath,"WEB-INF").getPath());
         Tomcat tomcat = new Tomcat();
+
         Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
         connector.setPort(port);
         connector.setURIEncoding(Environment.defaultEncode);

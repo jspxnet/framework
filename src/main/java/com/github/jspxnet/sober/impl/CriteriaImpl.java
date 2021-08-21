@@ -178,11 +178,13 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             return null;
         }
 
+        String errorInfo = StringUtil.empty;
         StringBuilder termText = new StringBuilder();
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
             if (criterionEntry.getCriterion().getFields()!=null&&!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
+                errorInfo = ObjectUtil.toString(criterionEntry.getCriterion().getFields());
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
@@ -193,6 +195,11 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (criterionEntry.getCriterion().getParameter(soberTable) != null) {
                 objectArray = JdbcUtil.appendArray(objectArray, criterionEntry.getCriterion().getParameter(soberTable));
             }
+        }
+        if (StringUtil.trim(termText.toString()).endsWith(" AND"))
+        {
+            log.error("SQL 存在错误,检查字段名称是否匹配:{}",errorInfo);
+            return null;
         }
 
         StringBuilder groupText = new StringBuilder();
@@ -369,10 +376,12 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             objectArray = JdbcUtil.appendArray(objectArray, updateMap.get(key));
         }
 
+        String errorInfo = StringUtil.empty;
         StringBuilder termText = new StringBuilder();
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
             if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
+                errorInfo = ObjectUtil.toString(criterionEntry.getCriterion().getFields());
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
@@ -383,6 +392,11 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (criterionEntry.getCriterion().getParameter(soberTable) != null) {
                 objectArray = JdbcUtil.appendArray(objectArray, criterionEntry.getCriterion().getParameter(soberTable));
             }
+        }
+        if (StringUtil.trim(termText.toString()).endsWith(" AND"))
+        {
+            log.error("SQL 存在错误,检查字段名称是否匹配:{}",errorInfo);
+            return -2;
         }
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
@@ -446,17 +460,18 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
         if (soberTable == null) {
             log.error("no fond sober Config :" + criteriaClass.getName());
-            return new ArrayList<T>();
+            return new ArrayList<T>(0);
         }
 
         Dialect dialect = soberFactory.getDialect();
         String databaseType = soberFactory.getDatabaseType();
+        String errorInfo = StringUtil.empty;
         StringBuilder termText = new StringBuilder();
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
-
             if (!(criterionEntry.getCriterion() instanceof LogicalExpression)&& !SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
+                errorInfo = ObjectUtil.toString(criterionEntry.getCriterion().getFields());
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
@@ -467,6 +482,11 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (criterionEntry.getCriterion().getParameter(soberTable) != null) {
                 objectArray = JdbcUtil.appendArray(objectArray, criterionEntry.getCriterion().getParameter(soberTable));
             }
+        }
+        if (StringUtil.trim(termText.toString()).endsWith(" AND"))
+        {
+            log.error("SQL存在错误,检查字段名称是否匹配:{}",errorInfo);
+            return new ArrayList<T>(0);
         }
         StringBuilder groupText = new StringBuilder();
         for (int i = 0; i < groupList.size(); i++) {
@@ -619,11 +639,13 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         }
         Dialect dialect = soberFactory.getDialect();
         String databaseType = soberFactory.getDatabaseType();
+        String errorInfo = StringUtil.empty;
         StringBuilder termText = new StringBuilder();
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
             if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
+                errorInfo = ObjectUtil.toString(criterionEntry.getCriterion().getFields());
                 continue;
             }
             String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
@@ -634,6 +656,11 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (criterionEntry.getCriterion().getParameter(soberTable) != null) {
                 objectArray = JdbcUtil.appendArray(objectArray, criterionEntry.getCriterion().getParameter(soberTable));
             }
+        }
+        if (StringUtil.trim(termText.toString()).endsWith(" AND"))
+        {
+            log.error("SQL存在错误,检查字段名称是否匹配:{}",errorInfo);
+            return new ArrayList<>(0);
         }
         StringBuilder groupText = new StringBuilder();
         for (int i = 0; i < groupList.size(); i++) {

@@ -22,7 +22,9 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -183,20 +185,18 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
                         cls = (Class<?>)o;
                     }
                 }
-                //对象方式
+                //构造参数对象
                 if (valueMap==null)
                 {
-                    for (Object o:arg)
+                    valueMap = new HashMap<>();
+                    //执行到这里说明一直都没用标准的参数进入，在这里构造参数列表
+                    Map<String, Type>  parameterMap = ClassUtil.getParameterNames(exeMethod);
+                    if (parameterMap != null)
                     {
-                        if (o ==null)
+                        for (String key:parameterMap.keySet())
                         {
-                            continue;
+                            valueMap.put(key,ClassUtil.getParameterValue(exeMethod,key,arg));
                         }
-                       if (o instanceof Serializable)
-                       {
-                           valueMap = ObjectUtil.getMap(o);
-                           break;
-                       }
                     }
                 }
             }
@@ -240,6 +240,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
             {
                 totalCount = soberSupport.getMaxRows();
             }
+
             return soberSupport.buildSqlMap().query(sqlMap.namespace(),exeId,valueMap,currentPage,totalCount,sqlMap.nexus(),cls);
         }
 

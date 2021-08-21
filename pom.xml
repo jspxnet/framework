@@ -493,6 +493,11 @@ mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=com
             <version>2.12.1</version>
         </dependency>
         <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.4.01</version>
+        </dependency>
+        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.66.Final</version>
@@ -503,7 +508,6 @@ mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=com
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.12</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.thetransactioncompany/cors-filter -->

@@ -32,6 +32,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -220,7 +221,6 @@ public class SqlMapClientImpl implements SqlMapClient {
         if (totalCount > jdbcOperations.getMaxRows()) {
             totalCount = jdbcOperations.getMaxRows();
         }
-
         if (totalCount<1)
         {
             totalCount = 1;
@@ -229,6 +229,11 @@ public class SqlMapClientImpl implements SqlMapClient {
         if (currentPage <= 0) {
             currentPage = 1;
         }
+        if (valueMap==null)
+        {
+            valueMap = new HashMap<>();
+        }
+
 
         int beginRow = currentPage * totalCount - totalCount;
         if (beginRow < 0) {
