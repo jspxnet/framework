@@ -2,10 +2,14 @@ package com.github.jspxnet.component.jxls;
 
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.ReflectUtil;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
+import org.jxls.area.Area;
+import org.jxls.builder.AreaBuilder;
+import org.jxls.builder.xls.XlsCommentAreaBuilder;
 import org.jxls.common.Context;
 import org.jxls.expression.JexlExpressionEvaluator;
 import org.jxls.jdbc.JdbcHelper;
@@ -17,7 +21,11 @@ import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.util.*;
 
-public class JxlsUtil {
+public final class JxlsUtil {
+    private JxlsUtil()
+    {
+
+    }
 
     /**
      * 导出EXCEL
@@ -50,6 +58,7 @@ public class JxlsUtil {
         funcs.put("jspx", new JxlsFunction());
         JexlEngine customJexlEngine = new JexlBuilder().namespaces(funcs).create();
         evaluator.setJexlEngine(customJexlEngine);
+
         //必须要这个，否者表格函数统计会错乱
         jxlsHelper.setUseFastFormulaProcessor(false).processTemplate(context, transformer);
     }
@@ -162,6 +171,51 @@ public class JxlsUtil {
                 }
             }
             list.add(obj);
+        }
+        return list;
+    }
+
+
+    /**
+     * 合并算法
+     * 是用方法:JxlsUtil.getMergeValue(list,"acs98","mergerRows")
+     * 在excel单元格里边
+     *
+     * @param objectList 对象
+     * @param field  需要合并的字段
+     * @param mergeNumFieldName  合并算法的数字字段,动态生成的字段
+     *                          例如:单元里边填写的  $ {jspx:mergeCell(d.acs98,d.mergerRows)}  mergerRows 就是
+     * @return 合并算法,算法计算后添加一个字段保存算法数据
+     */
+    public static List<?> getMergeValue(List<?> objectList, String field,String mergeNumFieldName) {
+        if (objectList == null || objectList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        int[] rowValue = new int[objectList.size()];
+        int j = 0;
+        rowValue[0] = 0;
+        String name = BeanUtil.getFieldValue(objectList.get(0), field,true);
+        for (int i = 1; i <objectList.size(); i++) {
+            if (name != null && name.equals(BeanUtil.getFieldValue(objectList.get(i), field,true))) {
+                j++;
+                rowValue[i] = 0;
+            } else {
+                rowValue[i - 1] = j;
+                j = 0;
+            }
+            if (objectList.size()-1==i && name != null && name.equals(BeanUtil.getFieldValue(objectList.get(i), field,true)))
+            {
+                rowValue[i] = j;
+            }
+            name =  BeanUtil.getFieldValue(objectList.get(i), field,true);
+        }
+        List<Object> list = new ArrayList<>();
+        for (int i = 0; i < objectList.size(); i++) {
+            //原对象
+            Object org = objectList.get(i);
+            Map<String, Object > newFieldMap = new HashMap<>();
+            newFieldMap.put(mergeNumFieldName,rowValue[i]);
+            list.add(ReflectUtil.createDynamicBean(org,newFieldMap,false));
         }
         return list;
     }

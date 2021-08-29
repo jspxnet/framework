@@ -13,8 +13,8 @@ import java.util.Date;
 
 public class MergeCell implements WritableCellValue {
 
-    private Object value;
-    private int mergerRows;
+    private final Object value;
+    private final int mergerRows;
 
 
     public MergeCell(Object value, int mergerRows) {

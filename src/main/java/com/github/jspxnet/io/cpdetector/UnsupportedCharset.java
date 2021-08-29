@@ -73,7 +73,7 @@ public class UnsupportedCharset
      * Singleton cache for the unsupported charsets (no need transfer instanciate the same unsupported
      * charset again and again).
      */
-    private static final Map<String, Charset> singletons = new HashMap<String, Charset>();
+    private static final Map<String, Charset> SINGLETONS = new HashMap<String, Charset>();
 
     /**
      * Singleton constructor.
@@ -85,10 +85,10 @@ public class UnsupportedCharset
     }
 
     public static Charset forName(String name) {
-        Charset ret = singletons.get(name);
+        Charset ret = SINGLETONS.get(name);
         if (ret == null) {
             ret = new UnsupportedCharset(name);
-            UnsupportedCharset.singletons.put(name, ret);
+            UnsupportedCharset.SINGLETONS.put(name, ret);
         }
         return ret;
     }

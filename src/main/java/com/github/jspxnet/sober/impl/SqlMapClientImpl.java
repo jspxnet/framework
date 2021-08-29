@@ -377,12 +377,15 @@ public class SqlMapClientImpl implements SqlMapClient {
             log.error("ERROR:not get sql map namespace " + namespace + " query id " + exeId + ",此命名空间中不能够找到sql");
             return 0;
         }
-        valueMap.put("databaseName", soberFactory.getDatabaseType());
+        valueMap.put("databaseType", soberFactory.getDatabaseType());
         valueMap.put("currentPage", 1);
         valueMap.put("totalCount", 1);
         valueMap.put("loadChild", false);
         valueMap.put("rollRows", false);
         valueMap.put("namespace", namespace);
+        valueMap.put("beginRow", 0);
+        valueMap.put("endRow", soberFactory.getMaxRows());
+
         String sqlText = dialect.processSql(sqlRoom.getReplenish(mapSql.getContext()), valueMap);
         if (StringUtil.isNull(sqlText)) {
             throw new IllegalArgumentException("ERROR SQL IS NULL:" + sqlText);
@@ -453,7 +456,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         Dialect dialect = soberFactory.getDialect();
         SqlMapConfig mapSql = sqlRoom.getUpdateMapSql(exeId,soberFactory.getDatabaseType());
         if (mapSql == null) {
-            log.error("ERROR SQL map not config SQL update id :" + exeId + "  namespace:" + namespace);
+            log.error("ERROR SQL map not config SQL update id:{},namespace:{}",exeId,namespace);
             return -3;
         }
         return jdbcOperations.update(dialect.processSql(sqlRoom.getReplenish(mapSql.getContext()), valueMap));

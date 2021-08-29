@@ -358,6 +358,39 @@ final public class NumberUtil {
     }
 
     /**
+     * 数字对象转字符串
+     * @param value 值
+     * @return 字符串
+     */
+    public static String toString(Object value) {
+        try {
+            if (value instanceof  Double)
+            {
+                return toString((double)value);
+            }
+            if (value instanceof  Float)
+            {
+                return toString((float)value);
+            }
+            if (value instanceof  Integer)
+            {
+                return toString((int)value);
+            }
+            if (value instanceof  Long)
+            {
+                return toString((long)value);
+            }
+            if (value instanceof  Short)
+            {
+                return toString((short)value);
+            }
+
+        } catch (NumberFormatException e) {
+            log.error("toString value:{},error:{}",value,e.getMessage());
+        }
+        return "0";
+    }
+    /**
      * @param value 数字
      * @return boolean 判断一个数是否为偶数
      */

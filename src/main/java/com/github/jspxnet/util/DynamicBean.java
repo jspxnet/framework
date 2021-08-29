@@ -10,12 +10,12 @@ import java.util.Set;
 
 public class DynamicBean implements Serializable {
 
-    private BeanMap propertyMap;
+    private final BeanMap propertyMap;
     /**
      * 实体Object
      */
     @JsonIgnore
-    private Object target;
+    private final Object target;
 
 
     public DynamicBean(Map<String, Class<?>> propertyMap) {

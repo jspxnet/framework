@@ -122,6 +122,11 @@ public final class BeanUtil {
         }
 
         Class<?> cls = ClassUtil.getClass(object.getClass());
+        if (ClassUtil.isProxy(cls))
+        {
+            //代理对象
+            fieldName = "$cglib_prop_" + fieldName;
+        }
         Field field = ClassUtil.getDeclaredField(cls, fieldName);
         if (field == null) {
             log.debug(object.getClass() + " set field {} not find", fieldName);
@@ -184,6 +189,9 @@ public final class BeanUtil {
             return obj;
         }
 
+        if (ClassUtil.isNumberType(obj.getClass()) && aType.equals(String.class)) {
+            return NumberUtil.toString(obj);
+        }
         if (obj  instanceof JSONArray && aType.equals(String.class))
         {
             JSONArray array = (JSONArray)obj;

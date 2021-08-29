@@ -53,7 +53,7 @@ public final  class ReflectUtil {
      * @param addProperties 要增加的属性名及值
      * @return 返回增加了属性的新对象
      */
-    public static Object createDynamicBean(Object dest, Map<String, Object> addProperties) {
+    public static Object createDynamicBean(Object dest, Map<String, ?> addProperties) {
         return createDynamicBean(dest, addProperties, true);
     }
 
@@ -65,7 +65,7 @@ public final  class ReflectUtil {
      * @param discardOldValue 是否舍弃原有属性的值，如果true，则原有属性的值将都被置为默认值
      * @return 返回增加了属性的新对象
      */
-    public static Object createDynamicBean(Object dest, Map<String, Object> addProperties, boolean discardOldValue) {
+    public static Object createDynamicBean(Object dest, Map<String, ?> addProperties, boolean discardOldValue) {
         Map<String, Class<?>> propertyMap = new HashMap<>();
 
         PropertyUtilsBean utilsBean = new PropertyUtilsBean();

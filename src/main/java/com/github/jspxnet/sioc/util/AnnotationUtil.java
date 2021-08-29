@@ -72,7 +72,7 @@ public final class AnnotationUtil {
             Scheduled scheduled = method.getAnnotation(Scheduled.class);
             if (scheduled==null)
             {
-                return false;
+                continue;
             }
             if (scheduled.force()) {
                 //强制开启

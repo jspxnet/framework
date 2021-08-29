@@ -797,6 +797,9 @@ public class ClassUtil {
      * @return hessian 查询调用接口方法
      */
     public static Class<?> findRemoteAPI(Class<?> implClass) {
+ 		if (implClass == null) {
+            return null;
+        }
         if (implClass.isInterface())
         {
             return implClass;

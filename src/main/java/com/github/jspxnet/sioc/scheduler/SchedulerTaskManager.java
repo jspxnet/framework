@@ -76,6 +76,7 @@ public class SchedulerTaskManager implements SchedulerManager {
             if (scheduled == null) {
                 continue;
             }
+
             TaskProxy taskProxy = new TaskProxy();
             taskProxy.setBean(bean);
             taskProxy.setMethodName(method.getName());
@@ -86,7 +87,7 @@ public class SchedulerTaskManager implements SchedulerManager {
                 cron = EnvFactory.getPlaceholder().processTemplate(valueMap,cron);
                 if (StringUtil.isEmpty(cron))
                 {
-                    cron = "* * * * *";
+                    cron = "0 */1 * * * *";
                 }
             }
             taskProxy.setPattern(cron);
@@ -116,6 +117,8 @@ public class SchedulerTaskManager implements SchedulerManager {
             //已经有这个任务了，不重复
             return false;
         }
+
+        log.debug("定时任务加入:id={},{}",taskProxy.getScheduledId(),taskProxy.toString());
         if (!SchedulingPattern.validate(taskProxy.getPattern())) {
             log.error("Scheduled cron is cron4j,定时器表达式错误，查看cron4j表达式," + taskProxy.getBean().getClass());
             return false;
@@ -131,7 +134,7 @@ public class SchedulerTaskManager implements SchedulerManager {
             cron = EnvFactory.getPlaceholder().processTemplate(valueMap,cron);
             if (StringUtil.isEmpty(cron))
             {
-                cron = "* * * * * *";
+                cron = "0 */1 * * * *";
             }
         }
         scheduler.schedule(cron, taskProxy);
@@ -189,6 +192,14 @@ public class SchedulerTaskManager implements SchedulerManager {
             {
                 scheduler.stop();
             }
+        }
+    }
+
+    public void debugPrint()
+    {
+        for (String id:SCHEDULER_MAP.keySet())
+        {
+          System.out.println("task id=" + id );
         }
     }
 

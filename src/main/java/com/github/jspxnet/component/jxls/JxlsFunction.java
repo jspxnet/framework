@@ -4,12 +4,8 @@ package com.github.jspxnet.component.jxls;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class JxlsFunction {
@@ -93,6 +89,8 @@ public class JxlsFunction {
 
     /**
      *  单元格合并,注意这里是倒起来合并的,
+     *  是用方法:${jspx:mergeCell(d.acs98,d.mergerRows)}
+     *  mergerRows 是 JxlsUtil.getMergeValue(list,"acs98","mergerRows") 创建出来的字段
      * @param value 值
      * @param mergerRows  当前行向上合并几个单元
      * @return 单元格合并
@@ -108,7 +106,13 @@ public class JxlsFunction {
         return ((String) o).trim();
     }
 
-
+    /**
+     * 替换
+     * @param o 原对象
+     * @param a 替换
+     * @param b 替换为
+     * @return 返回替换后的
+     */
     public String replace(String o, String a, String b) {
         return StringUtil.replace(o, a, b);
     }
@@ -123,10 +127,21 @@ public class JxlsFunction {
         return StringUtil.quote(string, dub);
     }
 
+    /**
+     *
+     * @param num 数字
+     * @return 中文数字
+     */
     public String getChineseNumber(String num) {
         return getChineseNumber(num, 0);
     }
 
+    /**
+     *
+     * @param num 数字
+     * @param type  数值型，中文型
+     * @return 中文数字
+     */
     public String getChineseNumber(String num, int type) {
         return NumberUtil.toChineseNumber(new BigDecimal(num), type);
     }
@@ -197,51 +212,6 @@ public class JxlsFunction {
         return StringUtil.toAttachMap(text);
     }
 
-    /**
-     * 合并算法
-     *
-     * @param objectList 对象列表
-     * @param field      字段
-     * @return 合并算法
-     */
-    public List<CellProxy> getMergeValue(List<CellProxy> objectList, String field) {
-        if (objectList == null || objectList.isEmpty()) {
-            return new ArrayList<>();
-        }
-        int[] rowValue = new int[objectList.size()];
-        int j = 0;
-        rowValue[0] = 0;
-        String name = BeanUtil.getFieldValue(objectList.get(0), field,true);
-        for (int i = 1; i < objectList.size(); i++) {
-            if (name != null && name.equals(BeanUtil.getFieldValue(objectList.get(i), field,true))) {
-                j++;
-                rowValue[i] = 0;
-            } else {
-                rowValue[i - 1] = j;
-                j = 0;
-            }
-            name =  BeanUtil.getFieldValue(objectList.get(i), field,true);
-        }
-        for (int i = 0; i < objectList.size(); i++) {
-            objectList.get(i).setMergerRows(rowValue[i]);
-        }
-        return objectList;
-    }
-
-    /**
-     * @param objectList 数据对象
-     * @param field      合并对象
-     * @return 自动计算合并单元
-     */
-    public List<CellProxy> getMerge(List<Object> objectList, String field) {
-        List<CellProxy> list = new ArrayList<>();
-        for (Object obj : objectList) {
-            CellProxy cellProxy = (CellProxy) Proxy.newProxyInstance(CellProxy.class.getClassLoader(),
-                    new Class[]{CellProxy.class}, new CellHandler(obj));
-            list.add(cellProxy);
-        }
-        return getMergeValue(list, field);
-    }
 
 
 }
