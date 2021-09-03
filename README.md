@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.48</version>
+    <version>6.50</version>
 </dependency>
 ```
     
@@ -34,7 +34,6 @@
 *	名称里边的.net表示：以web和网络研究为主的一套框架。
 *	本框架不是一个傻瓜式的构架，在本构架的开发过程中一直在寻求，简化和效率的结合点，故而考虑得比较灵活。
 *   sping cloud 能实现的功能,本构架基本都能实现,各有侧重
-
 
 
 ##要解决的问题
@@ -121,3 +120,4 @@
 *    2021年07月：Jspx.net Framework 6.46 日志统一slf4j,rpc分布式调用默认不进行权限判断,细节调整优化,修复类型转换bug和UTC日期转换bug
 *    2021年07月：Jspx.net Framework 6.47 添加对达梦数据库支持,优化多数据库支持
 *    2021年08月：Jspx.net Framework 6.48 json兼容致远OA调整.sql功能升级支持变量直接映射到xml,sql配置.
+*    2021年09月：Jspx.net Framework 6.50 sqlmap简化,修复单一返回模式的bug,路由算法优化.

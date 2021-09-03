@@ -14,12 +14,21 @@ import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
 import com.github.jspxnet.network.rpc.model.transfer.ChannelSession;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.IpUtil;
+import com.github.jspxnet.utils.StringUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 
 @Slf4j
@@ -43,7 +52,6 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         super.handlerRemoved(ctx);
-
     }
 
     /**
@@ -62,17 +70,21 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
         }
         SESSION_CHANNEL_MANAGE.removeSession(channel.id());
         SESSION_CHANNEL_MANAGE.remove(channel);
+
+        channel.pipeline().remove(LengthFieldBasedFrameDecoder.class);
+        channel.pipeline().remove(LengthFieldPrepender.class);
+        channel.pipeline().remove(StringDecoder.class);
+        channel.pipeline().remove(StringEncoder.class);
+        channel.pipeline().remove(IdleStateHandler.class);
+        channel.pipeline().close();
         channel.close();
-
-
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-
-      //  log.debug("localAddress:{}--channelRead---remoteAddress:{}", ctx.channel().localAddress(), ctx.channel().remoteAddress());
         try {
             RpcInvokerFactory.invokeService(ctx, (String) msg);
+            ctx.flush();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -92,18 +104,24 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         Channel channel = ctx.channel();
         if (channel == null) {
-            System.out.println("channel is null");
+            log.debug("channel is null :{}", channel);
             cause.printStackTrace();
             return;
         }
-        if (!channel.isActive()) {
-            System.out.println("SimpleClient:" + channel.remoteAddress() + "异常并关闭");
-            channel.close();
+        try {
+            cleanSession(ctx.channel());
+            ctx.disconnect(ctx.newPromise());
+            ctx.close();
+        } catch (Exception e)
+        {
+            //...
         }
-        log.debug("异常并关闭,用户主动退出:" + channel.remoteAddress());
-        cleanSession(ctx.channel());
-        ctx.disconnect(ctx.newPromise());
-        ctx.close();
+        if (cause instanceof IOException)
+        {
+            log.debug("对方主动退出:{}",IpUtil.getIp(channel.remoteAddress()));
+
+
+        }
     }
 
     @Override
@@ -157,7 +175,8 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
             {
                 netSession.setOnline(YesNoEnumType.NO.getValue());
             }
-            if (netSession.getHeartbeatTimes() >= 3 && System.currentTimeMillis() - netSession.getLastRequestTime() > DateUtil.SECOND * RpcConfig.getInstance().getTimeout())
+            final long waitTime = StringUtil.toLong(DateUtil.SECOND * RpcConfig.getInstance().getTimeout()+"");
+            if (netSession.getHeartbeatTimes() >= 3 && System.currentTimeMillis() - netSession.getLastRequestTime() > waitTime)
             {
                 cleanSession(ctx.channel());
             }

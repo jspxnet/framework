@@ -13,8 +13,6 @@ package com.github.jspxnet.boot.environment;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.StringUtil;
 
-import java.nio.charset.StandardCharsets;
-
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -44,12 +42,7 @@ public abstract class Environment {
 
     final public static String evasive_config = "evasive_config";
 
-    //final public static String StepwiseConfig = "stepwise_config";
-
-    final public static String TXWebConfigReload = "txweb_config_reload";
-
     public static String config_file = "jspx.net.xml";
-
 
     final public static String templateSuffix = "templateSuffix";
 
@@ -142,7 +135,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.49";
+    final static public String VERSION = "6.50";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";

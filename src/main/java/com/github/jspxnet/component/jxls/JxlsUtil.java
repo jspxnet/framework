@@ -3,16 +3,15 @@ package com.github.jspxnet.component.jxls;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ReflectUtil;
+import com.github.jspxnet.utils.StreamUtil;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
-import org.jxls.area.Area;
-import org.jxls.builder.AreaBuilder;
-import org.jxls.builder.xls.XlsCommentAreaBuilder;
 import org.jxls.common.Context;
 import org.jxls.expression.JexlExpressionEvaluator;
 import org.jxls.jdbc.JdbcHelper;
+import org.jxls.transform.TransformationConfig;
 import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.JxlsHelper;
@@ -34,9 +33,10 @@ public final class JxlsUtil {
      * @param os    生成模版输出流
      * @param model 模版中填充的数据
      * @param conn  数据库中的连接，支持sql查询,是用完后记得自己关闭
+     * @param fixEva 强制修复公式计算
      * @throws IOException 一次
      */
-    public static void exportExcel(InputStream is, OutputStream os, Map<String, Object> model, Connection conn) throws IOException {
+    public static void exportExcel(InputStream is, OutputStream os, Map<String, Object> model,boolean fixEva,Connection conn) throws IOException {
         Context context = PoiTransformer.createInitialContext();
         if (model != null) {
             for (String key : model.keySet()) {
@@ -49,61 +49,65 @@ public final class JxlsUtil {
         }
 
         JxlsHelper jxlsHelper = JxlsHelper.getInstance();
-        Transformer transformer = jxlsHelper.createTransformer(is, os);
+        jxlsHelper.setEvaluateFormulas(true);
+        jxlsHelper.setProcessFormulas(true);
+        jxlsHelper.setUseFastFormulaProcessor(false);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        Transformer transformer = null;
+        if (fixEva)
+        {
+            transformer = jxlsHelper.createTransformer(is, byteArrayOutputStream);
+        } else
+        {
+            transformer = jxlsHelper.createTransformer(is, os);
+        }
+
         //获得配置
         JexlExpressionEvaluator evaluator = (JexlExpressionEvaluator) transformer.getTransformationConfig().getExpressionEvaluator();
         //自定义功能
-        Map<String, Object> funcs = new HashMap<>();
+        Map<String, Object> funcs = new HashMap<>(2);
         //添加自定义功能
         funcs.put("jspx", new JxlsFunction());
         JexlEngine customJexlEngine = new JexlBuilder().namespaces(funcs).create();
         evaluator.setJexlEngine(customJexlEngine);
 
         //必须要这个，否者表格函数统计会错乱
-        jxlsHelper.setUseFastFormulaProcessor(false).processTemplate(context, transformer);
+        jxlsHelper.processTemplate(context, transformer);
+        if (!fixEva)
+        {
+            return;
+        }
+        byteArrayOutputStream.flush();
+        Workbook workbook = WorkbookFactory.create(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+        workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
+        workbook.write(os);
+        byteArrayOutputStream.close();
+        workbook.close();
     }
-
-    public static void exportExcel(InputStream is, OutputStream os, Map<String, Object> model) throws IOException {
-        exportExcel(is, os, model, null);
-    }
-
-
 
     /**
-     *  重新设置单元格计算公式20180615
-     * @param wb 用于修复生成的excel不计算公式的问题
+     *
+     * @param is    excel文件流
+     * @param os    生成模版输出流
+     * @param model 模版中填充的数据
+     * @param fixEva  强制执行公司
+    * @throws IOException 异常
      */
-    public static void resetCellFormula(HSSFWorkbook wb)
-    {
-        HSSFFormulaEvaluator e = new HSSFFormulaEvaluator(wb);
-        int sheetNum = wb.getNumberOfSheets();
-        for (int i = 0; i < sheetNum; i++)
-        {
-            HSSFSheet sheet = wb.getSheetAt(i);
-            int rows = sheet.getLastRowNum() + 1;
-            for (int j = 0; j < rows; j++)
-            {
-                HSSFRow row = sheet.getRow(j);
-                if (row == null)
-                {
-                    continue;
-                }
-                int cols = row.getLastCellNum();
-                for (int k = 0; k < cols; k++)
-                {
-                    HSSFCell cell = row.getCell(k);
-                    if (cell == null)
-                    {
-                        continue;
-                    }
-                    if (cell.getCellType() == CellType.FORMULA)
-                    {
-                        cell.setCellFormula(cell.getCellFormula());
-                        cell = e.evaluateInCell(cell);
-                    }
-                }
-            }
-        }
+    public static void exportExcel(InputStream is, OutputStream os, Map<String, Object> model,boolean fixEva) throws IOException {
+        exportExcel(is, os, model, fixEva,null);
+    }
+
+    /**
+     * 导出EXCEL
+     *
+     * @param is    excel文件流
+     * @param os    生成模版输出流
+     * @param model 模版中填充的数据
+     * @throws IOException 一次
+     */
+    public static void exportExcel(InputStream is, OutputStream os, Map<String, Object> model) throws IOException {
+        exportExcel(is, os, model, false,null);
     }
 
     /**
@@ -189,7 +193,7 @@ public final class JxlsUtil {
      */
     public static List<?> getMergeValue(List<?> objectList, String field,String mergeNumFieldName) {
         if (objectList == null || objectList.isEmpty()) {
-            return new ArrayList<>();
+            return new ArrayList<>(0);
         }
         int[] rowValue = new int[objectList.size()];
         int j = 0;
@@ -213,7 +217,7 @@ public final class JxlsUtil {
         for (int i = 0; i < objectList.size(); i++) {
             //原对象
             Object org = objectList.get(i);
-            Map<String, Object > newFieldMap = new HashMap<>();
+            Map<String, Object > newFieldMap = new HashMap<>(5);
             newFieldMap.put(mergeNumFieldName,rowValue[i]);
             list.add(ReflectUtil.createDynamicBean(org,newFieldMap,false));
         }

@@ -25,7 +25,7 @@ public class ThreadHashMap<K, V> extends ThreadLocal implements Map<K, V> {
     // 在调用get()方法的时候返回一个ArrayList对象
     @Override
     public Map<K, V> initialValue() {
-        return new ConcurrentHashMap<K, V>();
+        return new ConcurrentHashMap<K, V>(4);
     }
 
     //将保存在ThreadLocal中的List返回

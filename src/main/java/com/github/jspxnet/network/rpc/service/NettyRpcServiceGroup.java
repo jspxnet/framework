@@ -6,7 +6,6 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.network.consul.ConsulService;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
-import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
 import com.github.jspxnet.network.rpc.service.route.RouteService;
 import com.github.jspxnet.utils.IpUtil;
@@ -67,10 +66,10 @@ public class NettyRpcServiceGroup {
         int groupCount = RPC_CONFIG.getGroupCount();
         if (groupCount<=0)
         {
-            log.info("------->netty rpc 调用配置参数,分组个数 rpc_localGroupCount={}配置错误,不能等于小于0",groupCount);
-            return;
+            log.debug("netty rpc 调用配置参数,分组个数 rpc_localGroupCount={}配置错误,不能等于小于0",groupCount);
+            groupCount = 1;
         }
-        List<RouteSession> routeSessionList = RPC_CONFIG.getConfigRouteSessionList();
+        List<RouteSession> routeSessionList = RPC_CONFIG.createConfigRouteSessionList();
         DaemonThreadFactory threadFactory =  new DaemonThreadFactory(RPC_THREAD_NAME);
 
         for (RouteSession routeSession:routeSessionList)
@@ -116,9 +115,6 @@ public class NettyRpcServiceGroup {
                 {
                     log.error("*严重异常* 检查consul注册中心是否运行正常,必须先启动consul,否则系统将不能分布式调用");
                 }
-            } else
-            {
-                RouteChannelManage.getStartList().add(routeSession.getSocketAddress());
             }
             groupCount--;
         }

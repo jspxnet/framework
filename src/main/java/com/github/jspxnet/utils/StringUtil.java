@@ -1447,7 +1447,7 @@ public class StringUtil {
 
     public static Map<String, String> toMap(String str, String keySplit, String lineSplit) {
 
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         String[] attachmentsArray = split(str, lineSplit);
         for (String value : attachmentsArray) {
             if (StringUtil.isNull(value)) {
@@ -2199,7 +2199,7 @@ public class StringUtil {
      */
     static public Map<String, String> splitToMap(String text, String fen, boolean fix) {
         if (StringUtil.isNull(text)) {
-            return new HashMap<>();
+            return new HashMap<>(0);
         }
         String[] xx = split(convertCR(text), CR);
         /////////////处理每一行

@@ -10,7 +10,6 @@
 package com.github.jspxnet.sober;
 
 import com.github.jspxnet.sober.config.SoberColumn;
-import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.exception.ValidException;
 import java.io.Serializable;
 import java.util.Collection;

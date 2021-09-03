@@ -361,6 +361,11 @@ public class SoberUtil {
     {
         //&& !soberSupport.tableExists(cla)
         SoberTable soberTable = AnnotationUtil.getSoberTable(cla);
+        if (soberTable==null)
+        {
+            //DTO 对象
+            return null;
+        }
         if (StringUtil.isEmpty(soberTable.getDatabaseName()))
         {
             Connection connection = null;

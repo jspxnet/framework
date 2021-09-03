@@ -4,8 +4,9 @@ import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
+import com.github.jspxnet.network.rpc.model.route.RouteManage;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
-import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
+import com.github.jspxnet.network.rpc.model.route.impl.RouteChannelManage;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.StringUtil;
 import io.netty.channel.Channel;
@@ -13,7 +14,7 @@ import io.netty.channel.Channel;
 import java.util.List;
 
 public class RouteCmd extends INetCommand {
-    private RouteChannelManage ROUTE_CHANNEL_MANAGE = RouteChannelManage.getInstance();
+
 
     static final public String NAME = INetCommand.ROUTE;
 
@@ -26,6 +27,7 @@ public class RouteCmd extends INetCommand {
     @Override
     public SendCmd execute(Channel channel, SendCmd command)
     {
+        RouteManage routeManage = RouteChannelManage.getInstance();
         if (INetCommand.TYPE_JSON.equals(command.getType()))
         {
             String str = command.getData();
@@ -35,14 +37,14 @@ public class RouteCmd extends INetCommand {
                 //只有同一个功能组的才加入进来
                 JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                 List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                ROUTE_CHANNEL_MANAGE.joinCheckRoute(list);
+                routeManage.joinCheckRoute(list);
             }
         }
 
         SendCmd replyCmd = BeanUtil.copy(command, SendCmd.class);
         replyCmd.setAction(INetCommand.ROUTE);
         replyCmd.setType(INetCommand.TYPE_JSON);
-        replyCmd.setData(ROUTE_CHANNEL_MANAGE.getSendRouteTable());
+        replyCmd.setData(routeManage.getSendRouteTable());
         return replyCmd;
     }
 }

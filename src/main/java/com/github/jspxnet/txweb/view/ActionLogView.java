@@ -50,8 +50,8 @@ public class ActionLogView extends ActionSupport {
     private int currentPage = 0;
     private String term = StringUtil.empty;
     private String sort = "createDate:D";
-    private String[] field = ArrayUtil.emptyString;
-    private String[] find = ArrayUtil.emptyString;
+    private String[] field = ArrayUtil.EMPTY_STRING_ARRAY;
+    private String[] find = ArrayUtil.EMPTY_STRING_ARRAY;
     private String id = StringUtil.empty;
 
     @TurnPage(params = "find;field;sort;uid")

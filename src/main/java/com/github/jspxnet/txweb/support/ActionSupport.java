@@ -48,7 +48,7 @@ import java.util.*;
  */
 public abstract class ActionSupport implements Action {
 
-    final private Map<String, Object> environment = new HashMap<>();
+    final private Map<String, Object> environment = new HashMap<>(20);
     //fusionCharts 图形文字换行
     //protected static final String ChartTextWrap = "&#xD;";
     protected transient HttpSession session = null;

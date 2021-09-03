@@ -2,7 +2,8 @@ package com.github.jspxnet.network.rpc.service.command;
 
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
-import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
+import com.github.jspxnet.network.rpc.model.route.impl.RouteChannelManage;
+import com.github.jspxnet.network.rpc.model.route.RouteManage;
 import com.github.jspxnet.utils.BeanUtil;
 import io.netty.channel.Channel;
 
@@ -18,11 +19,11 @@ public class RouteCmd extends INetCommand {
     @Override
     public SendCmd execute(Channel channel, SendCmd command)
     {
-        RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
+        RouteManage routeManage = RouteChannelManage.getInstance();
         SendCmd replyCmd = BeanUtil.copy(command, SendCmd.class);
         replyCmd.setAction(INetCommand.ROUTE);
         replyCmd.setType(INetCommand.TYPE_JSON);
-        replyCmd.setData(routeChannelManage.getSendRouteTable());
+        replyCmd.setData(routeManage.getSendRouteTable());
         return replyCmd;
     }
 }

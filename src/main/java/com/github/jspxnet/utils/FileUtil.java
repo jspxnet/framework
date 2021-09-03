@@ -1887,7 +1887,6 @@ public final class FileUtil {
                     return list;
                 }
             }
-
         }
         return new ArrayList<>(0);
     }

@@ -151,7 +151,7 @@ public class DataTypeValidator implements Validator {
 
     private List<TagNode> getConfig()  {
         if (!StringUtil.hasLength(formId)) {
-            return new ArrayList<>();
+            return new ArrayList<>(0);
         }
         String xml = readConfigText();
         try {
@@ -246,7 +246,7 @@ public class DataTypeValidator implements Validator {
     @Override
     public Map<String, String> getInformation()
     {
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>(5);
         if (checkObject==null)
         {
             result.put(Environment.warningInfo,"null object,空数据");

@@ -9,7 +9,7 @@ import com.github.jspxnet.boot.environment.Environment;
  * date: 2020/8/14 22:13
  * description: jspbox
  **/
-public class ActionEnv {
+public final class ActionEnv {
     private ActionEnv()
     {
 

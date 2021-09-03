@@ -1,15 +1,14 @@
 package com.github.jspxnet.network.rpc.client.proxy;
 
-import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.client.NettyClientPool;
 import com.github.jspxnet.network.rpc.env.DiscoveryServiceAddress;
-import com.github.jspxnet.network.rpc.env.MasterSocketAddress;
 import com.github.jspxnet.network.rpc.model.SendCommandFactory;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
-import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
+import com.github.jspxnet.network.rpc.model.route.impl.RouteChannelManage;
+import com.github.jspxnet.network.rpc.model.route.RouteManage;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
 import com.github.jspxnet.network.rpc.model.transfer.IocRequest;
 import com.github.jspxnet.network.rpc.model.transfer.IocResponse;
@@ -17,7 +16,6 @@ import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.util.HessianSerializableUtil;
-import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
@@ -43,6 +41,11 @@ public class RpcMethodInterceptor implements MethodInterceptor {
     private InetSocketAddress address;
     //ioc 名称,类名
     private String url;
+
+    public RpcMethodInterceptor()
+    {
+
+    }
 
 
     public RequestTo getRequest() {
@@ -123,21 +126,21 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         }
         if (address==null)
         {
-            if (System.currentTimeMillis()- JspxNetApplication.getRunDate().getTime()< DateUtil.SECOND*30)
-            {
-                Thread.sleep(1000);
-                address = DiscoveryServiceAddress.getSocketAddress(serviceName);
-            }
-        }
-        if (address==null)
-        {
-            log.error("TCP调用没有配置服务器地址:{}",serviceName);
+            Thread.sleep(1000);
+            address = DiscoveryServiceAddress.getSocketAddress(serviceName);
         }
 
+        if (address==null)
+        {
+            log.error("TCP RPC 调用没有配置服务器地址:{}",serviceName);
+            throw new Exception("TCP RPC 调用没有分组服务器地址:" + serviceName);
+        }
+
+
         SendCmd reply = NettyClientPool.getInstance().send(address, command);
-        if (reply == null && MasterSocketAddress.getInstance().removeGroupSocketAddress(serviceName,address)) {
+        if (reply == null) {
             //异常后删除重新检查
-            RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
+            RouteManage routeManage = RouteChannelManage.getInstance();
             RouteSession routeSession = new RouteSession();
             routeSession.setHeartbeatTimes(0);
             routeSession.setOnline(YesNoEnumType.YES.getValue());
@@ -145,7 +148,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             routeSession.setCreateTimeMillis(System.currentTimeMillis());
             routeSession.setGroupName(serviceName);
             routeSession.setSocketAddress(address);
-            routeChannelManage.joinCheckRoute(routeSession);
+            routeManage.joinCheckRoute(routeSession);
             return null;
         }
 

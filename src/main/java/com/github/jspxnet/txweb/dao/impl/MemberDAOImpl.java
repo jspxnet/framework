@@ -840,7 +840,7 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
     @Override
     public List<Member> getMemberChildList(long memberId, String organizeId, String namespace, int page, int count) {
         if (memberId <= 0 || StringUtil.isEmpty(organizeId) || !StringUtil.hasLength(namespace)) {
-            return new ArrayList<>();
+            return new ArrayList<>(0);
         }
         Criteria criteria = createCriteria(MemberSpace.class).add(Expression.eq("memberId", memberId));
         criteria = criteria.add(Expression.eq("organizeId", organizeId));

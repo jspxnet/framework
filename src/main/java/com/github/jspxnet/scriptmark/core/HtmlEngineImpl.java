@@ -106,7 +106,7 @@ public class HtmlEngineImpl implements HtmlEngine {
     public List<TagNode> getBlockTree(final String code, Map<String, String> tagMap) {
         if (tagMap == null) {
             log.error("need tag define parse,没有定义要解析的标签");
-            return new ArrayList<>();
+            return new ArrayList<>(0);
         }
         List<TagNode> nodeTree = new LinkedList<>();
         if (code == null) {

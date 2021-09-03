@@ -79,9 +79,9 @@ public class FileManager {
     }
 
     static public List<File> getFileList(File dir, String[] types, boolean chid) {
-        List<File> result = new ArrayList<File>();
+        List<File> result = new ArrayList<>();
         if (!dir.exists()) {
-            return new ArrayList<File>();
+            return new ArrayList<>(0);
         }
         File[] fileList = dir.listFiles();
         int I;

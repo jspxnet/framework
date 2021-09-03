@@ -81,6 +81,10 @@ public class NettyClientPool {
      * @throws Exception 异常
      */
     public SendCmd send(SocketAddress address, SendCmd command) throws Exception {
+        if (address==null)
+        {
+            return null;
+        }
         final FixedChannelPool pool = pools.get(address);
         Channel channel = null;
         try {

@@ -4,7 +4,6 @@ import com.github.jspxnet.sober.annotation.Column;
 import lombok.Data;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 /**
  * Created by jspx.net

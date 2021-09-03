@@ -29,6 +29,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -760,6 +761,7 @@ public class ParamUtil {
         if (theParam instanceof String) {
             checkSafe(action, param, paramName, theParam.toString());
         }
+
         if (ClassUtil.isNumberType(theParam.getClass())||theParam instanceof Number) {
             checkSafe(action, param, paramName, BigDecimal.valueOf(ObjectUtil.toDouble(theParam)));
         }

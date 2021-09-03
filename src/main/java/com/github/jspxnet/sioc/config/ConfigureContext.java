@@ -398,7 +398,7 @@ public class ConfigureContext implements IocContext {
         String txt = readContext(file);
         if (txt==null)
         {
-            return new ArrayList<>();
+            return new ArrayList<>(0);
         }
         log.debug("jspx sioc load file:" + file);
         List<TagNode> results = xmlEngine.getTagNodes(txt);

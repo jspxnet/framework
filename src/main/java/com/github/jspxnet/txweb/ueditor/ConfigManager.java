@@ -72,7 +72,7 @@ public final class ConfigManager {
 
     public Map<String, Object> getConfig(int type) {
 
-        Map<String, Object> conf = new HashMap<String, Object>();
+        Map<String, Object> conf = new HashMap<>();
         String savePath = null;
 
         switch (type) {

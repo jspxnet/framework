@@ -400,6 +400,10 @@ public final class XMLUtil {
                     last = i + 1;
                     out.append(QUOT_ENCODE);
                     break;
+                default:
+                {
+                    break;
+                }
             }
         }
         if (last == 0) {

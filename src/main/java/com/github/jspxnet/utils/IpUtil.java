@@ -178,6 +178,11 @@ public final class IpUtil {
         return (aIpAddress >> 24 & 255) + StringUtil.DOT + (aIpAddress >> 16 & 255) + StringUtil.DOT + (aIpAddress >> 8 & 255) + StringUtil.DOT + (aIpAddress & 255);
     }
 
+    /**
+     *
+     * @param address InetAddress
+     * @return 得到ip和端口的标准写法
+     */
     public static String getIp(InetAddress address) {
         if (address == null) {
             return StringUtil.empty;
@@ -292,7 +297,7 @@ public final class IpUtil {
         return (b >= 0) ? (int) b : ((int) b) + 256;
     }
 
-    public static InetAddress getPublicIP() {
+    public static InetAddress getPublicIp() {
 
         try {
             InetAddress[] ia = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
@@ -486,7 +491,7 @@ public final class IpUtil {
         int begin = ObjectUtil.toInt(StringUtil.substringBefore(portStr, "-"));
         int end = ObjectUtil.toInt(StringUtil.substringAfter(portStr, "-"));
         if (begin > end || begin == 0 || end == 0) {
-            return new ArrayList<>();
+            return new ArrayList<>(0);
         }
         List<InetSocketAddress> result = new ArrayList<>();
         for (int i = begin; i <= end; i++) {

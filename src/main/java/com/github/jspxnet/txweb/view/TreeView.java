@@ -158,10 +158,10 @@ public class TreeView extends ActionSupport {
             if (!isGuest() && role!=null&&role.getUserType() < UserEnumType.ChenYuan.getValue()) {
                 treeItemDAO.setChecked(memberTreeDAO.getMemberTreeSplitString(userSession.getUid()));
             } else {
-                treeItemDAO.setChecked(ArrayUtil.emptyString);
+                treeItemDAO.setChecked(ArrayUtil.EMPTY_STRING_ARRAY);
             }
         } else {
-            treeItemDAO.setChecked(ArrayUtil.emptyString);
+            treeItemDAO.setChecked(ArrayUtil.EMPTY_STRING_ARRAY);
         }
         Map<String, String> map = treeItemDAO.getSelectTreeItemMap("....|-");
         StringBuilder sb = new StringBuilder();
@@ -201,7 +201,7 @@ public class TreeView extends ActionSupport {
         treeItemDAO.setSelected(nodeId);
         treeItemDAO.setInput(input);
         treeItemDAO.setUseLimb(useLimb);
-        treeItemDAO.setChecked(ArrayUtil.emptyString);
+        treeItemDAO.setChecked(ArrayUtil.EMPTY_STRING_ARRAY);
         return treeItemDAO.getTreeSrc(TreeItemDAOImpl.TYPE_JSON);
     }
 
@@ -288,7 +288,7 @@ public class TreeView extends ActionSupport {
         if (!isGuest() && role!=null&&role.getUserType() < UserEnumType.ChenYuan.getValue()) {
             treeItemDAO.setChecked(memberTreeDAO.getMemberTreeSplitString(userSession.getUid()));
         } else {
-            treeItemDAO.setChecked(ArrayUtil.emptyString);
+            treeItemDAO.setChecked(ArrayUtil.EMPTY_STRING_ARRAY);
         }
         if (!StringUtil.hasLength(nodeId)) {
             nodeId = ArrayUtil.toString(getArray("nodeId", true), StringUtil.SEMICOLON);

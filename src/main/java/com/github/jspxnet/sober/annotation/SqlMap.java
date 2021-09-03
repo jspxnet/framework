@@ -25,7 +25,7 @@ public @interface SqlMap
     //返回单一对象 int 单个Bean
     QueryModelEnumType mode() default QueryModelEnumType.LIST;
     //空间
-    String namespace();
+    String namespace() default StringUtil.empty;
     //执行方式
     ExecuteEnumType execute() default ExecuteEnumType.QUERY;
 

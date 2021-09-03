@@ -551,6 +551,7 @@ public class UploadFileAction extends MultipartSupport {
                     }
                     return uploadObjArray;
                 } else {
+
                     //上传到云盘
                     CloudFileConfig cloudFileConfig = uploadFileDAO.getCloudFileConfig();
                     AssertException.isNull(cloudFileConfig, "云盘空间没有配置");
@@ -563,7 +564,8 @@ public class UploadFileAction extends MultipartSupport {
                             continue;
                         }
                         File localFile = new File(tmpUploadFile.getTempFilePath());
-                        String cloudUrl = cloudFileClient.upload(cloudFileConfig.getNamespace(), localFile);
+                        String createUrlFileName = cloudFileConfig.getNamespace()+ StringUtil.BACKSLASH +RandomUtil.getRandomGUID(28)+  StringUtil.DOT + FileUtil.getTypePart(localFile);
+                        String cloudUrl = cloudFileClient.upload(createUrlFileName, localFile);
                         tmpUploadFile.setFileName(cloudUrl);
                         StringMap<String, String> attributeMap = tmpUploadFile.getAttributeMap();
                         attributeMap.put("configId",cloudFileConfig.getId()+"");

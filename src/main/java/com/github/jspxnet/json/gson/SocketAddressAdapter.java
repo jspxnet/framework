@@ -29,4 +29,6 @@ public class SocketAddressAdapter implements JsonSerializer<SocketAddress>, Json
         }
         return new JsonPrimitive(value);
     }
+
+
 }

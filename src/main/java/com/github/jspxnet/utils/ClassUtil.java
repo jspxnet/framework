@@ -21,6 +21,7 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLClassLoader;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
 import java.io.*;
@@ -60,14 +61,14 @@ public class ClassUtil {
     public static boolean isStandardType(Type clazz) {
         return isNumberType(clazz) || clazz.equals(Byte.class) || clazz.equals(Character.class)
                 || clazz.equals(String.class) || clazz.equals(char.class) || clazz.equals(boolean.class) || clazz.equals(Boolean.class) ||
-                clazz.equals(Date.class) || clazz.equals(Timestamp.class);
+                clazz.equals(Date.class) || clazz.equals(Timestamp.class)  || clazz.equals(Time.class);
     }
 
 
     public static boolean isStandardProperty(Class<?> clazz) {
         return clazz.isPrimitive() || isNumberProperty(clazz) || clazz.isAssignableFrom(Byte.class) || clazz.isAssignableFrom(Character.class)
                 || clazz.isAssignableFrom(String.class) || clazz.isAssignableFrom(char.class) || clazz.isAssignableFrom(Boolean.class) ||
-                clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(Timestamp.class)|| clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(String.class);
+                clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(Timestamp.class) || clazz.isAssignableFrom(Time.class)|| clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(String.class);
     }
 
 
@@ -130,7 +131,7 @@ public class ClassUtil {
      * @return 得到Set 方法的 key方法明  和 value 类型
      */
     public static Map<String, Class<?>> getMethodsNameAndType(Class<?> c, String name) {
-        Map<String, Class<?>> result = new HashMap<>();
+        Map<String, Class<?>> result = new HashMap<>(c.getMethods().length);
         try {
             Method[] methods = c.getMethods();
             for (Method method : methods) {
@@ -945,9 +946,9 @@ public class ClassUtil {
     public static Map<Object,Object> getEnumMap(Class<?> cla, String fieldName,String name) {
         if (cla==null||cla.equals(NullClass.class))
         {
-            return new HashMap<>();
+            return new HashMap<>(0);
         }
-        Map<Object,Object> result = new HashMap<>();
+        Map<Object,Object> result = new HashMap<>(5);
         try {
             Field field = cla.getDeclaredField(fieldName);
             Field fieldDes = cla.getDeclaredField(name);

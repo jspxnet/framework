@@ -3,6 +3,7 @@ package com.github.jspxnet.sioc.interceptor;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.Sioc;
+import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.annotation.SqlMap;
 import com.github.jspxnet.sober.enums.ExecuteEnumType;
@@ -20,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -90,7 +90,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
         {
             if (sqlMap!=null)
             {
-                result = invokeSqlMap(targetClass, obj,  arg, proxy,sqlMap,exeMethod);
+                result = invokeSqlMap(targetClass, obj,  arg, proxy, sqlMap, exeMethod);
             } else
             {
                 result = proxy.invokeSuper(obj, arg);
@@ -145,6 +145,16 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
             exeId = ClassUtil.getImplements(targetClass).getName() + StringUtil.DOT + exeMethod.getName();
         }
         proxy.invokeSuper(obj, arg);
+
+        String namespace = sqlMap.namespace();
+        if (StringUtil.isEmpty(namespace))
+        {
+            Bean bean = targetClass.getAnnotation(Bean.class);
+            if (bean!=null)
+            {
+                namespace  = bean.namespace();
+            }
+        }
 
         //这里开始事务处理
         SoberSupport soberSupport = (SoberSupport)obj;
@@ -212,10 +222,10 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
             {
                 if (cls!=null&&ClassUtil.isStandardType(cls))
                 {
-                    Object result = soberSupport.buildSqlMap().getUniqueResult(sqlMap.namespace(),exeId,valueMap);
+                    Object result = soberSupport.buildSqlMap().getUniqueResult(namespace,exeId,valueMap);
                     return BeanUtil.getTypeValue(result,cls);
                 }
-                List<?> list = soberSupport.buildSqlMap().query(sqlMap.namespace(),exeId,valueMap,1,1,sqlMap.nexus(),false,cls);
+                List<?> list = soberSupport.buildSqlMap().query(namespace,exeId,valueMap,1,1,sqlMap.nexus(),false,cls);
                 if (list==null||list.isEmpty())
                 {
                     return null;
@@ -225,7 +235,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
 
             if (QueryModelEnumType.COUNT.equals(sqlMap.mode()))
             {
-                Object result = soberSupport.buildSqlMap().queryCount(sqlMap.namespace(),exeId,valueMap);
+                Object result = soberSupport.buildSqlMap().queryCount(namespace,exeId,valueMap);
                 if (cls!=null&&ClassUtil.isStandardType(cls))
                 {
                     return BeanUtil.getTypeValue(result,cls);
@@ -241,7 +251,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
                 totalCount = soberSupport.getMaxRows();
             }
 
-            return soberSupport.buildSqlMap().query(sqlMap.namespace(),exeId,valueMap,currentPage,totalCount,sqlMap.nexus(),cls);
+            return soberSupport.buildSqlMap().query(namespace,exeId,valueMap,currentPage,totalCount,sqlMap.nexus(),cls);
         }
 
         if (ExecuteEnumType.UPDATE.equals(sqlMap.execute()))
@@ -257,7 +267,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
                     }
                 }
             }
-            return soberSupport.buildSqlMap().update(sqlMap.namespace(),exeId,valueMap);
+            return soberSupport.buildSqlMap().update(namespace,exeId,valueMap);
         }
 
         if (ExecuteEnumType.EXECUTE.equals(sqlMap.execute()))
@@ -273,7 +283,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
                     }
                 }
             }
-            return soberSupport.buildSqlMap().execute(sqlMap.namespace(),exeId,valueMap);
+            return soberSupport.buildSqlMap().execute(namespace,exeId,valueMap);
         }
         return null;
     }

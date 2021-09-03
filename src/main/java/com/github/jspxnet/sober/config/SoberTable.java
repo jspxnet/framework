@@ -24,7 +24,7 @@ import java.util.*;
  * Time: 23:07:57
  */
 public class SoberTable implements TableModels {
-    //数据库名
+    //数据库名 ，这里不是数据库类型
     private String databaseName = StringUtil.empty;
 
     //数据库表名

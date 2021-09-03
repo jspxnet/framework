@@ -60,7 +60,7 @@ public class PassportInterceptor extends InterceptorSupport {
         if (userSession != null && !userSession.isGuest() && urlList != null) {
             for (String url : urlList) {
                 HttpClient httpClient = HttpClientFactory.createHttpClient(url);
-                Map param = new HashMap();
+                Map<String,Object> param = new HashMap<>();
                 param.put("ticket", CookieUtil.getCookieString(action.getRequest(), TXWeb.COOKIE_TICKET, null));
                 param.put("tmc", tmc + "");
                 try {

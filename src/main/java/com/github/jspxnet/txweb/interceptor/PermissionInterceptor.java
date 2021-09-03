@@ -238,6 +238,7 @@ public class PermissionInterceptor extends InterceptorSupport {
             onlineManager.updateUserSessionCache(userSession);
         }
         //没有角色权限自动载入 end
+
         HttpServletRequest requestTmp = action.getRequest();
         if (requestTmp instanceof RequestTo || INetCommand.RPC.equals(requestTmp.getAttribute(ActionEnv.Key_REMOTE_TYPE))) {
             //如果是RPC调用不拦截，RPC调用的安全使用通讯密钥方式来确保
@@ -245,7 +246,6 @@ public class PermissionInterceptor extends InterceptorSupport {
         }
 
         //屏蔽的URL游客
-
         if (userSession.isGuest() && ArrayUtil.inArray(guestStopUrl, checkUrl, true)) {
 
             //如果都载入为空，那么载入游客权限 begin

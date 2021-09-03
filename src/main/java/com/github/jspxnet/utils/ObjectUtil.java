@@ -328,6 +328,29 @@ public final  class ObjectUtil {
         return new java.sql.Timestamp(DateUtil.empty.getTime());
     }
 
+    public static java.sql.Time toSqlTime(Object obj) {
+        if (obj == null) {
+            return new java.sql.Time(DateUtil.empty.getTime());
+        }
+        if (obj.getClass().isAssignableFrom(java.sql.Time.class)) {
+            return ((java.sql.Time) obj);
+        }
+
+        if (obj.getClass().isAssignableFrom(Long.class)) {
+            return new java.sql.Time(((Long) obj));
+        }
+        if (obj.getClass().isAssignableFrom(Date.class)) {
+            return new java.sql.Time(((Date) obj).getTime());
+        }
+        try {
+            Date date = StringUtil.getDate(obj.toString());
+            return new java.sql.Time(date.getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new java.sql.Time(DateUtil.empty.getTime());
+    }
+
     public static String toString(Object obj) {
         if (obj == null) {
             return StringUtil.empty;
@@ -510,10 +533,10 @@ public final  class ObjectUtil {
      */
     public static Map<String, Object> getMap(Object o) {
         if (o == null) {
-            return new HashMap<>();
+            return new HashMap<>(0);
         }
         if (o instanceof Class) {
-            return new HashMap<>();
+            return new HashMap<>(0);
         }
         if (o instanceof AbstractMap) {
             return (Map<String, Object>) o;

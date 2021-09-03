@@ -1,8 +1,10 @@
-package com.github.jspxnet.network.rpc.model.route;
+package com.github.jspxnet.network.rpc.model.route.impl;
 
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
+import com.github.jspxnet.network.rpc.model.route.RouteManage;
+import com.github.jspxnet.network.rpc.model.route.RouteSession;
 import com.github.jspxnet.utils.IpUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -19,32 +21,50 @@ import java.util.concurrent.ConcurrentHashMap;
  * description: master 路由表
  **/
 @Slf4j
-public class RouteChannelManage {
+public class RouteChannelManage implements RouteManage {
     final public static String KEY_ROUTE = "route";
-    final private static RouteChannelManage INSTANCE = new RouteChannelManage();
-    //本服务启动的ip地址,配置的不一定都启动,应为要分组,这里的ip不会被路由表不删除
+    private static RouteManage INSTANCE;
+    //本服务启动的ip地址,统一不判断，不检测是连接
     private static final List<InetSocketAddress> START_LIST = new ArrayList<>();
+
+    //保存的是配置的关联ip，如果路由表里边没有就自动添加到检测列表里边等待检测
+    private static final List<RouteSession> MASTER_LIST = new ArrayList<>();
+
     private RouteChannelManage()
     {
-        initConfigRoute();
-    }
 
-    public void initConfigRoute()
-    {
         RpcConfig rpcConfig = RpcConfig.getInstance();
-        List<RouteSession>  list = rpcConfig.getConfigRouteSessionList();
-        int i = 0;
+        List<RouteSession>  list = rpcConfig.createConfigRouteSessionList();
         for (RouteSession routeSession:list)
         {
-          routeSocketMap.put(routeSession.getSocketAddress(),routeSession);
+            //这里会去掉相同的配置
+            routeSocketMap.put(routeSession.getSocketAddress(),routeSession);
         }
-        log.debug("初始化路由表:{}",ObjectUtil.toString(list));
+        log.debug("初始化本地路由表:{}",ObjectUtil.toString(list));
+
+        if (START_LIST.isEmpty())
+        {
+            START_LIST.addAll(rpcConfig.getLocalAddressList());
+        }
+
+        if (MASTER_LIST.isEmpty())
+        {
+            MASTER_LIST.addAll(rpcConfig.createMasterRouteSessionList());
+        }
+
     }
     /**
      *
      * @return 单例
      */
-    public static RouteChannelManage getInstance(){
+    public static RouteManage getInstance(){
+        if (INSTANCE==null)
+        {
+            synchronized (RouteChannelManage.class)
+            {
+                INSTANCE = new RouteChannelManage();
+            }
+        }
         return INSTANCE;
     }
 
@@ -60,14 +80,23 @@ public class RouteChannelManage {
     private final Map<InetSocketAddress, RouteSession> checkRouteSocketMap = new ConcurrentHashMap<>();
 
 
-    public static List<InetSocketAddress> getStartList() {
-        return START_LIST;
+    /**
+     * 判断是否为本地服务
+     * @param socketAddress ip地址
+     * @return  判断是否为本地服务
+     */
+
+    @Override
+    public boolean isLocalAddress(InetSocketAddress socketAddress) {
+        return START_LIST.contains(socketAddress);
     }
+
 
     /**
      *
      * @return 得到要发送的路由表, json
      */
+    @Override
     public String getSendRouteTable()
     {
         List<RouteSession> list = new ArrayList<>();
@@ -88,6 +117,7 @@ public class RouteChannelManage {
      * 放入请求得到的路由表
      * @param list 路由表
      */
+    @Override
     public void joinCheckRoute(List<RouteSession> list)
     {
         if (ObjectUtil.isEmpty(list))
@@ -105,6 +135,7 @@ public class RouteChannelManage {
         }
     }
 
+    @Override
     public void joinCheckRoute(RouteSession routeSession)
     {
         if (ObjectUtil.isEmpty(routeSession))
@@ -112,13 +143,14 @@ public class RouteChannelManage {
             return;
         }
 
-
-        if (routeSession==null)
+        if (START_LIST.contains(routeSession.getSocketAddress()))
         {
             return;
         }
-        if (START_LIST.contains(routeSession.getSocketAddress()))
+
+        if (routeSocketMap.containsKey(routeSession.getSocketAddress()))
         {
+            //路由表里边已经有了
             return;
         }
         if (!checkRouteSocketMap.containsKey(routeSession.getSocketAddress()))
@@ -131,6 +163,7 @@ public class RouteChannelManage {
      * 真正的加入到路由表中
      * @param list 路由表
      */
+    @Override
     public void joinRoute(List<RouteSession> list)
     {
         if (ObjectUtil.isEmpty(list))
@@ -156,6 +189,7 @@ public class RouteChannelManage {
      *
      * @return 拷贝一份出去
      */
+    @Override
     public List<RouteSession> getRouteSessionList()
     {
         return new ArrayList<>(routeSocketMap.values());
@@ -165,50 +199,70 @@ public class RouteChannelManage {
      *
      * @return 拷贝一份出去,带检查的路由表
      */
-    public Map<InetSocketAddress, RouteSession> getCheckRouteSocketMap()
+  /*  public Map<InetSocketAddress, RouteSession> getCheckRouteSocketMap()
     {
         return checkRouteSocketMap;
-    }
+    }*/
 
     /**
-     *
-     * @param configList 当前路由表
+     * 情况检查的路由表
+     */
+    @Override
+    public void clearCheckRouteSocketMap()
+    {
+        if (checkRouteSocketMap.isEmpty())
+        {
+            return;
+        }
+        checkRouteSocketMap.clear();
+    }
+
+
+
+    /**
+     * 得到当前需要检查的路由表,先排除自己本地服务,如果本地配置的没有加入本地配置的ip去检查
      * @return 当前路由表排除当前服务
      */
-    public List<RouteSession> getNotRouteSessionList(List<RouteSession> configList)
+    @Override
+    public List<RouteSession> getNeedCheckRouteSessionList()
     {
-        if (ObjectUtil.isEmpty(configList))
-        {
-            return null;
-        }
-
         List<RouteSession> result = new ArrayList<>();
-        for (RouteSession routeSession:configList)
+        for (RouteSession routeSession:checkRouteSocketMap.values())
         {
             if (START_LIST.contains(routeSession.getSocketAddress()))
             {
                 continue;
             }
-            result.add(routeSession);
+            if (!routeSocketMap.containsKey(routeSession.getSocketAddress()))
+            {
+                result.add(routeSession);
+            }
+        }
+        for (RouteSession routeSession:MASTER_LIST)
+        {
+            if (!result.contains(routeSession))
+            {
+                result.add(routeSession);
+            }
         }
         return result;
     }
 
 
     /**
-     *
-     * @param configList 带检查的路由列表
-     * @return 需要检查的
+     * checkRouteSocketMap 里边过滤掉本地的地址,和路由表里边已经有的地址
+     * @return 待检查的路由列表, 需要检查的
      */
-    public List<RouteSession> getNotCheckRouteSessionList(List<RouteSession> configList)
+/*
+    public List<RouteSession> getWaitCheckRouteSessionList()
     {
-        if (ObjectUtil.isEmpty(configList))
+        if (ObjectUtil.isEmpty(checkRouteSocketMap))
         {
             return null;
         }
 
         List<RouteSession> result = new ArrayList<>();
-        for (RouteSession routeSession:configList)
+        for (RouteSession routeSession:checkRouteSocketMap.values())
         {
             if (START_LIST.contains(routeSession.getSocketAddress()))
             {
@@ -222,12 +276,14 @@ public class RouteChannelManage {
         }
         return result;
     }
+*/
 
 
     /**
      *
      * @return 当前实际可用的节点数量
      */
+
     public int getRouteSessionCount()
     {
         int result = 0;
@@ -245,9 +301,10 @@ public class RouteChannelManage {
      *
      * @param address 标记下线
      */
+    @Override
     public void routeOff(InetSocketAddress address)
     {
-        if (RouteChannelManage.getStartList().contains(address))
+        if (START_LIST.contains(address))
         {
             return;
         }
@@ -259,17 +316,32 @@ public class RouteChannelManage {
         }
     }
 
+    @Override
+    public void routeOn(InetSocketAddress address)
+    {
+        if (START_LIST.contains(address))
+        {
+            return;
+        }
+        RouteSession routeSession = routeSocketMap.get(address);
+        if (routeSession!=null)
+        {
+            routeSession.setHeartbeatTimes(0);
+            routeSession.setOnline(YesNoEnumType.YES.getValue());
+        }
+    }
+
     /**
      * 清理下线的地址
      */
+    @Override
     public void cleanOffRoute()
     {
-        List<InetSocketAddress>  localList = RouteChannelManage.getStartList();
         Enumeration<InetSocketAddress> keys = routeSocketMap.keys();
         while (keys.hasMoreElements())
         {
             SocketAddress key=keys.nextElement();
-            if (localList.contains(key))
+            if (START_LIST.contains(key))
             {
                 //本地的不删除
                 continue;
@@ -286,4 +358,6 @@ public class RouteChannelManage {
             }
         }
     }
+
+
 }

@@ -281,7 +281,7 @@ public class Member extends OperateTable implements IMember {
 
     public Map<String, String> getMedalMap()
     {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         String[] medalArray = StringUtil.split(StringUtil.convertCR(medals), StringUtil.CR);
         for (String value : medalArray) {
             if (StringUtil.isNull(value) || !value.contains(StringUtil.EQUAL)) {

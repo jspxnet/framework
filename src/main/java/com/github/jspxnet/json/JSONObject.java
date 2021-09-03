@@ -307,25 +307,26 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         }
         if (bean instanceof Map) {
             Map map = (Map) bean;
-            for (Object key : map.keySet()) {
+            for (Object objKey : map.keySet()) {
+                String key = ObjectUtil.toString(objKey);
                 //判断是否需要返回
                 if (!ArrayUtil.isEmpty(showField)&&!ArrayUtil.contains(showField,key))
                 {
                     continue;
                 }
-                Object v = map.get(key);
+                Object v = map.get(objKey);
                 if (v==null)
                 {
-                    super.put((String) key, null);
+                    super.put(key, null);
                 } else
                 if (ClassUtil.isCollection(v))
                 {
-                    super.put((String) key, new JSONArray(v,includeSuperClass));
+                    super.put(key, new JSONArray(v,includeSuperClass));
                 } else
                 if (!ClassUtil.isStandardProperty(v.getClass())&&!(v instanceof JSONObject)) {
-                    super.put((String) key, new JSONObject(v, includeSuperClass,dataField));
+                    super.put(key, new JSONObject(v, includeSuperClass,dataField));
                 } else {
-                    super.put((String) key, v);
+                    super.put(key, v);
                 }
             }
             return;

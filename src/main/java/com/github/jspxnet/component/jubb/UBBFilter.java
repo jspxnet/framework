@@ -93,10 +93,12 @@ public class UBBFilter extends HTMLFilter {
      */
     @Override
     public String getFilterString() {
+
         String outString = s;
         try {
             for (String a : as) {
-                Filter filter = (Filter) Class.forName("com.github.jspxnet.component.jubb." + a).newInstance();
+                String className =  "com.github.jspxnet.component.jubb." + a;
+                Filter filter = (Filter) Class.forName(className).newInstance();
                 filter.setInputString(outString);
                 if (a.equals(LocalFilter)) {
                     BeanUtil.setSimpleProperty(filter, "downloadLink", downloadLink);
@@ -104,6 +106,7 @@ public class UBBFilter extends HTMLFilter {
                 outString = filter.getFilterString();
             }
         } catch (Exception exception) {
+            exception.printStackTrace();
             return s;
         }
         return outString;

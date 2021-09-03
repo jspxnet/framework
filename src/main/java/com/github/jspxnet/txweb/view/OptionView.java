@@ -40,8 +40,8 @@ public class OptionView extends ActionSupport {
     private String term = StringUtil.empty;
     private String sort = null;
     private String namespace;
-    private String[] field = ArrayUtil.emptyString;
-    private String[] find = ArrayUtil.emptyString;
+    private String[] field = ArrayUtil.EMPTY_STRING_ARRAY;
+    private String[] find = ArrayUtil.EMPTY_STRING_ARRAY;
     private Long id;
 
     public String getNamespace() {

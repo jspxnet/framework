@@ -83,22 +83,22 @@ public class BeanModel extends BeanElement {
 
     @Override
     public List<PropertyElement> getPropertyElements() {
-        return new ArrayList<PropertyElement>();
+        return new ArrayList<>(0);
     }
 
     @Override
     public List<TagNode> getMapElements() {
-        return new ArrayList<TagNode>();
+        return new ArrayList<>(0);
     }
 
     @Override
     public List<TagNode> getListElements() {
-        return new ArrayList<TagNode>();
+        return new ArrayList<>(0);
     }
 
     @Override
     public List<TagNode> getArrayElements() {
-        return new ArrayList<TagNode>();
+        return new ArrayList<>(0);
     }
 
     @Override

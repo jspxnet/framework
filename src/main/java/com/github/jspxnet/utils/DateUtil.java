@@ -650,6 +650,13 @@ public final  class DateUtil {
         return compareDay(beginDate, new Date());
     }
 
+
+    public static long compareSecond(Date beginDate, Date endDate) {
+        Calendar beginYears = new GregorianCalendar();
+        beginYears.setTime(beginDate);
+        long diffMillis = endDate.getTime() - beginYears.getTimeInMillis();
+        return diffMillis / SECOND;
+    }
     /**
      * @param beginDate 开始时间
      * @param endDate   结束时间

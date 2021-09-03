@@ -31,14 +31,14 @@ import static java.util.regex.Pattern.compile;
 public class TimingFilter extends HTMLFilter {
     private Date startDate = new Date();
     private String timingTip = "定时{0}显示内容";
+    public TimingFilter() {
 
+    }
     public TimingFilter(String s) {
         super(s);
     }
 
-    public TimingFilter() {
 
-    }
 
     public String getTimingTip() {
         return timingTip;

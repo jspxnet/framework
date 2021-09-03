@@ -207,7 +207,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T loadColumnsValue(Class<T> tClass, ResultSet resultSet) throws Exception {
-        T result = null;
+        T result;
         if (Map.class.isAssignableFrom(tClass)||HashMap.class.isAssignableFrom(tClass))
         {
             ResultSetMetaData metaData = resultSet.getMetaData();

@@ -27,6 +27,7 @@ public abstract class HTMLFilter implements Filter {
 
     protected String s;
 
+
     public HTMLFilter(String s1) {
         s = StringUtil.empty;
         s = s1;

@@ -53,7 +53,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
     protected String organizeId = StringUtil.empty;
     protected String namespace; //命名空间
     protected boolean show = true; //是否显示隐藏
-    protected String[] selected = ArrayUtil.emptyString; //当前 选中状态
+    protected String[] selected = ArrayUtil.EMPTY_STRING_ARRAY; //当前 选中状态
     protected String input = StringUtil.empty; //输入框 text
     protected String inputName = "nodeId"; //输入框 text
     protected boolean useLimb = false; //是否使用叶子部分
@@ -1183,7 +1183,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
     public String[] getRoleNodeIds(String roleId) {
         if (StringUtil.isNull(roleId))
         {
-            return ArrayUtil.emptyString;
+            return ArrayUtil.EMPTY_STRING_ARRAY;
         }
         try {
             TreeRole treeRole = super.load(TreeRole.class, "roleId", roleId, false);
@@ -1191,7 +1191,7 @@ public abstract class TreeItemDAOImpl extends JdbcOperations implements TreeItem
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return ArrayUtil.emptyString;
+        return ArrayUtil.EMPTY_STRING_ARRAY;
     }
 
 

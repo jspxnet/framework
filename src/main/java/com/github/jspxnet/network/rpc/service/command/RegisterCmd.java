@@ -4,7 +4,8 @@ import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.cmd.SendCmd;
-import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
+import com.github.jspxnet.network.rpc.model.route.impl.RouteChannelManage;
+import com.github.jspxnet.network.rpc.model.route.RouteManage;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -34,18 +35,17 @@ public class RegisterCmd extends INetCommand {
     @Override
     public SendCmd execute(Channel channel, SendCmd command)
     {
-        RouteChannelManage routeChannelManage = RouteChannelManage.getInstance();
+        RouteManage routeManage = RouteChannelManage.getInstance();
         //有服务器注册上来
         if (INetCommand.TYPE_JSON.equals(command.getType()))
         {
             //注册上来的是一个地址列表,还没有路由表,将路由表给对方
             String str = command.getData();
             if (StringUtil.isJsonObject(str)) {
-                JSONObject json = new JSONObject(str);
                 //只有同一个功能组的才加入进来
-                JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
+                JSONArray jsonArray = new JSONObject(str).getJSONArray(RouteChannelManage.KEY_ROUTE);
                 List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
-                routeChannelManage.joinCheckRoute(list);
+                routeManage.joinCheckRoute(list);
             }
 
         }
@@ -54,7 +54,7 @@ public class RegisterCmd extends INetCommand {
         SendCmd replyCmd = BeanUtil.copy(command, SendCmd.class);
         replyCmd.setAction(INetCommand.ROUTE);
         replyCmd.setType(INetCommand.TYPE_JSON);
-        replyCmd.setData(routeChannelManage.getSendRouteTable());
+        replyCmd.setData(routeManage.getSendRouteTable());
         return replyCmd;
     }
 }

@@ -17,9 +17,7 @@ import io.netty.channel.ChannelHandlerContext;
  * description: 请求退出
  **/
 public class ExitCmd  extends INetCommand {
-    static final private BeanFactory BEAN_FACTORY = EnvFactory.getBeanFactory();
     static final public String NAME = INetCommand.EXIT;
-
     /**
      * 执行方法
      * @param channel 连接

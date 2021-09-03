@@ -13,9 +13,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
-
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 /**
  * Created by jspx.net
@@ -71,7 +69,7 @@ public class NettyRpcServer implements Runnable {
             ChannelFuture channelFuture = bootstrap.bind().sync();
             isRun = true;
 
-            log.debug("--rpc service {} started and listen on port:{}",name,channelFuture.channel().localAddress());
+            log.debug("--rpc service {} started and listen on port:{}",name,IpUtil.getIp(channelFuture.channel().localAddress()));
             channelFuture.channel().closeFuture().addListener(ChannelFutureListener.CLOSE).sync();
         }
         catch (InterruptedException ignored)

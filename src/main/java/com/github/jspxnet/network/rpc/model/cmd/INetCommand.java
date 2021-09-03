@@ -11,7 +11,6 @@ package com.github.jspxnet.network.rpc.model.cmd;
 
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
-import com.github.jspxnet.network.rpc.model.route.RouteChannelManage;
 import com.github.jspxnet.network.util.PacketUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;

@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -232,8 +233,8 @@ public final class BeanUtil {
         if (aType instanceof ParameterizedType && obj instanceof JSONObject)
         {
             ParameterizedType ptype = (ParameterizedType)aType;
-            Type rawType = ptype.getRawType();
-            System.out.println("最外层<>前面那个类型 rawType："+rawType.getTypeName());
+            //Type rawType = ptype.getRawType();
+            //System.out.println("最外层<>前面那个类型 rawType："+rawType.getTypeName());
             Type type = ptype.getActualTypeArguments()[0];
             Gson gson = GsonUtil.createGson();
             JSONObject json = (JSONObject)obj;
@@ -373,7 +374,9 @@ public final class BeanUtil {
             return ObjectUtil.toSqlDate(obj);
         } else if (aType.equals(Timestamp.class)) {
             return ObjectUtil.toSqlTimestamp(obj);
-        } else if (aType.equals(String.class)) {
+        } else if (aType.equals(Time.class)) {
+            return ObjectUtil.toSqlTime(obj);
+        }else if (aType.equals(String.class)) {
             if (obj instanceof JSONObject) {
                 JSONObject jsonObject = (JSONObject) obj;
                 if (jsonObject.isEmpty()) {

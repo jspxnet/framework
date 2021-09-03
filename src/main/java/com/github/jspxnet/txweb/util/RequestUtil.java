@@ -638,9 +638,9 @@ public class RequestUtil {
             return null;
         }
         String[] result = null;
-        Enumeration enm = request.getParameterNames();
+        Enumeration<String> enm = request.getParameterNames();
         while (enm.hasMoreElements()) {
-            result = ArrayUtil.add(result, (String) enm.nextElement());
+            result = ArrayUtil.add(result, enm.nextElement());
         }
         return result;
     }
@@ -656,7 +656,7 @@ public class RequestUtil {
         if (request == null||name==null) {
             return false;
         }
-        Enumeration enm = request.getParameterNames();
+        Enumeration<String> enm = request.getParameterNames();
         while (enm.hasMoreElements()) {
             if (name.equals(enm.nextElement()))
             {
@@ -704,9 +704,9 @@ public class RequestUtil {
             return null;
         }
         String[] result = null;
-        Enumeration enm = request.getAttributeNames();
+        Enumeration<String> enm = request.getAttributeNames();
         while (enm.hasMoreElements()) {
-            result = ArrayUtil.add(result, (String) enm.nextElement());
+            result = ArrayUtil.add(result, enm.nextElement());
         }
         return result;
     }
@@ -825,7 +825,6 @@ public class RequestUtil {
     }
 
     static public String getSystem(String agent) {
-
         if (StringUtil.isNull(agent)) {
             return StringUtil.empty;
         }

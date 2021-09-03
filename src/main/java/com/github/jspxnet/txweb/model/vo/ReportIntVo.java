@@ -21,6 +21,7 @@ import java.io.Serializable;
  * date: 12-4-8
  * Time: 下午9:39
  */
+
 @Data
 @Table(caption = "整数统计报表", create = false)
 public class ReportIntVo implements Serializable {

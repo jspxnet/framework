@@ -32,7 +32,7 @@ public class JumpFilterView extends ActionSupport {
     private int promptly = 0;
 
     //安全判断表达式
-    private String[] expressions = ArrayUtil.emptyString;
+    private String[] expressions = ArrayUtil.EMPTY_STRING_ARRAY;
 
     private String url = StringUtil.empty;
 

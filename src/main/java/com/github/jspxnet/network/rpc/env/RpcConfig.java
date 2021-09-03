@@ -6,7 +6,11 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.network.rpc.model.route.RouteSession;
 import com.github.jspxnet.utils.IpUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +22,12 @@ import java.util.List;
  * date: 2020/6/21 0:46
  * description: rpc服务配置
  **/
+@Slf4j
 public class RpcConfig {
-    final static EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
+    final static private EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
+
     final static private String USE_NETTY_RPC = "useNettyRpc";
+
     final static private String NETTY_RPC_DEBUG = "nettyRpcDebug";
 
     //包的最大长度
@@ -43,7 +50,7 @@ public class RpcConfig {
     final static private String LOCAL_GROUP_COUNT = "rpc_localGroupCount";
 
     //服务器本机地址
-    final static private String MASTER_GROUP = "rpc_master.group";
+    final static private String MASTER_GROUP = "rpc_master_group";
 
     //服务器本机功能组名称
     final static private String GROUP_NAMES = "rpc_group_names";
@@ -106,7 +113,6 @@ public class RpcConfig {
         return ENV_TEMPLATE.getInt(ROUTES_SECOND, 5);
     }
 
-
     public String getLocalAddress() {
         return ENV_TEMPLATE.getString(LOCAL_ADDRESS);
     }
@@ -119,18 +125,19 @@ public class RpcConfig {
     public List<InetSocketAddress> getLocalAddressList() {
         String localAddressStr = getLocalAddress();
         List<InetSocketAddress> result = IpUtil.getSocketAddressList(localAddressStr);
-        if (getLocalIpAutoPublicIp()&&result!=null)
-        {
-            String ip = IpUtil.getPublicIP().getHostAddress();
-            if (!StringUtil.isNull(ip))
-            {
-                for (int i=0;i<result.size();i++)
-                {
+        if (getLocalIpAutoPublicIp()) {
+            InetAddress inetAddress = IpUtil.getPublicIp();
+            if (inetAddress == null) {
+                return result;
+            }
+
+            String ip = inetAddress.getHostAddress();
+            if (!StringUtil.isNull(ip)) {
+                for (int i = 0; i < result.size(); i++) {
                     InetSocketAddress address = result.get(i);
-                    if ("127.0.0.1".equalsIgnoreCase(IpUtil.getOnlyIp(address)))
-                    {
-                        address = new InetSocketAddress(ip,address.getPort());
-                        result.set(i,address);
+                    if ("127.0.0.1".equalsIgnoreCase(IpUtil.getOnlyIp(address))) {
+                        address = new InetSocketAddress(ip, address.getPort());
+                        result.set(i, address);
                     }
                 }
             }
@@ -138,23 +145,19 @@ public class RpcConfig {
         return result;
     }
 
-    public String[] getLocalGroupList() {
-        return StringUtil.split(ENV_TEMPLATE.getString(LOCAL_GROUP_NAME),StringUtil.SEMICOLON);
+    private String[] getLocalGroupList() {
+        return StringUtil.split(ENV_TEMPLATE.getString(LOCAL_GROUP_NAME), StringUtil.SEMICOLON);
     }
 
-    public String getMasterGroup(String groupName) {
-        return ENV_TEMPLATE.getString(MASTER_GROUP + StringUtil.UNDERLINE + groupName);
-    }
 
     public List<InetSocketAddress> getMasterGroupList(String groupName) {
-        String masterGroupStr = getMasterGroup(groupName);
+        String masterGroupStr = ENV_TEMPLATE.getString(MASTER_GROUP + StringUtil.UNDERLINE + groupName);
         return IpUtil.getSocketAddressList(masterGroupStr);
     }
 
     public String getServiceDiscoverMode() {
         return ENV_TEMPLATE.getString(SERVICE_DISCOVER_MODE);
     }
-
 
     public String getSecretKey() {
         return ENV_TEMPLATE.getString(Environment.secretKey, Environment.defaultDrug);
@@ -165,7 +168,7 @@ public class RpcConfig {
     }
 
     public String[] getGroupNames() {
-        return StringUtil.split(ENV_TEMPLATE.getString(GROUP_NAMES, "default"),StringUtil.SEMICOLON);
+        return StringUtil.split(ENV_TEMPLATE.getString(GROUP_NAMES, "default"), StringUtil.SEMICOLON);
     }
 
     public boolean getLocalIpAutoPublicIp() {
@@ -176,28 +179,69 @@ public class RpcConfig {
      *
      * @return 得到配置的路由表
      */
-    public List<RouteSession> getConfigRouteSessionList()
-    {
+    public List<RouteSession> createConfigRouteSessionList() {
         List<RouteSession> result = new ArrayList<>();
-        //初始化默认的路由表,就是自己的IP地址
+        //初始化默认的路由表,就是自己的IP地址---begin
         String[] groupNames = getLocalGroupList();
+        if (ObjectUtil.isEmpty(groupNames))
+        {
+            log.error("本地路由表分组没有配置");
+            return new ArrayList<>(0);
+        }
         List<InetSocketAddress> list = getLocalAddressList();
         int i = 0;
-        for (InetSocketAddress socketAddress:list)
-        {
+        for (InetSocketAddress socketAddress : list) {
             RouteSession routeSession = new RouteSession();
             routeSession.setSocketAddress(socketAddress);
             routeSession.setOnline(YesNoEnumType.YES.getValue());
             routeSession.setHeartbeatTimes(0);
-            if (groupNames.length>=list.size())
-            {
+            if (groupNames.length >= list.size()) {
                 routeSession.setGroupName(groupNames[i]);
-            } else
-            {
+                i++;
+            } else {
                 routeSession.setGroupName(groupNames[0]);
             }
             result.add(routeSession);
         }
+        //初始化默认的路由表,就是自己的IP地址---end
+
+        //在加上配置的集群ip表-----begin
+        result.addAll(createMasterRouteSessionList());
+        //在加上配置的集群ip表-----end
+        return result;
+    }
+
+    /**
+     * 配置的关联ip 路由表
+     * @return 配置的关联ip
+     */
+    public List<RouteSession> createMasterRouteSessionList() {
+        List<RouteSession> result = new ArrayList<>();
+        //在加上配置的集群ip表-----begin
+        String[] mastGroupName = getGroupNames();
+        if (ObjectUtil.isEmpty(mastGroupName))
+        {
+            log.error("集群路由表分组没有配置");
+            return new ArrayList<>(0);
+        }
+        int j = 0;
+        for (String groupName : mastGroupName) {
+            List<InetSocketAddress> addressGroupList = getMasterGroupList(groupName);
+            for (InetSocketAddress socketAddress : addressGroupList) {
+                RouteSession routeSession = new RouteSession();
+                routeSession.setSocketAddress(socketAddress);
+                routeSession.setOnline(YesNoEnumType.YES.getValue());
+                routeSession.setHeartbeatTimes(0);
+                if (mastGroupName.length >= addressGroupList.size()) {
+                    routeSession.setGroupName(mastGroupName[j]);
+                    j++;
+                } else {
+                    routeSession.setGroupName(mastGroupName[0]);
+                }
+                result.add(routeSession);
+            }
+        }
+        //在加上配置的集群ip表-----end
         return result;
     }
 }

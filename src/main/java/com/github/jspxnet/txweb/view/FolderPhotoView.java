@@ -104,7 +104,7 @@ public class FolderPhotoView extends ActionSupport {
         if (file.exists() && file.isDirectory()) {
             return FileUtil.getFileListSort(file.getPath(), find, type, order, getSetupPath());
         }
-        return new ArrayList<>();
+        return new ArrayList<>(0);
     }
 
 }

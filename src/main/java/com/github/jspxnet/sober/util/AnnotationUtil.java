@@ -351,7 +351,6 @@ public class AnnotationUtil {
         if (table == null) {
             return null;
         }
-
         soberTable.setName(table.name());  //得到数据库表名
         soberTable.setTableCaption(table.caption());//表的别名
         soberTable.setUseCache(table.cache()); //是否使用cache 默认使用

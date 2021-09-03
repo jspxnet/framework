@@ -43,8 +43,8 @@ public class TemplateView extends ActionSupport {
     private int currentPage = 0;
     private String term = StringUtil.empty;
     private String sort = "sortType:D;sortDate:D";
-    private String[] field = ArrayUtil.emptyString;
-    private String[] find = ArrayUtil.emptyString;
+    private String[] field = ArrayUtil.EMPTY_STRING_ARRAY;
+    private String[] find = ArrayUtil.EMPTY_STRING_ARRAY;
     private Serializable id;
 
     public TemplateView() {

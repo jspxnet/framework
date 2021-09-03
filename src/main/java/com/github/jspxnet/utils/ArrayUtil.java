@@ -25,7 +25,7 @@ import java.util.ArrayList;
  * @author chenYuan
  */
 public final class ArrayUtil {
-    public static final String[] emptyString = new String[0];
+    public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     //public static final int[] emptyInt = new int[0];
 

@@ -18,6 +18,10 @@ import java.util.regex.Pattern;
 import static java.util.regex.Pattern.compile;
 
 public class URLFilter extends HTMLFilter {
+    public URLFilter()
+    {
+
+    }
 
     public URLFilter(String s) {
         super(s);
