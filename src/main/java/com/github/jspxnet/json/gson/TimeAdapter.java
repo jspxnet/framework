@@ -1,34 +1,26 @@
 package com.github.jspxnet.json.gson;
 
-/**
- * Created by jspx.net
- *
- * @author: chenYuan
- * date: 2020/5/6 14:34
- * description: jspxpro
- */
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.sql.Timestamp;
+import java.sql.Time;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
- * date: 2020/5/6 15:27
- * description: gson适配器
- */
-public class TimestampAdapter implements JsonSerializer<Timestamp>, JsonDeserializer<Timestamp> {
+ * date: 2021/9/4 1:20
+ * description: jspx-framework
+ **/
+public class TimeAdapter implements JsonSerializer<Time>, JsonDeserializer<Time> {
 
     @Override
-    public Timestamp deserialize(JsonElement json, Type typeOfT,
+    public Time deserialize(JsonElement json, Type typeOfT,
                                  JsonDeserializationContext context) throws JsonParseException {
         if(json == null){
             return null;
         } else {
             try {
-                return Timestamp.valueOf(json.getAsString());
+                return Time.valueOf (json.getAsString());
             } catch (Exception e) {
                 return null;
             }
@@ -36,11 +28,12 @@ public class TimestampAdapter implements JsonSerializer<Timestamp>, JsonDeserial
     }
 
     @Override
-    public JsonElement serialize(Timestamp src, Type typeOfSrc,
+    public JsonElement serialize(Time src, Type typeOfSrc,
                                  JsonSerializationContext context) {
         String value = null;
         if(src != null){
-            value = src.toString();
+
+            value =  src.toString();
         }
         return new JsonPrimitive(value);
     }

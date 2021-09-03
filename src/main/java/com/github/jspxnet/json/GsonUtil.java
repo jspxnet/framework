@@ -1,12 +1,15 @@
 package com.github.jspxnet.json;
 
 import com.github.jspxnet.json.gson.*;
+import com.github.jspxnet.utils.DateUtil;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,6 +54,8 @@ public class GsonUtil {
                 .registerTypeAdapter(Double.class,new DoubleAdapter())
                 .registerTypeAdapter(BigDecimal.class,new BigDecimalAdapter())
                 .registerTypeAdapter(Date.class,new DateAdapter())
+                .registerTypeAdapter(TimeAdapter.class,new DateAdapter())
+                .registerTypeAdapter(TimestampAdapter.class,new DateAdapter())
                 .registerTypeAdapter(SocketAddress.class,new SocketAddressAdapter())
                 .registerTypeAdapter(InetSocketAddress.class,new SocketAddressAdapter())
                 .create();
@@ -96,4 +101,5 @@ public class GsonUtil {
         Gson gson = createGson();
         return gson.fromJson(json, new TypeToken<Map<String, T>>() {}.getType());
     }
+
 }
