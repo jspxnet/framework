@@ -17,8 +17,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,7 +30,7 @@ import java.util.HashMap;
  * Time: 10:34:50
  */
 public final  class FileSuffixUtil {
-    private static final Map<String, String> HEAD_TYPES = new HashMap<String, String>();
+    private static final Map<String, String> HEAD_TYPES = new HashMap<>(40);
 
     static {
         HEAD_TYPES.put("jpg", "ff");
@@ -45,13 +48,12 @@ public final  class FileSuffixUtil {
         HEAD_TYPES.put("jar", "50");
         HEAD_TYPES.put("zip", "50");
         HEAD_TYPES.put("a", "21");
-        HEAD_TYPES.put("ini", "ff");
+        HEAD_TYPES.put("INI", "ff");
         HEAD_TYPES.put("iso", "00");
         HEAD_TYPES.put("exe", "4d");
         HEAD_TYPES.put("com", "66");
         HEAD_TYPES.put("pyc", "b3");
         HEAD_TYPES.put("swftools", "25");
-        HEAD_TYPES.put("zip", "50");
         HEAD_TYPES.put("dll", "4d");
         HEAD_TYPES.put("msi", "d0");
         HEAD_TYPES.put("pl", "23");
@@ -138,7 +140,70 @@ public final  class FileSuffixUtil {
      * @return 得到文件头信息
      */
     static public String getFileHeadHex(String filename, int headLength) {
-        return StringUtil.encodeHex(getFileHead(filename, headLength), " ").trim();
+        return StringUtil.encodeHex(Objects.requireNonNull(getFileHead(filename, headLength)), " ").trim();
+    }
+
+    final private static float version = StringUtil.toFloat(System.getProperty("java.vm.specification.version"));
+
+    /**
+     * 得到文件的http  ContentType 类型
+     * @param fileName 文件
+     * @return  ContentType
+     */
+    public static String getContentType(File fileName)
+    {
+        if (fileName==null)
+        {
+            return  "application/octet-stream";
+        }
+        String fileType = FileUtil.getTypePart(fileName.getName());
+        String contentType = null;
+        if (version >= 1.7) {
+            try {
+                contentType = Files.probeContentType(Paths.get(fileName.getAbsolutePath()));
+            } catch (IOException e) {
+                e.printStackTrace();
+                contentType = null;
+            }
+        }
+
+        if (contentType!=null)
+         {
+            //为了兼容 jdk 1.6
+            if ("mp4".equalsIgnoreCase(fileType)) {
+                contentType = "video/mpeg4";
+            } else if ("bt".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-bittorrent";
+            } else if ("swftools".equalsIgnoreCase(fileType)) {
+                contentType = "application/swftools";
+            } else if ("xls".equalsIgnoreCase(fileType)) {
+                contentType = "application/vnd.ms-excel";
+            } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
+                contentType = "application/msword";
+            } else if ("mdb".equalsIgnoreCase(fileType)) {
+                contentType = "application/msaccess";
+            } else if ("ppt".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-ppt";
+            } else if ("xml".equalsIgnoreCase(fileType)) {
+                contentType = "application/xml";
+            } else if ("txt".equalsIgnoreCase(fileType) || "htm".equalsIgnoreCase(fileType) || "html".equalsIgnoreCase(fileType)) {
+                contentType = "text/html";
+            } else if ("zip".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-zip-compressed";
+            } else if ("rar".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-rar-compressed";
+            } else if (FileSuffixUtil.isImageSuffix(fileType)) {
+                contentType = "image/" + fileType;
+            } else if ("js".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-javascript";
+            } else {
+                contentType = "application/msword";
+            }
+        }
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+        return contentType;
     }
 
 }

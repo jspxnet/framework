@@ -5,6 +5,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.network.oss.CloudFileClient;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.table.CloudFileConfig;
+import com.github.jspxnet.utils.FileSuffixUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.obs.services.ObsClient;
@@ -44,10 +45,12 @@ public class HuaWeiObs extends BaseCloudFile implements CloudFileClient {
         if (StringUtil.isEmpty(cloudPath)) {
             cloudPath = fixCloudPath(file.getName());
         }
+        String contentType = FileSuffixUtil.getContentType(file);
         try (ObsClient obsClient = new ObsClient(config.getAccessKeyId(), config.getAccessKeySecret(), config.getEndpoint());
              InputStream inputStream = new FileInputStream(file)) {
             String hash = obsClient.base64Md5(new FileInputStream(file));
             ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(contentType);
             metadata.setContentEncoding(Environment.defaultEncode);
             metadata.setContentMd5(hash);
             metadata.setContentLength(file.length());

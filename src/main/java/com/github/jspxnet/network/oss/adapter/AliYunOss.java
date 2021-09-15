@@ -85,8 +85,10 @@ public class AliYunOss extends BaseCloudFile implements CloudFileClient {
             ossClient = new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(), config.getAccessKeySecret());
         }
         // 上传文件流。
+        String contentType = FileSuffixUtil.getContentType(file);
         try (InputStream input = new FileInputStream(file)) {
             ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(contentType);
             metadata.setContentEncoding(Environment.defaultEncode);
             String hash = EncryptUtil.getBase64Encode(FileUtil.getHash( new FileInputStream(file), "MD5"), EncryptUtil.DEFAULT);
             metadata.setContentMD5(hash);
