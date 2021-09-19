@@ -198,8 +198,44 @@ public class DownloadFileView extends ActionSupport {
         }
 
         String fileType = FileUtil.getTypePart(fileName.getName());
-        String contentType = FileSuffixUtil.getContentType(fileName);
-
+        String contentType = StringUtil.empty;
+        if (version >= 1.7) {
+            contentType = Files.probeContentType(Paths.get(fileName.getAbsolutePath()));
+        } else {
+            //为了兼容 jdk 1.6
+            if ("mp4".equalsIgnoreCase(fileType)) {
+                contentType = "video/mpeg4";
+            } else if ("bt".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-bittorrent";
+            } else if ("swftools".equalsIgnoreCase(fileType)) {
+                contentType = "application/swftools";
+            } else if ("xls".equalsIgnoreCase(fileType)) {
+                contentType = "application/vnd.ms-excel";
+            } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
+                contentType = "application/msword";
+            } else if ("mdb".equalsIgnoreCase(fileType)) {
+                contentType = "application/msaccess";
+            } else if ("ppt".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-ppt";
+            } else if ("xml".equalsIgnoreCase(fileType)) {
+                contentType = "application/xml";
+            } else if ("txt".equalsIgnoreCase(fileType) || "htm".equalsIgnoreCase(fileType) || "html".equalsIgnoreCase(fileType)) {
+                contentType = "text/html";
+            } else if ("zip".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-zip-compressed";
+            } else if ("rar".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-rar-compressed";
+            } else if (FileSuffixUtil.isImageSuffix(fileType)) {
+                contentType = "image/" + fileType;
+            } else if ("js".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-javascript";
+            } else {
+                contentType = "application/msword";
+            }
+        }
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
         response.reset();
 
         response.setHeader("framework", Environment.frameworkName + " " + Environment.VERSION);
