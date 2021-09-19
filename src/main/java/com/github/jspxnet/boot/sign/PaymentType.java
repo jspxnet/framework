@@ -6,6 +6,6 @@ public class PaymentType {
     public static final String KEY_AMOUNT = "amount";
 
 
-    public static final String KEY_points = "points";
+    public static final String KEY_POINTS = "points";
 
 }

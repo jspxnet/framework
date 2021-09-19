@@ -17,14 +17,14 @@ import com.github.jspxnet.utils.StringUtil;
  * date: 2007-3-26
  * Time: 15:05:29
  */
-public abstract class TXWeb {
+public final class TXWeb {
     private TXWeb() {
 
     }
 
     final public static String global = "global";
 
-    final public static String jspxSmsValidate = "jspx_sms_validate";
+    final public static String JSPX_SMS_VALIDATE = "jspx_sms_validate";
     final public static String jspxSmsValidateTime = "jspx_sms_validate_time";
 
     //final public static String jspxValidate = "jspx_validate";

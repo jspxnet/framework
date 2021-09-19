@@ -48,7 +48,6 @@ public final class HessianSerializableUtil {
             ho.setSerializerFactory(factory.getSerializerFactory());
             ho.writeObject(object);
             ho.flush();
-            //ho.close();
             return outputStream.toByteArray();
         }
     }

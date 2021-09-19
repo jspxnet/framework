@@ -34,7 +34,7 @@ import java.util.Objects;
 
 public class UploadedFile implements Serializable {
     private FileRenamePolicy renamePolicy = new JspxNetFileRenamePolicy();
-    private final static String crcFileName = "index.tmp";
+    private final static String CRC_FILE_NAME = "index.tmp";
     //变量名称
     private String name;
     //上传保存的目录
@@ -65,6 +65,10 @@ public class UploadedFile implements Serializable {
         this.original = original;
         this.contentType = contentType;
         this.fileType = fileType;
+    }
+
+    public void setRenamePolicy(FileRenamePolicy renamePolicy) {
+        this.renamePolicy = renamePolicy;
     }
 
     public String getName() {
@@ -141,7 +145,6 @@ public class UploadedFile implements Serializable {
         File oldFile = getFile();
         if (FileUtil.moveFile(oldFile, nFile, true)) {
             dir = FileUtil.mendPath(nFile.getParent());
-            //name = nFile.getName();
             fileName = nFile.getName();
             fileType = FileUtil.getTypePart(nFile);
             return true;
@@ -209,7 +212,7 @@ public class UploadedFile implements Serializable {
         if (result) {
             FileUtil.delete(oldFile);
             if (chunk == 0) {
-                File crcFile = new File(newDir, crcFileName);
+                File crcFile = new File(newDir, CRC_FILE_NAME);
                 AbstractWrite write = new WriteFile();
                 write.setFile(crcFile.getPath());
                 StringMap<String,String> valueMap = new StringMap<>();
@@ -242,7 +245,7 @@ public class UploadedFile implements Serializable {
             return null;
         }
         if (chunks <= 0) {
-            File crcFile = new File(newDir, crcFileName);
+            File crcFile = new File(newDir, CRC_FILE_NAME);
             AbstractRead read = new AutoReadTextFile();
             read.setFile(crcFile.getPath());
             StringMap<String, String> valueMap = new StringMap<>();
@@ -314,7 +317,7 @@ public class UploadedFile implements Serializable {
             return false;
         }
         if (chunks <= 0) {
-            File crcFile = new File(newDir, crcFileName);
+            File crcFile = new File(newDir, CRC_FILE_NAME);
             AbstractRead read = new AutoReadTextFile();
             read.setFile(crcFile.getPath());
 

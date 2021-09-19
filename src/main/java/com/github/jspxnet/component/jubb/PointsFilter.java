@@ -100,7 +100,7 @@ public class PointsFilter extends HTMLFilter {
             int payValue = StringUtil.toInt(lan);
             i++;
             pointsMap.put(i, payValue);
-            valueMap.put(PaymentType.KEY_points, payValue);
+            valueMap.put(PaymentType.KEY_POINTS, payValue);
             valueMap.put("sort", i);
             if (!isGuest && ValidUtil.isNumber(lan) && payMap.containsKey(i) && payMap.get(i) >= pointsMap.get(i)) {
                 matcher.appendReplacement(stringbuffer, matcher.group(3));

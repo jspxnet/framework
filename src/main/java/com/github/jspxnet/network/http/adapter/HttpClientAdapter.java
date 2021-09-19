@@ -716,7 +716,7 @@ public class HttpClientAdapter implements HttpClient {
     public void cleanHeaders() {
         defaultHeaders.clear();
     }
-
+/*
     public static void main(String[] args) throws Exception {
         HttpClient httpClient = new HttpClientAdapter();
         Map<String, String> param = new HashMap<>();
@@ -730,5 +730,5 @@ public class HttpClientAdapter implements HttpClient {
         // httpClient.setEncode("gb2312");
         String out = httpClient.build().getString("http://www.modoopark.com/");
         System.out.println(out);
-    }
+    }*/
 }

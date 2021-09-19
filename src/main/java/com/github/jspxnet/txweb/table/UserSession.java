@@ -115,11 +115,15 @@ public class UserSession implements IUserSession {
             {
                 continue;
             }
+            if (namespace.equals(role.getNamespace())&&organizeId.equals(role.getOrganizeId()))
+            {
+                return role;
+            }
             if (StringUtil.isEmpty(organizeId)&&namespace.equals(role.getNamespace()))
             {
                 return role;
             }
-            if (namespace.equals(role.getNamespace())&&organizeId.equals(role.getOrganizeId()))
+            if (StringUtil.isEmpty(organizeId)&&StringUtil.isNull(role.getOrganizeId()) &&namespace.equals(role.getNamespace()))
             {
                 return role;
             }

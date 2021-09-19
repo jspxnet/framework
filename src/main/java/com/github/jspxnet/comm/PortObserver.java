@@ -16,8 +16,8 @@ import java.util.*;
 public abstract class PortObserver implements Observer {
 
     //过滤重复的电话响铃，结果只要一次，周期为 1分半
-    private static final Map<String, Long> ringList = new HashMap<String, Long>();
-    public static final String CanSendNotification = "canSendNotification";
+    private static final Map<String, Long> RING_LIST = new HashMap<>();
+    public static final String CAN_SEND_NOTIFICATION = "canSendNotification";
     public static long lastSendTimeMillis = System.currentTimeMillis();
     public static long lastMessageInTimeMillis = System.currentTimeMillis();
     public static long sendWaitSecond = DateUtil.SECOND * 12;
@@ -66,7 +66,7 @@ public abstract class PortObserver implements Observer {
     public void update(Observable o, Object arg) {
         SerialComm serialComm = (SerialComm) o;
         String cmd = StringUtil.trim((String) arg);
-        if (!waiting && CanSendNotification.equalsIgnoreCase(cmd) && (System.currentTimeMillis() - lastSendTimeMillis > sendWaitSecond)) {
+        if (!waiting && CAN_SEND_NOTIFICATION.equalsIgnoreCase(cmd) && (System.currentTimeMillis() - lastSendTimeMillis > sendWaitSecond)) {
             try {
                 waiting = true;
                 lastSendTimeMillis = System.currentTimeMillis();
@@ -117,16 +117,16 @@ public abstract class PortObserver implements Observer {
             messageListNotification(serialComm, list);
         } else if (cmd.startsWith("RING") && cmd.contains("+CLIP")) {
             String phone = FormatParsing.getRingCode(cmd);
-            synchronized (ringList) {
-                for (String key : ringList.keySet()) {
-                    long timeMillis = ringList.get(key);
+            synchronized (RING_LIST) {
+                for (String key : RING_LIST.keySet()) {
+                    long timeMillis = RING_LIST.get(key);
                     if ((Math.abs(System.currentTimeMillis() - timeMillis) > DateUtil.MINUTE)) {
-                        ringList.remove(key);
+                        RING_LIST.remove(key);
                     }
                 }
             }
-            if (!ringList.containsKey(phone)) {
-                ringList.put(phone, System.currentTimeMillis());
+            if (!RING_LIST.containsKey(phone)) {
+                RING_LIST.put(phone, System.currentTimeMillis());
                 callNotification(serialComm, phone);
 
             }

@@ -389,7 +389,7 @@ public class ProcessTask extends Task {
 			b.append('[');
 			for (int i = 0; i < arr.length; i++) {
 				if (i > 0) {
-					b.append(", ");
+					b.append(",");
 				}
 				b.append(arr[i]);
 			}
@@ -407,9 +407,9 @@ public class ProcessTask extends Task {
 		b.append("Task[");
 		b.append("cmd=");
 		b.append(ProcessTask.listStrings(command));
-		b.append(", env=");
+		b.append(",env=");
 		b.append(ProcessTask.listStrings(envs));
-		b.append(", ");
+		b.append(",");
 		b.append("dir=");
 		b.append(directory);
 		b.append("]");

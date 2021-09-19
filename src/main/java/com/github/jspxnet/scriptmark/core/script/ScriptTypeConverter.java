@@ -259,7 +259,7 @@ public final class ScriptTypeConverter {
      * @throws Exception 异常
      */
     static public void getInjectVariables(ScriptRunner scriptEngine, TagNode tagNode, Writer out, String variableBegin,String variableSafeBegin, String variableEnd, char escapeVariable) throws Exception {
-        if (tagNode == null || tagNode.getTagName().equals(CommentBlock.noteTagBegin)) {
+        if (tagNode == null || tagNode.getTagName().equals(CommentBlock.NOTE_TAG_BEGIN)) {
             return;
         }
         String str = tagNode.getBody();

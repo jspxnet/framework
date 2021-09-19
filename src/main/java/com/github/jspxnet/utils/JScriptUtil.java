@@ -22,12 +22,12 @@ import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
  * 脚本执行
  */
 public final class JScriptUtil {
-    private final static ScriptRunner scriptRunner = new TemplateScriptEngine();
+    private final static ScriptRunner SCRIPT_RUNNER = new TemplateScriptEngine();
 
     public static String cleanWordTag(String html) {
-        scriptRunner.put("html", html);
+        SCRIPT_RUNNER.put("html", html);
         try {
-            return (String) scriptRunner.eval("cleanWordTag(html)", 0);
+            return (String) SCRIPT_RUNNER.eval("cleanWordTag(html)", 0);
         } catch (Exception e) {
             return html;
         }

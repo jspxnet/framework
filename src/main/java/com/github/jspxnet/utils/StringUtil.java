@@ -1903,7 +1903,7 @@ public class StringUtil {
                 //2014-06-25T05:01:04
                 format = DateUtil.UTC_SHORT_FORMAT;
             }
-        } else if (date.length() > 14 && date.length() > 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains(StringUtil.DOT)) {
+        } else if (date.length() > 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains(StringUtil.DOT)) {
             format = DateUtil.UTC_ST_MILLISECOND_FORMAT;
         }
         else if (date.length() > 14 && date.length() <= 19 && countMatches(date, "-") == 2 && countMatches(date, ":") == 2) {

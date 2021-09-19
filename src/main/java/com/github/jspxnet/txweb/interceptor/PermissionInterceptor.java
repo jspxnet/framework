@@ -196,7 +196,7 @@ public class PermissionInterceptor extends InterceptorSupport {
         if (StringUtil.isNull(pathNamespace)) {
             pathNamespace = actionProxy.getNamespace();
         }
-        //String actionName = actionInvocation.getActionName();
+
         String checkUrl = StringUtil.replace(StringUtil.BACKSLASH + pathNamespace + StringUtil.BACKSLASH + actionInvocation.getActionName(), "//", StringUtil.BACKSLASH);
 
         String organizeId = null;
@@ -210,9 +210,11 @@ public class PermissionInterceptor extends InterceptorSupport {
             permissionDAO.setOrganizeId(organizeId);
         }
 
+        //todo 待检查确认
         IRole role = userSession.getRole(permissionDAO.getNamespace(), permissionDAO.getOrganizeId());
         //自动分配调试权限 begin
-        if (role == null && !permission && (Environment.SYSTEM_ID == userSession.getUid() || userSession.getUid() == 1)) {
+        //role == null &&
+        if (!permission && (Environment.SYSTEM_ID == userSession.getUid() || userSession.getUid() == 1)) {
             //调试模式
             Role debugRole = createDebugRole();
             debugRole.setNamespace(permissionDAO.getNamespace());

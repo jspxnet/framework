@@ -150,8 +150,8 @@ public class XMLFormat {
 
             Object doc = method.invoke(builder, inputStream);
             //org.jdom.Document doc = builder.build(inputStream);
-            Class c = ClassUtil.loadClass("org.jdom.output.XMLOutputter");
-            Constructor c1 = c.getDeclaredConstructor(ClassUtil.loadClass("org.jdom.output.Format"));
+            Class<?> c = ClassUtil.loadClass("org.jdom.output.XMLOutputter");
+            Constructor<?> c1 = c.getDeclaredConstructor(ClassUtil.loadClass("org.jdom.output.Format"));
             c1.setAccessible(true);
             Object XmlOut = c1.newInstance(format);
             //org.jdom.output.XMLOutputter XmlOut = new org.jdom.output.XMLOutputter(format);

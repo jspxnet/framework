@@ -43,7 +43,7 @@ public class FusionChartsXmlResult extends ResultSupport {
         if (o == null) {
             return;
         }
-        String browserCache = action.getEnv(ActionEnv.BrowserCache);
+        String browserCache = action.getEnv(ActionEnv.BROWSER_CACHE);
         boolean noCache = (!StringUtil.isNull(browserCache) && ("false".equalsIgnoreCase(browserCache) || "0".equals(browserCache)));
         if (noCache) {
             response.setHeader("Pragma", "No-cache");

@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class WordStatCount {
     //the default hyphen collection.
-    final private static String regex = " '";
+    final private static String REGEX = " '";
 
 
     /**
@@ -27,7 +27,7 @@ public class WordStatCount {
      * @return the words as a Set by default comparator and hyphens
      */
     public Set<OneWord> getWordCount(String text) {
-        return getWordCount(text, regex, FREQUENCY_ORDER);
+        return getWordCount(text, REGEX, FREQUENCY_ORDER);
     }
 
 
@@ -47,7 +47,7 @@ public class WordStatCount {
      */
     public Set<com.github.jspxnet.lucene.wordcount.OneWord> getWordCount(String text, Comparator<com.github.jspxnet.lucene.wordcount.OneWord> order) {
 
-        return getWordCount(text, regex, order);
+        return getWordCount(text, REGEX, order);
     }
 
     /**

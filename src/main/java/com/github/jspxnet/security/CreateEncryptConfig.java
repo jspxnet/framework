@@ -9,7 +9,9 @@ import com.github.jspxnet.utils.ArrayUtil;
 
 import java.io.File;
 
-//创建加密的配置文件
+/**
+ * 创建加密的配置文件
+ */
 public class CreateEncryptConfig {
     public static void main(String[] arge) throws Exception {
 

@@ -90,7 +90,7 @@ public class TemplateResult extends ResultSupport {
         }
         //兼容Roc返回提示方式end
 
-        String contentType = action.getEnv(ActionEnv.ContentType);
+        String contentType = action.getEnv(ActionEnv.CONTENT_TYPE);
         if (!StringUtil.isNull(contentType)) {
             response.setContentType(contentType);
             String tempEncode = StringUtil.substringAfterLast(StringUtil.replace(contentType, " ", ""), "charset=");
@@ -111,9 +111,9 @@ public class TemplateResult extends ResultSupport {
         //请求编码end
 
         //处理下载情况 begin
-        String disposition = action.getEnv(ActionEnv.Content_Disposition);
+        String disposition = action.getEnv(ActionEnv.CONTENT_DISPOSITION);
         if (!StringUtil.isNull(disposition)) {
-            response.setHeader(ActionEnv.Content_Disposition, disposition);
+            response.setHeader(ActionEnv.CONTENT_DISPOSITION, disposition);
         }
         //处理下载情况 end
         //如果 resultConfig 里边有明确的返回，先使用明确的返回

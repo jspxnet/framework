@@ -236,7 +236,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         String cacheKey = null;
        if (soberFactory.isUseCache() && soberTable.isUseCache()) {
             StringBuilder termKey = new StringBuilder();
-            termKey.append("_").append(termText.toString()).append("_p_").append(projection == null ? "" : projection.toSqlString(soberFactory.getDatabaseType())).append("_g_").append(groupText.toString()).append("_o_").append(orderText.toString());
+            termKey.append("_").append(termText).append("_p_").append(projection == null ? "" : projection.toSqlString(soberFactory.getDatabaseType())).append("_g_").append(groupText).append("_o_").append(orderText);
             if (objectArray != null) {
                 for (Object po : objectArray) {
                     termKey.append(ObjectUtil.toString(po));
@@ -334,7 +334,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         valueMap.put(Dialect.KEY_FIELD_NAME, soberTable.getPrimary());
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
         valueMap.put(Dialect.KEY_TERM, termText.toString());
-        int result = 0;
+        int result;
         String sqlText = null;
         try {
             sqlText = dialect.processTemplate(Dialect.SQL_CRITERIA_DELETE, valueMap);
@@ -577,14 +577,12 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             }
-            if (!dialect.supportsLimit()) {
-                if (totalCount<24)
-                {
-                    statement.setFetchSize(Math.max(totalCount, 24));
-                } else
-                {
-                    statement.setFetchSize(50);
-                }
+            if (totalCount>10&&totalCount<24)
+            {
+                statement.setFetchSize(30);
+            } else if (totalCount>=24)
+            {
+                statement.setFetchSize(100);
             }
             statement.setMaxRows(iEnd);
             if (objectArray != null) {
@@ -754,14 +752,12 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             }
-            if (!dialect.supportsLimit()) {
-                if (totalCount<24)
-                {
-                    statement.setFetchSize(Math.max(totalCount, 24));
-                } else
-                {
-                    statement.setFetchSize(50);
-                }
+            if (totalCount>10&&totalCount<24)
+            {
+                statement.setFetchSize(30);
+            } else if (totalCount>=24)
+            {
+                statement.setFetchSize(100);
             }
             statement.setMaxRows(iEnd);
             if (objectArray != null) {

@@ -143,17 +143,25 @@ public class MemberTreeDAOImpl extends JdbcOperations implements MemberTreeDAO {
         return criteria.delete(false) > 0;
     }
 
+
+
     /**
+     *
      * @param uid 用户id
-     * @return boolean
+     * @param treeId 树id
+     * @return 是否删除
      */
     @Override
-    public boolean deleteForUid(long uid) {
+    public boolean deleteForUid(long uid,String treeId)
+    {
         Criteria criteria = createCriteria(MemberTree.class)
                 .add(Expression.eq("namespace", namespace))
                 .add(Expression.eq("uid", uid));
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.eq("organizeId", organizeId));
+        }
+        if (!StringUtil.isEmpty(treeId)) {
+            criteria = criteria.add(Expression.eq("treeId", treeId));
         }
         return criteria.delete(false) > 0;
     }

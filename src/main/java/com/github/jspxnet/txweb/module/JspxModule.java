@@ -88,7 +88,7 @@ public class JspxModule {
         envParams.put(ActionEnv.Key_ActionName, namePart);
         envParams.put(ActionEnv.Key_Namespace, namespace);
         envParams.put(ActionEnv.Key_RealPath, request.getServletPath());
-        envParams.put(ActionEnv.ContentType, "text/html; charset=" + request.getCharacterEncoding());
+        envParams.put(ActionEnv.CONTENT_TYPE, "text/html; charset=" + request.getCharacterEncoding());
         ///////////////////////////////////环境参数 end
         ////////////////////ajax begin
         WebConfigManager webConfigManager = TxWebConfigManager.getInstance();

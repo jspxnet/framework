@@ -81,7 +81,7 @@ public class ExcelResult extends ResultSupport {
         Action action = actionInvocation.getActionProxy().getAction();
         action.setActionResult(ActionSupport.NONE);
         HttpServletResponse response = action.getResponse();
-        String browserCache = action.getEnv(ActionEnv.BrowserCache);
+        String browserCache = action.getEnv(ActionEnv.BROWSER_CACHE);
         if (!StringUtil.isNull(browserCache) && !StringUtil.toBoolean(browserCache)) {
             response.setHeader("Pragma", "No-cache");
             response.setHeader("Cache-Control", "no-cache, must-revalidate");

@@ -142,7 +142,7 @@ public class ListPhrase implements Phrase {
             //如果在循环中碰到错误，保持已经处理的数据，并返回,如果抛出异常就不能保持处理结果了
             for (TagNode node : childNode) {
                 bc = env.runBlock(node, out);
-                if (bc == ContinueBlock.value || bc == BreakBlock.value) {
+                if (bc == ContinueBlock.VALUE || bc == BreakBlock.value) {
                     break;       //相当于conintue
                 }
             }

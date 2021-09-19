@@ -4,7 +4,6 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.lucene.ChineseAnalyzer;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.IRole;
 import com.github.jspxnet.txweb.IUserSession;
@@ -54,11 +53,6 @@ public class UEditorAdaptor extends ActionSupport {
     @Ref
     private UploadFileAction uploadFileAction;
 
-    /**
-     * 中文分词
-     */
-    @Ref
-    private ChineseAnalyzer chineseAnalyzer;
 
     /**
      * @return 得到配置允许上传的文件类型
@@ -207,6 +201,9 @@ public class UEditorAdaptor extends ActionSupport {
                 String[] allowFiles = (String[]) conf.get("allowFiles");
                 state = new FileManager(saveDirectory, Dispatcher.getRealPath(), allowFiles, count).listFile(start);
                 break;
+            default:{
+                break;
+            }
         }
         return state.toJSONString();
 
@@ -324,30 +321,7 @@ public class UEditorAdaptor extends ActionSupport {
             upFile.setIp(getRemoteAddr());
         }
         upFile.setHash(FileUtil.getFileGuid(file, UploadFileAction.hashType));
-        Object alreadyUploadFile = uploadFileDAO.getForHash(upFile.getHash());
-        IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;
-      /*  if (alreadyUploadFile!=null &&!StringUtil.isNull(upFile.getHash()) && alreadyUploadFile != null && checkUploadFile.getHash().equalsIgnoreCase(upFile.getHash())) {
-            if (checkUploadFile.getPutUid() != userSession.getUid()) {
-                //不同用户发布的，转存一份
-                checkUploadFile.setId(0);
-                checkUploadFile.setPutName(userSession.getName());
-                checkUploadFile.setPutUid(userSession.getUid());
-                checkUploadFile.setIp(getRemoteAddr());
-                checkUploadFile.setDownTimes(0);
-                uploadFileDAO.save(alreadyUploadFile);
-            }
-
-            File oldFile = UploadFileAction.getUploadFile(config, checkUploadFile.getFileName());
-            state = new BaseState(true, oldFile.getAbsolutePath());
-            state.putInfo("size", checkUploadFile.getFileSize());
-            state.putInfo("title", checkUploadFile.getTitle());
-            state.putInfo("url", checkUploadFile.getFileName());
-            state.putInfo("type", checkUploadFile.getFileType());
-            state.putInfo("original", "");
-            FileUtil.delete(file);
-            return state;
-
-        } else */if (uploadFileDAO != null) {
+        if (uploadFileDAO != null) {
 
             uploadFileDAO.save(upFile);
 

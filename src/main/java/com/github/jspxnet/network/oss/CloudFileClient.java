@@ -3,7 +3,6 @@ package com.github.jspxnet.network.oss;
 import com.github.jspxnet.network.oss.adapter.OssSts;
 
 import java.io.File;
-import java.io.InputStream;
 
 /**
  * Created by jspx.net

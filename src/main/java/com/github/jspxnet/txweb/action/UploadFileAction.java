@@ -69,6 +69,8 @@ public class UploadFileAction extends MultipartSupport {
 
     //分组变量名称
     final public static String GROUP_VAR_NAME = "groupName";
+    final public static String ORGANIZE_ID = "organizeId";
+
     final public static String THUMBNAIL_VAR_NAME = "thumbnail";
 
     final public static String USE_FAST_UPLOAD = "useFastUpload";
@@ -92,7 +94,6 @@ public class UploadFileAction extends MultipartSupport {
         this.editorUpload = editorUpload;
     }
 
-    private String organizeId = StringUtil.empty;
 
     public UploadFileAction() {
         setActionResult(NONE);
@@ -130,16 +131,11 @@ public class UploadFileAction extends MultipartSupport {
         return useFastUpload;
     }
 
-    @Param(caption = "机构id")
-    public void setOrganizeId(String organizeId) {
-        this.organizeId = organizeId;
-    }
-
     protected String getOrganizeId() {
         if (!StringUtil.isEmpty(uploadFileDAO.getOrganizeId())) {
             return uploadFileDAO.getOrganizeId();
         }
-        return organizeId;
+        return getString(ORGANIZE_ID);
     }
 
     /**
@@ -335,6 +331,7 @@ public class UploadFileAction extends MultipartSupport {
                   language.getLang(LanguageRes.success));
         }
         TXWebUtil.print(json.toString(), contentType, response);
+
     }
 
     private String fileName = StringUtil.empty;
@@ -445,6 +442,8 @@ public class UploadFileAction extends MultipartSupport {
         else
         {
             TXWebUtil.print(json.toString(4),contentType,response);
+            //其他方式不能释放,否则不会返回
+            json.clear();
         }
         uploadFileDAO.evict(uploadFileDAO.getClassType());
         if (multipartRequest!=null)
@@ -452,7 +451,6 @@ public class UploadFileAction extends MultipartSupport {
             multipartRequest.destroy();
         }
         multipartRequest = null;
-        json.clear();
         return NONE;
     }
 
@@ -551,6 +549,7 @@ public class UploadFileAction extends MultipartSupport {
                     }
                     return uploadObjArray;
                 } else {
+
                     //上传到云盘
                     CloudFileConfig cloudFileConfig = uploadFileDAO.getCloudFileConfig();
                     AssertException.isNull(cloudFileConfig, "云盘空间没有配置");
@@ -603,9 +602,10 @@ public class UploadFileAction extends MultipartSupport {
         //没有上传过的
         //已经上传成功的,还没有的上传上去的就上传上去
         Object[] result = new Object[2];
+        File file = uf.getFile();
+        upFile.setTempFilePath(file.getPath());
 
         if (FileSuffixUtil.isImageSuffix(uf.getFileType())) {
-            File file = uf.getFile();
             //如果是图片就得到宽高
             BufferedImage image = null;
             try {
@@ -667,6 +667,7 @@ public class UploadFileAction extends MultipartSupport {
                 thumbnailUploadFile.setTempFilePath(thumbnailFile.getPath());
                 thumbnailUploadFile.setOrganizeId(getOrganizeId());
                 thumbnailUploadFile.setNamespace(uploadFileDAO.getNamespace());
+                thumbnailUploadFile.setTempFilePath(thumbnailFile.getPath());
                 result[1] = thumbnailUploadFile;
             }
 
@@ -886,6 +887,7 @@ public class UploadFileAction extends MultipartSupport {
      * @param objects     上次的对象
      * @param chunkJson   分片上传信息
      * @param thumbnail   是否有缩图
+     * @param mobile      是否有手机
      * @param namespace   命名空间
      * @param message     消息
      * @return 返回json

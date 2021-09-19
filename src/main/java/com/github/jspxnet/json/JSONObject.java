@@ -416,7 +416,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                         }
 
                     } else if (result.getClass().isArray() || result instanceof Collection) {
-                        super.put(key, new JSONArray(result, includeSuperClass,key,dataField));
+                        super.put(displayKey, new JSONArray(result, includeSuperClass,key,dataField));
                     } else if (ClassUtil.isNumberType(result.getClass())) {
                         // 数字格式化
                         if (jsonField != null &&!StringUtil.isNull(jsonField.format())) {

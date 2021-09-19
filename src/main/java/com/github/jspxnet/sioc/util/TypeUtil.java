@@ -262,18 +262,7 @@ public final class TypeUtil {
         for (int i = 0; i < valueLists.size(); i++) {
             ValueElement ve = (ValueElement) valueLists.get(i);
             if (ve.isRef() && beanFactory != null) {
-  /*              Object obj = beanFactory.getBean(ve.getValue(), namespace);
-                if (obj!=null&&Proxy.isProxyClass(obj.getClass()))
-                {
-                    //代理创建的对象,类型会不匹配
-                    InvocationHandler iocInvocationHandler =  Proxy.getInvocationHandler(obj);
-                    if (iocInvocationHandler instanceof IocInvocationHandler)
-                    {
-                        IocInvocationHandler handler = (IocInvocationHandler)iocInvocationHandler;
-                        obj = handler.getProxyObject();
-                    }
-                }*/
-                result[i] = beanFactory.getBean(ve.getValue(), namespace);
+                  result[i] = beanFactory.getBean(ve.getValue(), namespace);
             } else {
                 result[i] = ve.getValue();
             }

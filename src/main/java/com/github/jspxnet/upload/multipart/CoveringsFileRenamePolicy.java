@@ -20,8 +20,7 @@ import java.io.File;
  */
 public class CoveringsFileRenamePolicy extends FileRenamePolicy {
 
-    // This method does not need transfer be synchronized because createNewFile()
-    // is atomic and used here transfer mark when a file name is chosen
+
     @Override
     public File rename(File f) {
         if (f.isFile()) {

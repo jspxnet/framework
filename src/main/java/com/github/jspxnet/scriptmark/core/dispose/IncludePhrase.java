@@ -47,7 +47,7 @@ public class IncludePhrase implements Phrase {
         IncludeBlock includeBlock = (IncludeBlock) tagNode;
         includeBlock.setCurrentPath(env.getCurrentPath());
         includeBlock.setRootDirectory(env.getRootDirectory());
-        final String[] jumpName = new String[]{IncludeBlock.name, IncludeBlock.caption, IncludeBlock.caption, IncludeBlock.encoding, IncludeBlock.file};
+        final String[] jumpName = new String[]{IncludeBlock.NAME, IncludeBlock.CAPTION, IncludeBlock.CAPTION, IncludeBlock.ENCODING, IncludeBlock.FILE};
         String[] attributeName = includeBlock.getAttributeName();
         if (!ArrayUtil.isEmpty(attributeName)) {
             for (String varName : attributeName) {

@@ -96,7 +96,7 @@ public class HtmlImgResult extends ResultSupport {
 
         String imgType = "png";
         //请求编码begin
-        String contentType = action.getEnv(ActionEnv.ContentType);
+        String contentType = action.getEnv(ActionEnv.CONTENT_TYPE);
         if (!StringUtil.isNull(contentType)) {
             response.setContentType(contentType);
             if (contentType.contains("jpg")) {

@@ -2,7 +2,9 @@ package com.github.jspxnet.network.oss.adapter;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.internal.OSSHeaders;
 import com.aliyun.oss.model.ObjectMetadata;
+import com.aliyun.oss.model.StorageClass;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.auth.sts.AssumeRoleRequest;
 import com.aliyuncs.auth.sts.AssumeRoleResponse;
@@ -92,7 +94,8 @@ public class AliYunOss extends BaseCloudFile implements CloudFileClient {
             metadata.setContentEncoding(Environment.defaultEncode);
             String hash = EncryptUtil.getBase64Encode(FileUtil.getHash( new FileInputStream(file), "MD5"), EncryptUtil.DEFAULT);
             metadata.setContentMD5(hash);
-            ossClient.putObject(config.getBucket(), cloudPath, input);
+            metadata.setHeader(OSSHeaders.OSS_STORAGE_CLASS, StorageClass.Standard.toString());
+            ossClient.putObject(config.getBucket(), cloudPath, input,metadata);
             return getDownloadUrlByKeyName(ossClient, cloudPath);
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,8 +112,17 @@ public class AliYunOss extends BaseCloudFile implements CloudFileClient {
      */
     @Override
     public boolean delete(String cloudPath) {
+        if (cloudPath==null)
+        {
+            return false;
+        }
+        if (cloudPath.startsWith(StringUtil.BACKSLASH))
+        {
+            cloudPath = cloudPath.substring(1);
+        }
         OSS ossClient = new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(), config.getAccessKeySecret());
         boolean exist = ossClient.doesObjectExist(config.getBucket(), cloudPath);
+
         if (!exist) {
             log.error("文件不存在,filePath={}", cloudPath);
             return false;

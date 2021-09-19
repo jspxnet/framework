@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 
-import static com.github.jspxnet.comm.PortObserver.CanSendNotification;
+import static com.github.jspxnet.comm.PortObserver.CAN_SEND_NOTIFICATION;
 
 /**
  * Created by chenyuan on 2015/9/2.
@@ -102,7 +102,7 @@ public abstract class HttpComm extends Observable implements SerialPortEventList
 
     public void canSendNotification() {
         setChanged();
-        notifyObservers(CanSendNotification);
+        notifyObservers(CAN_SEND_NOTIFICATION);
     }
 
     //------------------------------------------------------------------------------------------------------------------

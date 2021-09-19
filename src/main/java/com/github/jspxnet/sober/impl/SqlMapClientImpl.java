@@ -290,7 +290,13 @@ public class SqlMapClientImpl implements SqlMapClient {
             } else {
                 preparedStatement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             }
-
+            if (totalCount>10&&totalCount<24)
+            {
+                preparedStatement.setFetchSize(30);
+            } else if (totalCount>=24)
+            {
+                preparedStatement.setFetchSize(100);
+            }
             preparedStatement.setMaxRows(endRow);
             resultSet = preparedStatement.executeQuery();
 

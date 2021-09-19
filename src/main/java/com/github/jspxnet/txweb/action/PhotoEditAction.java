@@ -24,9 +24,9 @@ import java.util.Date;
 @HttpMethod(caption = "图片编辑器")
 public class PhotoEditAction extends UploadFileView {
     //支持的文件类型
-    private String[] fileTypes = new String[]{"gif", "jpg", "jpeg", "png", "bmp"};
-    private static final int maxHistory = 5;
-    private JSONObject json = new JSONObject();
+    private final String[] fileTypes = new String[]{"gif", "jpg", "jpeg", "png", "bmp"};
+    private static final int MAX_HISTORY = 5;
+    final private JSONObject json = new JSONObject();
 
     public PhotoEditAction() {
         json.put(SUCCESS, 0);
@@ -132,7 +132,7 @@ public class PhotoEditAction extends UploadFileView {
         StringList list = new StringList();
         list.setString(uploadFile.getHistory());
         list.add(history.getName());
-        if (list.size() > maxHistory) {
+        if (list.size() > MAX_HISTORY) {
             File deleteHistoryFile = new File(file.getParent(), list.removeFirst());
             if (deleteHistoryFile.exists() && deleteHistoryFile.isFile()) {
                 FileUtil.delete(deleteHistoryFile);
@@ -201,7 +201,7 @@ public class PhotoEditAction extends UploadFileView {
         StringList list = new StringList();
         list.setString(uploadFile.getHistory());
         list.add(history.getName());
-        if (list.size() > maxHistory) {
+        if (list.size() > MAX_HISTORY) {
             File deleteHistoryFile = new File(file.getParent(), list.removeFirst());
             if (deleteHistoryFile.exists() && deleteHistoryFile.isFile()) {
                 FileUtil.delete(deleteHistoryFile);
@@ -274,7 +274,7 @@ public class PhotoEditAction extends UploadFileView {
         StringList list = new StringList();
         list.setString(uploadFile.getHistory());
         list.add(history.getName());
-        if (list.size() > maxHistory) {
+        if (list.size() > MAX_HISTORY) {
             File deleteHistoryFile = new File(file.getParent(), list.removeFirst());
             if (deleteHistoryFile.exists() && deleteHistoryFile.isFile()) {
                 FileUtil.delete(deleteHistoryFile);
@@ -333,7 +333,7 @@ public class PhotoEditAction extends UploadFileView {
         StringList list = new StringList();
         list.setString(uploadFile.getHistory());
         list.add(history.getName());
-        if (list.size() > maxHistory) {
+        if (list.size() > MAX_HISTORY) {
             File deleteHistoryFile = new File(file.getParent(), list.removeFirst());
             if (deleteHistoryFile.exists() && deleteHistoryFile.isFile()) {
                 FileUtil.delete(deleteHistoryFile);
@@ -393,7 +393,7 @@ public class PhotoEditAction extends UploadFileView {
         StringList list = new StringList();
         list.setString(uploadFile.getHistory());
         list.add(history.getName());
-        if (list.size() > maxHistory) {
+        if (list.size() > MAX_HISTORY) {
             File deleteHistoryFile = new File(file.getParent(), list.removeFirst());
             if (deleteHistoryFile.exists() && deleteHistoryFile.isFile()) {
                 FileUtil.delete(deleteHistoryFile);
@@ -454,7 +454,7 @@ public class PhotoEditAction extends UploadFileView {
         StringList list = new StringList();
         list.setString(uploadFile.getHistory());
         list.add(history.getName());
-        if (list.size() > maxHistory) {
+        if (list.size() > MAX_HISTORY) {
             File deleteHistoryFile = new File(file.getParent(), list.removeFirst());
             if (deleteHistoryFile.exists() && deleteHistoryFile.isFile()) {
                 FileUtil.delete(deleteHistoryFile);
@@ -527,7 +527,7 @@ public class PhotoEditAction extends UploadFileView {
         StringList list = new StringList();
         list.setString(uploadFile.getHistory());
         list.add(history.getName());
-        if (list.size() > maxHistory) {
+        if (list.size() > MAX_HISTORY) {
             File deleteHistoryFile = new File(file.getParent(), list.removeFirst());
             if (deleteHistoryFile.exists() && deleteHistoryFile.isFile()) {
                 FileUtil.delete(deleteHistoryFile);

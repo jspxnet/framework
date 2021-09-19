@@ -51,7 +51,7 @@ public class ReadConfig extends DefaultHandler {
     private ResultConfigBean defaultResultBean = null; //默认返回
     private String namespace = StringUtil.empty;
 
-    private final static String TAG_alias = "alias";
+    private final static String TAG_ALIAS = "alias";
     private final static String TAG_pass = "pass";
 
 
@@ -161,7 +161,7 @@ public class ReadConfig extends DefaultHandler {
 
             groupMap.put(actionName, actionConfigBean);
             ///////////别名支持begin
-            String alias = attr.getValue(TAG_alias);
+            String alias = attr.getValue(TAG_ALIAS);
             if (!StringUtil.isNull(alias)) {
                 String[] aliasArray = StringUtil.split(StringUtil.replace(alias, "/", StringUtil.SEMICOLON));
                 for (String aa : aliasArray) {

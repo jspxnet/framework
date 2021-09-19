@@ -23,8 +23,6 @@ import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.config.SqlMapConfig;
 import com.github.jspxnet.sober.config.xml.*;
 import com.github.jspxnet.sober.dialect.Dialect;
-import com.github.jspxnet.sober.dialect.DmDialect;
-import com.github.jspxnet.sober.dialect.OracleDialect;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
@@ -129,19 +127,6 @@ public class SoberUtil {
         }
         return resultMap;
     }
-/*
-
-    public static Object getSingleValue(ResultSetMetaData resultSetMetaData, Dialect dialect, ResultSet resultSet) throws SQLException {
-        int numColumns = resultSetMetaData.getColumnCount();
-        Map<String, Object> resultMap = new HashMap<>();
-        for (int c = 1; c <= numColumns; c++) {
-            String colName = resultSetMetaData.getColumnLabel(c);
-            resultMap.put(colName, dialect.getResultSetValue(resultSet, c));
-        }
-        return resultMap;
-    }
-*/
-
 
     /**
      * 读取xml sql

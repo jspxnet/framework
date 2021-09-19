@@ -51,7 +51,7 @@ import java.util.*;
 public class HttpMessage {
 
     URL servlet;
-    Hashtable headers = null;
+    Hashtable<String,Object> headers = null;
 
     /**
      * Constructs a new HttpMessage that can be used transfer communicate with the
@@ -201,7 +201,7 @@ public class HttpMessage {
      */
     public void setHeader(String name, String value) {
         if (headers == null) {
-            headers = new Hashtable();
+            headers = new Hashtable<>();
         }
         headers.put(name, value);
     }
@@ -209,7 +209,7 @@ public class HttpMessage {
     // Send the contents of the headers hashtable transfer the server
     private void sendHeaders(URLConnection con) {
         if (headers != null) {
-            Enumeration enumm = headers.keys();
+            Enumeration<String> enumm = headers.keys();
             while (enumm.hasMoreElements()) {
                 String name = (String) enumm.nextElement();
                 String value = (String) headers.get(name);
@@ -228,7 +228,7 @@ public class HttpMessage {
      */
     public void setCookie(String name, String value) {
         if (headers == null) {
-            headers = new Hashtable();
+            headers = new Hashtable<>();
         }
         String existingCookies = (String) headers.get("Cookie");
         if (existingCookies == null) {
@@ -256,7 +256,7 @@ public class HttpMessage {
      */
     private String toEncodedString(Properties args) {
         StringBuilder buf = new StringBuilder();
-        Enumeration names = args.propertyNames();
+        Enumeration<?> names = args.propertyNames();
         while (names.hasMoreElements()) {
             String name = (String) names.nextElement();
             String value = args.getProperty(name);

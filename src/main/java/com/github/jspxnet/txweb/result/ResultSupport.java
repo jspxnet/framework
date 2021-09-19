@@ -219,7 +219,7 @@ public abstract class ResultSupport implements Result {
      * @param response 请求
      */
     static void checkCache(Action action, HttpServletResponse response) {
-        String browserCache = action.getEnv(ActionEnv.BrowserCache);
+        String browserCache = action.getEnv(ActionEnv.BROWSER_CACHE);
         if (!StringUtil.isNull(browserCache) && !StringUtil.toBoolean(browserCache)) {
             response.setHeader("Pragma", "No-cache");
             response.setHeader("Cache-Control", "no-cache,must-revalidate");

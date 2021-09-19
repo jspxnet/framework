@@ -86,7 +86,7 @@ public class HuaWeiObs extends BaseCloudFile implements CloudFileClient {
 
     public static void main(String[] args) throws Exception {
 
-       byte[] content =  FileUtil.readFileByte(new File("f:\\httpd.conf"));
+        byte[] content =  FileUtil.readFileByte(new File("f:\\httpd.conf"));
 
         String md5 = BinaryUtil.toBase64String(BinaryUtil.calculateMd5(content));
 

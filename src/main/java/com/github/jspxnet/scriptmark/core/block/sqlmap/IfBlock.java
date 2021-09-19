@@ -45,11 +45,11 @@ public class IfBlock extends TagNode implements BaseIfBlock {
     final private static String WHERE = "where";
     final private static String W = "w";
 
-    final private static String elseBegin = "else";
-    final private static String elseEnd = "/else";
+    final private static String ELSE_BEGIN = "else";
+    final private static String ELSE_END = "/else";
 
-    final private static String ifBegin = "if";
-    final private static String ifEnd = "/if";
+    final private static String IF_BEGIN = "if";
+    final private static String IF_END = "/if";
 
     public IfBlock() {
 
@@ -96,12 +96,12 @@ public class IfBlock extends TagNode implements BaseIfBlock {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (c == beginTag) {
-                if ((i + 4 < s.length()) && ifBegin.equalsIgnoreCase(s.substring(i + 1, i + 1 + ifBegin.length()))) {
+                if ((i + 4 < s.length()) && IF_BEGIN.equalsIgnoreCase(s.substring(i + 1, i + 1 + IF_BEGIN.length()))) {
                     inIf++;
                 }
 
                 //inif == 0 &&
-                if ((inIf == 0 && i + 6 < s.length()) && elseBegin.equalsIgnoreCase(s.substring(i + 1, i + 1 + elseBegin.length()))) {
+                if ((inIf == 0 && i + 6 < s.length()) && ELSE_BEGIN.equalsIgnoreCase(s.substring(i + 1, i + 1 + ELSE_BEGIN.length()))) {
                     inElse++;
                 }
             }
@@ -112,11 +112,11 @@ public class IfBlock extends TagNode implements BaseIfBlock {
             }
 
             if (c == endTag) {
-                if (i > ifEnd.length() && ifEnd.equalsIgnoreCase(s.substring(i - ifEnd.length(), i))) {
+                if (i > IF_END.length() && IF_END.equalsIgnoreCase(s.substring(i - IF_END.length(), i))) {
                     inIf--;
                 }
                 //inif == 0 &&
-                if (inIf == 0 && i > elseEnd.length() && elseEnd.equalsIgnoreCase(s.substring(i - elseEnd.length(), i))) {
+                if (inIf == 0 && i > ELSE_END.length() && ELSE_END.equalsIgnoreCase(s.substring(i - ELSE_END.length(), i))) {
                     inElse--;
                 }
             }
@@ -132,7 +132,7 @@ public class IfBlock extends TagNode implements BaseIfBlock {
     public List<TagNode> getElseBlock() {
         TemplateElement templateEl = new TemplateElement(getBody(false), getTemplate().getLastModified(), getTemplate().getConfigurable());
         Map<String, String> termTagMap = new HashMap<>();
-        termTagMap.put(elseBegin, ElseBlock.class.getName());
+        termTagMap.put(ELSE_BEGIN, ElseBlock.class.getName());
         return templateEl.getBlockTree(getBody(false), termTagMap);
     }
 }
