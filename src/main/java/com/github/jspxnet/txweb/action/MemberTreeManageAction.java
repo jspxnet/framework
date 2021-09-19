@@ -41,10 +41,10 @@ public class MemberTreeManageAction extends TreeView {
      *
      * @param uid 用户ID
      * @param nodeId 删除内容,删除条件,1:包含mid列表,并且是在自己管理的栏目中
-     * @throws Exception 异常
+     * @param treeId 树id
      */
     @Operate(caption = "保存")
-    public void save(@Param(caption = "uid") long uid,@Param(caption = "nodeId",max = 64) String[] nodeId,@Param(caption = "树ID") String treeId) throws Exception
+    public void save(@Param(caption = "uid") long uid,@Param(caption = "nodeId",max = 64) String[] nodeId,@Param(caption = "树ID") String treeId)
     {
         if (uid < 1) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needSelect));

@@ -456,8 +456,11 @@ public class UploadFileAction extends MultipartSupport {
 
     protected JSONObject chunkJson;
 
+
     /**
+     *
      * @param userSession 用户信息
+     * @param thumbnail 是否生成缩图
      * @return 上传的数据列表
      * @throws Exception 异常
      */
@@ -887,7 +890,6 @@ public class UploadFileAction extends MultipartSupport {
      * @param objects     上次的对象
      * @param chunkJson   分片上传信息
      * @param thumbnail   是否有缩图
-     * @param mobile      是否有手机
      * @param namespace   命名空间
      * @param message     消息
      * @return 返回json
