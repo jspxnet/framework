@@ -11,7 +11,6 @@ package com.github.jspxnet.txweb.result;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.io.IoUtil;
-import com.github.jspxnet.io.StringOutputStream;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.load.Source;
 import com.github.jspxnet.scriptmark.load.StringSource;
@@ -29,7 +28,6 @@ import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.utils.StringUtil;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Map;
@@ -60,9 +58,9 @@ public class MarkdownResult extends ResultSupport {
 
 
         //处理下载情况 begin
-        String disposition = action.getEnv(ActionEnv.Content_Disposition);
+        String disposition = action.getEnv(ActionEnv.CONTENT_DISPOSITION);
         if (!StringUtil.isNull(disposition)) {
-            response.setHeader(ActionEnv.Content_Disposition, disposition);
+            response.setHeader(ActionEnv.CONTENT_DISPOSITION, disposition);
         }
         //处理下载情况 end
 
@@ -120,7 +118,7 @@ public class MarkdownResult extends ResultSupport {
         valueMap.put("content", ScriptMarkUtil.getMarkdownHtml(mdFileSource.getSource()));
 
         //请求编码begin
-        String contentType = action.getEnv(ActionEnv.ContentType);
+        String contentType = action.getEnv(ActionEnv.CONTENT_TYPE);
         if (!StringUtil.isNull(contentType)) {
             response.setContentType(contentType);
             String tempEncode = StringUtil.substringAfterLast(StringUtil.replace(contentType, " ", ""), "charset=");

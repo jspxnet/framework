@@ -24,6 +24,7 @@ import com.github.jspxnet.txweb.validator.Validator;
 import com.github.jspxnet.txweb.view.ValidatorView;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -38,7 +39,7 @@ import java.util.regex.Pattern;
  * author chenyuan
  */
 @Slf4j
-public class ParamUtil {
+public final class ParamUtil {
 
     //包含特殊字符的符号,安全过滤掉的符号 / 表示路径会用
     private final static char[] incertitudeChars = {
@@ -59,7 +60,7 @@ public class ParamUtil {
 
 
     final static public String variableBegin = "${";
-    final static public  String variableEnd = "}";
+    final static public String variableEnd = "}";
 
     private ParamUtil() {
 
@@ -129,7 +130,7 @@ public class ParamUtil {
      * @return 是否安全
      */
     public static boolean isSafe(String str, long minLength, long maxLength, SafetyEnumType level) {
-        if (StringUtil.isEmpty(str)&&minLength<=0 || SafetyEnumType.NONE.equals(level)) {
+        if (StringUtil.isEmpty(str) && minLength <= 0 || SafetyEnumType.NONE.equals(level)) {
             return true;
         }
         if (str.length() > maxLength) {
@@ -147,8 +148,7 @@ public class ParamUtil {
                 return false;
             }
         }
-        if (SafetyEnumType.LOW.equals(level))
-        {
+        if (SafetyEnumType.LOW.equals(level)) {
             return true;
         }
         //2
@@ -174,7 +174,7 @@ public class ParamUtil {
      * @param number 数字
      * @param min    最小
      * @param max    最大
-     * @return 是否满足,在这个范围类返回 true
+     * @return 是否满足, 在这个范围类返回 true
      */
     public static boolean isSafe(Number number, int min, long max) {
         if (number == null) {
@@ -191,7 +191,7 @@ public class ParamUtil {
      * @param level     安全等级
      * @return 过滤得到的字符串
      */
-    public static String getSafeFilter(String str, int maxLength,  SafetyEnumType level) {
+    public static String getSafeFilter(String str, int maxLength, SafetyEnumType level) {
         if (str == null) {
             return StringUtil.empty;
         }
@@ -201,7 +201,7 @@ public class ParamUtil {
         String result = HtmlUtil.deleteHtml(str);
         //1
         for (char c : incertitudeChars) {
-            result = StringUtil.replaceIgnoreCase(result, c + "", StringUtil.empty);
+            result = StringUtil.replaceIgnoreCase(result, c + StringUtil.empty, StringUtil.empty);
         }
         if (level.getValue() < SafetyEnumType.LOW.getValue()) {
             return result;
@@ -214,8 +214,7 @@ public class ParamUtil {
         for (String safetyUrlKey : safetyFilterKeys) {
             result = StringUtil.replaceIgnoreCase(result, safetyUrlKey, StringUtil.halfToFull(safetyUrlKey));
         }
-        if (level.getValue() < SafetyEnumType.MIDDLE.getValue())
-        {
+        if (level.getValue() < SafetyEnumType.MIDDLE.getValue()) {
             return result;
         }
         //3
@@ -266,7 +265,7 @@ public class ParamUtil {
                         //验证参数
                         paramObj[i] = BeanUtil.getTypeValue(paramsArray.get(i), pType);
                     }
-                    isRequired( action,  param,  paramName, paramObj[i]);
+                    isRequired(action, param, paramName, paramObj[i]);
                     if (action.hasFieldInfo()) {
                         return paramObj;
                     }
@@ -304,14 +303,13 @@ public class ParamUtil {
                             action.addFieldInfo(Environment.warningInfo, "错误的访问路径");
                             return null;
                         }
-                        for (int p = 0; p < values.length&&p<paths.length; p++) {
+                        for (int p = 0; p < values.length && p < paths.length; p++) {
                             if (paths[i].contains("{" + varName + "}")) {
                                 if (ClassUtil.isNumberType(pType) && StringUtil.isStandardNumber(values[i])) {
                                     if (isSafe(ObjectUtil.toLong(values[i]), pathVar.min(), pathVar.max())) {
                                         paramObj[i] = BeanUtil.getTypeValue(values[i], pType);
-                                    } else
-                                    {
-                                        String message = StringUtil.isEmpty(pathVar.message())?("参数值域不正确,["+pathVar.min()+"-"+ pathVar.max()+"]"):pathVar.message();
+                                    } else {
+                                        String message = StringUtil.isEmpty(pathVar.message()) ? ("参数值域不正确,[" + pathVar.min() + "-" + pathVar.max() + "]") : pathVar.message();
                                         action.addFieldInfo(Environment.errorInfo, message);
                                         return null;
                                     }
@@ -319,10 +317,8 @@ public class ParamUtil {
                                     long max = pathVar.max() == Integer.MAX_VALUE ? 50000 : pathVar.max();
                                     if (isSafe(values[i], pathVar.min(), max, pathVar.level())) {
                                         paramObj[i] = BeanUtil.getTypeValue(values[i], pType);
-                                    }
-                                    else
-                                    {
-                                        String message = StringUtil.isEmpty(pathVar.message())?("参数值域不正确,["+pathVar.min()+"-"+ pathVar.max()+"]"):pathVar.message();
+                                    } else {
+                                        String message = StringUtil.isEmpty(pathVar.message()) ? ("参数值域不正确,[" + pathVar.min() + "-" + pathVar.max() + "]") : pathVar.message();
                                         action.addFieldInfo(Environment.errorInfo, message);
                                         return null;
                                     }
@@ -372,46 +368,36 @@ public class ParamUtil {
                     Param param = (Param) annotation;
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType)) {
                         if (paramsJson != null && paramsJson.containsKey(paramName)) {
-                            if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
-                            {
-                               // paramsJson.containsKey(Environment.rocParams)
+                            if (ParamModeType.RocMode.getValue() == param.modeType().getValue()) {
+                                // paramsJson.containsKey(Environment.rocParams)
                                 paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
                             }
-                            if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
-                            {
-                                JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
-                                if (jsonObject!=null)
-                                {
+                            if (ParamModeType.JsonMode.getValue() == param.modeType().getValue() && pType.equals(JSONObject.class)) {
+                                JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                if (jsonObject != null) {
                                     paramObj[i] = jsonObject;
                                 }
                             }
-                            if (ParamModeType.SpringMode.getValue()==param.modeType().getValue())
-                            {
-                                JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
-                                if (jsonObject!=null)
-                                {
+                            if (ParamModeType.SpringMode.getValue() == param.modeType().getValue()) {
+                                JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                if (jsonObject != null) {
                                     paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
                                 }
                             }
 
                         } else {
-                            if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
-                            {
+                            if (ParamModeType.RocMode.getValue() == param.modeType().getValue()) {
                                 paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
                             }
-                            if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
-                            {
-                                JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
-                                if (jsonObject!=null)
-                                {
+                            if (ParamModeType.JsonMode.getValue() == param.modeType().getValue() && pType.equals(JSONObject.class)) {
+                                JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                if (jsonObject != null) {
                                     paramObj[i] = jsonObject;
                                 }
                             }
-                            if (ParamModeType.SpringMode.getValue()==param.modeType().getValue())
-                            {
-                                JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
-                                if (jsonObject!=null)
-                                {
+                            if (ParamModeType.SpringMode.getValue() == param.modeType().getValue()) {
+                                JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                if (jsonObject != null) {
                                     paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
                                 }
                             }
@@ -428,16 +414,14 @@ public class ParamUtil {
                         paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
                     }
                     //-------------
-                    isRequired( action,  param,  paramName, paramObj[i]);
+                    isRequired(action, param, paramName, paramObj[i]);
                     if (action.hasFieldInfo()) {
                         return paramObj;
                     }
-                    if (paramObj[i] == null&&!StringUtil.empty.equals(param.value()))
-                    {
+                    if (paramObj[i] == null && !StringUtil.empty.equals(param.value())) {
                         //放入默认参数
-                        paramObj[i] = BeanUtil.getTypeValue(param.value(), pType);
-                    } else if (paramObj[i]==null && ClassUtil.isBaseNumberType(pType))
-                    {
+                        paramObj[i] = getDefaultParam(param, pType);
+                    } else if (paramObj[i] == null && ClassUtil.isBaseNumberType(pType)) {
                         paramObj[i] = 0;
                     }
 
@@ -464,13 +448,12 @@ public class ParamUtil {
                         }
                         String[] values = StringUtil.split(checkPath, StringUtil.BACKSLASH);
                         String[] paths = StringUtil.split(operatePath, StringUtil.BACKSLASH);
-                        if (ArrayUtil.isEmpty(values) || ArrayUtil.isEmpty(paths))
-                        {
-                            String message = StringUtil.isEmpty(pathVar.message())?("错误的访问路径"):pathVar.message();
+                        if (ArrayUtil.isEmpty(values) || ArrayUtil.isEmpty(paths)) {
+                            String message = StringUtil.isEmpty(pathVar.message()) ? ("错误的访问路径") : pathVar.message();
                             action.addFieldInfo(Environment.errorInfo, message);
                             return null;
                         }
-                        for (int p = 0; p < values.length&&p<paths.length; p++) {
+                        for (int p = 0; p < values.length && p < paths.length; p++) {
                             if (paths[i].contains("{" + pathVar.name() + "}")) {
                                 paramObj[i] = BeanUtil.getTypeValue(values[i], pType);
                             }
@@ -519,40 +502,30 @@ public class ParamUtil {
                     Param param = (Param) annotation;
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
 
-                        if (ParamModeType.RocMode.getValue()==param.modeType().getValue())
-                        {
-                            JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                        if (ParamModeType.RocMode.getValue() == param.modeType().getValue()) {
+                            JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
                             boolean isRoc = isRocRequest(jsonObject);
-                            if (isRoc)
-                            {
+                            if (isRoc) {
                                 paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
-                            } else
-                            {
-                                if (jsonObject!=null)
-                                {
+                            } else {
+                                if (jsonObject != null) {
                                     paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
-                                } else
-                                {
+                                } else {
                                     paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
                                 }
                             }
                         }
-                        if (ParamModeType.JsonMode.getValue()==param.modeType().getValue()&&pType.equals(JSONObject.class))
-                        {
-                            JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
-                            if (jsonObject!=null)
-                            {
+                        if (ParamModeType.JsonMode.getValue() == param.modeType().getValue() && pType.equals(JSONObject.class)) {
+                            JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                            if (jsonObject != null) {
                                 paramObj[i] = jsonObject;
                             }
                         }
-                        if (ParamModeType.SpringMode.getValue()==param.modeType().getValue())
-                        {
-                            JSONObject jsonObject = (JSONObject)action.getEnv().get(ActionEnv.Key_CallRocJsonData);
-                            if (jsonObject!=null)
-                            {
+                        if (ParamModeType.SpringMode.getValue() == param.modeType().getValue()) {
+                            JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                            if (jsonObject != null) {
                                 paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
-                            } else
-                            {
+                            } else {
                                 paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
                             }
                         }
@@ -570,14 +543,13 @@ public class ParamUtil {
                             paramObj[i] = BeanUtil.getTypeValue(action.getString(paramName, false), pType);
                         }
                         //放入默认参数
-                        isRequired( action,  param,  paramName, paramObj[i]);
+                        isRequired(action, param, paramName, paramObj[i]);
                         if (action.hasFieldInfo()) {
                             return paramObj;
                         }
-                        if (paramObj[i] == null)
-                        {
+                        if (paramObj[i] == null) {
                             //放入默认参数
-                            paramObj[i] = BeanUtil.getTypeValue(param.value(), pType);
+                            paramObj[i] = getDefaultParam(param, pType);
                         }
                     }
                 }
@@ -611,7 +583,7 @@ public class ParamUtil {
                         String[] values = StringUtil.split(checkPath, StringUtil.BACKSLASH);
                         String[] paths = StringUtil.split(operatePath, StringUtil.BACKSLASH);
                         if (ArrayUtil.isEmpty(values) || ArrayUtil.isEmpty(paths)) {
-                            String message = StringUtil.isEmpty(pathVar.message())?("错误的访问路径"):pathVar.message();
+                            String message = StringUtil.isEmpty(pathVar.message()) ? ("错误的访问路径") : pathVar.message();
                             action.addFieldInfo(Environment.errorInfo, message);
                             return null;
                         }
@@ -644,14 +616,14 @@ public class ParamUtil {
      * @param action    action
      * @param exeMethod 执行方法
      * @param value     参数
-     * @return  表示不安全
+     * @return 表示不安全
      */
     public static boolean isMethodParamSafe(Action action, Method exeMethod, Object[] value) {
         if (value == null) {
             return true;
         }
         Type[] pTypes = exeMethod.getGenericParameterTypes();
-             //i 表示第几个参数，下边完成参数组装
+        //i 表示第几个参数，下边完成参数组装
         Parameter[] parameters = exeMethod.getParameters();
         for (int i = 0; i < parameters.length; i++) {
             Annotation[] annotations = parameters[i].getDeclaredAnnotations();
@@ -698,10 +670,8 @@ public class ParamUtil {
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            isSafeParam(action,param,paramName,value[i]);
+                        } else {
+                            isSafeParam(action, param, paramName, value[i]);
                             if (action.hasFieldInfo()) {
                                 return false;
                             }
@@ -727,16 +697,16 @@ public class ParamUtil {
      *
      * @param action    action
      * @param param     参数
-     * @param paramName  参数名称
+     * @param paramName 参数名称
      * @param theParam  当前参数
-     *  判断是否必填 false, 为不安全
+     *                  判断是否必填 false, 为不安全
      */
     public static void isRequired(Action action, Param param, String paramName, Object theParam) {
         if (!param.required()) {
             return;
         }
-        if (param.required()&&StringUtil.isEmpty(param.value())&&theParam==null)
-        {
+        param.required();
+        if (StringUtil.isEmpty(param.value()) && theParam == null) {
             if (StringUtil.isNull(param.message())) {
                 action.addFieldInfo(Environment.warningInfo, paramName + "参数不允许空");
             } else {
@@ -748,13 +718,14 @@ public class ParamUtil {
     //------------------------------------------------------------------------------------------------
 
     /**
-     *  判断是否安全
-     * @param action action
-     * @param param 参数
+     * 判断是否安全
+     *
+     * @param action    action
+     * @param param     参数
      * @param paramName 参数名称
-     * @param theParam 当前参数
+     * @param theParam  当前参数
      */
-    public static void isSafeParam(Action action,Param param, String paramName, Object theParam) {
+    public static void isSafeParam(Action action, Param param, String paramName, Object theParam) {
         if (theParam == null) {
             return;
         }
@@ -762,7 +733,7 @@ public class ParamUtil {
             checkSafe(action, param, paramName, theParam.toString());
         }
 
-        if (ClassUtil.isNumberType(theParam.getClass())||theParam instanceof Number) {
+        if (ClassUtil.isNumberType(theParam.getClass()) || theParam instanceof Number) {
             checkSafe(action, param, paramName, BigDecimal.valueOf(ObjectUtil.toDouble(theParam)));
         }
     }
@@ -772,15 +743,14 @@ public class ParamUtil {
      *
      * @param action    action
      * @param param     安全配置
-     * @param paramName      参数名称
+     * @param paramName 参数名称
      * @param theParam  参数值
      *                  返回是否安全
      */
-    private static void checkSafe(Action action,Param param, String paramName, String theParam) {
+    private static void checkSafe(Action action, Param param, String paramName, String theParam) {
         //配置不检查
 
-        if (SafetyEnumType.NONE.equals(param.level()))
-        {
+        if (SafetyEnumType.NONE.equals(param.level())) {
             return;
         }
         String[] strEnum = null;
@@ -819,7 +789,7 @@ public class ParamUtil {
      * @param theParam  参数值
      *                  返回是否安全
      */
-    private static void checkSafe(Action action,  Param param, String paramName, BigDecimal theParam) {
+    private static void checkSafe(Action action, Param param, String paramName, BigDecimal theParam) {
         //配置不检查
         if (SafetyEnumType.NONE.equals(param.level())) {
             return;
@@ -838,14 +808,13 @@ public class ParamUtil {
                 e.printStackTrace();
             }
         }
-
         if (!ArrayUtil.isEmpty(strEnum) && !ArrayUtil.contains(strEnum, theParam.intValue())) {
-            String message = StringUtil.isEmpty(param.message()) ? (paramName+  " ,参数不在允许范围") : param.message();
+            String message = StringUtil.isEmpty(param.message()) ? (paramName + " ,参数不在允许范围") : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
             return;
         }
 
-        if (theParam.compareTo(new BigDecimal(param.min()))<0 || theParam.compareTo(new BigDecimal(param.max()))>0) {
+        if (theParam.compareTo(new BigDecimal(param.min())) < 0 || theParam.compareTo(new BigDecimal(param.max())) > 0) {
             String message = StringUtil.isEmpty(param.message()) ? (paramName + " ,参数不在允许范围") : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
         }
@@ -945,56 +914,42 @@ public class ParamUtil {
                 e.printStackTrace();
             }
             Class<?> pType = field.getType();
-            if (!StringUtil.isEmpty(classParam.value()) && (value == null || ClassUtil.isBaseNumberType(pType)&&0==((Number)value).intValue())) {
-                value = BeanUtil.getTypeValue(classParam.value(),pType);
+            if (!StringUtil.isEmpty(classParam.value()) && (value == null || ClassUtil.isBaseNumberType(pType) && 0 == ((Number) value).intValue())) {
+                value = BeanUtil.getTypeValue(classParam.value(), pType);
                 BeanUtil.setFieldValue(obj, field.getName(), value);
             }
 
-            if (value!=null)
-            {
-                if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType))
-                {
-                    isNullSetDefaultValue( action,  classParam,  paramName, value);
-                    if (action.hasFieldInfo())
-                    {
+            if (value != null) {
+                if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
+                    isNullSetDefaultValue(action, classParam, paramName, value);
+                    if (action.hasFieldInfo()) {
                         return;
                     }
-                } else
-                if (ClassUtil.isArrayType(pType))
-                {
+                } else if (ClassUtil.isArrayType(pType)) {
                     int len = Array.getLength(value);
-                    for (int i=0;i<len;i++)
-                    {
-                        Object v = Array.get(value,i);
-                        isNullSetDefaultValue( action,  classParam,  paramName, v);
-                        if (action.hasFieldInfo())
-                        {
+                    for (int i = 0; i < len; i++) {
+                        Object v = Array.get(value, i);
+                        isNullSetDefaultValue(action, classParam, paramName, v);
+                        if (action.hasFieldInfo()) {
                             return;
                         }
                     }
-                } else
-                if (ClassUtil.isCollection(pType))
-                {
-                    Collection<?> collection = (Collection<?>)value;
-                    for (Object v:collection)
-                    {
-                        isNullSetDefaultValue( action,  classParam,  paramName, v);
-                        if (action.hasFieldInfo())
-                        {
+                } else if (ClassUtil.isCollection(pType)) {
+                    Collection<?> collection = (Collection<?>) value;
+                    for (Object v : collection) {
+                        isNullSetDefaultValue(action, classParam, paramName, v);
+                        if (action.hasFieldInfo()) {
                             return;
                         }
                     }
-                }
-                else
-                {
-                    isSafeParam(action,classParam,field.getName(),value);
+                } else {
+                    isSafeParam(action, classParam, field.getName(), value);
                     if (action.hasFieldInfo()) {
                         return;
                     }
                 }
-            } else
-            {
-                isRequired(action,classParam,field.getName(),value);
+            } else {
+                isRequired(action, classParam, field.getName(), value);
             }
         }
     }
@@ -1058,26 +1013,46 @@ public class ParamUtil {
 
     /**
      * 判断是否为Roc请求方式
+     *
      * @param json json
-     * @return  判断是否为Roc请求方式
+     * @return 判断是否为Roc请求方式
      */
-    public static boolean isRocRequest(JSONObject json)
-    {
-        if (ObjectUtil.isEmpty(json))
-        {
+    public static boolean isRocRequest(JSONObject json) {
+        if (ObjectUtil.isEmpty(json)) {
             return false;
         }
-        if (json.containsKey(Environment.Protocol))
-        {
+        if (json.containsKey(Environment.Protocol)) {
             String protocol = json.getString(Environment.Protocol);
             return protocol != null && protocol.contains("roc");
         }
-        if (json.containsKey(Environment.rocVersion)&&json.containsKey(Environment.rocMethod))
-        {
+        if (json.containsKey(Environment.rocVersion) && json.containsKey(Environment.rocMethod)) {
             String varsion = json.getString(Environment.rocVersion);
             return varsion != null && varsion.equals(Environment.jspxNetRocVersion);
         }
 
         return false;
     }
+
+    /**
+     * 得到默认参数
+     *
+     * @param param 参数标签
+     * @param pType 参数类型
+     * @return 返回值
+     */
+    public static Object getDefaultParam(Param param, Type pType) {
+        String value = param.value();
+        if (value == null) {
+            return null;
+        }
+        if (value.contains("${") && value.contains("}")) {
+            Map<String, Object> valueMap = new HashMap<>();
+            valueMap.put("date", new Date());
+            valueMap.put("max", param.max());
+            valueMap.put("min", param.min());
+            value = EnvFactory.getPlaceholder().processTemplate(valueMap, value);
+        }
+        return BeanUtil.getTypeValue(value, pType);
+    }
+
 }

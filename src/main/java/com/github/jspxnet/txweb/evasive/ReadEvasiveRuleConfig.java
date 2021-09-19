@@ -18,20 +18,20 @@ import java.util.List;
 public class ReadEvasiveRuleConfig extends DefaultHandler {
 
     //命名空间,空间中的action MAP
-    private List<EvasiveRule> evasiveRuleList = new ArrayList<EvasiveRule>();
+    private final List<EvasiveRule> evasiveRuleList = new ArrayList<>();
     private String[] whiteList = null;
     private String[] blackList = null;
-    private List<QueryBlack> queryBlackRuleList = new ArrayList<QueryBlack>();
-    private List<ResultConfigBean> resultConfigList = new ArrayList<ResultConfigBean>();
+    private final List<QueryBlack> queryBlackRuleList = new ArrayList<>();
+    private final List<ResultConfigBean> resultConfigList = new ArrayList<>();
 
-    final private static String KEY_InsecureUrlKeys = "insecureUrlKeys";
-    final private static String KEY_InsecureQueryStringKeys = "insecureQueryStringKeys";
-    final private static String KEY_queryBlack = "queryBlack";
+    final private static String KEY_INSECURE_URL_KEYS = "insecureUrlKeys";
+    final private static String KEY_INSECURE_QUERY_STRING_KEYS = "insecureQueryStringKeys";
+    final private static String KEY_QUERY_BLACK = "queryBlack";
 
 
     private String[] insecureUrlKeys = null;
     private String[] insecureQueryStringKeys = null;
-    private CharArrayWriter contents = new CharArrayWriter();
+    private final CharArrayWriter contents = new CharArrayWriter();
     private ResultConfigBean resultConfigBean = null;
     private Condition condition = null;
     private QueryBlack queryBlack = null;
@@ -46,7 +46,6 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
     private boolean inBlackList = false;
     private boolean inInsecureUrlKeys = false;
     private boolean inInsecureQueryStringKeys = false;
-
     private boolean inQueryBlack = false;
 
     ReadEvasiveRuleConfig() {
@@ -54,7 +53,7 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    //@SuppressWarnings("unchecked")
     public void startElement(String namespaceURI,
                              String localName,
                              String qName,
@@ -74,14 +73,14 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
         }
 
 
-        if (localName.equalsIgnoreCase(KEY_InsecureUrlKeys)) {
+        if (localName.equalsIgnoreCase(KEY_INSECURE_URL_KEYS)) {
             inInsecureUrlKeys = true;
         }
 
-        if (localName.equalsIgnoreCase(KEY_InsecureQueryStringKeys)) {
+        if (localName.equalsIgnoreCase(KEY_INSECURE_QUERY_STRING_KEYS)) {
             inInsecureQueryStringKeys = true;
         }
-        if (localName.equalsIgnoreCase(KEY_queryBlack)) {
+        if (localName.equalsIgnoreCase(KEY_QUERY_BLACK)) {
             inQueryBlack = true;
             queryBlack = new QueryBlack();
             queryBlack.setName(attr.getValue(TXWeb.CONFIG_NAME));
@@ -148,12 +147,12 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
             inBlackList = false;
         }
 
-        if (inInsecureUrlKeys && localName.equalsIgnoreCase(KEY_InsecureUrlKeys)) {
+        if (inInsecureUrlKeys && localName.equalsIgnoreCase(KEY_INSECURE_URL_KEYS)) {
             insecureUrlKeys = ArrayUtil.join(insecureUrlKeys, StringUtil.split(StringUtil.replace(StringUtil.trim(contents.toString()), StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON));
             inInsecureUrlKeys = false;
         }
 
-        if (inInsecureQueryStringKeys && localName.equalsIgnoreCase(KEY_InsecureQueryStringKeys)) {
+        if (inInsecureQueryStringKeys && localName.equalsIgnoreCase(KEY_INSECURE_QUERY_STRING_KEYS)) {
             insecureQueryStringKeys = ArrayUtil.join(insecureQueryStringKeys, StringUtil.split(StringUtil.replace(StringUtil.trim(contents.toString()), StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON));
             inInsecureQueryStringKeys = false;
         }
@@ -172,7 +171,7 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
             inEvasive = false;
             evasiveRuleList.add(evasiveRule);
         }
-        if (inQueryBlack && localName.equalsIgnoreCase(KEY_queryBlack)) {
+        if (inQueryBlack && localName.equalsIgnoreCase(KEY_QUERY_BLACK)) {
             queryBlack.setSql(StringUtil.trim(contents.toString()));
             queryBlackRuleList.add(queryBlack);
             inQueryBlack = false;

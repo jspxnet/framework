@@ -225,7 +225,7 @@ public abstract class TagNode implements Serializable {
      * @return 正文内容
      */
     public String getBody() {
-        if (getTagName().equals(CommentBlock.noteTagBegin)) {
+        if (getTagName().equals(CommentBlock.NOTE_TAG_BEGIN)) {
             return StringUtil.empty;
         }
         if (HtmlEngineImpl.NONE_TAG.equals(name)) {

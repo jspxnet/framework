@@ -5,9 +5,6 @@ import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * Created by jspx.net

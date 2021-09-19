@@ -22,11 +22,11 @@ import com.github.jspxnet.scriptmark.core.TagNode;
  * }</pre>
  */
 public class CommentBlock extends TagNode {
-    final static public String noteTagBegin = "!--#";
+    final static public String NOTE_TAG_BEGIN = "!--#";
 
-    final static public String noteTagEnd = "#--";
+    final static public String NOTE_TAG_END = "#--";
 
     public CommentBlock() {
-        super.setTagName(noteTagBegin);
+        super.setTagName(NOTE_TAG_BEGIN);
     }
 }

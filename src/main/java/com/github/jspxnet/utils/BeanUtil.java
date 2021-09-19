@@ -30,7 +30,6 @@ import java.util.*;
  */
 @Slf4j
 public final class BeanUtil {
-    private final static LRUHashMap<String,BeanCopier> BEAN_COPIER_MAP = new LRUHashMap<>(30);
     private BeanUtil() {
 
     }
@@ -85,7 +84,6 @@ public final class BeanUtil {
             Object[] pObject = new Object[1];
             try {
                 pObject[0] = getTypeValue(obj, aType);
-                //method.invoke(object, pObject);
                 (new java.beans.Expression(object, methodName, pObject)).execute();
                 /*
                 if (SystemUtil.isAndroid()) {
@@ -556,7 +554,6 @@ public final class BeanUtil {
         return null;
     }
 
-
     /**
      * @param object 数据对象
      * @param cls    类对象，作为模型创建新的对象
@@ -583,7 +580,7 @@ public final class BeanUtil {
             if (cls.equals(object.getClass()))
             {
                 //相同类型,快速拷贝
-                BeanCopier beanCopier = BEAN_COPIER_MAP.getOrDefault(cls.getName(),BeanCopier.create(cls, cls, false));
+                BeanCopier beanCopier = BeanCopier.create(cls, cls,false);
                 beanCopier.copy(object, result, null);
             } else
             {
@@ -627,13 +624,13 @@ public final class BeanUtil {
             out = ((JSONObject) out).toMap();
         }
         if (out instanceof Map) {
-            Map map = (Map) out;
-            Class getClass = in.getClass();
+            Map<String,Object> map = (Map) out;
+            Class<?> getClass = in.getClass();
             for (Object keyObj : map.keySet()) {
                 if (keyObj == null) {
                     continue;
                 }
-                String key = keyObj.toString();
+                String key = ObjectUtil.toString(keyObj);
                 Method method = ClassUtil.getSetMethod(getClass, key);
                 if (method != null) {
                     setSimpleProperty(in, method.getName(), map.get(key));
@@ -669,7 +666,7 @@ public final class BeanUtil {
     }
 
 
-    private final static int[] stopModifiers = {18, 25, 26, 28};
+    private final static int[] STOP_MODIFIERS = {18, 25, 26, 28};
 
     /**
      * 拷贝属性, 后边的数据拷贝到前边
@@ -687,18 +684,18 @@ public final class BeanUtil {
             getData = ReflectUtil.getValueMap(getData);
         }
         if (getData instanceof Map) {
-            Map map = (Map) getData;
+            Map<String,Object> map = (Map) getData;
             Class<?> getClass = oldData.getClass();
             for (Object keyObj : map.keySet()) {
                 if (keyObj == null) {
                     continue;
                 }
-                String key = keyObj.toString();
+                String key = ObjectUtil.toString(keyObj);
                 Field field = ClassUtil.getDeclaredField(getClass, key);
                 if (field == null) {
                     continue;
                 }
-                if (ArrayUtil.indexOf(stopModifiers, field.getModifiers()) != -1) {
+                if (ArrayUtil.indexOf(STOP_MODIFIERS, field.getModifiers()) != -1) {
                     continue;
                 }
                 try {
@@ -716,7 +713,7 @@ public final class BeanUtil {
         Field[] fieldSet = ClassUtil.getDeclaredFields(getData.getClass());
         for (Field setField : fieldSet) {
             for (Field field : fieldGet) {
-                if (ArrayUtil.indexOf(stopModifiers, field.getModifiers()) != -1) {
+                if (ArrayUtil.indexOf(STOP_MODIFIERS, field.getModifiers()) != -1) {
                     continue;
                 }
                 if (field.getName().equals(setField.getName())) {
@@ -925,6 +922,4 @@ public final class BeanUtil {
             return method.invoke(object,string,args);
         }
     }
-
-
 }

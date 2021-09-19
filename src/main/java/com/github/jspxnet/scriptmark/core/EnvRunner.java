@@ -168,7 +168,7 @@ public class EnvRunner {
             return BreakBlock.value;
         }
         if (tagNode.getTagName().equals(continueBlockName)) {
-            return ContinueBlock.value;
+            return ContinueBlock.VALUE;
         }
 
         Phrase phrase = phrases.get(tagNode.getClass().getName());

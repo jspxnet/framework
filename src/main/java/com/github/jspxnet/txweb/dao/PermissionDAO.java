@@ -28,7 +28,6 @@ public interface PermissionDAO extends SoberSupport {
     MemberRole getMemberRole(long uid) throws SQLException;
 
 
-    //int deleteMemberRole(long uid) throws Exception;
     Role getRole(String roleId);
 
     List<MemberRole> getMemberRoles(long uid, boolean load);
@@ -40,8 +39,6 @@ public interface PermissionDAO extends SoberSupport {
     List<Role> getRoleList(String find) throws SQLException;
 
     int getRoleCount(String find) throws SQLException;
-
-//    Role getHighestRole() throws SQLException;
 
     boolean updateSortDate(String[] ids);
 

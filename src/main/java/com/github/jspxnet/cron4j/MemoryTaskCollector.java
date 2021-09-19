@@ -47,19 +47,6 @@ class MemoryTaskCollector implements TaskCollector {
 	 * IDs for task-pattern couples.
 	 */
 	private final List<String> ids = new ArrayList<>();
-/*	*//**
-	 * Size.
-	 *//*
-	private int size = 0;
-	*//**
-	 * Counts how many task are currently collected by this collector.
-	 *
-	 * @return The size of the currently collected task list.
-	 *//*
-	public synchronized int size() {
-
-		return size;
-	}*/
 
 	/**
 	 * Adds a pattern and a task to the collector.

@@ -26,7 +26,9 @@ public class IDType {
 
     final public static String serial = "serial";
 
-    //用户自己自定
+    /**
+     * 用户自己自定
+     */
     final public static String none = "none";
     /*
     seq:系统默认生成 yyyyMMddhhss + 序列,类型可以是long 和 String

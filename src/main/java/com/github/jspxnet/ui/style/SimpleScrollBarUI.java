@@ -93,6 +93,9 @@ public class SimpleScrollBarUI extends BasicScrollBarUI {
                         g2.drawImage(arrowImg, 0, 0, arrowImg.getWidth(null), arrowImg.getHeight(null), null);
 
                         break;
+                    default:{
+                        break;
+                    }
 
                 }
 

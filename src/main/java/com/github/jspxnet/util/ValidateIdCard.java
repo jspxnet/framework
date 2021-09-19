@@ -460,6 +460,9 @@ public class ValidateIdCard {
             case 0:
                 sCode = "1";
                 break;
+            default:{
+                break;
+            }
         }
         return sCode;
     }

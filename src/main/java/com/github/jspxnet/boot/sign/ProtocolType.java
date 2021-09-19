@@ -20,7 +20,7 @@ public abstract class ProtocolType {
 
     }
 
-    public static final String HTTP_Protocol = "http";
-    public static final String TORRENT_Protocol = "torrent";
-    public static final String FTP_Protocol = "ftp";
+    public static final String HTTP_PROTOCOL = "http";
+    public static final String TORRENT_PROTOCOL = "torrent";
+    public static final String FTP_PROTOCOL = "ftp";
 }

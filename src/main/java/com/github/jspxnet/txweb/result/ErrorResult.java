@@ -30,7 +30,7 @@ public class ErrorResult extends ResultSupport {
         HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin
-        String browserCache = action.getEnv(ActionEnv.BrowserCache);
+        String browserCache = action.getEnv(ActionEnv.BROWSER_CACHE);
         boolean noCache = !StringUtil.isNull(browserCache) && !StringUtil.toBoolean(browserCache);
         if (noCache) {
             response.setHeader("Pragma", "No-cache");

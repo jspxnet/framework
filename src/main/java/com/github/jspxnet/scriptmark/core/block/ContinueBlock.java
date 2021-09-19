@@ -19,5 +19,5 @@ import com.github.jspxnet.scriptmark.core.TagNode;
  * 循环跳过
  */
 public class ContinueBlock extends TagNode {
-    final public static int value = 2;
+    final public static int VALUE = 2;
 }

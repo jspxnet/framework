@@ -359,6 +359,10 @@ public final  class ObjectUtil {
         {
             return (String)obj;
         }
+        if (obj instanceof Number)
+        {
+            return NumberUtil.toString(obj);
+        }
         if (obj instanceof InetAddress) {
             return IpUtil.getIp((InetAddress)obj);
         }

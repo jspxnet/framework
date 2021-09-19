@@ -10,7 +10,6 @@
 package com.github.jspxnet.scriptmark.core;
 
 
-import com.github.jspxnet.sioc.tag.LoadElement;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.scriptmark.*;
 import com.github.jspxnet.scriptmark.core.block.CallBlock;
@@ -40,8 +39,8 @@ public class HtmlEngineImpl implements HtmlEngine {
     private char endTag = '>';
 
     //为了兼容HTML 采用注释格式为 <!--# 注释内容 #-->
-    final static private String NOTE_TAG_BEGIN = CommentBlock.noteTagBegin;
-    final static private String NOTE_TAG_END = CommentBlock.noteTagEnd;
+    final static private String NOTE_TAG_BEGIN = CommentBlock.NOTE_TAG_BEGIN;
+    final static private String NOTE_TAG_END = CommentBlock.NOTE_TAG_END;
 
     protected char escapeVariable = '\\';
     private boolean htmlExtType = false;

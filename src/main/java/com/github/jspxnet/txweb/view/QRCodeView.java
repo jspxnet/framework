@@ -40,8 +40,8 @@ public class QRCodeView extends ActionSupport {
     private int width = 140;
     private int height = 140;
     private String fileType = "png";
-    private static final int color = 0xFFFFFFFF;
-    private static final int bgColor = 0xff000000;
+    private static final int COLOR = 0xFFFFFFFF;
+    private static final int BG_COLOR = 0xff000000;
     private boolean safe = true;
 
     private int format = 11;  //CODE_39,CODE_93,CODE_128,
@@ -75,11 +75,11 @@ public class QRCodeView extends ActionSupport {
     }
 
     public static int getColor() {
-        return color;
+        return COLOR;
     }
 
     public static int getBgColor() {
-        return bgColor;
+        return BG_COLOR;
     }
 
     @Param(request = false)
@@ -167,7 +167,7 @@ public class QRCodeView extends ActionSupport {
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    image.setRGB(x, y, matrix.get(x, y) ? bgColor : color);
+                    image.setRGB(x, y, matrix.get(x, y) ? BG_COLOR : COLOR);
                 }
             }
             ImageIO.write(image, fileType, out);

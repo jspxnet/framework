@@ -34,10 +34,10 @@ import java.net.URL;
  * }</pre>
  */
 public class IncludeBlock extends TagNode {
-    public static final String file = "file";
-    public static final String encoding = "encoding";
-    public static final String caption = "caption";
-    public static final String name = "name";
+    public static final String FILE = "file";
+    public static final String ENCODING = "encoding";
+    public static final String CAPTION = "caption";
+    public static final String NAME = "name";
 
 
     //当前路径
@@ -65,11 +65,11 @@ public class IncludeBlock extends TagNode {
     }
 
     public String getFile() {
-        return ScriptMarkUtil.deleteQuote(getStringAttribute(file));
+        return ScriptMarkUtil.deleteQuote(getStringAttribute(FILE));
     }
 
     public String getEncoding() {
-        String encode = ScriptMarkUtil.deleteQuote(getStringAttribute(encoding));
+        String encode = ScriptMarkUtil.deleteQuote(getStringAttribute(ENCODING));
         if (encode == null || encode.length() < 2) {
             encode = Environment.defaultEncode;
         }
@@ -77,11 +77,11 @@ public class IncludeBlock extends TagNode {
     }
 
     public String getCaption() {
-        return ScriptMarkUtil.deleteQuote(getStringAttribute(caption));
+        return ScriptMarkUtil.deleteQuote(getStringAttribute(CAPTION));
     }
 
     public String getName() {
-        return ScriptMarkUtil.deleteQuote(getStringAttribute(name));
+        return ScriptMarkUtil.deleteQuote(getStringAttribute(NAME));
     }
 
     public List<TagNode> getIncludeNodeList() throws ScriptRunException {

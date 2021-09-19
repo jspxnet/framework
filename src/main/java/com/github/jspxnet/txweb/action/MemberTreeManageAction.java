@@ -44,7 +44,7 @@ public class MemberTreeManageAction extends TreeView {
      * @throws Exception 异常
      */
     @Operate(caption = "保存")
-    public void save(@Param(caption = "uid") long uid,@Param(caption = "nodeId",max = 64) String[] nodeId) throws Exception
+    public void save(@Param(caption = "uid") long uid,@Param(caption = "nodeId",max = 64) String[] nodeId,@Param(caption = "树ID") String treeId) throws Exception
     {
         if (uid < 1) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needSelect));
@@ -53,7 +53,7 @@ public class MemberTreeManageAction extends TreeView {
         String[] nodeIdArray = nodeId;
         nodeIdArray = treeItemDAO.addLimb(nodeIdArray);
         try {
-            memberTreeDAO.deleteForUid(uid);
+            memberTreeDAO.deleteForUid(uid,treeId);
             if (!ArrayUtil.isEmpty(nodeIdArray))
             {
                 for (String aCheckbox : nodeIdArray) {
@@ -63,6 +63,7 @@ public class MemberTreeManageAction extends TreeView {
                     MemberTree memberTree = new MemberTree();
                     memberTree.setNodeId(aCheckbox);
                     memberTree.setUid(uid);
+                    memberTree.setTreeId(treeId);
                     memberTree.setNamespace(treeItemDAO.getNamespace());
                     IUserSession userSession = getUserSession();
                     if (userSession != null) {

@@ -9,7 +9,7 @@ import java.sql.Time;
  * Created by jspx.net
  * author: chenYuan
  * date: 2021/9/4 1:20
- * description: jspx-framework
+ * description:
  **/
 public class TimeAdapter implements JsonSerializer<Time>, JsonDeserializer<Time> {
 

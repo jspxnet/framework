@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public final class IpUtil {
-    final static private char[] ExpChar = new char[]{'@', '#', '$', '%', '^', '<', '>', '&', '+', '\\', '\'', '\"'};
+    final static private char[] EXP_CHAR = new char[]{'@', '#', '$', '%', '^', '<', '>', '&', '+', '\\', '\'', '\"'};
 
     private IpUtil() {
 
@@ -56,7 +56,7 @@ public final class IpUtil {
         if (expression.length() < 8) {
             return false;
         }
-        for (char c : ExpChar) {
+        for (char c : EXP_CHAR) {
             if (expression.indexOf(c) != -1) {
                 return false;
             }

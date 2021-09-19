@@ -18,7 +18,7 @@ import java.util.*;
  * 这里只是提供外部显示账户信息
  */
 @Data
-@Table(caption = "账号信息", create = false)
+@Table(caption = "账号信息", create = false,cache = false)
 public class MemberVo implements Serializable {
     @Column(caption = "ID")
     private long id;
@@ -163,20 +163,6 @@ public class MemberVo implements Serializable {
     @JsonIgnore
     private List<Role> roleList = new ArrayList<>();
 
-    public MemberDeptVo getDepartment()
-    {
-        for (MemberDeptVo memberDeptVo:deptList)
-        {
-            if (YesNoEnumType.YES.getValue()==memberDeptVo.getDefaultType())
-            {
-                return memberDeptVo;
-            }
-        }
-        MemberDeptVo memberDeptVo = new MemberDeptVo();
-        memberDeptVo.setDepartmentId(null);
-        return  memberDeptVo;
-    }
-
     @JsonField(name = "roleCaption", caption = "角色列表")
     public String getRoleCaption()
     {
@@ -196,7 +182,4 @@ public class MemberVo implements Serializable {
         return sb.toString();
     }
 
-    public void setRoleList(List<Role> roleList) {
-        this.roleList = roleList;
-    }
 }

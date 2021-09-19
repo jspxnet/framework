@@ -46,7 +46,8 @@ public abstract class AbstractSourceLoader implements SourceLoader {
 
         this.fileName = name;
         int i = name.indexOf("/*/");
-        if (name.startsWith("/")) {
+
+        if (name.startsWith(StringUtil.BACKSLASH)) {
             if (i > -1) {
                 String path = rootDirectory + name.substring(0, i + 1) + name.substring(i + 3);
                 try {

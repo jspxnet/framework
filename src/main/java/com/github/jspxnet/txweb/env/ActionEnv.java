@@ -17,12 +17,16 @@ public final class ActionEnv {
 
     //保留的常量数据
     public static final String[] NO_CLEAN = new String[]{ActionEnv.Key_ActionName, ActionEnv.mobileTemplateSuffix,
-            ActionEnv.Key_RealPath,Environment.scriptPath,ActionEnv.mobileTemplateSuffix,Environment.filterSuffix,Environment.ApiFilterSuffix, Environment.templateSuffix,ActionEnv.KEY_MobileTemplate, ActionEnv.Key_Namespace,ActionEnv.ContentType};
+            ActionEnv.Key_RealPath,Environment.scriptPath,ActionEnv.mobileTemplateSuffix,Environment.filterSuffix,Environment.ApiFilterSuffix, Environment.templateSuffix,ActionEnv.KEY_MobileTemplate, ActionEnv.Key_Namespace,ActionEnv.CONTENT_TYPE};
 
-    static public final String BrowserCache = "BrowserCache"; //是否使用浏览器缓存 默认为 true
-    static public final String ContentType = "ContentType"; //请求类型
-    static public final String Content_Disposition = "Content-Disposition"; //下载类型
-    static public final String KEY_RedirectUrl = "RedirectUrl"; //注释方式的配置返回
+    //是否使用浏览器缓存 默认为 true
+    static public final String BROWSER_CACHE = "BrowserCache";
+    //请求类型
+    static public final String CONTENT_TYPE = "ContentType";
+    //下载类型
+    static public final String CONTENT_DISPOSITION = "Content-Disposition";
+    //注释方式的配置返回
+    static public final String KEY_RedirectUrl = "RedirectUrl";
     //浏览器控制 end
 
     //是否载入手机模板,如果是手机，那么载入 name.mobile.ftl 否则 name.ftl  目录不变

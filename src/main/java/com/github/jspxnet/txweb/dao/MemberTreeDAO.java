@@ -30,11 +30,11 @@ public interface MemberTreeDAO extends SoberSupport {
 
     String getMemberTreeSplitString(long uid);
 
-    boolean deleteForUid(long uid) throws Exception;
-
     String[] getMemberTreeArray(long uid);
 
     boolean deleteAll() throws Exception;
+
+    boolean deleteForUid(long uid, String treeId);
 
     boolean fixTreeItem(String[] treeItemId) throws Exception;
 

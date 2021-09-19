@@ -248,13 +248,16 @@ public abstract class SerialComm extends Observable implements SerialPortEventLi
                     log.error("设备断开,不能链接设备", e);
                 }
                 break;
+            default:{
+                break;
+            }
         }
 
     }
 
     public void canSendNotification() {
         setChanged();
-        notifyObservers(PortObserver.CanSendNotification);
+        notifyObservers(PortObserver.CAN_SEND_NOTIFICATION);
     }
 
     //------------------------------------------------------------------------------------------------------------------

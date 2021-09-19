@@ -32,5 +32,4 @@ class AlwaysTrueValueMatcher implements ValueMatcher {
 	public boolean match(int value) {
 		return true;
 	}
-
 }

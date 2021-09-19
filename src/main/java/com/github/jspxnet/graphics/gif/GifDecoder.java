@@ -232,6 +232,10 @@ public class GifDecoder {
                         case 4:
                             iline = 1;
                             inc = 2;
+                            break;
+                        default:{
+                            break;
+                        }
                     }
                 }
                 line = iline;

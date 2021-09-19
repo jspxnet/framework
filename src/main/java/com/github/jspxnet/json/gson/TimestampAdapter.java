@@ -7,10 +7,12 @@ package com.github.jspxnet.json.gson;
  * date: 2020/5/6 14:34
  * description: jspxpro
  */
+import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.StringUtil;
 import com.google.gson.*;
-
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * Created by jspx.net
@@ -28,7 +30,8 @@ public class TimestampAdapter implements JsonSerializer<Timestamp>, JsonDeserial
             return null;
         } else {
             try {
-                return Timestamp.valueOf(json.getAsString());
+                Date data = StringUtil.getDate(json.getAsString());
+                return new Timestamp(data.getTime());
             } catch (Exception e) {
                 return null;
             }
@@ -40,7 +43,7 @@ public class TimestampAdapter implements JsonSerializer<Timestamp>, JsonDeserial
                                  JsonSerializationContext context) {
         String value = null;
         if(src != null){
-            value = src.toString();
+            value = DateUtil.toString(src, DateUtil.FULL_ST_FORMAT);
         }
         return new JsonPrimitive(value);
     }
