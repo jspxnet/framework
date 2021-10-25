@@ -74,7 +74,7 @@ public class HessianHandle extends ActionHandle {
 
         //替代原版HessianSkeleton  实现事务标签功能
         HessianSkeleton objectSkeleton = new HessianSkeleton(action, Objects.requireNonNull(ClassUtil.findRemoteAPI(actionClass)));
-        boolean debug = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.logJspxDebug);
+        boolean debug = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.DEBUG);
         objectSkeleton.setDebug(debug);
         try {
             com.caucho.services.server.ServiceContext.begin(request, response, serviceId, objectId);

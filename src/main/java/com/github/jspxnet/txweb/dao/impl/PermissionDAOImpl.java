@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.dao.impl;
 
 
+import com.github.jspxnet.enums.CongealEnumType;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sober.Criteria;
 import com.github.jspxnet.sober.criteria.Order;
@@ -24,7 +25,6 @@ import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.txweb.util.RoleUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.*;
 
 /**
@@ -75,11 +75,20 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         return load(Role.class, roleId);
     }
 
+    /**
+     * 角色合并
+     * @param uid 用户id
+     * @return 权限最搞的角色
+     */
     @Override
     public MemberRole getMemberRole(long uid) {
         Criteria criteria = createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.eq("uid", uid));
         if (!StringUtil.isEmpty(organizeId)) {
-            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
+            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)));
+        }
+        else
+        {
+            criteria = criteria.add(Expression.isNull("organizeId"));
         }
         List<MemberRole> memberRoles = criteria.list(true);
         //多个返回权值最大的一个
@@ -91,7 +100,6 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         {
             return memberRoles.get(0);
         }
-
         MemberRole memberRole =  memberRoles.get(0);
         for (MemberRole mr:memberRoles)
         {
@@ -99,10 +107,19 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
             {
                 continue;
             }
+            if (CongealEnumType.NO_CONGEAL.getValue()!= mr.getRole().getCongealType())
+            {
+                continue;
+            }
             if (mr.getRole().getUserType()>memberRole.getRole().getUserType())
             {
                 memberRole = mr;
             }
+        }
+
+        if (memberRole.getRole()==null  || memberRole.getRole().getCongealType()!= CongealEnumType.NO_CONGEAL.getValue())
+        {
+            return null;
         }
         return memberRole;
     }
@@ -129,6 +146,10 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
         }
+        else
+        {
+            criteria = criteria.add(Expression.isNull("organizeId"));
+        }
         return criteria.list(load);
     }
 
@@ -144,6 +165,10 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
         }
+        else
+        {
+            criteria = criteria.add(Expression.isNull("organizeId"));
+        }
         List<MemberRole> memberRoleList = criteria.list(true);
         if (ObjectUtil.isEmpty(memberRoleList))
         {
@@ -153,6 +178,10 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         for (MemberRole memberRole:memberRoleList)
         {
             Role role = memberRole.getRole();
+            if (role==null || role.getCongealType()!= CongealEnumType.NO_CONGEAL.getValue())
+            {
+                continue;
+            }
             if (StringUtil.isEmpty(role.getOrganizeId()))
             {
                 role.setOrganizeId(memberRole.getOrganizeId());
@@ -161,7 +190,6 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         }
         return RoleUtil.mergeRole(roles,organizeId);
     }
-
 
     @Override
     public List<Role> getRoleList() {
@@ -193,6 +221,9 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         }
         if (!StringUtil.isNull(organizeId)) {
             criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
+        }  else
+        {
+            criteria = criteria.add(Expression.isNull("organizeId"));
         }
         return criteria.intUniqueResult();
     }
@@ -210,6 +241,9 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         }
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
+        }  else
+        {
+            criteria = criteria.add(Expression.isNull("organizeId"));
         }
         return criteria.addOrder(Order.desc("sortDate")).addOrder(Order.desc("userType")).setTotalCount(count).setCurrentPage(page)
                 .list(false);

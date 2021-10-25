@@ -20,9 +20,13 @@ import com.github.jspxnet.component.zhex.spell.ChineseUtil;
  */
 public class FullSpellFilter extends AbstractWordFilter {
 
-    private static WordFilter instance = new FullSpellFilter();
+    private static WordFilter instance = null;
 
-    public static WordFilter getInstance() {
+    public synchronized static WordFilter getInstance() {
+        if (instance==null)
+        {
+            instance = new FullSpellFilter();
+        }
         return instance;
     }
 

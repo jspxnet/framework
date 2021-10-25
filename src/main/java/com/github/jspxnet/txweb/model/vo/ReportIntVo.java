@@ -23,7 +23,7 @@ import java.io.Serializable;
  */
 
 @Data
-@Table(caption = "整数统计报表", create = false)
+@Table(caption = "整数统计报表", create = false,cache = false)
 public class ReportIntVo implements Serializable {
 
     private String name = StringUtil.empty;

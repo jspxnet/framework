@@ -384,7 +384,8 @@ public class RequestUtil {
         String s = null;
         try {
             s = request.getParameter(name);
-            if (!StringUtil.hasLength(s)) {
+            if (!StringUtil.hasLength(s))
+            {
                 return def;
             }
             if (REPAIR_ENCODE && (StringUtil.ASTERISK.equals(REPAIR_REQUEST_METHOD) || StringUtil.indexIgnoreCaseOf(REPAIR_REQUEST_METHOD, request.getMethod()) != -1)) {

@@ -93,7 +93,7 @@ public class TreeItem extends OperateTable {
     private String password = StringUtil.empty;
 
     //保存 {76:管理员};{75:会员} (多个用;分开) xin新颁布改为{ } 表示角色，[] 表示用户
-    @Column(caption = "查看角色", length = 240, notNull = true)
+    @Column(caption = "查看角色", length = 1000, notNull = true)
     private String roleIds = StringUtil.empty;
 
     @Column(caption = "允许发布", length = 2, option = "0:否;1:是", notNull = true)

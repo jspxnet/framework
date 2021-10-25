@@ -28,7 +28,7 @@ import java.io.Serializable;
  * 构架会更具配置文件自动生成
  */
 @Data
-@Table(name = "jspx_operate_vo", caption = "TXWeb动作", create = false)
+@Table(name = "jspx_operate_vo", caption = "TXWeb动作", create = false,cache = false)
 public class OperateVo implements Serializable {
 
     @Column(caption = "名称", length = 100, notNull = true)

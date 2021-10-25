@@ -489,14 +489,8 @@ public class MultipartRequest implements HttpServletRequest {
 
 
     public void destroy() {
-        if (parameters!=null)
-        {
-            parameters.clear();
-        }
-        if (fileList!=null)
-        {
-            fileList.clear();
-        }
+        parameters.clear();
+        fileList.clear();
         try {
             ServletInputStream stream = request.getInputStream();
             if (stream!=null)

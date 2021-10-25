@@ -42,7 +42,7 @@ public abstract class IUploadFile extends OperateTable {
     private long id = 0;
 
     //用来判断是否已经存在，也是唯一ID
-    @Column(caption = "Hash", length = 40, notNull = false)
+    @Column(caption = "Hash", length = 40)
     private String hash = StringUtil.empty;
 
     @Column(caption = "标题", length = 250, notNull = true)
@@ -114,7 +114,6 @@ public abstract class IUploadFile extends OperateTable {
     }
 
     public String[] getTagsArray() {
-
         return StringUtil.split(tags, " ");
     }
 

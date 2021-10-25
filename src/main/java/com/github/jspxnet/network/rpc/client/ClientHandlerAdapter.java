@@ -23,7 +23,6 @@ import java.util.concurrent.*;
 @Slf4j
 public class ClientHandlerAdapter extends ChannelInboundHandlerAdapter {
 
-
     public ClientHandlerAdapter() {
 
     }

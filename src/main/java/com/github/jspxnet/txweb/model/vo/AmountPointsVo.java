@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Created by ChenYuan on 2017/7/9.
  */
 @Data
-@Table(caption = "钱和积分", create = false)
+@Table(caption = "钱和积分", create = false,cache = false)
 public class AmountPointsVo implements Serializable {
 
     @Column(caption = "金额")

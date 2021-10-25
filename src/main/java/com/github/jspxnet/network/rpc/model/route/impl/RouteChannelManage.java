@@ -32,7 +32,6 @@ public class RouteChannelManage implements RouteManage {
 
     private RouteChannelManage()
     {
-
         RpcConfig rpcConfig = RpcConfig.getInstance();
         List<RouteSession>  list = rpcConfig.createConfigRouteSessionList();
         for (RouteSession routeSession:list)

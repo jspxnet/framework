@@ -7,7 +7,7 @@
  * @jvm:jdk1.6+  x86/amd64
  *
  */
-package com.github.jspxnet.lucene.tag;
+package com.github.jspxnet.component.zhex.tag;
 
 import com.github.jspxnet.boot.environment.Environment;
 
@@ -23,7 +23,7 @@ import java.util.HashSet;
 @Slf4j
 public class TagDictionary {
 
-    final private static String FILE_NO_TAG = "/com/github/jspxnet/lucene/tag/notag.txt";
+    final private static String FILE_NO_TAG = "/com/github/jspxnet/component/zhex/tag/notag.txt";
 
     final private static TagDictionary SINGLETON = new TagDictionary();
     private HashSet<String> hsNotag = null;
@@ -38,7 +38,7 @@ public class TagDictionary {
 
     private void loadNoTag() {
         InputStream is = TagDictionary.class.getResourceAsStream(TagDictionary.FILE_NO_TAG);
-        this.hsNotag = new HashSet<>(32);
+        this.hsNotag = new HashSet<>();
         String theWord;
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(is, Environment.defaultEncode), 512);

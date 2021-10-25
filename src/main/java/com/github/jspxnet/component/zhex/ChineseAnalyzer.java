@@ -7,7 +7,7 @@
  * @jvm:jdk1.6+  x86/amd64
  *
  */
-package com.github.jspxnet.lucene;
+package com.github.jspxnet.component.zhex;
 
 import java.io.File;
 import java.io.IOException;

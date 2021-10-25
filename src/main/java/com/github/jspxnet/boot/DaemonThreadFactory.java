@@ -31,8 +31,7 @@ public final class DaemonThreadFactory implements ThreadFactory {
      */
     @Override
     public Thread newThread(Runnable runnable) {
-
-        Thread thread = new Thread(runnable,name + "_" + runnable.hashCode());
+       Thread thread = new Thread(runnable,name + "_" + runnable.hashCode());
         //设置守护线程
         thread.setDaemon(true);
         THREAD_LIST.add(thread);

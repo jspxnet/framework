@@ -67,7 +67,7 @@ public final  class FileSuffixUtil {
     public static final String[] IMAGE_TYPES = {"jpg", "jpeg", "gif", "png", "bmp"};
     public static final String[] ZIP_TYPES = {"rar", "zip", "7z", "gz", "bz2", "cab", "iso", "ace", "gzip", "jzb", "arj", "uue"};
     public static final String[] VIDEO_TYPES = {"flv", "swf", "mkv", "avi", "asf", "rm", "rmvb", "mpeg", "mpg", "ogg", "mp4", "wmv", "m4v", "mp3", "wav", "vob", "ram", "mid", "mod", "cpk", "3gp", "vob", "mov", "3g2", "asf", "xvid", "divx"};
-    public static final String[] OFFICE_TYPES = {"doc", "docx", "xls", "xlsx", "ppt", "pptx", "mdb", "one", "pdf", "gd", "wps", "dps", "et", "ett", "rtf", "chm"};
+    public static final String[] OFFICE_TYPES = {"txt","doc", "docx", "xls", "xlsx", "ppt", "pptx", "mdb", "one", "pdf", "gd", "wps", "dps", "et", "ett", "rtf", "chm"};
 
     private FileSuffixUtil() {
 

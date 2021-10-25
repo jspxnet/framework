@@ -32,10 +32,26 @@ import java.util.Objects;
 
 @Slf4j
 public class GB2Big5 {
-    private static final GB2Big5 pTmp = new GB2Big5();
-    private byte[] b_big5Table;
-    private byte[] b_gbTable = null;
-    private StringMap<String, String> twZhUesdMap = null;
+    private final static String zhtwusedFile = "gbbig5word.txt";
+    private final static String gb2Big5File = "gb-big5.txt";
+    private final static String big52gb2File = "big5-gb.txt";
+
+    private static byte[] b_big5Table;
+    private static byte[] b_gbTable = null;
+    private static StringMap<String, String> twZhUsedMap = new StringMap<>();
+
+    private static GB2Big5 instance = null;
+
+    public synchronized static GB2Big5 getInstance() {
+
+        if (instance==null)
+        {
+            instance = new GB2Big5();
+        }
+
+        return instance;
+    }
+
 
 
     /**
@@ -101,9 +117,7 @@ public class GB2Big5 {
         return result;
     }
 
-    private final static String zhtwusedFile = "gbbig5word.txt";
-    private final static String gb2Big5File = "gb-big5.txt";
-    private final static String big52gb2File = "big5-gb.txt";
+
 
 
     /**
@@ -112,9 +126,13 @@ public class GB2Big5 {
      * @throws NullPointerException 异常
      */
     private GB2Big5() throws NullPointerException {
-        twZhUesdMap = new StringMap<>();
-        twZhUesdMap.setKeySplit(StringUtil.EQUAL);
-        twZhUesdMap.setLineSplit("\r\n");
+        if (twZhUsedMap==null)
+        {
+            twZhUsedMap = new StringMap<>();
+        }
+
+        twZhUsedMap.setKeySplit(StringUtil.EQUAL);
+        twZhUsedMap.setLineSplit(StringUtil.CRLF);
 
         InputStream inputStream = GB2Big5.class.getResourceAsStream(zhtwusedFile);
         if (inputStream==null)
@@ -133,7 +151,7 @@ public class GB2Big5 {
         }
         if (inputStream != null) {
             try {
-                twZhUesdMap.setString(new String(Objects.requireNonNull(getBytesFromFile(inputStream)), Environment.defaultEncode));
+                twZhUsedMap.setString(new String(Objects.requireNonNull(getBytesFromFile(inputStream)), Environment.defaultEncode));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -144,6 +162,17 @@ public class GB2Big5 {
         {
             inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +gb2Big5File);
         }
+        if (inputStream==null)
+        {
+            try {
+                inputStream = new FileInputStream(new File(System.getProperty("user.dir"),"/reslib/table/" +gb2Big5File));
+            } catch (FileNotFoundException e) {
+                inputStream =  null;
+                e.printStackTrace();
+
+            }
+        }
+
         if (inputStream == null) {
             File file = EnvFactory.getFile(gb2Big5File);
             if (file != null) {
@@ -163,6 +192,17 @@ public class GB2Big5 {
         {
             inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +big52gb2File);
         }
+        if (inputStream==null)
+        {
+
+            try {
+                inputStream = new FileInputStream( new File(System.getProperty("user.dir"),"/reslib/table/" +big52gb2File));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                inputStream =  null;
+            }
+        }
+
         if (inputStream == null) {
             File file = EnvFactory.getFile(big52gb2File);
             if (file != null) {
@@ -175,10 +215,12 @@ public class GB2Big5 {
         }
         b_big5Table = getBytesFromFile(inputStream);
         if (null == b_gbTable) {
-            throw new NullPointerException("No gb table can be load");
+
+
+            throw new NullPointerException("No gb table can be load:" + System.getProperty("user.dir"));
         }
         if (null == b_big5Table) {
-            throw new NullPointerException("No big5 table can be load");
+            throw new NullPointerException("No big5 table can be load:" + System.getProperty("user.dir"));
         }
     }
 
@@ -193,23 +235,23 @@ public class GB2Big5 {
         if (null == inStr || inStr.length() <= 0) {
             return StringUtil.empty;
         }
-        for (String big5Word : twZhUesdMap.keySet()) {
-            inStr = StringUtil.replace(inStr, twZhUesdMap.get(big5Word), big5Word);
+        for (String big5Word : twZhUsedMap.keySet()) {
+            inStr = StringUtil.replace(inStr, twZhUsedMap.get(big5Word), big5Word);
         }
-        byte[] Text = new String(inStr.getBytes("GBK"), "GBK").getBytes("GBK");
-        int max = Text.length - 1;
+        byte[] text = new String(inStr.getBytes("GBK"), "GBK").getBytes("GBK");
+        int max = text.length - 1;
         int h;
         int l;
         int p;
         int b = 256;
         byte[] big = new byte[2];
         for (int i = 0; i < max; i++) {
-            h = Text[i];
+            h = text[i];
             if (h < 0) {
                 h = b + h;
-                l = Text[i + 1];
+                l = text[i + 1];
                 if (l < 0) {
-                    l = b + (int) (Text[i + 1]);
+                    l = b + (int) (text[i + 1]);
                 }
                 if (h == 161 && l == 64) {
                     big[0] = big[1] = (byte) (161 - b);
@@ -226,13 +268,13 @@ public class GB2Big5 {
                         big[1] = 45;
                     }
                 }
-                Text[i] = big[0];
-                Text[i + 1] = big[1];
+                text[i] = big[0];
+                text[i + 1] = big[1];
                 i++;
             }
 
         }
-        return new String(Text, "BIG5");
+        return new String(text, "BIG5");
     }
 
     /**
@@ -285,8 +327,8 @@ public class GB2Big5 {
 
         }
         String result = new String(Text, "GBK");
-        for (String big5Word : twZhUesdMap.keySet()) {
-            result = StringUtil.replace(result, big5Word, twZhUesdMap.get(big5Word));
+        for (String big5Word : twZhUsedMap.keySet()) {
+            result = StringUtil.replace(result, big5Word, twZhUsedMap.get(big5Word));
         }
         return result;
     }
@@ -317,11 +359,12 @@ public class GB2Big5 {
     }
 
     public static String getGbkToBig5(String gbk) throws Exception {
-        return pTmp.gb2big5(gbk);
+
+        return getInstance().gb2big5(gbk);
     }
 
     public static String getBig5ToGbk(String big5) throws Exception {
-        return pTmp.big52gb(big5);
+        return getInstance().big52gb(big5);
     }
 
 

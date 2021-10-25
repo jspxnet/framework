@@ -3535,7 +3535,7 @@ public final class ArrayUtil {
         }
         Long[] longArray = new Long[array.length];
         for (int i = 0; i < array.length; i++) {
-            longArray[i] = Long.valueOf(array[i]);
+            longArray[i] = array[i];
         }
         return longArray;
     }
@@ -3652,7 +3652,6 @@ public final class ArrayUtil {
         return bigDecimalArray;
     }
 
-
     public static String[] toStringArray(Object[] array) {
         if (array == null) {
             return null;
@@ -3717,7 +3716,7 @@ public final class ArrayUtil {
      */
     public static String getFieldTerms(String[] fields, String[] terms, String type, boolean havAnd) {
         if (StringUtil.isNull(type)) {
-            type = "like";
+            type = "LIKE";
         }
         if (StringUtil.isNull(type)) {
             type = StringUtil.EQUAL;
@@ -3731,7 +3730,7 @@ public final class ArrayUtil {
         int len = NumberUtil.getMin(new int[]{fields.length, terms.length});
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < len; i++) {
-            if ("like".equalsIgnoreCase(type)) {
+            if ("LIKE".equalsIgnoreCase(type)) {
                 if (StringUtil.isNull(fields[i])) {
                     continue;
                 }
@@ -4230,9 +4229,9 @@ public final class ArrayUtil {
 
     public static int max(int[] array) {
         int result = 0;
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] > result) {
-                result = array[i];
+        for (int j : array) {
+            if (j > result) {
+                result = j;
             }
         }
         return result;
@@ -4240,9 +4239,9 @@ public final class ArrayUtil {
 
     public static int min(int[] array) {
         int result = max(array);
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] < result) {
-                result = array[i];
+        for (int j : array) {
+            if (j < result) {
+                result = j;
             }
         }
         return result;
@@ -4255,27 +4254,56 @@ public final class ArrayUtil {
      * @param array 数组
      * @return 字符串返回
      */
-    public static Collection<Object> toCollection(Object[] array) {
-        Collection<Object> list = new ArrayList<>();
-        if (array == null) {
-            return list;
-        }
-        for (int i = 0; i < array.length; i++) {
-            list.add(array[i]);
-        }
-        return list;
-    }
-
-
-
-
-    public static List<Object> toList(Object[] array) {
-        List<Object> list = new ArrayList<>();
+    public static <T> Collection<T> toCollection(T[] array) {
+        Collection<T> list = new ArrayList<>();
         if (array == null) {
             return list;
         }
         Collections.addAll(list, array);
         return list;
+    }
+
+    /**
+     *
+     * @param array 数组转列表
+     * @param <T> 类型
+     * @return 列表对象
+     */
+    public static <T> List<T> toList(T[] array) {
+        List<T> list = new ArrayList<>();
+        if (array == null) {
+            return list;
+        }
+        Collections.addAll(list, array);
+        return list;
+    }
+
+    public static <T> T get(T[] array,int index)
+    {
+        return get(array,index,null);
+    }
+    /**
+     *
+     * @param array 数组对象
+     * @param index 索引
+     * @return 返回 当前索引的数据，这里不会出现空异常
+     */
+    public static <T> T get(T[] array,int index,T def)
+    {
+        if (array==null || array.length==0)
+        {
+            return def;
+        }
+        if (index>=array.length || index<0)
+        {
+            return def;
+        }
+        T t = array[index];
+        if (t==null)
+        {
+            return def;
+        }
+        return t;
     }
     /**
      * If the given Object is no Array, it's toString - method is invoked.

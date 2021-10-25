@@ -41,7 +41,7 @@ import java.io.PrintWriter;
 @HttpMethod(caption = "下载代理")
 public class DownloadFileNameProxy extends ActionSupport {
     private String[] stopArray = new String[]{"sourceforge.net", "xunlei", "flashget", "dirbuster", "nikto", "sqlmap", "whatweb", "openvas", "jbrofuzz", "libwhisker", "webshag", "baiduspider", "googlebot", "yahoo", "msnbot", "scooter", "docin", "douban", "eapoo", "doc88", "baidu", "renrendoc"};
-    private static boolean DEBUG = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.logJspxDebug);
+    private static boolean DEBUG = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.DEBUG);
 
     public DownloadFileNameProxy() {
 

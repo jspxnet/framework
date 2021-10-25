@@ -503,14 +503,14 @@ public class TXWebUtil {
         }
         List<Map.Entry<Operate, Method>> sortList = new ArrayList<>(operateMethodMap.entrySet());
 
-        Collections.sort(sortList, (s1, s2) -> {
+        sortList.sort((s1, s2) -> {
             String st1 = (s1 == null || StringUtil.isNull(s1.getKey().method())) ? StringUtil.empty : s1.getKey().method();
             String st2 = (s2 == null || StringUtil.isNull(s2.getKey().method())) ? StringUtil.empty : s2.getKey().method();
             return Integer.compare(st2.length(), st1.length());//keep
         });
 
         return sortList.stream().collect(
-                Collectors.toMap(item -> item.getKey(), item -> item.getValue(), (oldVal, currVal) -> oldVal, LinkedHashMap::new)
+                Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldVal, currVal) -> oldVal, LinkedHashMap::new)
         );
     }
 
@@ -740,14 +740,14 @@ public class TXWebUtil {
         boolean isArray = true;
         JSONObject paramsObject = null;
         JSONArray paramsArray = null;
-        if (rocMethodJson != null && rocMethodJson.containsKey(Environment.rocParams)) {
+        if (rocMethodJson != null && !rocMethodJson.isEmpty() && rocMethodJson.containsKey(Environment.rocParams))
+        {
             paramsArray = rocMethodJson.getJSONArray(Environment.rocParams);
             if (paramsArray == null) {
                 paramsObject = rocMethodJson.getJSONObject(Environment.rocParams);
                 isArray = false;
             }
         }
-
 
         int iParam = 0;
         if (isArray) {
@@ -763,7 +763,7 @@ public class TXWebUtil {
             //处理通配符情况
             if (TXWebUtil.AT.equals(operate.method())) {
                 Method tmpMethod = operateMap.get(operate);
-                if (tmpMethod != null && tmpMethod.getName().equalsIgnoreCase(method) && tmpMethod.getParameterCount() == iParam)
+                if (tmpMethod != null && tmpMethod.getName().equalsIgnoreCase(method) &&   tmpMethod.getParameterCount() == iParam)
                 {
                     exeMethod = operateMap.get(operate);
                     if (exeMethod != null) {
@@ -809,14 +809,13 @@ public class TXWebUtil {
                 exeMethod = methodList[0];
             } else if (methodList != null && methodList.length > 1) {
                 //这里有继承关系 多个方法匹配
-
-                for (Method theMethod : methodList) {
+                for (Method theMethod : methodList)
+                {
                     if (ClassUtil.isDeclaredMethod(actionClass, theMethod)) {
                         if (isArray) {
                             if ((paramsArray == null || paramsArray.isEmpty()) && theMethod.getParameterTypes().length == 0) {
                                 exeMethod = theMethod;
                                 break;
-
                             } else if ((paramsArray != null && !paramsArray.isEmpty()) && theMethod.getParameterTypes().length == paramsArray.length()) {
                                 exeMethod = theMethod;
                                 break;
@@ -825,7 +824,6 @@ public class TXWebUtil {
                             if ((paramsObject == null || paramsObject.isEmpty()) && theMethod.getParameterTypes().length == 0) {
                                 exeMethod = theMethod;
                                 break;
-
                             } else if ((paramsObject != null && !paramsObject.isEmpty()) && theMethod.getParameterTypes().length == paramsObject.size()) {
                                 exeMethod = theMethod;
                                 break;
@@ -1136,7 +1134,7 @@ public class TXWebUtil {
         venParams.put(Environment.scriptPath, envTemplate.getString(Environment.scriptPath, "/script"));
         venParams.put(Environment.sitePath, envTemplate.getString(Environment.sitePath, "/"));
         venParams.put(Environment.userLoginUrl, envTemplate.getString(Environment.userLoginUrl, "/user/login." + envTemplate.getString(Environment.filterSuffix)));
-        venParams.put(Environment.logJspxDebug, envTemplate.getBoolean(Environment.logJspxDebug));
+        venParams.put(Environment.DEBUG, envTemplate.getBoolean(Environment.DEBUG));
         venParams.put("date", new Date());
         return venParams;
     }

@@ -40,7 +40,6 @@ public class FullSpell {
      */
     public static String fullSpell(String src, String separator) {
         char[] t1 = src.toCharArray();
-        String[] t2 = new String[t1.length];
         HanyuPinyinOutputFormat t3 = new HanyuPinyinOutputFormat();
         t3.setCaseType(HanyuPinyinCaseType.LOWERCASE);
         t3.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
@@ -50,7 +49,7 @@ public class FullSpell {
             for (char aT1 : t1) {
                 // 判断是否为汉字字符
                 if (Character.toString(aT1).matches("[\\u4E00-\\u9FA5]+")) {
-                    t2 = PinyinHelper.toHanyuPinyinStringArray(aT1, t3);
+                    String[] t2 = PinyinHelper.toHanyuPinyinStringArray(aT1, t3);
                     result.append(StringUtil.capitalize(t2[0])).append(separator);
                 } else {
                     result.append(aT1).append(separator);

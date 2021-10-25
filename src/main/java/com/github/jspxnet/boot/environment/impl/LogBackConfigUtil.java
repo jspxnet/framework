@@ -60,6 +60,7 @@ public class LogBackConfigUtil {
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
 
+        boolean isDefaultConfig = false;
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         File file = new File(envTemplate.getString(Environment.defaultPath),Environment.DEFAULT_LOAD_LOG_NAME);
         String defaultConfigTxt = null;
@@ -83,6 +84,7 @@ public class LogBackConfigUtil {
                 }
                 try {
                     defaultConfigTxt = new String(bytes,Environment.defaultEncode);
+                    isDefaultConfig = true;
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
@@ -97,14 +99,18 @@ public class LogBackConfigUtil {
         {
             valueMap.put("logMaxHistory",60);
         }
-        String confTxt = EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt);
-        org.xml.sax.InputSource inputSource = new InputSource(new StringReader(confTxt));
-        try {
-            configurator.doConfigure(inputSource);
-        } catch (JoranException e) {
-            System.err.println("1.默认路径是否配置错误;2.检查defaultlog.xml文件是否存在");
-            e.printStackTrace();
-            StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
+
+        String confTxt = isDefaultConfig?EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt):defaultConfigTxt;
+        if (!StringUtil.isEmpty(confTxt))
+        {
+            org.xml.sax.InputSource inputSource = new InputSource(new StringReader(confTxt));
+            try {
+                configurator.doConfigure(inputSource);
+            } catch (JoranException e) {
+                System.err.println("1.默认路径是否配置错误;2.检查defaultlog.xml文件是否存在");
+                e.printStackTrace();
+                StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
+            }
         }
         lc.setPackagingDataEnabled(true);
     }

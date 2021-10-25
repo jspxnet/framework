@@ -16,7 +16,7 @@ import lombok.Data;
  * Created by yuan on 14-3-27.
  */
 @Data
-@Table(caption = "岗位统计", create = false)
+@Table(caption = "岗位统计", create = false,cache = false)
 public class PositionStatVo {
     public PositionStatVo() {
 

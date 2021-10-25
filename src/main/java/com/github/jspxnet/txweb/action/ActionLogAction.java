@@ -41,7 +41,6 @@ public class ActionLogAction extends ActionLogView {
         return RocResponse.success(actionLogDAO.clear(),language.getLang(LanguageRes.deleteSuccess));
     }
 
-
     @Override
     public String execute() throws Exception {
         if (isMethodInvoked()) {

@@ -162,7 +162,7 @@ public class DownloadFileView extends ActionSupport {
         File fileName = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
         if (fileName == null || !fileName.exists() || !fileName.isFile() || !fileName.canRead()) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.fileNotFind) + "," + uploadFile.getFileName());
-            boolean debug = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.logJspxDebug);
+            boolean debug = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.DEBUG);
             if (debug) {
                 TXWebUtil.print(language.getLang(LanguageRes.fileNotFind) + "," + fileName, WebOutEnumType.HTML.getValue(), response);
             } else {

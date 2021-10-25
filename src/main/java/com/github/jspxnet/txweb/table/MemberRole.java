@@ -9,7 +9,6 @@
  */
 package com.github.jspxnet.txweb.table;
 
-import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.enums.MappingType;
 import com.github.jspxnet.sober.annotation.*;
 import com.github.jspxnet.sober.table.OperateTable;
@@ -39,7 +38,7 @@ public class MemberRole extends OperateTable {
     @Column(caption = "权限角色ID", length = 32, notNull = true)
     private String roleId = StringUtil.empty;
 
-    @Nexus(mapping = MappingType.OneToOne, field = "roleId", targetField = "id", targetEntity = Role.class,chain = true, delete = false, where = "${roleId!=0}")
+    @Nexus(mapping = MappingType.OneToOne, field = "roleId", targetField = "id", targetEntity = Role.class,chain = true, delete = false, where = "${roleId!=0}",term="congealType:eq[0];auditingType:eq[1]")
     private Role role = new Role();
 
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")

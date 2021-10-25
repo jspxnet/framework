@@ -254,11 +254,11 @@ public class PacketUtil {
         //验证
         String hash = getHash(dataBase);
         if (!dataHash.equalsIgnoreCase(hash)) {
+            data = null;
             throw new Exception("非法的数据格式");
         }
 
         byte[] byteData = EncryptUtil.getBase64Decode(dataBase);
-
         //解密
         if (!StringUtil.isNull(secretKey) && SymmetryEncryptFactory.contains(encryptClass)) {
             Encrypt encrypt = SymmetryEncryptFactory.createEncrypt(encryptClass);

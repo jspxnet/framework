@@ -251,6 +251,7 @@ public class JspxCoreListener implements ServletContextListener {
         }
 
         BeanFactory beanFactory = EnvFactory.getBeanFactory();
+        beanFactory.getIocContext().shutdown();
         beanFactory.shutdown();
         log.info("bean factory shutdown");
 
@@ -259,7 +260,7 @@ public class JspxCoreListener implements ServletContextListener {
         log.info("JSCache shutdown");
         //关闭缓存和线程end
 
-        beanFactory.getIocContext().shutdown();
+
 
         //卸载jdbc驱动begin
         Enumeration<Driver> drivers = DriverManager.getDrivers();

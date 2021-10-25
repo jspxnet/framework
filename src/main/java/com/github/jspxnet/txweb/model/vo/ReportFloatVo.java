@@ -21,7 +21,7 @@ import lombok.Data;
  * 报表图形VO对象
  */
 @Data
-@Table(caption = "小数统计报表", create = false)
+@Table(caption = "小数统计报表", create = false,cache = false)
 public class ReportFloatVo {
     private String name = StringUtil.empty;
     private float num = 0;

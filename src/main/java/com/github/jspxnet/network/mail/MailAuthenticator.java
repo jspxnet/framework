@@ -19,8 +19,8 @@ import javax.mail.PasswordAuthentication;
  * Time: 16:14:52
  */
 public class MailAuthenticator extends Authenticator {
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
 
     public MailAuthenticator(String username, String password) {
         this.username = username;

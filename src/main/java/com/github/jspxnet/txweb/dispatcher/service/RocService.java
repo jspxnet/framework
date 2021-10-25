@@ -62,21 +62,19 @@ public class RocService extends IService {
             try {
                 jsonData = new JSONObject(rpc);
             } catch (JSONException e) {
-                JSONObject errorResultJson = new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "Invalid params.参数无效,无效的请求"));
-                return errorResultJson.toString(4);
+                return new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "Invalid params.参数无效,无效的请求")).toString(4);
             }
         }
 
         if (jsonData == null) {
-            JSONObject errorResultJson = new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "Invalid params.参数无效,不能识别的格式"));
-            return errorResultJson.toString(4);
+            return new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "Invalid params.参数无效,不能识别的格式")).toString(4);
         }
         //判断是XML还是JSON end
 
 
         JSONObject methodCall = jsonData.getJSONObject(Environment.rocMethodCall);
         //兼容格式调整
-        if (methodCall != null) {
+        if (methodCall != null && jsonData.containsKey(Environment.rocMethodCall)) {
             jsonData = methodCall;
         }
 
@@ -105,23 +103,18 @@ public class RocService extends IService {
 
         envParams.put(ActionEnv.Key_ActionName, namePart);
         envParams.put(ActionEnv.Key_Namespace, namespace);
-        if (StringUtil.isNull(jsonData.getString("id"))) {
-            jsonData.put("id", namePart);
-        }
+
         ActionConfig actionConfig = webConfigManager.getActionConfig(namePart, namespace, true);
         if (actionConfig == null) {
             envParams.clear();
-            JSONObject errorResultJson = new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "class not found.找不到执行对象"));
-            return errorResultJson.toString(4);
+            return new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "class not found.找不到执行对象")).toString(4);
         }
 
         if (secret != actionConfig.isSecret()) {
-            JSONObject errorResultJson = new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "forbidden not secret request roc.禁止非加密方式调用"));
-            return errorResultJson.toString(4);
+            return new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "forbidden not secret request roc.禁止非加密方式调用")).toString(4);
             //加密调用这里返回
         }
         jsonData.put(Environment.rocFormat, jsonFormat ? "json" : "xml");
-
         //在高并发下，ajax请求会出现异常，必须使用synchronized
 
         //执行action返回数据begin

@@ -172,7 +172,7 @@ public abstract class Environment {
 
     final public static String logError = "error";
 
-    final public static String logJspxDebug = "jspxDebug";
+    final public static String DEBUG = "debug";
 
     final public static String LOGIN_TIMES = "loginTimes";
 
@@ -491,6 +491,7 @@ public abstract class Environment {
     final public static String rocFormat = "format";
     final public static String rocMethodCall = "methodCall";
 
+    //方法调用方式的 actinName
     final public static String rocId = "id";
     final public static String rocMethod = "method";
     final public static String rocName = "name";
@@ -499,6 +500,8 @@ public abstract class Environment {
     final public static String rocResult = "result";
     final public static String rocSecret = "secret-roc";
     //json 解析是否包括子对象数据
+
+    final public static String THREAD_SAFE_MODE = "threadSafe";
 
 
     final public static String id_errorCode = "code";

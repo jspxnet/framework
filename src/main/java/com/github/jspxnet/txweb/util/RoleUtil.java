@@ -1,5 +1,6 @@
 package com.github.jspxnet.txweb.util;
 
+import com.github.jspxnet.enums.AuditEnumType;
 import com.github.jspxnet.enums.CongealEnumType;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.utils.ArrayUtil;
@@ -65,7 +66,7 @@ public  class RoleUtil {
 
         for (Role roleTmp:roleList)
         {
-            if (CongealEnumType.YES_CONGEAL.getValue()==roleTmp.getCongealType())
+            if (CongealEnumType.NO_CONGEAL.getValue()!=roleTmp.getCongealType())
             {
                 continue;
             }

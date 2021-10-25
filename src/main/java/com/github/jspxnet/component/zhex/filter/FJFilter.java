@@ -20,9 +20,13 @@ import com.github.jspxnet.component.zhex.bg2big5.GB2Big5;
  */
 public class FJFilter extends AbstractWordFilter {
 
-    private static WordFilter instance = new FJFilter();
+    private static WordFilter instance = null;
 
-    public static WordFilter getInstance() {
+    public synchronized static WordFilter getInstance() {
+        if (instance==null)
+        {
+            instance = new FJFilter();
+        }
         return instance;
     }
 
@@ -52,7 +56,7 @@ public class FJFilter extends AbstractWordFilter {
     public static void main(String[] args) {
         WordFilter wordFilter = FJFilter.getInstance();
         try {
-            String out = wordFilter.doFilter(args[0], FJFilter.GB_BIG5);
+            String out = wordFilter.doFilter("中文三大范德萨阿斯蒂芬", FJFilter.GB_BIG5);
             System.out.println(out);
         } catch (Exception e) {
             e.printStackTrace();

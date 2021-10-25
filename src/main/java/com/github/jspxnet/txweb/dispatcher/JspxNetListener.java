@@ -16,7 +16,6 @@ public class JspxNetListener implements ServletContextListener {
         Dispatcher.init(servletContextEvent.getServletContext());
     }
 
-
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         JspxNetApplication.destroy();

@@ -10,7 +10,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-@Table(caption = "部门信息", create = false)
+@Table(caption = "部门信息", create = false, cache = false)
 public class MemberDeptVo implements Serializable {
     @Column(caption = "ID", notNull = true)
     private long id;

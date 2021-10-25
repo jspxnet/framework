@@ -9,7 +9,6 @@ import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.txweb.model.param.PageParam;
 import com.github.jspxnet.utils.ObjectUtil;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -221,9 +220,8 @@ public class RocResponse<T> implements Serializable {
      * @param <T>  数据类型
      * @return 列表返回封装简化
      */
-    public static <T> RocResponse<T> success(T data, PageParam pageParam,int totalCount) {
-        RocResponse<T> response = new RocResponse<>(data);
-        return response.setCurrentPage(pageParam.getCurrentPage()).setCount(pageParam.getCount()).setTotalCount(totalCount);
+    public static <T> RocResponse<T> success(T data, PageParam pageParam, Number totalCount) {
+        return new RocResponse<>(data).setCurrentPage(pageParam.getCurrentPage()).setCount(pageParam.getCount()).setTotalCount(totalCount.longValue());
     }
 
     /**

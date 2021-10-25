@@ -319,7 +319,7 @@ public abstract class JdbcOperations implements SoberSupport {
                 criteria = criteria.add(Expression.in(soberNexus.getTargetField(), idList));
                 if (!StringUtil.isNull(soberNexus.getTerm())) {
                     String term = soberNexus.getTerm();
-                    if (term.contains("${"))
+                    if (term.contains("${") && term.contains("}"))
                     {
                         term = placeholder.processTemplate(ObjectUtil.getMap(list.get(0)), term);
                     }

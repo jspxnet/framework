@@ -20,11 +20,10 @@ import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.sioc.factory.EntryFactory;
-import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;
 import org.springframework.context.ApplicationContext;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -106,8 +105,21 @@ public final class JspxNetApplication {
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
+        if (context!=null)
+        {
+            envTemplate.put(Environment.DEBUG,context.getEnvironment().getProperty(Environment.DEBUG));
+            envTemplate.put("jspxDebug",context.getEnvironment().getProperty(Environment.DEBUG));
+            envTemplate.put("useCache",context.getEnvironment().getProperty(Environment.useCache));
+            envTemplate.put(Environment.useTxWeb,false);
+        } else
+        {
+            envTemplate.put(Environment.DEBUG,false);
+            envTemplate.put("jspxDebug",false);
+            envTemplate.put("useCache",false);
+            envTemplate.put(Environment.useTxWeb,false);
+        }
         envTemplate.createSystemEnv();
-        envTemplate.put(Environment.useTxWeb,false);
+
 
         //////////////////////初始化脚本语言环境 begin
         Configurable templateConfigurable = TemplateConfigurable.getInstance();
@@ -119,7 +131,6 @@ public final class JspxNetApplication {
         {
             templateConfigurable.setSearchPath(new String[]{defaultPath});
         }
-
 
         envTemplate.createJspxEnv(jspxConfiguration.getConfigFilePath());
 
@@ -169,8 +180,11 @@ public final class JspxNetApplication {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         envTemplate.createPathEnv(defaultPath);
 
-        envTemplate.createSystemEnv();
+        envTemplate.put(Environment.DEBUG,context.getEnvironment().getProperty(Environment.DEBUG));
+        envTemplate.put("jspxDebug",context.getEnvironment().getProperty(Environment.DEBUG));
+        envTemplate.put("useCache",context.getEnvironment().getProperty(Environment.useCache));
         envTemplate.put(Environment.useTxWeb,false);
+        envTemplate.createSystemEnv();
 
         //////////////////////初始化脚本语言环境 begin
         Configurable templateConfigurable = TemplateConfigurable.getInstance();

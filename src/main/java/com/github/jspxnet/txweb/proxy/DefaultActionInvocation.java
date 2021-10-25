@@ -221,7 +221,7 @@ public class DefaultActionInvocation implements ActionInvocation {
                 requestMethodName = jsonData.getString(Environment.rocMethod);
             }
             if (!StringUtil.isEmpty(methodName) && !methodName.startsWith(TXWebUtil.AT) && !methodName.equalsIgnoreCase(requestMethodName)) {
-                log.debug(actionConfig.toString() + " 已配置了执行方法 method:" + methodName + "不允许在调用其它未指定方法");
+                log.debug(actionConfig + " 已配置了执行方法 method:" + methodName + "不允许在调用其它未指定方法");
                 JSONObject errorJson = new JSONObject(RocResponse.error(ErrorEnumType.METHOD_NOT_FOUND.getValue(), actionConfig.getActionName() + " 已配置了执行方法 method:" + methodName + "不允许在调用其它未指定方法"));
                 TXWebUtil.errorPrint(errorJson.toString(4), null, action.getResponse(), HttpStatusType.HTTP_status_403);
                 return;

@@ -133,7 +133,7 @@ public class TemplateResult extends ResultSupport {
         //如果使用cache 就使用uri
 
         String cacheKey = ScriptmarkEnv.noCache;
-        if (!ENV_TEMPLATE.getBoolean(Environment.logJspxDebug)) {
+        if (!ENV_TEMPLATE.getBoolean(Environment.DEBUG)) {
             cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
         }
         CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), TEMPLATE_PATH});

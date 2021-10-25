@@ -7,7 +7,7 @@
  * @jvm:jdk1.6+  x86/amd64
  *
  */
-package com.github.jspxnet.lucene.wordcount;
+package com.github.jspxnet.component.zhex.wordcount;
 
 /**
  * Created by IntelliJ IDEA.

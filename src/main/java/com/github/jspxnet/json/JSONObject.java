@@ -91,19 +91,12 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * Regular Expression Pattern that matches JSON Numbers. This is primarily used for
-     * output transfer guarantee that we are always writing valid JSON.
-     */
-    //static final Pattern NUMBER_PATTERN = Pattern.compile("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?");
-
-    /**
      * It is sometimes more convenient and less ambiguous transfer have a
      * {@code null  } object than transfer use Java's {@code null  } value.
      * [code]JSONObject.NULL.equals(null) } returns [code]true } .
      * [code]JSONObject.NULL.toString() } returns [code]"null" } .
      */
     public static final Object NULL = new Null();
-
 
     /**
      * Construct an empty JSONObject.
@@ -127,7 +120,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             putOnce(name, jo.get(name));
         }
     }
-
 
     /**
      * Construct a JSONObject from a JSONTokener.
@@ -158,7 +150,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             /*
              * The key is followed by ':'. We will also tolerate '=' or '=>'.
              */
-
             c = x.nextClean();
             if (c != ':') {
                 throw x.syntaxError("Expected a ':' after a key");
@@ -713,8 +704,16 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      */
     public JSONArray getJSONArray(String key) {
         Object o = get(key);
+        if (o==null)
+        {
+            return null;
+        }
         if (o instanceof JSONArray) {
             return (JSONArray) o;
+        }
+        if (o instanceof Collections || ClassUtil.isArrayType(o.getClass()))
+        {
+            return new JSONArray(o);
         }
         return null;
     }
@@ -730,8 +729,18 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      */
     public JSONObject getJSONObject(String key) {
         Object o = get(key);
+        if (o ==null||o instanceof Collections || ClassUtil.isArrayType(o.getClass()))
+        {
+            return null;
+        }
         if (o instanceof JSONObject) {
             return (JSONObject) o;
+        }
+        if (o instanceof String && StringUtil.isJsonObject((String)o)) {
+            return new JSONObject(o) ;
+        }
+        if (o instanceof Map) {
+            return new JSONObject(o) ;
         }
         return null;
     }
@@ -786,6 +795,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (o==null)
         {
             return null;
+        }
+        if (o instanceof Number)
+        {
+            return NumberUtil.toString(o);
         }
         return o.toString();
     }

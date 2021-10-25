@@ -49,7 +49,7 @@ public class TemplateScriptEngine implements ScriptRunner {
         scope = context.newObject(sharedScope);
         scope.setPrototype(sharedScope);
         scope.setParentScope(null);
-        if (EnvFactory.getEnvironmentTemplate().getBoolean(Environment.logJspxDebug)) {
+        if (EnvFactory.getEnvironmentTemplate().getBoolean(Environment.DEBUG)) {
             scope.put("console", scope, java.lang.System.out);
         }
     }

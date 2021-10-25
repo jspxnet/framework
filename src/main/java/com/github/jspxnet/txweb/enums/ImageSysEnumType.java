@@ -16,7 +16,9 @@ public enum ImageSysEnumType implements EnumType {
     //手机
     MOBILE(1, "手机"),
     //原图
-    NONE(0, "原图");
+    NONE(0, "原图"),
+    //原图
+    DELETE(-1, "删除");
 
     private final int value;
     private final String name;

@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.sioc.util;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.type.*;
 import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.Sioc;
@@ -211,6 +212,10 @@ public final class TypeUtil {
         if (type.contains(StringUtil.DOT))
         {
             types = StringUtil.substringAfterLast(type,StringUtil.DOT);
+        }
+        if (types.contains("$Null"))
+        {
+            return null;
         }
         for (TypeSerializer typeSerializer : typeMap.values()) {
             if (typeSerializer.getTypeString().equalsIgnoreCase(types)) {

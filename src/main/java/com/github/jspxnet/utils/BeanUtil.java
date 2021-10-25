@@ -700,7 +700,7 @@ public final class BeanUtil {
                 }
                 try {
                     field.setAccessible(true);
-                    field.set(oldData, TypeUtil.getTypeValue(field.getType().getSimpleName(), map.get(key)));
+                    field.set(oldData, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
                 } catch (Exception e) {
                     e.printStackTrace();
                     log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);

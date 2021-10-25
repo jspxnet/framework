@@ -24,12 +24,10 @@ import com.github.jspxnet.sober.config.SqlMapConfig;
 import com.github.jspxnet.sober.config.xml.*;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
-import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.XMLUtil;
+import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.utils.StringUtil;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -321,10 +319,34 @@ public class SoberUtil {
                 name = StringUtil.camelToUnderline(tableModels.getName(),true)+ "_" + line +"_idx";
                 field = line;
             }
+
             if (name==null&&field==null)
             {
                 continue;
             }
+
+
+            if (DatabaseEnumType.find(soberSupport.getSoberFactory().getDatabaseType()).equals(DatabaseEnumType.MSSQL))
+            {
+                String[] fields = StringUtil.split(field,StringUtil.COMMAS);
+                if (ArrayUtil.isEmpty(fields))
+                {
+                    continue;
+                }
+
+                for (int i=0;i<fields.length;i++)
+                {
+                    if (fields[i].toLowerCase().contains("date"))
+                    {
+                        fields[i] = "["+fields[i]+"] DESC";
+                    } else
+                    {
+                        fields[i] = "["+fields[i]+"] ASC";
+                    }
+                }
+                field = ArrayUtil.toString(fields,StringUtil.COMMAS);
+            }
+
             try {
                 soberSupport.createIndex(tableModels.getDatabaseName(),tableModels.getName(),name,field);
             } catch (Exception e) {
@@ -364,7 +386,7 @@ public class SoberUtil {
                 JdbcUtil.closeConnection(connection);
             }
         }
-        DatabaseEnumType[] oracleDatabaseEnumType = new DatabaseEnumType[]{DatabaseEnumType.ORACLE,DatabaseEnumType.DB2,DatabaseEnumType.DM};
+        DatabaseEnumType[] oracleDatabaseEnumType = new DatabaseEnumType[]{DatabaseEnumType.ORACLE,DatabaseEnumType.DB2,DatabaseEnumType.DM,DatabaseEnumType.MSSQL};
 
         String sql = null;
         try {
@@ -384,8 +406,10 @@ public class SoberUtil {
                         soberSupport.execute(sqlLine);
                     }
                     //创建数据库序列
-                    if (IDType.serial.equalsIgnoreCase(soberTable.getIdType()))
+                    if (DatabaseEnumType.inArray(new DatabaseEnumType[]{DatabaseEnumType.ORACLE,DatabaseEnumType.DM},soberSupport.getSoberFactory().getDatabaseType())&&
+                            IDType.serial.equalsIgnoreCase(soberTable.getIdType()))
                     {
+                        //oracle 和 dm数据需要创新序列
                         Map<String, Object> valueMap = new HashMap<>();
                         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
                         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
@@ -399,9 +423,9 @@ public class SoberUtil {
                             soberSupport.execute(seqSql);
                         }
 
-                        String tiggerSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_CREATE_SEQ_TIGGER,valueMap);
-                        log.info("tiggerSql:\r\n{}",tiggerSql);
-                        soberSupport.execute(tiggerSql);
+                        String tigSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_CREATE_SEQ_TIGGER,valueMap);
+                        log.info("tigSql:\r\n{}",tigSql);
+                        soberSupport.execute(tigSql);
                     }
                 }
                 else

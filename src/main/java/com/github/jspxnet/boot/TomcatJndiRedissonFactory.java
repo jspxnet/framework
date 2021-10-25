@@ -1,15 +1,10 @@
 package com.github.jspxnet.boot;
 
 import com.github.jspxnet.cache.redis.RedissonClientConfig;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.StringUtil;
 import org.redisson.JndiRedissonFactory;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
-import javax.naming.NamingException;
-import java.io.File;
-import java.net.URL;
 
 /**
  * Created by jspx.net
@@ -20,7 +15,7 @@ import java.net.URL;
  **/
 public class TomcatJndiRedissonFactory extends JndiRedissonFactory {
     @Override
-    protected RedissonClient buildClient(String config) throws NamingException
+    protected RedissonClient buildClient(String config)
     {
         try {
             Config redisConfig = RedissonClientConfig.getRedisConfig(config);

@@ -7,18 +7,17 @@
  * @jvm:jdk1.6+  x86/amd64
  *
  */
-package com.github.jspxnet.lucene.impl;
+package com.github.jspxnet.component.zhex.analyzer;
 
-import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.lucene.ChineseAnalyzer;
-import com.github.jspxnet.lucene.tag.TagDictionary;
-import com.github.jspxnet.lucene.wordcount.OneWord;
-import com.github.jspxnet.lucene.wordcount.WordStatCount;
+import com.github.jspxnet.component.zhex.ChineseAnalyzer;
+import com.github.jspxnet.component.zhex.tag.TagDictionary;
+import com.github.jspxnet.component.zhex.wordcount.OneWord;
+import com.github.jspxnet.component.zhex.wordcount.WordStatCount;
 import com.github.jspxnet.utils.StringUtil;
 import org.wltea.analyzer.core.IKSegmenter;
 import org.wltea.analyzer.core.Lexeme;
-
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 /**
@@ -27,7 +26,7 @@ import java.util.Set;
  * date: 2007-11-14
  * Time: 15:00:35
  * <p>
- * com.github.jspxnet.lucene.impl.ChineseAnalyzerImpl;
+ * com.github.jspxnet.component.zhex.analyzer.ChineseAnalyzerImpl;
  */
 
 public class ChineseAnalyzerImpl implements ChineseAnalyzer {
@@ -130,7 +129,7 @@ public class ChineseAnalyzerImpl implements ChineseAnalyzer {
         InputStreamReader inReader = null;
         try {
             in = new FileInputStream(file);
-            inReader = new InputStreamReader(in, Environment.defaultEncode);
+            inReader = new InputStreamReader(in, StandardCharsets.UTF_8.name());
             BufferedReader bufferedReader = new BufferedReader(inReader);
             StringBuilder buffer = new StringBuilder();
             String line;
@@ -170,7 +169,6 @@ public class ChineseAnalyzerImpl implements ChineseAnalyzer {
             if (length > 0 && word.length() < length) {
                 continue;
             }
-
             buffer.append(word);
             buffer.append(separator);
             times--;

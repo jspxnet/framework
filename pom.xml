@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.51</version>
+    <version>6.52</version>
     <description>jspx framework</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,12 +15,11 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.test.skip>true</maven.test.skip>
         <github.global.server>github</github.global.server>
-        <tomcat.version>9.0.52</tomcat.version>
+        <tomcat.version>9.0.54</tomcat.version>
         <jackson.version>2.12.5</jackson.version>
         <redisson.version>3.16.0</redisson.version>
         <slf4j.version>1.7.32</slf4j.version>
         <log4j2.version>2.14.1</log4j2.version>
-        <lucene.version>8.9.0</lucene.version>
     </properties>
     <licenses>
         <license>
@@ -28,9 +27,9 @@
             <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
         </license>
     </licenses>
-<!--
-mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=compile
--->
+    <!--
+    mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=compile
+    -->
     <scm>
         <developerConnection>scm:git:git@github.com:jspxnet/framework.git</developerConnection>
         <url>https://github.com/jspxnet/framework</url>
@@ -171,42 +170,6 @@ mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=com
             <version>2.24</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>${lucene.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-highlighter</artifactId>
-            <version>${lucene.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analyzers-common</artifactId>
-            <version>${lucene.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-queries</artifactId>
-            <version>${lucene.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-queryparser</artifactId>
-            <version>${lucene.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-memory</artifactId>
-            <version>${lucene.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-jta_1.1_spec</artifactId>
             <version>1.1.1</version>
@@ -243,11 +206,7 @@ mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=com
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
         </dependency>
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.36.0.1</version>
-        </dependency>
+
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
@@ -471,12 +430,16 @@ mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=com
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.26</version>
         </dependency>
-        <!--
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.49</version>
-        </dependency>-->
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.36.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.jtds</groupId>
+            <artifactId>jtds</artifactId>
+            <version>1.3.1</version>
+        </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
@@ -504,12 +467,12 @@ mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=com
         </dependency>
         <!--测试基础支持end -->
         <!--maven tools begin -->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.14</version>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.thetransactioncompany/cors-filter -->
         <dependency>
             <groupId>com.thetransactioncompany</groupId>
@@ -615,11 +578,11 @@ mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=com
         </dependency>
 
         <!--log4j2日志依赖结束-->
- <!--       <dependency>&lt;!&ndash;提供商是log4j官方，这个是log4j和slf4j的桥接器，spring是通过slf4j输出日志的，依赖桥接器的实现&ndash;&gt;
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j2.version}</version>&lt;!&ndash;版本这里尤为重要，必须与log4j的依赖版版本一致&ndash;&gt;
-        </dependency>-->
+        <!--       <dependency>&lt;!&ndash;提供商是log4j官方，这个是log4j和slf4j的桥接器，spring是通过slf4j输出日志的，依赖桥接器的实现&ndash;&gt;
+                   <groupId>org.apache.logging.log4j</groupId>
+                   <artifactId>log4j-slf4j-impl</artifactId>
+                   <version>${log4j2.version}</version>&lt;!&ndash;版本这里尤为重要，必须与log4j的依赖版版本一致&ndash;&gt;
+               </dependency>-->
 
         <!--需要使用log4j2的AsyncLogger需要包含disruptor-->
         <dependency>

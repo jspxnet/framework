@@ -760,11 +760,11 @@ Array.prototype.avg = function () {
 };
 //判断是否在数组
 Array.prototype.contains = function (item) {
-    return this.indexOf(item) != -1;
+    return this.indexOf(item) !== -1;
 };
 //判断是否在数组,并返回位置
 Array.prototype.indexOf = function (item, from) {
-    if (from == undefined) from = 0;
+    if (from === undefined) from = 0;
     var len = this.length;
     for (var i = (from < 0) ? Math.max(0, len + from) : from || 0; i < len; i++) {
         if (this[i].equals(item)) return i;
@@ -776,7 +776,7 @@ Array.prototype.getLast = function () {
 };
 Array.prototype.erase = function (item) {
     for (var i = this.length; i--; i) {
-        if (this[i] == item) this.splice(i, 1);
+        if (this[i] === item) this.splice(i, 1);
     }
 };
 Array.prototype.empty = function () {
@@ -791,7 +791,7 @@ Array.prototype.options = function (sel, keyf) {
     return converter.getHtmlOptions(this, sel, keyf);
 };
 Array.prototype.string = function (sel) {
-    if (sel == undefined) sel = ';';
+    if (sel === undefined) sel = ';';
     var result = "";
     for (var i = 0; i < this.length; i++) {
         result = result + sel + this[i];
@@ -806,16 +806,16 @@ Array.prototype.radio = function (rname, sel) {
     return this.radio(rname, sel, null, ":");
 };
 Array.prototype.radio = function (rname, sel, style, keyf) {
-    if (!keyf || keyf == undefined) keyf = ":";
+    if (!keyf || keyf === undefined) keyf = ":";
     var out = "";
     for (var i = 0; i < this.length; i++) {
         if (!this[i]) continue;
         var hav = this[i].indexOf(keyf);
-        if (hav == -1) {
+        if (hav === -1) {
             out = out + '<label class="radioLabel' + rname + '">';
             out = out + ' <input id="' + rname + i + '" name="' + rname + '" type="radio" value="' + this[i] + '"';
             if (this[i].equals(sel)) out = out + ' checked="checked"';
-            if (style && style != "") out = out + ' style="' + style + '" ';
+            if (style && style !== "") out = out + ' style="' + style + '" ';
             out = out + ' />' + this[i] + '</label>';
         } else {
             var keys = this[i].substring(0, hav);
@@ -823,7 +823,7 @@ Array.prototype.radio = function (rname, sel, style, keyf) {
             out = out + '<label class="radioLabel' + rname + '">';
             out = out + '<input id="' + rname + i + '" name="' + rname + '" type="radio" value="' + keys + '" ';
             if (keys === sel || keys.equals(sel)) out = out + 'checked="checked" ';
-            if (style && style != "") out = out + 'style="' + style + '" ';
+            if (style && style !== "") out = out + 'style="' + style + '" ';
             out = out + ' />' + vars + '</label>';
         }
     }
@@ -833,7 +833,7 @@ Array.prototype.checkbox = function (name, sel) {
     return this.checkbox(name, sel, null, ":");
 };
 Array.prototype.checkbox = function (rname, selected, style, keyf) {
-    if (!keyf || keyf == undefined) keyf = ":";
+    if (!keyf || keyf === undefined) keyf = ":";
     var sel;
     if (typeof (selected) == "string") sel = selected.split(";");
     else sel = selected;
@@ -841,10 +841,10 @@ Array.prototype.checkbox = function (rname, selected, style, keyf) {
     for (var i = 0; i < this.length; i++) {
         if (!this[i]) continue;
         var hav = this[i].indexOf(keyf);
-        if (hav == -1) {
+        if (hav === -1) {
             out = out + '<label class="checkLabel' + rname + '">';
             out = out + ' <input id="' + rname + i + '" name="' + rname + '" type="checkbox" value="' + this[i] + '" ';
-            if (sel && sel.indexOf(this[i]) != -1) out = out + 'checked="checked" ';
+            if (sel && sel.indexOf(this[i]) !== -1) out = out + 'checked="checked" ';
             if (style && style != "") out = out + 'style="' + style + '" ';
             out = out + ' />' + this[i] + '</label>';
         } else {
@@ -852,7 +852,7 @@ Array.prototype.checkbox = function (rname, selected, style, keyf) {
             var vars = this[i].substring(hav + 1, this[i].getLength());
             out = out + '<label class="checkLabel' + rname + '">';
             out = out + '<input id="' + rname + i + '" name="' + rname + '" type="checkbox" value="' + keys + '"';
-            if (sel && sel.indexOf(keys) != -1) out = out + ' checked="checked" ';
+            if (sel && sel.indexOf(keys) !== -1) out = out + ' checked="checked" ';
             if (style && style != "") out = out + 'style="' + style + '" ';
             out = out + ' />' + vars + '</label>';
         }
@@ -862,10 +862,10 @@ Array.prototype.checkbox = function (rname, selected, style, keyf) {
 //-------------------------对象
 Object.prototype.Clone = function () {
     var objClone;
-    if (this.constructor == Object) objClone = new this.constructor();
+    if (this.constructor === Object) objClone = new this.constructor();
     else objClone = new this.constructor(this.valueOf());
     for (var key in this) {
-        if (objClone[key] != this[key]) {
+        if (objClone[key] !== this[key]) {
             if (typeof (this[key]) == "object") objClone[key] = this[key].Clone();
             else objClone[key] = this[key];
         }

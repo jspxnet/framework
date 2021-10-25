@@ -229,7 +229,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
         VALUE_MAP.put(Environment.logErrorFile, logPath + Environment.log_error_file);
 
-        LogBackConfigUtil.createConfig();
+
     }
 
     private String getEncode() {
@@ -317,10 +317,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             System.setProperty("user.timezone", timezone);
         }
 
-     /*   if (VALUE_MAP.containsKey(Environment.cachePath)) {
-            System.setProperty(Environment.cachePath, (String) VALUE_MAP.get(Environment.cachePath));
-        }
-*/
+
         //系统密钥
         if (VALUE_MAP.containsKey(Environment.secretKey)) {
             System.setProperty(Environment.secretKey, (String) VALUE_MAP.get(Environment.secretKey));
@@ -392,6 +389,9 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         } catch (Exception e2) {
             log.info("com.sun.xml.internal.stream.XMLInputFactoryImpl " + e2.getLocalizedMessage());
         }
+
+
+        LogBackConfigUtil.createConfig();
     }
 
     /**
@@ -441,6 +441,14 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 VALUE_MAP.put((String) key, o);
             }
             VALUE_MAP.put(Environment.jspxProperties, fileName);
+            if (!VALUE_MAP.containsKey("jspxDebug"))
+            {
+                VALUE_MAP.put("jspxDebug",p.getProperty(Environment.DEBUG,"false"));
+            }
+            if (!VALUE_MAP.containsKey(Environment.DEBUG))
+            {
+                VALUE_MAP.put(Environment.DEBUG,p.getProperty(Environment.DEBUG,"false"));
+            }
             if (!VALUE_MAP.containsKey("catalina.base")) {
                 VALUE_MAP.put("catalina.base", System.getProperty("CATALINA_BASE", System.getProperty("user.dir")));
             }

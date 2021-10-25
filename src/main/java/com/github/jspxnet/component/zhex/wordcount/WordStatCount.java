@@ -7,7 +7,7 @@
  * @jvm:jdk1.6+  x86/amd64
  *
  */
-package com.github.jspxnet.lucene.wordcount;
+package com.github.jspxnet.component.zhex.wordcount;
 
 import java.util.*;
 
@@ -36,7 +36,7 @@ public class WordStatCount {
      * @param regex the default hyphen collection.
      * @return the words as a Set by the default comparator
      */
-    public Set<com.github.jspxnet.lucene.wordcount.OneWord> getWordCount(String text, String regex) {
+    public Set<OneWord> getWordCount(String text, String regex) {
         return getWordCount(text, regex, FREQUENCY_ORDER);
     }
 
@@ -45,7 +45,7 @@ public class WordStatCount {
      * @param order 排序
      * @return the words as a Set by the default hyphens
      */
-    public Set<com.github.jspxnet.lucene.wordcount.OneWord> getWordCount(String text, Comparator<com.github.jspxnet.lucene.wordcount.OneWord> order) {
+    public Set<OneWord> getWordCount(String text, Comparator<OneWord> order) {
 
         return getWordCount(text, REGEX, order);
     }
@@ -59,11 +59,11 @@ public class WordStatCount {
      * @param order     the order of the Set returned by.
      * @return the word Set that the text contains.
      */
-    public Set<com.github.jspxnet.lucene.wordcount.OneWord> getWordCount(String text, String separator, Comparator<com.github.jspxnet.lucene.wordcount.OneWord> order) {
-        Map<com.github.jspxnet.lucene.wordcount.OneWord, com.github.jspxnet.lucene.wordcount.OneWord> map = new HashMap<com.github.jspxnet.lucene.wordcount.OneWord, com.github.jspxnet.lucene.wordcount.OneWord>();
+    public Set<OneWord> getWordCount(String text, String separator, Comparator<OneWord> order) {
+        Map<OneWord, OneWord> map = new HashMap<OneWord, OneWord>();
         String[] words = text.split(separator);
         for (String word : words) {
-            com.github.jspxnet.lucene.wordcount.OneWord o = new com.github.jspxnet.lucene.wordcount.OneWord(word);
+            OneWord o = new OneWord(word);
             if (map.containsKey(o)) {
                 (map.get(o)).increase();
             } else {
@@ -71,7 +71,7 @@ public class WordStatCount {
             }
         }
 
-        Set<com.github.jspxnet.lucene.wordcount.OneWord> sort = new TreeSet<com.github.jspxnet.lucene.wordcount.OneWord>(order);
+        Set<OneWord> sort = new TreeSet<OneWord>(order);
         sort.addAll(map.keySet());
         return Collections.unmodifiableSet(sort);
     }
@@ -83,8 +83,8 @@ public class WordStatCount {
     public static Comparator DICTIONARY_ORDER = new Comparator() {
         @Override
         public int compare(Object o1, Object o2) {
-            com.github.jspxnet.lucene.wordcount.OneWord w1 = (com.github.jspxnet.lucene.wordcount.OneWord) o1;
-            com.github.jspxnet.lucene.wordcount.OneWord w2 = (com.github.jspxnet.lucene.wordcount.OneWord) o2;
+            OneWord w1 = (OneWord) o1;
+            OneWord w2 = (OneWord) o2;
             return w1.getWord().compareTo(w2.getWord());
         }
     };
@@ -92,9 +92,9 @@ public class WordStatCount {
      * the sort contant of FREQUENCY,the words was sorted by the apperance
      * times in the Set.
      */
-    final public static Comparator<com.github.jspxnet.lucene.wordcount.OneWord> FREQUENCY_ORDER = new Comparator<com.github.jspxnet.lucene.wordcount.OneWord>() {
+    final public static Comparator<OneWord> FREQUENCY_ORDER = new Comparator<OneWord>() {
         @Override
-        public int compare(com.github.jspxnet.lucene.wordcount.OneWord w1, OneWord w2) {
+        public int compare(OneWord w1, OneWord w2) {
             int i = w2.getCount() - w1.getCount();
             if (i == 0) {
                 return w1.getWord().compareTo(w2.getWord());

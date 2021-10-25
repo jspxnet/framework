@@ -1,6 +1,8 @@
 package com.github.jspxnet.txweb.dispatcher.handle;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.XML;
@@ -22,6 +24,7 @@ import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
 import com.github.jspxnet.utils.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -88,40 +91,40 @@ public class RocHandle extends ActionHandle {
 
         //为了兼用 api restFull 方式，这里允许为空,默认构造配置
         if (jsonData == null) {
-            jsonData = new JSONObject();
             JSONObject methodJson = new JSONObject();
             methodJson.put(Environment.rocName, URLUtil.getFileNamePart(request.getRequestURI()));
+            jsonData = new JSONObject();
             jsonData.put(Environment.rocMethod, methodJson);
             jsonData.put(Environment.rocFormat, WebOutEnumType.JSON.getName());
         }
 
         JSONObject methodJson = jsonData.getJSONObject(Environment.rocMethod);
-        if (methodJson == null) {
+        if (methodJson == null || methodJson.isEmpty()) {
             methodJson = new JSONObject();
             methodJson.put(Environment.rocName, URLUtil.getFileNamePart(request.getRequestURI()));
             jsonData.put(Environment.rocMethod, methodJson);
         }
         //判断是XML还是JSON end
 
+        //兼容格式调整
         JSONObject methodCall = jsonData.getJSONObject(Environment.rocMethodCall);
         //兼容格式调整
-        if (methodCall != null) {
+
+        boolean oldFormat = false;
+        if (jsonData.containsKey(Environment.rocMethodCall)&&methodCall != null) {
             jsonData = methodCall;
+            oldFormat = true;
+
         }
         //////////////////初始end
 
         String namespace = TXWebUtil.getNamespace(request.getServletPath());
-        String  namePart = jsonData.getString(Environment.rocId);
-        if (StringUtil.isNull(namePart)) {
-            namePart = URLUtil.getFileNamePart(request.getRequestURI());
-        }
-        if (namePart != null && namePart.contains(TXWebUtil.AT)) {
+        String namePart =  oldFormat?jsonData.getString(Environment.rocId):URLUtil.getFileNamePart(request.getRequestURI());
+        if (oldFormat&&namePart != null && namePart.contains(TXWebUtil.AT)) {
             namePart = StringUtil.substringBefore(namePart, TXWebUtil.AT);
             namespace = StringUtil.substringAfter(namePart, TXWebUtil.AT);
         }
         ///////////////////////////////////环境参数 begin
-
-
         WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         ActionConfig actionConfig = webConfigManager.getActionConfig(namePart, namespace, true);
         if (actionConfig == null) {
@@ -147,11 +150,26 @@ public class RocHandle extends ActionHandle {
 
     static public void executeActionInvocation(ActionConfig actionConfig, JSONObject jsonData,HttpServletRequest request,HttpServletResponse response) throws Exception
     {
-
         JSONObject dataField = jsonData.getJSONObject(DATA_FIELD);
         Map<String, Object> envParams = createEnvironment(request, response);
-        LOCK.lock();
-        try {
+        EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
+        if (!environmentTemplate.containsName(Environment.THREAD_SAFE_MODE)||environmentTemplate.getBoolean(Environment.THREAD_SAFE_MODE))
+        {
+            //线程安全模式
+            LOCK.lock();
+            try {
+                ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
+                actionInvocation.initAction();
+                if (ActionSupport.NONE.equalsIgnoreCase(actionInvocation.invoke()))
+                {
+                    return;
+                }
+                actionInvocation.executeResult(new RocResult(dataField));
+            } finally {
+                LOCK.unlock();
+            }
+        } else {
+            //非线程安全模式
             ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
             actionInvocation.initAction();
             if (ActionSupport.NONE.equalsIgnoreCase(actionInvocation.invoke()))
@@ -159,8 +177,6 @@ public class RocHandle extends ActionHandle {
                 return;
             }
             actionInvocation.executeResult(new RocResult(dataField));
-        } finally {
-            LOCK.unlock();
         }
         //执行action返回数据end
     }

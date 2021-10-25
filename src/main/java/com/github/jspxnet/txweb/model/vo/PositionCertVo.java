@@ -23,7 +23,7 @@ import java.util.List;
  * 统计证书的合格比例
  */
 @Data
-@Table(caption = "证书比例视图", create = false)
+@Table(caption = "证书比例视图", create = false,cache = false)
 public class PositionCertVo implements Serializable {
     public PositionCertVo() {
 
@@ -37,7 +37,7 @@ public class PositionCertVo implements Serializable {
     private String organize = StringUtil.empty;
 
     @Column(caption = "岗位", dataType = "isLengthBetween(0,200)", length = 200)
-    private List<PositionStatVo> list = new ArrayList<PositionStatVo>();
+    private List<PositionStatVo> list = new ArrayList<>();
 
     public boolean containsPosition(String position) {
         for (PositionStatVo positionNum : this.list) {

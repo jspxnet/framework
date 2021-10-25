@@ -44,7 +44,7 @@ import java.util.Map;
 @Slf4j
 public abstract class ResultSupport implements Result {
     final static protected EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
-    final static protected boolean DEBUG = ENV_TEMPLATE.getBoolean(Environment.logJspxDebug);
+    final static protected boolean DEBUG = ENV_TEMPLATE.getBoolean(Environment.DEBUG);
     //json 无对应返回标识
     private static final String KEY_GRID = "grid";
     static final String KEY_ROC_XML = "xml"; //xml 需要设置 json 为默认

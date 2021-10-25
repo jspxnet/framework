@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.txweb.view;
 
-import com.github.jspxnet.lucene.ChineseAnalyzer;
+import com.github.jspxnet.component.zhex.ChineseAnalyzer;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 

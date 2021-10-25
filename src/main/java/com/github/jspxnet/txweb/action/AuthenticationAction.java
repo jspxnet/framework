@@ -214,7 +214,7 @@ public class AuthenticationAction extends AuthenticationView {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (!loginInfo.isEmpty()) {
+        if (!ObjectUtil.isEmpty(loginInfo)) {
             Iterator<String> iterator = loginInfo.keySet().iterator();
             if (iterator.hasNext()) {
                 return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), loginInfo.get(iterator.next()));
@@ -222,7 +222,7 @@ public class AuthenticationAction extends AuthenticationView {
         }
 
         //--------------
-        boolean isLogin = loginInfo.isEmpty();
+        boolean isLogin = loginInfo!=null&&loginInfo.isEmpty();
         if (isLogin) {
             //已经登陆
             userSession = onlineManager.getUserSession(this);

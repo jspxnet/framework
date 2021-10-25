@@ -47,7 +47,6 @@ public final class JxlsUtil {
             JdbcHelper jdbcHelper = new JdbcHelper(conn);
             context.putVar("jdbc", jdbcHelper);
         }
-
         JxlsHelper jxlsHelper = JxlsHelper.getInstance();
         jxlsHelper.setEvaluateFormulas(true);
         jxlsHelper.setProcessFormulas(true);

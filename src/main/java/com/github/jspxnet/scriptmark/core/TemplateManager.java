@@ -42,7 +42,7 @@ public class TemplateManager implements TemplateLoader {
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
         int second = environmentTemplate.getInt(ScriptmarkEnv.Template_update_delay, configurable.getInt(ScriptmarkEnv.Template_update_delay));
         int size = environmentTemplate.getInt(ScriptmarkEnv.Template_cache_size, configurable.getInt(ScriptmarkEnv.Template_cache_size));
-        useCache = !environmentTemplate.getBoolean(Environment.logJspxDebug);
+        useCache = !environmentTemplate.getBoolean(Environment.DEBUG);
         //如果为调试模式，将自动关闭缓存
         if (size < 5) {
             size = 30;
