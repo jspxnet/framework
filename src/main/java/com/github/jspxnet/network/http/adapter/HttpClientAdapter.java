@@ -4,6 +4,7 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.http.HttpClient;
+import com.github.jspxnet.network.http.HttpClientFactory;
 import com.github.jspxnet.security.asymmetric.AsyEncrypt;
 import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.security.utils.EncryptUtil;
@@ -556,8 +557,6 @@ public class HttpClientAdapter implements HttpClient {
         return EntityUtils.toString(post(url, json, defaultHeaders),encode);
     }
 
-
-
     @Override
     public String getResponseString() throws ParseException, IOException {
         return EntityUtils.toString(httpResponse.getEntity());
@@ -582,7 +581,6 @@ public class HttpClientAdapter implements HttpClient {
             httpRequest.setHeader(entry.getKey(), entry.getValue());
         }
     }
-
 
     /**
      *
@@ -716,19 +714,13 @@ public class HttpClientAdapter implements HttpClient {
     public void cleanHeaders() {
         defaultHeaders.clear();
     }
-/*
+
     public static void main(String[] args) throws Exception {
-        HttpClient httpClient = new HttpClientAdapter();
-        Map<String, String> param = new HashMap<>();
-        param.put("loginId", "admin");
-        param.put("method", "manageLogin");
-        param.put("password", "111111");
-        param.put("submit", "登陆");
-        param.put("uid", "name");
-        //http://192.168.0.200:8080/jbbs/payreturn.jhtml
-        //http://www.jspx.net/jcms/htdoc/products.jhtml
-        // httpClient.setEncode("gb2312");
-        String out = httpClient.build().getString("http://www.modoopark.com/");
+
+
+        HttpClient httpClient =  HttpClientFactory.createHttpClient("https://www.baidu.com");
+
+        String out = httpClient.getString();
         System.out.println(out);
-    }*/
+    }
 }

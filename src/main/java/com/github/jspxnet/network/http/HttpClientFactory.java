@@ -3,7 +3,10 @@ package com.github.jspxnet.network.http;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.network.http.adapter.HttpClientAdapter;
 import com.github.jspxnet.network.http.adapter.HttpsClientAdapter;
+import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.SystemUtil;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +44,6 @@ public abstract class HttpClientFactory {
         } else {
             client = new HttpClientAdapter().build(url);
         }
-
         client.setHeaders(ROC_HEADERS);
         return client;
     }
@@ -57,6 +59,24 @@ public abstract class HttpClientFactory {
         client.setHeaders(ROC_SECRET_HEADERS);
         return client;
     }
+
+    /**
+     *
+     * @return 得到证书的保存路径,默认的保存文件名为 cacerts
+     */
+    public static String getJdkSecurityCertFile() {
+
+        String path = System.getProperty("java.home") + File.separatorChar + "lib"+ File.separatorChar + "security";
+        path = FileUtil.mendPath(path);
+        File file = new File(path,"cacerts");
+        if (file.isFile()&&file.canRead())
+        {
+            return file.getPath();
+        }
+        file = new File(path,"jssecacerts");
+        return file.getPath();
+    }
+
 
     /**
      * 简化调用

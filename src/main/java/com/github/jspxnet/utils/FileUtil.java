@@ -1113,8 +1113,8 @@ public final class FileUtil {
             return StringUtil.empty;
         }
         String result = mendFile(path);
-        if (!result.endsWith("/") && !result.endsWith("\\")) {
-            result = result + "/";
+        if (!result.endsWith(StringUtil.BACKSLASH) && !result.endsWith(StringUtil.TRANSFERRED)) {
+            result = result + StringUtil.BACKSLASH;
         }
         return result;
     }
@@ -1127,7 +1127,7 @@ public final class FileUtil {
         if (path == null || path.length() < 1) {
             return StringUtil.empty;
         }
-        String result = StringUtil.replace(path, "/", "\\");
+        String result = StringUtil.replace(path, StringUtil.BACKSLASH, StringUtil.TRANSFERRED);
         if (result.startsWith("file:\\\\")) {
             return result;
         }
@@ -1146,7 +1146,7 @@ public final class FileUtil {
         if (fileName == null || fileName.length() < 1) {
             return StringUtil.empty;
         }
-        String result = StringUtil.replace(fileName, "\\", "/");
+        String result = StringUtil.replace(fileName, StringUtil.TRANSFERRED, StringUtil.BACKSLASH);
         if (SystemUtil.OS == SystemUtil.WINDOWS) {
             if (result.startsWith("file://")) {
                 result = result.substring(7);
@@ -1161,7 +1161,7 @@ public final class FileUtil {
         if (result.startsWith("file:") || result.startsWith("http:") || result.startsWith("https:") || result.startsWith("ftp:") || result.startsWith("ftps:")) {
             return result;
         }
-        return StringUtil.replace(result, "//", "/");
+        return StringUtil.replace(result, "//", StringUtil.BACKSLASH);
     }
 
     /**

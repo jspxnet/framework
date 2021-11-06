@@ -416,6 +416,21 @@ public final class URLUtil {
         }
         return result;
     }
+
+    static public String getHostNameAndPort(String str) {
+        if (StringUtil.isNull(str)) {
+            return StringUtil.empty;
+        }
+        String result = StringUtil.empty;
+        if (str.startsWith("http://")) {
+            result = StringUtil.substringBefore(str.substring(7), "/").trim();
+        }
+        if (str.startsWith("https://")) {
+            result = StringUtil.substringBefore(str.substring(8), "/").trim();
+        }
+
+        return result;
+    }
 /*    public static void main(String[] args) {
         System.out.println(getFixHessianUrl("/jcompany/menu/tree","http://www.jspxn.net","jcompany","http://127.0.0.1/xxx/222"));
     }*/
