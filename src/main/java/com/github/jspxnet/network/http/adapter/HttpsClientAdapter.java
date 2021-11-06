@@ -152,8 +152,7 @@ public class HttpsClientAdapter extends HttpClientAdapter implements HttpClient 
         }
 
         @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException {
+        public void checkClientTrusted(X509Certificate[] chain, String authType) {
             throw new UnsupportedOperationException();
         }
 
@@ -184,9 +183,6 @@ public class HttpsClientAdapter extends HttpClientAdapter implements HttpClient 
 
         HttpsClientAdapter.installCert(keyStore,domain,null);
         */
-
-
-
 
     }
 }
