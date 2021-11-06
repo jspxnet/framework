@@ -3,6 +3,7 @@ package com.github.jspxnet.network.http.adapter;
 import com.github.jspxnet.network.http.HttpClient;
 import com.github.jspxnet.network.http.HttpClientFactory;
 import com.github.jspxnet.security.NullX509TrustManager;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
 import javax.net.ssl.*;
@@ -111,8 +112,7 @@ public class HttpsClientAdapter extends HttpClientAdapter implements HttpClient 
         }
 
         X509Certificate[] chain = tm.chain;
-        if (chain == null) {
-            System.out.println("Could not obtain server certificate chain");
+        if (ObjectUtil.isEmpty(chain)) {
             return;
         }
 
