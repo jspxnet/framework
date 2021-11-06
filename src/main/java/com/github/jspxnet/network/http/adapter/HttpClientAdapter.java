@@ -4,7 +4,6 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.http.HttpClient;
-import com.github.jspxnet.network.http.HttpClientFactory;
 import com.github.jspxnet.security.asymmetric.AsyEncrypt;
 import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.security.utils.EncryptUtil;
@@ -648,13 +647,10 @@ public class HttpClientAdapter implements HttpClient {
                 }
             }
 
-
             // 对于MIME类型的请求，httpclient建议全用MulitPartRequestEntity进行包装
-
             MultipartRequestEntity multipartRequest = new MultipartRequestEntity(parts, postMethod.getParams());
             postMethod.setRequestEntity(multipartRequest);
             //---------------------------------------------
-
 
             org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
 
@@ -715,12 +711,5 @@ public class HttpClientAdapter implements HttpClient {
         defaultHeaders.clear();
     }
 
-    public static void main(String[] args) throws Exception {
 
-
-        HttpClient httpClient =  HttpClientFactory.createHttpClient("https://www.baidu.com");
-
-        String out = httpClient.getString();
-        System.out.println(out);
-    }
 }
