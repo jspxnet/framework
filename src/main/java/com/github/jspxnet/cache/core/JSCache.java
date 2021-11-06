@@ -59,7 +59,7 @@ public class JSCache implements Runnable, Cache {
     /**
      * 最大允许内存空间
      */
-    private int maxElements = 10000;
+    private int maxElements = 50000;
 
     /**
      * 缓存文件保存路径

@@ -156,11 +156,11 @@ public class UploadFileAction extends MultipartSupport {
     }
 
     protected int getSysType(ImageSysEnumType imageSysEnumType) {
-        return getInt(SYS_TYPE,imageSysEnumType.getValue());
+        return getInt(SYS_TYPE, imageSysEnumType.getValue());
     }
 
     protected int getMaxImageWidthHeight() {
-        return getInt(MAX_IMAGE_WIDTH_HEIGHT,config.getInt(Environment.maxImageWidth,1280));
+        return getInt(MAX_IMAGE_WIDTH_HEIGHT, config.getInt(Environment.maxImageWidth, 1280));
     }
 
 
@@ -658,19 +658,18 @@ public class UploadFileAction extends MultipartSupport {
                 upFile.setAttributes(map.toString());
             }
             int maxImageWidth = getMaxImageWidthHeight();
-            if (image.getHeight()>maxImageWidth||image.getWidth() > maxImageWidth) {
+            if (image.getHeight() > maxImageWidth || image.getWidth() > maxImageWidth) {
                 boolean repair = ImageUtil.thumbnail(image, new FileOutputStream(file), uf.getFileType(), maxImageWidth, maxImageWidth);
                 image = ImageIO.read(file);
-                if (image!=null)
-                {
+                if (image != null) {
                     StringMap<String, String> attributeMap = upFile.getAttributeMap();
                     attributeMap.put(WIDTH_NAME, NumberUtil.toString(image.getWidth()));
                     attributeMap.put(HEIGHT_NAME, NumberUtil.toString(image.getHeight()));
                     upFile.setAttributes(attributeMap.toString());
+                    upFile.setFileSize(file.length());
                 }
                 json.put("repair", repair);
-            } else
-            {
+            } else {
                 StringMap<String, String> attributeMap = upFile.getAttributeMap();
                 attributeMap.put(WIDTH_NAME, NumberUtil.toString(w));
                 attributeMap.put(HEIGHT_NAME, NumberUtil.toString(h));
@@ -678,14 +677,12 @@ public class UploadFileAction extends MultipartSupport {
             }
 
             String thumbnailImg = FileUtil.getThumbnailFileName(uf.getFileName());
-            if (thumbnail)
-            {
+            if (thumbnail) {
                 int width = getInt(THUMBNAIL_WIDTH_VAR_NAME, config.getInt(THUMBNAIL_WIDTH_VAR_NAME, 400));
                 int height = getInt(THUMBNAIL_HEIGHT_VAR_NAME, config.getInt(THUMBNAIL_HEIGHT_VAR_NAME, 400));
                 //创建缩图
                 File thumbnailFile = new File(file.getParent(), thumbnailImg);
-                if (ImageUtil.thumbnail(image, new FileOutputStream(thumbnailFile), uf.getFileType(), width, height))
-                {
+                if (ImageUtil.thumbnail(image, new FileOutputStream(thumbnailFile), uf.getFileType(), width, height)) {
                     String thumbnailPath = FileUtil.mendPath(FileUtil.getDecrease(setupPath, uf.getDir())) + thumbnailImg;
                     IUploadFile thumbnailUploadFile = (IUploadFile) uploadFileDAO.getClassType().newInstance();
                     thumbnailUploadFile.setHash(FileUtil.getFileGuid(thumbnailFile, hashType));

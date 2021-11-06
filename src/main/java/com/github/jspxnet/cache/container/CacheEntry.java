@@ -25,7 +25,7 @@ import java.io.Serializable;
 public class CacheEntry implements Serializable, Cloneable {
 
     private static final int ONE_SECOND = DateUtil.SECOND;
-    private static final int MAX_KEY_LENGTH = 250;
+    private static final int MAX_KEY_LENGTH = 1024;
 
     public CacheEntry() {
 
