@@ -15,21 +15,23 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.io.IoUtil;
-import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.StringUtil;
 import org.apache.log4j.*;
+import org.apache.log4j.varia.ExternallyRolledFileAppender;
 import org.apache.log4j.varia.LevelRangeFilter;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,7 +49,11 @@ public class LogBackConfigUtil {
         if (loggerFactory instanceof ch.qos.logback.classic.LoggerContext)
         {
             LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-            createLogBackConfig(lc);
+            //spring 环境，让给spring配置
+            if (lc.getObject("org.springframework.boot.logging.LoggingSystem")==null)
+            {
+                createLogBackConfig(lc);
+            }
         } else
         {
             createLog4jConfig();
@@ -132,7 +138,7 @@ public class LogBackConfigUtil {
         }*/
 
         if (envTemplate.getBoolean(Environment.logError)) {
-            RollingFileAppender errorAppender = new RollingFileAppender();
+            ExternallyRolledFileAppender errorAppender = new ExternallyRolledFileAppender();
             errorAppender.setName(Environment.logError);
             errorAppender.setBufferSize(64);
             errorAppender.setAppend(true);
@@ -159,7 +165,7 @@ public class LogBackConfigUtil {
 
         //info
         if (envTemplate.getBoolean(Environment.logInfo)) {
-            RollingFileAppender infoAppender = new RollingFileAppender();
+            ExternallyRolledFileAppender infoAppender = new ExternallyRolledFileAppender();
             infoAppender.setName(Environment.logInfo);
             infoAppender.setBufferSize(128);
             infoAppender.setAppend(false);

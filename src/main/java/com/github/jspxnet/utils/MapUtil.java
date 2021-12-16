@@ -14,8 +14,6 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.util.StringMap;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +25,7 @@ import java.util.*;
  * date: 2004-7-19
  * Time: 21:48:44
  */
-public class MapUtil {
+public final class MapUtil {
     private MapUtil() {
 
     }
@@ -91,8 +89,14 @@ public class MapUtil {
         }
         StringBuilder result = new StringBuilder();
         for (String key : map.keySet()) {
-            String value = (String) map.get(key);
-            result.append(key).append(StringUtil.EQUAL).append(URLUtil.getUrlEncoder(value, Environment.defaultEncode)).append(StringUtil.AND);
+            String value = ObjectUtil.toString(map.get(key));
+            if (StringUtil.isChinese(value))
+            {
+                result.append(key).append(StringUtil.EQUAL).append( URLUtil.getUrlEncoder(value, Environment.defaultEncode)).append(StringUtil.AND);
+            } else
+            {
+                result.append(key).append(StringUtil.EQUAL).append(value).append(StringUtil.AND);
+            }
         }
         if (result.toString().endsWith(StringUtil.AND)) {
             result.setLength(result.length() - 1);
@@ -230,7 +234,7 @@ public class MapUtil {
         while(iter.hasNext()) {
             name = iter.next();
             String value = String.valueOf(map.get(name));
-            if (!"sign".equalsIgnoreCase(name) && StringUtils.isNotBlank(name) && StringUtils.isNotBlank(value)) {
+            if (!"sign".equalsIgnoreCase(name) && !StringUtil.isBlank(name) && !StringUtil.isBlank(value)) {
                 sb.append(name).append(StringUtil.EQUAL).append(value).append(StringUtil.AND);
             }
         }
@@ -249,11 +253,96 @@ public class MapUtil {
         while(iter.hasNext()) {
             String name = iter.next();
             String value = String.valueOf(map.get(name));
-            if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(value)) {
+            if (!StringUtil.isBlank(name) && !StringUtil.isBlank(value)) {
                 sb.append("<").append(name).append(">").append(value).append("</").append(name).append(">");
             }
         }
         sb.append("</xml>");
         return sb.toString();
     }
+    /**
+     *
+     * @param valueMap 变量map
+     * @return 修复变量名称，  数字开头加下划线,.开头变成下划线，中间有-的变成下划线
+     */
+    public static Map<String, Object> autoTypeValueMap(final Map<String, Object> valueMap) {
+        if (valueMap==null)
+        {
+            return valueMap;
+        }
+        Map<String,Object> fixMap = new HashMap<>();
+        Set<Map.Entry<String, Object>> set=valueMap.entrySet();
+        Iterator<Map.Entry<String, Object>> iterator=set.iterator();
+
+        while(iterator.hasNext()){
+            Map.Entry<String, Object> entry=iterator.next();
+            String key=entry.getKey();
+
+            String newName = key;
+            if (ValidUtil.isNumber(key.charAt(0)+""))
+            {
+                newName = "_" + key;
+            } else
+            if ('.'==key.charAt(0))
+            {
+                newName =  StringUtil.replaceOnce(key,".","_");
+            }
+            if (key.contains("-"))
+            {
+                newName = StringUtil.replace(newName,"-","_");
+            }
+            if (!key.equals(newName))
+            {
+                iterator.remove();
+                fixMap.put(newName,entry.getValue());
+            }
+        }
+        valueMap.putAll(fixMap);
+        return fixValueType(valueMap);
+    }
+
+    public static Map<String, Object> fixValueType(final Map<String, Object> valueMap) {
+        if (valueMap==null)
+        {
+            return valueMap;
+        }
+
+        Set<Map.Entry<String, Object>> set=valueMap.entrySet();
+        Iterator<Map.Entry<String, Object>> iterator=set.iterator();
+        while(iterator.hasNext()){
+            Map.Entry<String, Object> entry=iterator.next();
+            String key=entry.getKey();
+            Object obj = entry.getValue();
+            if (obj==null)
+            {
+                continue;
+            }
+            if (obj instanceof String)
+            {
+                String str = (String)obj;
+                if (StringUtil.isStandardNumber(str))
+                {
+                    String numStr = NumberUtil.getNumberStdFormat(str);
+                    if (numStr.contains("."))
+                    {
+                        valueMap.put(key,StringUtil.toDouble(str));
+                    } else
+                    {
+                        valueMap.put(key,StringUtil.toLong(str));
+                    }
+
+                } else
+                if ("false".equals(str)||"off".equals(str))
+                {
+                    valueMap.put(key,false);
+                } else
+                if ("true".equals(str)|| "on".equals(str))
+                {
+                    valueMap.put(key,true);
+                }
+            }
+        }
+        return valueMap;
+    }
+
 }

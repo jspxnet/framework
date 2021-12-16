@@ -14,7 +14,6 @@ import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.scriptmark.parse.html.*;
 import com.github.jspxnet.utils.*;
-
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -67,7 +66,7 @@ public class HtmlReplaceHost {
         this.oldUrl = oldUrl;
         this.urlName = URLUtil.getFileName(oldUrl);
         oldHost = URLUtil.getHostUrl(oldUrl);
-        oldUrlPath = URLUtil.getURLPath(oldUrl);
+        oldUrlPath = URLUtil.getUrlPath(oldUrl);
         if ("http://".equalsIgnoreCase(oldUrlPath)) {
             oldUrlPath = oldHost;
         }
@@ -204,7 +203,7 @@ public class HtmlReplaceHost {
                     String photoFileName = URLUtil.getFileName(newURL);
                     String photoUrlName = URLUtil.getFileNamePart(photoFileName);
                     String photoType = URLUtil.getFileType(photoFileName);
-                    newURL = URLUtil.getURLPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
+                    newURL = URLUtil.getUrlPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
                 }
 
                 String source = imgTag.getSource();
@@ -237,7 +236,7 @@ public class HtmlReplaceHost {
                             String photoFileName = URLUtil.getFileName(newURL2);
                             String photoUrlName = URLUtil.getFileNamePart(photoFileName);
                             String photoType = URLUtil.getFileType(photoFileName);
-                            newURL2 = URLUtil.getURLPath(newURL2) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
+                            newURL2 = URLUtil.getUrlPath(newURL2) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
                         }
                         String oldHtml = StringUtil.replace(source2, linkUrlData, newURL2);
                         result = StringUtil.replace(result, source2, oldHtml);
@@ -270,7 +269,7 @@ public class HtmlReplaceHost {
                         String photoFileName = URLUtil.getFileName(newURL2);
                         String photoUrlName = URLUtil.getFileNamePart(photoFileName);
                         String photoType = URLUtil.getFileType(photoFileName);
-                        newURL2 = URLUtil.getURLPath(newURL2) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
+                        newURL2 = URLUtil.getUrlPath(newURL2) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
                     }
                     String oldHtml = StringUtil.replace(body, linkUrl2, newURL2);
                     result = StringUtil.replace(result, body, oldHtml);
@@ -292,7 +291,7 @@ public class HtmlReplaceHost {
                     String photoFileName = URLUtil.getFileName(newURL);
                     String photoUrlName = URLUtil.getFileNamePart(photoFileName);
                     String photoType = URLUtil.getFileType(photoFileName);
-                    newURL = URLUtil.getURLPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
+                    newURL = URLUtil.getUrlPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
                 }
                 String oldHtml = StringUtil.replace(source, linkUrl, newURL);
                 result = StringUtil.replace(result, source, oldHtml);
@@ -375,7 +374,7 @@ public class HtmlReplaceHost {
                         String photoFileName = URLUtil.getFileName(newURL2);
                         String photoUrlName = URLUtil.getFileNamePart(photoFileName);
                         String photoType = URLUtil.getFileType(photoFileName);
-                        newURL2 = URLUtil.getURLPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
+                        newURL2 = URLUtil.getUrlPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
                     }
                     String source2 = imgTag.getSource();
                     String oldHtml2 = StringUtil.replace(source2, linkUrl2, newURL2);
@@ -423,7 +422,7 @@ public class HtmlReplaceHost {
                             String photoFileName = URLUtil.getFileName(newURL2);
                             String photoUrlName = URLUtil.getFileNamePart(photoFileName);
                             String photoType = URLUtil.getFileType(photoFileName);
-                            newURL2 = URLUtil.getURLPath(newURL2) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
+                            newURL2 = URLUtil.getUrlPath(newURL2) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
                         }
                         String oldHtml = StringUtil.replace(source2, linkUrlData, newURL2);
                         result = StringUtil.replace(result, source2, oldHtml);
@@ -456,7 +455,7 @@ public class HtmlReplaceHost {
                         String photoFileName = URLUtil.getFileName(newURL2);
                         String photoUrlName = URLUtil.getFileNamePart(photoFileName);
                         String photoType = URLUtil.getFileType(photoFileName);
-                        newURL2 = URLUtil.getURLPath(newURL2) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
+                        newURL2 = URLUtil.getUrlPath(newURL2) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
                     }
                     String oldHtml = StringUtil.replace(body, linkUrl2, newURL2);
                     result = StringUtil.replace(result, body, oldHtml);
@@ -478,7 +477,7 @@ public class HtmlReplaceHost {
                     String photoFileName = URLUtil.getFileName(newURL);
                     String photoUrlName = URLUtil.getFileNamePart(photoFileName);
                     String photoType = URLUtil.getFileType(photoFileName);
-                    newURL = URLUtil.getURLPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
+                    newURL = URLUtil.getUrlPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
                 }
                 String oldHtml = StringUtil.replace(objectTag.getSource(), linkUrl, newURL);
                 result = StringUtil.replace(result, objectTag.getSource(), oldHtml);
@@ -560,7 +559,7 @@ public class HtmlReplaceHost {
                 String photoFileName = URLUtil.getFileName(newURL);
                 String photoUrlName = URLUtil.getFileNamePart(photoFileName);
                 String photoType = URLUtil.getFileType(photoFileName);
-                newURL = URLUtil.getURLPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
+                newURL = URLUtil.getUrlPath(newURL) + photoUrlName + "_" + htmlEncode.toLowerCase() + StringUtil.DOT + photoType;
             }
             String oldHtml = StringUtil.replace(xml, linkUrl, newURL);
             result = StringUtil.replace(result, xml, oldHtml);

@@ -166,7 +166,7 @@ public final class URLUtil {
      * @param url 完整的URL路径
      * @return 返回URL 不代文件名称部分 例如:http://www.jspx.net/xxx/
      */
-    public static String getURLPath(String url) {
+    public static String getUrlPath(String url) {
         if (StringUtil.isNull(url)) {
             return StringUtil.empty;
         }
@@ -414,21 +414,6 @@ public final class URLUtil {
         {
             result = domain + StringUtil.replace("/" +  result,"//","/");
         }
-        return result;
-    }
-
-    static public String getHostNameAndPort(String str) {
-        if (StringUtil.isNull(str)) {
-            return StringUtil.empty;
-        }
-        String result = StringUtil.empty;
-        if (str.startsWith("http://")) {
-            result = StringUtil.substringBefore(str.substring(7), "/").trim();
-        }
-        if (str.startsWith("https://")) {
-            result = StringUtil.substringBefore(str.substring(8), "/").trim();
-        }
-
         return result;
     }
 /*    public static void main(String[] args) {

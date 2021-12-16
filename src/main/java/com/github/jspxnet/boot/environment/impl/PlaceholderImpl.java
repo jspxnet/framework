@@ -11,7 +11,6 @@ package com.github.jspxnet.boot.environment.impl;
 
 import java.util.Map;
 import java.io.*;
-
 import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
@@ -61,6 +60,17 @@ public class PlaceholderImpl implements Placeholder {
         return StringUtil.empty;
     }
 
+    @Override
+    public String processTemplateException(Map<String, Object> valueMap, String templateString) throws Exception {
+        if (templateString == null || valueMap==null) {
+            return StringUtil.empty;
+        }
+        try (Writer writer = new StringWriter()){
+            ScriptMark scriptMark = new ScriptMarkEngine(ScriptmarkEnv.noCache, new StringSource(templateString), TemplateConfigurable.getInstance());
+            scriptMark.process(writer, valueMap);
+            return writer.toString();
+        }
+    }
     /**
      * @param valueMap 变量map
      * @param file     文件方式

@@ -10,6 +10,7 @@
 package com.github.jspxnet.utils;
 
 
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.annotation.NullClass;
 import com.github.jspxnet.txweb.Action;
@@ -350,7 +351,7 @@ public class ClassUtil {
         className = className + ".class";
         java.net.URL classUrl = ClassUtil.class.getResource(className);
         if (classUrl != null) {
-            return classUrl.getPath();
+            return URLUtil.getUrlDecoder(classUrl.getPath(), Environment.defaultEncode);
         }
         String classpath = System.getProperties().getProperty("java.class.path");
         String[] classPathList = classpath.split(StringUtil.SEMICOLON);

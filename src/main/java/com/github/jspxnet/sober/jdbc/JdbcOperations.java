@@ -1082,7 +1082,7 @@ public abstract class JdbcOperations implements SoberSupport {
     }
 
     /**
-     * 更具字段删除一个对象,或一组对象
+     * 根据字段删除一个对象,或一组对象,快速删除
      *
      * @param aClass       类
      * @param field        字段
@@ -1091,7 +1091,27 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int delete(Class<?> aClass, String field, Serializable serializable) {
-        return delete(aClass, field, serializable, null, false);
+        TableModels soberTable = getSoberTable(aClass);
+        if (soberTable == null) {
+            return -2;
+        }
+        if (!soberTable.containsField(field))
+        {
+            return -1;
+        }
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
+        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+        valueMap.put(Dialect.KEY_FIELD_NAME, field);
+        valueMap.put(Dialect.KEY_FIELD_NAME + Dialect.FIELD_QUOTE, JdbcUtil.isQuote(soberTable, field));
+        valueMap.put(Dialect.KEY_FIELD_VALUE, serializable);
+        String sqlText = dialect.processTemplate(Dialect.SQL_DELETE, valueMap);
+        try {
+            return update(sqlText);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -2;
     }
 
     /**
@@ -2103,7 +2123,9 @@ public abstract class JdbcOperations implements SoberSupport {
             }
             valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
             valueMap.put(Dialect.COLUMN_NAME, soberColumn.getName());
+
             valueMap.put(Dialect.COLUMN_LENGTH, soberColumn.getLength());
+
             valueMap.put(Dialect.COLUMN_NOT_NULL, soberColumn.isNotNull());
             if (StringUtil.isEmpty(soberColumn.getDefaultValue()) && ClassUtil.isNumberType(soberColumn.getClassType())) {
                 valueMap.put(Dialect.COLUMN_DEFAULT, 0);
@@ -2111,6 +2133,11 @@ public abstract class JdbcOperations implements SoberSupport {
                 valueMap.put(Dialect.COLUMN_DEFAULT, soberColumn.getDefaultValue());
             }
 
+            if (soberColumn.getLength()==0&&soberColumn.getClassType().equals(String.class))
+            {
+                valueMap.put(Dialect.COLUMN_LENGTH, 32);
+                log.error("类对象{}创建表结构字段{},没有设置长度,系统默认设置32",createClass,soberColumn.getName());
+            }
             valueMap.put(Dialect.COLUMN_CAPTION, soberColumn.getCaption());
             String columnData = dialect.processTemplate(soberColumn.getClassType().getName(), valueMap);
             if (StringUtil.isEmpty(columnData) || columnData.length() < 4) {
@@ -2680,6 +2707,7 @@ public abstract class JdbcOperations implements SoberSupport {
             JSCacheManager.put(cla,cacheKey,data);
         }
     }
+
 
 
 

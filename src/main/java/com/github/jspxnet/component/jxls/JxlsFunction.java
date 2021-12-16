@@ -1,6 +1,7 @@
 package com.github.jspxnet.component.jxls;
 
 
+import com.github.jspxnet.component.zhex.spell.ChineseUtil;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -67,12 +68,7 @@ public class JxlsFunction {
         if (src == null) {
             return StringUtil.empty;
         }
-        try {
-            return (String) ClassUtil.callStaticMethod(ClassUtil.loadClass("com.github.jspxnet.component.zhex.spell.ChineseUtil"), "fullSpell", src, fen);
-        } catch (ClassNotFoundException e) {
-            log.error("no fount jspx-zhex-x.jar", e);
-        }
-        return StringUtil.empty;
+        return ChineseUtil.getFullSpell(src,fen);
     }
 
     /**
@@ -86,7 +82,16 @@ public class JxlsFunction {
     }
 
 
-
+    /**
+     *
+     * @param b 判断对象
+     * @param o1  true返回
+     * @param o2 false 返回
+     * @return 返回数据
+     */
+    public Object ifNull(Object b, Object o1, Object o2) {
+        return ObjectUtil.isEmpty(b) ? o1 : o2;
+    }
     /**
      *  单元格合并,注意这里是倒起来合并的,
      *  是用方法:${jspx:mergeCell(d.acs98,d.mergerRows)}

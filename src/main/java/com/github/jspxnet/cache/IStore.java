@@ -12,6 +12,7 @@ package com.github.jspxnet.cache;
 import com.github.jspxnet.cache.container.CacheEntry;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -73,6 +74,8 @@ public interface IStore extends Serializable {
     long size();
 
     Set<String> getKeys();
+
+    Collection<CacheEntry> getAll();
 
     long getSizeInBytes();
 

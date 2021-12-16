@@ -50,15 +50,29 @@ public class HttpClientAdapter implements HttpClient {
     protected int readTimeout = 20000;
     //当前实体对象
     protected HttpResponse httpResponse;
-    final private static String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
+    final private String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
 
     protected final Map<String, String> defaultHeaders = new HashMap<>();
 
     protected String url;
 
     public String getUrl() {
-
         return url;
+    }
+
+
+   @Override
+    public void close()
+    {
+        if (httpClient!=null)
+        {
+            try {
+                cookieStore.clear();
+                httpClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -164,6 +178,8 @@ public class HttpClientAdapter implements HttpClient {
         } else {
             httpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         }
+
+
         if (!StringUtil.isNull(url)) {
             this.url = url;
         }
@@ -395,6 +411,7 @@ public class HttpClientAdapter implements HttpClient {
         }
         httpResponse = httpClient.execute(httpPost);
         return httpResponse.getEntity();
+
     }
 
     @Override
@@ -581,6 +598,7 @@ public class HttpClientAdapter implements HttpClient {
         }
     }
 
+
     /**
      *
      * @param files 文件
@@ -647,10 +665,13 @@ public class HttpClientAdapter implements HttpClient {
                 }
             }
 
+
             // 对于MIME类型的请求，httpclient建议全用MulitPartRequestEntity进行包装
+
             MultipartRequestEntity multipartRequest = new MultipartRequestEntity(parts, postMethod.getParams());
             postMethod.setRequestEntity(multipartRequest);
             //---------------------------------------------
+
 
             org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
 
@@ -710,6 +731,7 @@ public class HttpClientAdapter implements HttpClient {
     public void cleanHeaders() {
         defaultHeaders.clear();
     }
+
 
 
 }

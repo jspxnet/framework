@@ -19,6 +19,7 @@
 package com.github.jspxnet.cron4j;
 
 import com.github.jspxnet.boot.DaemonThreadFactory;
+import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.RandomUtil;
 
 import java.util.ArrayList;
@@ -242,6 +243,7 @@ public class TaskExecutor {
 	 * daemon true to spawn a daemon thread; false otherwise.
 	 */
 	void start() {
+
 		synchronized (lock) {
 			startTime = System.currentTimeMillis();
 			String name = "cron4j::scheduler[" + scheduler.getGuid() + "]::executor[" + guid + "]";
@@ -308,10 +310,10 @@ public class TaskExecutor {
 		if (joinit) {
 			do {
 				try {
-					thread.join();
+					thread.join(DateUtil.MINUTE);
 					break;
 				} catch (InterruptedException e) {
-					continue;
+					thread.stop();
 				}
 			} while (true);
 			thread = null;
@@ -328,7 +330,7 @@ public class TaskExecutor {
 	 */
 	public void join() throws InterruptedException {
 		if (thread != null) {
-			thread.join();
+			thread.join(DateUtil.MINUTE);
 		}
 	}
 

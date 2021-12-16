@@ -16,11 +16,15 @@ import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.cache.event.CacheEventListener;
 import com.github.jspxnet.cache.store.MemoryStore;
+import com.github.jspxnet.cache.store.SingleRedissonStore;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
+import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -57,7 +61,7 @@ public class JSCache implements Runnable, Cache {
     private boolean eternal;
 
     /**
-     * 最大允许内存空间
+     * 最大允许长度空间
      */
     private int maxElements = 50000;
 
@@ -140,27 +144,34 @@ public class JSCache implements Runnable, Cache {
     @Override
     public void put(CacheEntry entry) {
 
-        if (entry.getTimeToLive()<=0)
+        if (entry.getLive()<=0)
         {
-            entry.setTimeToLive(second);
+            entry.setLive(second);
         }
-        if (store.size() > maxElements)
+        if (store instanceof SingleRedissonStore)
         {
-            CacheEntry evictedEntry = store.getEvictedCacheEntry();
-            if (evictedEntry != null) {
-                if (store.containsKey(entry.getKey())) {
-                    for (CacheEventListener eventListener : cacheEventListeners) {
-                        eventListener.notifyElementUpdated(this, evictedEntry);
-                    }
-                } else {
-                    for (CacheEventListener eventListener : cacheEventListeners) {
-                        eventListener.notifyElementPut(this, evictedEntry);
+            //redis 就直接放了，不限制大小
+            store.put(entry);
+        } else
+        {
+            if (store.size() > maxElements)
+            {
+                CacheEntry evictedEntry = store.getEvictedCacheEntry();
+                if (evictedEntry != null) {
+                    if (store.containsKey(entry.getKey())) {
+                        for (CacheEventListener eventListener : cacheEventListeners) {
+                            eventListener.notifyElementUpdated(this, evictedEntry);
+                        }
+                    } else {
+                        for (CacheEventListener eventListener : cacheEventListeners) {
+                            eventListener.notifyElementPut(this, evictedEntry);
+                        }
                     }
                 }
             }
-        }
-        if (store.size() < maxElements) {
-            store.put(entry);
+            if (store.size() < maxElements) {
+                store.put(entry);
+            }
         }
     }
 
@@ -230,6 +241,12 @@ public class JSCache implements Runnable, Cache {
     @Override
     public void flush() throws IllegalStateException, com.github.jspxnet.cache.CacheException {
 
+    }
+
+    @Override
+    public List<Object> getAll()  {
+        Collection<CacheEntry>  collection = store.getAll();
+        return BeanUtil.copyFieldList(collection,"value");
     }
 
     /**

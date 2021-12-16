@@ -165,6 +165,8 @@ public final class SystemUtil {
 
 
     public static String cmd(String shell) throws IOException, InterruptedException {
+
+
         StringBuilder showInfo = new StringBuilder();
         Process p = null;
         try {
@@ -312,6 +314,8 @@ public final class SystemUtil {
         String name = ManagementFactory.getRuntimeMXBean().getName();
         return StringUtil.substringBefore(name,"@");
     }
+
+
 
 
 }

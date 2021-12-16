@@ -1113,8 +1113,8 @@ public final class FileUtil {
             return StringUtil.empty;
         }
         String result = mendFile(path);
-        if (!result.endsWith(StringUtil.BACKSLASH) && !result.endsWith(StringUtil.TRANSFERRED)) {
-            result = result + StringUtil.BACKSLASH;
+        if (!result.endsWith("/") && !result.endsWith("\\")) {
+            result = result + "/";
         }
         return result;
     }
@@ -1127,7 +1127,7 @@ public final class FileUtil {
         if (path == null || path.length() < 1) {
             return StringUtil.empty;
         }
-        String result = StringUtil.replace(path, StringUtil.BACKSLASH, StringUtil.TRANSFERRED);
+        String result = StringUtil.replace(path, "/", "\\");
         if (result.startsWith("file:\\\\")) {
             return result;
         }
@@ -1146,7 +1146,7 @@ public final class FileUtil {
         if (fileName == null || fileName.length() < 1) {
             return StringUtil.empty;
         }
-        String result = StringUtil.replace(fileName, StringUtil.TRANSFERRED, StringUtil.BACKSLASH);
+        String result = StringUtil.replace(fileName, "\\", "/");
         if (SystemUtil.OS == SystemUtil.WINDOWS) {
             if (result.startsWith("file://")) {
                 result = result.substring(7);
@@ -1161,7 +1161,7 @@ public final class FileUtil {
         if (result.startsWith("file:") || result.startsWith("http:") || result.startsWith("https:") || result.startsWith("ftp:") || result.startsWith("ftps:")) {
             return result;
         }
-        return StringUtil.replace(result, "//", StringUtil.BACKSLASH);
+        return StringUtil.replace(result, "//", "/");
     }
 
     /**
@@ -1684,13 +1684,13 @@ public final class FileUtil {
         URL url = ClassUtil.getResource(StringUtil.replace(dir, StringUtil.DOT, "/"));
         String path = "";
         if (url != null) {
-            path = url.getPath();
+            path = URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode);
         }
         if (StringUtil.isNull(path)) {
             url = ClassUtil.getResource(StringUtil.replace(dir, StringUtil.DOT, "/"));
         }
         if (url != null) {
-            path = url.getPath();
+            path = URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode);
         }
         if (!StringUtil.isNull(path)) {
             path = new File(path).getAbsolutePath();
@@ -1699,12 +1699,12 @@ public final class FileUtil {
         String startPath = "";
         URL startUrl = ClassUtil.getResource("/");
         if (startUrl != null) {
-            startPath = startUrl.getPath();
+            startPath = URLUtil.getUrlDecoder(startUrl.getPath(), Environment.defaultEncode);
         }
         if (StringUtil.isNull(startPath)) {
             startUrl = ClassUtil.getResource("");
             if (startUrl != null) {
-                startPath = startUrl.getPath();
+                startPath = URLUtil.getUrlDecoder(startUrl.getPath(), Environment.defaultEncode);
             }
         }
         File classStartDir = new File(startPath);
@@ -2325,7 +2325,7 @@ public final class FileUtil {
                 url = Thread.currentThread().getContextClassLoader().getResource(tempPath.substring(1));
             }
             if (url != null) {
-                File file = new File(url.getPath());
+                File file = new File(URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode));
                 if (FileUtil.isFileExist(file)) {
                     return file;
                 }
@@ -2342,7 +2342,7 @@ public final class FileUtil {
                 }
             }
             if (url != null) {
-                String findDir = new File(url.getPath()).getPath();
+                String findDir = new File(URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode)).getPath();
                 List<File> files = FileUtil.getPatternFiles(findDir, find);
                 if (!ObjectUtil.isEmpty(files)) {
                     return files.get(0);
@@ -2403,29 +2403,29 @@ public final class FileUtil {
         URL url =  Environment.class.getResource("/Boot-inf/classes/" + FileUtil.getFileName(loadFile));
         if (url!=null)
         {
-            return new File(url.getPath());
+            return new File(URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode));
         }
 
         url =  Environment.class.getResource("/resources/" + loadFile);
         if (url!=null)
         {
-            return new File(url.getPath());
+            return new File(URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode));
         }
 
         url =  Environment.class.getResource("/resources/template/" + loadFile);
         if (url!=null)
         {
-            return new File(url.getPath());
+            return new File(URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode));
         }
         url =  Environment.class.getResource("/resources/reslib/" + loadFile);
         if (url!=null)
         {
-            return new File(url.getPath());
+            return new File(URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode));
         }
         url =  Environment.class.getResource(loadFile);
         if (url!=null)
         {
-            return new File(url.getPath());
+            return new File(URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode));
         }
 
         return null;

@@ -1,13 +1,12 @@
 package com.github.jspxnet.sioc.scheduler;
 
 
-
-import com.github.jspxnet.cron4j.Scheduler;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.utils.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 @Slf4j
@@ -21,6 +20,8 @@ public class TaskProxy implements Runnable {
     private String methodName;
 
     private Object bean;
+
+    private int runTimes = 0;
 
     @Override
     public String toString()
@@ -41,7 +42,6 @@ public class TaskProxy implements Runnable {
     {
         return EncryptUtil.getMd5(toString());
     }
-
 
     public String getPattern() {
         return pattern;
@@ -83,26 +83,41 @@ public class TaskProxy implements Runnable {
         this.delayed = delayed;
     }
 
+    final private ReentrantLock lock = new ReentrantLock();
+
     @Override
     public void run() {
         try {
             if (delayed > 0) {
                 Thread.sleep(delayed);
             }
-            BeanUtil.invoke(bean, methodName);
+            if (methodName!=null && !lock.isLocked())
+            {
+                lock.lock();
+                try {
+                    runTimes++;
+                    BeanUtil.invoke(bean, methodName);
+
+                    //关闭一次性任务 begin
+                    if (once&&runTimes==1)
+                    {
+                        SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
+                        try {
+                            log.info("关闭一次性任务:" + bean + "method." + methodName);
+                            schedulerManager.stopRemove(getScheduledId());
+                        } catch (IllegalStateException e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                    //关闭一次性任务 end
+                } finally {
+                    lock.unlock();
+                }
+            }
         } catch (Exception e) {
             log.error(bean + "method" + methodName, e);
             e.printStackTrace();
-        }
-
-        if (once) {
-            SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
-            String scheduledId = getScheduledId();
-            Scheduler scheduler = schedulerManager.remove(scheduledId);
-            if (scheduler != null) {
-                log.info("关闭一次性任务:" + bean + "method." + methodName);
-                scheduler.stop();
-            }
         }
     }
 }

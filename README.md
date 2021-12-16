@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.52</version>
+    <version>6.53</version>
 </dependency>
 ```
     
@@ -122,3 +122,4 @@
 *    2021年08月：Jspx.net Framework 6.48 json兼容致远OA调整.sql功能升级支持变量直接映射到xml,sql配置.
 *    2021年09月：Jspx.net Framework 6.49-6.51 sqlmap简化,修复单一返回模式的bug,路由算法优化.oos上传优化,手机图片单独保存功删除.* 
 *    2021年10月：Jspx.net Framework 6.52 json兼容性调整,上传调整,注释标签简化，细节调整标准化.
+*    2021年12月：Jspx.net Framework 6.53 修复sqlmap配置bug,扩展两个大数据是用方便的功能,http连接提供关闭,中文路径识别错误修复,金蝶.

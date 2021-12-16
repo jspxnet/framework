@@ -10,6 +10,7 @@
 package com.github.jspxnet.sober.impl;
 
 import com.github.jspxnet.cache.JSCacheManager;
+import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
 import com.github.jspxnet.sober.SoberEnv;
 import com.github.jspxnet.sober.SoberFactory;
 import com.github.jspxnet.sober.SqlMapClient;
@@ -260,10 +261,15 @@ public class SqlMapClientImpl implements SqlMapClient {
         valueMap.put("endRow", endRow);
         valueMap.put("namespace", namespace);
 
+        //修复变量,避免空异常 begin
+        ScriptMarkUtil.fixVarNull(valueMap,mapSql.getContext());
+        //修复变量,避免空异常 end
+
         String sqlText  = dialect.processSql(sqlRoom.getReplenish(mapSql.getContext()), valueMap);
         if (StringUtil.isNull(sqlText)) {
             throw new Exception("ERROR SQL IS NULL");
         }
+
 
         //判断是否是用缓存
         Table table = AnnotationUtil.getTable(cls);
@@ -392,14 +398,22 @@ public class SqlMapClientImpl implements SqlMapClient {
         valueMap.put("beginRow", 0);
         valueMap.put("endRow", soberFactory.getMaxRows());
 
-        String sqlText = dialect.processSql(sqlRoom.getReplenish(mapSql.getContext()), valueMap);
-        if (StringUtil.isNull(sqlText)) {
-            throw new IllegalArgumentException("ERROR SQL IS NULL:" + sqlText);
+        String sqlTxt = sqlRoom.getReplenish(mapSql.getContext());
+
+        //修复变量,避免空异常 begin
+        ScriptMarkUtil.fixVarNull(valueMap,sqlTxt);
+        //修复变量,避免空异常 end
+
+        String sql = dialect.processSql(sqlTxt, valueMap);
+        if (StringUtil.isNull(sql)) {
+            throw new IllegalArgumentException("ERROR SQL IS NULL:" + sql);
         }
-        sqlText = StringUtil.removeOrders(sqlText);
-        sqlText = "SELECT count(1) as countNum FROM (" + sqlText + ") queryCount";
-        jdbcOperations.debugPrint(sqlText);
-        return ObjectUtil.toLong(jdbcOperations.getUniqueResult(sqlText));
+        sql = StringUtil.removeOrders(sql);
+
+
+        sql = "SELECT count(1) as countNum FROM (" + sql + ") queryCount";
+        jdbcOperations.debugPrint(sql);
+        return ObjectUtil.toLong(jdbcOperations.getUniqueResult(sql));
         //放入cache
 
     }

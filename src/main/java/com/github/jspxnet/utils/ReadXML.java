@@ -25,7 +25,7 @@ public class ReadXML extends DefaultHandler {
     private String value = StringUtil.empty;
     private boolean result = false;
 
-    private CharArrayWriter contents = new CharArrayWriter();
+    private final CharArrayWriter contents = new CharArrayWriter();
 
     public ReadXML(String key, String value) {
         this.Key = key;

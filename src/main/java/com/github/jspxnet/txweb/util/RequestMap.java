@@ -28,7 +28,7 @@ import java.util.Map;
  * 不推荐使用本功能，尽量使用 action.getString("xxx") 这样的方式更好
  */
 public class RequestMap extends HashMap<String,Object> implements Map<String,Object> {
-    private HttpServletRequest request;
+    private final HttpServletRequest request;
     private Method method = null;
 
     public RequestMap(HttpServletRequest request) {
@@ -51,13 +51,13 @@ public class RequestMap extends HashMap<String,Object> implements Map<String,Obj
         }
         //解决 msoa 在firefox 中得到路径错误问题,firefox得到路径认为是更目录下开始
         if ("requestURIPath".equals(key)) {
-            return URLUtil.getURLPath(request.getRequestURI());
+            return URLUtil.getUrlPath(request.getRequestURI());
         }
-        if ("hostURL".equals(key)) {
+        if ("hostUrl".equals(key)) {
             return URLUtil.getHostUrl(request.getRequestURL().toString());
         }
-        if ("URLPath".equals(key)) {
-            return FileUtil.mendPath(URLUtil.getURLPath(request.getRequestURL().toString()));
+        if ("urlPath".equals(key)) {
+            return FileUtil.mendPath(URLUtil.getUrlPath(request.getRequestURL().toString()));
         }
         if ("realPath".equals(key)) {
             return Dispatcher.getRealPath();
@@ -65,7 +65,7 @@ public class RequestMap extends HashMap<String,Object> implements Map<String,Obj
         if ("isPirated".equals(key)) {
             return RequestUtil.isPirated(request);
         }
-        if ("locationURL".equals(key)) {
+        if ("locationUrl".equals(key)) {
             if (StringUtil.isNull(request.getQueryString())) {
                 return request.getRequestURL().toString();
             }

@@ -9,12 +9,14 @@
  */
 package com.github.jspxnet.txweb.bundle.provider;
 
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;
 import com.github.jspxnet.txweb.bundle.BundleProvider;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.io.AbstractWrite;
 import com.github.jspxnet.io.WriteFile;
+import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -56,7 +58,7 @@ public class PropertyProvider extends BundleProvider {
         }
 
         if (url != null) {
-            file = new File(url.getPath());
+            file = new File(URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode));
         }
         if (file==null)
         {

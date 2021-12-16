@@ -247,6 +247,15 @@ public class DefaultActionInvocation implements ActionInvocation {
 
         this.actionConfig = actionConfig;
         createInterceptorList();
+
+        //如果是void 方法，自动设置 NONE begin
+        Method execMethod = actionProxy.getMethod();
+        if (void.class.equals(execMethod.getGenericReturnType()))
+        {
+            actionProxy.getAction().setActionResult(ActionSupport.NONE);
+        }
+        //如果是void 方法，自动设置 NONE end
+
     }
 
     private void createInterceptorList() {

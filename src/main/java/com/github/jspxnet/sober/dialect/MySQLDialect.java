@@ -32,10 +32,10 @@ public class MySQLDialect extends Dialect {
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nPRIMARY KEY  (`${" + KEY_PRIMARY_KEY + "}`)\n) COMMENT = '${"+ KEY_TABLE_CAPTION +"}';"); //DEFAULT CHARSET=UTF8
 
-        put(SQL_INSERT, "INSERT INTO ${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">`${field}`<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
-        put(SQL_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE `${" + KEY_FIELD_NAME + "}`=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#ifwhere= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
-        put(SQL_DELETE_IN, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE `${" + KEY_FIELD_NAME + "}` IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=fvalue_has_next>,</#if></#list>)");
-        put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">`${field}`=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_INSERT, "INSERT INTO ${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">`${field}`<#if where=\"field_has_next\">,</#if></#list>) VALUES (<#list x=1.." + KEY_FIELD_COUNT + ">?<#if x_has_next>,</#if></#list>)");
+        put(SQL_DELETE, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE `${" + KEY_FIELD_NAME + "}`=<#if where=\"" + KEY_FIELD_NAME + FIELD_QUOTE + "\">'</#if>${" + KEY_FIELD_VALUE + "}<#if where= " + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
+        put(SQL_DELETE_IN, "DELETE FROM ${" + KEY_TABLE_NAME + "} WHERE `${" + KEY_FIELD_NAME + "}` IN (<#list fvalue=" + KEY_FIELD_VALUE + ">'${fvalue}'<#if where=\"fvalue_has_next\">,</#if></#list>)");
+        put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">`${field}`=?<#if where=\"field_has_next\">,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
 
         put(String.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "&gt;512\"><#if where=\"" + COLUMN_LENGTH + "&lt;30000\" >text<#else>mediumtext</#else></#if><#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
@@ -74,6 +74,15 @@ public class MySQLDialect extends Dialect {
 
         //创建索引,一个一个
         put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX `${"+KEY_INDEX_NAME+"}`(${"+KEY_INDEX_FIELD+"})");
+
+
+        /*
+        判断没有才插入
+        INSERT INTO table(field1, field2, fieldn) SELECT 'field1',
+                'field2', 'fieldn' FROM DUAL WHERE NOT EXISTS(SELECT field FROM
+                table WHERE field = ?)
+
+         */
 
     }
 

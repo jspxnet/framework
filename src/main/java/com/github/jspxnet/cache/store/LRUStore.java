@@ -14,6 +14,7 @@ import com.github.jspxnet.cache.IStore;
 import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.util.LRUHashMap;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -27,7 +28,7 @@ import java.util.Set;
  * 数据一直保持，过期周期设置长一点比较合适
  */
 public class LRUStore extends Store implements IStore {
-    private final LRUHashMap<String, CacheEntry> cacheLists = new LRUHashMap<>(4000);
+    private final LRUHashMap<String, CacheEntry> cacheList = new LRUHashMap<>(4000);
 
     public LRUStore() {
 
@@ -35,19 +36,19 @@ public class LRUStore extends Store implements IStore {
 
     @Override
     public void setMaxElements(int maxElements) {
-        cacheLists.setMaxCapacity(maxElements);
+        cacheList.setMaxCapacity(maxElements);
         super.setMaxElements(maxElements);
     }
 
     @Override
     public void put(CacheEntry entry) {
-        cacheLists.put(entry.getKey(), entry);
+        cacheList.put(entry.getKey(), entry);
     }
 
 
     @Override
     public long size() {
-        return cacheLists.size();
+        return cacheList.size();
     }
 
     /**
@@ -58,7 +59,7 @@ public class LRUStore extends Store implements IStore {
      */
     @Override
     public CacheEntry get(String key) {
-        return cacheLists.get(key);
+        return cacheList.get(key);
     }
 
     /**
@@ -68,7 +69,7 @@ public class LRUStore extends Store implements IStore {
      */
     @Override
     public CacheEntry getEvictedCacheEntry() {
-        Iterator<CacheEntry> iterator = cacheLists.values().iterator();
+        Iterator<CacheEntry> iterator = cacheList.values().iterator();
         if (iterator.hasNext()) {
             return iterator.next();
         }
@@ -83,7 +84,7 @@ public class LRUStore extends Store implements IStore {
      */
     @Override
     public CacheEntry remove(String key) {
-        return cacheLists.remove(key);
+        return cacheList.remove(key);
     }
 
     /**
@@ -92,13 +93,13 @@ public class LRUStore extends Store implements IStore {
 
     @Override
     public void removeAll() {
-        cacheLists.clear();
+        cacheList.clear();
     }
 
     @Override
     public long getSizeInBytes() throws CacheException {
         long sizeInBytes = 0;
-        for (CacheEntry entry : cacheLists.values()) {
+        for (CacheEntry entry : cacheList.values()) {
             sizeInBytes += entry.getSerializedSize();
         }
         return sizeInBytes;
@@ -106,12 +107,17 @@ public class LRUStore extends Store implements IStore {
 
     @Override
     public Set<String> getKeys() {
-        return new HashSet<String>(cacheLists.keySet());
+        return new HashSet<String>(cacheList.keySet());
+    }
+
+    @Override
+    public Collection<CacheEntry> getAll() {
+        return cacheList.values();
     }
 
     @Override
     public boolean containsKey(String key) {
-        return cacheLists.containsKey(key);
+        return cacheList.containsKey(key);
     }
 
     @Override
@@ -121,7 +127,7 @@ public class LRUStore extends Store implements IStore {
 
     @Override
     public void dispose() {
-        cacheLists.clear();
+        cacheList.clear();
     }
 
 

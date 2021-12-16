@@ -14,13 +14,15 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.io.IoUtil;
+import com.github.jspxnet.scriptmark.Configurable;
+import com.github.jspxnet.scriptmark.ScriptmarkEnv;
+import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.security.symmetry.impl.XOREncrypt;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.*;
 import java.util.*;
 
@@ -93,8 +95,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         return StringUtil.toLong(getString(keys), def);
     }
 
-    @Override
-    public String processTemplate(String templateString) {
+    private String processTemplate(String templateString) {
         Placeholder placeholder = new PlaceholderImpl();
         return placeholder.processTemplate(VALUE_MAP, templateString);
     }
@@ -164,10 +165,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             //FileUtil.makeDirectory(tempDir);
             //VALUE_MAP.put(Environment.loaderPath, tempDir);
 
-            //LucenePath     得到默认的Lucene 目录,应为文件放在外部不安全
-            tempDir = webInfPath + "lucene/";
-            //FileUtil.makeDirectory(tempDir);
-            VALUE_MAP.put(Environment.lucenePath, tempDir);
 
             //本地数据库默认路径
             tempDir = webInfPath + "database/";
@@ -390,7 +387,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             log.info("com.sun.xml.internal.stream.XMLInputFactoryImpl " + e2.getLocalizedMessage());
         }
 
-
         LogBackConfigUtil.createConfig();
     }
 
@@ -455,13 +451,21 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (!VALUE_MAP.containsKey("catalina.home")) {
                 VALUE_MAP.put("catalina.home", System.getProperty("CATALINA_HOME", System.getProperty("user.dir")));
             }
-
             p.clear();
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
             e.printStackTrace();
         }
-        //创建配置 begin
+        //创建配置 end
+
+
+        //放入模版默认变量
+        Configurable configurable = TemplateConfigurable.getInstance();
+        configurable.put(ScriptmarkEnv.NumberFormat,VALUE_MAP.getOrDefault(ScriptmarkEnv.NumberFormat, "####.##"));
+        configurable.put(ScriptmarkEnv.DateTimeFormat,VALUE_MAP.getOrDefault(ScriptmarkEnv.DateTimeFormat, "yyyy-MM-dd HH:mm"));
+        configurable.put(ScriptmarkEnv.TimeFormat,VALUE_MAP.getOrDefault(ScriptmarkEnv.TimeFormat, "HH:mm:ss"));
+
+
     }
 
     @Override

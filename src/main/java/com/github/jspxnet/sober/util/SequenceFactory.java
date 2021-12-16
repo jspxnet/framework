@@ -12,7 +12,6 @@ import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.IDType;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
-import com.github.jspxnet.sober.queue.RedisStoreQueueClient;
 import com.github.jspxnet.sober.table.Sequences;
 import com.github.jspxnet.utils.BooleanUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -31,8 +30,6 @@ public class SequenceFactory {
     @Ref(bind = RedissonClientConfig.class)
     protected RedissonClient redissonClient;
 
-    @Ref(bind = RedisStoreQueueClient.class)
-    protected RedisStoreQueueClient redisStoreQueueClient;
 
     private boolean useSchedule = true;
 
@@ -90,13 +87,7 @@ public class SequenceFactory {
         long keyValue  = generate(tableSequences.getName());
         TableModels sequencesTable = jdbcOperations.getSoberTable(Sequences.class);
         String sql = "UPDATE " + sequencesTable.getName() + " SET keyValue="+keyValue+" WHERE " + sequencesTable.getPrimary() + StringUtil.EQUAL + StringUtil.quoteSql(tableSequences.getName());
-        if (useSchedule&&redisStoreQueueClient!=null&&redisStoreQueueClient.useRedisson()&&tableSequences.getKeyValue()>=idf.min())
-        {
-            redisStoreQueueClient.updateSql(sql);
-        } else
-        {
-            jdbcOperations.update(sql);
-        }
+        jdbcOperations.update(sql);
         return tableSequences.getNextKey(keyValue);
     }
 

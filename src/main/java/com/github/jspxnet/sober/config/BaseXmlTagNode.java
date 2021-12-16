@@ -28,6 +28,7 @@ public abstract class BaseXmlTagNode extends TagNode {
         }
         return XMLUtil.deleteQuote(getStringAttribute("resultType"));
     }
+
     public String getIndex()
     {
         String result = XMLUtil.deleteQuote(getStringAttribute("index"));

@@ -62,6 +62,9 @@ public interface HttpClient {
 
     boolean download(File file, JSONObject json) throws Exception;
 
+
+    void close();
+
     void setUrl(String url);
 
     HttpClient build(String url);

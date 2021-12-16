@@ -5,7 +5,6 @@ import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
-import com.github.jspxnet.util.LRUHashMap;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.beans.BeanCopier;
@@ -702,8 +701,8 @@ public final class BeanUtil {
                     field.setAccessible(true);
                     field.set(oldData, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
                 } catch (Exception e) {
+                    log.error("class={},field={},data={}",getClass,field.getName(),map.get(key), e);
                     e.printStackTrace();
-                    log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
                 }
             }
             return;
@@ -752,7 +751,7 @@ public final class BeanUtil {
      * @param <T> 泛型类型
      * @return 列表
      */
-    static public <T> List<T> copyFieldList(List<?> list, String field, boolean dis,boolean anyField)
+    static public <T> List<T> copyFieldList(Collection<?> list, String field, boolean dis,boolean anyField)
     {
         return copyFieldList(list,  field, null,dis, anyField);
     }
@@ -765,7 +764,7 @@ public final class BeanUtil {
      * @param <T> 泛型类型
      * @return 列表
      */
-    static public <T> List<T> copyFieldList(List<?> list, String field, boolean dis)
+    static public <T> List<T> copyFieldList(Collection<?> list, String field, boolean dis)
     {
         return copyFieldList(list,  field, null,dis,false);
     }
@@ -778,7 +777,7 @@ public final class BeanUtil {
      * @param <T> 泛型类型
      * @return 列表
      */
-    static public <T> List<T> copyFieldList(List<?> list, String field,  Class<T> cls)
+    static public <T> List<T> copyFieldList(Collection<?> list, String field,  Class<T> cls)
     {
         return copyFieldList(list,  field, cls,false,false);
     }
@@ -790,10 +789,11 @@ public final class BeanUtil {
      * @param <T>   泛型类型
      * @return 列表
      */
-    static public <T> List<T> copyFieldList(List<?> list, String field)
+    static public <T> List<T> copyFieldList(Collection<?> list, String field)
     {
         return copyFieldList( list,  field,false,false);
     }
+
     /**
      *
      * @param list 列表
@@ -804,12 +804,12 @@ public final class BeanUtil {
      * @param <T> 泛型类型
      * @return 列表
      */
-    static public <T> List<T> copyFieldList(List<?> list, String field, Class<T> cls,boolean dis,boolean anyField)
+    static public <T> List<T> copyFieldList(Collection<?> list, String field, Class<T> cls,boolean dis,boolean anyField)
     {
-        if (list == null) {
+        if (ObjectUtil.isEmpty(list)) {
             return new ArrayList<>(0);
         }
-        List<T> result = new ArrayList<>(list.size());
+        List<T> result = new LinkedList<>();
         for (Object bean : list) {
             T v = null;
             if (cls!=null)

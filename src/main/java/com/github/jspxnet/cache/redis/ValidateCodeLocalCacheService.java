@@ -80,7 +80,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
         try {
             entry.setKey(mobile);
             entry.setValue(code);
-            entry.setTimeToLive(smsTimeOutSecond* DateUtil.SECOND);
+            entry.setLive(smsTimeOutSecond* DateUtil.SECOND);
             CACHE.put(entry);
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,7 +111,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
             }
             times++;
             entry.setValue(times);
-            entry.setTimeToLive(10 * DateUtil.MINUTE);
+            entry.setLive(10 * DateUtil.MINUTE);
             CACHE.put(entry);
         }
         return result;
@@ -180,7 +180,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
             e.printStackTrace();
         }
         entry.setValue(code);
-        entry.setTimeToLive(imgTimeOutSecond*DateUtil.SECOND);
+        entry.setLive(imgTimeOutSecond*DateUtil.SECOND);
         CACHE.put(entry);
         return true;
     }
@@ -244,7 +244,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
                 }
                 times++;
                 entry.setValue(times);
-                entry.setTimeToLive(10*DateUtil.MINUTE);
+                entry.setLive(10*DateUtil.MINUTE);
                 CACHE.put(entry);
             }
             return result;
@@ -284,7 +284,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
          * 默认时间
          */
         int generalTimeOutSecond = 900;
-        entry.setTimeToLive(generalTimeOutSecond *DateUtil.SECOND);
+        entry.setLive(generalTimeOutSecond *DateUtil.SECOND);
         CACHE.put(entry);
         return true;
     }
@@ -336,7 +336,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
         Integer times = (Integer)entry.getValue();
         if (times == null) {
             times = 0;
-            entry.setTimeToLive(10*DateUtil.MINUTE);
+            entry.setLive(10*DateUtil.MINUTE);
             entry.setValue(times);
             CACHE.put(entry);
         }
@@ -365,7 +365,7 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
             value = 0;
         }
         entry.setValue(value + 1);
-        entry.setTimeToLive(10*DateUtil.MINUTE);
+        entry.setLive(10*DateUtil.MINUTE);
         CACHE.put(entry);
     }
 

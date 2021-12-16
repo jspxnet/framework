@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadFactory;
  * description: 守护线程
  **/
 public final class DaemonThreadFactory implements ThreadFactory {
-    static final private transient List<Thread> THREAD_LIST = new ArrayList<>();
+    static final private List<Thread> THREAD_LIST = new ArrayList<>();
     private String name;
     public DaemonThreadFactory(String name)
     {
@@ -31,6 +31,10 @@ public final class DaemonThreadFactory implements ThreadFactory {
      */
     @Override
     public Thread newThread(Runnable runnable) {
+        if (runnable==null)
+        {
+            return null;
+        }
        Thread thread = new Thread(runnable,name + "_" + runnable.hashCode());
         //设置守护线程
         thread.setDaemon(true);

@@ -126,7 +126,6 @@ public class SchedulerTaskManager implements SchedulerManager {
 
         Scheduler scheduler = new Scheduler();
         scheduler.setDaemon(true);
-
         String cron = taskProxy.getPattern();
         if (cron.contains("${"))
         {
@@ -174,7 +173,12 @@ public class SchedulerTaskManager implements SchedulerManager {
      * @return 删除定时任务
      */
     @Override
-    public Scheduler remove(String id) {
+     public Scheduler stopRemove(String id) {
+        Scheduler scheduler = SCHEDULER_MAP.get(id);
+        if (scheduler!=null&&scheduler.isStarted())
+        {
+            scheduler.stop();
+        }
         return SCHEDULER_MAP.remove(id);
     }
 

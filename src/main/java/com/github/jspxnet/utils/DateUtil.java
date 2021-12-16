@@ -46,7 +46,7 @@ public final  class DateUtil {
     final static public String DAY_FORMAT = "yyyy-MM-dd";
     final static public String SHORT_DATE_FORMAT = "yy-MM-dd";
     final static public String DATE_GUID = "yyMMddHHmmssSSS";
-
+    final static public String SIMPLE_NUMBER_FORMAT = "yyyyMMdd";
     //空日期日期 1800-01-01 01:01:01  太小有些数据库和语言不支持
     final static public Date empty = new Date(-5364687539000L);
     final static public String EMPTY_DATE_STRING = "1800-01-01";
@@ -405,11 +405,56 @@ public final  class DateUtil {
     }
 
     /**
+     *
+     * @param year 年
+     * @param quarter 季度
+     * @return  得到季度开始日期和结束日期
+     */
+    public static Date[] getQuarterStartAndEnd(int year, int quarter) {
+        String dayStr = getQuarterStartDate(quarter);
+        Date  date = StringUtil.getDate(year + "-" + dayStr  + " 01:01:01");
+        return getQuarterStartAndEnd(date);
+    }
+
+    /**
+     * 获得季度的开始日期
+     * @param q 季度
+     * @return 开始的日期
+     */
+    public static String getQuarterStartDate(int q){
+        if(q == 1){
+            return "01-01";
+        }else if(q == 2){
+            return "04-01";
+        }else if(q == 3){
+            return "07-01";
+        }else if(q == 4){
+            return "10-01";
+        }
+        return  null;
+    }
+    /**
+     *
+     * @param m 月份
+     * @return 获得当前季度
+     */
+    public static int getCurrentQuarter(int m){
+        if(m>= 1 && m <=3){
+            return 1;
+        }else if(m>= 4 && m <=6){
+            return 2;
+        }else if(m>= 7 && m <=9){
+            return 3;
+        }else if(m>= 10 && m <=12){
+            return 4;
+        }
+        return  -1;
+    }
+    /**
      * @param date 当前日期
      * @return 得到当前季度开始日期和结束日期
-     * @throws Exception 异常
      */
-    public static Date[] getSeasonStartAndEnd(Date date) throws Exception {
+    public static Date[] getQuarterStartAndEnd(Date date)  {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int year = calendar.get(Calendar.YEAR);
@@ -418,19 +463,18 @@ public final  class DateUtil {
 
         if (month <= 3) {
             startMonth = 1;
-        } else if (month > 3 && month <= 6) {
+        } else if (month <= 6) {
             startMonth = 4;
-        } else if (month > 6 && month <= 9) {
+        } else if (month <= 9) {
             startMonth = 7;
-        } else if (month > 9) {
+        } else {
             startMonth = 10;
         }
-
         //7月-9月;
         Date[] result = new Date[2];
         int endMonth = startMonth + 2;
-        Date start = DateUtil.getStartMonthDate(StringUtil.getDate((new StringBuilder().append(year).append("-").append(startMonth).append("-01")).toString()));
-        Date end = DateUtil.getEndMonthDate(StringUtil.getDate((new StringBuilder().append(year).append("-").append(endMonth).append("-25")).toString()));
+        Date start = getStartMonthDate(StringUtil.getDate(year + "-" + startMonth + "-01"));
+        Date end = getEndMonthDate(StringUtil.getDate(year + "-" + endMonth + "-25"));
         result[0] = start;
         result[1] = end;
         return result;
@@ -542,6 +586,38 @@ public final  class DateUtil {
         calendar.set(Calendar.MINUTE, calendar.getMaximum(Calendar.MINUTE));
         calendar.set(Calendar.SECOND, calendar.getMaximum(Calendar.SECOND));
         return calendar.getTime();
+    }
+
+    /**
+     *
+     * @param date 日期
+     * @return 供热季度 开始日期
+     */
+    public static Date getGongReQuarterStart(Date date)
+    {
+        int month = DateUtil.getMonth(date);
+        int year = DateUtil.getYear(date);
+        if (month<5)
+        {
+            year = year - 1;
+        }
+        return StringUtil.getDate(year + "-10-01 00:00:00");
+    }
+
+    /**
+     *
+     * @param date 日期
+     * @return 供热季度 结束日期
+     */
+    public static Date getGongReQuarterEnd(Date date)
+    {
+        int year = DateUtil.getYear(date);
+        int month = DateUtil.getMonth(date);
+        if (month>9)
+        {
+            year = year + 1;
+        }
+        return DateUtil.getEndMonthDate(StringUtil.getDate(year + "-04-28 23:59:59"));
     }
 
     /**

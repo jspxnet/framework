@@ -18,10 +18,13 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.RandomUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -59,7 +62,7 @@ public class Scheduler {
 	/**
 	 * Registered {@link TaskCollector}s list.
 	 */
-	private final List<TaskCollector> collectors = new ArrayList<>();
+	private final List<TaskCollector> collectors = Collections.synchronizedList(new ArrayList<>());
 
 	/**
 	 * The {@link MemoryTaskCollector} used for memory stored tasks. Represented
@@ -78,7 +81,7 @@ public class Scheduler {
 	/**
 	 * Registered {@link SchedulerListener}s list.
 	 */
-	private final List<SchedulerListener> listeners = new ArrayList<>();
+	private final List<SchedulerListener> listeners = Collections.synchronizedList(new ArrayList<>());
 
 	/**
 	 * The thread checking the clock and requesting the spawning of launcher
@@ -89,12 +92,12 @@ public class Scheduler {
 	/**
 	 * Currently running {@link LauncherThread} instances.
 	 */
-	final private List<LauncherThread> launchers = new ArrayList<>();
+	final private List<LauncherThread> launchers = Collections.synchronizedList(new ArrayList<>());
 
 	/**
 	 * Currently running {@link TaskExecutor} instances.
 	 */
-	final private List<TaskExecutor> executors = new ArrayList<>();
+	final private List<TaskExecutor> executors = Collections.synchronizedList(new ArrayList<>());
 
 	/**
 	 * Internal lock, used to synchronize status-aware operations.
@@ -278,7 +281,7 @@ public class Scheduler {
 			int size = collectors.size() - 2;
 			TaskCollector[] ret = new TaskCollector[size];
 			for (int i = 0; i < size; i++) {
-				ret[i] = (TaskCollector) collectors.get(i + 2);
+				ret[i] = collectors.get(i + 2);
 			}
 			return ret;
 		}
@@ -344,7 +347,7 @@ public class Scheduler {
 	 *         {@link TaskExecutor} objects.
 	 */
 	public TaskExecutor[] getExecutingTasks() {
-		if (executors==null)
+		if (ObjectUtil.isEmpty(executors))
 		{
 			return null;
 		}
@@ -582,6 +585,10 @@ public class Scheduler {
 	 *             Thrown if this scheduler is not started.
 	 */
 	public void stop() throws IllegalStateException {
+		if (timer==null)
+		{
+			return;
+		}
 		synchronized (lock) {
 			if (!started) {
 				throw new IllegalStateException("Scheduler not started");
@@ -774,7 +781,7 @@ public class Scheduler {
 		boolean dead = false;
 		do {
 			try {
-				thread.join();
+				thread.join(DateUtil.MINUTE);
 				dead = true;
 			} catch (InterruptedException e) {
 				;

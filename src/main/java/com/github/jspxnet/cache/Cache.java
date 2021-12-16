@@ -13,6 +13,7 @@ import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.cache.event.CacheEventListener;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -41,6 +42,8 @@ public interface Cache extends Serializable, Cloneable {
     void flush() throws IllegalStateException, CacheException;
 
     long getSize() throws IllegalStateException, CacheException;
+
+    List<Object> getAll();
 
     long calculateInMemorySize() throws IllegalStateException, CacheException;
 

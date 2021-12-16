@@ -205,17 +205,13 @@ public final class TypeUtil {
      * @return Object   对象
      */
     public static Object getTypeValue(String type, Object object) {
-        if (object == null) {
+        if (object == null || JSONObject.NULL.equals(object)||type.contains("JSONObject$Null")||type.endsWith("$Null")) {
             return null;
         }
         String types = type;
         if (type.contains(StringUtil.DOT))
         {
             types = StringUtil.substringAfterLast(type,StringUtil.DOT);
-        }
-        if (types.contains("$Null"))
-        {
-            return null;
         }
         for (TypeSerializer typeSerializer : typeMap.values()) {
             if (typeSerializer.getTypeString().equalsIgnoreCase(types)) {

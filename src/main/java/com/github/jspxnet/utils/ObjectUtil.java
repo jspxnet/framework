@@ -542,7 +542,7 @@ public final  class ObjectUtil {
         if (o instanceof Class) {
             return new HashMap<>(0);
         }
-        if (o instanceof AbstractMap) {
+        if (o instanceof Map) {
             return (Map<String, Object>) o;
         }
         Map<String, Object> valueMap = new TreeMap<>();
@@ -551,7 +551,13 @@ public final  class ObjectUtil {
             for (Field field : fields) {
                 try {
                     Object value = BeanUtil.getFieldValue(o, field.getName(),false);
-                    valueMap.put(field.getName(), value);
+                    if (JSONObject.NULL.equals(value))
+                    {
+                        valueMap.put(field.getName(), null);
+                    } else
+                    {
+                        valueMap.put(field.getName(), value);
+                    }
                 } catch (Exception e) {
                     log.error(o + "   method=" + field.getName(), e);
                 }

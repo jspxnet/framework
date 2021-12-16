@@ -1407,7 +1407,13 @@ public final class ArrayUtil {
         }
         return indexes;
     }
-
+    public static Integer[] getInitIntegerArray(int length, int value) {
+        Integer[] indexes = new Integer[length];
+        for (int i = 0; i < length; i++) {
+            indexes[i] = value;
+        }
+        return indexes;
+    }
 
 
 // IndexOf search
@@ -4249,9 +4255,9 @@ public final class ArrayUtil {
 
 
     /**
-     * 字符串返回 Collection
-     *
-     * @param array 数组
+     *  字符串返回 Collection
+     * @param array  数组
+     * @param <T> 类型
      * @return 字符串返回
      */
     public static <T> Collection<T> toCollection(T[] array) {
@@ -4282,10 +4288,13 @@ public final class ArrayUtil {
     {
         return get(array,index,null);
     }
+
     /**
      *
      * @param array 数组对象
      * @param index 索引
+     * @param def 默认值
+     * @param <T> 类型
      * @return 返回 当前索引的数据，这里不会出现空异常
      */
     public static <T> T get(T[] array,int index,T def)

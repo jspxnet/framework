@@ -55,6 +55,18 @@ public class SqlMapPlaceholderImpl implements Placeholder {
         return StringUtil.empty;
     }
 
+    @Override
+    public String processTemplateException(Map<String, Object> valueMap, String templateString) throws Exception {
+        if (templateString == null) {
+            return StringUtil.empty;
+        }
+        try (Writer writer = new StringWriter()) {
+            ScriptMark scriptMark = new ScriptMarkEngine(ScriptmarkEnv.noCache, new StringSource(templateString), SqlMapTemplateConfigurable.getInstance());
+            scriptMark.process(writer, valueMap);
+            return writer.toString();
+        }
+    }
+
     /**
      * @param valueMap 变量map
      * @param file     文件方式

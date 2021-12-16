@@ -17,7 +17,6 @@ package com.github.jspxnet.sober.criteria.projection;
  */
 public class AvgProjection extends AggregateProjection {
     public AvgProjection(String propertyName) {
-        super("avg", propertyName);
+        super("AVG", propertyName);
     }
-
 }

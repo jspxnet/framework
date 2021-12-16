@@ -11,11 +11,7 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
-
-
-
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,6 +46,7 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public void put(CacheEntry entry) {
+
         if (!useCache||entry.getKey()==null)
         {
             return;
@@ -100,9 +97,9 @@ public class SingleRedissonStore extends Store implements IStore {
                 rMap.delete();
                 return null;
             }
-            if (cacheEntry.isAccessKeep())
+            if (cacheEntry.isKeep())
             {
-                cacheEntry.setLastAccessTime();
+                cacheEntry.setAccessTime(System.currentTimeMillis());
                 rMap.replace(key,cacheEntry);
             }
             return cacheEntry;
@@ -159,6 +156,19 @@ public class SingleRedissonStore extends Store implements IStore {
         }
     }
 
+    @Override
+    public Collection<CacheEntry> getAll() {
+        if (!useCache||redisson==null||redisson.isShutdown()) {
+            return new ArrayList(0);
+        }
+        RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
+        if (rMap!=null)
+        {
+           return rMap.values();
+
+        }
+        return new ArrayList(0);
+    }
     /**
      *
      * @return redis默认一直保存

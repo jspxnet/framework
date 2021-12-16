@@ -5,10 +5,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.txweb.config.ResultConfigBean;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.XMLUtil;
+import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -123,14 +120,14 @@ public class EvasiveConfiguration implements Configuration {
         if (!FileUtil.isFileExist(defaultFile)) {
             URL url = Environment.class.getResource("/" + fileName);
             if (url != null) {
-                defaultFile = url.getPath();
+                defaultFile = URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode);
             }
         }
 
         if (!FileUtil.isFileExist(defaultFile)) {
             URL url = Environment.class.getResource("/resources/"+fileName);
             if (url != null) {
-                defaultFile = url.getPath();
+                defaultFile = URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode);
             }
         }
 
@@ -138,7 +135,7 @@ public class EvasiveConfiguration implements Configuration {
         if (!FileUtil.isFileExist(defaultFile)) {
             URL url = Environment.class.getResource(fileName);
             if (url != null) {
-                defaultFile = url.getPath();
+                defaultFile = URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode);
             }
         }
 

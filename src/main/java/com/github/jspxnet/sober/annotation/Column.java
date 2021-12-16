@@ -45,14 +45,14 @@ public @interface Column {
     String option() default StringUtil.empty;
 
 
-    Class enumType() default NullClass.class;
+    Class<?> enumType() default NullClass.class;
 
     /**
      * 验证更具js库 函数，和配置验证里边的条件一样
      * 在前后段不分离的时候使用的,如果在前后端分离的结构中不用使用此字段
      * @return 验证表达式
      */
-    String dataType() default "";
+    String dataType() default StringUtil.empty;
 
     /**
      * @return 默认值, 映射到数据库

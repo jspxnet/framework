@@ -40,7 +40,7 @@ public class DefaultConfiguration implements Configuration {
 
     //默认环境
     private final EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-    private final Map<String, String> extendMap = new Hashtable<String, String>();
+    private final Map<String, String> extendMap = new Hashtable<>();
     //每个命名空间里边的默认拦截器列表
     private final Map<String, List<DefaultInterceptorBean>> defaultInterceptorMap = new Hashtable<>();
     private final Map<String, List<ResultConfigBean>> defaultResultMap = new HashMap<>();
@@ -108,19 +108,19 @@ public class DefaultConfiguration implements Configuration {
         if (!FileUtil.isFileExist(defaultFile)) {
             URL url = Environment.class.getResource("/" + fileName);
             if (url != null) {
-                defaultFile = url.getPath();
+                defaultFile = URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode);
             }
         }
         if (!FileUtil.isFileExist(defaultFile)) {
             URL url = Environment.class.getResource("/resources/" + fileName);
             if (url != null) {
-                defaultFile = url.getPath();
+                defaultFile = URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode);
             }
         }
         if (!FileUtil.isFileExist(defaultFile)) {
             URL url = Environment.class.getResource(fileName);
             if (url != null) {
-                defaultFile = url.getPath();
+                defaultFile = URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode);
             }
         }
         if (!FileUtil.isFileExist(defaultFile)) {

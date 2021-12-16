@@ -112,6 +112,11 @@ public class MemoryStore extends Store implements IStore {
     }
 
     @Override
+    public Collection<CacheEntry> getAll() {
+        return cacheList.values();
+    }
+
+    @Override
     public boolean containsKey(String key) {
         return cacheList.containsKey(key);
     }

@@ -19,7 +19,6 @@ import com.github.jspxnet.scriptmark.core.dispose.*;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,17 +31,30 @@ import java.util.Map;
 
 public class TemplateConfigurable implements Configurable, Cloneable {
     private final static Map<String, MacroBlock> REG_MACRO = new HashMap<>();
-    private Map<String, String> tagMap = new HashMap<>();
-    private Map<String, Object> hashMap = new HashMap<>();
+    private final Map<String, String> tagMap = new HashMap<>();
+    private final Map<String, Object> hashMap = new HashMap<>();
+    private final Map<String, Phrase> phrases = new HashMap<>(20);
+
     private String[] autoImports = null;
     private String[] autoIncludes = null;
     private String[] staticModels = null;
     private String[] searchPath = null;
     private Map<String, Object> globalMap = new HashMap<>();
-    private final Map<String, Phrase> phrases = new HashMap<>(20);
-    final static private Configurable INSTANCE = new TemplateConfigurable();
+    static private Configurable INSTANCE = null;
 
     static public Configurable getInstance() {
+
+        if (INSTANCE!=null)
+        {
+            return INSTANCE;
+        }
+        synchronized (TemplateConfigurable.class)
+        {
+            if (INSTANCE==null)
+            {
+                INSTANCE = new TemplateConfigurable();
+            }
+        }
         return INSTANCE;
     }
 
@@ -219,7 +231,8 @@ public class TemplateConfigurable implements Configurable, Cloneable {
 
     @Override
     public void setTagMap(Map<String, String> tagMap) {
-        this.tagMap = tagMap;
+        this.tagMap.clear();
+        this.tagMap.putAll(tagMap);
     }
 
     @Override
@@ -234,7 +247,8 @@ public class TemplateConfigurable implements Configurable, Cloneable {
 
     @Override
     public void setHashMap(Map<String, Object> hashMap) {
-        this.hashMap = hashMap;
+        this.hashMap.clear();
+        this.hashMap.putAll(hashMap);
     }
 
     @Override

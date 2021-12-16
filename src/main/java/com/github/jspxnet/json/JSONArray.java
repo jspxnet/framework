@@ -97,7 +97,7 @@ import java.util.*;
  */
 //CopyOnWriteArrayList
 @Slf4j
-public class JSONArray extends ArrayList<Object> {
+public class JSONArray extends LinkedList<Object> {
     public static JSONArray parse(String str) {
         if (str==null)
         {
@@ -117,7 +117,6 @@ public class JSONArray extends ArrayList<Object> {
      */
     public JSONArray() {
     }
-
 
     /**
      * Construct a JSONArray from a JSONTokener.

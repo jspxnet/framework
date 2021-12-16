@@ -286,7 +286,7 @@ public final class ParamUtil {
 
                     String varName = StringUtil.isNull(pathVar.name()) ? parameters[i].getName() : pathVar.name();
                     if (operate != null && operate.method().contains(varName)) {
-                        String urlPath = URLUtil.getURLPath(request.getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
+                        String urlPath = URLUtil.getUrlPath(request.getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
                         String tempMethodUrl = StringUtil.substringBefore(operate.method(), StringUtil.BACKSLASH);
                         String checkPath = StringUtil.substringAfter(urlPath, tempMethodUrl);
                         String operatePath = StringUtil.substringAfter(operate.method(), tempMethodUrl);
@@ -436,7 +436,7 @@ public final class ParamUtil {
                     Operate operate = exeMethod.getAnnotation(Operate.class);
                     PathVar pathVar = (PathVar) annotation;
                     if (operate != null && operate.method().contains(pathVar.name())) {
-                        String urlPath = URLUtil.getURLPath(request.getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
+                        String urlPath = URLUtil.getUrlPath(request.getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
                         String tempMethodUrl = StringUtil.substringBefore(operate.method(), StringUtil.BACKSLASH);
                         String checkPath = StringUtil.substringAfter(urlPath, tempMethodUrl);
                         String operatePath = StringUtil.substringAfter(operate.method(), tempMethodUrl);
@@ -569,7 +569,7 @@ public final class ParamUtil {
                     }
 
                     if (operate != null && operate.method().contains(pathVarName)) {
-                        String urlPath = URLUtil.getURLPath(request.getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
+                        String urlPath = URLUtil.getUrlPath(request.getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
                         String tempMethodUrl = StringUtil.substringBefore(operate.method(), variableBegin);
                         String checkPath = StringUtil.substringAfter(urlPath, tempMethodUrl);
 

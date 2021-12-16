@@ -11,13 +11,13 @@ package com.github.jspxnet.scriptmark.core.script;
 
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONException;
+import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.scriptmark.core.block.CommentBlock;
 import com.github.jspxnet.scriptmark.core.type.*;
 import com.github.jspxnet.scriptmark.core.iterator.*;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.*;
 import com.github.jspxnet.scriptmark.ListIterator;
-import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -36,30 +36,33 @@ import java.io.Writer;
  */
 @Slf4j
 public final class ScriptTypeConverter {
-    final private static Map<String, AbstractType> TYPE_MAP = new HashMap<>();
 
-    static {
-        Configurable config = TemplateConfigurable.getInstance();
+
+    private static Map<String, AbstractType> getTypeMap(Configurable config)
+    {
+        Map<String, AbstractType> typeMap = new HashMap<>();
         DateProvider typeSerializer = new DateProvider();
         typeSerializer.setFormat(config.getString(ScriptmarkEnv.DateTimeFormat));
-        TYPE_MAP.put(Date.class.getName(), typeSerializer);
+        typeMap.put(Date.class.getName(), typeSerializer);
 
         DoubleProvider doubleProvider = new DoubleProvider();
         doubleProvider.setFormat(config.getString(ScriptmarkEnv.NumberFormat));
-        TYPE_MAP.put(Double.class.getName(), doubleProvider);
+        typeMap.put(Double.class.getName(), doubleProvider);
+        typeMap.put(double.class.getName(), doubleProvider);
 
         FloatProvider floatProvider = new FloatProvider();
         floatProvider.setFormat(config.getString(ScriptmarkEnv.NumberFormat));
-        TYPE_MAP.put(Float.class.getName(), floatProvider);
+        typeMap.put(Float.class.getName(), floatProvider);
+        typeMap.put(float.class.getName(), floatProvider);
 
         IntegerProvider integerProvider = new IntegerProvider();
-        TYPE_MAP.put(Integer.class.getName(), integerProvider);
+        typeMap.put(Integer.class.getName(), integerProvider);
 
         BooleanProvider booleanProvider = new BooleanProvider();
-        TYPE_MAP.put(Boolean.class.getName(), booleanProvider);
+        typeMap.put(Boolean.class.getName(), booleanProvider);
         ///////////////////////////////////////
+        return typeMap;
     }
-
     private ScriptTypeConverter() {
 
     }
@@ -68,13 +71,19 @@ public final class ScriptTypeConverter {
         return o != null && (o.getClass().getName().toLowerCase().contains("number") || o.getClass().getName().toLowerCase().contains("integer") || isStandardNumber(o.toString()));
     }
 
+
+    static public String toString(Object o)
+    {
+        return toString( o, TemplateConfigurable.getInstance());
+    }
+
     /**
      * 创建相应的类型数组
-     *
      * @param o 对象
+     * @param configurable 配置
      * @return 数组字符串
      */
-    static public String toString(Object o) {
+    static public String toString(Object o,Configurable configurable) {
         if (o == null || "undefined".equals(o)) {
             return StringUtil.empty;
         }
@@ -82,7 +91,8 @@ public final class ScriptTypeConverter {
             return (String) o;
         }
         //转换匹配
-        AbstractType type = TYPE_MAP.get(o.getClass().getName());
+        Map<String, AbstractType> typeMap = getTypeMap(configurable);
+        AbstractType type = typeMap.get(o.getClass().getName());
         if (type != null) {
             return type.toString(o);
         }
@@ -99,9 +109,9 @@ public final class ScriptTypeConverter {
             StringBuilder sb = new StringBuilder("[");
             for (int i = 0; i < o1.length; i++) {
                 if (isDouble(o1[i])) {
-                    sb.append(toString(o1[i]));
+                    sb.append(toString(o1[i],configurable));
                 } else {
-                    sb.append(StringUtil.quote(toString(o1[i]), true));
+                    sb.append(StringUtil.quote(toString(o1[i],configurable), true));
                 }
                 if (i + 1 < o1.length) {
                     sb.append(",");
@@ -123,7 +133,7 @@ public final class ScriptTypeConverter {
             StringBuilder sb = new StringBuilder();
             Iterator iterator = (Iterator) o;
             while (iterator.hasNext()) {
-                sb.append(toString(iterator.next()));
+                sb.append(toString(iterator.next(),configurable));
             }
             return sb.toString();
         }
@@ -300,11 +310,11 @@ public final class ScriptTypeConverter {
                     try {
                         if (quote)
                         {
-                            out.write(StringUtil.quoteSql(toString(scriptEngine.eval(varName, tagNode.getLineNumber()))));
+                            out.write(StringUtil.quoteSql(toString(scriptEngine.eval(varName, tagNode.getLineNumber()),tagNode.getTemplate().getConfigurable())));
                         }
                         else
                         {
-                            out.write( toString(scriptEngine.eval(varName, tagNode.getLineNumber())) );
+                            out.write( toString(scriptEngine.eval(varName, tagNode.getLineNumber()),tagNode.getTemplate().getConfigurable()) );
                         }
                     } finally {
                         ivb = -1;

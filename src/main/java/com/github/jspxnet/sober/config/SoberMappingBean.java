@@ -70,7 +70,7 @@ public class SoberMappingBean implements SoberFactory {
     //整合服务器JNDI接口
     private Context context = null;
     //一次最多查询行数，避免out memory 
-    private int maxRows = 20000;
+    private int maxRows = 50000;
     //数据源
     private DataSource dataSource;
     //显示SQL
@@ -457,7 +457,6 @@ public class SoberMappingBean implements SoberFactory {
         String defaultPath = envTemplate.getString(Environment.defaultPath);
         List<File> fileList = new ArrayList<>();
         if (strings != null) {
-
             for (String file : strings) {
                 if (FileUtil.isPatternFileName(file))
                 {
@@ -532,10 +531,8 @@ public class SoberMappingBean implements SoberFactory {
                 {
                     checkList.add(fileId);
                 }
-
                 String xmlString = IoUtil.autoReadText(path,envTemplate.getString(Environment.encode, Environment.defaultEncode));
-                xmlString = StringUtil.trim(xmlString);
-                if (!StringUtil.isNull(xmlString))
+                if (!StringUtil.isNull(StringUtil.trim(xmlString)))
                 {
                     SoberUtil.readSqlMap(xmlString,SQL_MAP,INIT_TABLE_MAP);
                 }

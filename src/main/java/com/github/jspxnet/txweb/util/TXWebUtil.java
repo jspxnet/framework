@@ -72,7 +72,7 @@ import java.util.stream.Collectors;
  * LifecycleManager
  */
 @Slf4j
-public class TXWebUtil {
+public final class TXWebUtil {
     public final static String chainType = "chain";
     public final static String redirectType = "redirect";
     public final static String defaultExecute = "execute";
@@ -779,7 +779,7 @@ public class TXWebUtil {
             } else if (operate.method().contains(StringUtil.BACKSLASH)) {
                 String urlNamespace = StringUtil.BACKSLASH + actionProxy.getNamespace();
                 //URL外部路径
-                String url = URLUtil.getURLPath(action.getRequest().getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
+                String url = URLUtil.getUrlPath(action.getRequest().getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
                 //当前允许执行的方法
                 String operateUrl = urlNamespace + (operate.method().startsWith(StringUtil.BACKSLASH) ? operate.method() : (StringUtil.BACKSLASH + operate.method()));
                 if (url.startsWith(urlNamespace) && operate.method().contains(ParamUtil.variableBegin)) {
@@ -972,7 +972,7 @@ public class TXWebUtil {
      * @return namespace 命名空间
      */
     public static String getNamespace(String servletPath) {
-        String namespace = URLUtil.getURLPath(servletPath);
+        String namespace = URLUtil.getUrlPath(servletPath);
         if (namespace.endsWith(StringUtil.ASTERISK)) {
             namespace = namespace.substring(0, namespace.length() - 1);
         }
@@ -1003,7 +1003,7 @@ public class TXWebUtil {
         if (servletPath.startsWith("http")) {
             servletPath = StringUtil.substringAfter(servletPath, URLUtil.getHostUrl(servletPath));
         }
-        String namespace = URLUtil.getURLPath(servletPath);
+        String namespace = URLUtil.getUrlPath(servletPath);
         if (namespace.startsWith("/")) {
             namespace = namespace.substring(1);
         }

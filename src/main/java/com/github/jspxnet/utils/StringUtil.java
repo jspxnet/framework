@@ -65,7 +65,7 @@ public class StringUtil {
 
     public static final String TRANSFERRED = "\\ ".trim();
 
-    public static final String COMMAS = ",";
+    public static final String COMMAS   = ",";
 
     public static final String EQUAL = "=";
 
@@ -101,6 +101,7 @@ public class StringUtil {
         if (sqlText == null) {
             return empty;
         }
+
         String sqlUpperCase = sqlText.toUpperCase();
         int pos = sqlUpperCase.lastIndexOf("LIMIT");
         if (pos != -1) {
@@ -1128,7 +1129,7 @@ public class StringUtil {
         if (StringUtil.isNull(value)) {
             return empty;
         } else {
-            return replaceOnce(value.trim(), "\t", StringUtil.empty);
+            return value.trim();
         }
     }
 
@@ -1433,11 +1434,11 @@ public class StringUtil {
         if (StringUtil.isNull(value)) {
             return true;
         }
-        String tmp = replace(value, "\t", "");
-        tmp = replace(value, "\n", "");
-        tmp = replace(value, "\f", "");
-        tmp = replace(value, "\r", "");
-        return hasLength(tmp);
+        String tmp = replace(value, "\t", empty);
+        tmp = replace(value, "\n", empty);
+        tmp = replace(value, "\f", empty);
+        tmp = replace(value, "\r", empty);
+        return hasLength(tmp.trim());
     }
 
 
@@ -3108,6 +3109,14 @@ public class StringUtil {
     public static String underlineToCamel(String value) {
         if (isNull(value)) {
             return empty;
+        }
+        if (!value.contains(UNDERLINE+""))
+        {
+            if (Character.isUpperCase(value.charAt(0)))
+            {
+                return uncapitalize(value);
+            }
+            return value;
         }
         String param= value.toLowerCase();
         int len = param.length();

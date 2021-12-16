@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.bundle.provider;
 
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.utils.*;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;
 import com.github.jspxnet.txweb.bundle.BundleProvider;
@@ -53,7 +54,7 @@ public class XMLBundleProvider extends BundleProvider {
             url = ClassUtil.getResource("/resources/" + name);
         }
         if (url != null) {
-            file = new File(url.getPath());
+            file = new File(URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode));
         }
         file = new File(name);
         return file;

@@ -14,10 +14,13 @@ import com.github.jspxnet.sober.Criteria;
 import com.github.jspxnet.sober.SoberEnv;
 import com.github.jspxnet.sober.SoberFactory;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.sober.criteria.expression.LogicalExpression;
+import com.github.jspxnet.sober.criteria.projection.AvgProjection;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.criteria.projection.Projection;
+import com.github.jspxnet.sober.criteria.projection.SumProjection;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.util.JdbcUtil;
@@ -71,6 +74,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
     }
 
+    /**
+     *
+     * @return 类对象
+     */
     @Override
     public Class<T> getCriteriaClass() {
         return criteriaClass;
@@ -130,7 +137,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         setCurrentPage(1);
         setTotalCount(1);
         List<T> list = list(loadChild);
-        if (list == null || list.isEmpty()) {
+        if (ObjectUtil.isEmpty(list))
+        {
             return null;
         }
         return list.get(0);
@@ -352,7 +360,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
 
     /**
-     * 快速删除,不删除映射对象
+     * 更新
      *
      * @return boolean 是否成功
      */
@@ -806,6 +814,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         return this;
     }
 
+    /**
+     *
+     * @return 删除这个查询的缓存数据
+     */
     @Override
     public String  getDeleteListCacheKey()
     {
@@ -844,5 +856,276 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         }
         return StringUtil.substringBefore(SoberUtil.getListKey(soberTable.getEntity(), StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),StringUtil.empty,1,1,false),"_T_")+StringUtil.ASTERISK;
     }
+
+    /**
+     * 对一个类对象求合计并返回
+     * @param <T> 类型
+     * @return 类实体对象
+     */
+    @Override
+    public <T> T autoSum() {
+            TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
+            String databaseName = soberFactory.getDatabaseType();
+            if (soberTable == null) {
+                return null;
+            }
+            StringBuilder projectionTxt = new StringBuilder();
+            for (SoberColumn column : soberTable.getColumns()) {
+                if (column.getName().equals(soberTable.getPrimary()) ) {
+                    continue;
+                }
+                if (ClassUtil.isNumberProperty(column.getClassType()))
+                {
+                    Projection projection = new SumProjection(column.getName());
+                    projectionTxt.append(projection.toSqlString(databaseName)).append(StringUtil.COMMAS);
+                }
+            }
+            if (projectionTxt.toString().endsWith(StringUtil.COMMAS))
+            {
+                projectionTxt.setLength(projectionTxt.length()-1);
+            }
+
+            String errorInfo = StringUtil.empty;
+            StringBuilder termText = new StringBuilder();
+            Object[] objectArray = null;
+            for (int i = 0; i < criterionEntries.size(); i++) {
+                CriterionEntry criterionEntry = criterionEntries.get(i);
+                if (criterionEntry.getCriterion().getFields()!=null&&!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
+                    errorInfo = ObjectUtil.toString(criterionEntry.getCriterion().getFields());
+                    continue;
+                }
+                String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
+                termText.append(term);
+                if (i != (criterionEntries.size() - 1) && !StringUtil.isNull(StringUtil.trim(term))) {
+                    termText.append(" AND ");
+                }
+                if (criterionEntry.getCriterion().getParameter(soberTable) != null) {
+                    objectArray = JdbcUtil.appendArray(objectArray, criterionEntry.getCriterion().getParameter(soberTable));
+                }
+            }
+            if (StringUtil.trim(termText.toString()).endsWith(" AND"))
+            {
+                log.error("SQL 存在错误,检查字段名称是否匹配:{}",errorInfo);
+                return null;
+            }
+
+            Map<String, Object> valueMap = new HashMap<>();
+            valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+            valueMap.put(Dialect.KEY_FIELD_PROJECTION, projectionTxt.toString());
+            valueMap.put(Dialect.KEY_TERM, termText.toString());
+            valueMap.put(Dialect.KEY_FIELD_GROUPBY, false);
+            valueMap.put(Dialect.KEY_FIELD_ORDERBY, false);
+
+            T result = null;
+            //取出cache  begin
+            String cacheKey = null;
+            if (soberFactory.isUseCache() && soberTable.isUseCache()) {
+                StringBuilder termKey = new StringBuilder();
+                termKey.append("_").append(termText).append("_p_").append(projectionTxt);
+                if (objectArray != null) {
+                    for (Object po : objectArray) {
+                        termKey.append(ObjectUtil.toString(po));
+                    }
+                }
+                cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),StringUtil.empty,1,1, false);
+                result = (T)JSCacheManager.get(criteriaClass, cacheKey);
+                if (result != null) {
+                    return result;
+                }
+            }
+            //取出cache  end
+
+            PreparedStatement statement = null;
+            ResultSet resultSet = null;
+            Connection conn = null;
+
+            Dialect dialect = soberFactory.getDialect();
+            String sqlText = StringUtil.empty;
+            try {
+                conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
+                sqlText = dialect.processTemplate(Dialect.SQL_CRITERIA_UNIQUERESULT, valueMap);
+                jdbcOperations.debugPrint(sqlText);
+                if (!dialect.supportsConcurReadOnly()) {
+                    statement = conn.prepareStatement(sqlText);
+                } else {
+                    statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                }
+
+                statement.setMaxRows(1);
+                if (objectArray != null) {
+                    for (int i = 0; i < objectArray.length; i++) {
+                        jdbcOperations.debugPrint("SetPrepared[" + (i + 1) + "]=" + objectArray[i]);
+                        dialect.setPreparedStatementValue(statement, i + 1, objectArray[i]);
+                    }
+                }
+                resultSet = statement.executeQuery();
+
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                if (resultSet.next())
+                {
+                    result = (T)ClassUtil.newInstance(criteriaClass.getName());
+                    for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                        String dbFiled = metaData.getColumnLabel(i);
+                        SoberColumn soberColumn = soberTable.getColumn(dbFiled);
+                        if (soberColumn != null) {
+                            Object obj = dialect.getResultSetValue(resultSet, i);
+                            BeanUtil.setFieldValue(result, soberColumn.getName(), obj);
+                        } else if (ClassUtil.getDeclaredField(criteriaClass, dbFiled) != null) {
+                            BeanUtil.setFieldValue(result, dbFiled, dialect.getResultSetValue(resultSet, i));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("table:" + soberTable + " sql:" + sqlText, e);
+                e.printStackTrace();
+                throw new IllegalArgumentException("table:" + soberTable + " sql:" + sqlText);
+            } finally {
+                valueMap.clear();
+                JdbcUtil.closeResultSet(resultSet);
+                JdbcUtil.closeStatement(statement);
+                JdbcUtil.closeConnection(conn);
+            }
+            //放入cache
+            if (soberFactory.isUseCache() && soberTable.isUseCache()) {
+                JSCacheManager.put(criteriaClass, cacheKey, result);
+            }
+            return result;
+
+    }
+
+    /**
+     * 对一个类对象里边的数字求平均数,在保存到对象返回
+     * @param <T> 类型
+     * @return 类实体对象
+     */
+    @Override
+    public <T> T autoAvg() {
+        TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
+        String databaseName = soberFactory.getDatabaseType();
+        if (soberTable == null) {
+            return null;
+        }
+        StringBuilder projectionTxt = new StringBuilder();
+        for (SoberColumn column : soberTable.getColumns()) {
+            if (column.getName().equals(soberTable.getPrimary()) ) {
+                continue;
+            }
+            if (ClassUtil.isNumberProperty(column.getClassType()))
+            {
+                Projection projection = new AvgProjection(column.getName());
+                projectionTxt.append(projection.toSqlString(databaseName)).append(StringUtil.COMMAS);
+            }
+        }
+        if (projectionTxt.toString().endsWith(StringUtil.COMMAS))
+        {
+            projectionTxt.setLength(projectionTxt.length()-1);
+        }
+        String errorInfo = StringUtil.empty;
+        StringBuilder termText = new StringBuilder();
+        Object[] objectArray = null;
+        for (int i = 0; i < criterionEntries.size(); i++) {
+            CriterionEntry criterionEntry = criterionEntries.get(i);
+            if (criterionEntry.getCriterion().getFields()!=null&&!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
+                errorInfo = ObjectUtil.toString(criterionEntry.getCriterion().getFields());
+                continue;
+            }
+            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
+            termText.append(term);
+            if (i != (criterionEntries.size() - 1) && !StringUtil.isNull(StringUtil.trim(term))) {
+                termText.append(" AND ");
+            }
+            if (criterionEntry.getCriterion().getParameter(soberTable) != null) {
+                objectArray = JdbcUtil.appendArray(objectArray, criterionEntry.getCriterion().getParameter(soberTable));
+            }
+        }
+        if (StringUtil.trim(termText.toString()).endsWith(" AND"))
+        {
+            log.error("SQL 存在错误,检查字段名称是否匹配:{}",errorInfo);
+            return null;
+        }
+
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+        valueMap.put(Dialect.KEY_FIELD_PROJECTION, projectionTxt.toString());
+        valueMap.put(Dialect.KEY_TERM, termText.toString());
+        valueMap.put(Dialect.KEY_FIELD_GROUPBY, false);
+        valueMap.put(Dialect.KEY_FIELD_ORDERBY, false);
+
+        T result = null;
+        //取出cache  begin
+        String cacheKey = null;
+        if (soberFactory.isUseCache() && soberTable.isUseCache()) {
+            StringBuilder termKey = new StringBuilder();
+            termKey.append("_").append(termText).append("_p_").append(projectionTxt);
+            if (objectArray != null) {
+                for (Object po : objectArray) {
+                    termKey.append(ObjectUtil.toString(po));
+                }
+            }
+            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),StringUtil.empty,1,1, false);
+            result = (T)JSCacheManager.get(criteriaClass, cacheKey);
+            if (result != null) {
+                return result;
+            }
+        }
+        //取出cache  end
+
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        Connection conn = null;
+
+        Dialect dialect = soberFactory.getDialect();
+        String sqlText = StringUtil.empty;
+        try {
+            conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
+            sqlText = dialect.processTemplate(Dialect.SQL_CRITERIA_UNIQUERESULT, valueMap);
+            jdbcOperations.debugPrint(sqlText);
+            if (!dialect.supportsConcurReadOnly()) {
+                statement = conn.prepareStatement(sqlText);
+            } else {
+                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            }
+
+            statement.setMaxRows(1);
+            if (objectArray != null) {
+                for (int i = 0; i < objectArray.length; i++) {
+                    jdbcOperations.debugPrint("SetPrepared[" + (i + 1) + "]=" + objectArray[i]);
+                    dialect.setPreparedStatementValue(statement, i + 1, objectArray[i]);
+                }
+            }
+            resultSet = statement.executeQuery();
+
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            if (resultSet.next()) {
+                result = (T)ClassUtil.newInstance(criteriaClass.getName());
+                for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                    String dbFiled = metaData.getColumnLabel(i);
+                    SoberColumn soberColumn = soberTable.getColumn(dbFiled);
+                    if (soberColumn != null) {
+                        Object obj = dialect.getResultSetValue(resultSet, i);
+                        BeanUtil.setFieldValue(result, soberColumn.getName(), obj);
+                    } else if (ClassUtil.getDeclaredField(criteriaClass, dbFiled) != null) {
+                        BeanUtil.setFieldValue(result, dbFiled, dialect.getResultSetValue(resultSet, i));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("table:" + soberTable + " sql:" + sqlText, e);
+            e.printStackTrace();
+            throw new IllegalArgumentException("table:" + soberTable + " sql:" + sqlText);
+        } finally {
+            valueMap.clear();
+            JdbcUtil.closeResultSet(resultSet);
+            JdbcUtil.closeStatement(statement);
+            JdbcUtil.closeConnection(conn);
+        }
+        //放入cache
+        if (soberFactory.isUseCache() && soberTable.isUseCache()) {
+            JSCacheManager.put(criteriaClass, cacheKey, result);
+        }
+        return result;
+
+    }
+
 
 }

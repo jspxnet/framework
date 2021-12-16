@@ -42,7 +42,7 @@ public interface SchedulerManager {
      * @param id 任务id
      * @return 删除定时任务
      */
-    Scheduler remove(String id);
+    Scheduler stopRemove(String id);
 
     /**
      * 关闭所有

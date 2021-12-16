@@ -59,7 +59,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         URL url = Environment.class.getResource("/" + defaultConfigFile);
 
         if (url != null) {
-            path = url.getPath();
+            path = URLUtil.getUrlDecoder(url.getPath(),Environment.defaultEncode);
 
             if (!FileUtil.isFileExist(path)) {
                 path = null;
@@ -70,14 +70,14 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         if (url == null) {
             url = Environment.class.getResource(defaultConfigFile);
             if (url != null) {
-                path = url.getPath();
+                path = URLUtil.getUrlDecoder(url.getPath(),Environment.defaultEncode);
 
             }
         }
         if (path == null) {
             url = Environment.class.getResource("/resources/"+defaultConfigFile);
             if (url != null) {
-                path = url.getPath();
+                path = URLUtil.getUrlDecoder(url.getPath(),Environment.defaultEncode);
                 if (!FileUtil.isFileExist(path)) {
                     path = null;
                 }
@@ -94,7 +94,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
             url = ClassUtil.getResource("/" + defaultConfigFile);
 
             if (url != null) {
-                path = url.getPath();
+                path = URLUtil.getUrlDecoder(url.getPath(),Environment.defaultEncode);
 
                 int i = path.toLowerCase().indexOf("file-inf");
                 if (i != -1) {
@@ -154,7 +154,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         if (path == null) {
             url = ClassUtil.getResource(defaultConfigFile);
             if (url != null) {
-                path = url.getPath();
+                path = URLUtil.getUrlDecoder(url.getPath(),Environment.defaultEncode);
             }
         }
 
@@ -177,7 +177,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         defaultPath = FileUtil.mendPath(file.getPath());
 
         //路径里边有空格
-        if (defaultPath!=null&&defaultPath.contains("%20"))
+        if (defaultPath!=null)
         {
             defaultPath = URLUtil.getUrlDecoder(defaultPath,Environment.defaultEncode);
         }

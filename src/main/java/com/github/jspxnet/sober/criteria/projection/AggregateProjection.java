@@ -33,7 +33,7 @@ public class AggregateProjection extends SimpleProjection {
 
     @Override
     public String toSqlString(String databaseName) {
-        return aggregate + "(" + propertyName + ")";
+        return aggregate + "(" + propertyName + ") AS " + propertyName;
     }
 
 }

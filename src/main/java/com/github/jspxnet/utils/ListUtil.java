@@ -35,9 +35,14 @@ public final class ListUtil {
         }
         StringBuilder sb = new StringBuilder();
         for (Object aList : list) {
+            if (aList==null)
+            {
+                sb.append("null").append(fen);
+            } else
             if (ClassUtil.isStandardProperty(aList.getClass())) {
                 sb.append(aList).append(fen);
-            } else {
+            }
+            else {
                 sb.append(new JSONObject(aList)).append(fen);
             }
 

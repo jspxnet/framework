@@ -12,7 +12,6 @@ package com.github.jspxnet.sober;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.criteria.projection.Projection;
 import com.github.jspxnet.sober.criteria.Order;
-
 import java.util.List;
 import java.io.Serializable;
 import java.util.Map;
@@ -59,7 +58,31 @@ public interface Criteria extends Serializable {
 
     int update(Map<String, Object> updateMap);
 
+
+    /**
+     *
+     * @param <T> 类型
+     * @return 类对象
+     */
     <T> Class<T> getCriteriaClass();
 
+    /**
+     *
+     * @return 删除这个查询的缓存数据
+     */
     String getDeleteListCacheKey();
+
+    /**
+     * 对一个类对象求合计并返回
+     * @param <T> 类型
+     * @return 类实体对象
+     */
+    <T> T autoSum();
+
+    /**
+     * 对一个类对象里边的数字求平均数,在保存到对象返回
+     * @param <T> 类型
+     * @return 类实体对象
+     */
+    <T> T autoAvg();
 }

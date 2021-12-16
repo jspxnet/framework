@@ -147,6 +147,7 @@ public class EnvRunner {
      * @throws IOException     读取错误
      */
     public void getInjectVariables(TagNode tagNode, Writer out) throws Exception {
+
         ScriptTypeConverter.getInjectVariables(scriptEngine, tagNode, out, variableBegin, variableSafeBegin,variableEnd, escapeVariable);
     }
 

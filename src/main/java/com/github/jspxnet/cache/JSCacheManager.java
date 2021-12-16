@@ -14,7 +14,6 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.cache.core.JSCache;
 import com.github.jspxnet.cache.event.CacheEventListener;
-import com.github.jspxnet.cron4j.Scheduler;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
@@ -232,7 +231,7 @@ public class JSCacheManager implements CacheManager {
             e.printStackTrace();
             log.error("缓存数据规则不正确", e);
         }
-        cacheEntry.setTimeToLive(timeToLive);
+        cacheEntry.setLive(timeToLive);
         cache.put(cacheEntry);
         return true;
     }
@@ -325,6 +324,16 @@ public class JSCacheManager implements CacheManager {
     }
 
     /**
+     *
+     * @param cla 类对象
+     * @param cacheEventListener 监听
+     * @return 是否成功
+     */
+    static public boolean registeredEventListeners(Class<?> cla, CacheEventListener cacheEventListener)
+    {
+        return registeredEventListeners(cla.getName(), cacheEventListener);
+    }
+    /**
      * 得到事件个数
      *
      * @param cacheName 缓存
@@ -336,11 +345,42 @@ public class JSCacheManager implements CacheManager {
 
     /**
      * @param cacheName 缓存名称
-     * @return 得到缓存
+     * @return 得到缓存 key
      */
     static public Set<String> getKeys(String cacheName) {
         return CACHE_MANAGER.getCache(cacheName).getKeys();
     }
+
+    /**
+     *
+     * @param cla 缓存名称
+     * @return 一次性得到所有数据
+     */
+    static public List<Object> getAll(Class<?> cla)
+    {
+        return getAll(cla.getName());
+    }
+    /**
+     * @param cacheName 缓存名称
+     * @return 一次性得到所有数据
+     */
+    static public List<Object> getAll(String cacheName) {
+        return CACHE_MANAGER.getCache(cacheName).getAll();
+    }
+
+    /**
+     *
+     * @param cla 类名
+     * @return 得到缓存 key
+     */
+    static public Set<String> getKeys(Class<?> cla) {
+        if (cla==null)
+        {
+            return new HashSet<>(0);
+        }
+        return getKeys(cla.getName());
+    }
+
 
 
     /**
@@ -357,13 +397,8 @@ public class JSCacheManager implements CacheManager {
 
 
     static public void shutdown() {
-        SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
         for (Cache cache : caches) {
             cache.destroy();
-            Scheduler scheduler = schedulerManager.remove(cache.getName());
-            if (scheduler != null&&scheduler.isStarted()) {
-                scheduler.stop();
-            }
         }
         caches.clear();
     }

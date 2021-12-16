@@ -56,8 +56,12 @@ public class SQLRoom implements Serializable {
         this.namespace = namespace;
     }
 
+    /**
+     * 载入 include
+     * @param sql sql
+     * @return 返回
+     */
     public String getReplenish(String sql)  {
-
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag(IncludeXml.TAG_NAME, IncludeXml.class.getName());
         List<TagNode> list = null;
@@ -116,7 +120,6 @@ public class SQLRoom implements Serializable {
         Map<String, SqlMapConfig> configMap = queryMap.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
         configMap.put(StringUtil.toLowerCase(sqlMapConfig.getDatabase()),sqlMapConfig);
     }
-
 
 
     /**

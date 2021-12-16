@@ -13,12 +13,15 @@ import com.github.jspxnet.scriptmark.ScriptRunner;
 import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
 import com.github.jspxnet.scriptmark.exception.ScriptException;
 
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.ValidUtil;
 import com.github.jspxnet.utils.XMLUtil;
 
 import java.util.LinkedList;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -452,5 +455,23 @@ public class ScriptMarkUtil {
         return StringUtil.empty;
 
     }
+
+    public static void fixVarNull(Map<String, Object> valueMap,String txt)
+    {
+        //修复变量,避免空异常 begin
+        String[] varName = StringUtil.getFreeMarkerVar(txt);
+        if (!ObjectUtil.isEmpty(varName))
+        {
+            for (String name:varName)
+            {
+                if (!valueMap.containsKey(name) && ValidUtil.isGoodName(name,1,24) && !ValidUtil.isNumber(name.charAt(0)+""))
+                {
+                    valueMap.put(name,false);
+                }
+            }
+        }
+        //修复变量,避免空异常 end
+    }
+
 
 }

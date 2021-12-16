@@ -29,5 +29,7 @@ public interface Placeholder {
 
     String processTemplate(Map<String, Object> valueMap, String templateString);
 
+    String processTemplateException(Map<String, Object> valueMap, String templateString) throws Exception;
+
     String processTemplate(Map<String, Object> valueMap, File fileName, String encode);
 }
