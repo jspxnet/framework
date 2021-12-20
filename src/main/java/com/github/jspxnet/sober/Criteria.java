@@ -79,10 +79,14 @@ public interface Criteria extends Serializable {
      */
     <T> T autoSum();
 
+    <T> T autoSum(String[] fields);
+
     /**
      * 对一个类对象里边的数字求平均数,在保存到对象返回
      * @param <T> 类型
      * @return 类实体对象
      */
     <T> T autoAvg();
+
+    <T> T autoAvg(String[] fields);
 }
