@@ -43,8 +43,6 @@ public final class XMLUtil {
     final public static String CDATA_START_KEY = "<![CDATA[";
     final public static String CDATA_END_KEY = "]]>";
 
-
-
     private XMLUtil() {
 
     }
@@ -93,7 +91,6 @@ public final class XMLUtil {
         }
         return "<img src=" + typePath + FileUtil.getTypePart(fileName) + ".gif" + " border=0 />";
     }
-
 
     /**
      * @param s 字符串

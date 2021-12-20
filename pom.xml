@@ -16,10 +16,13 @@
         <maven.test.skip>true</maven.test.skip>
         <github.global.server>github</github.global.server>
         <tomcat.version>9.0.54</tomcat.version>
-        <jackson.version>2.12.5</jackson.version>
+        <jackson.version>2.13.1</jackson.version>
         <redisson.version>3.16.0</redisson.version>
         <slf4j.version>1.7.32</slf4j.version>
         <log4j2.version>[2.16.0,)</log4j2.version>
+        <poi.version>5.0.0</poi.version>
+        <jxls.version>2.11.0</jxls.version>
+
     </properties>
     <licenses>
         <license>
@@ -161,13 +164,13 @@
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>quercus</artifactId>
-            <version>4.0.63</version>
+            <version>4.0.65</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.htmlcleaner</groupId>
             <artifactId>htmlcleaner</artifactId>
-            <version>2.24</version>
+            <version>2.25</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
@@ -247,7 +250,7 @@
         <dependency>
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
-            <version>1.1.2</version>
+            <version>1.9.1</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -277,7 +280,7 @@
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-core</artifactId>
-            <version>4.5.25</version>
+            <version>4.5.30</version>
         </dependency>
         <dependency>
             <groupId>com.aliyun</groupId>
@@ -288,7 +291,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.74</version>
+            <version>1.2.79</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -306,29 +309,29 @@
         <dependency>
             <groupId>org.jxls</groupId>
             <artifactId>jxls</artifactId>
-            <version>2.10.0</version>
+            <version>${jxls.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jxls</groupId>
             <artifactId>jxls-poi</artifactId>
-            <version>2.10.0</version>
+            <version>${jxls.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-excelant -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>5.0.0</version>
+            <version>${poi.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-excelant</artifactId>
-            <version>5.0.0</version>
+            <version>${poi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.0.0</version>
+            <version>${poi.version}</version>
             <exclusions>
 
                 <exclusion>
@@ -367,7 +370,7 @@
         <dependency>
             <groupId>com.drewnoakes</groupId>
             <artifactId>metadata-extractor</artifactId>
-            <version>2.15.0</version>
+            <version>2.16.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -428,12 +431,13 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.26</version>
+            <version>8.0.27</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.36.0.1</version>
+            <version>3.36.0.3</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.jtds</groupId>
@@ -455,11 +459,11 @@
             <artifactId>xercesImpl</artifactId>
             <version>2.12.1</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
-            <version>1.4.01</version>
-        </dependency>
+            <version>2.0.2</version>
+        </dependency>-->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
@@ -467,7 +471,6 @@
         </dependency>
         <!--测试基础支持end -->
         <!--maven tools begin -->
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -529,7 +532,7 @@
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-jxr-plugin</artifactId>
-            <version>3.0.0</version>
+            <version>3.1.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
