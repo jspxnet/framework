@@ -10,6 +10,9 @@ import io.netty.channel.Channel;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 命令回复工程类
+ */
 public class ReplyCmdFactory {
     final static private Map<String, String> CMD_ACTION_MAP = new HashMap<>();
     static

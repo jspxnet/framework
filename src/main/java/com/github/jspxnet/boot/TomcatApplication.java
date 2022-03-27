@@ -27,6 +27,8 @@ import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.redisson.tomcat.JndiRedissonSessionManager;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -56,6 +58,8 @@ public class TomcatApplication {
     //@Parameter(names = "-config", description = "application config path")
     private static int config;
 
+    private static int maxPostSize;
+
 
     private static JspxNetBootApplication jspxNetBootApplication;
     public static void setJspxNetBootApplication(JspxNetBootApplication jspxNetBootApplication) {
@@ -75,19 +79,46 @@ public class TomcatApplication {
         String defaultPath = jspxConfiguration.getDefaultPath();
         Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile((defaultPath==null?"":defaultPath) + "/" + Environment.jspx_properties_file));
 
-        if (TomcatApplication.jspxNetBootApplication!=null)
+        if (properties.size()>3 && properties.containsKey(Environment.SERVER_PORT) && properties.containsKey(Environment.SERVER_WEB_PATH))
+        {
+            port = StringUtil.toInt(properties.getProperty(Environment.SERVER_PORT,"8080"));
+            webPath = properties.getProperty(Environment.SERVER_WEB_PATH,System.getProperty("user.dir"));
+            ip = properties.getProperty(Environment.SERVER_IP,"127.0.0.1");
+            cors = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CORS,"true"));
+            threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS,"3"));
+            maxPostSize = StringUtil.toInt(properties.getProperty(Environment.SERVER_MAX_POST_SIZE,"10000000"));
+        } else
+        if (TomcatApplication.jspxNetBootApplication!=null && properties.size() < 2)
         {
             port = TomcatApplication.jspxNetBootApplication.port();
             webPath = TomcatApplication.jspxNetBootApplication.webPath();
             ip = TomcatApplication.jspxNetBootApplication.ip();
             cors = TomcatApplication.jspxNetBootApplication.cors();
             threads = TomcatApplication.jspxNetBootApplication.threads();
+            maxPostSize = TomcatApplication.jspxNetBootApplication.maxPostSize();
         } else {
             port = StringUtil.toInt(properties.getProperty(Environment.SERVER_PORT,"8080"));
             webPath = properties.getProperty(Environment.SERVER_WEB_PATH,System.getProperty("user.dir"));
             ip = properties.getProperty(Environment.SERVER_IP,"127.0.0.1");
             cors = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CORS,"true"));
             threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS,"3"));
+            maxPostSize = StringUtil.toInt(properties.getProperty(Environment.SERVER_MAX_POST_SIZE,"10000000"));
+        }
+
+        if (webPath!=null&&webPath.contains("${")&&webPath.contains("}"))
+        {
+            webPath = EnvFactory.getPlaceholder().processTemplate(new HashMap<String,Object>((Map)System.getProperties()),webPath);
+        }
+
+        if (StringUtil.isNull(webPath))
+        {
+            webPath = System.getProperty("user.dir");
+        }
+
+        boolean cachingAllowed = true;
+        if (properties.containsKey(Environment.SERVER_CACHING_ALLOWED))
+        {
+            cachingAllowed = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CACHING_ALLOWED));
         }
 
         boolean openRedis = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_SESSION_REDIS));
@@ -108,16 +139,16 @@ public class TomcatApplication {
         connector.setURIEncoding(Environment.defaultEncode);
         //让 URI 和 body 编码一致。(针对POST请求)
         connector.setUseBodyEncodingForURI(true);
-        connector.setMaxPostSize(-1);
+        connector.setMaxPostSize(maxPostSize); //默认100M 上传大小限制
         connector.setMaxSavePostSize(-1);
-        connector.setEnableLookups(true);
-        connector.setMaxCookieCount(500000);
+        connector.setEnableLookups(false);
+        connector.setMaxCookieCount(threads*100000);
 
         Http11NioProtocol protocol = (Http11NioProtocol)connector.getProtocolHandler();
         //设置最大连接数
-        protocol.setMaxConnections(3000);
+        protocol.setMaxConnections(threads* 1000);
         //设置最大线程数
-        protocol.setMaxThreads(2000);
+        protocol.setMaxThreads(threads*1000);
         protocol.setConnectionTimeout(30000);
 
         //设置Host
@@ -135,12 +166,13 @@ public class TomcatApplication {
         //host.setAppBase(FileUtil.mendPath(file.getParent()));
         host.setAppBase(webPath);
         Context standardContext = tomcat.addWebapp("",webPath);
-        final int maxCacheSize = 40 * 1024;
-        StandardRoot standardRoot = new StandardRoot();
-        standardRoot.setCacheMaxSize(maxCacheSize);
-        standardRoot.setCacheObjectMaxSize(1024);
-        standardRoot.setCachingAllowed(true);
+        //100000
+        //92160
 
+        StandardRoot standardRoot = new StandardRoot();
+        standardRoot.setCacheMaxSize((threads*20)*1024); //最大100M
+        standardRoot.setCacheObjectMaxSize(1024);
+        standardRoot.setCachingAllowed(cachingAllowed);
         standardContext.setResources(standardRoot);
 
         //前面的那个步骤只是把Tomcat起起来了，但是没啥东西
@@ -171,7 +203,6 @@ public class TomcatApplication {
         scanFilter.setDefaultPluggabilityScan(false);
         scanFilter.setDefaultTldScan(true);
         scanFilter.setTldSkip("*.jar");
-
 
         //scanner.setJarScanFilter(scanFilter);
         JarScanner scanner = new StandardJarScanner();
@@ -304,4 +335,5 @@ public class TomcatApplication {
         server.setUtilityThreads(threads);
         server.await();
     }
+
 }

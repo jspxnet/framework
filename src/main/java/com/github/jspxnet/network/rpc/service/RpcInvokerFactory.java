@@ -45,33 +45,61 @@ public class RpcInvokerFactory {
     }
 
 
-    public static void invokeService(ChannelHandlerContext ctx,String str) throws Exception {
-
+    public static void invokeService(ChannelHandlerContext ctx,String str)  {
+        if (ctx==null)
+        {
+            log.error("ChannelHandlerContext ctx 为空");
+            return;
+        }
         String jsonStr = INetCommand.getDecodePacket(str);
         if (!StringUtil.isJsonObject(jsonStr))
         {
+            log.error("str 不是有效的json");
             return;
+
         }
         SendCmd command = GsonUtil.createGson().fromJson(jsonStr,SendCmd.class);
-        String actionCmdName =  CMD_ACTION_MAP.get(command.getAction());
-        if (StringUtil.isNull(actionCmdName))
+        if (command==null)
         {
-            SendCmd reply = BeanUtil.copy(command, SendCmd.class);
+            log.error("command json 格式解析非法:{}",jsonStr);
+            return;
+        }
+        String actionCmdName =  CMD_ACTION_MAP.get(command.getAction());
+        ICmd cmd = null;
+        try {
+            cmd = (ICmd) ClassUtil.newInstance(actionCmdName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("异常载入命令:{}",actionCmdName);
+            return;
+        }
+        SendCmd reply =  cmd.execute(ctx,command);
+        if (reply==null||StringUtil.isNull(actionCmdName))
+        {
+            reply = BeanUtil.copy(command, SendCmd.class);
             IocResponse rpcResponse = new IocResponse();
-            rpcResponse.setError(new Exception("未知的action命令名称"));
+            rpcResponse.setError(new Exception(actionCmdName+"未知的action命令名称"));
             try {
                 reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(rpcResponse)));
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
-            INetCommand.sendEncodePacket(ctx.channel(),reply);
+            try {
+                INetCommand.sendEncodePacket(ctx.channel(),reply);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("发送数据发生异常",e);
+            }
             return;
         }
-        ICmd cmd = (ICmd)ClassUtil.newInstance(actionCmdName);
-        SendCmd reply =  cmd.execute(ctx,command);
-        if (reply!=null)
-        {
+
+        try {
             INetCommand.sendEncodePacket(ctx.channel(),reply);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("发送数据发生异常",e);
         }
+
     }
+
 }

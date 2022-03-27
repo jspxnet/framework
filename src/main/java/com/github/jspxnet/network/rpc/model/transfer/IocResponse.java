@@ -16,6 +16,7 @@ public class IocResponse  implements Serializable {
 
 
     private Throwable error;
+
     private Object result;
 
     public boolean isError() {

@@ -12,6 +12,8 @@ package com.github.jspxnet.txweb.util;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
+import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.sioc.annotation.RpcClient;
 import com.github.jspxnet.sioc.rpc.RpcClientProxy;
@@ -21,6 +23,8 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.RequestFacade;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -148,6 +152,10 @@ public class RequestUtil {
      * @return 判断是否为ROC请求
      */
     public static boolean isRocRequest(HttpServletRequest request) {
+        if (request==null)
+        {
+            return false;
+        }
         String requestedWith = request.getHeader("X-Requested-With");
         return requestedWith != null && requestedWith.toLowerCase().contains("-roc");
     }
@@ -173,7 +181,7 @@ public class RequestUtil {
     }
 
     public static boolean isMultipart(HttpServletRequest request) {
-        if (request == null) {
+        if (request == null || !"POST".equalsIgnoreCase(request.getMethod())) {
             return false;
         }
         String type = null;
@@ -204,12 +212,15 @@ public class RequestUtil {
         if (response == null) {
             return new HashMap<>(0);
         }
+        if (response instanceof ResponseTo)
+        {
+            return (ResponseTo)response;
+        }
         Map<String, Object> result = new HashMap<>();
         result.put("bufferSize", response.getBufferSize());
         result.put("characterEncoding", response.getCharacterEncoding());
         result.put("locale", response.getLocale());
         result.put("contentType", response.getContentType());
-
         return result;
     }
 
@@ -1018,7 +1029,12 @@ public class RequestUtil {
         if (request == null) {
             return StringUtil.empty;
         }
-        return URLUtil.getHostUrl(request.getRequestURL().toString());
+        StringBuffer sb =  request.getRequestURL();
+        if (sb==null)
+        {
+            return StringUtil.empty;
+        }
+        return URLUtil.getHostUrl(sb.toString());
     }
 
     /**
@@ -1081,6 +1097,10 @@ public class RequestUtil {
         Enumeration<String> env = request.getParameterNames();
         while (env.hasMoreElements()) {
             String name = env.nextElement();
+            if (name==null)
+            {
+                continue;
+            }
             if (Environment.sign.equals(name)) {
                 continue;
             }
@@ -1105,6 +1125,10 @@ public class RequestUtil {
         Enumeration<String> requestParams = request.getParameterNames();
         while (requestParams.hasMoreElements()) {
             String key = requestParams.nextElement();
+            if (key==null)
+            {
+                continue;
+            }
             String value = request.getParameter(key);
             treeMap.put(key, value);
         }
@@ -1117,6 +1141,10 @@ public class RequestUtil {
      * @return map
      */
     public static Map<String, Object> getTransferMap(HttpServletRequest request) {
+        if (request instanceof RequestTo)
+        {
+            return (RequestTo) request;
+        }
         Map<String, Object> resultMap = new HashMap<>();
         if (request==null)
         {
@@ -1126,6 +1154,10 @@ public class RequestUtil {
         Enumeration<String> requestParams = request.getParameterNames();
         while (requestParams.hasMoreElements()) {
             String key = requestParams.nextElement();
+            if (key==null)
+            {
+                continue;
+            }
             String value = request.getParameter(key);
             resultMap.put(key, value);
         }
@@ -1133,6 +1165,10 @@ public class RequestUtil {
         while (enumeration.hasMoreElements())
         {
             String key = enumeration.nextElement();
+            if (key==null)
+            {
+                continue;
+            }
             resultMap.put(HEADER+StringUtil.DOT+key.toLowerCase(),request.getHeader(key));
         }
         //header 中key 全部小写
@@ -1144,6 +1180,29 @@ public class RequestUtil {
         resultMap.put(HEADER+".remoteaddr",request.getRemoteAddr());
         resultMap.put(HEADER+".remotehost",request.getRemoteHost());
         resultMap.put(HEADER+".authtype",request.getAuthType());
+        resultMap.put(HEADER+".querystring",request.getQueryString());
+        resultMap.put(HEADER+".remoteuser",request.getRemoteUser());
+        resultMap.put(HEADER+".requestedsessionid",request.getRequestedSessionId());
+        if (request instanceof RequestFacade)
+        {
+            resultMap.put(HEADER+".requesturi",StringUtil.empty);
+            resultMap.put(HEADER+".requesturl",StringUtil.empty);
+        } else
+        {
+            resultMap.put(HEADER+".requesturi",request.getRequestURI());
+            resultMap.put(HEADER+".requesturl",request.getRequestURL()==null?StringUtil.empty:request.getRequestURL().toString());
+        }
+        resultMap.put(HEADER+".pathinfo",request.getPathInfo());
+        resultMap.put(HEADER+".pathtranslated",request.getPathTranslated());
+        resultMap.put(HEADER+".servletpath",request.getServletPath());
+        resultMap.put(HEADER+".contextpath",request.getContextPath());
+        resultMap.put(HEADER+".scheme",request.getScheme());
+        resultMap.put(HEADER+".servername",request.getServerName());
+        resultMap.put(HEADER+".serverport",request.getServerPort());
+        resultMap.put(HEADER+".localport",request.getLocalPort());
+        resultMap.put(HEADER+".remoteport",request.getRemotePort());
+        resultMap.put(HEADER+".characterencoding",request.getCharacterEncoding());
+
         HttpSession httpSession = request.getSession();
         if (httpSession==null)
         {
@@ -1155,7 +1214,6 @@ public class RequestUtil {
         }
         return resultMap;
     }
-
 
     /**
      *

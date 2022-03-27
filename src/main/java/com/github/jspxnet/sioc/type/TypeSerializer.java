@@ -12,6 +12,8 @@ package com.github.jspxnet.sioc.type;
 
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.reflect.Type;
+
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -37,6 +39,11 @@ public abstract class TypeSerializer {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Type getJavaType()
+    {
+        return null;
     }
 
     public Object getTypeObject() throws Exception {

@@ -51,11 +51,14 @@ public enum ErrorEnumType implements EnumType {
 
     CONNECT(-32638, "数据库连接错误"),
 
-    DATABASE(-32640, "数据库操作错误");
+    DATABASE(-32640, "数据库操作错误"),
 
+    SIGNATURE_VERIFY(-32642, "签名验证错误"),
 
-    private int value;
-    private String name;
+    KEY_VERIFY(-32644, "KEY验证错误");
+
+    private final int value;
+    private final String name;
 
     ErrorEnumType(int value, String name) {
         this.value = value;

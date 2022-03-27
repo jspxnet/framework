@@ -11,6 +11,8 @@ package com.github.jspxnet.sioc.type;
 
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.reflect.Type;
+
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -18,6 +20,12 @@ import com.github.jspxnet.utils.StringUtil;
  * Time: 22:18:00
  */
 public class LongArrayXmlType extends ArrayXmlType {
+
+    @Override
+    public Type getJavaType()
+    {
+        return long[].class;
+    }
 
     @Override
     public Object getTypeObject() {

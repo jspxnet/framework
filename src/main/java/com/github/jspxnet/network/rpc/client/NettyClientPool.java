@@ -12,7 +12,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -32,7 +31,7 @@ public class NettyClientPool {
     /**
      * volatile保持线程之间的可见性，连接池的创建是单例，在这里可加可不加
      */
-    private static NettyClientPool instance;
+    private static NettyClientPool instance = null;
     private static ChannelPoolMap<SocketAddress,FixedChannelPool> pools;
     private final Bootstrap bootstrap = new Bootstrap();
     private final NioEventLoopGroup workersGroup;
@@ -49,15 +48,16 @@ public class NettyClientPool {
         pools = new AbstractChannelPoolMap<SocketAddress, FixedChannelPool>() {
             @Override
             protected FixedChannelPool newPool(SocketAddress key) {
-
                 //lastRecentUsed: true就是后进先出，false 就是先进先出
                 return new FixedChannelPool(bootstrap.remoteAddress(key),new NettyChannelPoolHandler(), ChannelHealthChecker.ACTIVE, FixedChannelPool.AcquireTimeoutAction.NEW, RpcConfig.getInstance().getTimeout()* DateUtil.SECOND, 30, 2147483647, true, false);
             }
-
-
         };
     }
 
+    public boolean isRun()
+    {
+        return pools != null;
+    }
     /**
      *
      * @return 单例
@@ -111,15 +111,23 @@ public class NettyClientPool {
         return queue.poll(rpcConfig.getTimeout(), TimeUnit.SECONDS);
     }
 
-    @SuppressWarnings("all")
     public void shutdown() {
         if (pools==null)
         {
             return;
         }
-        AbstractChannelPoolMap poolMap = (AbstractChannelPoolMap) pools;
-        for (Map.Entry<InetSocketAddress, FixedChannelPool> inetSocketAddressFixedChannelPoolEntry : (Iterable<Map.Entry<InetSocketAddress, FixedChannelPool>>) poolMap) {
-            inetSocketAddressFixedChannelPoolEntry.getValue().close();
+        AbstractChannelPoolMap<SocketAddress,FixedChannelPool> poolMap = (AbstractChannelPoolMap<SocketAddress,FixedChannelPool>) pools;
+        for (Map.Entry<SocketAddress, FixedChannelPool> inetSocketAddressFixedChannelPoolEntry : poolMap) {
+            if (inetSocketAddressFixedChannelPoolEntry==null)
+            {
+                continue;
+            }
+            FixedChannelPool pool = inetSocketAddressFixedChannelPoolEntry.getValue();
+            if (pool==null)
+            {
+                continue;
+            }
+            pool.close();
         }
         poolMap.close();
         workersGroup.shutdownGracefully();

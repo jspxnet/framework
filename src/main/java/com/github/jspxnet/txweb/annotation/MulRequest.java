@@ -27,6 +27,8 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MulRequest {
+    String  component() default "cos"; //组件,目前支持cos 和 apache,推荐是用 apache
+
     FileCoveringPolicyEnumType covering() default FileCoveringPolicyEnumType.JSPX; //是否覆盖文件
 
     String saveDirectory() default "saveDirectory"; //保存目录

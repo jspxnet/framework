@@ -16,20 +16,25 @@ import java.io.OutputStream;
  * description: jspxpro
  **/
 public class CustomFilePart  extends FilePart {
-    public CustomFilePart(String filename, File file)
+
+    public CustomFilePart(String filename, File file,String charset)
             throws FileNotFoundException {
-        super(filename, file);
+        super(filename, file,DEFAULT_CONTENT_TYPE, charset);
     }
 
     @Override
     protected void sendDispositionHeader(OutputStream out) throws IOException {
-        super.sendDispositionHeader(out);
+        out.write(CONTENT_DISPOSITION_BYTES);
+        out.write(QUOTE_BYTES);
+        out.write(EncodingUtil.getBytes(getName(), getCharSet()));
+        out.write(QUOTE_BYTES);
         String filename = getSource().getFileName();
         if (filename != null) {
             out.write(EncodingUtil.getAsciiBytes(FILE_NAME));
             out.write(QUOTE_BYTES);
-            out.write(EncodingUtil.getBytes(filename, Environment.defaultEncode));
+            out.write(EncodingUtil.getBytes(filename, getCharSet()));
             out.write(QUOTE_BYTES);
         }
+
     }
 }

@@ -68,7 +68,6 @@ public  class DiscoveryServiceAddress {
             return new InetSocketAddress(service.getAddress(),service.getPort());
         }
 
-
         //这里优先从路由表里边得到---begin
         List<InetSocketAddress> groupSocketAddressList =  new ArrayList<>();
         List<RouteSession> routeSessionList = RouteChannelManage.getInstance().getRouteSessionList();
@@ -80,10 +79,29 @@ public  class DiscoveryServiceAddress {
             }
         }
 
+        String tempGroup = groupName;
+        //如果没用到默认组里边找
+        if (groupSocketAddressList.isEmpty() )
+        {
+            for (RouteSession routeSession:routeSessionList)
+            {
+                if (Environment.defaultValue.equalsIgnoreCase(routeSession.getGroupName())&&routeSession.getOnline()== YesNoEnumType.YES.getValue())
+                {
+                    tempGroup = Environment.defaultValue;
+                    groupSocketAddressList.add(routeSession.getSocketAddress());
+                }
+            }
+        }
+
+        if (groupSocketAddressList.isEmpty())
+        {
+            log.error("网络不中不能找到适配的nettyRpc服务：{},{}",groupName,tempGroup);
+        }
+
         //这里要判断地址的有效性
         synchronized (GROUP_CURRENT)
         {
-            int current = GROUP_CURRENT.getOrDefault(groupName.toLowerCase(),0);
+            int current = GROUP_CURRENT.getOrDefault(tempGroup.toLowerCase(),0);
             if (current>=groupSocketAddressList.size())
             {
                 current = 0;

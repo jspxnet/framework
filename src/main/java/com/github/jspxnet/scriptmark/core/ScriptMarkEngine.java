@@ -9,11 +9,13 @@
  */
 package com.github.jspxnet.scriptmark.core;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.scriptmark.*;
 import com.github.jspxnet.scriptmark.core.script.ScriptMap;
+import com.github.jspxnet.scriptmark.exception.ScriptRunException;
 import com.github.jspxnet.scriptmark.load.Source;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
-
+import com.github.jspxnet.utils.StringUtil;
 import java.io.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -86,10 +88,10 @@ public class ScriptMarkEngine implements ScriptMark {
         ScriptRunner scriptRunner = runner.getScriptRunner();
         try {
             //放入全局变量
-            Map<String, Object> globalMap = runner.getTemplate().getConfigurable().getGlobalMap();
-            putVarMap(scriptRunner, globalMap);
+            putVarMap(scriptRunner, runner.getTemplate().getConfigurable().getGlobalMap());
             //放入私有变量
             putVarMap(scriptRunner, map);
+            //运行
             runner.run(out);
             //执行完成后不要情况模板
         } finally {
@@ -107,8 +109,33 @@ public class ScriptMarkEngine implements ScriptMark {
                 scriptRunner.put(name, new ScriptMap((Map) o));
                 continue;
             }
+            if (name.contains(StringUtil.DOT))
+            {
+                String[] varNames = StringUtil.split(name,StringUtil.DOT);
+                if (varNames.length>1)
+                {
+                    JSONObject root = new JSONObject();
+                    JSONObject child = new JSONObject();
+                    root.put(varNames[0],child);
+                    for (int i=2;i<varNames.length;i++)
+                    {
+                        JSONObject childA = new JSONObject();
+                        childA.put(varNames[i],JSONObject.NULL);
+                        child.put(varNames[i-1],childA);
+                        child = childA;
+                    }
+                    String value = root.getJSONObject(varNames[0]).toString();
+                    if (!scriptRunner.containsVar(varNames[0]))
+                    {
+                        try {
+                            scriptRunner.putVar(varNames[0],value);
+                        } catch (ScriptRunException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
             scriptRunner.put(name, o);
         }
     }
-
 }

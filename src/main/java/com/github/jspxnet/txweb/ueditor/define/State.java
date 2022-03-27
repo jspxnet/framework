@@ -15,8 +15,8 @@ public interface State {
 
     void putInfo(String name, long val);
 
-    JSONObject toJSONObject();
+    JSONObject toJson();
 
-    String toJSONString();
+    String toJsonString();
 
 }

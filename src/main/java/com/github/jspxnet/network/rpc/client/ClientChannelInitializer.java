@@ -1,6 +1,7 @@
 package com.github.jspxnet.network.rpc.client;
 
 import com.github.jspxnet.network.rpc.env.RpcConfig;
+import com.github.jspxnet.utils.DateUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -35,8 +36,9 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> 
         ch.config().setReceiveBufferSize(rpcConfig.getBufferSize());
         ch.config().setTcpNoDelay(true);
         ch.config().setAllocator(PooledByteBufAllocator.DEFAULT);
-        ChannelPipeline pipeline = ch.pipeline();
+        ch.config().setConnectTimeoutMillis(rpcConfig.getTimeout() * DateUtil.SECOND);
 
+        ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast(new LengthFieldBasedFrameDecoder(rpcConfig.getMaxFrameLength(), 0, 4, 0, 4));
         pipeline.addLast(new LengthFieldPrepender(4));
         pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));

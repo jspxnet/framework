@@ -194,14 +194,7 @@ public class RouteChannelManage implements RouteManage {
         return new ArrayList<>(routeSocketMap.values());
     }
 
-    /**
-     *
-     * @return 拷贝一份出去,带检查的路由表
-     */
-  /*  public Map<InetSocketAddress, RouteSession> getCheckRouteSocketMap()
-    {
-        return checkRouteSocketMap;
-    }*/
+
 
     /**
      * 情况检查的路由表
@@ -247,42 +240,10 @@ public class RouteChannelManage implements RouteManage {
         return result;
     }
 
-
-    /**
-     * checkRouteSocketMap 里边过滤掉本地的地址,和路由表里边已经有的地址
-     * @return 待检查的路由列表, 需要检查的
-     */
-/*
-    public List<RouteSession> getWaitCheckRouteSessionList()
-    {
-        if (ObjectUtil.isEmpty(checkRouteSocketMap))
-        {
-            return null;
-        }
-
-        List<RouteSession> result = new ArrayList<>();
-        for (RouteSession routeSession:checkRouteSocketMap.values())
-        {
-            if (START_LIST.contains(routeSession.getSocketAddress()))
-            {
-                continue;
-            }
-            if (routeSocketMap.containsKey(routeSession.getSocketAddress()))
-            {
-                continue;
-            }
-            result.add(routeSession);
-        }
-        return result;
-    }
-*/
-
-
     /**
      *
      * @return 当前实际可用的节点数量
      */
-
     public int getRouteSessionCount()
     {
         int result = 0;

@@ -226,7 +226,7 @@ public class AuthenticationAction extends AuthenticationView {
         if (isLogin) {
             //已经登陆
             userSession = onlineManager.getUserSession(this);
-            Role role = permissionDAO.getComposeRole(userSession.getUid());
+            Role role = permissionDAO.getComposeRole(userSession.getUid(),permissionDAO.getOrganizeId());
             if (role==null||role.getUserType()!= UserEnumType.RESET_ADMIN.getValue())
             {
                 //只允许 reset_admin登陆

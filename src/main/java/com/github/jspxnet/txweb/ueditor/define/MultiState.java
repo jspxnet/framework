@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 
@@ -19,9 +18,9 @@ public class MultiState implements State {
 
     private boolean state = false;
     private String info = null;
-    private Map<String, Long> intMap = new HashMap<String, Long>();
-    private Map<String, String> infoMap = new HashMap<String, String>();
-    private List<State> stateList = new ArrayList<State>();
+    private Map<String, Long> intMap = new HashMap<>();
+    private Map<String, String> infoMap = new HashMap<>();
+    private List<State> stateList = new ArrayList<>();
 
     public MultiState(boolean state) {
         this.state = state;
@@ -56,7 +55,7 @@ public class MultiState implements State {
 
 
     @Override
-    public JSONObject toJSONObject() {
+    public JSONObject toJson() {
 
 		/*
 		{"state": "SUCCESS","title": "fkscdJieXian2.jpg","original": "fkscd\u63a5\u7ebf.jpg","type": "jpg","url": "upload\2015\fkscdJieXian2.jpg","size": "51811"}
@@ -80,16 +79,15 @@ public class MultiState implements State {
 
         JSONArray stateJsonArray = new JSONArray();
         for (State state : this.stateList) {
-            stateJsonArray.add(state.toJSONObject());
+            stateJsonArray.add(state.toJson());
         }
         json.put("list", stateJsonArray);
         return json;
     }
 
-
     @Override
-    public String toJSONString() {
-        return toJSONObject().toString();
+    public String toJsonString() {
+        return toJson().toString();
     }
 
     @Override

@@ -8,12 +8,16 @@ import com.github.jspxnet.network.rpc.client.proxy.NettyRpcProxy;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.sioc.annotation.RpcClient;
+import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.enums.RpcProtocolEnumType;
 import com.github.jspxnet.txweb.service.HessianClient;
 import com.github.jspxnet.txweb.service.client.HessianClientFactory;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.RequestFacade;
+import org.apache.catalina.connector.ResponseFacade;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationHandler;
@@ -37,7 +41,6 @@ public class RpcClientInvocationHandler implements InvocationHandler {
 
         this.target = target;
     }
-
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -66,6 +69,19 @@ public class RpcClientInvocationHandler implements InvocationHandler {
         RpcClient rpcClient = target.getAnnotation(RpcClient.class);
         if (rpcClient!=null)
         {
+            if (proxy instanceof Action)
+            {
+                Action action = (Action)proxy;
+                if (request==null || request instanceof RequestFacade|| request instanceof RequestTo)
+                {
+                    request = action.getRequest();
+                }
+                if (response==null || response instanceof ResponseFacade|| response instanceof ResponseTo)
+                {
+                    response = action.getResponse();
+                }
+            }
+
             if (RpcProtocolEnumType.TCP.equals(rpcClient.protocol()))
             {
                 Object targetObject;
@@ -80,7 +96,12 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 {
                     throw new Exception(targetObject + " Rpc 创建远程调用对象失败,确认远程服务器已经启动");
                 }
-                return method.invoke(targetObject, args);
+                Object result = method.invoke(targetObject, args);
+                if (result==null)
+                {
+                    throw new Exception(targetObject + " Rpc 创建远程调用对象失败,确认远程服务器已经启动,并且对应参数运行无异常");
+                }
+                return result;
             }
             if (RpcProtocolEnumType.HTTP.equals(rpcClient.protocol())) {
                 //读取本地配置
@@ -101,7 +122,12 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 try {
                     HessianClient hessianClient = HessianClientFactory.getInstance();
                     Object targetObject = hessianClient.create(target,hessianUrl,RequestUtil.getToken(request));
-                    return method.invoke(targetObject, args);
+                    Object result = method.invoke(targetObject, args);
+                    if (result==null)
+                    {
+                        throw new Exception(targetObject + " http 创建远程调用对象失败,确认远程服务器已经启动,并且对应参数运行无异常");
+                    }
+                    return result;
                 } catch (Exception e)
                 {
                     log.error("检查http rpc 调用路径是否正确:{},error:{}",hessianUrl,e.getLocalizedMessage());

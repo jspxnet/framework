@@ -32,6 +32,7 @@ import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.txweb.config.DefaultConfiguration;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
+import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -260,6 +261,7 @@ public class JspxCoreListener implements ServletContextListener {
         log.info("JSCache shutdown");
         //关闭缓存和线程end
 
+        Dispatcher.shutdown();
 
 
         //卸载jdbc驱动begin

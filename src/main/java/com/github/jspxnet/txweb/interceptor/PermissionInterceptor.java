@@ -205,20 +205,18 @@ public class PermissionInterceptor extends InterceptorSupport {
         }
         //is admin url
         if (isAdminRuleUrl(checkUrl)) {
-            permissionDAO.setOrganizeId(null);
-        } else {
-            permissionDAO.setOrganizeId(organizeId);
+            organizeId = null;
         }
-
+        permissionDAO.setOrganizeId(organizeId);
         //todo 待检查确认
-        IRole role = userSession.getRole(permissionDAO.getNamespace(), permissionDAO.getOrganizeId());
+        IRole role = userSession.getRole(permissionDAO.getNamespace(), organizeId);
         //自动分配调试权限 begin
         //role == null &&
         if (!permission && (Environment.SYSTEM_ID == userSession.getUid() || userSession.getUid() == 1)) {
             //调试模式
             Role debugRole = createDebugRole();
             debugRole.setNamespace(permissionDAO.getNamespace());
-            debugRole.setOrganizeId(permissionDAO.getOrganizeId());
+            debugRole.setOrganizeId(organizeId);
             debugRole.setIp(userSession.getIp());
             userSession.setRole(debugRole);
             userSession.setLastRequestTime(System.currentTimeMillis());
@@ -230,9 +228,9 @@ public class PermissionInterceptor extends InterceptorSupport {
             userSession.setRole(permissionDAO.getRole(config.getString(Environment.guestRole)));
             onlineManager.updateUserSessionCache(userSession);
         } else if (role == null) {
-            userSession.setRole(permissionDAO.getComposeRole(userSession.getUid()));
+            userSession.setRole(permissionDAO.getComposeRole(userSession.getUid(),organizeId));
             //二次修复
-            role = userSession.getRole(permissionDAO.getNamespace(), permissionDAO.getOrganizeId());
+            role = userSession.getRole(permissionDAO.getNamespace(), organizeId);
             if (role == null) {
                 Role regRole = permissionDAO.getRole(config.getString(Environment.registerRole));
                 userSession.setRole(regRole);
@@ -263,18 +261,19 @@ public class PermissionInterceptor extends InterceptorSupport {
             if (isRule) {
                 log.debug("ruleOutUrl checkUrl={},isRule={}", checkUrl, isRule);
                 return actionInvocation.invoke();
-            } else if (userSession.isGuest()) {
+            } /*
+                else if (userSession.isGuest()) {
                 action.addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needLogin));
                 return ActionSupport.LOGIN;
-            }
+            }*/
         }
 
-        if (permission && userSession.getRole(permissionDAO.getNamespace(), permissionDAO.getOrganizeId()) == null) {
+        if (permission && userSession.getRole(permissionDAO.getNamespace(), organizeId) == null) {
             action.addFieldInfo(Environment.warningInfo, permissionDAO.getNamespace() + " need config role,权限够不够");
             return ActionSupport.UNTITLED;
         }
 
-        role = userSession.getRole(permissionDAO.getNamespace(), permissionDAO.getOrganizeId());
+        role = userSession.getRole(permissionDAO.getNamespace(), organizeId);
         if (role == null) {
             if (RequestUtil.isRocRequest(action.getRequest())) {
                 TXWebUtil.print(new JSONObject(RocResponse.error(ErrorEnumType.CONFIG.getValue(), "需要配置角色,初始化系统")),

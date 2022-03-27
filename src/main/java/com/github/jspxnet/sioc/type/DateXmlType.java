@@ -10,8 +10,10 @@
 package com.github.jspxnet.sioc.type;
 
 import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.reflect.Type;
 import java.util.Date;
 
 
@@ -22,6 +24,13 @@ import java.util.Date;
  * Time: 11:36:43
  */
 public class DateXmlType extends TypeSerializer {
+
+    @Override
+    public Type getJavaType()
+    {
+        return Date.class;
+    }
+
     @Override
     public String getTypeString() {
         return "date";
@@ -35,6 +44,17 @@ public class DateXmlType extends TypeSerializer {
         if (value instanceof String) {
             try {
                 return StringUtil.getDate((String) value);
+            } catch (Exception e) {
+                return value;
+            }
+        }
+        if (value instanceof Number) {
+            if (ObjectUtil.toLong(value)==0)
+            {
+                return null;
+            }
+            try {
+                return new Date(ObjectUtil.toLong(value));
             } catch (Exception e) {
                 return value;
             }

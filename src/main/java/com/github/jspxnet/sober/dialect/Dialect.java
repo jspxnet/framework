@@ -292,6 +292,7 @@ public abstract class Dialect extends HashMap<String,String> {
 
 
     /**
+     *
      * @param rs    数据
      * @param index 索引
      * @return 返回查询结果

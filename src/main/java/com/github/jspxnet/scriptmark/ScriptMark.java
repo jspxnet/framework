@@ -20,10 +20,26 @@ import java.util.Map;
  * Time: 16:59:17
  */
 public interface ScriptMark extends Serializable {
+    /**
+     * @param currentPath 当前路径
+     */
     void setCurrentPath(String currentPath);
-
+    /**
+     * @param rootDirectory 更路径，最底层路径
+     */
     void setRootDirectory(String rootDirectory);
-
+    /**
+     * {@code
+     * if (o instanceof Map && !o.getClass().getName().equals(ScriptMap.class.getName())) {
+     * scriptRunner.put(name, new ScriptMap((Map) o));
+     * continue;
+     * }
+     * }
+     *
+     * @param out 输出
+     * @param map 解析块
+     * @throws Exception 异常
+     */
     void process(Writer out, Map<String, Object> map) throws Exception;
 
 }

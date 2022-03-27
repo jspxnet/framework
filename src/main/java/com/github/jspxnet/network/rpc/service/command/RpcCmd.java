@@ -91,6 +91,7 @@ public class RpcCmd extends INetCommand {
                 reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(rpcResponse)));
             } catch (IOException ioException) {
                 ioException.printStackTrace();
+                rpcResponse.setError(ioException);
             }
             return reply;
         }
@@ -101,7 +102,7 @@ public class RpcCmd extends INetCommand {
 
 
 
-    public void exeAction(IocRequest iocRequest, SendCmd reply) {
+    public static void exeAction(IocRequest iocRequest,final SendCmd reply) {
 
         //得到请求对象
         WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
@@ -121,6 +122,7 @@ public class RpcCmd extends INetCommand {
                 reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(rpcResponse)));
             } catch (IOException e) {
                 e.printStackTrace();
+                rpcResponse.setError(e);
             }
             return;
         }
@@ -139,6 +141,7 @@ public class RpcCmd extends INetCommand {
         requestTo.setAttribute(ActionEnv.Key_REMOTE_TYPE,INetCommand.RPC);
         IocResponse response = new IocResponse();
         try {
+
             ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig,envParam , RocHandle.NAME,
                     json,requestTo, new ResponseTo((Map) iocRequest.getResponse()));
             actionInvocation.initAction();
@@ -154,8 +157,9 @@ public class RpcCmd extends INetCommand {
         try {
             reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(response)));
         } catch (IOException e) {
-            e.printStackTrace();
             response.setError(e);
+            e.printStackTrace();
+
         }
     }
 

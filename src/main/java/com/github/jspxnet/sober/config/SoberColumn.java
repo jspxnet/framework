@@ -12,6 +12,7 @@ package com.github.jspxnet.sober.config;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
+import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
@@ -28,13 +29,21 @@ import java.util.Date;
  * 字段属性
  */
 @Data
+@Table(name = "jspx_sober_column",caption = "字段关系",cache = false)
 public class SoberColumn implements Serializable {
-    @Column(caption = "字段名称")
+
+    //同时也是关联关系
+    @Column(caption = "表名称",length = 100)
+    private String tableName;
+
+    @Column(caption = "字段名称",length = 100)
     private String name = StringUtil.empty;
+
     //类型
     @JsonIgnore
-    @Column(caption = "类对象")
+    //Column(caption = "类对象")
     private Class<?> classType;
+
 
     @Column(caption = "是否空")
     private boolean notNull = false;
@@ -56,42 +65,42 @@ public class SoberColumn implements Serializable {
 
     @Column(caption = "长度")
     private int length = 0;
+
     //true 的时候导出屏蔽
-    @Column(caption = "屏蔽")
+    @Column(caption = "隐藏")
     private boolean hidden = false;
 
-    @JsonField
-    public String getType() {
-        return TypeUtil.getTypeString(classType);
-    }
-
+    @Column(caption = "java类型")
+    private String javaType = StringUtil.empty;
 
     @JsonField
-    public String getJavaType() {
-        return classType.getName();
+    public String getTypeString() {
+        if (classType!=null)
+        {
+            return TypeUtil.getTypeString(classType);
+        }
+        return  javaType;
     }
 
 
     @JsonField
     public String getBeanField() {
         StringBuilder sb = new StringBuilder();
-        sb.append("@Column(caption = \"").append(caption).append("\", length = ").append(length).append(",notNull = ").append(notNull).append(")").append("\r\n");
+        sb.append("@Column(caption = \"").append(caption).append("\", length = ").append(length).append(",notNull=").append(notNull).append(")").append("\r\n");
         //StringUtil.empty
-        if (ClassUtil.isNumberType(classType))
+        String typeString = getTypeString();
+        if (ClassUtil.isNumberType(typeString))
         {
-            sb.append("private ").append(classType.getSimpleName()).append(" ").append(name).append(" = 0;");
+            sb.append("private ").append(getTypeString()).append(" ").append(name).append(" = 0;");
         } else
-        if (classType.equals(Date.class) )
+        if (typeString.equals(Date.class.getName()) || typeString.equals(Date.class.getSimpleName()) )
         {
-            sb.append("private ").append(classType.getSimpleName()).append(" ").append(name).append(" = new Date();");
+            sb.append("private ").append(getTypeString()).append(" ").append(name).append(" = new Date();");
         }
         else
         {
-            sb.append("private ").append(classType.getSimpleName()).append(" ").append(name).append(" = StringUtil.empty;");
+            sb.append("private ").append(getTypeString()).append(" ").append(name).append(" = StringUtil.empty;");
         }
         return sb.toString();
     }
-
-
-
 }

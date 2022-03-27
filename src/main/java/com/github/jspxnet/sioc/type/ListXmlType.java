@@ -12,6 +12,8 @@ package com.github.jspxnet.sioc.type;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,6 +23,14 @@ import java.util.List;
  * Time: 12:51:31
  */
 public class ListXmlType extends TypeSerializer {
+
+    @Override
+    public Type getJavaType()
+    {
+        return ArrayList.class;
+    }
+
+
     @Override
     public String getTypeString() {
         return "list";

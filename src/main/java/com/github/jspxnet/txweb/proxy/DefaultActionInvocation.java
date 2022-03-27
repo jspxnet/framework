@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.proxy;
 
+import com.github.jspxnet.boot.DaemonThreadFactory;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.Placeholder;
@@ -17,6 +18,7 @@ import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.Sioc;
+import com.github.jspxnet.txweb.annotation.Async;
 import com.github.jspxnet.txweb.*;
 import com.github.jspxnet.txweb.annotation.Intercept;
 import com.github.jspxnet.txweb.annotation.Redirect;
@@ -33,12 +35,8 @@ import com.github.jspxnet.txweb.result.*;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
@@ -135,7 +133,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         this.actionProxy.setExeType(exeType);
         this.actionProxy.setNamespace(this.namespace);
         if (!params.containsKey(ActionEnv.Key_Namespace)) {
-            params.put(ActionEnv.Key_Namespace,this.namespace);
+            params.put(ActionEnv.Key_Namespace, this.namespace);
         }
 
         /////////创建bean对象 begin
@@ -250,8 +248,7 @@ public class DefaultActionInvocation implements ActionInvocation {
 
         //如果是void 方法，自动设置 NONE begin
         Method execMethod = actionProxy.getMethod();
-        if (void.class.equals(execMethod.getGenericReturnType()))
-        {
+        if (void.class.equals(execMethod.getGenericReturnType())) {
             actionProxy.getAction().setActionResult(ActionSupport.NONE);
         }
         //如果是void 方法，自动设置 NONE end
@@ -446,7 +443,25 @@ public class DefaultActionInvocation implements ActionInvocation {
             }
         } else {
             executed = true;
-            resultCode = actionProxy.execute();
+            Method method = actionProxy.getMethod();
+            if (method != null && method.getAnnotation(Async.class)!=null) {
+                //开启异步执行
+                DaemonThreadFactory threadFactory = new DaemonThreadFactory(method + "" + this.hashCode());
+                Thread thread = threadFactory.newThread(() -> {
+                            try {
+                                resultCode = actionProxy.execute();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                );
+                thread.start();
+                Thread.sleep(20);
+                thread.interrupt();
+                return ActionSupport.NONE;
+            } else {
+                resultCode = actionProxy.execute();
+            }
         }
         return resultCode;
     }
@@ -458,7 +473,7 @@ public class DefaultActionInvocation implements ActionInvocation {
      */
     @Override
     public void executeResult(Result result) throws Exception {
-        if (resultCode==null||ActionSupport.NONE.equalsIgnoreCase(resultCode)) {
+        if (resultCode == null || ActionSupport.NONE.equalsIgnoreCase(resultCode)) {
             return;
         }
 

@@ -40,12 +40,16 @@ public class JarScanner implements ScanJar {
                             //得到该jar文件下面的类实体
                             Enumeration<JarEntry> jarEntryEnumeration = jarFile.entries();
                             while (jarEntryEnumeration.hasMoreElements()) {
-                            /*entry的结果大概是这样：
+                                    /*entry的结果大概是这样：
                                     org/
                                     org/junit/
                                     org/junit/rules/
                                     org/junit/runners/*/
                                 JarEntry entry = jarEntryEnumeration.nextElement();
+                                if (entry==null)
+                                {
+                                    continue;
+                                }
                                 String jarEntryName = entry.getName();
                                 //这里我们需要过滤不是class文件和不在basePack包名下的类
                                 String tempName = jarEntryName.replaceAll("/", StringUtil.DOT);
@@ -60,7 +64,6 @@ public class JarScanner implements ScanJar {
                                     if (predicate == null || predicate.test(cls)) {
                                         classes.add(cls);
                                     }
-
                                 }
                             }
                         }

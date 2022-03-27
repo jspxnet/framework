@@ -12,6 +12,8 @@ package com.github.jspxnet.sioc.type;
 
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.reflect.Type;
+
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -19,6 +21,15 @@ import com.github.jspxnet.utils.StringUtil;
  * Time: 11:36:19
  */
 public class StringXmlType extends TypeSerializer {
+
+
+    @Override
+    public Type getJavaType()
+    {
+        return String.class;
+    }
+
+
     @Override
     public String getTypeString() {
         return "string";

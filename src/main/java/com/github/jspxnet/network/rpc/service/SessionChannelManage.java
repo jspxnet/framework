@@ -63,6 +63,4 @@ public class SessionChannelManage {
         SESSION_MAP.remove(channelId);
     }
 
-
-
 }

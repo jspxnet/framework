@@ -100,7 +100,7 @@ public class UserInterceptor extends InterceptorSupport {
             userSession.setRole(permissionDAO.getRole(config.getString(Environment.guestRole)));
             onlineManager.updateUserSessionCache(userSession);
         } else if (role == null) {
-            userSession.setRole(permissionDAO.getComposeRole(userSession.getUid()));
+            userSession.setRole(permissionDAO.getComposeRole(userSession.getUid(),organizeId));
             //二次修复
             role = userSession.getRole(permissionDAO.getNamespace(), permissionDAO.getOrganizeId());
             if (role == null) {

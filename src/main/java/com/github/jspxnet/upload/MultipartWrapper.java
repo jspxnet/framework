@@ -15,16 +15,16 @@ import javax.servlet.http.*;
 
 public class MultipartWrapper extends HttpServletRequestWrapper {
 
-    private MultipartRequest mreq = null;
+    private CosMultipartRequest mreq = null;
 
     public MultipartWrapper(HttpServletRequest req, String dir)
             throws IOException {
         super(req);
-        mreq = new MultipartRequest(req, dir);
+        mreq = new CosMultipartRequest(req, dir);
     }
 
     @Override
-    public Enumeration getParameterNames() {
+    public Enumeration<String> getParameterNames() {
         return mreq.getParameterNames();
     }
 
@@ -40,10 +40,11 @@ public class MultipartWrapper extends HttpServletRequestWrapper {
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        Map<String, String[]> map = new HashMap<String, String[]>();
-        Enumeration enums = getParameterNames();
+
+        Map<String, String[]> map = new HashMap<>();
+        Enumeration<String> enums = getParameterNames();
         while (enums.hasMoreElements()) {
-            String name = (String) enums.nextElement();
+            String name = enums.nextElement();
             map.put(name, mreq.getParameterValues(name));
         }
         return map;

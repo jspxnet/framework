@@ -11,8 +11,12 @@ package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.InputStream;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
@@ -22,6 +26,7 @@ import java.util.Date;
  * Time: 11:29:08
  * MS SQL 2000 数据库 SQL 匹配
  */
+@Slf4j
 public class MsSqlDialect extends Dialect {
     public MsSqlDialect() {
         put(SQL_CREATE_TABLE, "<#assign primary_length=" + KEY_PRIMARY_KEY + ".length />" +
@@ -121,5 +126,39 @@ GO
     @Override
     public boolean commentPatch() {
         return true;
+    }
+
+
+    /**
+     * @param rs    数据
+     * @param index 索引
+     * @return 返回查询结果
+     * @throws SQLException 异常
+     */
+    @Override
+    public Object getResultSetValue(ResultSet rs, int index) throws SQLException {
+        if (rs == null || index <= 0) {
+            return null;
+        }
+        String typeName = null;
+        int colSize = 0;
+        try {
+            typeName = rs.getMetaData().getColumnTypeName(index).toLowerCase();
+            colSize = rs.getMetaData().getColumnDisplaySize(index);
+            ///////日期
+            if ("date".equals(typeName) || "datetime".equals(typeName)) {
+                java.sql.Timestamp t = rs.getTimestamp(index);
+                if (t == null) {
+                    return null;
+                }
+                return new java.util.Date(t.getTime());
+            }
+            //短断整型
+            return super.getResultSetValue(rs,index);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            log.error("typeName=" + typeName + " size=" + colSize + " columnName=" + rs.getMetaData().getColumnName(index), e);
+        }
+        return null;
     }
 }

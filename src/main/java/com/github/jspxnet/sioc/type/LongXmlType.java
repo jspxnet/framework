@@ -10,6 +10,9 @@
 package com.github.jspxnet.sioc.type;
 
 
+import java.lang.reflect.Type;
+import java.util.HashMap;
+
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -17,6 +20,13 @@ package com.github.jspxnet.sioc.type;
  * Time: 11:44:12
  */
 public class LongXmlType extends TypeSerializer {
+
+    @Override
+    public Type getJavaType()
+    {
+        return long.class;
+    }
+
     @Override
     public String getTypeString() {
         return "long";

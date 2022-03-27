@@ -11,7 +11,6 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -21,7 +20,7 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Date;
 
-@HttpMethod(caption = "阿里云短信")
+@Deprecated
 @Slf4j
 public class AliySmsValidAction extends ActionSupport {
 

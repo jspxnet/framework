@@ -17,6 +17,7 @@ import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -30,6 +31,13 @@ import java.util.List;
  * [/array]
  */
 public class ArrayXmlType extends TypeSerializer {
+
+    @Override
+    public Type getJavaType()
+    {
+        return Object[].class;
+    }
+
     @Override
     public String getTypeString() {
         return "array";

@@ -181,6 +181,8 @@ public class BaseConfigurationImpl implements JspxConfiguration {
         {
             defaultPath = URLUtil.getUrlDecoder(defaultPath,Environment.defaultEncode);
         }
+
+
         //修复spring的路径方式
         if (defaultPath!=null&&defaultPath.toLowerCase().contains(Environment.SPRING_PATH_SIGN.toLowerCase()))
         {

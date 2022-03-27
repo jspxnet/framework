@@ -149,7 +149,7 @@ public class TemplateScriptEngine implements ScriptRunner {
      */
     @Override
     public void put(String name, Object o) {
-        scope.put(name, scope, o);
+        scope.put(name,scope, o);
     }
 
     /**
@@ -171,7 +171,8 @@ public class TemplateScriptEngine implements ScriptRunner {
                 e.printStackTrace();
                 throw new ScriptRunException(null, value);
             }
-        } else if (o instanceof Collection || o instanceof Map) {
+        }
+        else if (o instanceof Collection || o instanceof Map) {
             put(name, o);
         } else
         {
@@ -220,7 +221,8 @@ public class TemplateScriptEngine implements ScriptRunner {
             return nativeJavaObject.unwrap();
         }
         if (o == null || o instanceof Undefined) {
-            return StringUtil.empty;
+            //return StringUtil.empty;
+            return null;
         }
         return o;
     }

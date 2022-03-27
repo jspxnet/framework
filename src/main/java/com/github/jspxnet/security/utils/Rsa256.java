@@ -30,6 +30,10 @@ public class Rsa256   {
     public static final String RSA_NAME = "RSA";
     private String encode = Environment.defaultEncode;
 
+    public void setEncode(String encode) {
+        this.encode = encode;
+    }
+
     public String sign(String data, String key) {
 
         try {

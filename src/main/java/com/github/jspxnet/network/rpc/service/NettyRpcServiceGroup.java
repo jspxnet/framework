@@ -96,7 +96,6 @@ public class NettyRpcServiceGroup {
                     log.info("注册发现服务是用consul,但是没有找到ioc中配置的consulService");
                     continue;
                 }
-
                 NewService discoveryService = new NewService();
                 discoveryService.setId(nettyRpcServer.getId());
                 discoveryService.setName(nettyRpcServer.getName());
@@ -125,7 +124,6 @@ public class NettyRpcServiceGroup {
         }
         started = true;
     }
-
 
 
     public void stop() {
@@ -162,7 +160,6 @@ public class NettyRpcServiceGroup {
                 nettyRpcServer.close();
             }
         }
-
         SERVER_LIST.clear();
     }
 

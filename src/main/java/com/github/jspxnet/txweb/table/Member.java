@@ -113,6 +113,9 @@ public class Member extends OperateTable implements IMember {
     private int credit = 0;
     //积分属性 end
 
+    @Column(caption = "扩展变量",length = 1000)
+    private String valueMap = StringUtil.empty;
+
     //奖励
     //数据保存格式  xx奖励=xxx.jpg 一行一个
     @Column(caption = "勋章", length = 250)
@@ -195,18 +198,21 @@ public class Member extends OperateTable implements IMember {
     @Column(caption = "城市", length = 50)
     private String city = StringUtil.empty;
 
+    @Column(caption = "区", length = 50)
+    private String area = StringUtil.empty;
+
     @Column(caption = "地址", length = 250)
     private String address = StringUtil.empty;
 
     @Column(caption = "签名", length = 250)
     private String signature = StringUtil.empty;
 
-    @Column(caption = "备注", length = 250, notNull = true)
+    @Column(caption = "备注", length = 250)
     private String remark = StringUtil.empty;
 
     //作为FTP的基本用户目录，
     @JsonIgnore
-    @Column(caption = "个人目录", length = 250, notNull = true)
+    @Column(caption = "个人目录", length = 250)
     private String uploadFolder = StringUtil.empty;
 
     /*
@@ -224,7 +230,7 @@ public class Member extends OperateTable implements IMember {
     private String contactsAnswer = StringUtil.empty;
 
     @JsonIgnore
-    @Column(caption = "扩展", length = 250)
+    @Column(caption = "扩展", length = 1000)
     private String other = StringUtil.empty;
 
     //电子钥匙登录方式 begin

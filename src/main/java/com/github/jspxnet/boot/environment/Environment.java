@@ -91,6 +91,9 @@ public abstract class Environment {
 
     final public static String DEFAULT_LOAD_LOG_NAME = "logback.xml";
 
+    final public static String LOG4J_CONFIG_NAME = "log4j2.xml";
+
+
     final public static String DEFAULT_LOG_NAME = "defaultlog.xml";
 
 
@@ -135,7 +138,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.51";
+    final static public String VERSION = "6.53";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -254,7 +257,7 @@ public abstract class Environment {
 
     final static public String maxImageWidth = "maxImageWidth";
 
-
+    final static public String maxImageHeight = "maxImageHeight";
     //上传路径
     final static public String uploadPath = "uploadPath";
 
@@ -603,6 +606,10 @@ public abstract class Environment {
     static public final String SERVER_CORS = "server.cors";
 
     static public final String SERVER_THREADS = "server.threads";
+
+    static public final String SERVER_CACHING_ALLOWED = "server.CachingAllowed";
+
+    static public final String SERVER_MAX_POST_SIZE = "server.maxPostSize";
 
     static public final String SERVER_SESSION_REDIS = "server.session.redis";
 

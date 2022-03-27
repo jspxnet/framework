@@ -10,6 +10,8 @@ import com.github.jspxnet.enums.EnumType;
  */
 public enum SafetyEnumType implements EnumType {
 
+    //变量规则,不允许中文,空格,数字不能开头
+    VAR_HEIGHT(4, "变量类型"),
     //高
     HEIGHT(3, "高"),
     //中

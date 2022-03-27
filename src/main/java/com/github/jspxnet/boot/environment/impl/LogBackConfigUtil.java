@@ -20,17 +20,15 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
-import org.apache.log4j.*;
-import org.apache.log4j.varia.ExternallyRolledFileAppender;
-import org.apache.log4j.varia.LevelRangeFilter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.ConfigurationFactory;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.xml.XmlConfigurationFactory;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Map;
 
 /**
@@ -121,73 +119,68 @@ public class LogBackConfigUtil {
         lc.setPackagingDataEnabled(true);
     }
 
-
     public static void createLog4jConfig() {
-        Logger log = LogManager.getRootLogger();
-        log.setAdditivity(true);
-        log.setLevel(Level.ALL);
+
+        boolean isDefaultConfig = false;
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-
-        //log.removeAllAppenders();
-        //不想显示的日志放在这里
-      /*  Set<String> loggers = new HashSet<>(Arrays.asList("org.apache", "groovyx.net.http", "org.redisson", "org.jboss", "io.netty"));
-        for (String httplog : loggers) {
-            Logger logger = Logger.getLogger(httplog);
-            logger.setLevel(Level.DEBUG);
-            logger.setAdditivity(false);
-        }*/
-
-        if (envTemplate.getBoolean(Environment.logError)) {
-            ExternallyRolledFileAppender errorAppender = new ExternallyRolledFileAppender();
-            errorAppender.setName(Environment.logError);
-            errorAppender.setBufferSize(64);
-            errorAppender.setAppend(true);
-            errorAppender.setEncoding(envTemplate.getString(Environment.encode));
-            errorAppender.setFile(envTemplate.getString(Environment.logErrorFile));
-            errorAppender.setMaxFileSize("5120KB");
-            errorAppender.setMaxBackupIndex(9);
-
-
-
-            PatternLayout errorLayout = new PatternLayout();
-            errorLayout.setConversionPattern("%d{yyyy-MM-dd HH:mm} %t %p %c %l - %m%n");
-            errorAppender.setLayout(errorLayout);
-
-
-            LevelRangeFilter errorLevel = new LevelRangeFilter();
-
-            errorLevel.setLevelMax(Level.FATAL);
-            errorLevel.setLevelMin(Level.ERROR);
-            errorAppender.addFilter(errorLevel);
-            errorAppender.activateOptions();
-            log.addAppender(errorAppender);
+        File file = new File(envTemplate.getString(Environment.defaultPath),Environment.LOG4J_CONFIG_NAME);
+        String defaultConfigTxt = null;
+        if (file.isFile())
+        {
+            try {
+                defaultConfigTxt = IoUtil.autoReadText(file.getPath(),Environment.defaultEncode);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-
-        //info
-        if (envTemplate.getBoolean(Environment.logInfo)) {
-            ExternallyRolledFileAppender infoAppender = new ExternallyRolledFileAppender();
-            infoAppender.setName(Environment.logInfo);
-            infoAppender.setBufferSize(128);
-            infoAppender.setAppend(false);
-            infoAppender.setEncoding(envTemplate.getString(Environment.encode));
-            infoAppender.setFile(envTemplate.getString(Environment.logInfoFile));
-            infoAppender.setMaxFileSize("5120KB");
-            infoAppender.setMaxBackupIndex(9);
-
-            PatternLayout infoLayout = new PatternLayout();
-            infoLayout.setConversionPattern("%d{yyyy-MM-dd HH:mm} %t %p %c %l - %m%n");
-            infoAppender.setLayout(infoLayout);
-
-            LevelRangeFilter infoLevel = new LevelRangeFilter();
-            infoLevel.setLevelMax(Level.INFO);
-            infoLevel.setLevelMin(Level.INFO);
-            infoAppender.addFilter(infoLevel);
-            // infoAppender.addFilter(new StopFilter());
-            infoAppender.activateOptions();
-            log.addAppender(infoAppender);
+        if (StringUtil.isEmpty(defaultConfigTxt))
+        {
+            InputStream stream = LogBackConfigUtil.class.getResourceAsStream(Environment.LOG4J_CONFIG_NAME);
+            if (stream!=null)
+            {
+                byte[] bytes = FileUtil.getBytesFromInputStream(stream);
+                if (bytes==null)
+                {
+                    bytes = new byte[0];
+                }
+                try {
+                    defaultConfigTxt = new String(bytes,Environment.defaultEncode);
+                    isDefaultConfig = true;
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+        if (StringUtil.isNull(defaultConfigTxt))
+        {
+            System.err.println("LogBack defaultConfig:" + defaultConfigTxt);
+        }
+        Map<String, Object> valueMap = envTemplate.getVariableMap();
 
+        String confTxt = isDefaultConfig?EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt):defaultConfigTxt;
+        if (!StringUtil.isEmpty(confTxt))
+        {
+            // 创建XML配置解析工厂
+            ConfigurationFactory configFactory = XmlConfigurationFactory.getInstance();
+            // 设置配置工厂为XML方式
+            ConfigurationFactory.setConfigurationFactory(configFactory);
+            // 转换配置为输入流
 
+            // 转换配置流为配置源
+            ConfigurationSource configurationSource = null;
+            try {
+                configurationSource = new ConfigurationSource(new ByteArrayInputStream(confTxt.getBytes()));
+                // 获取日志环境
+                org.apache.logging.log4j.spi.LoggerContext ctx =  LogManager.getContext(false);
+                // 生成新的配置
+                Configuration configuration = configFactory.getConfiguration((org.apache.logging.log4j.core.LoggerContext)ctx, configurationSource);
+                // 使用新配置重新配置环境
+                ((org.apache.logging.log4j.core.LoggerContext) ctx).reconfigure(configuration);
+                // 忽略其它资源释放代码
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 

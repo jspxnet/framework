@@ -1426,7 +1426,7 @@ public class StringUtil {
     }
 
     public static boolean isEmpty(String value) {
-        return value == null || value.equals(empty) || value.length() < 1;
+        return value == null || value.length() ==0;
     }
 
 
@@ -3269,6 +3269,25 @@ public class StringUtil {
     }
 
 
+    public static String fixedVarName(String name) {
+        if (name == null) {
+            return null;
+        }
+        String newName = name;
+        if (ValidUtil.isNumber(name.charAt(0)+""))
+        {
+            newName = "_" + name;
+        } else
+        if ('.'==name.charAt(0))
+        {
+            newName =  StringUtil.replaceOnce(name,".","_");
+        }
+        if (name.contains("-"))
+        {
+            newName = StringUtil.replace(newName,"-","_");
+        }
+        return newName;
+    }
 
     public static void main(String[] args) {
 

@@ -87,14 +87,14 @@ public abstract class INetCommand implements ICmd {
     public  static void sendEncodePacket(Channel channel, SendCmd cmd) throws Exception {
         if (channel==null)
         {
-            throw  new Exception("channel为空");
+            throw new Exception("channel为空");
         }
         String sendData = PacketUtil.getEncodePacket(new JSONObject(cmd).toString(),secretKey);
         try {
             channel.writeAndFlush(sendData);
         } catch (Exception e)
         {
-            throw  new Exception("发送信息发生掉线");
+            throw new Exception("发送信息发生掉线");
         }
     }
 
@@ -108,6 +108,11 @@ public abstract class INetCommand implements ICmd {
     @Override
     public SendCmd execute(ChannelHandlerContext ctx, SendCmd command)
     {
+        if (ctx==null)
+        {
+            log.error("ctx 为空");
+            return null;
+        }
         //收到要退出的通知
         return execute(ctx.channel(), command);
     }

@@ -29,7 +29,7 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.validator.tag.ValidElement;
 import com.github.jspxnet.txweb.validator.tag.ValidatorElement;
-import com.github.jspxnet.upload.MultipartRequest;
+import com.github.jspxnet.upload.CosMultipartRequest;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -347,7 +347,7 @@ public class DataTypeValidator implements Validator {
                 }
             }
             return RequestUtil.getRequestMap(actionSupport.getRequest());
-        } else if (checkObject instanceof MultipartRequest || checkObject instanceof HttpServletRequest) {
+        } else if (checkObject instanceof CosMultipartRequest || checkObject instanceof HttpServletRequest) {
             return RequestUtil.getRequestMap(((HttpServletRequest) checkObject));
         } else if (checkObject instanceof Map) {
             return (Map) checkObject;

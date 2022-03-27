@@ -23,6 +23,8 @@ import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.scriptmark.core.TagNode;
 
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.List;
 import java.lang.reflect.Method;
@@ -36,6 +38,13 @@ import java.lang.reflect.Method;
  * [bean id="classId" class="com.jspx.XXXXX" singleton="false" /]
  */
 public class BeanXmlType extends TypeSerializer {
+
+    @Override
+    public Type getJavaType()
+    {
+        return Object.class;
+    }
+
     @Override
     public String getTypeString() {
         return "bean";

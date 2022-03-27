@@ -10,7 +10,10 @@
 package com.github.jspxnet.sober.config;
 
 import com.github.jspxnet.json.JsonIgnore;
+import com.github.jspxnet.sober.annotation.Column;
+import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.txweb.annotation.Param;
+import lombok.Data;
 
 import java.io.Serializable;
 
@@ -21,132 +24,69 @@ import java.io.Serializable;
  * Time: 9:20:43
  * 映射关系 manytoone onetomany  onttoone
  */
+
+@Data
+@Table(name = "jspx_sober_nexus",caption = "关联关系",cache = false)
 public class SoberNexus implements Serializable {
     public SoberNexus() {
 
     }
+    //同时也是关联关系
+    @Column(caption = "表名称",length = 100)
+    private String tableName;
 
-    //映射关系
+    @Column(caption = "映射关系", length = 100)
     private String mapping;
-    //字段名称
+
+    @Column(caption = "字段名称", length = 100)
     private String field;
-    //触发字段
+
+    @Column(caption = "触发字段", length = 100)
     private String targetField;
     //触发实体
+
     @JsonIgnore
     private Class<?> targetEntity;
-    //条件
+
+    @Column(caption = "实体对象", length = 100)
+    private String entityClass;
+
+    @Column(caption = "条件", length = 100)
     private String term;
-    //排序
+
+    @Column(caption = "排序", length = 100)
     private String orderBy;
-    //关联删除
+
+    @Column(caption = "关联删除")
     private boolean delete;
-    //关联保存
+
+    @Column(caption = "关联保存")
     private boolean save;
-    //关联更新
+
+    @Column(caption = "关联更新")
     private boolean update;
-    //关联更新
+
+    @Column(caption = "关联更新")
     private boolean chain;
-    //关联更新
+
+    @Column(caption = "查询条件")
     private String where;
-    //数据个数
+
+    @Column(caption = "长度")
     private String length;
 
-    public String getMapping() {
-        return mapping;
-    }
 
-    public void setMapping(String mapping) {
-        this.mapping = mapping;
-    }
-
-    public String getField() {
-        return field;
-    }
-
-    public void setField(String field) {
-        this.field = field;
-    }
-
-    public String getTargetField() {
-        return targetField;
-    }
-
-    public void setTargetField(String targetField) {
-        this.targetField = targetField;
-    }
-
-
-    public Class<?> getTargetEntity() {
-        return targetEntity;
-    }
-
-    public void setTargetEntity(Class<?> targetEntity) {
-        this.targetEntity = targetEntity;
-    }
-
-    public String getTerm() {
-        return term;
-    }
-
-    @Param(caption = "条件", max = 50)
+    @Param(caption = "条件", max = 200)
     public void setTerm(String term) {
         this.term = term;
     }
 
-    public String getOrderBy() {
-        return orderBy;
-    }
-
-    public void setOrderBy(String orderBy) {
-        this.orderBy = orderBy;
-    }
-
-    public boolean isDelete() {
-        return delete;
-    }
-
-    public void setDelete(boolean delete) {
-        this.delete = delete;
-    }
-
-    public boolean isUpdate() {
-        return update;
-    }
-
-    public void setUpdate(boolean update) {
-        this.update = update;
-    }
-
-    public boolean isChain() {
-        return chain;
-    }
-
-    public void setChain(boolean chain) {
-        this.chain = chain;
-    }
-
-    public boolean isSave() {
-        return save;
-    }
-
-    public void setSave(boolean save) {
-        this.save = save;
-    }
-
-    public String getWhere() {
-        return where;
-    }
-
-    public void setWhere(String where) {
-        this.where = where;
-    }
-
-    public String getLength() {
-        return length;
-    }
-
-    public void setLength(String length) {
-        this.length = length;
+    public void setTargetEntity(Class<?> targetEntity) {
+        if (targetEntity==null)
+        {
+            return;
+        }
+        this.targetEntity = targetEntity;
+        this.entityClass = targetEntity.getName();
     }
 }

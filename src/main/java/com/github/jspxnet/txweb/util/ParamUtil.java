@@ -59,8 +59,9 @@ public final class ParamUtil {
     private final static String[] DANGEROUS_TOKEN_REPLACEMENTS = new String[]{"ＪＡＶＡＳＣＲＩＰＴ："};
 
 
-    final static public String variableBegin = "${";
-    final static public String variableEnd = "}";
+    final static public String VARIABLE_BEGIN = "${";
+
+    final static public String VARIABLE_END = "}";
 
     private ParamUtil() {
 
@@ -130,13 +131,13 @@ public final class ParamUtil {
      * @return 是否安全
      */
     public static boolean isSafe(String str, long minLength, long maxLength, SafetyEnumType level) {
+
         if (StringUtil.isEmpty(str) && minLength <= 0 || SafetyEnumType.NONE.equals(level)) {
             return true;
         }
         if (str.length() > maxLength) {
             return false;
         }
-
 
         if (str.length() < Math.max(minLength, 0)) {
             return false;
@@ -223,6 +224,18 @@ public final class ParamUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        if (level.getValue() < SafetyEnumType.HEIGHT.getValue()) {
+            return result;
+        }
+        //4
+        try {
+            if ((result!=null&& (result.contains(" ") || ValidUtil.isNumber(result.charAt(0)+""))))
+            {
+                return result;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return result;
     }
 
@@ -274,7 +287,6 @@ public final class ParamUtil {
                         paramObj[i] = BeanUtil.getTypeValue(param.value(), pType);
                     }
                 }
-
 
                 if (annotation instanceof PathVar) {
                     HttpServletRequest request = action.getRequest();
@@ -501,8 +513,8 @@ public final class ParamUtil {
                     isParam = true;
                     Param param = (Param) annotation;
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
-
-                        if (ParamModeType.RocMode.getValue() == param.modeType().getValue()) {
+                        if (ParamModeType.RocMode.getValue() == param.modeType().getValue())
+                        {
                             JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
                             boolean isRoc = isRocRequest(jsonObject);
                             if (isRoc) {
@@ -570,7 +582,7 @@ public final class ParamUtil {
 
                     if (operate != null && operate.method().contains(pathVarName)) {
                         String urlPath = URLUtil.getUrlPath(request.getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
-                        String tempMethodUrl = StringUtil.substringBefore(operate.method(), variableBegin);
+                        String tempMethodUrl = StringUtil.substringBefore(operate.method(), VARIABLE_BEGIN);
                         String checkPath = StringUtil.substringAfter(urlPath, tempMethodUrl);
 
                         String operatePath = StringUtil.substringAfter(operate.method(), tempMethodUrl);
@@ -588,7 +600,7 @@ public final class ParamUtil {
                             return null;
                         }
                         Map<String, Object> valueMap = new HashMap<>();
-                        String varName = StringUtil.substringBetween(paths[i], variableBegin, variableEnd);
+                        String varName = StringUtil.substringBetween(paths[i], VARIABLE_BEGIN, VARIABLE_END);
                         if (!StringUtil.isEmpty(varName) && !varName.contains("+") && !varName.contains("-") && !varName.contains(StringUtil.ASTERISK) && !varName.contains(StringUtil.BACKSLASH) && !varName.contains("(")) {
                             valueMap.put(varName, values[i]);
                         }
@@ -645,7 +657,6 @@ public final class ParamUtil {
                             return false;
                         }
                         //这里是检查参数安全性 begin
-
                         if (ClassUtil.isArrayType(pType)) {
                             if (value[i] != null && value[i].getClass().isArray()) {
                                 if (pType.equals(String[].class)) {
@@ -691,7 +702,6 @@ public final class ParamUtil {
         return true;
     }
     //------------------------------------------------------------------------------------------------------------------
-
     /**
      * 判断是否必填
      *
@@ -706,7 +716,8 @@ public final class ParamUtil {
             return;
         }
         param.required();
-        if (StringUtil.isEmpty(param.value()) && theParam == null) {
+        if (StringUtil.isEmpty(param.value()) && (theParam == null || ((theParam instanceof String) && StringUtil.isEmpty((String)theParam))))
+        {
             if (StringUtil.isNull(param.message())) {
                 action.addFieldInfo(Environment.warningInfo, paramName + "参数不允许空");
             } else {

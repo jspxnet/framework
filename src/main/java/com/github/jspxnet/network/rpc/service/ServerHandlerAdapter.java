@@ -82,11 +82,16 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        if (ctx==null)
+        {
+            return;
+        }
         try {
             RpcInvokerFactory.invokeService(ctx, (String) msg);
             ctx.flush();
         } catch (Exception e) {
             e.printStackTrace();
+            log.error("channelRead 发送数据异常",e);
         } finally {
             ReferenceCountUtil.release(msg);
         }
@@ -95,6 +100,10 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
     //接收完成
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
+        if (ctx==null)
+        {
+            return;
+        }
         ctx.flush();
         //这里不能关闭,因为如果数据量大的情况,会多次进入这里读取数据
     }
@@ -119,8 +128,6 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
         if (cause instanceof IOException)
         {
             log.debug("对方主动退出:{}",IpUtil.getIp(channel.remoteAddress()));
-
-
         }
     }
 
@@ -162,13 +169,22 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
 
     private void handleAllIdle(ChannelHandlerContext ctx) {
         //主动发出心跳请求
-        ChannelSession netSession = SESSION_CHANNEL_MANAGE.getSession(ctx.channel().id());
+        if (ctx==null)
+        {
+            return;
+        }
+        Channel channel = ctx.channel();
+        if (channel==null)
+        {
+            return;
+        }
+        ChannelSession netSession = SESSION_CHANNEL_MANAGE.getSession(channel.id());
         if (netSession != null) {
 
             if (netSession.getHeartbeatTimes()==0)
             {
                 SendCmd sendCmd = SendCommandFactory.createCommand(INetCommand.PING);
-                ctx.channel().writeAndFlush(sendCmd);
+                channel.writeAndFlush(sendCmd);
             }
             netSession.setHeartbeatTimes(netSession.getHeartbeatTimes() + 1);
             if (netSession.getHeartbeatTimes()>1)
@@ -178,11 +194,11 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
             final long waitTime = StringUtil.toLong(DateUtil.SECOND * RpcConfig.getInstance().getTimeout()+"");
             if (netSession.getHeartbeatTimes() >= 3 && System.currentTimeMillis() - netSession.getLastRequestTime() > waitTime)
             {
-                cleanSession(ctx.channel());
+                cleanSession(channel);
             }
         } else {
             //session 为空的情况，直接删除
-            cleanSession(ctx.channel());
+            cleanSession(channel);
          }
     }
 

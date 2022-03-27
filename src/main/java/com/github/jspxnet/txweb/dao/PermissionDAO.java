@@ -32,7 +32,9 @@ public interface PermissionDAO extends SoberSupport {
 
     List<MemberRole> getMemberRoles(long uid, boolean load);
 
-    Role getComposeRole(long uid);
+    //Role getComposeRole(long uid);
+
+    Role getComposeRole(long uid, String organizeId);
 
     List<Role> getRoleList();
 

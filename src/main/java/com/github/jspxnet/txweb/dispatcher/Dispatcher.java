@@ -46,22 +46,18 @@ import java.util.Map;
  * 转发器，转交action动作
  */
 @Slf4j
-public class Dispatcher {
-    //private static final ThreadLocal<Dispatcher> INSTANCE = new ThreadLocal<>();
-
-    private static Dispatcher instance;
-
-    public static final Map<String, ActionHandle> HANDLE_LIST = new HashMap<>(5);
-
-    static {
-        HANDLE_LIST.put(RocHandle.NAME, new RocHandle());
-        HANDLE_LIST.put(RsaRocHandle.NAME, new RsaRocHandle());
-        HANDLE_LIST.put(ActionHandle.NAME, new ActionHandle());
-        HANDLE_LIST.put(MarkdownHandle.NAME, new MarkdownHandle());
-        HANDLE_LIST.put(HessianHandle.NAME, new HessianHandle());
-        HANDLE_LIST.put(CommandHandle.NAME, new CommandHandle());
-
-    }
+public final class Dispatcher {
+    private static final Map<String, Class<?>> ACTION_HANDLE_MAP = new HashMap<String, Class<?>>(7)
+    {
+        {
+            put(RocHandle.NAME, RocHandle.class);
+            put(RsaRocHandle.NAME, RsaRocHandle.class);
+            put(ActionHandle.NAME, ActionHandle.class);
+            put(MarkdownHandle.NAME, MarkdownHandle.class);
+            put(HessianHandle.NAME, HessianHandle.class);
+            put(CommandHandle.NAME, CommandHandle.class);
+        }
+    };
 
     //根路径
     private static String realPath;
@@ -73,7 +69,7 @@ public class Dispatcher {
     //转发次数
     private static EvasiveManager evasiveManager = null;
     private static String encode;
-    final private static String commandSuffix = "cmd";
+    private static String commandSuffix = "cmd";
     private static String markdownSuffix = "md";
     private static String filterSuffix = "jhtml";
     private static String apiFilterSuffix = "jwc";
@@ -82,6 +78,7 @@ public class Dispatcher {
 
     private static boolean accessAllowOrigin = true;
 
+    private static final Dispatcher DISPATCHER = new Dispatcher();
     private Dispatcher() {
 
     }
@@ -95,12 +92,7 @@ public class Dispatcher {
     }
 
     public static Dispatcher getInstance() {
-        if (instance == null) {
-            synchronized (Dispatcher.class) {
-                instance = new Dispatcher();
-            }
-        }
-        return instance;
+        return DISPATCHER;
     }
 
 
@@ -109,6 +101,7 @@ public class Dispatcher {
      */
     static public void shutdown() {
 
+        //ACTION_HANDLE_MAP_INSTANCE.remove();
     }
 
     public static String getRealPath() {
@@ -141,10 +134,7 @@ public class Dispatcher {
             log.debug("系统编码错误", e);
             return;
         }
-        if (HANDLE_LIST.isEmpty()) {
-            TXWebUtil.errorPrint("系统在启动中,请稍后", null, response, HttpStatusType.HTTP_status_403);
-            return;
-        }
+
 
         //防刷功能 begin
         if (useEvasive && JspxNetApplication.checkRun() && evasiveManager.execute(request, response)) {
@@ -192,20 +182,16 @@ public class Dispatcher {
                 suffix = ActionHandle.NAME;
             }
         }
-
-        //到要执行的方式end
-        //执行begin
-
         try {
-            WebHandle actionHandle = HANDLE_LIST.get(suffix);
+            WebHandle actionHandle = (WebHandle)ACTION_HANDLE_MAP.get(suffix).newInstance();
             actionHandle.doing(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             log.info(namespace + "/" + urlName, e);
             printException(e, response, WebOutEnumType.HTML.getValue());
         }
-
     }
+
 
     private static void printException(Exception e, HttpServletResponse response, int type) {
         if (response.isCommitted()) {

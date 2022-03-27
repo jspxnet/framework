@@ -15,6 +15,7 @@ public class HttpGetEx  extends HttpEntityEnclosingRequestBase {
     public static final String METHOD_NAME = "GET";
 
     public HttpGetEx() {
+
     }
 
     @Override

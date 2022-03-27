@@ -2,7 +2,7 @@ package com.github.jspxnet.network.rpc.model.transfer;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
-import com.github.jspxnet.txweb.env.ActionEnv;
+import com.github.jspxnet.sioc.util.TypeUtil;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.ObjectUtil;
@@ -10,10 +10,7 @@ import com.github.jspxnet.utils.StringUtil;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.Principal;
 import java.util.*;
 
@@ -56,17 +53,21 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public String getHeader(String s) {
+        if (s==null)
+        {
+            return StringUtil.empty;
+        }
         Object value = super.get(RequestUtil.HEADER + StringUtil.DOT+s.toLowerCase());
         if (value==null)
         {
-            return null;
+            return StringUtil.empty;
         }
         return value.toString();
     }
 
     @Override
     public Enumeration<String> getHeaders(String s) {
-        Vector<String> names = new Vector<String>();
+        Vector<String> names = new Vector<>();
         for (String key:super.keySet())
         {
             if (key==null)
@@ -110,27 +111,27 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public String getPathInfo() {
-        return null;
+        return getHeader("pathinfo");
     }
 
     @Override
     public String getPathTranslated() {
-        return null;
+        return getHeader("pathtranslated");
     }
 
     @Override
     public String getContextPath() {
-        return null;
+        return getHeader("contextpath");
     }
 
     @Override
     public String getQueryString() {
-        return null;
+        return getHeader("querystring");
     }
 
     @Override
     public String getRemoteUser() {
-        return null;
+        return getHeader("remoteuser");
     }
 
     @Override
@@ -145,22 +146,22 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public String getRequestedSessionId() {
-        return null;
+        return getHeader("requestedsessionid");
     }
 
     @Override
     public String getRequestURI() {
-        return null;
+        return getHeader("requesturi");
     }
 
     @Override
     public StringBuffer getRequestURL() {
-        return null;
+        return new StringBuffer(getHeader("requesturl"));
     }
 
     @Override
     public String getServletPath() {
-        return null;
+        return getHeader("servletpath");
     }
 
     @Override
@@ -215,7 +216,7 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public Collection<Part> getParts() throws IOException, ServletException {
-        return null;
+        return new HashSet<>();
     }
 
     @Override
@@ -230,19 +231,27 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public Object getAttribute(String s) {
-        return get(s);
+        return super.get(s);
     }
 
     @Override
     public Enumeration<String> getAttributeNames() {
         Vector<String> names = new Vector<String>();
-        names.addAll(super.keySet());
+        for (String key:super.keySet())
+        {
+            if (key==null)
+            {
+                continue;
+            }
+            names.add(key);
+        }
         return names.elements();
     }
 
     @Override
     public String getCharacterEncoding() {
-        return Environment.defaultEncode;
+        String encode = getHeader("characterencoding");
+        return StringUtil.isEmpty(encode)?Environment.defaultEncode:encode;
     }
 
     @Override
@@ -252,18 +261,17 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public int getContentLength() {
-        return ObjectUtil.toInt(super.get(RequestUtil.HEADER+".contentlength"));
+        return ObjectUtil.toInt(getHeader("contentlength"));
     }
 
     @Override
     public long getContentLengthLong() {
-        return ObjectUtil.toLong(super.get(RequestUtil.HEADER+".contentlength"));
+        return ObjectUtil.toLong(getHeader("contentlength"));
     }
-
 
     @Override
     public String getContentType() {
-        return (String)super.get(RequestUtil.HEADER+".contenttype");
+        return getHeader("contenttype");
     }
 
     @Override
@@ -301,10 +309,16 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        Map result = new HashMap();
-        result.putAll(this);
+        Map<String, String[]> result = new HashMap<>();
+        for (String key:super.keySet())
+        {
+            if (key==null)
+            {
+                continue;
+            }
+            result.put(key, (String[])TypeUtil.getTypeValue(String[].class.getName(),get(key)));
+        }
         return result;
-
     }
 
     @Override
@@ -314,22 +328,22 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public String getScheme() {
-        return null;
+        return getHeader("scheme");
     }
 
     @Override
     public String getServerName() {
-        return null;
+        return getHeader("servername");
     }
 
     @Override
     public int getServerPort() {
-        return 0;
+        return ObjectUtil.toInt(getHeader("serverport"));
     }
 
     @Override
     public BufferedReader getReader() throws IOException {
-        return null;
+        return new BufferedReader(new StringReader(ObjectUtil.toString(this)));
     }
 
     @Override
@@ -359,7 +373,11 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public Enumeration<Locale> getLocales() {
-        return null;
+        Hashtable<String,Locale> map = new Hashtable<>();
+        map.put(Locale.CHINESE.toString(),Locale.CHINESE);
+        map.put(Locale.ENGLISH.toString(),Locale.ENGLISH);
+        map.put(Locale.CHINA.toString(),Locale.CHINA);
+        return map.elements();
     }
 
     @Override
@@ -379,7 +397,7 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public int getRemotePort() {
-        return 0;
+        return ObjectUtil.toInt(getHeader("remoteport"));
     }
 
     @Override
@@ -389,12 +407,12 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
 
     @Override
     public String getLocalAddr() {
-        return (String)super.get(RequestUtil.HEADER+".remoteaddr");
+        return getHeader("remoteaddr");
     }
 
     @Override
     public int getLocalPort() {
-        return 0;
+        return ObjectUtil.toInt(getHeader("localport"));
     }
 
     @Override
@@ -431,6 +449,5 @@ public class RequestTo extends HashMap<String,Object> implements  HttpServletReq
     public DispatcherType getDispatcherType() {
         return null;
     }
-
 
 }

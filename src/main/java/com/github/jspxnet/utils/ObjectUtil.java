@@ -351,7 +351,35 @@ public final  class ObjectUtil {
         return new java.sql.Time(DateUtil.empty.getTime());
     }
 
-    public static String toString(Object obj) {
+    /**
+     * 调试用,格式化后的字符串
+     * @param obj 对象转字符串
+     * @return 字符串
+     */
+    public static String toFormatString(Object obj)
+    {
+        return toString( obj,4);
+    }
+
+    /**
+     *
+     * 调试用,一行方式
+     * @param obj 对象转字符串
+     * @return 字符串
+     */
+    public static String toString(Object obj)
+    {
+        return toString( obj,0);
+    }
+
+    /**
+     *
+     * @param obj 对象转字符串
+     * @param tab 格式化间隔
+     * @return 字符串
+     */
+    public static String toString(Object obj,int tab)
+    {
         if (obj == null) {
             return StringUtil.empty;
         }
@@ -370,7 +398,7 @@ public final  class ObjectUtil {
             return IpUtil.getIp((SocketAddress)obj);
         }
         if (obj instanceof Object[]) {
-            return new JSONArray(obj).toString();
+            return new JSONArray(obj).toString(tab);
         }
         if (ClassUtil.isStandardProperty(obj.getClass())) {
             if (ClassUtil.isNumberProperty(obj.getClass()))
@@ -379,14 +407,16 @@ public final  class ObjectUtil {
             }
             return obj + "";
         }
-
+        if (obj instanceof JSONArray) {
+            return ((JSONArray)obj).toString(tab);
+        }
+        if (obj instanceof JSONObject) {
+            return ((JSONObject)obj).toString(tab);
+        }
         if (obj.getClass().isArray() || obj instanceof List) {
-            return new JSONArray(obj).toString();
+            return new JSONArray(obj).toString(tab);
         }
-        if (obj instanceof JSONObject||obj instanceof JSONArray) {
-            return obj.toString();
-        }
-        return new JSONObject(obj).toString();
+        return new JSONObject(obj).toString(tab);
     }
 
     /**
@@ -469,7 +499,6 @@ public final  class ObjectUtil {
         decoder.close();
         return obj;
     }
-
 
     /**
      * jdk xml 反系列化

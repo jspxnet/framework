@@ -51,12 +51,12 @@ public class BaseState implements State {
     }
 
     @Override
-    public String toJSONString() {
-        return toJSONObject().toString();
+    public String toJsonString() {
+        return toJson().toString();
     }
 
     @Override
-    public JSONObject toJSONObject() {
+    public JSONObject toJson() {
         String stateVal = this.isSuccess() ? AppInfo.getStateInfo(AppInfo.SUCCESS) : this.info;
         json.put("state", stateVal);
         return json;

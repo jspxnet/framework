@@ -159,7 +159,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
      * @return 角色
      */
     @Override
-    public Role getComposeRole(long uid)
+    public Role getComposeRole(long uid,String organizeId)
     {
         Criteria criteria = createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.eq("uid", uid));
         if (!StringUtil.isEmpty(organizeId)) {
@@ -184,7 +184,7 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
             }
             if (StringUtil.isEmpty(role.getOrganizeId()))
             {
-                role.setOrganizeId(memberRole.getOrganizeId());
+                role.setOrganizeId(organizeId);
             }
             roles.add(role);
         }

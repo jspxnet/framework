@@ -260,12 +260,14 @@ public final class MapUtil {
         sb.append("</xml>");
         return sb.toString();
     }
+
+
     /**
      *
      * @param valueMap 变量map
      * @return 修复变量名称，  数字开头加下划线,.开头变成下划线，中间有-的变成下划线
      */
-    public static Map<String, Object> autoTypeValueMap(final Map<String, Object> valueMap) {
+    public static Map<String, Object> fixedVarName(final Map<String, Object> valueMap) {
         if (valueMap==null)
         {
             return valueMap;
@@ -277,20 +279,7 @@ public final class MapUtil {
         while(iterator.hasNext()){
             Map.Entry<String, Object> entry=iterator.next();
             String key=entry.getKey();
-
-            String newName = key;
-            if (ValidUtil.isNumber(key.charAt(0)+""))
-            {
-                newName = "_" + key;
-            } else
-            if ('.'==key.charAt(0))
-            {
-                newName =  StringUtil.replaceOnce(key,".","_");
-            }
-            if (key.contains("-"))
-            {
-                newName = StringUtil.replace(newName,"-","_");
-            }
+            String newName = StringUtil.fixedVarName(key);
             if (!key.equals(newName))
             {
                 iterator.remove();
@@ -298,10 +287,10 @@ public final class MapUtil {
             }
         }
         valueMap.putAll(fixMap);
-        return fixValueType(valueMap);
+        return valueMap;
     }
 
-    public static Map<String, Object> fixValueType(final Map<String, Object> valueMap) {
+    public static Map<String, Object> fixedValueType(final Map<String, Object> valueMap) {
         if (valueMap==null)
         {
             return valueMap;
@@ -330,7 +319,6 @@ public final class MapUtil {
                     {
                         valueMap.put(key,StringUtil.toLong(str));
                     }
-
                 } else
                 if ("false".equals(str)||"off".equals(str))
                 {

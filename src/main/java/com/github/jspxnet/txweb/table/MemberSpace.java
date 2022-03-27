@@ -54,7 +54,6 @@ public class MemberSpace extends OperateTable {
     @Column(caption = "组织名称", length = 200, dataType = "isLengthBetween(0,200)", notNull = true)
     private String organize = StringUtil.empty;
 
-
     @Column(caption = "部门节点", length = 32)
     private String nodeId = StringUtil.empty;
 
@@ -69,7 +68,6 @@ public class MemberSpace extends OperateTable {
 
     @Column(caption = "备注", length = 250)
     private String remark = StringUtil.empty;
-
 
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;

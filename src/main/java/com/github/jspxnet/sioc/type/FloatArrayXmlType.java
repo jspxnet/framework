@@ -11,6 +11,8 @@ package com.github.jspxnet.sioc.type;
 
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.reflect.Type;
+
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -18,7 +20,11 @@ import com.github.jspxnet.utils.StringUtil;
  * Time: 0:05:44
  */
 public class FloatArrayXmlType extends ArrayXmlType {
-
+    @Override
+    public Type getJavaType()
+    {
+        return float[].class;
+    }
     @Override
     public Object getTypeObject() {
         String[] stringArray = StringUtil.split((String) value, ",");

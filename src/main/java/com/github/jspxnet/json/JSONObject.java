@@ -300,6 +300,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             Map map = (Map) bean;
             for (Object objKey : map.keySet()) {
                 String key = ObjectUtil.toString(objKey);
+
                 //判断是否需要返回
                 if (!ArrayUtil.isEmpty(showField)&&!ArrayUtil.contains(showField,key))
                 {
@@ -634,7 +635,14 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     public boolean getBoolean(String key) {
         return ObjectUtil.toBoolean(get(key));
     }
-
+    public boolean getIgnoreBoolean(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return false;
+        }
+        return getBoolean(key);
+    }
 
     /**
      * Get the double value associated with a key.
@@ -647,11 +655,26 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     public double getDouble(String key) {
         return ObjectUtil.toDouble(get(key));
     }
+    public double getIgnoreDouble(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return 0;
+        }
+        return getDouble(key);
+    }
 
     public float getFloat(String key) {
         return ObjectUtil.toFloat(get(key));
     }
-
+    public float getIgnoreFloat(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return 0;
+        }
+        return getFloat(key);
+    }
     /**
      * Get the int value associated with a key. If the number value is too
      * large for an int, it will be clipped.
@@ -665,6 +688,15 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return ObjectUtil.toInt(get(key));
     }
 
+
+    public int getIgnoreInt(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return 0;
+        }
+        return getInt(key);
+    }
 
     /**
      * Increment a property of a JSONObject. If there is no such property,
@@ -718,6 +750,15 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return null;
     }
 
+    public JSONArray getIgnoreJSONArray(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return new JSONArray();
+        }
+        return getJSONArray(key);
+    }
+
 
     /**
      * Get the JSONObject value associated with a key.
@@ -745,6 +786,14 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return null;
     }
 
+    public JSONObject getIgnoreJSONObject(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return new JSONObject();
+        }
+        return getJSONObject(key);
+    }
 
     /**
      * Get the long value associated with a key. If the number value is too
@@ -759,7 +808,18 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return ObjectUtil.toLong(get(key));
     }
 
-    public Date getDate(String key) throws JSONException {
+
+    public long getIgnoreLong(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return 0;
+        }
+        return getLong(key);
+    }
+
+    public Date getDate(String key) throws JSONException
+    {
         Object o = get(key);
         if (o == null) {
             return null;
@@ -780,6 +840,15 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public Date getIgnoreDate(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return null;
+        }
+        return getDate(key);
     }
 
 
@@ -803,7 +872,34 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return o.toString();
     }
 
+    public String getIgnoreString(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return null;
+        }
+        return getString(key);
+    }
 
+    /**
+     * 不区分大小写的得到 key
+     * @param key key
+     * @return 返回大小写的key
+     */
+    public String getIgnoreKey(String key) {
+        if (key==null)
+        {
+            return null;
+        }
+        Set<String> keySet = super.keySet();
+        for (String myKey:keySet){
+            if (key.equalsIgnoreCase(myKey))
+            {
+                return myKey;
+            }
+        }
+        return null;
+    }
     /**
      * Determine if the JSONObject contains a specific key.
      *
@@ -814,6 +910,9 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return super.containsKey(key);
     }
 
+    public boolean hasIgnore(String key) {
+        return getIgnoreKey(key)!=null;
+    }
 
     /**
      * Determine if the value associated with the key is null or if there is
@@ -824,6 +923,15 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * the value is the JSONObject.NULL object.
      */
     public boolean isNull(String key) {
+        return JSONObject.NULL.equals(get(key)) || get(key)==null;
+    }
+
+    public boolean isIgnoreNull(String key) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return false;
+        }
         return JSONObject.NULL.equals(get(key)) || get(key)==null;
     }
 
@@ -893,6 +1001,15 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return A string which is the value.
      */
     public String getString(String key, String defaultValue) {
+        Object o = get(key);
+        return o != null ? o.toString() : defaultValue;
+    }
+    public String getIgnoreString(String key, String defaultValue) {
+        key = getIgnoreKey(key);
+        if (key==null)
+        {
+            return null;
+        }
         Object o = get(key);
         return o != null ? o.toString() : defaultValue;
     }

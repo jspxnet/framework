@@ -10,8 +10,8 @@
 package com.github.jspxnet.txweb.support;
 
 import com.github.jspxnet.txweb.annotation.HttpMethod;
-import com.github.jspxnet.upload.MultipartRequest;
 import com.github.jspxnet.txweb.annotation.MulRequest;
+import com.github.jspxnet.txweb.annotation.Param;
 
 /**
  * Created by IntelliJ IDEA.
@@ -34,6 +34,7 @@ public class DefaultUploadAction extends MultipartSupport {
         return filterCodeMarker;
     }
 
+    @Param(request = false)
     public void setFilterCodeMarker(boolean filterCodeMarker) {
         this.filterCodeMarker = filterCodeMarker;
     }
@@ -41,7 +42,6 @@ public class DefaultUploadAction extends MultipartSupport {
     @Override
     @MulRequest(saveDirectory = "@saveDirectory", fileTypes = "@fileTypes", maxPostSize = "@maxPostSize")
     public void setMultipartRequest(MultipartRequest multipartRequest) {
-        this.multipartRequest = multipartRequest;
         if (filterCodeMarker) {
             int iCheck = checkFileMatching("jpg;png;bmp;gif;zip;swftools");
             if (iCheck > 0) {

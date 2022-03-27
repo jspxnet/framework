@@ -234,7 +234,6 @@ public abstract class ActionSupport implements Action {
     private static boolean isGuest(IUserSession userSession) {
         return userSession == null || userSession.isGuest();
     }
-
     ////////////提交错误的时候显示的错误字段信息 begin  如果使用校验后错误信息会保存在这里边
 
     /**

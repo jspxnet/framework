@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -22,12 +22,14 @@ import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
+ *
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2007-2-5
  * Time: 23:49:08
@@ -41,20 +43,21 @@ public class AnnotationUtil {
 
     /**
      * postgre 数据库seq修复
-     * @param soberTable 模型
+     *
+     * @param soberTable     模型
      * @param jdbcOperations jdbc
      */
-    public static void postgreSqlFixSeqId(TableModels soberTable,JdbcOperations jdbcOperations) {
+    public static void postgreSqlFixSeqId(TableModels soberTable, JdbcOperations jdbcOperations) {
         try {
-            jdbcOperations.update(" SELECT setval('"+soberTable.getName()+"_id_seq', (SELECT MAX(id) FROM "+ soberTable.getName() +")+1)");
+            jdbcOperations.update(" SELECT setval('" + soberTable.getName() + "_id_seq', (SELECT MAX(id) FROM " + soberTable.getName() + ")+1)");
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("注意：{}你的字段类型，关键字配置",soberTable.getName());
+            log.error("注意：{}你的字段类型，关键字配置", soberTable.getName());
         }
     }
 
-    public static void fixIdCacheMax(TableModels soberTable,Object object, JdbcOperations jdbcOperations) {
-        if (jdbcOperations == null|| object==null) {
+    public static void fixIdCacheMax(TableModels soberTable, Object object, JdbcOperations jdbcOperations) {
+        if (jdbcOperations == null || object == null) {
             return;
         }
 
@@ -68,52 +71,40 @@ public class AnnotationUtil {
             return;
         }
 
-        if (IDType.uuid.equals(idf.type()))
-        {
+        if (IDType.uuid.equals(idf.type())) {
             return;
         }
 
-        Object maxId = jdbcOperations.getUniqueResult("SELECT max("+soberTable.getPrimary()+") FROM " + soberTable.getName());
+        Object maxId = jdbcOperations.getUniqueResult("SELECT max(" + soberTable.getPrimary() + ") FROM " + soberTable.getName());
         long value = 0;
-        if (maxId instanceof Number)
-        {
-            value = ((Number)maxId).longValue();
-        }
-        else
-        if (maxId instanceof String)
-        {
+        if (maxId instanceof Number) {
+            value = ((Number) maxId).longValue();
+        } else if (maxId instanceof String) {
             String strId = (String) maxId;
-            if (idf.dateStart()&&!StringUtil.isEmpty(idf.dateFormat())&&(strId.length()>idf.dateFormat().length()))
-            {
+            if (idf.dateStart() && !StringUtil.isEmpty(idf.dateFormat()) && (strId.length() > idf.dateFormat().length())) {
                 strId = strId.substring(idf.dateFormat().length());
             }
-            if (StringUtil.isStandardNumber(strId))
-            {
+            if (StringUtil.isStandardNumber(strId)) {
                 value = ObjectUtil.toLong(NumberUtil.getNumberStdFormat(strId));
             }
-        }
-        else
-        {
-            if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(soberTable.getDatabaseName())))
-            {
+        } else {
+            if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(soberTable.getDatabaseName()))) {
                 value = ObjectUtil.toLong(jdbcOperations.getUniqueResult("SELECT count(1) FROM " + soberTable.getDatabaseName() + StringUtil.DOT + soberTable.getName()));
-            }
-            else
-            {
+            } else {
                 value = ObjectUtil.toLong(jdbcOperations.getUniqueResult("SELECT count(1) FROM " + soberTable.getName()));
             }
         }
         SequenceFactory sequenceFactory = EnvFactory.getBeanFactory().getBean(SequenceFactory.class);
-        sequenceFactory.fixCache(object.getClass().getName(),value);
+        sequenceFactory.fixCache(object.getClass().getName(), value);
     }
+
     /**
-     * @param object       自动生成ID
-     * @param fieldName    字段名称
+     * @param object         自动生成ID
+     * @param fieldName      字段名称
      * @param jdbcOperations 系列化DAO对象
-     *                     验证错误
+     *                       验证错误
      */
-    public static void autoSetId(Object object, String fieldName, JdbcOperations jdbcOperations)
-    {
+    public static void autoSetId(Object object, String fieldName, JdbcOperations jdbcOperations) {
         if (object == null || StringUtil.isNull(fieldName)) {
             return;
         }
@@ -141,10 +132,10 @@ public class AnnotationUtil {
                 if (IDType.serial.equalsIgnoreCase(idf.type()) && !dialect.isSupportsGetGeneratedKeys()) {
                     //配置数据库来运行
                     //配置的序列方式，但数据库又不支持，这里就切换到数据库来自动生成，就是seq方式
-                    BeanUtil.setFieldValue(object, field.getName(), StringUtil.toLong(sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(),jdbcOperations)));
+                    BeanUtil.setFieldValue(object, field.getName(), StringUtil.toLong(sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(), jdbcOperations)));
                 } else if (IDType.seq.equalsIgnoreCase(idf.type())) {
                     //配置构架来生成
-                    BeanUtil.setFieldValue(object, field.getName(), StringUtil.toLong(sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(),jdbcOperations)));
+                    BeanUtil.setFieldValue(object, field.getName(), StringUtil.toLong(sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(), jdbcOperations)));
                 } else if (IDType.uuid.equalsIgnoreCase(idf.type())) {
                     BeanUtil.setFieldValue(object, field.getName(), RandomUtil.getRandomGUID(idf.length()));
                 } else {
@@ -156,9 +147,9 @@ public class AnnotationUtil {
             if ((field.getType().equals(Integer.class) || field.getType().equals(int.class)) && ObjectUtil.toInt(oldIdValue) == 0) {
                 if (IDType.serial.equalsIgnoreCase(idf.type()) && !dialect.isSupportsGetGeneratedKeys()) {
                     //配置的序列方式，但数据库又不支持，这里就切换到数据库来自动生成，就是seq方式
-                    BeanUtil.setFieldValue(object, field.getName(), StringUtil.toInt(sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(),jdbcOperations)));
+                    BeanUtil.setFieldValue(object, field.getName(), StringUtil.toInt(sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(), jdbcOperations)));
                 } else if (IDType.seq.equalsIgnoreCase(idf.type())) {
-                    BeanUtil.setFieldValue(object, field.getName(), StringUtil.toInt(sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(),jdbcOperations)));
+                    BeanUtil.setFieldValue(object, field.getName(), StringUtil.toInt(sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(), jdbcOperations)));
                 } else {
                     BeanUtil.setFieldValue(object, field.getName(), RandomUtil.getRandomGUID(idf.length()));
                 }
@@ -170,9 +161,9 @@ public class AnnotationUtil {
                 //字符串类型
                 if (IDType.serial.equalsIgnoreCase(idf.type()) && !dialect.isSupportsGetGeneratedKeys()) {
                     //配置的序列方式，但数据库又不支持，这里就切换到数据库来自动生成，就是seq方式
-                    BeanUtil.setFieldValue(object, field.getName(), sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(),jdbcOperations));
+                    BeanUtil.setFieldValue(object, field.getName(), sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(), jdbcOperations));
                 } else if (IDType.seq.equalsIgnoreCase(idf.type())) {
-                    BeanUtil.setFieldValue(object, field.getName(), sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(),jdbcOperations));
+                    BeanUtil.setFieldValue(object, field.getName(), sequenceFactory.getNextKey(object.getClass().getName(), idf, field.getType(), jdbcOperations));
                 } else { //uid
                     BeanUtil.setFieldValue(object, field.getName(), RandomUtil.getRandomGUID(idf.length()));
                 }
@@ -204,12 +195,12 @@ public class AnnotationUtil {
                 soberColumn.setDataType(column.dataType());
                 soberColumn.setHidden(column.hidden());
                 soberColumns.add(soberColumn);
-                if (field.getType() == String.class && column.length() < 1) {
-                    Table table = cls.getAnnotation(Table.class);
-                    if (table!=null&&table.create())
-                    {
-                        log.error("class " + cls.getName() + " field " + field.getName() + " not column length,没有定义字段长度");
-                    }
+                Table table = cls.getAnnotation(Table.class);
+                if (field.getType() == String.class && column.length() < 1 && table != null && table.create()) {
+                    log.error("class " + cls.getName() + " field " + field.getName() + " not column length,没有定义字段长度");
+                }
+                if (table != null) {
+                    soberColumn.setTableName(table.name());
                 }
             }
         }
@@ -266,6 +257,7 @@ public class AnnotationUtil {
         }
         return soberCalcUniques;
     }
+
     /**
      * 得到映射关系中的表名
      *
@@ -273,13 +265,11 @@ public class AnnotationUtil {
      * @return 表名
      */
     public static Table getTable(Class<?> cls) {
-        if (cls==null)
-        {
+        if (cls == null) {
             return null;
         }
         Annotation[] annotation = cls.getAnnotations();
-        if (ObjectUtil.isEmpty(annotation))
-        {
+        if (ObjectUtil.isEmpty(annotation)) {
             return null;
         }
         for (Annotation a : annotation) {
@@ -295,13 +285,11 @@ public class AnnotationUtil {
      * @return 得到的显示名称
      */
     public static String getTableCaption(Class<?> cls) {
-        if (cls==null)
-        {
+        if (cls == null) {
             return null;
         }
         Annotation[] annotation = cls.getAnnotations();
-        if (ObjectUtil.isEmpty(annotation))
-        {
+        if (ObjectUtil.isEmpty(annotation)) {
             return null;
         }
         for (Annotation anAnnotation : annotation) {
@@ -317,13 +305,11 @@ public class AnnotationUtil {
      * @return 得到数据库的名
      */
     public static String getTableName(Class<?> cls) {
-        if (cls==null)
-        {
+        if (cls == null) {
             return null;
         }
         Annotation[] annotation = cls.getAnnotations();
-        if (ObjectUtil.isEmpty(annotation))
-        {
+        if (ObjectUtil.isEmpty(annotation)) {
             return null;
         }
         for (Annotation anAnnotation : annotation) {
@@ -341,8 +327,7 @@ public class AnnotationUtil {
      * @return SoberTable
      */
     public static SoberTable getSoberTable(Class<?> cls) {
-        if (cls==null)
-        {
+        if (cls == null) {
             return null;
         }
         SoberTable soberTable = new SoberTable();
@@ -371,7 +356,7 @@ public class AnnotationUtil {
         return soberTable;
     }
 
-    static public String getNexusOrderBy(Object obj, String orderBy)  {
+    static public String getNexusOrderBy(Object obj, String orderBy) {
         if (obj == null || orderBy == null) {
             return StringUtil.empty;
         }
@@ -386,7 +371,7 @@ public class AnnotationUtil {
         return orderBy;
     }
 
-    static public String getNexusTerm(Object obj, String term)  {
+    static public String getNexusTerm(Object obj, String term) {
         if (obj == null || term == null) {
             return StringUtil.empty;
         }
@@ -416,6 +401,7 @@ public class AnnotationUtil {
         int len = StringUtil.toInt(length);
         return len <= 0 ? defaultLength : len;
     }
+
     /**
      * 得到有Table的class列表
      *
@@ -435,7 +421,7 @@ public class AnnotationUtil {
         }
 
 
-        Set<Class<?>> list = ClassScannerUtils.searchClasses(classPath,EnvFactory.getBaseConfiguration().getDefaultPath());
+        Set<Class<?>> list = ClassScannerUtils.searchClasses(classPath, EnvFactory.getBaseConfiguration().getDefaultPath());
         for (Class<?> cls : list) {
             if (cls == null) {
                 continue;

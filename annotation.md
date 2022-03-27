@@ -1,8 +1,8 @@
-#Jspx.net Framework 6.4X注释标签
+#Jspx.net Framework 6.5X注释标签
 
 ##一.简介
 
- Jspx.net Framework 6.4X 支持传统方式的页面模版方式和微服务方式,注释标签涉及数据库,容器,WEB和JSON三部分.
+ Jspx.net Framework 6.5X 支持传统方式的页面模版方式和微服务方式,注释标签涉及数据库,容器,WEB和JSON三部分.
 
 ##二. sober数据库注释标签
 
@@ -246,3 +246,7 @@ level对应枚举类型SafetyEnumType
     //无
     NONE(0, "无");
 ```
+* **@Async**标签,异步action (controller) 支持
+* 
+不会返回只接收 
+

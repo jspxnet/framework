@@ -41,10 +41,12 @@ import com.github.jspxnet.txweb.interceptor.InterceptorSupport;
 import com.github.jspxnet.txweb.result.RocException;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
+import com.github.jspxnet.txweb.support.ApacheMultipartRequest;
+import com.github.jspxnet.txweb.support.MultipartRequest;
 import com.github.jspxnet.txweb.support.MultipartSupport;
 import com.github.jspxnet.txweb.turnpage.TurnPageButton;
 import com.github.jspxnet.txweb.turnpage.impl.TurnPageButtonImpl;
-import com.github.jspxnet.upload.MultipartRequest;
+import com.github.jspxnet.upload.CosMultipartRequest;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
@@ -126,7 +128,14 @@ public final class TXWebUtil {
             if (!StringUtil.isNull(fileType) && !StringUtil.ASTERISK.equals(fileType)) {
                 fileTypes = StringUtil.split(StringUtil.replace(fileType, StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON);
             }
-            MultipartRequest multipartRequest = new MultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, mulRequest.covering().getRenamePolicy(), fileTypes);
+            MultipartRequest multipartRequest = null;
+            if ("cos".equalsIgnoreCase(mulRequest.component()))
+            {
+                multipartRequest = new CosMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null,mulRequest.covering().getRenamePolicy(), fileTypes);
+            } else
+            {
+                multipartRequest = new ApacheMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null,mulRequest.covering().getRenamePolicy(), fileTypes);
+            }
             BeanUtil.setSimpleProperty(action, method.getName(), multipartRequest);
             action.setRequest(multipartRequest);
         }
@@ -573,7 +582,7 @@ public final class TXWebUtil {
 
         //路径方式载入参数
         Operate operate = exeMethod.getAnnotation(Operate.class);
-        if (operate != null && operate.method().contains(ParamUtil.variableBegin) && operate.method().contains(ParamUtil.variableEnd)) {
+        if (operate != null && operate.method().contains(ParamUtil.VARIABLE_BEGIN) && operate.method().contains(ParamUtil.VARIABLE_END)) {
             paramObj = ParamUtil.getMethodParameter(action, exeMethod);
             if (action.hasFieldInfo())
             {
@@ -782,9 +791,9 @@ public final class TXWebUtil {
                 String url = URLUtil.getUrlPath(action.getRequest().getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
                 //当前允许执行的方法
                 String operateUrl = urlNamespace + (operate.method().startsWith(StringUtil.BACKSLASH) ? operate.method() : (StringUtil.BACKSLASH + operate.method()));
-                if (url.startsWith(urlNamespace) && operate.method().contains(ParamUtil.variableBegin)) {
+                if (url.startsWith(urlNamespace) && operate.method().contains(ParamUtil.VARIABLE_BEGIN)) {
                     //方法配置的路径 路径参数方式${} {}
-                    String methodUrl = StringUtil.substringBefore(operate.method(), ParamUtil.variableBegin);
+                    String methodUrl = StringUtil.substringBefore(operate.method(), ParamUtil.VARIABLE_BEGIN);
                     if (url.toLowerCase().contains(methodUrl.toLowerCase())) {
                         return operateMap.get(operate);
                     }
@@ -893,7 +902,7 @@ public final class TXWebUtil {
                 if (transaction != null&&!StringUtil.isEmpty(transaction.message()))
                 {
                     String msg = transaction.message();
-                    if (msg.contains(ParamUtil.variableBegin) && msg.contains(ParamUtil.variableEnd)) {
+                    if (msg.contains(ParamUtil.VARIABLE_BEGIN) && msg.contains(ParamUtil.VARIABLE_END)) {
                         Map<String, Object> valueMap = new HashMap<>();
                         valueMap.put(ActionEnv.Key_Language, action.getLanguage());
                         msg = EnvFactory.getPlaceholder().processTemplate(valueMap, msg);
@@ -1117,8 +1126,6 @@ public final class TXWebUtil {
             }
         }
     }
-
-
 
     /**
      * @return 创建默认环境

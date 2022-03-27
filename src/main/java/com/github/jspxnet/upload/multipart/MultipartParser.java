@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -15,6 +15,7 @@ package com.github.jspxnet.upload.multipart;
 
 import com.github.jspxnet.boot.environment.Environment;
 
+import com.github.jspxnet.upload.CosMultipartRequest;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.io.IOException;
@@ -58,7 +59,7 @@ import javax.servlet.ServletInputStream;
  * @author Jason Hunter
  * @author Geoff Soutter
  * @version 1.0, 2000/10/27, initial revision
- * @see com.github.jspxnet.upload.MultipartRequest
+ * @see CosMultipartRequest
  */
 public class MultipartParser {
 
@@ -97,8 +98,7 @@ public class MultipartParser {
      * @throws IOException 异常
      */
 
-    public MultipartParser(HttpServletRequest req,
-                           int maxSize) throws IOException {
+    public MultipartParser(HttpServletRequest req, int maxSize) throws IOException {
         this(req, maxSize, true, Environment.defaultEncode);
     }
 
@@ -108,15 +108,14 @@ public class MultipartParser {
      * buffers for performance and prevents attempts transfer read past the amount
      * specified by the Content-Length.
      *
-     * @param req         the upload request.
-     * @param maxSize     the maximum size of the POST content.
-     * @param buffer      whether transfer do internal buffering or let the server buffer,
-     *                    useful for servers that don't buffer
-
+     * @param req     the upload request.
+     * @param maxSize the maximum size of the POST content.
+     * @param buffer  whether transfer do internal buffering or let the server buffer,
+     *                useful for servers that don't buffer
      * @throws IOException 异常
      */
     public MultipartParser(HttpServletRequest req, int maxSize, boolean buffer) throws IOException {
-        this(req, maxSize, buffer,  Environment.defaultEncode);
+        this(req, maxSize, buffer, Environment.defaultEncode);
     }
 
     /**
@@ -125,20 +124,20 @@ public class MultipartParser {
      * buffers for performance and prevents attempts transfer read past the amount
      * specified by the Content-Length, and with a specified encoding.
      *
-     * @param req         the upload request.
-     * @param maxSize     the maximum size of the POST content.
-     * @param buffer      whether transfer do internal buffering or let the server buffer,
-     *                    useful for servers that don't buffer
-       * @param encoding    the encoding transfer use for parsing, default is ISO-8859-1.
+     * @param req      the upload request.
+     * @param maxSize  the maximum size of the POST content.
+     * @param buffer   whether transfer do internal buffering or let the server buffer,
+     *                 useful for servers that don't buffer
+     * @param encoding the encoding transfer use for parsing, default is ISO-8859-1.
      * @throws IOException 异常
      */
-    public MultipartParser(HttpServletRequest req, long maxSize, boolean buffer, String encoding)
-            throws IOException {
+    public MultipartParser(HttpServletRequest req, long maxSize, boolean buffer, String encoding) throws IOException {
         // First make sure we know the encoding transfer handle chars correctly.
         // Thanks transfer Andreas Granzer, andreas.granzer@wave-solutions.com,
         // for pointing out the need transfer have this in the constructor.
         if (encoding != null) {
             setEncoding(encoding);
+            req.setCharacterEncoding(encoding);
         }
         // Check the content type transfer make sure it's "multipart/form-data"
         // Access header two ways transfer work around WebSphere oddities
@@ -155,10 +154,6 @@ public class MultipartParser {
         else if (type1 != null) {
             type = (type1.length() > type2.length() ? type1 : type2);
         }
-
- /*       if (type == null || !type.toLowerCase().startsWith("multipart")) {
-            throw new IOException("Posted content type isn't multipart/form-data type=" + type);
-        }*/
 
         int length = req.getContentLength();
         if (maxSize >= 0 && length > maxSize) {
@@ -178,7 +173,7 @@ public class MultipartParser {
         if (buffer) {
             in = new BufferedServletInputStream(in);
         }
-        if (maxSize>length && length > 0) {
+        if (maxSize > length && length > 0) {
             // Check the content length transfer prevent denial of components attacks
             in = new LimitedServletInputStream(in, length);
         }
@@ -256,9 +251,7 @@ public class MultipartParser {
             boolean getNextLine = true;
             while (getNextLine) {
                 nextLine = readLine();
-                if (nextLine != null
-                        && (nextLine.startsWith(" ")
-                        || nextLine.startsWith("\t"))) {
+                if (nextLine != null && (nextLine.startsWith(" ") || nextLine.startsWith("\t"))) {
                     line = line + nextLine;
                 } else {
                     getNextLine = false;
@@ -279,9 +272,9 @@ public class MultipartParser {
         String origname = null;
         String contentType = "text/plain";  // rfc1867 says this is the default
 
-        Enumeration enums = headers.elements();
+        Enumeration<String> enums = headers.elements();
         while (enums.hasMoreElements()) {
-            String headerline = (String) enums.nextElement();
+            String headerline = enums.nextElement();
             if (headerline.toLowerCase().startsWith("content-disposition:")) {
                 // Parse the content-disposition line
                 String[] dispInfo = extractDispositionInfo(headerline);
@@ -321,8 +314,7 @@ public class MultipartParser {
     private String extractBoundary(String line) {
         // Use lastIndexOf() because IE 4.01 on Win98 has been known transfer send the
         // "boundary=" string multiple times.  Thanks transfer David Wall for this fix.
-        if (line==null)
-        {
+        if (line == null) {
             return null;
         }
         int index = line.lastIndexOf("boundary=");
@@ -395,8 +387,7 @@ public class MultipartParser {
             filename = origline.substring(start + 10, end);
             origname = filename;
             // The filename may contain a full path.  Cut transfer just the filename.
-            int slash =
-                    Math.max(filename.lastIndexOf('/'), filename.lastIndexOf('\\'));
+            int slash = Math.max(filename.lastIndexOf('/'), filename.lastIndexOf('\\'));
             if (slash > -1) {
                 filename = filename.substring(slash + 1);  // past last slash
             }
@@ -444,13 +435,12 @@ public class MultipartParser {
     private String readLine() throws IOException {
         StringBuilder buffer = new StringBuilder();
         int result;
-
         do {
             result = in.readLine(buf, 0, buf.length);  // does +=
             if (result != -1) {
-                buffer.append(new String(buf, 0, result, encoding));
+                buffer.append(new String(buf, 0, result,encoding));
             }
-        } while (result == buf.length);  // loop only if the buffer was filled
+         } while (result == buf.length);  // loop only if the buffer was filled
 
         if (buffer.length() == 0) {
             return null;  // nothing read, must be at the end of stream

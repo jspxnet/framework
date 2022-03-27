@@ -59,6 +59,10 @@ public class ClassUtil {
                 cla.equals(BigDecimal.class);
     }
 
+    public static boolean isNumberType(String typeName) {
+        return ArrayUtil.inArray(new String[]{"int","Integer","long","float","double","BigDecimal","Short"},typeName,true);
+    }
+
     public static boolean isStandardType(Type clazz) {
         return isNumberType(clazz) || clazz.equals(Byte.class) || clazz.equals(Character.class)
                 || clazz.equals(String.class) || clazz.equals(char.class) || clazz.equals(boolean.class) || clazz.equals(Boolean.class) ||

@@ -44,31 +44,39 @@ public final class TypeUtil {
         TypeSerializer typeSerializer = new BooleanXmlType();
         typeMap.put(boolean.class.getName(), typeSerializer);
         typeMap.put(Boolean.class.getName(), typeSerializer);
+        typeMap.put("bool", typeSerializer);
 
         typeSerializer = new IntXmlType();
         typeMap.put(int.class.getName(), typeSerializer);
         typeMap.put(Integer.class.getName(), typeSerializer);
+        typeMap.put("int", typeSerializer);
 
         typeSerializer = new BigIntegerXmlType();
         typeMap.put(BigInteger.class.getName(), typeSerializer);
+        typeMap.put("BigInteger", typeSerializer);
 
         typeSerializer = new LongXmlType();
         typeMap.put(long.class.getName(), typeSerializer);
         typeMap.put(Long.class.getName(), typeSerializer);
+        typeMap.put("long", typeSerializer);
 
         typeSerializer = new FloatXmlType();
         typeMap.put(float.class.getName(), typeSerializer);
         typeMap.put(Float.class.getName(), typeSerializer);
+        typeMap.put("float", typeSerializer);
 
         typeSerializer = new BigDecimalXmlType();
         typeMap.put(BigDecimal.class.getName(), typeSerializer);
+        typeMap.put("BigDecimal", typeSerializer);
 
         typeSerializer = new StringXmlType();
         typeMap.put(String.class.getName(), typeSerializer);
+        typeMap.put("String", typeSerializer);
 
         typeSerializer = new DateXmlType();
         typeMap.put(Date.class.getName(), typeSerializer);
         typeMap.put(java.sql.Date.class.getName(), typeSerializer);
+        typeMap.put("Date", typeSerializer);
 
         typeMap.put(Object[].class.getName(), new ArrayXmlType());
 
@@ -84,26 +92,32 @@ public final class TypeUtil {
         typeSerializer = new FloatArrayXmlType();
         typeMap.put(float[].class.getName(), typeSerializer);
         typeMap.put(Float[].class.getName(), typeSerializer);
+        typeMap.put("float[]", typeSerializer);
 
         typeSerializer = new BooleanArrayXmlType();
         typeMap.put(boolean[].class.getName(), typeSerializer);
         typeMap.put(Boolean[].class.getName(), typeSerializer);
+        typeMap.put("Boolean[]", typeSerializer);
 
         typeSerializer = new DoubleArrayXmlType();
         typeMap.put(double[].class.getName(), typeSerializer);
         typeMap.put(Double[].class.getName(), typeSerializer);
+        typeMap.put("Double[]", typeSerializer);
 
         typeMap.put(Date[].class.getName(), new DateArrayXmlType());
+        typeMap.put("Date[]", typeSerializer);
 
         typeSerializer = new ListXmlType();
         typeMap.put(List.class.getName(), typeSerializer);
         typeMap.put(LinkedList.class.getName(), typeSerializer);
         typeMap.put(ArrayList.class.getName(), typeSerializer);
+        typeMap.put("list", typeSerializer);
 
         typeSerializer = new MapXmlType();
         typeMap.put(HashMap.class.getName(), typeSerializer);
         typeMap.put(Hashtable.class.getName(), typeSerializer);
         typeMap.put(LinkedHashMap.class.getName(), typeSerializer);
+        typeMap.put("map", typeSerializer);
     }
 
     /**
@@ -139,11 +153,8 @@ public final class TypeUtil {
         } else if ("object".equalsIgnoreCase(typeString)) {
             result = new Object[length];
         } else if (!StringUtil.isNull(typeString)) {
-
             try {
                 Class<?> classType = Class.forName(typeString);
-//                Modifier.isAbstract(classType.getModifiers())
-  //              Modifier.isInterface(classType.getModifiers())
                 result = (Object[]) Array.newInstance(classType, length);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -151,6 +162,20 @@ public final class TypeUtil {
             }
         }
         return result;
+    }
+
+    /**
+     * 转换得到java 类型
+     * @param typeString 类型字符串
+     * @return 转换得到java 类型
+     */
+    public static Type getJavaType(String typeString) {
+        TypeSerializer typeSerializer = typeMap.get(typeString);
+        if (typeSerializer!=null)
+        {
+            return typeSerializer.getJavaType();
+        }
+        return Object.class;
     }
 
     /**
@@ -237,7 +262,7 @@ public final class TypeUtil {
     public static List<Object> getListValue(ListElement element, String namespace, BeanFactory beanFactory) throws Exception {
 
         List<TagNode> valueLists = element.getValueList();
-        List<Object> result = new ArrayList<Object>(valueLists.size());
+        List<Object> result = new ArrayList<>(valueLists.size());
         for (TagNode valueElement : valueLists) {
             ValueElement value = (ValueElement) valueElement;
             if (beanFactory != null && (Sioc.IocRef.equalsIgnoreCase(element.getClassName()) || value.isRef())) {
@@ -272,7 +297,7 @@ public final class TypeUtil {
     }
 
     public static Map<String, Object> getMapValue(MapElement element, String namespace, BeanFactory beanFactory) throws Exception {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Map<String, Object> result = new LinkedHashMap<>();
         List<TagNode> valueLists = element.getValueList();
         for (TagNode xve : valueLists) {
             ValueElement ve = (ValueElement) xve;
@@ -291,8 +316,8 @@ public final class TypeUtil {
     }
 
 
-    public static Map<String, Object> getPropertyValue(List<PropertyElement> propertyElements, String namespace) throws Exception {
-        Map<String, Object> paramMap = new LinkedHashMap<String, Object>(propertyElements.size());
+    public static Map<String, Object> getPropertyValue(List<PropertyElement> propertyElements, String namespace) {
+        Map<String, Object> paramMap = new LinkedHashMap<>(propertyElements.size());
         //////////////PropertyElement begin
         for (PropertyElement element : propertyElements) {
             if (Sioc.IocRef.equalsIgnoreCase(element.getTypeName())) {

@@ -124,7 +124,6 @@ public class UserSession implements IUserSession {
                 return role;
             }
 
-
         }
         return null;
     }

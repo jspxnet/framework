@@ -143,7 +143,7 @@ public class BufferedServletInputStream extends ServletInputStream {
 
     @Override
     public boolean isFinished() {
-        return false;
+        return in.isFinished();
     }
 
     @Override
@@ -153,8 +153,7 @@ public class BufferedServletInputStream extends ServletInputStream {
 
     @Override
     public void setReadListener(ReadListener readListener) {
-
-
+        in.setReadListener(readListener);
     }
 
     /**

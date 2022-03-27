@@ -388,62 +388,22 @@ public final class FileUtil {
      * @param fileName 文件名称
      * @param hashType 哈希类型
      * @return  文件唯一标识ID
-     * @throws Exception 异常
      */
-    public static String getFileGuid(File fileName, String hashType) throws Exception {
+    public static String getFileGuid(File fileName, String hashType) {
         if (fileName==null)
         {
             return null;
         }
         String head = EncryptUtil.toHex(FileUtil.readFileByte(fileName,100));
-        String value = FileUtil.getHash(fileName,hashType);
+        String value = null;
+        try {
+            value = FileUtil.getHash(fileName,hashType);
+        } catch (Exception e) {
+            log.error("getFileGuid",e);
+            e.printStackTrace();
+        }
         return EncryptUtil.getMd5(value + head + FileUtil.getTypePart(fileName) + fileName.length());
     }
-    /**
-     * 上边是标准的验证方式，但有的文件太大验证时间很慢
-     * 所以提供下边这个快速的验证方法，只起一个包来比较，并不是所有的数据都比较，
-     * 虽然不能保证100%的数据正确，但可以保证大部分正确，
-     * 算法1M内的文件调用上边的方法，大于10的文件平均分成10份来验证就可以了
-     *
-     * @param fileName 文件列表
-     * @param hashType 哈希类型
-     * @return 得到哈希值
-     * @throws Exception 异常
-     */
-/*    public static String getFastHash(File fileName, String hashType) throws
-            Exception {
-        if (StringUtil.isNull(hashType) || "AUTO".equalsIgnoreCase(hashType)) {
-            hashType = "MD5";
-        }
-        if (fileName.exists()) {
-            if (fileName.length() < 1024 * 1024) {
-                return getHash(fileName, hashType);
-            }
-            int step = (int) fileName.length() / 10;
-            InputStream fis = new FileInputStream(fileName);
-            MessageDigest md5;
-            try {
-                byte[] buffer = new byte[BUFFER_SIZE];
-                md5 = MessageDigest.getInstance(hashType);
-                int numRead;
-                int i = 0;
-                while ((numRead = fis.read(buffer)) > 0) {
-                    i++;
-                    int p = i * step;
-                    if (p < fileName.length()) {
-                        fis.skip(p);
-                    } else {
-                        break;
-                    }
-                    md5.update(buffer, 0, numRead);
-                }
-            } finally {
-                fis.close();
-            }
-            return StringUtil.toHexString(md5.digest());
-        }
-        return StringUtil.empty;
-    }*/
 
 
     /**
@@ -1109,13 +1069,14 @@ public final class FileUtil {
      * @since 0.2
      */
     public static String mendPath(String path) {
-        if (path == null || path.length() < 1) {
+        if (path == null || "/".equals(path) || path.length() < 1) {
             return StringUtil.empty;
         }
         String result = mendFile(path);
         if (!result.endsWith("/") && !result.endsWith("\\")) {
             result = result + "/";
         }
+
         return result;
     }
 
@@ -1509,11 +1470,17 @@ public final class FileUtil {
         if (path1.length() == path2.length()) {
             return StringUtil.empty;
         }
+        String result;
         if (path2.length() > path1.length()) {
-            return path2.substring(path1.length());
+            result = path2.substring(path1.length());
         } else {
-            return path1.substring(path2.length());
+            result = path1.substring(path2.length());
         }
+        if ("/".equals(result))
+        {
+            return StringUtil.empty;
+        }
+        return result;
     }
 
     /**
@@ -1721,7 +1688,7 @@ public final class FileUtil {
                     tempName = tempName.substring(1);
                 }
             } else {
-                tempName = FileUtil.getDecrease(fileName, startPath);
+                tempName = getDecrease(fileName, startPath);
                 if (tempName != null && (tempName.startsWith("/") || tempName.startsWith("\\"))) {
                     tempName = tempName.substring(1);
                 }

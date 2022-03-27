@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.sioc.type;
 
+import java.lang.reflect.Type;
+
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -16,6 +18,12 @@ package com.github.jspxnet.sioc.type;
  * Time: 11:46:01
  */
 public class ObjectXmlType extends TypeSerializer {
+    @Override
+    public Type getJavaType()
+    {
+        return Object.class;
+    }
+
     @Override
     public String getTypeString() {
         return "object";

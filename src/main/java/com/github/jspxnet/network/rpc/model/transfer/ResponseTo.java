@@ -1,6 +1,11 @@
 package com.github.jspxnet.network.rpc.model.transfer;
 
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.txweb.util.RequestUtil;
+import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.URLUtil;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -8,10 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by jspx.net
@@ -86,7 +88,7 @@ public class ResponseTo extends HashMap<String,Object>  implements HttpServletRe
 
     @Override
     public int getBufferSize() {
-        return 0;
+        return ObjectUtil.toInt(super.get("bufferSize"));
     }
 
     @Override
@@ -116,7 +118,7 @@ public class ResponseTo extends HashMap<String,Object>  implements HttpServletRe
 
     @Override
     public Locale getLocale() {
-        return null;
+        return Locale.CHINA;
     }
 
     @Override
@@ -126,27 +128,27 @@ public class ResponseTo extends HashMap<String,Object>  implements HttpServletRe
 
     @Override
     public boolean containsHeader(String s) {
-        return false;
+        return super.containsKey(s);
     }
 
     @Override
     public String encodeURL(String s) {
-        return null;
+        return URLUtil.getEncoder(s, Environment.defaultEncode);
     }
 
     @Override
     public String encodeRedirectURL(String s) {
-        return null;
+        return URLUtil.getEncoder(s, Environment.defaultEncode);
     }
 
     @Override
     public String encodeUrl(String s) {
-        return null;
+        return URLUtil.getEncoder(s, Environment.defaultEncode);
     }
 
     @Override
     public String encodeRedirectUrl(String s) {
-        return null;
+        return URLUtil.getEncoder(s, Environment.defaultEncode);
     }
 
     @Override
@@ -211,16 +213,17 @@ public class ResponseTo extends HashMap<String,Object>  implements HttpServletRe
 
     @Override
     public String getHeader(String s) {
-        return null;
+        Object value  = super.get(s);
+        return value==null? StringUtil.empty:(String)value;
     }
 
     @Override
     public Collection<String> getHeaders(String s) {
-        return null;
+        return new HashSet<>(0);
     }
 
     @Override
     public Collection<String> getHeaderNames() {
-        return null;
+        return new HashSet<>(0);
     }
 }

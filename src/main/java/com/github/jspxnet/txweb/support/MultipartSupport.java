@@ -9,12 +9,9 @@
  */
 package com.github.jspxnet.txweb.support;
 
-import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
-import com.github.jspxnet.upload.MultipartRequest;
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.utils.*;
-
 import java.io.*;
 
 /**
@@ -24,13 +21,13 @@ import java.io.*;
  * Time: 11:35:46
  * MultipartSupport
  */
-@HttpMethod(caption = "上传")
+
 public abstract class MultipartSupport extends ActionSupport {
     public MultipartSupport() {
 
     }
 
-    protected int covering = FileCoveringPolicyEnumType.JSPX.getValue();
+    protected int covering = FileCoveringPolicyEnumType.DateRandom.getValue();
     protected int maxPostSize = -1;
     protected String saveDirectory = "d:/upload";
     protected String fileTypes = StringUtil.ASTERISK;
@@ -41,10 +38,6 @@ public abstract class MultipartSupport extends ActionSupport {
 
     public MultipartRequest getMultipartRequest() {
         return multipartRequest;
-    }
-
-    public void putMultipartRequest(MultipartRequest multipartRequest) {
-        this.multipartRequest = multipartRequest;
     }
 
     public String getFileTypes() {
@@ -112,5 +105,12 @@ public abstract class MultipartSupport extends ActionSupport {
             multipartRequest.destroy();
         }
         super.destroy();
+    }
+
+    public static boolean fileEquals(String hash1, String hash2) {
+        if (StringUtil.isNull(hash1) || StringUtil.isNull(hash2)) {
+            return false;
+        }
+        return hash1.equals(hash2);
     }
 }

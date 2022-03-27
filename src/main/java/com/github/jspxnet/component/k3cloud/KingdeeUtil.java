@@ -5,8 +5,8 @@ import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ListUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.util.*;
 
 /**
@@ -28,7 +28,7 @@ public final class KingdeeUtil {
         String[] lines = StringUtil.split(str,StringUtil.CR);
         for (String line:lines)
         {
-            if (StringUtil.isEmpty(line))
+            if (StringUtil.isNull(StringUtil.trim(line)) || line.startsWith("#") || (!line.contains("：") && !line.contains(":")))
             {
                 continue;
             }
@@ -50,7 +50,9 @@ public final class KingdeeUtil {
             String name = StringUtil.replace(StringUtil.substringBefore(line,"："),"/","");
             name = StringUtil.replace(name,"（","");
             name = StringUtil.replace(name,"）","");
-            String kingField = StringUtil.substringAfter(line,"：");
+            line = StringUtil.replace(line,"：",":");
+            String kingField = StringUtil.substringAfter(line,":");
+
             if (StringUtil.isEmpty(field))
             {
                 field = StringUtil.underlineToCamel(kingField);
@@ -101,22 +103,51 @@ public final class KingdeeUtil {
             Map<String,Object> valueMap = new HashMap<>();
             valueMap.put("k",kingdeeField);
             String kingField = kingdeeField.getKingdeeField();
-            if (kingField.endsWith("Date")||kingField.substring(0,kingField.length()-1).endsWith("Date"))
+
+            try
             {
-                sb.append(placeholder.processTemplate(valueMap,templateDate)).append("\r\n");
-            } else
-            if (kingField.startsWith("F_IS"))
-            {
-                sb.append(placeholder.processTemplate(valueMap,templateBool)).append("\r\n");
-            } else
-            {
-                sb.append(placeholder.processTemplate(valueMap,templateString)).append("\r\n");
+                if (kingField.endsWith("Date")||kingField.substring(0,kingField.length()-1).endsWith("Date"))
+                {
+                    sb.append(placeholder.processTemplate(valueMap,templateDate)).append("\r\n");
+                } else
+                if (kingField.startsWith("F_IS"))
+                {
+                    sb.append(placeholder.processTemplate(valueMap,templateBool)).append("\r\n");
+                } else
+                {
+                    sb.append(placeholder.processTemplate(valueMap,templateString)).append("\r\n");
+                }
+            } catch (Exception e){
+                System.err.println(ObjectUtil.toString(kingdeeField));
+                e.printStackTrace();
             }
+
         }
         return sb.toString();
     }
-
+    /**
+     * 创建k3 星空查询
+     * @param tableId 表ID
+     * @param fieldKeys 字段
+     * @param filter 过滤条件
+     * @param index 开始行
+     * @return 返回查询结构
+     */
     public static JSONObject createQuery(String tableId,String fieldKeys,String filter,int index)
+    {
+        return createQuery( tableId, fieldKeys, filter, index,500);
+    }
+
+    /**
+     * 创建k3 星空查询
+     * @param tableId 表ID
+     * @param fieldKeys 字段
+     * @param filter 过滤条件
+     * @param index 开始行
+     * @param limit  最大行数 500
+     * @return 返回查询结构
+     */
+    public static JSONObject createQuery(String tableId,String fieldKeys,String filter,int index,int limit)
     {
         JSONObject data = new JSONObject();
 
@@ -138,7 +169,7 @@ public final class KingdeeUtil {
         data.put("StartRow", index);
 
         //Limit：最大行数，整型，不能超过2000（非必录）
-        data.put("Limit", "500");
+        data.put("Limit", limit);
         return data;
     }
 

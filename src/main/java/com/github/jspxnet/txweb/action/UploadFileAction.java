@@ -19,6 +19,7 @@ import com.github.jspxnet.component.zhex.ChineseAnalyzer;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.oss.CloudServiceFactory;
 import com.github.jspxnet.network.oss.CloudFileClient;
+import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.txweb.IRole;
@@ -30,13 +31,15 @@ import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.ImageSysEnumType;
+import com.github.jspxnet.txweb.enums.UploadVerifyEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
+import com.github.jspxnet.txweb.support.MultipartRequest;
 import com.github.jspxnet.txweb.support.MultipartSupport;
 import com.github.jspxnet.txweb.table.CloudFileConfig;
 import com.github.jspxnet.txweb.table.IUploadFile;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.upload.MultipartRequest;
+import com.github.jspxnet.upload.CosMultipartRequest;
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
@@ -74,12 +77,16 @@ public class UploadFileAction extends MultipartSupport {
     final public static String TITLE_VAR_NAME = "title";
     final public static String CONTENT_VAR_NAME = "content";
 
-
+    //宽高控制
     final public static String THUMBNAIL_WIDTH_VAR_NAME = "thumbnailWidth";
     final public static String THUMBNAIL_HEIGHT_VAR_NAME = "thumbnailHeight";
-
     final public static String MAX_IMAGE_WIDTH_HEIGHT = "maxImageWidthHeight";
 
+    //数据的签名
+    final public static String SIGNATURE_KEY = "signature";
+
+    //时间戳 变量
+    final public static String TIMESTAMP_KEY = "timestamp";
 
     final private static String WIDTH_NAME = "width";
     final private static String HEIGHT_NAME = "height";
@@ -104,6 +111,7 @@ public class UploadFileAction extends MultipartSupport {
     private boolean useFastUpload = false;
 
     private boolean editorUpload = false;
+
 
     //编辑器上传不打印,只返回,属于外部调用
     @Param(caption = "是否为编辑器上传")
@@ -144,6 +152,21 @@ public class UploadFileAction extends MultipartSupport {
         this.useFastUpload = useFastUpload;
     }
 
+
+    //验证方式 0:游客方式不允许上传,其他通过角色配置  默认  1:游客也放开； 2:通过验证ApiKey判断
+    private int verifyType = UploadVerifyEnumType.DEFAULT.getValue();
+    @Param(request = false)
+    public void setVerifyType(int verifyType) {
+        this.verifyType = verifyType;
+    }
+
+    private String apiKey = StringUtil.empty;
+
+    @Param(request = false)
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
     public boolean isUseFastUpload() {
         return useFastUpload;
     }
@@ -159,10 +182,23 @@ public class UploadFileAction extends MultipartSupport {
         return getInt(SYS_TYPE,imageSysEnumType.getValue());
     }
 
-    protected int getMaxImageWidthHeight() {
+    protected int getMaxImageWidth() {
         return getInt(MAX_IMAGE_WIDTH_HEIGHT,config.getInt(Environment.maxImageWidth,1280));
     }
 
+    protected int getMaxImageHeight() {
+        return getInt(MAX_IMAGE_WIDTH_HEIGHT,config.getInt(Environment.maxImageHeight,1280));
+    }
+
+    //得到请求 签名
+    protected String getRequestSignature() {
+        return getString(SIGNATURE_KEY,true);
+    }
+
+    //得到请求的 时间戳
+    protected String getRequestTimestamp() {
+        return getString(TIMESTAMP_KEY,true);
+    }
 
     /**
      * @return 得到配置允许上传的文件类型
@@ -222,7 +258,7 @@ public class UploadFileAction extends MultipartSupport {
      * @throws Exception 异常
      */
 
-    protected String getSetupPath() throws Exception {
+    public String getSetupPath() throws Exception {
         String setupPath = FileUtil.mendPath(config.getString(Environment.setupPath));
         if (!FileUtil.isDirectory(setupPath)) {
             setupPath = FileUtil.mendPath(FileUtil.getParentPath(getTemplatePath()));
@@ -294,9 +330,26 @@ public class UploadFileAction extends MultipartSupport {
         json.put("OK", 0);
         json.put("success", false);
         setResult(json);
-        if (isGuest()) {
-            json.put(Environment.message, "没有登陆");
+
+        if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
+        {
+            printErrorInfo("没有登陆");
             return;
+        }
+        if (UploadVerifyEnumType.API_KEY_1.getValue()==verifyType&&!getRequestSignature().equalsIgnoreCase(apiKey))
+        {
+            printErrorInfo("key签证错误");
+            return;
+        }
+
+        if (UploadVerifyEnumType.API_KEY_2.getValue()==verifyType)
+        {
+            String signature = EncryptUtil.getMd5(apiKey + getRequestTimestamp());
+            if (!signature.equalsIgnoreCase(getRequestSignature()))
+            {
+                printErrorInfo("key签证错误");
+                return;
+            }
         }
 
         if (!useFastUpload) {
@@ -328,9 +381,26 @@ public class UploadFileAction extends MultipartSupport {
         json.put("OK", 0);
         json.put("success", false);
         setResult(json);
-        if (isGuest()) {
-            json.put(Environment.message, "没有登陆");
+
+        if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
+        {
+            printErrorInfo("没有登陆");
             return;
+        }
+        if (UploadVerifyEnumType.API_KEY_1.getValue()==verifyType&&!getRequestSignature().equalsIgnoreCase(apiKey))
+        {
+            printErrorInfo("key签证错误");
+            return;
+        }
+
+        if (UploadVerifyEnumType.API_KEY_2.getValue()==verifyType)
+        {
+            String signature = EncryptUtil.getMd5(apiKey + getRequestTimestamp());
+            if (!signature.equalsIgnoreCase(getRequestSignature()))
+            {
+                printErrorInfo("key签证错误");
+                return;
+            }
         }
         if (!useFastUpload) {
             printErrorInfo("秒传已经关闭");
@@ -372,10 +442,27 @@ public class UploadFileAction extends MultipartSupport {
         json.put("success", false);
         json.put("uploadType", "chunk");
 
-        if (isGuest()) {
+        if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
+        {
             printErrorInfo("没有登陆");
             return;
         }
+        if (UploadVerifyEnumType.API_KEY_1.getValue()==verifyType&&!getRequestSignature().equalsIgnoreCase(apiKey))
+        {
+            printErrorInfo("key签证错误");
+            return;
+        }
+
+        if (UploadVerifyEnumType.API_KEY_2.getValue()==verifyType)
+        {
+            String signature = EncryptUtil.getMd5(apiKey + getRequestTimestamp());
+            if (!signature.equalsIgnoreCase(getRequestSignature()))
+            {
+                printErrorInfo("key签证错误");
+                return;
+            }
+        }
+
 
         IUserSession userSession = getUserSession();
         UploadedFile uf = new UploadedFile(fileName, getUploadDirectory(config), fileName, fileName, "application/octet-stream", FileUtil.getTypePart(fileName));
@@ -389,7 +476,6 @@ public class UploadFileAction extends MultipartSupport {
             json.put("uploadType", "file");
             json.put(Environment.message, "chunk upload " + language.getLang(LanguageRes.success));
         }
-
         //兼容 plupload  end
         int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
         TXWebUtil.print(json.toString(), contentType, response);
@@ -405,6 +491,7 @@ public class UploadFileAction extends MultipartSupport {
     @Override
     @Operate(caption = "上传")
     public String execute() throws Exception {
+        //防止重复已提交
         if (isMethodInvoked()) {
             return NONE;
         }
@@ -413,17 +500,40 @@ public class UploadFileAction extends MultipartSupport {
             printErrorInfo("DAO配置错误");
             return NONE;
         }
+        //验证环境
         if (multipartRequest == null && !RequestUtil.isMultipart(request) && !response.isCommitted()) {
             printErrorInfo(language.getLang(LanguageRes.uploadRequestError));
             return NONE;
         }
 
-        if (isGuest()) {
+        if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
+        {
             printErrorInfo("没有登陆");
             for (UploadedFile uf : multipartRequest.getFiles()) {
                 FileUtil.delete(uf.getFile());
             }
             return NONE;
+        }
+        if (UploadVerifyEnumType.API_KEY_1.getValue()==verifyType&&!getRequestSignature().equalsIgnoreCase(apiKey))
+        {
+            printErrorInfo("key签证错误");
+            for (UploadedFile uf : multipartRequest.getFiles()) {
+                FileUtil.delete(uf.getFile());
+            }
+            return NONE;
+        }
+
+        if (UploadVerifyEnumType.API_KEY_2.getValue()==verifyType)
+        {
+            String signature = EncryptUtil.getMd5(apiKey + getRequestTimestamp());
+            if (!signature.equalsIgnoreCase(getRequestSignature()))
+            {
+                printErrorInfo("key签证错误");
+                for (UploadedFile uf : multipartRequest.getFiles()) {
+                    FileUtil.delete(uf.getFile());
+                }
+                return NONE;
+            }
         }
 
         IUserSession userSession = getUserSession();
@@ -529,7 +639,10 @@ public class UploadFileAction extends MultipartSupport {
             upFile.setFileSize(uf.getFile().length());
             upFile.setFileType(StringUtil.toLowerCase(uf.getFileType()));
 
-            upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
+            if (chineseAnalyzer!=null)
+            {
+                upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
+            }
             upFile.setGroupName(getString(GROUP_VAR_NAME, "未分类", true));
             upFile.setPutName(userSession.getName());
             upFile.setPutUid(userSession.getUid());
@@ -619,8 +732,6 @@ public class UploadFileAction extends MultipartSupport {
      */
     protected Object[] newUpload(UploadedFile uf, Object saveUploadFile, boolean thumbnail, IUserSession userSession) throws Exception {
         IUploadFile upFile = (IUploadFile) saveUploadFile;
-
-
         String setupPath = FileUtil.mendPath(config.getString(Environment.setupPath));
         JSONObject json = new JSONObject();
         json.put("OK", 0);
@@ -656,9 +767,11 @@ public class UploadFileAction extends MultipartSupport {
                 StringMap<String, String> map = ImageUtil.parsePhotoExif(file, ImageUtil.simpleExifTags);
                 upFile.setAttributes(map.toString());
             }
-            int maxImageWidth = getMaxImageWidthHeight();
-            if (image.getHeight()>maxImageWidth||image.getWidth() > maxImageWidth) {
-                boolean repair = ImageUtil.thumbnail(image, new FileOutputStream(file), uf.getFileType(), maxImageWidth, maxImageWidth);
+            int maxImageWidth = getMaxImageWidth();
+            int maxImageHeight = getMaxImageHeight();
+            if (image.getHeight()>maxImageHeight||image.getWidth() > maxImageWidth)
+            {
+                boolean repair = ImageUtil.thumbnail(image, new FileOutputStream(file), uf.getFileType(), Math.min(maxImageWidth,image.getWidth()) ,Math.min( image.getHeight(),maxImageHeight));
                 image = ImageIO.read(file);
                 if (image!=null)
                 {
@@ -730,10 +843,16 @@ public class UploadFileAction extends MultipartSupport {
                 }
                 content = StringUtil.cut(content, 2000, StringUtil.empty);
                 upFile.setContent(content);
-                upFile.setTags(chineseAnalyzer.getTag(content, StringUtil.space, 6, true));
+                if (chineseAnalyzer!=null)
+                {
+                    upFile.setTags(chineseAnalyzer.getTag(content, StringUtil.space, 6, true));
+                }
             } catch (Exception e) {
                 upFile.setContent(uf.getOriginal());
-                upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
+                if (chineseAnalyzer!=null)
+                {
+                    upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
+                }
             }
         }
 

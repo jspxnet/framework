@@ -205,16 +205,26 @@ public class K3cloudServiceImpl implements K3cloudService {
      */
     @Override
     public JSONObject createQuery(Class<?> cls, String filter, int index) {
+        return createQuery( cls,  filter,  index, 500);
+    }
+    /**
+     *
+     * @param cls 表类
+     * @param filter  过滤条件
+     * @param index  开始条数， 每次500条
+     * @param limit  每次500条
+     * @return 得到请求列表
+     */
+    @Override
+    public JSONObject createQuery(Class<?> cls, String filter, int index,int limit) {
         K3TableConf k3TableConf =  tableMap.get(cls.getName());
         if (k3TableConf==null)
         {
             return null;
         }
         String fieldKeys =  KingdeeUtil.getFieldKeys(k3TableConf.getContent());
-        return KingdeeUtil.createQuery(k3TableConf.getTableId(),fieldKeys,filter,index);
+        return KingdeeUtil.createQuery(k3TableConf.getTableId(),fieldKeys,filter,index,limit);
     }
-
-
     /**
      *
      * @param list k3返回的列表
@@ -293,5 +303,7 @@ public class K3cloudServiceImpl implements K3cloudService {
         }
         return result;
     }
+
+
 
 }

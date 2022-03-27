@@ -11,6 +11,7 @@ package com.github.jspxnet.sioc.type;
 
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.reflect.Type;
 import java.util.Date;
 
 /**
@@ -20,6 +21,13 @@ import java.util.Date;
  * Time: 22:24:00
  */
 public class DateArrayXmlType extends ArrayXmlType {
+
+    @Override
+    public Type getJavaType()
+    {
+        return Date[].class;
+    }
+
     @Override
     public String getTypeString() {
         return "array";

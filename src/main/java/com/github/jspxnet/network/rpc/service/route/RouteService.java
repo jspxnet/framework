@@ -30,7 +30,7 @@ import java.util.List;
 public class RouteService implements Runnable {
     //第一次使用配置服务器地址,以后将切换到路由表
     //有被误判拦截ip的可能
-    private static boolean isRun = true;
+
 
     private void init() {
         RpcConfig rpcConfig = RpcConfig.getInstance();
@@ -94,7 +94,8 @@ public class RouteService implements Runnable {
         NettyClientPool nettyClient = NettyClientPool.getInstance();
         int routeTableCharLength = 0;
         boolean debug = RpcConfig.getInstance().isDebug();
-        while (isRun) {
+
+        while (nettyClient.isRun()) {
             try {
 
                 if (debug) {
@@ -119,7 +120,6 @@ public class RouteService implements Runnable {
                 }
             }
         }
-        isRun = false;
         nettyClient.shutdown();
     }
     /**
@@ -227,7 +227,7 @@ public class RouteService implements Runnable {
     }
 
     public void shutdown() {
-        isRun = false;
+
         NettyClientPool.getInstance().shutdown();
     }
 

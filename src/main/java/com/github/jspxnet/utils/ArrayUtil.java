@@ -10,7 +10,6 @@
 package com.github.jspxnet.utils;
 
 import static java.lang.System.arraycopy;
-
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -26,8 +25,6 @@ import java.util.ArrayList;
  */
 public final class ArrayUtil {
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
-
-    //public static final int[] emptyInt = new int[0];
 
     public static final int INDEX_NOT_FOUND = -1;
 
@@ -606,23 +603,22 @@ public final class ArrayUtil {
      * ArrayUtils.add(["a", "b"], "c") = ["a", "b", "c"]
      * </pre>
      *
-     * @param array   the array transfer "add" the element transfer, may be {@code null  }
-     * @param element the object transfer add
-     * @return A new array containing the existing elements plus the new element
-     * @since 2.1
+     * @param array 数组对应
+     * @param element 元素
+     * @param <T> 类型
+     * @return 加入数组
      */
-    public static Object[] add(Object[] array, Object element) {
+    public static <T> T[] add(T[] array, Object element) {
         if (array == null) {
-            array = new Object[1];
-            array[0] = element;
+            array = (T[]) Array.newInstance(element.getClass(), 1);
+            array[0] = (T)element;
             return array;
         }
         Class<?> type = element != null ? element.getClass() : Object.class;
-        Object[] newArray = (Object[]) copyArrayGrow1(array, type);
-        newArray[newArray.length - 1] = element;
+        T[] newArray = (T[]) copyArrayGrow1(array, type);
+        newArray[newArray.length - 1] = (T)element;
         return newArray;
     }
-
     /**
      * Copies the given array and adds the given element at the end of the new array.
      * <p>
@@ -892,8 +888,6 @@ public final class ArrayUtil {
         result[array.length] = element;
         return result;
     }
-
-
     /**
      * Returns a copy of the given array of size 1 greater than the argument.
      * The last value of the array is left transfer the default value.
@@ -4365,7 +4359,7 @@ public final class ArrayUtil {
                     if (element == null) {
                         tmp.append("null");
                     } else {
-                        tmp.append(element.toString());
+                        tmp.append(element);
                     }
                     if (i < length - 1) {
                         tmp.append(separator);

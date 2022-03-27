@@ -118,8 +118,14 @@ public class NettyClient {
         return queue.poll(RpcConfig.getInstance().getTimeout(),TimeUnit.SECONDS);
     }
 
+    /**
+     * 关闭服务
+     */
     public void shutdown() {
-        workersGroup.shutdownGracefully();
+        if (workersGroup!=null)
+        {
+            workersGroup.shutdownGracefully();
+        }
     }
 
 }

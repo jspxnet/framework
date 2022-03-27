@@ -106,7 +106,7 @@ public class RpcConfig {
     }
 
     public int getTimeout() {
-        return ENV_TEMPLATE.getInt(TIMEOUT, 3);
+        return ENV_TEMPLATE.getInt(TIMEOUT, 10)<3?5:ENV_TEMPLATE.getInt(TIMEOUT, 10);
     }
 
     public int getRoutesSecond() {

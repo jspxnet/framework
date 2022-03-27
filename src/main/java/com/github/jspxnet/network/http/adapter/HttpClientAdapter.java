@@ -641,9 +641,7 @@ public class HttpClientAdapter implements HttpClient {
             // FilePart：用来上传文件的类,file即要上传的文件
             for (int i=0;i<files.length;i++)
             {
-                CustomFilePart filePart = new CustomFilePart(name,files[i]);
-                filePart.setCharSet(Environment.defaultEncode);
-                filePart.setContentType("text/plain");
+                CustomFilePart filePart = new CustomFilePart(name,files[i],encode);
                 parts[i]= filePart;
             }
             if (params!=null)
@@ -655,9 +653,10 @@ public class HttpClientAdapter implements HttpClient {
                     {
                         continue;
                     }
-                    StringPart strPart = new StringPart(key,params.get(key),Environment.defaultEncode);
+                    StringPart strPart = new StringPart(key,params.get(key),encode);
                     strPart.setContentType("text/plain");
-                    strPart.setTransferEncoding(Environment.defaultEncode);
+                    strPart.setCharSet(encode);
+                    strPart.setTransferEncoding(encode);
                     parts[i]= strPart;
                     i++;
 
@@ -676,10 +675,10 @@ public class HttpClientAdapter implements HttpClient {
             org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
 
             HttpClientParams httpClientParams = client.getParams();
-            httpClientParams.setContentCharset(Environment.defaultEncode);
+            //httpClientParams.setContentCharset(encode);
             httpClientParams.setConnectionManagerTimeout(10000);
-            httpClientParams.setHttpElementCharset(Environment.defaultEncode);
-            httpClientParams.setUriCharset(Environment.defaultEncode);
+            httpClientParams.setHttpElementCharset(encode);
+            httpClientParams.setUriCharset(encode);
             client.setParams(httpClientParams);
 
             int status = client.executeMethod(postMethod);

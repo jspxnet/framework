@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.53</version>
+    <version>6.54</version>
 </dependency>
 ```
     
@@ -89,37 +89,38 @@
 
 ##发展历程 
 
-*    2007年09月：Jspx.net Framework 1.0 发布
-*    2008年07月：Jspx.net Framework 2.0 发布
-*    2010年06月：Jspx.net Framework 3.5 发布
-*    2011年05月：Jspx.net Framework 4.0 发布
-*    2012年11月：Jspx.net Framework 4.9 发布，基本达到设计目标
-*    2013年07月：Jspx.net Framework 5.0 发布，正式发布开发文档
-*    2014年08月：Jspx.net Framework 5.4 发布，TXWeb正式支持ROC协议,同时简版兼容安卓
-*    2015年04月：Jspx.net Framework 5.5 发布，配置统一化，界面组件化，开发规范化
-*    2016年11月：Jspx.net Framework 5.6 发布，更新jdk1.8支持，调整在线管理部分，优化
-*    2018年11月：Jspx.net Framework 5.8 发布，分布式接口调整
-*    2019年11月：Jspx.net Framework 6.0 发布，精简,转向maven工程方式.resetFull,roc,redis 支持增强
-*    2020年3月：Jspx.net Framework 6.x 发布，泛型支持升级,标签标准化,API自动文档完善,服务间调用签名标准化,id生成算法优化
-*    2020年5月：Jspx.net Framework 6.5 发布，修复多个bug,优化权限管理方式支持动态配置,稳定版本
-*    2020年7月：Jspx.net Framework 6.6-6.11 发布，添加tcp和http RPC调用支持,可以使用注释方式,tcp方式支持多服务器集群调用,http方式可以使用代理服务器集群,bug修复
-*    2020年8月：Jspx.net Framework 6.11-6.16 性能,内存占用优化,修复多线程返回bug问题,bug版本
-*    2020年9月：Jspx.net Framework 6.17 规范代码
-*    2020年9月：Jspx.net Framework 6.18-22 稳定版本,调整上传支持云盘
-*    2020年10月：Jspx.net Framework 6.23 添加SqlMap注释,支持查询,调整用户支持来源
-*    2020年11月：Jspx.net Framework 6.24-26 微调
-*    2020年12月：Jspx.net Framework 6.27 稳定版本,迁移出部分功能,修复bug,做了部分调整避免事务踩坑
-*    2021年01月：Jspx.net Framework 6.30 分布式通讯支持完善,RpcClient标签,支持Http和TCP方式,TCP方式可以实现gossip整合集群
-*    2021年02月：Jspx.net Framework 6.34 修复bug,完整API文档自动生成功能,线程优化,资源优化,稳定版本
-*    2021年03月：Jspx.net Framework 6.35 嵌入tomcat,整合consul,appollo
-*    2021年03月：Jspx.net Framework 6.39 bug修复版本稳定版本,支持嵌入spring使用
-*    2021年04月：Jspx.net Framework 6.40 支持嵌入java二开平台
-*    2021年04月：Jspx.net Framework 6.41-6.42 嵌入兼容性调整，oracle兼容性调整
-*    2021年05月：Jspx.net Framework 6.43 嵌入兼容性调整，json兼容致远OA的PO解析.优化调整线程关闭,里程碑版本
-*    2021年07月：Jspx.net Framework 6.43-6.45 定时认为支持到秒，为了兼容嵌入到老系统，调整部分日子的输出方式，测试长时间高并发优化
-*    2021年07月：Jspx.net Framework 6.46 日志统一slf4j,rpc分布式调用默认不进行权限判断,细节调整优化,修复类型转换bug和UTC日期转换bug
-*    2021年07月：Jspx.net Framework 6.47 添加对达梦数据库支持,优化多数据库支持
-*    2021年08月：Jspx.net Framework 6.48 json兼容致远OA调整.sql功能升级支持变量直接映射到xml,sql配置.
-*    2021年09月：Jspx.net Framework 6.49-6.51 sqlmap简化,修复单一返回模式的bug,路由算法优化.oos上传优化,手机图片单独保存功删除.* 
-*    2021年10月：Jspx.net Framework 6.52 json兼容性调整,上传调整,注释标签简化，细节调整标准化.
-*    2021年12月：Jspx.net Framework 6.53 修复sqlmap配置bug,扩展两个大数据是用方便的功能,http连接提供关闭,中文路径识别错误修复.
+* 2007年09月：Jspx.net Framework 1.0 发布
+* 2008年07月：Jspx.net Framework 2.0 发布
+* 2010年06月：Jspx.net Framework 3.5 发布
+* 2011年05月：Jspx.net Framework 4.0 发布
+* 2012年11月：Jspx.net Framework 4.9 发布，基本达到设计目标
+* 2013年07月：Jspx.net Framework 5.0 发布，正式发布开发文档
+* 2014年08月：Jspx.net Framework 5.4 发布，TXWeb正式支持ROC协议,同时简版兼容安卓
+* 2015年04月：Jspx.net Framework 5.5 发布，配置统一化，界面组件化，开发规范化
+* 2016年11月：Jspx.net Framework 5.6 发布，更新jdk1.8支持，调整在线管理部分，优化
+* 2018年11月：Jspx.net Framework 5.8 发布，分布式接口调整
+* 2019年11月：Jspx.net Framework 6.0 发布，精简,转向maven工程方式.resetFull,roc,redis 支持增强
+* 2020年3月：Jspx.net Framework 6.x 发布，泛型支持升级,标签标准化,API自动文档完善,服务间调用签名标准化,id生成算法优化
+* 2020年5月：Jspx.net Framework 6.5 发布，修复多个bug,优化权限管理方式支持动态配置,稳定版本
+* 2020年7月：Jspx.net Framework 6.6-6.11 发布，添加tcp和http RPC调用支持,可以使用注释方式,tcp方式支持多服务器集群调用,http方式可以使用代理服务器集群,bug修复
+* 2020年8月：Jspx.net Framework 6.11-6.16 性能,内存占用优化,修复多线程返回bug问题,bug版本
+* 2020年9月：Jspx.net Framework 6.17 规范代码
+* 2020年9月：Jspx.net Framework 6.18-22 稳定版本,调整上传支持云盘
+* 2020年10月：Jspx.net Framework 6.23 添加SqlMap注释,支持查询,调整用户支持来源
+* 2020年11月：Jspx.net Framework 6.24-26 微调
+* 2020年12月：Jspx.net Framework 6.27 稳定版本,迁移出部分功能,修复bug,做了部分调整避免事务踩坑
+* 2021年01月：Jspx.net Framework 6.30 分布式通讯支持完善,RpcClient标签,支持Http和TCP方式,TCP方式可以实现gossip整合集群
+* 2021年02月：Jspx.net Framework 6.34 修复bug,完整API文档自动生成功能,线程优化,资源优化,稳定版本
+* 2021年03月：Jspx.net Framework 6.35 嵌入tomcat,整合consul,appollo
+* 2021年03月：Jspx.net Framework 6.39 bug修复版本稳定版本,支持嵌入spring使用
+* 2021年04月：Jspx.net Framework 6.40 支持嵌入java二开平台
+* 2021年04月：Jspx.net Framework 6.41-6.42 嵌入兼容性调整，oracle兼容性调整
+* 2021年05月：Jspx.net Framework 6.43 嵌入兼容性调整，json兼容致远OA的PO解析.优化调整线程关闭,里程碑版本
+* 2021年07月：Jspx.net Framework 6.43-6.45 定时认为支持到秒，为了兼容嵌入到老系统，调整部分日子的输出方式，测试长时间高并发优化
+* 2021年07月：Jspx.net Framework 6.46 日志统一slf4j,rpc分布式调用默认不进行权限判断,细节调整优化,修复类型转换bug和UTC日期转换bug
+* 2021年07月：Jspx.net Framework 6.47 添加对达梦数据库支持,优化多数据库支持
+* 2021年08月：Jspx.net Framework 6.48 json兼容致远OA调整.sql功能升级支持变量直接映射到xml,sql配置.
+* 2021年09月：Jspx.net Framework 6.49-6.51 sqlmap简化,修复单一返回模式的bug,路由算法优化.oos上传优化,手机图片单独保存功删除.* 
+* 2021年10月：Jspx.net Framework 6.52 json兼容性调整,上传调整,注释标签简化，细节调整标准化.
+* 2021年12月：Jspx.net Framework 6.53 修复sqlmap配置bug,扩展两个大数据是用方便的功能,http连接提供关闭,中文路径识别错误修复.
+* 2022年03月：Jspx.net Framework 6.54 分布式调用稳定性完善，金蝶星空字段映射功能(后期重新归类)，json功能扩展支持不区分大小写方式。异步action支持.

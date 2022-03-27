@@ -42,7 +42,7 @@ public class RocHandle extends ActionHandle {
     final public static String HTTP_HEAND_NAME = "application/json";
     final public static String DATA_FIELD = "dataField";
 
-    final private static Lock LOCK = new ReentrantLock();
+
     static String getRequestReader(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String callStr = RequestUtil.getReader(request);
         //////////////////初始begin
@@ -155,8 +155,9 @@ public class RocHandle extends ActionHandle {
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
         if (!environmentTemplate.containsName(Environment.THREAD_SAFE_MODE)||environmentTemplate.getBoolean(Environment.THREAD_SAFE_MODE))
         {
+            Lock lock = new ReentrantLock();
             //线程安全模式
-            LOCK.lock();
+            lock.lock();
             try {
                 ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
                 actionInvocation.initAction();
@@ -166,7 +167,7 @@ public class RocHandle extends ActionHandle {
                 }
                 actionInvocation.executeResult(new RocResult(dataField));
             } finally {
-                LOCK.unlock();
+                lock.unlock();
             }
         } else {
             //非线程安全模式

@@ -26,16 +26,6 @@ public @interface JspxNetBootApplication {
 
     String ip() default "127.0.0.1";
 
+    int maxPostSize() default 10000000; //100M
 
-    /*
-
-         boolean openRedis = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_SESSION_REDIS));
-        String redisConfig = properties.getProperty(Environment.SERVER_REDISSON_SESSION_CONFIG);
-
-        int port = StringUtil.toInt(properties.getProperty(Environment.SERVER_PORT,"8080"));
-        String webPath = properties.getProperty(Environment.SERVER_WEB_PATH,System.getProperty("user.dir"));
-        String ip = properties.getProperty(Environment.SERVER_IP,"127.0.0.1");
-        boolean cors = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CORS,"true"));
-        int threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS,"3"));
-     */
 }

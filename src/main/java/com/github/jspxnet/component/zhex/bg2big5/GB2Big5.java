@@ -12,6 +12,7 @@ package com.github.jspxnet.component.zhex.bg2big5;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.util.StringMap;
+import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.io.*;
@@ -165,9 +166,12 @@ public class GB2Big5 {
         if (inputStream==null)
         {
             try {
-                inputStream = new FileInputStream(new File(System.getProperty("user.dir"),"/reslib/table/" +gb2Big5File));
+                File file = new File(System.getProperty("user.dir"),"/reslib/table/" +gb2Big5File);
+                if (FileUtil.isFileExist(file))
+                {
+                    inputStream = new FileInputStream(file);
+                }
             } catch (FileNotFoundException e) {
-                inputStream =  null;
                 e.printStackTrace();
 
             }
@@ -175,7 +179,7 @@ public class GB2Big5 {
 
         if (inputStream == null) {
             File file = EnvFactory.getFile(gb2Big5File);
-            if (file != null) {
+            if (FileUtil.isFileExist(file)) {
                 try {
                     inputStream = new FileInputStream(file);
                 } catch (FileNotFoundException e) {
@@ -194,12 +198,14 @@ public class GB2Big5 {
         }
         if (inputStream==null)
         {
+            File file = new File(System.getProperty("user.dir"),"/reslib/table/" +big52gb2File);
+            if (FileUtil.isFileExist(file)) {
+                try {
 
-            try {
-                inputStream = new FileInputStream( new File(System.getProperty("user.dir"),"/reslib/table/" +big52gb2File));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                inputStream =  null;
+                    inputStream = new FileInputStream( new File(System.getProperty("user.dir"),"/reslib/table/" +big52gb2File));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -215,12 +221,10 @@ public class GB2Big5 {
         }
         b_big5Table = getBytesFromFile(inputStream);
         if (null == b_gbTable) {
-
-
-            throw new NullPointerException("No gb table can be load:" + System.getProperty("user.dir"));
+            log.error("No gb table can be load:{}",big52gb2File);
         }
         if (null == b_big5Table) {
-            throw new NullPointerException("No big5 table can be load:" + System.getProperty("user.dir"));
+            log.error("No big5 table can be load:{}",b_big5Table);
         }
     }
 

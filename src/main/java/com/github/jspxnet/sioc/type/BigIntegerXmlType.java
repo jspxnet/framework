@@ -3,9 +3,17 @@ package com.github.jspxnet.sioc.type;
 import com.github.jspxnet.utils.StringUtil;
 
 
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 
 public class BigIntegerXmlType extends TypeSerializer {
+
+    @Override
+    public Type getJavaType()
+    {
+        return BigInteger.class;
+    }
+
     @Override
     public String getTypeString() {
         return "BigInteger";

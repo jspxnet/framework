@@ -23,7 +23,6 @@ import com.github.jspxnet.txweb.ueditor.hunter.FileManager;
 import com.github.jspxnet.txweb.ueditor.hunter.ImageHunter;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.upload.MultipartRequest;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
 import com.github.jspxnet.utils.*;
 import javax.imageio.ImageIO;
@@ -45,7 +44,6 @@ import java.util.Map;
  */
 @HttpMethod(caption = "UEditor上传适配器")
 public class UEditorAdaptor extends ActionSupport {
-
 
     @Ref
     private UploadFileDAO uploadFileDAO;
@@ -140,10 +138,10 @@ public class UEditorAdaptor extends ActionSupport {
         String[] fileTypes = StringUtil.split(getFileTypes(), StringUtil.SEMICOLON);
         String actionType = getString("action", true);
         if (actionType == null || !ActionMap.MAPPING.containsKey(actionType)) {
-            return new BaseState(false, AppInfo.INVALID_ACTION).toJSONString();
+            return new BaseState(false, AppInfo.INVALID_ACTION).toJsonString();
         }
         if (this.configManager == null || !this.configManager.valid()) {
-            return new BaseState(false, AppInfo.CONFIG_ERROR).toJSONString();
+            return new BaseState(false, AppInfo.CONFIG_ERROR).toJsonString();
         }
 
         State state = null;
@@ -205,7 +203,7 @@ public class UEditorAdaptor extends ActionSupport {
                 break;
             }
         }
-        return state.toJSONString();
+        return state.toJsonString();
 
     }
 
@@ -229,7 +227,7 @@ public class UEditorAdaptor extends ActionSupport {
             uploadFileAction.setConfig(config);
             uploadFileAction.setLanguage(language);
             uploadFileAction.initialize();
-            uploadFileAction.setMultipartRequest(new MultipartRequest(request, uploadFileAction.getSaveDirectory()));
+            uploadFileAction.setMultipartRequest(uploadFileAction.getMultipartRequest());
             uploadFileAction.execute();
             Object obj = uploadFileAction.getResult();
             if (obj==null)
@@ -365,7 +363,7 @@ public class UEditorAdaptor extends ActionSupport {
         String result;
         if (!StringUtil.isNull(callbackName)) {
             if (!validCallbackName(callbackName)) {
-                result = new BaseState(false, AppInfo.ILLEGAL).toJSONString();
+                result = new BaseState(false, AppInfo.ILLEGAL).toJsonString();
             } else {
                 result = callbackName + "(" + this.invoke() + ");";
             }

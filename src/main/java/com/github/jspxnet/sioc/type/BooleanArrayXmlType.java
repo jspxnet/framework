@@ -11,6 +11,8 @@ package com.github.jspxnet.sioc.type;
 
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.reflect.Type;
+
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -18,6 +20,13 @@ import com.github.jspxnet.utils.StringUtil;
  * Time: 22:19:41
  */
 public class BooleanArrayXmlType extends ArrayXmlType {
+
+    @Override
+    public Type getJavaType()
+    {
+        return boolean[].class;
+    }
+
     @Override
     public String getTypeString() {
         return "array";

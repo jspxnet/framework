@@ -90,7 +90,6 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         //封装ClassInfo
         SendCmd command = SendCommandFactory.createCommand(INetCommand.RPC);
         command.setType(INetCommand.TYPE_BASE64);
-
         JSONObject parameterJson = new JSONObject();
         int i=0;
         Parameter[] parameters = method.getParameters();
@@ -126,7 +125,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         }
         if (address==null)
         {
-            Thread.sleep(1000);
+            Thread.sleep(500);
             address = DiscoveryServiceAddress.getSocketAddress(serviceName);
         }
 
@@ -149,7 +148,13 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             routeSession.setGroupName(serviceName);
             routeSession.setSocketAddress(address);
             routeManage.joinCheckRoute(routeSession);
-            return null;
+            Thread.sleep(100);
+            reply = NettyClientPool.getInstance().send(address, command);
+            if (reply==null)
+            {
+                log.error("TCP RPC 调用没有得到返回数据，已经重复过一次:{}",address);
+                return null;
+            }
         }
 
         //返回结果
@@ -158,7 +163,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             try {
                 iocResponse = HessianSerializableUtil.getUnSerializable(EncryptUtil.getBase64Decode(reply.getData()));
             } catch (Throwable e) {
-                log.debug("iocRequest={},error:{}",ObjectUtil.toString(iocRequest),e.getMessage());
+                log.error("iocRequest={},error:{}",ObjectUtil.toString(iocRequest),e.getMessage());
                 e.printStackTrace();
                 iocResponse = new IocResponse();
                 iocResponse.setError(e);
@@ -171,8 +176,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             }
             return iocResponse.getResult();
         }
-
+        log.error("TCP RPC 调用没有得到返回数据，检查调用服务器是否启动运行正常:{}",address);
         return null;
-
     }
 }

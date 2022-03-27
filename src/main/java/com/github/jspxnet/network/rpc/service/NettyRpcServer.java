@@ -68,7 +68,6 @@ public class NettyRpcServer implements Runnable {
 
             ChannelFuture channelFuture = bootstrap.bind().sync();
             isRun = true;
-
             log.debug("--rpc service {} started and listen on port:{}",name,IpUtil.getIp(channelFuture.channel().localAddress()));
             channelFuture.channel().closeFuture().addListener(ChannelFutureListener.CLOSE).sync();
         }
@@ -84,7 +83,7 @@ public class NettyRpcServer implements Runnable {
 
     public void close()
     {
-        if (isRun)
+        if (!isRun)
         {
             return;
         }

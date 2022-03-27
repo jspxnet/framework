@@ -9,6 +9,9 @@
  */
 package com.github.jspxnet.sioc.type;
 
+import java.lang.reflect.Type;
+import java.util.Date;
+
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -16,6 +19,13 @@ package com.github.jspxnet.sioc.type;
  * Time: 22:54:18
  */
 public class CharXmlType extends TypeSerializer {
+
+    @Override
+    public Type getJavaType()
+    {
+        return char.class;
+    }
+
     @Override
     public String getTypeString() {
         return "int";
