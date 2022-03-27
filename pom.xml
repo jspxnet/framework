@@ -16,7 +16,7 @@
         <maven.test.skip>true</maven.test.skip>
         <github.global.server>github</github.global.server>
         <tomcat.version>9.0.59</tomcat.version>
-        <jackson.version>2.13.1</jackson.version>
+        <jackson.version>2.13.2.1</jackson.version>
         <redisson.version>3.16.0</redisson.version>
         <log4j2.version>[2.17.1,)</log4j2.version>
         <poi.version>5.0.0</poi.version>
