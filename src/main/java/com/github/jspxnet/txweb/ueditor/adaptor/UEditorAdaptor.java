@@ -15,6 +15,7 @@ import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.support.ActionSupport;
+import com.github.jspxnet.txweb.support.MultipartRequest;
 import com.github.jspxnet.txweb.table.IUploadFile;
 import com.github.jspxnet.txweb.ueditor.ConfigManager;
 import com.github.jspxnet.txweb.ueditor.StorageManager;
@@ -227,7 +228,7 @@ public class UEditorAdaptor extends ActionSupport {
             uploadFileAction.setConfig(config);
             uploadFileAction.setLanguage(language);
             uploadFileAction.initialize();
-            uploadFileAction.setMultipartRequest(uploadFileAction.getMultipartRequest());
+            uploadFileAction.setMultipartRequest((MultipartRequest) uploadFileAction.getRequest());
             uploadFileAction.execute();
             Object obj = uploadFileAction.getResult();
             if (obj==null)

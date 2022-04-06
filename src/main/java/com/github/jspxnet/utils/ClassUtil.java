@@ -66,14 +66,17 @@ public class ClassUtil {
     public static boolean isStandardType(Type clazz) {
         return isNumberType(clazz) || clazz.equals(Byte.class) || clazz.equals(Character.class)
                 || clazz.equals(String.class) || clazz.equals(char.class) || clazz.equals(boolean.class) || clazz.equals(Boolean.class) ||
-                clazz.equals(Date.class) || clazz.equals(Timestamp.class)  || clazz.equals(Time.class);
+                clazz.equals(Date.class) || clazz.equals(Timestamp.class)  || clazz.equals(Time.class) || clazz.equals(java.util.Locale.class);
     }
-
 
     public static boolean isStandardProperty(Class<?> clazz) {
         return clazz.isPrimitive() || isNumberProperty(clazz) || clazz.isAssignableFrom(Byte.class) || clazz.isAssignableFrom(Character.class)
                 || clazz.isAssignableFrom(String.class) || clazz.isAssignableFrom(char.class) || clazz.isAssignableFrom(Boolean.class) ||
-                clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(Timestamp.class) || clazz.isAssignableFrom(Time.class)|| clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(String.class);
+                clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(Timestamp.class) ||
+                clazz.isAssignableFrom(Time.class)|| clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(String.class)
+                || clazz.isAssignableFrom(java.util.Locale.class)
+
+                ;
     }
 
 
@@ -1043,12 +1046,16 @@ public class ClassUtil {
         if (type == null || inNoCheckProxyClass(type)) {
             return false;
         }
+        if (ClassUtil.isStandardProperty(type))
+        {
+            return false;
+        }
         try {
             return type.getName().contains("CGLIB$$") || Enhancer.isEnhanced(type);
         } catch (Exception e)
         {
             e.printStackTrace();
-            log.info(type.getName(),e);
+            log.info("判断代理异常:{}",type,e);
         }
         return false;
     }

@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,8 +21,6 @@ import java.util.zip.ZipException;
  * Time: 13:33:00
  */
 public class ZipSource extends AbstractSource {
-
-    private static final long serialVersionUID = 1L;
 
     private final File file;
 
@@ -45,11 +42,15 @@ public class ZipSource extends AbstractSource {
         try {
             ZipFile zipFile = new ZipFile(file);
             return zipFile.getEntry(getName()).getTime();
-        } catch (ZipException e) {
-            return -1;
-        } catch (IOException e) {
+        } catch (Exception e) {
             return -1;
         }
+    }
+
+    @Override
+    public boolean isFile()
+    {
+        return file.isFile();
     }
 
 }

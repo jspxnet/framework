@@ -113,27 +113,29 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         }
         VALUE_MAP.put(Environment.defaultPath, defaultPath);
         VALUE_MAP.put(Environment.ConfigFile, defaultPath + Environment.config_file);
-        String logPath;
+        String webInfPath = null;
         if (SystemUtil.isAndroid()) {
             //安卓方式目录环境
             String tmpDir = FileUtil.mendPath(System.getProperty("java.io.tmpdir"));
-            logPath = tmpDir;
             VALUE_MAP.put(Environment.templatePath, defaultPath);
-            //VALUE_MAP.put(Environment.loaderPath, defaultPath);
             VALUE_MAP.put(Environment.resPath, defaultPath);
-            //VALUE_MAP.put(Environment.cachePath, tmpDir);
             VALUE_MAP.put(Environment.tempPath, tmpDir);
-
-
-        } else {
+        }
+        else
+        {
             //WebInfPath
-            String webInfPath;
+
             if (defaultPath != null && defaultPath.toLowerCase().contains("file-inf")) {
                 ///jsp方式
                 webInfPath = defaultPath.substring(0, defaultPath.toLowerCase().indexOf("file-inf/") + 8);
-            } else if (defaultPath != null && defaultPath.contains(".jar") || defaultPath != null && defaultPath.contains(".zip") || defaultPath != null && defaultPath.contains(".apk")) {
+            }
+            else if (defaultPath != null && defaultPath.contains(".jar") || defaultPath != null && defaultPath.contains(".zip") || defaultPath != null && defaultPath.contains(".apk")) {
                 //////////文件在jar目录中的情况
                 webInfPath = FileUtil.getParentPath(FileUtil.getPathPart(StringUtil.substringBefore(defaultPath, "!/")));
+                if (webInfPath.length()<4)
+                {
+                    webInfPath = new File(defaultPath).getParent();
+                }
             } else {
                 webInfPath = FileUtil.getParentPath(defaultPath);
             }
@@ -146,7 +148,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (createWebInf&&!FileUtil.isDirectory(tempDir)) {
                 FileUtil.makeDirectory(tempDir);
             }
-
 
             //修复路径支持本级下
             File file = new File(tempDir);
@@ -208,25 +209,18 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 VALUE_MAP.put(Environment.tempPath, FileUtil.mendPath(System.getProperty("java.io.tmpdir")));
             }
 
-            //Log4jPath
-            logPath = getLog4jPath((String) VALUE_MAP.get(Environment.logPath));
-            if (!StringUtil.isNull(logPath)) {
-                VALUE_MAP.put(Environment.log4jPath, logPath);
-            } else {
-                //LogPath    日志保存目录
-                logPath = webInfPath + "logs/";
-                if (!FileUtil.isDirectory(tempDir)) {
-                    FileUtil.makeDirectory(tempDir);
-                }
-                VALUE_MAP.put(Environment.logPath, logPath);
-            }
+
+        }
+        //LogPath
+        if (StringUtil.isNull(webInfPath))
+        {
+            webInfPath = defaultPath;
         }
 
+        String logPath = getLogPath((String) VALUE_MAP.get(Environment.logPath),new File(webInfPath,"logs").getPath());
+        VALUE_MAP.put(Environment.logPath, logPath);
         VALUE_MAP.put(Environment.logInfoFile, logPath + Environment.log_info_file);
-
         VALUE_MAP.put(Environment.logErrorFile, logPath + Environment.log_error_file);
-
-
     }
 
     private String getEncode() {
@@ -267,18 +261,18 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         return System.getProperty("java.awt.graphicsenv");
     }
 
-    private String getLog4jPath(String log4jPath) {
-        if (log4jPath == null) {
-            return null;
+    private String getLogPath(String logPath,String defaultPath) {
+        if (StringUtil.isEmpty(logPath)) {
+            logPath = defaultPath;
         }
-        File f = new File(log4jPath);
+        File f = new File(logPath);
         if (f.isDirectory()) {
-            return FileUtil.mendPath(f.getAbsolutePath());
+            return FileUtil.mendPath(f.getPath());
         }
-        if (!StringUtil.isNull(log4jPath) && log4jPath.contains("$")) {
-            return processTemplate(log4jPath);
+        if (!StringUtil.isNull(logPath) && logPath.contains("$")) {
+            return processTemplate(logPath);
         }
-        return null;
+        return defaultPath;
     }
 
     /**
@@ -483,12 +477,12 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
     public void restorePlaceholder() {
 
         for (String key : VALUE_MAP.keySet()) {
-            Object o = VALUE_MAP.get(key);
             if (StringUtil.isNull(key)) {
                 continue;
             }
+            Object o = VALUE_MAP.get(key);
             if (o != null) {
-                String value = (String) o;
+                String value = o+"";
                 if (value.contains("${")) {
                     try {
                         VALUE_MAP.put(key, processTemplate(value));

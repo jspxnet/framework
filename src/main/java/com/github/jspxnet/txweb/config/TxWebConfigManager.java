@@ -23,6 +23,7 @@ import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.model.vo.OperateVo;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -600,7 +601,7 @@ public class TxWebConfigManager implements WebConfigManager {
                             operateVO.setClassName(cls.getName());
                             operateVO.setNamespace(childNamespace);
                             operateVO.setClassMethod(method.getName());
-                            if (TXWebUtil.defaultExecute.equals(method.getName())) {
+                            if (ActionEnv.DEFAULT_EXECUTE.equals(method.getName())) {
                                 addExecute = false;
                             }
                             result.add(operateVO);
@@ -617,7 +618,7 @@ public class TxWebConfigManager implements WebConfigManager {
                             if (StringUtil.isNull(operateVO.getClassName())) {
                                 operateVO.setClassName(actionBean.getIocBean());
                             }
-                            operateVO.setClassMethod(TXWebUtil.defaultExecute);
+                            operateVO.setClassMethod(ActionEnv.DEFAULT_EXECUTE);
                             result.add(operateVO);
                             //一个什么都没有的类，保留浏览控制 end
                         }

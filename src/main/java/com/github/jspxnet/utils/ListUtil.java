@@ -19,7 +19,6 @@ import java.util.*;
  * Time: 21:54:27
  */
 public final class ListUtil {
-    public static final List<?> EMPTY = new ArrayList<>(0);
     private ListUtil() {
 
     }

@@ -30,10 +30,13 @@ public class MarkdownHandle extends ActionHandle {
         WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         ActionConfig actionConfig = webConfigManager.getActionConfig((String) envParams.get(ActionEnv.Key_ActionName), MD_NAMESPACE, true);
         ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
-        actionInvocation.initAction();
-        actionInvocation.invoke();
-        actionInvocation.setResultCode(ActionSupport.Markdown);
-        actionInvocation.executeResult(new MarkdownResult());
+        try {
+            actionInvocation.initAction();
+            actionInvocation.invoke();
+            actionInvocation.setResultCode(ActionSupport.Markdown);
+        } finally {
+            actionInvocation.executeResult(new MarkdownResult());
+        }
         ////////////////////action end
     }
 }

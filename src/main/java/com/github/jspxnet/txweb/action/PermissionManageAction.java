@@ -20,6 +20,7 @@ import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.model.param.RoleParam;
 import com.github.jspxnet.txweb.support.DefaultTemplateAction;
@@ -410,7 +411,7 @@ public class PermissionManageAction extends PermissionView {
             }
             if (!op.getNamespace().contains("/")) {
                 userOperates = ArrayUtil.add(userOperates, op.getActionMethodId());
-                if (TXWebUtil.defaultExecute.equals(op.getClassMethod()) || "login".equalsIgnoreCase(op.getClassMethod())
+                if (ActionEnv.DEFAULT_EXECUTE.equalsIgnoreCase(op.getClassMethod()) || "login".equalsIgnoreCase(op.getClassMethod())
                         || "exit".equalsIgnoreCase(op.getClassMethod())
                         || DefaultTemplateAction.class.getName().equalsIgnoreCase(op.getClassName())
                         || op.getNamespace().endsWith("validator") ||

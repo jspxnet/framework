@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.scriptmark.load;
 
+import com.github.jspxnet.utils.FileUtil;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
@@ -46,6 +48,11 @@ public class JarSource extends AbstractSource {
         } catch (IOException e) {
             return -1;
         }
+    }
+    @Override
+    public boolean isFile()
+    {
+        return FileUtil.isFileExist(file);
     }
 
 }

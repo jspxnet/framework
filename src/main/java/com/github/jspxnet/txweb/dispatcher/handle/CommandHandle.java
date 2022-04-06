@@ -32,9 +32,12 @@ public class CommandHandle extends ActionHandle {
 
         //不需要 synchronized
         ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
-        actionInvocation.initAction();
-        actionInvocation.invoke();
-        actionInvocation.executeResult(null);
+        try {
+            actionInvocation.initAction();
+            actionInvocation.invoke();
+        } finally {
+            actionInvocation.executeResult(null);
+        }
         ////////////////////action end
     }
 

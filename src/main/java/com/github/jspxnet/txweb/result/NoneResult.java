@@ -11,6 +11,9 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.thetransactioncompany.cors.CORSResponseWrapper;
+import org.apache.catalina.connector.ResponseFacade;
+
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -25,7 +28,7 @@ public class NoneResult extends ResultSupport {
     public void execute(ActionInvocation actionInvocation) throws Exception {
         Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
-        if (response != null && response.isCommitted()) {
+        if (!(response instanceof ResponseFacade) && !(response instanceof CORSResponseWrapper) && response.isCommitted()) {
             response.getOutputStream().close();
         }
     }

@@ -2,8 +2,10 @@ package com.github.jspxnet.boot;
 
 import com.github.jspxnet.boot.annotation.JspxNetBootApplication;
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
+import com.github.jspxnet.txweb.dispatcher.JspxNetFilter;
 import com.github.jspxnet.txweb.dispatcher.JspxNetListener;
 import com.github.jspxnet.txweb.dispatcher.ServletDispatcher;
 import com.github.jspxnet.utils.*;
@@ -23,6 +25,7 @@ import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.apache.tomcat.util.descriptor.web.ContextResourceLink;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.redisson.tomcat.JndiRedissonSessionManager;
@@ -72,12 +75,13 @@ public class TomcatApplication {
         //arg[0] 运行路径
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!ArrayUtil.isEmpty(args)) {
-            log.debug("tomcat param:"+args[0]);
+            log.debug("tomcat param:{}",args[0]);
             jspxConfiguration.setDefaultPath(args[0]);
         }
         System.setProperty("log4j.ignoreTCL","true");
         String defaultPath = jspxConfiguration.getDefaultPath();
-        Properties properties = EnvFactory.getEnvironmentTemplate().readDefaultProperties(FileUtil.mendFile((defaultPath==null?"":defaultPath) + "/" + Environment.jspx_properties_file));
+        EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
+        Properties properties = environmentTemplate.readDefaultProperties(FileUtil.mendFile((defaultPath==null?"":defaultPath) + "/" + Environment.jspx_properties_file));
 
         if (properties.size()>3 && properties.containsKey(Environment.SERVER_PORT) && properties.containsKey(Environment.SERVER_WEB_PATH))
         {
@@ -87,6 +91,8 @@ public class TomcatApplication {
             cors = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CORS,"true"));
             threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS,"3"));
             maxPostSize = StringUtil.toInt(properties.getProperty(Environment.SERVER_MAX_POST_SIZE,"10000000"));
+
+
         } else
         if (TomcatApplication.jspxNetBootApplication!=null && properties.size() < 2)
         {
@@ -96,6 +102,7 @@ public class TomcatApplication {
             cors = TomcatApplication.jspxNetBootApplication.cors();
             threads = TomcatApplication.jspxNetBootApplication.threads();
             maxPostSize = TomcatApplication.jspxNetBootApplication.maxPostSize();
+
         } else {
             port = StringUtil.toInt(properties.getProperty(Environment.SERVER_PORT,"8080"));
             webPath = properties.getProperty(Environment.SERVER_WEB_PATH,System.getProperty("user.dir"));
@@ -104,6 +111,7 @@ public class TomcatApplication {
             threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS,"3"));
             maxPostSize = StringUtil.toInt(properties.getProperty(Environment.SERVER_MAX_POST_SIZE,"10000000"));
         }
+
 
         if (webPath!=null&&webPath.contains("${")&&webPath.contains("}"))
         {
@@ -123,20 +131,22 @@ public class TomcatApplication {
 
         boolean openRedis = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_SESSION_REDIS));
         String redisConfig = properties.getProperty(Environment.SERVER_REDISSON_SESSION_CONFIG);
-        // log.debug("tomcat web path:{}, port:{},session share:{}",webPath, port,openRedis);
-
         if (!StringUtil.isEmpty(webPath))
         {
             FileUtil.makeDirectory(webPath);
         }
+        boolean filterMode = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_FILTER_MODE));
         System.setProperty("catalina.home",webPath);
         System.setProperty("catalina.base",webPath);
         System.setProperty("user.dir",new File(webPath,"WEB-INF").getPath());
-        Tomcat tomcat = new Tomcat();
 
+
+        String encode = properties.getProperty(Environment.encode,Environment.defaultEncode);
+
+        Tomcat tomcat = new Tomcat();
         Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
         connector.setPort(port);
-        connector.setURIEncoding(Environment.defaultEncode);
+        connector.setURIEncoding(encode);
         //让 URI 和 body 编码一致。(针对POST请求)
         connector.setUseBodyEncodingForURI(true);
         connector.setMaxPostSize(maxPostSize); //默认100M 上传大小限制
@@ -182,22 +192,52 @@ public class TomcatApplication {
         standardContext.setPrivileged(true);
         standardContext.setAddWebinfClassesResources(false);
 
-        //这个没必要
-        //standardContext.addLifecycleListener(new JreMemoryLeakPreventionListener());
-
         standardContext.addLifecycleListener(new Tomcat.FixContextListener());
-        tomcat.addServlet("", "jspxServlet", new ServletDispatcher());
 
-        standardContext.addServletMappingDecoded("*.jhtml", "jspxServlet");
-        standardContext.addServletMappingDecoded("*.jwc", "jspxServlet");
-        standardContext.addServletMappingDecoded("*.md", "jspxServlet");
-        standardContext.addServletMappingDecoded("*.cmd", "jspxServlet");
+        if (filterMode)
+        {
+            FilterDef jspxFilterDef = new FilterDef();
+            jspxFilterDef.setFilterName("JspxNetFilter");
+            jspxFilterDef.setDisplayName("jspx.net 默认过滤器");
+            jspxFilterDef.setFilter(new JspxNetFilter());
+            standardContext.addFilterDef(jspxFilterDef);
 
-        Dispatcher.setRealPath(webPath);
+            FilterMap jspxFilterMap = new FilterMap();
+            jspxFilterMap.setFilterName(jspxFilterDef.getFilterName());
+            jspxFilterMap.addURLPattern("/*");
+            standardContext.addFilterMap(jspxFilterMap);
+        } else
+        {
+            //servlet方式
+            tomcat.addServlet("", "jspxServlet", new ServletDispatcher());
+            standardContext.addServletMappingDecoded("/*", "jspxServlet");
+        }
 
+
+        //放入环境变量begin
+        for (Object key:properties.keySet())
+        {
+            String keyName = (String)key;
+            if (!environmentTemplate.containsName(keyName))
+            {
+                environmentTemplate.put(keyName,properties.getProperty(keyName));
+            }
+        }
+        environmentTemplate.put(Environment.SERVER_PORT,port);
+        environmentTemplate.put(Environment.SERVER_WEB_PATH,webPath);
+        environmentTemplate.put(Environment.SERVER_IP,ip);
+        environmentTemplate.put(Environment.SERVER_CORS,cors);
+        environmentTemplate.put(Environment.SERVER_THREADS,threads);
+        environmentTemplate.put(Environment.SERVER_MAX_POST_SIZE,maxPostSize);
+        environmentTemplate.put(Environment.SERVER_FILTER_MODE,filterMode);
+        environmentTemplate.put(Environment.SERVER_SESSION_REDIS,openRedis);
+        environmentTemplate.put(Environment.SERVER_EMBED,true);
+        //放入环境变量end
+
+
+        //放入默认的JSP
         tomcat.addServlet("", "jsp", new JspServlet());
         standardContext.addServletMappingDecoded("*.jsp", "jsp");
-
 
         StandardJarScanFilter scanFilter = new StandardJarScanFilter();
         scanFilter.setDefaultPluggabilityScan(false);
@@ -208,7 +248,6 @@ public class TomcatApplication {
         JarScanner scanner = new StandardJarScanner();
         scanner.setJarScanFilter(scanFilter);
         standardContext.setJarScanner(scanner);
-
 
         if (openRedis&&!StringUtil.isNull(redisConfig))
         {
@@ -259,14 +298,14 @@ public class TomcatApplication {
             if (webFile.exists()&&webFile.isFile())
             {
                 tmpContext.setDefaultWebXml(webFile.getPath());
-                log.debug("default web.xml:"+webFile.getPath());
+                log.debug("default web.xml:{}",webFile.getPath());
             }
         }
 
         //我们要把Servlet设置进去
         if (cors)
         {
-            FilterDef filterDef = new FilterDef();
+            FilterDef corsFilterDef = new FilterDef();
             CORSFilter corsFilter = new CORSFilter();
 
             Properties props = new Properties();
@@ -279,11 +318,18 @@ public class TomcatApplication {
 
             CORSConfiguration corsConfiguration = new CORSConfiguration(props);
             corsFilter.setConfiguration(corsConfiguration);
-            filterDef.setFilter(corsFilter);
-            filterDef.setFilterName("corsFilter");
-            filterDef.setDisplayName("跨域");
+            corsFilterDef.setFilter(corsFilter);
+            corsFilterDef.setFilterClass(CORSFilter.class.getName());
+            corsFilterDef.setFilterName("corsFilter");
+            corsFilterDef.setDisplayName("跨域");
+            standardContext.addFilterDef(corsFilterDef);
 
-            standardContext.addFilterDef(filterDef);
+            FilterMap corsFilterMap = new FilterMap();
+            corsFilterMap.setFilterName(corsFilterDef.getFilterName());
+            corsFilterMap.addURLPattern("/*");
+
+            standardContext.addFilterMap(corsFilterMap);
+
         }
 
         //Tomcat跑起来
@@ -303,9 +349,9 @@ public class TomcatApplication {
         standardContext.setUseHttpOnly(true);
         standardContext.setCookies(true);
         standardContext.setSessionCookiePathUsesTrailingSlash(true);
-        standardContext.setResponseCharacterEncoding(Environment.defaultEncode);
-        standardContext.setRequestCharacterEncoding(Environment.defaultEncode);
-        standardContext.setReloadable(false);
+        standardContext.setResponseCharacterEncoding(encode);
+        standardContext.setRequestCharacterEncoding(encode);
+        standardContext.setReloadable(true);
         if (standardContext.getLoader()==null)
         {
             WebappLoader webappLoader = new WebappLoader();
@@ -314,9 +360,7 @@ public class TomcatApplication {
             webappLoader.setLoaderInstance(new ParallelWebappClassLoader());
             standardContext.setLoader(webappLoader);
         }
-        System.out.println("defaultPath:"+defaultPath);
-        System.out.println("config server:" +ip+":"+port);
-        tomcat.start();
+
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = tomcat.getServer();
@@ -333,7 +377,12 @@ public class TomcatApplication {
         }
         server.setAddress(ip);
         server.setUtilityThreads(threads);
+        Dispatcher.setRealPath(webPath);
+
+        System.out.println("defaultPath="+defaultPath);
+        System.out.println("config server=" +ip+":"+port);
+        tomcat.start();
+
         server.await();
     }
-
 }

@@ -51,9 +51,12 @@ public class HessianHandle extends ActionHandle {
 
         //synchronized 这里不能有同步,否则调用不成功
         ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
-        actionInvocation.initAction();
-        actionInvocation.invoke();
-        actionInvocation.executeResult(null);
+        try {
+            actionInvocation.initAction();
+            actionInvocation.invoke();
+        } finally {
+            actionInvocation.executeResult(null);
+        }
         ////////////////////action end
 
     }
@@ -86,6 +89,7 @@ public class HessianHandle extends ActionHandle {
             log.error("serviceId:{},objectId:{},error:{}", objectId, objectId, e.getMessage());
         } finally {
             com.caucho.services.server.ServiceContext.end();
+            action.destroy();
         }
         //Hessian远程接口方式调用 end
 

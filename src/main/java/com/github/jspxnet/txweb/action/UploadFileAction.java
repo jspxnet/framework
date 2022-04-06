@@ -10,15 +10,15 @@ package com.github.jspxnet.txweb.action;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.component.zhex.ChineseAnalyzer;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.io.AbstractRead;
 import com.github.jspxnet.io.ReadPdfTextFile;
 import com.github.jspxnet.io.ReadWordTextFile;
 import com.github.jspxnet.json.JSONArray;
-import com.github.jspxnet.component.zhex.ChineseAnalyzer;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.network.oss.CloudServiceFactory;
 import com.github.jspxnet.network.oss.CloudFileClient;
+import com.github.jspxnet.network.oss.CloudServiceFactory;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.AssertException;
@@ -39,15 +39,18 @@ import com.github.jspxnet.txweb.table.CloudFileConfig;
 import com.github.jspxnet.txweb.table.IUploadFile;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.upload.CosMultipartRequest;
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
+import com.thetransactioncompany.cors.CORSResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ResponseFacade;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -310,7 +313,7 @@ public class UploadFileAction extends MultipartSupport {
     @Param(request = false)
     @MulRequest(covering = FileCoveringPolicyEnumType.JSPX, saveDirectory = "@saveDirectory", fileTypes = "@fileTypes", maxPostSize = "@maxPostSize")
     public void setMultipartRequest(MultipartRequest multipartRequest) {
-        request = this.multipartRequest = multipartRequest;
+        request =  multipartRequest;
     }
 
     /**
@@ -501,11 +504,12 @@ public class UploadFileAction extends MultipartSupport {
             return NONE;
         }
         //验证环境
-        if (multipartRequest == null && !RequestUtil.isMultipart(request) && !response.isCommitted()) {
+        if (request != null && !RequestUtil.isMultipart(request)) {
             printErrorInfo(language.getLang(LanguageRes.uploadRequestError));
             return NONE;
         }
 
+        MultipartRequest multipartRequest = (MultipartRequest)request;
         if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
         {
             printErrorInfo("没有登陆");
@@ -589,7 +593,7 @@ public class UploadFileAction extends MultipartSupport {
      */
     public Object[] localUploadFile(IUserSession userSession, boolean thumbnail) throws Exception {
         String setupPath = getSetupPath();
-
+        MultipartRequest multipartRequest = (MultipartRequest)request;
         String[] titleArray = multipartRequest.getParameterValues(TITLE_VAR_NAME);
         String[] contentArray = multipartRequest.getParameterValues(CONTENT_VAR_NAME);
 
@@ -1016,7 +1020,7 @@ public class UploadFileAction extends MultipartSupport {
      * @param valueMap 其他数据
      */
     protected void printErrorInfo(String info, Map<String, Object> valueMap) {
-        if (response.isCommitted()) {
+        if (!(response instanceof ResponseFacade) && !(response instanceof CORSResponseWrapper) && response.isCommitted()) {
             return;
         }
         JSONObject json = new JSONObject();

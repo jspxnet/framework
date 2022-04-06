@@ -215,7 +215,7 @@ public class StringUtil {
      * @since 2.0
      */
     public static String substringBefore(String str, String separator) {
-        if (StringUtil.isNull(str) || separator == null) {
+        if (isNull(str) || separator == null) {
             return empty;
         }
         if (separator.length() == 0) {

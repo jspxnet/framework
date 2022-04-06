@@ -63,7 +63,6 @@ public class JspxCoreListener implements ServletContextListener {
 
     }
 
-
     public static boolean isRun = false;
 
     private static final long START_CURRENT_TIME_MILLIS = System.currentTimeMillis();
@@ -143,7 +142,6 @@ public class JspxCoreListener implements ServletContextListener {
         log.info("create jspx.net system Environment");
         //环境配置
         envTemplate.createSystemEnv();
-
 
         //修复占位符号
         log.info("create placeholder Environment");

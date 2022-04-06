@@ -15,6 +15,7 @@ import com.github.jspxnet.network.http.HttpClientFactory;
 import com.github.jspxnet.utils.CharacterUtil;
 import com.github.jspxnet.utils.FileUtil;
 
+import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -45,6 +46,9 @@ public class AutoReadTextFile extends AbstractRead {
             return false;
         }
         resource = FileUtil.mendFile(resource);
+
+
+
         /////////不在jar文件中
         if (FileUtil.isZipPackageFile(resource)) {
             String jarFileName = null;
@@ -101,15 +105,17 @@ public class AutoReadTextFile extends AbstractRead {
         }
 
         File file = new File(resource);
-        if (file.exists() && file.canRead()) {
-
-            if (encode != null && (encode.toLowerCase().startsWith("utf") || encode.toLowerCase().startsWith("unicode"))) {
+        if (FileUtil.isFileExist(file)) {
+            if (StringUtil.isNull(encode) || "auto".equalsIgnoreCase(encode))
+            {
+                encode = CharacterUtil.getFileCharacterEnding(file, "UTF-8");
+                isr = new InputStreamReader(new FileInputStream(file), encode);
+            }
+            else
+            {
                 UnicodeReader reader = new UnicodeReader(new FileInputStream(file), encode);
                 encode = reader.getEncoding();
                 isr = reader;
-            } else {
-                encode = CharacterUtil.getFileCharacterEnding(file, encode);
-                isr = new InputStreamReader(new FileInputStream(file), encode);
             }
             return true;
         }

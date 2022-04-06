@@ -19,7 +19,6 @@ import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.XML;
 import com.github.jspxnet.scriptmark.ScriptMark;
-import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.scriptmark.core.ScriptMarkEngine;
 import com.github.jspxnet.scriptmark.load.AbstractSource;
@@ -33,6 +32,7 @@ import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.annotation.*;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
+import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
@@ -48,7 +48,9 @@ import com.github.jspxnet.txweb.turnpage.TurnPageButton;
 import com.github.jspxnet.txweb.turnpage.impl.TurnPageButtonImpl;
 import com.github.jspxnet.upload.CosMultipartRequest;
 import com.github.jspxnet.utils.*;
+import com.thetransactioncompany.cors.CORSResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ResponseFacade;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import javax.servlet.http.HttpServletRequest;
@@ -62,7 +64,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -75,15 +76,12 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public final class TXWebUtil {
-    public final static String chainType = "chain";
-    public final static String redirectType = "redirect";
-    public final static String defaultExecute = "execute";
-    public static final String defMethod = "method";
+
     public final static String REPEAT_VERIFY_KEY = "jspx:operate:repeat:verify:%s";
     public final static String AT = "@";
     //安全跳过,这些方法不接受请求发送的参数
     private final static String[] ACTION_SAFE_METHOD = new String[]{"setActionLogTitle", "setActionLogContent", "setActionResult", "isRepeatPost"};
-    private final static BeanFactory beanFactory = EnvFactory.getBeanFactory();
+
 
     private TXWebUtil() {
 
@@ -128,14 +126,28 @@ public final class TXWebUtil {
             if (!StringUtil.isNull(fileType) && !StringUtil.ASTERISK.equals(fileType)) {
                 fileTypes = StringUtil.split(StringUtil.replace(fileType, StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON);
             }
-            MultipartRequest multipartRequest = null;
+
+            if (action.getRequest() instanceof MultipartRequest)
+            {
+                continue;
+            }
+            FileCoveringPolicyEnumType fileCoveringPolicy = mulRequest.covering();
+            if (FileCoveringPolicyEnumType.Method.equals(mulRequest.covering())&&ClassUtil.isDeclaredMethod(action.getClass(),"covering"))
+            {
+
+                int covering = ObjectUtil.toInt(BeanUtil.getProperty(action, "covering"));
+                fileCoveringPolicy =  FileCoveringPolicyEnumType.find(covering);
+            }
+
+            MultipartRequest multipartRequest;
             if ("cos".equalsIgnoreCase(mulRequest.component()))
             {
-                multipartRequest = new CosMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null,mulRequest.covering().getRenamePolicy(), fileTypes);
+                multipartRequest = new CosMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null,fileCoveringPolicy.getRenamePolicy(), fileTypes);
             } else
             {
-                multipartRequest = new ApacheMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null,mulRequest.covering().getRenamePolicy(), fileTypes);
+                multipartRequest = new ApacheMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null,fileCoveringPolicy.getRenamePolicy(), fileTypes);
             }
+
             BeanUtil.setSimpleProperty(action, method.getName(), multipartRequest);
             action.setRequest(multipartRequest);
         }
@@ -356,7 +368,7 @@ public final class TXWebUtil {
      * @param action action bean
      */
     private static void copyRequestProperty(MultipartSupport action) {
-        MultipartRequest multipartRequest = action.getMultipartRequest();
+        MultipartRequest multipartRequest = (MultipartRequest)action.getRequest();
         String[] requestNames = action.getParameterNames();
         Class<?> cls = ClassUtil.getClass(action.getClass());
         Method[] methods = ClassUtil.getDeclaredSetMethods(cls);
@@ -592,7 +604,7 @@ public final class TXWebUtil {
 
         boolean isVoid = false;
         Object methodResult = null;
-        if (!TXWebUtil.defaultExecute.equals(exeMethod.getName())) {
+        if (!ActionEnv.DEFAULT_EXECUTE.equals(exeMethod.getName())) {
             //载入默认参数,修复方法参数匹配
             if (paramObj == null && exeMethod.getParameterCount() != 0 || (paramObj != null && paramObj.length != exeMethod.getParameterCount())) {
                 //一个参数都没有的情况
@@ -632,7 +644,7 @@ public final class TXWebUtil {
         for (Object v : resultJson.toArray()) {
             String methodName = (String) v;
             //比较，判断是否还有没有返回的对象,避免外部写重复的方法
-            if (TXWebUtil.defaultExecute.equals(methodName) || methodName.equals(exeMethod.getName()) || resultMap.containsKey(exeMethod.getName())) {
+            if (ActionEnv.DEFAULT_EXECUTE.equals(methodName) || methodName.equals(exeMethod.getName()) || resultMap.containsKey(exeMethod.getName())) {
                 continue;
             }
             Method method = ClassUtil.getDeclaredMethod(actionClass, methodName);
@@ -661,7 +673,7 @@ public final class TXWebUtil {
             methodFiled = exeMethod.getName();
         }
         //放入执行的结果
-        if (!isVoid && !TXWebUtil.defaultExecute.equals(exeMethod.getName())) {
+        if (!isVoid && !ActionEnv.DEFAULT_EXECUTE.equals(exeMethod.getName())) {
             if (methodResult == null) {
                 resultMap.put(methodFiled, new JSONObject());
             } else if (ClassUtil.isStandardProperty(methodResult.getClass()) || ClassUtil.isCollection(methodResult)) {
@@ -959,6 +971,7 @@ public final class TXWebUtil {
             String keyValue = ClassUtil.getClass(action.getClass()).getName() + StringUtil.DOT + exeMethod.getName() + StringUtil.DOT + action.getUserSession().getId();
             keyValue = EncryptUtil.getMd5(keyValue);
             String key = String.format(REPEAT_VERIFY_KEY, keyValue);
+            BeanFactory beanFactory = EnvFactory.getBeanFactory();
             RedissonClient redissonClient = (RedissonClient) beanFactory.getBean(RedissonClientConfig.class);
             if (redissonClient != null) {
                 RBucket<String> bucket = redissonClient.getBucket(key);
@@ -974,53 +987,6 @@ public final class TXWebUtil {
     }
 
 
-    /**
-     * 得到namespace
-     *
-     * @param servletPath 传入 request.servletPath
-     * @return namespace 命名空间
-     */
-    public static String getNamespace(String servletPath) {
-        String namespace = URLUtil.getUrlPath(servletPath);
-        if (namespace.endsWith(StringUtil.ASTERISK)) {
-            namespace = namespace.substring(0, namespace.length() - 1);
-        }
-        if (namespace.endsWith(StringUtil.BACKSLASH)) {
-            namespace = namespace.substring(0, namespace.length() - 1);
-        }
-        if (namespace.startsWith(StringUtil.BACKSLASH)) {
-            namespace = namespace.substring(1);
-        }
-        if (StringUtil.BACKSLASH.equals(namespace)) {
-            return StringUtil.empty;
-        }
-        return namespace;
-    }
-    //------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * @param servletPath 得到方法
-     * @return 得到更目录
-     */
-    public static String getRootNamespace(String servletPath) {
-        if (servletPath == null) {
-            return StringUtil.empty;
-        }
-        if (!servletPath.contains("/")) {
-            return servletPath;
-        }
-        if (servletPath.startsWith("http")) {
-            servletPath = StringUtil.substringAfter(servletPath, URLUtil.getHostUrl(servletPath));
-        }
-        String namespace = URLUtil.getUrlPath(servletPath);
-        if (namespace.startsWith("/")) {
-            namespace = namespace.substring(1);
-        }
-        if (namespace.contains("/")) {
-            return StringUtil.substringBefore(namespace, "/");
-        }
-        return namespace;
-    }
     //------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -1050,37 +1016,42 @@ public final class TXWebUtil {
         if (response == null) {
             return;
         }
-        if (response.isCommitted()) {
+        if (!(response instanceof ResponseFacade) && !(response instanceof CORSResponseWrapper) && response.isCommitted()) {
 
             StringBuilder sb = new StringBuilder();
             for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
                 sb.append(stackTraceElement.getLineNumber()).append(StringUtil.COLON).append(stackTraceElement.getClassName()).append(StringUtil.DOT).append(stackTraceElement.getMethodName()).append(StringUtil.CRLF);
             }
-            log.error("response 已经提交并且关闭,又输出信息:{},调用方法:{}", string, sb.toString());
+            log.error("response 已经提交并且关闭,又输出信息:{},调用方法:{}", string, sb);
             return;
         }
-        String contentType = "text/html";
+        String contentType = null;
         if (WebOutEnumType.JSON.getValue() == type) {
             contentType = "application/json";
-        }
+        } else
         if (WebOutEnumType.JAVASCRIPT.getValue() == type) {
-            contentType = "text/javascript; charset=" + response.getCharacterEncoding();
-        }
+            contentType = "text/javascript";
+        } else
         if (WebOutEnumType.XML.getValue() == type) {
             contentType = "text/xml";
-        }
+        } else
         if (WebOutEnumType.TEXT.getValue() == type) {
             contentType = "text/plain";
-        }
+        } else
         if (WebOutEnumType.HTML.getValue() == type) {
             contentType = "text/html";
-        }
+        } else
         if (WebOutEnumType.CSS.getValue() == type) {
             contentType = "text/css";
         }
-        AtomicReference<StringBuilder> sb = new AtomicReference<>(new StringBuilder());
-        sb.get().append(contentType).append(";charset=").append(response.getCharacterEncoding());
+        if (StringUtil.isEmpty(contentType))
+        {
+            contentType = "application/json";
+        }
+        StringBuilder sb = new StringBuilder(contentType);
+        sb.append(";charset=").append(StringUtil.isNull(response.getCharacterEncoding())?"UTF-8":response.getCharacterEncoding());
         response.setContentType(sb.toString());
+
         if (status!=null&&status>0&&status != 200) {
             response.setStatus(status);
         }
@@ -1093,7 +1064,6 @@ public final class TXWebUtil {
                 out.print(string);
                 out.flush();
             }
-            //if (out != null) out.close();
         } catch (Exception e) {
             e.printStackTrace();
             log.error("response writer is close,not out error", e);
@@ -1148,38 +1118,47 @@ public final class TXWebUtil {
 
 
     public static void errorPrint(String info, Map<String, String> fieldInfo, HttpServletResponse response, int status) {
-        if (response.isCommitted()) {
-            log.error("response 已经提交并且关闭,又输出错误信息:" + info + ",检查执行代码，之前错误信息");
-            return;
-        }
-        if (response.getStatus() != 200) {
-            return;
-        }
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         TemplateConfigurable configurable = new TemplateConfigurable();
         configurable.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
         AbstractSource fileSource = null;
-        File f = new File(envTemplate.getString(Environment.templatePath), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+        File f = new File(envTemplate.getString(Environment.templatePath,new File(Dispatcher.getRealPath(),"template").getPath()), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
         if (!f.isFile())
         {
+            f = new File(new File(Dispatcher.getRealPath(),envTemplate.getString(Environment.templatePath,"template")).getPath(), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+        }
+        if (f.isFile())
+        {
+            fileSource = new FileSource(f, envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"), envTemplate.getString(Environment.encode, Environment.defaultEncode));
+        } else
+        {
             InputStream inputStream = TXWebUtil.class.getResourceAsStream("/resources/template/"+envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+            if (inputStream==null)
+            {
+                inputStream = TXWebUtil.class.getResourceAsStream("/template/"+envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+            }
             if (inputStream!=null)
             {
                 fileSource = new InputStreamSource(inputStream,envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"), envTemplate.getString(Environment.encode, Environment.defaultEncode));
             }
-        } else
-        {
-            fileSource = new FileSource(f, envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"), envTemplate.getString(Environment.encode, Environment.defaultEncode));
+
         }
         if (fileSource==null)
         {
-            TXWebUtil.print("error template page not found,错误信息显示模版没有配置", WebOutEnumType.HTML.getValue(), response);
+            if (envTemplate.getBoolean(Environment.DEBUG))
+            {
+                TXWebUtil.print("error template page not found,错误信息显示模版没有配置" + f.getPath(), WebOutEnumType.HTML.getValue(), response);
+            } 
+            else
+            {
+                TXWebUtil.print("error template page not found,错误信息显示模版没有配置", WebOutEnumType.HTML.getValue(), response);
+            }
             return;
         }
-        configurable.setSearchPath(new String[]{envTemplate.getString(Environment.templatePath), Dispatcher.getRealPath()});
+        configurable.setSearchPath(new String[]{envTemplate.getString(Environment.templatePath,"template"), Dispatcher.getRealPath()});
         ScriptMark scriptMark;
         try {
-            scriptMark = new ScriptMarkEngine(ScriptmarkEnv.noCache, fileSource, configurable);
+            scriptMark = new ScriptMarkEngine(EncryptUtil.getMd5(f.getPath()), fileSource, configurable);
         } catch (Exception e) {
             log.error("error template page not found" + f.getAbsolutePath(), e);
             TXWebUtil.print("error template page not found,错误信息显示模版没有配置", WebOutEnumType.HTML.getValue(), response);

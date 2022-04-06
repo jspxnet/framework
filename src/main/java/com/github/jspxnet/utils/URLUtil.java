@@ -329,7 +329,7 @@ public final class URLUtil {
             host = new URL("http://" + host).getHost().toLowerCase();
             Pattern pattern = Pattern.compile(patternReg);
             Matcher matcher = pattern.matcher(host);
-            while (matcher.find()) {
+            if (matcher.find()) {
                 return StringUtil.trim(matcher.group());
             }
         } catch (Exception e) {
@@ -349,21 +349,6 @@ public final class URLUtil {
             return false;
         }
         return str.startsWith("http://") || str.startsWith("https://") || str.startsWith("ftp://") || str.startsWith("ftps://") || str.startsWith("file://");
-    }
-
-
-    public static String getRootNamespace(String namespace) {
-        if (namespace == null) {
-            return StringUtil.empty;
-        }
-        if (namespace.startsWith("/"))
-        {
-            namespace = namespace.substring(1);
-        }
-        if (namespace.contains("/")) {
-            return StringUtil.substringBefore(namespace, "/");
-        }
-        return namespace;
     }
 
 
@@ -415,6 +400,57 @@ public final class URLUtil {
             result = domain + StringUtil.replace("/" +  result,"//","/");
         }
         return result;
+    }
+
+
+    /**
+     * 得到namespace
+     *
+     * @param servletPath 传入 request.servletPath
+     * @return namespace 命名空间
+     */
+    public static String getNamespace(String servletPath) {
+        String namespace = URLUtil.getUrlPath(servletPath);
+        if (namespace.endsWith(StringUtil.ASTERISK)) {
+            namespace = namespace.substring(0, namespace.length() - 1);
+        }
+        if (namespace.endsWith(StringUtil.BACKSLASH)) {
+            namespace = namespace.substring(0, namespace.length() - 1);
+        }
+        if (namespace.startsWith(StringUtil.BACKSLASH)) {
+            namespace = namespace.substring(1);
+        }
+        if (StringUtil.BACKSLASH.equals(namespace)) {
+            return StringUtil.empty;
+        }
+        return namespace;
+    }
+
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @param servletPath 得到方法
+     * @return 得到更目录
+     */
+    public static String getRootNamespace(String servletPath) {
+        if (servletPath == null) {
+            return StringUtil.empty;
+        }
+        if (!servletPath.contains("/")) {
+            return servletPath;
+        }
+        if (servletPath.startsWith("http")) {
+            servletPath = StringUtil.substringAfter(servletPath, URLUtil.getHostUrl(servletPath));
+        }
+        String namespace = URLUtil.getUrlPath(servletPath);
+        if (namespace.startsWith("/")) {
+            namespace = namespace.substring(1);
+        }
+        if (namespace.contains("/")) {
+            return StringUtil.substringBefore(namespace, "/");
+        }
+        return namespace;
     }
 /*    public static void main(String[] args) {
         System.out.println(getFixHessianUrl("/jcompany/menu/tree","http://www.jspxn.net","jcompany","http://127.0.0.1/xxx/222"));

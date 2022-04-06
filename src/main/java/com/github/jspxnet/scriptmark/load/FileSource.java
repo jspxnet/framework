@@ -18,7 +18,7 @@ import java.io.*;
  * Time: 13:35:44
  */
 public class FileSource extends AbstractSource {
-    private File file;
+    private final File file;
 
 
     public FileSource(File file, String name, String encoding) {
@@ -36,4 +36,10 @@ public class FileSource extends AbstractSource {
         return new FileInputStream(file);
     }
 
+    @Override
+    public boolean isFile()
+    {
+
+        return file.isFile();
+    }
 }

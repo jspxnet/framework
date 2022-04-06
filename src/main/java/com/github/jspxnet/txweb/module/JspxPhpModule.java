@@ -19,6 +19,7 @@ import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
+import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.txweb.ActionInvocation;
@@ -93,7 +94,7 @@ public class JspxPhpModule extends AbstractQuercusModule {
 
     public Action getAction(Env env, String classname) throws ValidException {
         HttpServletRequest request = (HttpServletRequest) env.getRequest();
-        String namespace = TXWebUtil.getNamespace(request.getServletPath());
+        String namespace = URLUtil.getNamespace(request.getServletPath());
         if (classname == null) {
             return null;
         }

@@ -25,7 +25,10 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
+import com.thetransactioncompany.cors.CORSResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ResponseFacade;
+
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -64,16 +67,8 @@ public class RocResult extends ResultSupport {
     public void execute(ActionInvocation actionInvocation) throws Exception {
         Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
-        if (response.isCommitted()) {
 
-            StringBuilder sb = new StringBuilder();
-            for (StackTraceElement stackTraceElement:Thread.currentThread().getStackTrace())
-            {
-                sb.append(stackTraceElement.getLineNumber()).append(StringUtil.COLON).append(stackTraceElement.getClassName()).append(StringUtil.DOT).append(stackTraceElement.getMethodName()).append(StringUtil.CRLF);
-            }
-            log.error("response 已经提交并且关闭,调用方法:{}",sb);
-            return;
-        }
+
 
         checkCache(action, response);
         Bundle language = action.getLanguage();

@@ -583,7 +583,7 @@ public final class BeanUtil {
                 beanCopier.copy(object, result, null);
             } else
             {
-                copyFiledValue(object, result);
+                copyFiledValue(object,result);
             }
         } catch (Exception e) {
             log.error("对象copy失败 class:{},error:{}",cls,e.getLocalizedMessage());
@@ -716,6 +716,10 @@ public final class BeanUtil {
                     continue;
                 }
                 if (field.getName().equals(setField.getName())) {
+                    if (field.getName().contains("good"))
+                    {
+                        System.out.println(field);
+                    }
                     try {
                         field.setAccessible(true);
                         setField.setAccessible(true);
@@ -726,7 +730,21 @@ public final class BeanUtil {
                         } else
                         if (setField.getType().equals(field.getType()) || ClassUtil.isNumberType(setField.getType()) && ClassUtil.isNumberType(field.getType())) {
                             //todo字符串 和数字类型需要避开
-                            field.set(oldData, o);
+                            Object col =field.get(oldData);
+                            if ((col instanceof Collection)&& !ObjectUtil.isEmpty(col))
+                            {
+                                Collection coll = (Collection)col;
+                                Object obj = coll.iterator().next();
+                                if (obj!=null)
+                                {
+                                    Class<?> type = obj.getClass();
+                                    field.set(oldData, copyList((Collection)o,type));
+                                }
+                            }
+                            else
+                            {
+                                field.set(oldData, o);
+                            }
                         }
                         else
                         {

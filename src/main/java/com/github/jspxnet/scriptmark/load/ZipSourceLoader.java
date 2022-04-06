@@ -31,7 +31,7 @@ public class ZipSourceLoader extends AbstractSourceLoader {
         this(new File(zipFilePath));
     }
 
-    public ZipSourceLoader(File zipFile) throws IOException {
+    public ZipSourceLoader(File zipFile)  {
         this.zipFile = zipFile;
     }
 
@@ -40,8 +40,7 @@ public class ZipSourceLoader extends AbstractSourceLoader {
     }
 
     @Override
-    public Source loadResource(String path, String name, String encoding)
-            throws FileNotFoundException {
+    public Source loadResource(String path, String name, String encoding){
         return new ZipSource(zipFile, name, encoding);
     }
 

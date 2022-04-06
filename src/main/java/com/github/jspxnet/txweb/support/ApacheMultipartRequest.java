@@ -50,7 +50,9 @@ public class ApacheMultipartRequest extends MultipartRequest{
         {
             encoding = request.getCharacterEncoding();
         }
-
+        if (saveDirectory == null) {
+            throw new IllegalArgumentException("saveDirectory cannot be null,saveDirectory=" + saveDirectory);
+        }
         DiskFileItemFactory factory = new DiskFileItemFactory();
         //设置阈值，设置JVM一次能够处理的文件大小（默认吞吐量是10KB）
         factory.setSizeThreshold(DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD);
@@ -67,7 +69,7 @@ public class ApacheMultipartRequest extends MultipartRequest{
 
 
         //先放入请求头部的参数
-        if (request.getQueryString() != null) {
+        if (!StringUtil.isNull(request.getQueryString() )) {
             // Let HttpUtils create a name->String[] structure
             Map<String, String[]> queryParameters = parseQueryString(request.getQueryString());
             // For our own use, name it a name->Vector structure
@@ -80,8 +82,6 @@ public class ApacheMultipartRequest extends MultipartRequest{
         }
 
         List<FileItem> fileItems = fileUpload.parseRequest(new ServletRequestContext(request));
-
-
         for ( FileItem fileItem : fileItems) {
             if(fileItem.isFormField()){//判断该FileItem为一个普通的form元素
                 //获取字段名
@@ -89,15 +89,10 @@ public class ApacheMultipartRequest extends MultipartRequest{
                 List<String> existingValues = parameters.computeIfAbsent(fieldName, k -> new Vector<>());
                 existingValues.add(fileItem.getString(encoding));
             }else{//判断该FileItem为一个文件
-
-                System.out.println("Start to uplaod file!");
                 //获取文件名
                 String fileName = fileItem.getName();
-                System.out.println("fileName : " + fileName);
                 //获取文件大小
                 long fileSize = fileItem.getSize();
-                System.out.println("fileSize : " + fileSize);
-
                 String type = FileUtil.getTypePart(fileName);
                 if (StringUtil.hasLength(fileName)) {
                     if (!StringUtil.isNull(getParameter("name"))) {
@@ -108,24 +103,20 @@ public class ApacheMultipartRequest extends MultipartRequest{
                     file = policy.rename(file);
                     if (ArrayUtil.isEmpty(fileTypes) || ArrayUtil.inArray(fileTypes, StringUtil.ASTERISK, true) || ArrayUtil.inArray(fileTypes, type, true))
                     {
-                        try {
-                            fileItem.write(file);
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                            continue;
-                        }
-
                         UploadedFile yesUploadedFile = new UploadedFile(file.getName(), FileUtil.getPathPart(file.getPath()), file.getName(), fileName,  fileItem.getContentType(), type);
-                        yesUploadedFile.setUpload(fileSize > 0);
-
                         yesUploadedFile.setChunk(ObjectUtil.toInt(getParameter("chunk")));
                         yesUploadedFile.setChunks(ObjectUtil.toInt(getParameter("chunks")));
                         yesUploadedFile.setLength(fileSize);
                         yesUploadedFile.setChunkUpload(parameters.containsKey("chunks") && ObjectUtil.toInt(getParameter("chunks")) > 0);
-                        fileList.add(yesUploadedFile);
-                        if (fileSize > 0) {
+                        try {
+                            fileItem.write(file);
                             yesUploadedFile.setUpload(true);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            yesUploadedFile.setUpload(false);
+                            continue;
                         }
+                        fileList.add(yesUploadedFile);
                     } else {
                         //不允许的文件类型
                         UploadedFile noUploadedFile = new UploadedFile(file.getName(), FileUtil.getPathPart(file.getPath()), file.getName(), fileName, fileItem.getContentType(), type);

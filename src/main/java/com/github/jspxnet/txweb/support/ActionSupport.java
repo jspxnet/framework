@@ -157,7 +157,7 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String getRootNamespace() {
-        return TXWebUtil.getRootNamespace(getEnv(ActionEnv.Key_Namespace));
+        return URLUtil.getRootNamespace(getEnv(ActionEnv.Key_Namespace));
     }
 
     /**

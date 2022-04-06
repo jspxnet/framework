@@ -12,15 +12,15 @@ import com.github.jspxnet.txweb.config.ResultConfigBean;
 import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.evasive.condition.*;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,14 +32,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EvasiveManager {
 
     static protected boolean debug = false;
-    //private List<EvasiveRule> evasiveRuleList = Collections.synchronizedList(new ArrayList<EvasiveRule>());
-    //private List<QueryBlack> queryBlackRuleList = Collections.synchronizedList(new  ArrayList<QueryBlack>());
 
     private final Collection<EvasiveRule> EVASIVE_RULE_LIST = new ArrayList<>();
-    private final Collection<QueryBlack> QUERY_BLACK_RULE_LIST = new ArrayList<>();
+    private final static Collection<QueryBlack> QUERY_BLACK_RULE_LIST = new ArrayList<>();
 
-
-    private final Map<String, ResultConfigBean> RESULT_CONFIG_MAP = new ConcurrentHashMap<>();
+    private final static Map<String, ResultConfigBean> RESULT_CONFIG_MAP = new ConcurrentHashMap<>();
     //拦截的ip,放入的时间
     private static final Map<String, EvasiveIp> BLACK_IP_LIST = new ConcurrentHashMap<>();
     //白名单
@@ -47,11 +44,21 @@ public class EvasiveManager {
     //黑名单
     private static String[] blackList = new String[0];
 
+    //密码访问目录,<密码,目录>
+    private static Map<String,String> passwordFolderList = new HashMap<>();
+
+    //黑名单后缀
+    private static String[] blackSuffixList = null;
+
     final private static String BLACK_RESULT = "black";
+    final private static String PASSWORD = "password";
+    final private static String folderIndex = "index";
 
     private static boolean evasiveExcludeFilter = true;
     private static String[] insecureUrlKeys = null;
     private static String[] insecureQueryStringKeys = null;
+
+    private static EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
 
 
     //判断程序
@@ -79,8 +86,8 @@ public class EvasiveManager {
     }
 
     private void reload() {
-        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        boolean useEvasive = envTemplate.getBoolean(Environment.useEvasive);
+
+        boolean useEvasive = ENV_TEMPLATE.getBoolean(Environment.useEvasive);
         if (!useEvasive) {
             return;
         }
@@ -99,12 +106,22 @@ public class EvasiveManager {
         whiteList = configuration.getWhiteList();
         blackList = configuration.getBlackList();
 
+
+
         insecureUrlKeys = ArrayUtil.deleteRepeated(configuration.getInsecureUrlKeys(), true);
         insecureQueryStringKeys = ArrayUtil.deleteRepeated(configuration.getInsecureQueryStringKeys(), true);
+        blackSuffixList = ArrayUtil.deleteRepeated(configuration.getBlackSuffixList(), true);
+        passwordFolderList = configuration.getPasswordFolderList();
+
 
         log.info("white list，白名单:" + ArrayUtil.toString(whiteList, StringUtil.SEMICOLON));
         //合并字符串里边相同的内容
         log.info("black list，黑名单:" + ArrayUtil.toString(blackList, StringUtil.SEMICOLON));
+
+        log.info("black suffix，不允许的后缀:" + ArrayUtil.toString(blackSuffixList, StringUtil.SEMICOLON));
+
+        log.info("password folder，密码访问目录:" + ObjectUtil.toString(passwordFolderList));
+
 
         Map<String, Object> valueMap = TXWebUtil.createEnvironment();
         CacheManager cacheManager = JSCacheManager.getCacheManager();
@@ -129,8 +146,8 @@ public class EvasiveManager {
             }
         }
 
-        debug = envTemplate.getBoolean(Environment.logDebugEvasive);
-        evasiveExcludeFilter = envTemplate.getBoolean(Environment.evasiveExcludeFilter);
+        debug = ENV_TEMPLATE.getBoolean(Environment.logDebugEvasive);
+        evasiveExcludeFilter = ENV_TEMPLATE.getBoolean(Environment.evasiveExcludeFilter);
 
 
     }
@@ -197,7 +214,7 @@ public class EvasiveManager {
      * @param ip IP
      * @return 判断是否在黑名单
      */
-    private boolean isInBlackList(String ip) {
+    private static boolean isInBlackList(String ip) {
         if (ArrayUtil.isEmpty(blackList)) {
             return false;
         }
@@ -209,11 +226,34 @@ public class EvasiveManager {
         return false;
     }
 
+    private static boolean isInBlackSuffix(String suffix) {
+        if (ArrayUtil.isEmpty(blackSuffixList)) {
+            return false;
+        }
+        return ArrayUtil.inArray(blackSuffixList,suffix,true);
+    }
+
+    /**
+     *
+     * @param url url路径
+     * @return  返回密码
+     */
+    private static String isInPasswordFolder(String url) {
+        for (String folder:passwordFolderList.keySet())
+        {
+            if (FileUtil.isPatternEquals(url,folder))
+            {
+                return passwordFolderList.get(folder);
+            }
+        }
+        return null;
+    }
+
     /**
      * 查询方式判断
      * ip 查询黑名单,根据条件查询数据库，ip访问记录表，来分析是否有拦截
      */
-    private void runQueryBlack() {
+    private static void runQueryBlack() {
         for (QueryBlack queryBlack : QUERY_BLACK_RULE_LIST) {
             //执行周期为5分钟执行一次
             if (System.currentTimeMillis() - queryBlack.getLastQueryTimeMillis() < DateUtil.MINUTE * 2) {
@@ -283,7 +323,7 @@ public class EvasiveManager {
     private void runEvasiveRule(HttpServletRequest request, HttpServletResponse response) {
         String localUrl = request.getRequestURI(); //只是文件部分,没有参数
         if (debug) {
-            log.debug("evasive check url:" + localUrl);
+            log.debug("evasive check url:{}" ,localUrl);
         }
         if (localUrl != null) {
             localUrl = localUrl.toLowerCase();
@@ -319,6 +359,8 @@ public class EvasiveManager {
                 }
             }
             //判断是否满足脚本条件
+
+
 
             //如果创建的时间大于一个周期时间, 访问次数大于最大允许次数的数据，清空，重置,从黑名单里边放出来
             if (evasiveIp.getTimes() > evasiveRule.getMaxTimes()) {
@@ -359,7 +401,7 @@ public class EvasiveManager {
     public boolean execute(HttpServletRequest request, HttpServletResponse response) {
         String localUrl = request.getRequestURI(); //只是文件部分,没有参数
         if (debug) {
-            log.debug("evasive check url:" + localUrl);
+            log.debug("evasive check url:{}",localUrl);
         }
         if (localUrl != null) {
             localUrl = localUrl.toLowerCase();
@@ -392,6 +434,69 @@ public class EvasiveManager {
             }
         }
         ///////////////这里是网站的安全隔离 end
+
+        //过滤不允许方式的后缀begin
+        if (isInBlackSuffix(FileUtil.getTypePart(localUrl)))
+        {
+            TXWebUtil.errorPrint("禁止访问的文件后缀",null, response, HttpStatusType.HTTP_status_405);
+            return true;
+        }
+        //过滤不允许方式的后缀end
+
+
+        //过滤不允许方式的后缀begin
+        if (isInBlackSuffix(FileUtil.getTypePart(localUrl)))
+        {
+            TXWebUtil.errorPrint("禁止访问的文件后缀",null, response, HttpStatusType.HTTP_status_405);
+            return true;
+        }
+        //过滤不允许方式的后缀end
+
+        String password = isInPasswordFolder(localUrl);
+        if (!StringUtil.isNull(password) && !password.equalsIgnoreCase(request.getParameter(PASSWORD))) {
+            //无密码
+            TXWebUtil.errorPrint("安全目录,需要密码访问",null, response, HttpStatusType.HTTP_status_405);
+            return true;
+        } else
+        if (!StringUtil.isNull(password) && password.equalsIgnoreCase(request.getParameter(PASSWORD)) && folderIndex.equalsIgnoreCase(URLUtil.getFileNamePart(localUrl)))
+        {
+            //列表目录
+            File path;
+            if (ENV_TEMPLATE.getBoolean(Environment.SERVER_EMBED))
+            {
+                //嵌入模式
+                path = new File(ENV_TEMPLATE.getString(Environment.SERVER_WEB_PATH,Dispatcher.getRealPath()),URLUtil.getNamespace(localUrl));
+            } else
+            {
+                path = new File(Dispatcher.getRealPath(),URLUtil.getNamespace(localUrl));
+            }
+            if (path.exists())
+            {
+                List<File> fileList = FileUtil.getLatestFileList(path,20);
+                StringBuilder sb = new StringBuilder();
+                sb.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">" +
+                        "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\">" +
+                        "<style>#name{ padding-left: 10px;color: #00695C;} #length{padding-left: 10px;color: blue;}</style>" +
+                        "</head><body>");
+                for (File file: fileList)
+                {
+                    sb.append("<br><span id=\"name\">").append(file.getName()).append("</span><span id=\"length\">[").append(file.length()).append("]</span>").append("</br>");
+                }
+                sb.append("</body>").append("</html>");
+                TXWebUtil.print(sb.toString(),WebOutEnumType.HTML.getValue(), response);
+                fileList.clear();
+                return true;
+            }
+            TXWebUtil.errorPrint("非法路径",null, response, HttpStatusType.HTTP_status_405);
+            return true;
+        } else
+        if (!StringUtil.isNull(password) && password.equalsIgnoreCase(request.getParameter(PASSWORD)))
+        {
+            //有密码能访问
+            return false;
+        }
+
+
         //优化排除不需要判断的URL,如果tomcat单独作为web服务器的时候很有用
         if (evasiveExcludeFilter && localUrl.matches("/\\S+\\.\\S+." + Dispatcher.getFilterSuffix())) {
             return false;
@@ -409,6 +514,7 @@ public class EvasiveManager {
             printBlackError(request, response);
             return true;
         }
+
 
         EvasiveIp blackEvasiveIp = BLACK_IP_LIST.get(ip);
         if (blackEvasiveIp != null) {
@@ -433,7 +539,7 @@ public class EvasiveManager {
         return false;
     }
 
-    private void printBlackError(HttpServletRequest request, HttpServletResponse response) {
+    private static void printBlackError(HttpServletRequest request, HttpServletResponse response) {
         String ip = RequestUtil.getRemoteAddr(request);
         //为了支持脚本和更多功能
         Map<String, Object> envParams = TXWebUtil.createEnvironment();
@@ -446,7 +552,7 @@ public class EvasiveManager {
         doResult(request, response, envParams, resultConfig);
     }
 
-    private void printError(HttpServletRequest request, HttpServletResponse response, EvasiveIp blackEvasiveIp) {
+    private static void printError(HttpServletRequest request, HttpServletResponse response, EvasiveIp blackEvasiveIp) {
         String ip = RequestUtil.getRemoteAddr(request);
         //为了支持脚本和更多功能
         Map<String, Object> envParams = TXWebUtil.createEnvironment();
@@ -477,11 +583,11 @@ public class EvasiveManager {
         } catch (Exception e) {
             e.printStackTrace();
             if (debug) {
-                log.error("getPlaceholder processTemplate" + resultConfig.getValue());
+                log.error("getPlaceholder processTemplate {}",resultConfig.getValue());
                 TXWebUtil.errorPrint("evasive安全配置有错误:" + StringUtil.toBrLine(e.getMessage()),null, response, resultConfig.getStatus());
             }
         }
-        if (TXWebUtil.redirectType.equalsIgnoreCase(resultConfig.getType())) {
+        if (ActionEnv.REDIRECT_TYPE.equalsIgnoreCase(resultConfig.getType())) {
             try {
                 if (!StringUtil.isNull(resultSrc)) {
                     response.sendRedirect(resultSrc);
@@ -489,13 +595,13 @@ public class EvasiveManager {
             } catch (Exception e) {
                 e.printStackTrace();
                 if (debug) {
-                    log.error("sendRedirect " + resultConfig.getValue());
+                    log.error("sendRedirect {}" ,resultConfig.getValue());
                     TXWebUtil.errorPrint("sendRedirect " + resultConfig.getValue() + " " + StringUtil.toBrLine(e.getMessage()), null,response, resultConfig.getStatus());
                 } else {
                     TXWebUtil.errorPrint("转发地址错误:" + resultSrc,null, response, resultConfig.getStatus());
                 }
             }
-        } else if (TXWebUtil.chainType.equalsIgnoreCase(resultConfig.getType())) {
+        } else if (ActionEnv.CHAIN_TYPE.equalsIgnoreCase(resultConfig.getType())) {
             try {
                 if (!StringUtil.isNull(resultSrc)) {
                     request.getRequestDispatcher(resultSrc).forward(request, response);
@@ -516,7 +622,7 @@ public class EvasiveManager {
                 TXWebUtil.print(str, WebOutEnumType.HTML.getValue(), response, resultConfig.getStatus());
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("evasive config error :" + resultConfig.getName());
+                log.error("evasive config error :{}",resultConfig.getName());
             }
         } else if (WebOutEnumType.XML.getValue()==WebOutEnumType.find(resultConfig.getType()).getValue()) {
             try {
@@ -524,7 +630,7 @@ public class EvasiveManager {
                 TXWebUtil.print(str, WebOutEnumType.XML.getValue(), response, resultConfig.getStatus());
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("evasive config error :" + resultConfig.getName());
+                log.error("evasive config error :{}",resultConfig.getName());
             }
         } else if (WebOutEnumType.JSON.getValue()==WebOutEnumType.find(resultConfig.getType()).getValue())
         {
@@ -533,7 +639,7 @@ public class EvasiveManager {
                 TXWebUtil.print(str, WebOutEnumType.JSON.getValue(), response, resultConfig.getStatus());
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("evasive config error :" + resultConfig.getName());
+                log.error("evasive config error :{}",resultConfig.getName());
             }
 
         } else if (WebOutEnumType.JAVASCRIPT.getValue()==WebOutEnumType.find(resultConfig.getType()).getValue() || "script".equalsIgnoreCase(resultConfig.getType())) {
@@ -543,7 +649,7 @@ public class EvasiveManager {
                 TXWebUtil.print(str, WebOutEnumType.JAVASCRIPT.getValue(), response);
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("evasive config error :" + resultConfig.getName());
+                log.error("evasive config error : {}", resultConfig.getName());
             }
         } else {
             //消息类型

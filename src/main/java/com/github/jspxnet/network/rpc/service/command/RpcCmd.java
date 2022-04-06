@@ -107,7 +107,7 @@ public class RpcCmd extends INetCommand {
         //得到请求对象
         WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         ActionConfig actionConfig = null;
-        String namespace = TXWebUtil.getNamespace(iocRequest.getUrl());
+        String namespace = URLUtil.getNamespace(iocRequest.getUrl());
         String urlName = URLUtil.getFileName(iocRequest.getUrl());
         try {
             actionConfig = webConfigManager.getActionConfig(urlName, namespace, true);

@@ -23,22 +23,18 @@ import java.io.*;
  */
 
 public abstract class MultipartSupport extends ActionSupport {
-    public MultipartSupport() {
 
-    }
 
     protected int covering = FileCoveringPolicyEnumType.DateRandom.getValue();
     protected int maxPostSize = -1;
     protected String saveDirectory = "d:/upload";
     protected String fileTypes = StringUtil.ASTERISK;
-    protected MultipartRequest multipartRequest = null;
+
 
     //外部接口，放入上传请求
     public abstract void setMultipartRequest(MultipartRequest multipartRequest);
 
-    public MultipartRequest getMultipartRequest() {
-        return multipartRequest;
-    }
+
 
     public String getFileTypes() {
         return fileTypes;
@@ -79,7 +75,7 @@ public abstract class MultipartSupport extends ActionSupport {
     public int checkFileMatching(String fileTypes) {
         String[] types = StringUtil.split(fileTypes.toLowerCase(), StringUtil.SEMICOLON);
         int result = 0;
-        for (UploadedFile uploadFile : multipartRequest.getFiles()) {
+        for (UploadedFile uploadFile : ((MultipartRequest)request).getFiles()) {
             File f = uploadFile.getFile();
             if (!f.isFile()) {
                 continue;
@@ -100,9 +96,9 @@ public abstract class MultipartSupport extends ActionSupport {
 
     @Override
     public void destroy() {
-        if (multipartRequest!=null)
+        if (request!=null && request instanceof MultipartRequest)
         {
-            multipartRequest.destroy();
+            ((MultipartRequest)request).destroy();
         }
         super.destroy();
     }

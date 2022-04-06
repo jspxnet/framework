@@ -19,7 +19,6 @@ public class VcsBootConfig {
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         try {
             log.info("配置检测到是用vcs分布式配置");
-
             String url = StringUtil.trim(properties.getProperty(Environment.VCS_URL));
             String localPath = StringUtil.trim(properties.getProperty(Environment.VCS_LOCAL_PATH));
             String name = StringUtil.trim(properties.getProperty(Environment.VCS_USER_NAME));

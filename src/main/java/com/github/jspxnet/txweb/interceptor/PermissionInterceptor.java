@@ -261,11 +261,7 @@ public class PermissionInterceptor extends InterceptorSupport {
             if (isRule) {
                 log.debug("ruleOutUrl checkUrl={},isRule={}", checkUrl, isRule);
                 return actionInvocation.invoke();
-            } /*
-                else if (userSession.isGuest()) {
-                action.addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needLogin));
-                return ActionSupport.LOGIN;
-            }*/
+            }
         }
 
         if (permission && userSession.getRole(permissionDAO.getNamespace(), organizeId) == null) {

@@ -473,16 +473,14 @@ public class DefaultActionInvocation implements ActionInvocation {
      */
     @Override
     public void executeResult(Result result) throws Exception {
-        if (resultCode == null || ActionSupport.NONE.equalsIgnoreCase(resultCode)) {
-            return;
-        }
-
-        if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode) || ActionSupport.UNTITLED.equalsIgnoreCase(resultCode)) {
-            printResultError(actionProxy.getAction(), resultCode);
-            return;
-        }
-
         try {
+            if (resultCode == null || ActionSupport.NONE.equalsIgnoreCase(resultCode)) {
+                return;
+            }
+            if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode) || ActionSupport.UNTITLED.equalsIgnoreCase(resultCode)) {
+                printResultError(actionProxy.getAction(), resultCode);
+                return;
+            }
             if (result != null) {
                 result.execute(this);
             } else {

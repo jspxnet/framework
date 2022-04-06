@@ -8,10 +8,10 @@ import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.txweb.util.RequestUtil;
-import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendCallback;
@@ -90,7 +90,7 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
         //保存历史记录 begin
         //@method
         String operation = actionProxy.getMethod().getName();
-        if (TXWebUtil.defaultExecute.equalsIgnoreCase(operation) && !RequestUtil.isMultipart(action.getRequest()) || StringUtil.isEmpty(operation)) {
+        if (ActionEnv.DEFAULT_EXECUTE.equalsIgnoreCase(operation) && !RequestUtil.isMultipart(action.getRequest()) || StringUtil.isEmpty(operation)) {
             return result;
         }
         ActionLog actionLog = action.getActionLog();

@@ -83,7 +83,7 @@ public class DefaultActionProxy implements ActionProxy {
     public Method getMethod() {
         if (method == null) {
             try {
-                return ClassUtil.getClass(action.getClass()).getMethod(TXWebUtil.defaultExecute);
+                return ClassUtil.getClass(action.getClass()).getMethod(ActionEnv.DEFAULT_EXECUTE);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
                 return null;
@@ -185,11 +185,11 @@ public class DefaultActionProxy implements ActionProxy {
 
         //下边是roc，和传统方式调用
         if (method == null) {
-            method = ClassUtil.getClass(action.getClass()).getMethod(TXWebUtil.defaultExecute);
+            method = ClassUtil.getClass(action.getClass()).getMethod(ActionEnv.DEFAULT_EXECUTE);
         }
 
         TXWebUtil.setTurnPage(action);
-        if (!TXWebUtil.defaultExecute.equals(method.getName())&&TXWebUtil.checkOperate(action, method)) {
+        if (!ActionEnv.DEFAULT_EXECUTE.equals(method.getName())&&TXWebUtil.checkOperate(action, method)) {
             if (exeType.equalsIgnoreCase(RocHandle.NAME)) {
                 //ROC 普通调用
                 RocHandle.execute(this);

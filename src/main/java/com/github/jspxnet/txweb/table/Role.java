@@ -24,6 +24,7 @@ import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.table.OperateTable;
 import com.github.jspxnet.txweb.IRole;
 import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.Data;
@@ -169,7 +170,7 @@ public class Role extends OperateTable implements IRole {
             return false;
         }
         if (!StringUtil.hasLength(classMethod)) {
-            classMethod = TXWebUtil.defaultExecute;
+            classMethod = ActionEnv.DEFAULT_EXECUTE;
         }
 
         operateLines = getOperatesLines();
@@ -190,12 +191,12 @@ public class Role extends OperateTable implements IRole {
                 continue;
             }
 
-            String roleNamespace = TXWebUtil.getNamespace(url);
+            String roleNamespace = URLUtil.getNamespace(url);
             if (roleNamespace != null && !namespace.startsWith(roleNamespace)) {
                 continue;
             }
             String roleClassName = StringUtil.substringAfterLast(url,StringUtil.BACKSLASH);
-            if (!StringUtil.ASTERISK.equals(roleClassName) && !className.matches(roleClassName)) {
+            if (!StringUtil.ASTERISK.equals(roleClassName) && className!=null&&!className.matches(roleClassName)) {
                 continue;
             }
             if (line.endsWith(StringUtil.COLON + classMethod)) {

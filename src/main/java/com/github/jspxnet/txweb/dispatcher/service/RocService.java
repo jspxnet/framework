@@ -92,7 +92,7 @@ public class RocService extends IService {
             namespace = jsonData.getString(Environment.namespace);
         }
         if (namespace == null) {
-            namespace = TXWebUtil.getNamespace(request.getServletPath());
+            namespace = URLUtil.getNamespace(request.getServletPath());
         }
         ///////////////////////////////////环境参数 begin
         Map<String, Object> envParams = TXWebUtil.createEnvironment();

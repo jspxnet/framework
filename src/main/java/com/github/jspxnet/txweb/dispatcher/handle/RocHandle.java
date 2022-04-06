@@ -118,7 +118,7 @@ public class RocHandle extends ActionHandle {
         }
         //////////////////初始end
 
-        String namespace = TXWebUtil.getNamespace(request.getServletPath());
+        String namespace = URLUtil.getNamespace(request.getServletPath());
         String namePart =  oldFormat?jsonData.getString(Environment.rocId):URLUtil.getFileNamePart(request.getRequestURI());
         if (oldFormat&&namePart != null && namePart.contains(TXWebUtil.AT)) {
             namePart = StringUtil.substringBefore(namePart, TXWebUtil.AT);
@@ -158,26 +158,23 @@ public class RocHandle extends ActionHandle {
             Lock lock = new ReentrantLock();
             //线程安全模式
             lock.lock();
+            ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
             try {
-                ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
                 actionInvocation.initAction();
-                if (ActionSupport.NONE.equalsIgnoreCase(actionInvocation.invoke()))
-                {
-                    return;
-                }
-                actionInvocation.executeResult(new RocResult(dataField));
+                actionInvocation.invoke();
             } finally {
+                actionInvocation.executeResult(new RocResult(dataField));
                 lock.unlock();
             }
         } else {
             //非线程安全模式
             ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
-            actionInvocation.initAction();
-            if (ActionSupport.NONE.equalsIgnoreCase(actionInvocation.invoke()))
-            {
-                return;
+            try {
+                actionInvocation.initAction();
+                actionInvocation.invoke();
+            } finally {
+                actionInvocation.executeResult(new RocResult(dataField));
             }
-            actionInvocation.executeResult(new RocResult(dataField));
         }
         //执行action返回数据end
     }

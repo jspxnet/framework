@@ -77,4 +77,10 @@ public final class ActionEnv {
     static public final String KEY_ACTION_RESULT_OBJECT = "ActionResultObject";
 
     static public final String KEY_ACTION_RESULT = "keyActionResult";
+
+
+    //--------------TXWebUtil用到
+    public final static String CHAIN_TYPE = "chain";
+    public final static String REDIRECT_TYPE = "redirect";
+    public final static String DEFAULT_EXECUTE = "execute";
 }

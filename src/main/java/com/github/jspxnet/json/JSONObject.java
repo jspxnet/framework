@@ -335,6 +335,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         }
 
         Field[] fields = ClassUtil.getDeclaredFields(lass);
+
         if (!ObjectUtil.isEmpty(fields))
         {
             for (Field field : fields) {
@@ -369,6 +370,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 
                     if (result == null) {
                         super.put(displayKey, null);
+                        continue;
+                    }
+                    if (ClassUtil.isStandardProperty(result.getClass())) {
+                        super.put(key, result);
                         continue;
                     }
 
@@ -488,6 +493,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                         super.put(key, null);
                         continue;
                     }
+                    if (ClassUtil.isStandardProperty(result.getClass())) {
+                        super.put(key, result);
+                        continue;
+                    }
 
                     if (result instanceof JSONObject || result instanceof JSONArray) {
                         super.put(key, result);
@@ -541,7 +550,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                                     if (fieldArray!=null&&!fieldArray.isEmpty())
                                     {
                                         final  int size = fieldArray.size();
-                                        childShowField = (String[]) fieldArray.toArray(new String[size]);
+                                        childShowField = fieldArray.toArray(new String[size]);
                                     }
                                 }
                                 super.put(key, new JSONObject(result, childShowField,includeSuperClass,dataField));
@@ -1382,6 +1391,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 }
             }
         } catch (Exception f) {
+            f.printStackTrace();
             log.error("解析错误", f);
             return "{}";
         }
@@ -1514,7 +1524,13 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             return new JSONArray(value).toString(indentFactor, indent);
         }
         if (value instanceof Serializable && !ClassUtil.isStandardProperty(value.getClass())) {
-            return new JSONObject(value).toString(indentFactor, indent, classInfo);
+            try {
+                return new JSONObject(value).toString(indentFactor, indent, classInfo);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
         }
 
         return StringUtil.quote(value.toString(), true);

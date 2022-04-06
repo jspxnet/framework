@@ -163,7 +163,7 @@ public class UploadedFile implements Serializable {
         FileUtil.makeDirectory(newDir);
         File newFile = renamePolicy.rename(new File(newDir, fileName));
         File oldFile = getFile();
-        if (!oldFile.exists() || oldFile.length() <= 0) {
+        if (!oldFile.exists()) {
             return false;
         }
         if (FileUtil.copy(oldFile, newFile, true)) {

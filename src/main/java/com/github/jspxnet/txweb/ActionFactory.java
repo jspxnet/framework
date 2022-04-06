@@ -113,7 +113,7 @@ public class ActionFactory {
         if (arguments.size() > 1) {
             Object exec = arguments.get(1).toString();
             if ("true".equals(exec) || StringUtil.empty.equals(exec)) {
-                exeMethod = TXWebUtil.defaultExecute;
+                exeMethod = ActionEnv.DEFAULT_EXECUTE;
             } else {
                 exeMethod = exec.toString();
                 if ("false".equalsIgnoreCase(exeMethod) || "0".equals(exeMethod)) {

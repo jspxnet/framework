@@ -138,7 +138,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.53";
+    final static public String VERSION = "6.55";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -593,10 +593,11 @@ public abstract class Environment {
     static public final String HTTP_RPC_ROUTES = "http.rpc.routes.";
 
     //网络RPC调用服务发现模式
-    static public final String serviceDiscoverMode = "serviceDiscoverMode";
+    static public final String SERVICE_DISCOVER_MODE = "serviceDiscoverMode";
     static public final String consul = "consul";
 
-
+    //是否为嵌入tomcat方式运行
+    static public final String SERVER_EMBED = "server.embed";
     static public final String SERVER_PORT = "server.port";
 
     static public final String SERVER_WEB_PATH = "server.web.path";
@@ -614,6 +615,8 @@ public abstract class Environment {
     static public final String SERVER_SESSION_REDIS = "server.session.redis";
 
     static public final String SERVER_REDISSON_SESSION_CONFIG = "server.redissonSessionConfig";
+
+    static public final String SERVER_FILTER_MODE = "server.filter.mode";
 
     public final static String SPRING_PATH_SIGN = ".jar!/BOOT-INF/classes!";
 

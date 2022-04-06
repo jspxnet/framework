@@ -5,9 +5,9 @@ package com.github.jspxnet.scriptmark.exception;
  */
 public class ScriptException extends Exception {
 
-    private String fileName;
-    private int lineNumber;
-    private int columnNumber;
+    final private String fileName;
+    final private int lineNumber;
+    final private int columnNumber;
 
     /**
      * @param s The String transfer use in the message.

@@ -10,7 +10,9 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.CharArrayWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ChenYuan on 2017/6/14.
@@ -27,8 +29,14 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
     final private static String KEY_INSECURE_URL_KEYS = "insecureUrlKeys";
     final private static String KEY_INSECURE_QUERY_STRING_KEYS = "insecureQueryStringKeys";
     final private static String KEY_QUERY_BLACK = "queryBlack";
+    final private static String KEY_VALUE = "value";
+    final private static String KEY_PASSWORD = "password";
 
 
+
+    //密码访问目录,<密码,目录>
+    private Map<String,String> passwordFolderList = new HashMap<>();
+    private String[] blackSuffixList = null;
     private String[] insecureUrlKeys = null;
     private String[] insecureQueryStringKeys = null;
     private final CharArrayWriter contents = new CharArrayWriter();
@@ -40,13 +48,17 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
     private String[] include = null;
     private EvasiveRule evasiveRule = null;
     private boolean inEvasive = false;
+    private boolean inPasswordFolder = false;
     private boolean inResult = false;
     private boolean inCondition = false;
     private boolean inWhiteList = false;
     private boolean inBlackList = false;
+    private boolean inBlackSuffix = false;
+
     private boolean inInsecureUrlKeys = false;
     private boolean inInsecureQueryStringKeys = false;
     private boolean inQueryBlack = false;
+    private String password = "";
 
     ReadEvasiveRuleConfig() {
 
@@ -68,10 +80,22 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
             inWhiteList = true;
         }
 
-        if (localName.equalsIgnoreCase(TXWeb.EVASIVE_BlackList)) {
+        if (localName.equalsIgnoreCase(TXWeb.EVASIVE_BLACK_LIST)) {
             inBlackList = true;
         }
 
+        if (localName.equalsIgnoreCase(TXWeb.EVASIVE_BLACK_SUFFIX_LIST)) {
+            inBlackSuffix = true;
+        }
+
+        if (localName.equalsIgnoreCase(TXWeb.EVASIVE_PASSWORD_FOLDER)) {
+            inPasswordFolder = true;
+        }
+
+        if (inPasswordFolder&&localName.equalsIgnoreCase(KEY_VALUE))
+        {
+            password = attr.getValue(KEY_PASSWORD);
+        }
 
         if (localName.equalsIgnoreCase(KEY_INSECURE_URL_KEYS)) {
             inInsecureUrlKeys = true;
@@ -84,7 +108,7 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
             inQueryBlack = true;
             queryBlack = new QueryBlack();
             queryBlack.setName(attr.getValue(TXWeb.CONFIG_NAME));
-            queryBlack.setBlackSize(StringUtil.toInt(attr.getValue(TXWeb.EVASIVE_blackSize)));
+            queryBlack.setBlackSize(StringUtil.toInt(attr.getValue(TXWeb.EVASIVE_BLACK_SIZE)));
             queryBlack.setIpField(attr.getValue(TXWeb.EVASIVE_ipField));
             queryBlack.setTimesField(attr.getValue(TXWeb.EVASIVE_timesField));
             queryBlack.setMinTimes(StringUtil.toInt(attr.getValue(TXWeb.EVASIVE_minTimes)));
@@ -142,7 +166,7 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
             whiteList = ArrayUtil.join(whiteList, StringUtil.split(StringUtil.trim(contents.toString()), StringUtil.SEMICOLON));
             inWhiteList = false;
         }
-        if (!inEvasive && localName.equalsIgnoreCase(TXWeb.EVASIVE_BlackList)) {
+        if (!inEvasive && inBlackList&&localName.equalsIgnoreCase(TXWeb.EVASIVE_BLACK_LIST)) {
             blackList = ArrayUtil.join(blackList, StringUtil.split(StringUtil.trim(contents.toString()), StringUtil.SEMICOLON));
             inBlackList = false;
         }
@@ -156,6 +180,28 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
             insecureQueryStringKeys = ArrayUtil.join(insecureQueryStringKeys, StringUtil.split(StringUtil.replace(StringUtil.trim(contents.toString()), StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON));
             inInsecureQueryStringKeys = false;
         }
+
+        if (inBlackSuffix && localName.equalsIgnoreCase(TXWeb.EVASIVE_BLACK_SUFFIX_LIST)) {
+            blackSuffixList = ArrayUtil.join(blackSuffixList, StringUtil.split(StringUtil.replace(StringUtil.trim(contents.toString()), StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON));
+            inBlackSuffix = false;
+        }
+
+
+        if (inPasswordFolder&&localName.equalsIgnoreCase(KEY_VALUE))
+        {
+            String folder = StringUtil.trim(contents.toString());
+            if (!StringUtil.isNull(folder)&&password!=null)
+            {
+                passwordFolderList.put(folder,password);
+            }
+        }
+
+
+        if (localName.equalsIgnoreCase(TXWeb.EVASIVE_PASSWORD_FOLDER)) {
+            inPasswordFolder = false;
+        }
+
+
 
         if (inEvasive && inCondition && localName.equalsIgnoreCase(TXWeb.EVASIVE_CONDITION)) {
             condition.setScript(StringUtil.trim(contents.toString()));
@@ -189,32 +235,39 @@ public class ReadEvasiveRuleConfig extends DefaultHandler {
         return include;
     }
 
-    List<EvasiveRule> getEvasiveRuleList() {
+    public List<EvasiveRule> getEvasiveRuleList() {
         return evasiveRuleList;
     }
 
-    String[] getWhiteList() {
+    public String[] getWhiteList() {
         return whiteList;
     }
 
-    String[] getBlackList() {
+    public String[] getBlackList() {
         return blackList;
     }
 
-
-    String[] getInsecureUrlKeys() {
+    public String[] getInsecureUrlKeys() {
         return insecureUrlKeys;
     }
 
-    String[] getInsecureQueryStringKeys() {
+    public String[] getInsecureQueryStringKeys() {
         return insecureQueryStringKeys;
     }
 
-    List<QueryBlack> getQueryBlackRuleList() {
+    public List<QueryBlack> getQueryBlackRuleList() {
         return queryBlackRuleList;
     }
 
-    List<ResultConfigBean> getResultConfigList() {
+    public String[] getBlackSuffixList() {
+        return blackSuffixList;
+    }
+
+    public List<ResultConfigBean> getResultConfigList() {
         return resultConfigList;
+    }
+
+    public Map<String, String> getPasswordFolderList() {
+        return passwordFolderList;
     }
 }

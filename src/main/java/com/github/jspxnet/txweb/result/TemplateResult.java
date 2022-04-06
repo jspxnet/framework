@@ -14,6 +14,7 @@ import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.scriptmark.load.AbstractSource;
+import com.github.jspxnet.scriptmark.load.InputStreamSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
@@ -129,7 +130,20 @@ public class TemplateResult extends ResultSupport {
                 f = new File(action.getTemplatePath(), confFile);
             }
         }
+
         AbstractSource fileSource = new FileSource(f, action.getTemplateFile(), DEFAULT_ENCODE);
+        if (!fileSource.isFile())
+        {
+            InputStream inputStream = TXWebUtil.class.getResourceAsStream("/resources/template/"+action.getTemplateFile());
+            if (inputStream==null)
+            {
+                inputStream = TXWebUtil.class.getResourceAsStream("/template/"+action.getTemplateFile());
+            }
+            if (inputStream!=null)
+            {
+                fileSource = new InputStreamSource(inputStream,action.getTemplateFile(), DEFAULT_ENCODE);
+            }
+        }
         //如果使用cache 就使用uri
 
         String cacheKey = ScriptmarkEnv.noCache;

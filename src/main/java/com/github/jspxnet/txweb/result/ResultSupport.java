@@ -182,7 +182,7 @@ public abstract class ResultSupport implements Result {
                 //有错误信息
                 return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), action.getFailureMessage());
             } else
-            if (method==null||TXWebUtil.defaultExecute.equals(method.getName())&&action.getResult()==null)
+            if (method==null||ActionEnv.DEFAULT_EXECUTE.equals(method.getName())&&action.getResult()==null)
             {
                 //没有找到执行的方法
                 return RocResponse.error(ErrorEnumType.CALL_API.getValue(), "未知的接口").setStatus(HttpStatusType.HTTP_status_404);

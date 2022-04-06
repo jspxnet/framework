@@ -9,8 +9,6 @@
  */
 package com.github.jspxnet.txweb.env;
 
-import com.github.jspxnet.utils.StringUtil;
-
 /**
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
@@ -75,9 +73,15 @@ public final class TXWeb {
     final static public String EVASIVE_IMPRISON_SECOND = "imprisonSecond";
     final public static String EVASIVE_CONDITION = "condition";
     final public static String EVASIVE_WHITELIST = "whiteList";
-    final public static String EVASIVE_BlackList = "blackList";
+    final public static String EVASIVE_BLACK_LIST = "blackList";
+    final public static String EVASIVE_BLACK_SIZE = "blackSize";
 
-    final public static String EVASIVE_blackSize = "blackSize";
+    final public static String EVASIVE_BLACK_SUFFIX_LIST = "blackSuffixList";
+
+    final public static String EVASIVE_PASSWORD_FOLDER = "passwordFolder";
+
+
+
 
     final public static String EVASIVE_ipField = "ipField";
     final public static String EVASIVE_timesField = "timesField";

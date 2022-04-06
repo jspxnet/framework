@@ -34,8 +34,9 @@ public abstract class WebHandle {
 
     static protected Map<String, Object> createEnvironment(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
 
-        String namePart = URLUtil.getFileNamePart(request.getServletPath());
-        String namespace = TXWebUtil.getNamespace(request.getServletPath());
+
+        String namePart = URLUtil.getFileNamePart(request.getRequestURI());
+        String namespace = URLUtil.getNamespace(request.getRequestURI());
         if (!StringUtil.hasLength(namespace)) {
             namespace = TXWeb.global;
         }

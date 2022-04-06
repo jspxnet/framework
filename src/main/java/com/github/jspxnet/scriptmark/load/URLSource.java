@@ -9,6 +9,9 @@
  */
 package com.github.jspxnet.scriptmark.load;
 
+import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.MalformedURLException;
@@ -46,5 +49,9 @@ public class URLSource extends AbstractSource {
         conn.setReadTimeout(14000);
         return conn.getInputStream();
     }
-
+    @Override
+    public boolean isFile()
+    {
+        return StringUtil.isHttp(url.getPath());
+    }
 }

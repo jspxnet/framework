@@ -14,7 +14,10 @@ import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.StringUtil;
+import com.thetransactioncompany.cors.CORSResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ResponseFacade;
+
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -39,7 +42,7 @@ public class RedirectResult extends ResultSupport {
         Action action = actionInvocation.getActionProxy().getAction();
         HttpServletResponse response = action.getResponse();
         response.setContentType("text/html; charset=" + Dispatcher.getEncode());
-        if (response.isCommitted()) {
+        if (!(response instanceof ResponseFacade) && !(response instanceof CORSResponseWrapper) && response.isCommitted()) {
             log.error("redirect response.isCommitted():" + response.isCommitted());
             return;
         }

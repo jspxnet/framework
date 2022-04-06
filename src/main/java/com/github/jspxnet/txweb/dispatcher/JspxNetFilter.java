@@ -1,41 +1,41 @@
-/*
- * Copyright © 2004-2014 chenYuan. All rights reserved.
- * @Website:wwww.jspx.net
- * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
- * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
- * @jvm:jdk1.6+  x86/amd64
- *
- */
 package com.github.jspxnet.txweb.dispatcher;
 
+
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.JspxNetApplication;
-import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.txweb.evasive.Configuration;
+import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
+import com.github.jspxnet.txweb.evasive.EvasiveManager;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
- * date: 2006-12-26
- * Time: 17:42:15
- * tomcat get 方法需要设置编码修复
- * 这个东西会占用 request 读一次，不能正常使用ajax 请求
- */
-public class FilterDispatcher implements Filter {
+
+public class JspxNetFilter implements Filter {
+
+    private static boolean useEvasive = false;
+
+    private static EvasiveManager evasiveManager;
 
     /**
      * @param servletConfig 配置
      */
     @Override
-    public void init(FilterConfig servletConfig)  {
+    public void init(FilterConfig servletConfig) {
         ServletContext servletContext = servletConfig.getServletContext();
         Dispatcher.init(servletContext);
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        useEvasive = envTemplate.getBoolean(Environment.useEvasive);
+        if (useEvasive) {
+            Configuration evasiveConfiguration = EvasiveConfiguration.getInstance();
+            evasiveConfiguration.setFileName(envTemplate.getString(Environment.evasive_config));
+            evasiveManager = EvasiveManager.getInstance();
+        }
     }
 
     /**
@@ -58,19 +58,25 @@ public class FilterDispatcher implements Filter {
         }
         //确保系统跳转到正确到后缀名end
 
+
+        request.setCharacterEncoding(Dispatcher.getEncode());
+        response.setCharacterEncoding(Dispatcher.getEncode());
+
         String suffix = URLUtil.getFileType(request.getRequestURI());
         if (suffix != null) {
             suffix = suffix.toLowerCase();
         }
 
-
-        if (ArrayUtil.inArray(new String[]{Dispatcher.getTemplateSuffix(),Dispatcher.getFilterSuffix(),Dispatcher.getMarkdownSuffix()},suffix,true)) {
+        //防刷功能 begin
+        if (useEvasive && JspxNetApplication.checkRun() && evasiveManager.execute(request, response)) {
+            return;
+        }
+        if (Dispatcher.hasSuffix(suffix)) {
             Dispatcher.getInstance().wrapRequest(request, response);
         } else {
             filterChain.doFilter(servletRequest, servletResponse);
         }
     }
-
     /**
      * 卸载数据
      */

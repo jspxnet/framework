@@ -24,6 +24,8 @@ import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sober.exception.ValidException;
+import com.github.jspxnet.utils.URLUtil;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -73,7 +75,7 @@ public class JspxModule {
     }
 
     public static Action getAction(HttpServletRequest request, HttpServletResponse response, String namePart) throws ValidException {
-        String namespace = TXWebUtil.getNamespace(request.getServletPath());
+        String namespace = URLUtil.getNamespace(request.getServletPath());
         return getAction(request, response, namePart, namespace);
     }
 

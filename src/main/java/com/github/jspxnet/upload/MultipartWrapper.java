@@ -9,13 +9,16 @@
  */
 package com.github.jspxnet.upload;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MultipartWrapper extends HttpServletRequestWrapper {
 
-    private CosMultipartRequest mreq = null;
+    final private CosMultipartRequest mreq;
 
     public MultipartWrapper(HttpServletRequest req, String dir)
             throws IOException {
@@ -40,7 +43,6 @@ public class MultipartWrapper extends HttpServletRequestWrapper {
 
     @Override
     public Map<String, String[]> getParameterMap() {
-
         Map<String, String[]> map = new HashMap<>();
         Enumeration<String> enums = getParameterNames();
         while (enums.hasMoreElements()) {

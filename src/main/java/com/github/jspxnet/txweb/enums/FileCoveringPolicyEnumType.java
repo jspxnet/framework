@@ -18,7 +18,9 @@ public enum FileCoveringPolicyEnumType  {
     //覆盖方式
     COVERING(2, "覆盖方式",new CoveringsFileRenamePolicy()),
     //系统默认方式
-    JSPX(1, "文件名加日期加随机", new JspxNetFileRenamePolicy());
+    JSPX(1, "文件名加日期加随机", new JspxNetFileRenamePolicy()),
+
+    Method(0, "通过方法得到", new DateRandomNamePolicy());
 
 
     private final int value;
