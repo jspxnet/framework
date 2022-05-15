@@ -4,12 +4,11 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.io.zip.ZipFile;
-import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
-import com.github.jspxnet.txweb.env.ActionEnv;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.StringUtil;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
@@ -23,17 +22,13 @@ public class ZipFileResult extends ResultSupport {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception
     {
-        Action action = actionInvocation.getActionProxy().getAction();
-        action.setActionResult(ActionSupport.NONE);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
+        actionContext.setActionResult(ActionSupport.NONE);
 
-        HttpServletResponse response = action.getResponse();
-        String browserCache = action.getEnv(ActionEnv.BROWSER_CACHE);
-        if (!StringUtil.isNull(browserCache) && !StringUtil.toBoolean(browserCache)) {
-            response.setHeader("Pragma", "No-cache");
-            response.setHeader("Cache-Control", "no-cache, must-revalidate");
-            response.setDateHeader("Expires", 0);
-        }
-        Object obj = action.getResult();
+        checkCache(actionContext);
+
+        Object obj = actionContext.getResult();
         if (obj == null) {
             TXWebUtil.errorPrint("无数据",null,response, HttpStatusType.HTTP_status_404);
             return;

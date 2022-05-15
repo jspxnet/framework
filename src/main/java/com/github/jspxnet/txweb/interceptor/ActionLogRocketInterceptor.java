@@ -8,6 +8,8 @@ import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.txweb.table.ActionLog;
@@ -73,7 +75,7 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
 
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {
-        String result = actionInvocation.invoke();
+
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         Action action = actionProxy.getAction();
 
@@ -82,16 +84,17 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
             return actionInvocation.invoke();
         }
         //游客就不记录了
-        if (guestLog && action.isGuest() || !actionInvocation.isExecuted()) {
-            return result;
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (guestLog && action.isGuest() || !actionContext.isExecuted()) {
+            return actionContext.getActionResult();
         }
 
         //也可以 return Action.ERROR; 终止action的运行
         //保存历史记录 begin
         //@method
-        String operation = actionProxy.getMethod().getName();
+        String operation = actionContext.getMethod().getName();
         if (ActionEnv.DEFAULT_EXECUTE.equalsIgnoreCase(operation) && !RequestUtil.isMultipart(action.getRequest()) || StringUtil.isEmpty(operation)) {
-            return result;
+            return actionContext.getActionResult();
         }
         ActionLog actionLog = action.getActionLog();
         if (actionLog != null && !StringUtil.isNull(actionLog.getContent())) {
@@ -105,7 +108,7 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
             actionLog.setCaption(actionProxy.getCaption());
             actionLog.setClassMethod(operation);
             actionLog.setMethodCaption(actionProxy.getMethodCaption());
-            actionLog.setActionResult(result);
+            actionLog.setActionResult(actionContext.getActionResult());
 
             if (rocketMqProducer != null) {
                 JSONObject json = new JSONObject(actionLog);
@@ -126,7 +129,7 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
             //删除3年前的记录数据
         }
         //执行下一个动作,可能是下一个拦截器,也可能是action取决你的配置
-        return result;
+        return actionContext.getActionResult();
         //也可以 return Action.ERROR; 终止action的运行
     }
 }

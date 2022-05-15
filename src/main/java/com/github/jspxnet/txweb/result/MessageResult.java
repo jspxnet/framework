@@ -11,9 +11,13 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.Action;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +32,12 @@ import java.util.Map;
 public class MessageResult extends ResultSupport {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        Action action = actionInvocation.getActionProxy().getAction();
+
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
+
         StringBuilder sb = new StringBuilder();
-        Map<String, String> fieldInfo = action.getFieldInfo();
+        Map<String, String> fieldInfo = actionContext.getFieldInfo();
         if (fieldInfo != null && !fieldInfo.isEmpty()) {
             sb.append("<ul id=\"fieldInfo\">\r\n");
             for (String key : fieldInfo.keySet()) {
@@ -48,11 +55,9 @@ public class MessageResult extends ResultSupport {
         }
 
         String contentType = "text/html; charset=" + Dispatcher.getEncode();
-        ServletResponse response = action.getResponse();
-        response.setCharacterEncoding(Dispatcher.getEncode());
         response.setContentType(contentType);
         PrintWriter pw = response.getWriter();
-        pw.print(sb.toString());
+        pw.print(sb);
         pw.flush();
         pw.close();
     }

@@ -14,6 +14,8 @@ import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.ActionLogDAO;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.table.ActionLog;
@@ -55,6 +57,7 @@ public class ActionLogInterceptor extends InterceptorSupport {
 
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {
+
         String result = actionInvocation.invoke();
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         Action action = actionProxy.getAction();
@@ -62,16 +65,16 @@ public class ActionLogInterceptor extends InterceptorSupport {
         if (RequestUtil.isMultipart(action.getRequest())) {
             return actionInvocation.invoke();
         }
-
+        ActionContext actionContext = ThreadContextHolder.getContext();
         //游客就不记录了
-        if (guestLog && action.isGuest() || !actionInvocation.isExecuted()) {
+        if (guestLog && action.isGuest() || !actionContext.isExecuted()) {
             return result;
         }
 
         //也可以 return Action.ERROR; 终止action的运行
         //保存历史记录 begin
         //@method
-        String operation = actionProxy.getMethod().getName();
+        String operation = actionContext.getMethod().getName();
         if (ActionEnv.DEFAULT_EXECUTE.equalsIgnoreCase(operation) && !RequestUtil.isMultipart(action.getRequest()) || StringUtil.isEmpty(operation)) {
             return result;
         }

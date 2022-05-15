@@ -11,6 +11,7 @@ package com.github.jspxnet.txweb.online;
 
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.txweb.Action;
+import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.UserSession;
 import javax.servlet.http.HttpServletRequest;
@@ -51,6 +52,10 @@ public interface OnlineManager extends Serializable {
     UserSession getUserSession(String sessionId, String ip, long uid);
 
     UserSession getUserSession(Action action);
+
+    UserSession getUserSession();
+
+    UserSession getUserSession(ActionContext actionContext);
 
     void deleteUserSession(String sid, long uid) throws Exception;
 

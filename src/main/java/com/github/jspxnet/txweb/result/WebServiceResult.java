@@ -5,6 +5,8 @@ import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.XML;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.utils.XMLUtil;
 
@@ -34,7 +36,8 @@ public class WebServiceResult extends ResultSupport {
     public void execute(ActionInvocation actionInvocation) throws JSONException {
         Object methodResult = getRocAutoResult(actionInvocation);
         json = getResultJson(methodResult);
-        JSONObject callJson = actionInvocation.getActionProxy().getCallJson();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        JSONObject callJson = actionContext.getCallJson();
         if (callJson != null && "xml".equalsIgnoreCase(callJson.getString(Environment.rocFormat))) {
             outXml = true;
         }

@@ -180,7 +180,29 @@ public final class URLUtil {
         return url.substring(0, url.lastIndexOf("/") + 1);
     }
 
+    /**
+     *
+     * @param url rul
+     * @return 删除文件路径的后缀
+     */
+    public static String deleteUrlSuffix(String url) {
+        if (StringUtil.isNull(url)) {
+            return StringUtil.empty;
+        }
+        int whao = url.indexOf("?");
+        if (whao != -1) {
+            url = url.substring(0, whao);
+        }
+        if (url.contains(StringUtil.DOT))
+        {
+            url = url.substring(0, url.lastIndexOf(StringUtil.DOT));
+        }
+        return url;
+    }
 
+    public static void main(String[] args) {
+        System.out.println(deleteUrlSuffix("/jcommon/program/tree/create/treeid"));
+    }
     /**
      * @param str 完整的域名地址
      * @return 返回域名名称部分代http的 例如:http://www.jspx.net

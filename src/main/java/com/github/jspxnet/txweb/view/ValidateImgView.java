@@ -11,6 +11,7 @@ package com.github.jspxnet.txweb.view;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
 import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.security.utils.EncryptUtil;
@@ -98,9 +99,10 @@ public class ValidateImgView extends ActionSupport {
 
     @Override
     public String execute() throws Exception {
-        if (safe && RequestUtil.isPirated(request)) {
+        if (safe && RequestUtil.isPirated(getRequest())) {
             return NONE;
         }
+        HttpServletResponse response = getResponse();
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);

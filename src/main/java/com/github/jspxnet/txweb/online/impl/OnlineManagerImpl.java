@@ -11,7 +11,6 @@ package com.github.jspxnet.txweb.online.impl;
 
 
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.res.LanguageRes;
@@ -21,7 +20,6 @@ import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.CongealEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.sioc.annotation.Ref;
@@ -30,6 +28,8 @@ import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.bundle.provider.PropertyProvider;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.MemberDAO;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.online.OnlineManager;
@@ -131,20 +131,6 @@ public class OnlineManagerImpl implements OnlineManager {
 
     public void setVerifyTokenLevel(int verifyTokenLevel) {
         this.verifyTokenLevel = verifyTokenLevel;
-    }
-
-
-    static public void main(String[] arge) throws Exception {
-        JspxNetApplication.autoRun();
-        Encrypt encrypt = EnvFactory.getSymmetryEncrypt();
-        String strM = encrypt.getEncode("f26c29d9b52364237351f5cb72e3c3f8f26c29d9b52364237351f5cb72e3c3f8");
-        String sign = encrypt.sign(strM,EnvFactory.getHashAlgorithmKey());
-        boolean verify = encrypt.verify(strM,EnvFactory.getHashAlgorithmKey(),sign);
-        String str = encrypt.getDecode(strM);
-      /*  System.out.println(encrypt.getClass().getName()+"-------------sign="+ sign);
-        System.out.println("-------------verify="+ verify);
-        System.out.println("-------------strM="+ strM);
-        System.out.println("-------------str="+ str);*/
     }
 
     @Override
@@ -594,7 +580,6 @@ public class OnlineManagerImpl implements OnlineManager {
 
         return userSession;
     }
-
     /**
      * 得到在线用户信息,并且可以自动登录
      *
@@ -605,13 +590,32 @@ public class OnlineManagerImpl implements OnlineManager {
      * 如果没有就检查请求中是否有参数,说明(上传的时候用到),
      * 最后检查cookie中的seesionId(要加密),满足跨域要求,从而实现单点登录
      */
+    @Deprecated
     @Override
     public UserSession getUserSession(Action action) {
+        return getUserSession();
+    }
+
+
+
+
+    @Override
+    public UserSession getUserSession()
+    {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return getUserSession(actionContext);
+    }
+
+    @Override
+    public UserSession getUserSession(ActionContext actionContext)
+    {
+        HttpServletRequest request = actionContext.getRequest();
+
         //有可能多个拦截器，之前已经读取过一次了
         //DDOS攻击检查 begin
         //DDOS 攻击 sessionId 不同
 
-        HttpServletRequest request = action.getRequest();
+        //HttpServletRequest request = action.getRequest();
         //外挂接收登陆信息有一定风险性
         if (!ObjectUtil.isEmpty(request) && allowServerName != null && !StringUtil.ASTERISK.equals(allowServerName)) {
             if (!request.getServerName().matches(allowServerName)) {
@@ -626,6 +630,7 @@ public class OnlineManagerImpl implements OnlineManager {
 
         //才有头部传输sesionId的方式,这种方式比较标准一点
         //头部个数 Authorization: Bearer {seesionId}
+
         String token = null;
         if (request != null) {
             token = RequestUtil.getToken(request);
@@ -638,20 +643,23 @@ public class OnlineManagerImpl implements OnlineManager {
                 token = null;
             }
         }
-
-        HttpSession session = action.getSession();
-        if (session != null & StringUtil.isNull(token) ) {
-            token = (String) session.getAttribute(TXWeb.token);
+        HttpSession session = null;
+        if (request!=null)
+        {
+            session = request.getSession();
+            if (session != null & StringUtil.isNull(token) ) {
+                token = (String) session.getAttribute(TXWeb.token);
+            }
         }
 
         //如果是二级域名共享登陆
         if (session != null && StringUtil.isNull(token)) {
             UserSession userSession = createGuestUserSession();
-            userSession.setId(JWTUtil.createToken(action.getRemoteAddr(),"0", SessionUtil.getSessionId(session)));
+            userSession.setId(JWTUtil.createToken(actionContext.getRemoteAddr(),"0", SessionUtil.getSessionId(session)));
             updateUserSessionCache(userSession);
             return userSession;
         }
-        return getUserSession(token,action.getRemoteAddr());
+        return getUserSession(token,actionContext.getRemoteAddr());
     }
 
      /**

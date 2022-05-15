@@ -5,21 +5,27 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.txweb.evasive.Configuration;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.txweb.evasive.EvasiveManager;
+import com.github.jspxnet.txweb.util.RequestUtil;
+import com.github.jspxnet.txweb.util.RequestWrapper;
+import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
-
+@Slf4j
 public class JspxNetFilter implements Filter {
 
     private static boolean useEvasive = false;
-
     private static EvasiveManager evasiveManager;
 
     /**
@@ -47,8 +53,34 @@ public class JspxNetFilter implements Filter {
      */
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        try {
+            servletRequest.setCharacterEncoding(Dispatcher.getEncode());
+            servletResponse.setCharacterEncoding(Dispatcher.getEncode());
+        } catch (UnsupportedEncodingException e) {
+            TXWebUtil.errorPrint("系统编码错误", null, (HttpServletResponse)servletResponse, HttpStatusType.HTTP_status_403);
+            log.debug("系统编码错误", e);
+            return;
+        }
+        //必须在evasiveManager 前边
+        //getParameter()、getInputStream()和getReader() 三个是冲突的,调用一个,其他的会数据错误
+        HttpServletRequest request;
+        try {
+            if (!RequestUtil.isMultipart((HttpServletRequest)servletRequest))
+            {
+                request = new RequestWrapper((HttpServletRequest)servletRequest);
+            } else
+            {
+                request = (HttpServletRequest)servletRequest;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            request = (HttpServletRequest)servletRequest;
+        }
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+        if (useEvasive && JspxNetApplication.checkRun() && evasiveManager.execute(request, response)) {
+            return;
+        }
+
         String urlName = URLUtil.getFileName(request.getRequestURI());
 
         //确保系统跳转到正确到后缀名begin
@@ -57,11 +89,6 @@ public class JspxNetFilter implements Filter {
             return;
         }
         //确保系统跳转到正确到后缀名end
-
-
-        request.setCharacterEncoding(Dispatcher.getEncode());
-        response.setCharacterEncoding(Dispatcher.getEncode());
-
         String suffix = URLUtil.getFileType(request.getRequestURI());
         if (suffix != null) {
             suffix = suffix.toLowerCase();
@@ -71,7 +98,9 @@ public class JspxNetFilter implements Filter {
         if (useEvasive && JspxNetApplication.checkRun() && evasiveManager.execute(request, response)) {
             return;
         }
-        if (Dispatcher.hasSuffix(suffix)) {
+
+        if (Dispatcher.hasSuffix(suffix))
+        {
             Dispatcher.getInstance().wrapRequest(request, response);
         } else {
             filterChain.doFilter(servletRequest, servletResponse);

@@ -51,7 +51,7 @@ public class EditConfigAction extends ConfigView {
         boolean isSave = false;
         StringBuilder sb = new StringBuilder();
         String[] noSaveArray = {"post", "submit", "formId"};
-        java.util.Enumeration<java.lang.String> enumeration = request.getParameterNames();
+        java.util.Enumeration<java.lang.String> enumeration = getRequest().getParameterNames();
         try {
             while (enumeration.hasMoreElements()) {
                 String key = enumeration.nextElement();

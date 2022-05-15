@@ -17,6 +17,8 @@ import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
+import com.github.jspxnet.txweb.context.DefultContextHolderStrategy;
+import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
@@ -75,7 +77,7 @@ public class JspxModule {
     }
 
     public static Action getAction(HttpServletRequest request, HttpServletResponse response, String namePart) throws ValidException {
-        String namespace = URLUtil.getNamespace(request.getServletPath());
+        String namespace = URLUtil.getNamespace(request.getRequestURI());
         return getAction(request, response, namePart, namespace);
     }
 
@@ -89,7 +91,9 @@ public class JspxModule {
         Map<String, Object> envParams = TXWebUtil.createEnvironment();
         envParams.put(ActionEnv.Key_ActionName, namePart);
         envParams.put(ActionEnv.Key_Namespace, namespace);
-        envParams.put(ActionEnv.Key_RealPath, request.getServletPath());
+        envParams.put(ActionEnv.Key_RealPath, Dispatcher.getRealPath());
+        DefultContextHolderStrategy.createContext(request,response,envParams);
+
         envParams.put(ActionEnv.CONTENT_TYPE, "text/html; charset=" + request.getCharacterEncoding());
         ///////////////////////////////////环境参数 end
         ////////////////////ajax begin

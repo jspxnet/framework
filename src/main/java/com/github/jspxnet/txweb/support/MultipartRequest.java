@@ -2,8 +2,6 @@ package com.github.jspxnet.txweb.support;
 
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.upload.UploadedFile;
-import com.github.jspxnet.utils.StringUtil;
-
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -123,74 +121,6 @@ public abstract class MultipartRequest implements HttpServletRequest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-
-
-    static public Map<String, String[]> parseQueryString(String s) {
-        String[] valArray;
-        if (s == null) {
-            throw new IllegalArgumentException();
-        }
-        Map<String, String[]> ht = new Hashtable<String, String[]>();
-        StringBuffer sb = new StringBuffer();
-        StringTokenizer st = new StringTokenizer(s, StringUtil.AND);
-        while (st.hasMoreTokens()) {
-            String pair = st.nextToken();
-            int pos = pair.indexOf('=');
-            if (pos == -1) {
-                // XXX
-                // should give more detail about the illegal argument
-                throw new IllegalArgumentException();
-            }
-            String key = parseName(pair.substring(0, pos), sb);
-            String val = parseName(pair.substring(pos + 1), sb);
-            if (ht.containsKey(key)) {
-                String[] oldVals = ht.get(key);
-                valArray = new String[oldVals.length + 1];
-                System.arraycopy(oldVals, 0, valArray, 0, oldVals.length);
-                valArray[oldVals.length] = val;
-            } else {
-                valArray = new String[1];
-                valArray[0] = val;
-            }
-            ht.put(key, valArray);
-        }
-        return ht;
-    }
-
-
-    static private String parseName(String s, StringBuffer sb) {
-        sb.setLength(0);
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            switch (c) {
-                case '+':
-                    sb.append(' ');
-                    break;
-                case '%':
-                    try {
-                        sb.append((char) Integer.parseInt(s.substring(i + 1, i + 3), 16));
-                        i += 2;
-                    } catch (NumberFormatException e) {
-                        // XXX
-                        // need transfer be more specific about illegal arg
-                        throw new IllegalArgumentException();
-                    } catch (StringIndexOutOfBoundsException e) {
-                        String rest = s.substring(i);
-                        sb.append(rest);
-                        if (rest.length() == 2) {
-                            i++;
-                        }
-                    }
-
-                    break;
-                default:
-                    sb.append(c);
-                    break;
-            }
-        }
-        return sb.toString();
     }
 
     //---------------------------------

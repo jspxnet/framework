@@ -564,24 +564,34 @@ public class ClassUtil {
     }
 
     /**
-     * @param cls  类
+     *
+     * @param cls 类
      * @param name 名称
+     * @param ignore 不分大小写
      * @return 得到同名的方法列表
      */
-    public static Method[] getDeclaredMethodList(Class<?> cls, String name) {
+    public static Method[] getDeclaredMethodList(Class<?> cls, String name,boolean ignore) {
         if (name == null) {
             return null;
         }
         Method[] result = null;
         Method[] methods = getDeclaredMethods(cls);
         for (Method method : methods) {
-            if (method.getName().equals(name)) {
+            if (!ignore&&method.getName().equals(name) || ignore&&method.getName().equalsIgnoreCase(name)) {
                 result = BeanUtil.appendMethodArray(result, method);
             }
         }
         return result;
     }
 
+    /**
+     * @param cls  类
+     * @param name 名称
+     * @return 得到同名的方法列表
+     */
+    public static Method[] getDeclaredMethodList(Class<?> cls, String name) {
+        return getDeclaredMethodList(cls, name,false);
+    }
     /**
      * @param cls  类
      * @param name 方法名称
@@ -769,10 +779,6 @@ public class ClassUtil {
      */
     public static Object invokeStaticMethod(String className, String methodName, Object[] args) throws Exception {
         Class<?> ownerClass = loadClass(className);
-        if (ownerClass==null)
-        {
-            return null;
-        }
         if (args==null)
         {
             return ownerClass.getMethod(methodName).invoke(null);
@@ -805,7 +811,7 @@ public class ClassUtil {
      * @param implClass 对象
      * @return hessian 查询调用接口方法
      */
-    public static Class<?> findRemoteAPI(Class<?> implClass) {
+    public static Class<?> findRemoteApi(Class<?> implClass) {
  		if (implClass == null) {
             return null;
         }
@@ -821,7 +827,7 @@ public class ClassUtil {
         if (interfaces.length == 1) {
             return interfaces[0];
         }
-        return findRemoteAPI(implClass.getSuperclass());
+        return findRemoteApi(implClass.getSuperclass());
     }
 
 

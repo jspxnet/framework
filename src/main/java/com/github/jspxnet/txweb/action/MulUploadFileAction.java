@@ -19,6 +19,7 @@ import com.github.jspxnet.txweb.annotation.MulRequest;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.bundle.Bundle;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.ImageSysEnumType;
@@ -34,6 +35,7 @@ import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -290,7 +292,7 @@ public abstract class MulUploadFileAction extends MultipartSupport {
     @Param(request = false)
     @MulRequest(component = "apache", covering = FileCoveringPolicyEnumType.Method, saveDirectory = "@saveDirectory", fileTypes = "@fileTypes", maxPostSize = "@maxPostSize")
     public void setMultipartRequest(MultipartRequest multipartRequest) {
-        request = multipartRequest;
+        ThreadContextHolder.getContext().setRequest(multipartRequest);
     }
 
     /**
@@ -423,13 +425,14 @@ public abstract class MulUploadFileAction extends MultipartSupport {
         if (useSave && uploadFileDAO == null) {
             return RocResponse.error(ErrorEnumType.CONFIG.getValue(), "DAO配置错误");
         }
+
+        HttpServletRequest request = ThreadContextHolder.getContext().getRequest();
         //验证环境
         if (request != null && !RequestUtil.isMultipart(request)) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.uploadRequestError));
         }
 
         MultipartRequest multipartRequest = (MultipartRequest) request;
-
         if (UploadVerifyEnumType.DEFAULT.getValue() == verifyType && isGuest()) {
             log.info(language.getLang(LanguageRes.needLogin));
             for (UploadedFile uf : multipartRequest.getFiles()) {
@@ -473,6 +476,7 @@ public abstract class MulUploadFileAction extends MultipartSupport {
      */
     public IUploadFile[] localUploadFile(IUserSession userSession, boolean thumbnail) throws Exception {
         String setupPath = getSetupPath();
+        HttpServletRequest request = ThreadContextHolder.getContext().getRequest();
         MultipartRequest multipartRequest = (MultipartRequest) request;
         String[] titleArray = multipartRequest.getParameterValues(TITLE_VAR_NAME);
         String[] contentArray = multipartRequest.getParameterValues(CONTENT_VAR_NAME);

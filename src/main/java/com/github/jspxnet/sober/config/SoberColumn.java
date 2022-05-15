@@ -48,19 +48,19 @@ public class SoberColumn implements Serializable {
     @Column(caption = "是否空")
     private boolean notNull = false;
 
-    @Column(caption = "默认值")
+    @Column(caption = "默认值",length = 1000)
     private String defaultValue = StringUtil.empty;
 
-    @Column(caption = "描述")
+    @Column(caption = "描述",length = 200)
     private String caption = StringUtil.empty;
 
-    @Column(caption = "选项")
+    @Column(caption = "选项",length = 1000)
     private String option = StringUtil.empty;
 
-    @Column(caption = "验证")
+    @Column(caption = "验证",length = 1000)
     private String dataType = StringUtil.empty;
 
-    @Column(caption = "输入框")
+    @Column(caption = "输入框",length = 100)
     private String input = "text";
 
     @Column(caption = "长度")
@@ -70,7 +70,7 @@ public class SoberColumn implements Serializable {
     @Column(caption = "隐藏")
     private boolean hidden = false;
 
-    @Column(caption = "java类型")
+    @Column(caption = "java类型",length = 100)
     private String javaType = StringUtil.empty;
 
     @JsonField

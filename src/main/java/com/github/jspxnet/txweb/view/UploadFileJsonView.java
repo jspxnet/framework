@@ -16,6 +16,8 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.*;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -166,6 +168,7 @@ public class UploadFileJsonView extends ActionSupport {
             result.put("current_url", getCurrentUrl());
             result.put("total_count", fileList.size());
             result.put("file_list", fileList);
+            HttpServletResponse response = getResponse();
             response.setContentType("application/json; charset=UTF-8");
             response.getWriter().println(result.toString(1));
         }

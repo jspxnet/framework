@@ -86,8 +86,6 @@ public class JspxCoreListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(javax.servlet.ServletContextEvent servletContextEvent) {
-        log.info("create log4j config");
-
         boolean isAndroid = SystemUtil.isAndroid();
         //开始不能调用时间,调用了时间设置不了时区
         copyright = Environment.frameworkName + " " + Environment.VERSION + " " + Environment.licenses + " Powered By chenYuan ";
@@ -100,6 +98,8 @@ public class JspxCoreListener implements ServletContextListener {
             Security.addProvider((Provider) ClassUtil.newInstance("org.bouncycastle.jce.provider.BouncyCastleProvider"));
         } catch (Exception e) {
             e.printStackTrace();
+            log.info("1. 加密类bcprov-jdk15on-1.69.jar 拷贝到 %JAVA_HOME%\\jre\\lib\\ext 目录，一般jdk安装后有两个位置");
+            log.info("2. 在 jdk安装目录下（%JAVA_HOME%\\jre\\lib\\security）修改 java.security 文件修改为 security.provider.7=org.bouncycastle.jce.provider.BouncyCastleProvider");
         }
 
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();

@@ -138,7 +138,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.55";
+    final static public String VERSION = "6.57";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -188,8 +188,6 @@ public abstract class Environment {
     //static public final String uploadFileDAO = "uploadFileDAO";
 
     static public final String UserBundleDAO = "userBundleDAO";
-
-
 
     //文件上传对象Ueditor里边使用
     //static public final String uploadFileAction = "uploadFileAction";
@@ -492,7 +490,7 @@ public abstract class Environment {
     final public static String jspxNetRocVersion = "3.0";
     final public static String Protocol = "protocol";
     final public static String rocFormat = "format";
-    final public static String rocMethodCall = "methodCall";
+    //final public static String rocMethodCall = "methodCall";
 
     //方法调用方式的 actinName
     final public static String rocId = "id";

@@ -180,7 +180,7 @@ public class RouteService implements Runnable {
             } catch (Exception e) {
                 routeManage.routeOff(routeSession.getSocketAddress());
                 if (rpcConfig.isDebug()) {
-                    log.debug("netty rpc 路由网络中存在异常服务器:{},\r\n错误:{}", ObjectUtil.toString(routeSession),e.getLocalizedMessage());
+                    log.debug("netty rpc 路由网络中存在异常服务器:{},\r\n错误:{}", ObjectUtil.toString(routeSession),e.getMessage());
                 }
             }
         }

@@ -8,6 +8,7 @@ import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.helper.Helper;
 import com.github.jspxnet.txweb.helper.PageHelper;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.Writer;
 
 /**
@@ -59,6 +60,7 @@ public class HelperAction extends ActionSupport {
         //读取文件使用配置的编码
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
         processor.setEncode(environmentTemplate.getString(Environment.encode, Environment.defaultEncode));
+        HttpServletResponse response = getResponse();
         Writer writer = response.getWriter();
 
         if (JSON_formatType.equalsIgnoreCase(type)) {

@@ -15,10 +15,8 @@ package com.github.jspxnet.upload;
 
 import com.github.jspxnet.txweb.support.MultipartRequest;
 import com.github.jspxnet.upload.multipart.*;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.util.HttpUtil;
+import com.github.jspxnet.utils.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -132,7 +130,8 @@ public class CosMultipartRequest extends MultipartRequest {
         // Ben Johnson, ben.johnson@merrillcorp.com, for the idea.
         if (request.getQueryString() != null) {
             // Let HttpUtils create a name->String[] structure
-            Map<String, String[]> queryParameters = parseQueryString(request.getQueryString());
+            String queryString = URLUtil.getUrlDecoder(request.getQueryString(),encoding);
+            Map<String, String[]> queryParameters = HttpUtil.parseQueryString(queryString);
             // For our own use, name it a name->Vector structure
             for (String paramName : queryParameters.keySet()) {
                 String[] values = queryParameters.get(paramName);

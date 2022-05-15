@@ -27,7 +27,10 @@ public class TomcatUtil {
             if (MBeanServerFactory.findMBeanServer(null).size() > 0) {
                 server = MBeanServerFactory.findMBeanServer(null).get(0);
             }
-
+            if (server==null)
+            {
+                return new ArrayList<>(0);
+            }
             List<PortInfo> result = new ArrayList<>();
             Set<ObjectName> names = server.queryNames(new ObjectName("Catalina:type=Connector,*"), null);
             Iterator<ObjectName> iterator = names.iterator();

@@ -18,11 +18,11 @@ public class HelperView extends HelperAction {
 
     @Override
     public String execute() throws Exception {
-        String url = request.getRequestURI();
+        String url = getRequest().getRequestURI();
         if (StringUtil.countMatches(url, "/") < 3) {
             TXWebUtil.print("<div style=\"float:left; text-align:left; padding-left:20px; margin:10px; border:#F00 solid 1px; width:94%; font-size:14px; color:#000; background-color:#FFF;\">\n"
                     + "<h4>ERROR：</h4>\n" + "<blockquote>不存在的帮助信息</blockquote>"
-                    + "</div>", WebOutEnumType.HTML.getValue(), response);
+                    + "</div>", WebOutEnumType.HTML.getValue(), getResponse());
             return NONE;
         }
         url = StringUtil.substringAfter(url, "/");

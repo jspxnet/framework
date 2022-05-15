@@ -80,9 +80,9 @@ public class ValidatorAction extends ActionSupport {
     public String execute() throws Exception {
         processor.setEncode(Dispatcher.getEncode());
         if (WebOutEnumType.JSON.getValue()==WebOutEnumType.find(type).getValue()) {
-            TXWebUtil.print(getJson(), WebOutEnumType.JSON.getValue(), response);
+            TXWebUtil.print(getJson(), WebOutEnumType.JSON.getValue(), getResponse());
         } else {
-            TXWebUtil.print("<?xml version=\"1.0\" encoding=\"" + processor.getEncode() + "\"?>\r\n" + getXML(), WebOutEnumType.XML.getValue(), response);
+            TXWebUtil.print("<?xml version=\"1.0\" encoding=\"" + processor.getEncode() + "\"?>\r\n" + getXML(), WebOutEnumType.XML.getValue(), getResponse());
         }
         return NONE;
     }

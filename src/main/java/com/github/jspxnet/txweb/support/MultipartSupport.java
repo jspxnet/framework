@@ -12,6 +12,8 @@ package com.github.jspxnet.txweb.support;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.utils.*;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 
 /**
@@ -73,9 +75,10 @@ public abstract class MultipartSupport extends ActionSupport {
      * @return 判断上传的文件里边是否有代码数据
      */
     public int checkFileMatching(String fileTypes) {
+
         String[] types = StringUtil.split(fileTypes.toLowerCase(), StringUtil.SEMICOLON);
         int result = 0;
-        for (UploadedFile uploadFile : ((MultipartRequest)request).getFiles()) {
+        for (UploadedFile uploadFile : ((MultipartRequest)getRequest()).getFiles()) {
             File f = uploadFile.getFile();
             if (!f.isFile()) {
                 continue;
@@ -96,7 +99,8 @@ public abstract class MultipartSupport extends ActionSupport {
 
     @Override
     public void destroy() {
-        if (request!=null && request instanceof MultipartRequest)
+        HttpServletRequest request =  getRequest();
+        if (request instanceof MultipartRequest)
         {
             ((MultipartRequest)request).destroy();
         }

@@ -15,6 +15,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.json.JSONObject;
+
 import com.github.jspxnet.txweb.dispatcher.handle.*;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.result.RocResponse;
@@ -24,12 +25,10 @@ import com.github.jspxnet.utils.*;
 import com.thetransactioncompany.cors.CORSResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ResponseFacade;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,22 +43,21 @@ import java.util.Map;
  */
 @Slf4j
 public final class Dispatcher {
-    private static final Map<String, Class<?>> ACTION_HANDLE_MAP = new HashMap<String, Class<?>>(7)
+
+    private static final Map<String, WebHandle> ACTION_HANDLE_MAP = new HashMap<String, WebHandle>(7)
     {
         {
-            put(RocHandle.NAME, RocHandle.class);
-            put(RsaRocHandle.NAME, RsaRocHandle.class);
-            put(ActionHandle.NAME, ActionHandle.class);
-            put(MarkdownHandle.NAME, MarkdownHandle.class);
-            put(HessianHandle.NAME, HessianHandle.class);
-            put(CommandHandle.NAME, CommandHandle.class);
+            put(RocHandle.NAME, new RocHandle());
+            put(RsaRocHandle.NAME, new RsaRocHandle());
+            put(ActionHandle.NAME, new ActionHandle());
+            put(MarkdownHandle.NAME, new MarkdownHandle());
+            put(HessianHandle.NAME, new HessianHandle());
+            put(CommandHandle.NAME, new CommandHandle());
         }
     };
 
     //根路径
     private static String realPath;
-
-
 
     private static String encode;
     final private static String COMMAND_SUFFIX = "cmd";
@@ -93,8 +91,7 @@ public final class Dispatcher {
      * 主要是防止关闭异常
      */
     static public void shutdown() {
-
-        //ACTION_HANDLE_MAP_INSTANCE.remove();
+        ACTION_HANDLE_MAP.clear();
     }
 
     public static String getRealPath() {
@@ -105,7 +102,6 @@ public final class Dispatcher {
         Dispatcher.realPath = realPath;
     }
 
-
     public static String getFilterSuffix() {
         return FILTER_SUFFIX;
     }
@@ -115,6 +111,11 @@ public final class Dispatcher {
     }
 
 
+    /**
+     * 判断是否为当前系统需要处理的后缀
+     * @param suffix 后缀
+     * @return 是否处理
+     */
     public static boolean hasSuffix(String suffix)
     {
         return ArrayUtil.inArray(new String[]{COMMAND_SUFFIX,MARKDOWN_SUFFIX,FILTER_SUFFIX,API_FILTER_SUFFIX,TEMPLATE_SUFFIX},suffix,true);
@@ -123,10 +124,8 @@ public final class Dispatcher {
      * @param request  请求
      * @param response 应答
      */
-    void wrapRequest(final HttpServletRequest request, final HttpServletResponse response) {
+     void wrapRequest(final HttpServletRequest request, final HttpServletResponse response) {
 
-
-        //防刷功能 end
         if (accessAllowOrigin) {
             response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
             response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Authorization, Content-Type, Accept, If-Modified-Since");
@@ -138,7 +137,7 @@ public final class Dispatcher {
 
         // 正常到执行
         String urlName = URLUtil.getFileName(request.getRequestURI());
-        String namespace = URLUtil.getNamespace(request.getServletPath());
+        String namespace = URLUtil.getNamespace(request.getRequestURI());
 
 
         //X-Requested-With
@@ -168,16 +167,16 @@ public final class Dispatcher {
                 suffix = ActionHandle.NAME;
             }
         }
+
         try {
-            WebHandle actionHandle = (WebHandle)ACTION_HANDLE_MAP.get(suffix).newInstance();
-            actionHandle.doing(request, response);
+            WebHandle webHandle = ACTION_HANDLE_MAP.get(suffix);
+            webHandle.doing(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             log.info(namespace + "/" + urlName, e);
             printException(e, response, WebOutEnumType.HTML.getValue());
         }
     }
-
 
     private static void printException(Exception e, HttpServletResponse response, int type) {
         if (!(response instanceof ResponseFacade) && !(response instanceof CORSResponseWrapper) && response.isCommitted()) {

@@ -19,6 +19,8 @@ import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.config.ActionConfig;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
@@ -65,16 +67,21 @@ public class TemplateResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
+
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        HttpServletResponse response = actionContext.getResponse();
+
 
         //浏览器缓存控制begin
-        checkCache(action, response);
+        checkCache(actionContext);
         //浏览器缓存控制end
 
+        Action action = actionInvocation.getActionProxy().getAction();
+
         //兼容Roc返回提示方式begin
-        Object result = action.getResult();
-        if (result!=null&&!action.hasFieldInfo()&&!action.hasActionMessage() && result instanceof RocResponse)
+        Object result = actionContext.getResult();
+        if (result!=null&&!actionContext.hasFieldInfo()&&!actionContext.hasActionMessage() && result instanceof RocResponse)
         {
             RocResponse<?> rocResponse = (RocResponse<?>)result;
             if (YesNoEnumType.YES.getValue()==rocResponse.getSuccess())
@@ -83,15 +90,15 @@ public class TemplateResult extends ResultSupport {
                 {
                     rocResponse.setMessage(action.getLanguage().getString(LanguageRes.success));
                 }
-                action.addActionMessage(rocResponse.getMessage());
+                actionContext.addActionMessage(rocResponse.getMessage());
             } else
             {
-                action.addFieldInfo(Environment.warningInfo,rocResponse.getMessage());
+                actionContext.addFieldInfo(Environment.warningInfo,rocResponse.getMessage());
             }
         }
         //兼容Roc返回提示方式end
 
-        String contentType = action.getEnv(ActionEnv.CONTENT_TYPE);
+        String contentType = actionContext.getString(ActionEnv.CONTENT_TYPE);
         if (!StringUtil.isNull(contentType)) {
             response.setContentType(contentType);
             String tempEncode = StringUtil.substringAfterLast(StringUtil.replace(contentType, " ", ""), "charset=");
@@ -99,7 +106,7 @@ public class TemplateResult extends ResultSupport {
                 response.setCharacterEncoding(tempEncode);
             }
         } else {
-            String actionName = action.getEnv(ActionEnv.Key_ActionName);
+            String actionName = actionContext.getString(ActionEnv.Key_ActionName);
             String fileType = StringUtil.substringAfterLast(actionName, StringUtil.DOT);
             if (StringUtil.hasLength(fileType)) {
                 response.setContentType( MimeTypesUtil.getContentType(fileType,Dispatcher.getEncode()));
@@ -112,7 +119,7 @@ public class TemplateResult extends ResultSupport {
         //请求编码end
 
         //处理下载情况 begin
-        String disposition = action.getEnv(ActionEnv.CONTENT_DISPOSITION);
+        String disposition = actionContext.getString(ActionEnv.CONTENT_DISPOSITION);
         if (!StringUtil.isNull(disposition)) {
             response.setHeader(ActionEnv.CONTENT_DISPOSITION, disposition);
         }
@@ -181,9 +188,9 @@ public class TemplateResult extends ResultSupport {
         ActionConfig actionConfig = actionInvocation.getActionConfig();
         if (actionConfig!=null&&actionConfig.isCache())
         {
-            HttpServletRequest request = action.getRequest();
+
             String key = actionConfig.getCacheName() + ActionHandle.PAGE_KEY + EncryptUtil.getMd5(request.getRequestURL().toString()+ "?"+request.getQueryString() + ObjectUtil.toString(RequestUtil.getSortMap(request)));
-            log.debug("put page cache url:{}",action.getRequest().getRequestURL().toString()+ "?"+action.getRequest().getQueryString() );
+            log.debug("put page cache url:{}",request.getRequestURL().toString()+ "?"+request.getQueryString() );
             if (!StringUtil.isEmpty(out.toString()))
             {
                 JSCacheManager.put(actionConfig.getCacheName(),key,out.toString());

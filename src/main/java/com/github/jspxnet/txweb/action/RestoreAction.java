@@ -14,6 +14,7 @@ import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.sober.Criteria;
 import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
@@ -22,6 +23,8 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +98,7 @@ public class RestoreAction extends ActionSupport {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notDataFind));
             return;
         }
-
+        HttpServletRequest request = getRequest();
         if (StringUtil.isNull(namespace) || "auto".equalsIgnoreCase(namespace)) {
             String licenseVersion = getEnv(Environment.versionType);
             namespace = Environment.versionEnterprise.equalsIgnoreCase(licenseVersion) ? request.getServerName() : null;
@@ -120,7 +123,7 @@ public class RestoreAction extends ActionSupport {
 
     @Operate(caption = "备份数据")
     public void backup() throws Exception {
-
+        HttpServletRequest request = getRequest();
         if (StringUtil.isNull(namespace) || "auto".equalsIgnoreCase(namespace)) {
             String licenseVersion = getEnv(Environment.versionType);
             namespace = Environment.versionEnterprise.equalsIgnoreCase(licenseVersion) ? request.getServerName() : null;

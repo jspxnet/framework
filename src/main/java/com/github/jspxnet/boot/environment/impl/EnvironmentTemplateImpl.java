@@ -41,6 +41,10 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     }
 
+    /**
+     *
+     * @return 得到环境变量表
+     */
     @Override
     public Map<String, Object> getVariableMap() {
         return new Hashtable<>(VALUE_MAP);
@@ -52,6 +56,11 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         return VALUE_MAP.get(keys);
     }
 
+    /**
+     *
+     * @param key 变量名称
+     * @return 得到环境变量
+     */
     @Override
     public String getString(String key) {
         Object o = VALUE_MAP.get(key);
@@ -66,6 +75,12 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         return VALUE_MAP.containsKey(key);
     }
 
+    /**
+     *
+     * @param keys 变量名称
+     * @param def 默认值
+     * @return 得到环境变量
+     */
     @Override
     public String getString(String keys, String def) {
         String result = getString(keys);
@@ -148,6 +163,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (createWebInf&&!FileUtil.isDirectory(tempDir)) {
                 FileUtil.makeDirectory(tempDir);
             }
+            VALUE_MAP.put("lucenePath", webInfPath+"/lucene");
 
             //修复路径支持本级下
             File file = new File(tempDir);

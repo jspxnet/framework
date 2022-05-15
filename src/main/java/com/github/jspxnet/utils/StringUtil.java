@@ -3144,10 +3144,10 @@ public class StringUtil {
      * @return 是否相同
      */
     public static boolean getPatternFind(String url, String find) {
-        if (find == null || url == null) {
+        if (find == null || url == null || "{".equals(find) || "(".equals(find)) {
             return false;
         }
-        if (url.equals(find))
+        if (url.equals(find)||"*".equals(find))
         {
             return true;
         }

@@ -2503,5 +2503,52 @@ public final class FileUtil {
         }
         return result;
     }
+    final private static float JAVA_VERSION = StringUtil.toFloat(System.getProperty("java.vm.specification.version"));
+    public static String getContentType(File file)
+    {
+        if (JAVA_VERSION >= 1.7) {
+            try {
+                return Files.probeContentType(Paths.get(file.getPath()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
+        String fileType = FileUtil.getTypePart(file.getName());
+        String contentType = null;
+        //为了兼容 jdk 1.6
+        if ("mp4".equalsIgnoreCase(fileType)) {
+            contentType = "video/mpeg4";
+        } else if ("bt".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-bittorrent";
+        } else if ("swftools".equalsIgnoreCase(fileType)) {
+            contentType = "application/swftools";
+        } else if ("xls".equalsIgnoreCase(fileType)) {
+            contentType = "application/vnd.ms-excel";
+        } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
+            contentType = "application/msword";
+        } else if ("mdb".equalsIgnoreCase(fileType)) {
+            contentType = "application/msaccess";
+        } else if ("ppt".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-ppt";
+        } else if ("xml".equalsIgnoreCase(fileType)) {
+            contentType = "application/xml";
+        } else if ("txt".equalsIgnoreCase(fileType) || "htm".equalsIgnoreCase(fileType) || "html".equalsIgnoreCase(fileType)) {
+            contentType = "text/html";
+        } else if ("zip".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-zip-compressed";
+        } else if ("rar".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-rar-compressed";
+        } else if (FileSuffixUtil.isImageSuffix(fileType)) {
+            contentType = "image/" + fileType;
+        } else if ("js".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-javascript";
+        } else {
+            contentType = "application/msword";
+        }
+        if (StringUtil.isNull(contentType)) {
+            contentType = "application/octet-stream";
+        }
+        return contentType;
+    }
 }

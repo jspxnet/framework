@@ -287,7 +287,4 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
         }
         return null;
     }
-
-
-
 }

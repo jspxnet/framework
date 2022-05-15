@@ -2,6 +2,7 @@ package com.github.jspxnet.txweb.support;
 
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.upload.multipart.*;
+import com.github.jspxnet.util.HttpUtil;
 import com.github.jspxnet.utils.*;
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
@@ -67,11 +68,11 @@ public class ApacheMultipartRequest extends MultipartRequest{
         //设置转换时使用的字符集
         fileUpload.setHeaderEncoding(encoding);
 
-
+        String queryString = URLUtil.getUrlDecoder(request.getQueryString(),encoding);
         //先放入请求头部的参数
-        if (!StringUtil.isNull(request.getQueryString() )) {
+        if (!StringUtil.isNull(queryString )) {
             // Let HttpUtils create a name->String[] structure
-            Map<String, String[]> queryParameters = parseQueryString(request.getQueryString());
+            Map<String, String[]> queryParameters = HttpUtil.parseQueryString(queryString);
             // For our own use, name it a name->Vector structure
             for (String paramName : queryParameters.keySet()) {
                 String[] values = queryParameters.get(paramName);

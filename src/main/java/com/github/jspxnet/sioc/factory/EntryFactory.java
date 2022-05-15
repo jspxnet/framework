@@ -22,6 +22,7 @@ import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.sioc.util.Empty;
+import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,6 @@ import java.util.Map;
  */
 @Slf4j
 public final class EntryFactory implements BeanFactory {
-
     private final static Lifecycle LIFE_CYCLE = new LifecycleManager();
     private final static Map<String, BeanElement> INJECT_OBJECTS = new HashMap<>();
     private static IocContext iocContext;

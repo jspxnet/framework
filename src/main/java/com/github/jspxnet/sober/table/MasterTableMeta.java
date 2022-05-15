@@ -37,11 +37,11 @@ public class MasterTableMeta extends OperateTable{
     private boolean useCache = true;
 
     //如果没用配置将变成动态对象
-    @Column(caption = "实体对象")
+    @Column(caption = "实体对象", length = 200)
     private String entityClass;
 
     //一般默认为id
-    @Column(caption = "关键字名")
+    @Column(caption = "关键字名", length = 200)
     private String primary = StringUtil.empty;
 
     @Nexus(mapping = MappingType.OneToMany, field = "tableName", targetField = "tableName", targetEntity = SoberColumn.class)

@@ -19,7 +19,7 @@ import com.github.jspxnet.utils.StringUtil;
 public class ValidatorView extends ValidatorAction {
     @Override
     public String execute() throws Exception {
-        String url = request.getRequestURI();
+        String url = getRequest().getRequestURI();
         if (StringUtil.countMatches(url, "/") < 2) {
             print(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "验证配置不能找到"));
             return NONE;

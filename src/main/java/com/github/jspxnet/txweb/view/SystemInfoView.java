@@ -19,6 +19,9 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.boot.EnvFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
@@ -48,7 +51,7 @@ public class SystemInfoView extends ActionSupport {
         result.put("osArch", System.getProperty("os.arch"));
         result.put("osArchDataModel", System.getProperty("sun.arch.data.remote"));
 
-
+        HttpServletRequest request = getRequest();
         result.put("graphicsenv", System.getProperty("java.awt.graphicsenv"));
         result.put("usePlatformFont", StringUtil.toBoolean(System.getProperty("java2d.font.usePlatformFont")));
         result.put("fileEncoding", System.getProperty("file.encoding"));

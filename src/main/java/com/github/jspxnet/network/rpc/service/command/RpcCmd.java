@@ -18,16 +18,15 @@ import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.result.RpcResult;
-import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.util.HessianSerializableUtil;
 import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -134,33 +133,40 @@ public class RpcCmd extends INetCommand {
         methodJson.put(Environment.rocName, iocRequest.getMethodName());
         methodJson.put(Environment.rocParams, new JSONObject(iocRequest.getParameters()));
         json.put(Environment.rocMethod, methodJson);
-        Map<String, Object>  envParam = TXWebUtil.createEnvironment();
+        Map<String, Object>  envParam = new HashMap<>();
         envParam.put(ActionEnv.Key_Namespace,namespace);
         envParam.put(ActionEnv.Key_ActionName,urlName);
         RequestTo requestTo = new RequestTo((Map) iocRequest.getRequest());
         requestTo.setAttribute(ActionEnv.Key_REMOTE_TYPE,INetCommand.RPC);
         IocResponse response = new IocResponse();
+        ActionInvocation actionInvocation = null;
         try {
-
-            ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig,envParam , RocHandle.NAME,
+            actionInvocation = new DefaultActionInvocation(actionConfig,envParam , RocHandle.NAME,
                     json,requestTo, new ResponseTo((Map) iocRequest.getResponse()));
             actionInvocation.initAction();
             actionInvocation.invoke();
-            RpcResult rpcResult = new RpcResult();
-            actionInvocation.executeResult(rpcResult);
-            Object result = rpcResult.getResult();
-            response.setResult(result);
         } catch (Throwable t) {
             response.setError(t);
             t.printStackTrace();
+        } finally {
+            if (actionInvocation!=null)
+            {
+                RpcResult rpcResult = new RpcResult();
+                try {
+                    actionInvocation.executeResult(rpcResult);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                response.setResult(rpcResult.getResult());
+            }
         }
         try {
             reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(response)));
         } catch (IOException e) {
             response.setError(e);
             e.printStackTrace();
-
         }
+
     }
 
     @Override

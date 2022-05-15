@@ -16,6 +16,8 @@ import com.github.jspxnet.sioc.annotation.Scheduled;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Proxy;
@@ -64,6 +66,8 @@ import java.util.logging.Logger;
  * 比较中规中矩的一个连接池，性能不算高，但稳定 ReentrantReadWriteLock 就不要了，在高并发的时候会死锁
  * 最后一个作为备用
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 @Slf4j
 public class JspxDataSource extends DriverManagerDataSource {
 
@@ -83,56 +87,6 @@ public class JspxDataSource extends DriverManagerDataSource {
 
     public JspxDataSource() {
     }
-
-
-    public boolean isMailTips() {
-        return mailTips;
-    }
-
-    public void setMailTips(boolean mailTips) {
-        this.mailTips = mailTips;
-    }
-
-    public String getSmtp() {
-        return smtp;
-    }
-
-    public void setSmtp(String smtp) {
-        this.smtp = smtp;
-    }
-
-    public String getMailFrom() {
-        return mailFrom;
-    }
-
-    public void setMailFrom(String mailFrom) {
-        this.mailFrom = mailFrom;
-    }
-
-    public String getMailUser() {
-        return mailUser;
-    }
-
-    public void setMailUser(String mailUser) {
-        this.mailUser = mailUser;
-    }
-
-    public String getMailPassword() {
-        return mailPassword;
-    }
-
-    public void setMailPassword(String mailPassword) {
-        this.mailPassword = mailPassword;
-    }
-
-    public String getMailSendTo() {
-        return mailSendTo;
-    }
-
-    public void setMailSendTo(String mailSendTo) {
-        this.mailSendTo = mailSendTo;
-    }
-
 
     public int getPoolSize() {
         int result = 0;
@@ -166,22 +120,6 @@ public class JspxDataSource extends DriverManagerDataSource {
     public void setMinPoolSize(int minPoolSize) {
         //不需要，系统默认保持最优
         this.minPoolSize = minPoolSize;
-    }
-
-    public int getMinPoolSize() {
-        return minPoolSize;
-    }
-
-    public int getMaxConnectionTime() {
-        return maxConnectionTime;
-    }
-
-    public String getCheckSql() {
-        return checkSql;
-    }
-
-    public void setCheckSql(String checkSql) {
-        this.checkSql = checkSql;
     }
 
     public void setMaxConnectionTime(int maxConnectionTime) {
@@ -304,7 +242,6 @@ public class JspxDataSource extends DriverManagerDataSource {
         if (!isRun || ArrayUtil.isEmpty(connectionPool)) {
             return;
         }
-
         int poolSize = getPoolSize();
         try {
             for (int i = 0; i < connectionPool.length; i++) {

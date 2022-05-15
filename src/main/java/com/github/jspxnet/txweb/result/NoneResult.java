@@ -11,9 +11,12 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.thetransactioncompany.cors.CORSResponseWrapper;
 import org.apache.catalina.connector.ResponseFacade;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -26,10 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 public class NoneResult extends ResultSupport {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
-        if (!(response instanceof ResponseFacade) && !(response instanceof CORSResponseWrapper) && response.isCommitted()) {
-            response.getOutputStream().close();
-        }
+        //什么都不处理
     }
 }

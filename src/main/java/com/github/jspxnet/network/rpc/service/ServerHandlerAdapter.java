@@ -15,6 +15,7 @@ import com.github.jspxnet.network.rpc.model.transfer.ChannelSession;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.IpUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -28,8 +29,6 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 
 @Slf4j
 public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
@@ -82,7 +81,7 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (ctx==null)
+        if (ctx==null|| ObjectUtil.isEmpty(msg))
         {
             return;
         }

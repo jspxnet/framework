@@ -12,7 +12,8 @@ package com.github.jspxnet.txweb.util;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
-import com.github.jspxnet.cache.redis.RedissonClientConfig;
+import com.github.jspxnet.cache.DefaultCache;
+import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONException;
@@ -25,13 +26,16 @@ import com.github.jspxnet.scriptmark.load.AbstractSource;
 import com.github.jspxnet.scriptmark.load.FileSource;
 import com.github.jspxnet.scriptmark.load.InputStreamSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
-import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.exception.TransactionException;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.annotation.*;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
+import com.github.jspxnet.txweb.dispatcher.handle.CommandHandle;
+import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
@@ -51,8 +55,7 @@ import com.github.jspxnet.utils.*;
 import com.thetransactioncompany.cors.CORSResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ResponseFacade;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -63,12 +66,11 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
- *
+ * <p>
  * author chenYuan (mail:39793751@qq.com)
  * date: 2006-12-27
  * Time: 15:16:56
@@ -127,32 +129,31 @@ public final class TXWebUtil {
                 fileTypes = StringUtil.split(StringUtil.replace(fileType, StringUtil.COMMAS, StringUtil.SEMICOLON), StringUtil.SEMICOLON);
             }
 
-            if (action.getRequest() instanceof MultipartRequest)
-            {
+            if (action.getRequest() instanceof MultipartRequest) {
                 continue;
             }
             FileCoveringPolicyEnumType fileCoveringPolicy = mulRequest.covering();
-            if (FileCoveringPolicyEnumType.Method.equals(mulRequest.covering())&&ClassUtil.isDeclaredMethod(action.getClass(),"covering"))
-            {
+            if (FileCoveringPolicyEnumType.Method.equals(mulRequest.covering()) && ClassUtil.isDeclaredMethod(action.getClass(), "covering")) {
 
                 int covering = ObjectUtil.toInt(BeanUtil.getProperty(action, "covering"));
-                fileCoveringPolicy =  FileCoveringPolicyEnumType.find(covering);
+                fileCoveringPolicy = FileCoveringPolicyEnumType.find(covering);
             }
 
             MultipartRequest multipartRequest;
-            if ("cos".equalsIgnoreCase(mulRequest.component()))
-            {
-                multipartRequest = new CosMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null,fileCoveringPolicy.getRenamePolicy(), fileTypes);
-            } else
-            {
-                multipartRequest = new ApacheMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null,fileCoveringPolicy.getRenamePolicy(), fileTypes);
+            if ("cos".equalsIgnoreCase(mulRequest.component())) {
+                multipartRequest = new CosMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null, fileCoveringPolicy.getRenamePolicy(), fileTypes);
+            } else {
+                multipartRequest = new ApacheMultipartRequest(action.getRequest(), saveDirectory, iMaxPostSize, null, fileCoveringPolicy.getRenamePolicy(), fileTypes);
             }
 
             BeanUtil.setSimpleProperty(action, method.getName(), multipartRequest);
-            action.setRequest(multipartRequest);
+            ActionContext actionContext = ThreadContextHolder.getContext();
+            actionContext.setRequest(multipartRequest);
+
         }
     }
     //------------------------------------------------------------------------------------------------------------------
+
     /**
      * 推荐更多的使用ajax方式分页
      *
@@ -266,7 +267,7 @@ public final class TXWebUtil {
      *
      * @param action action
      */
-    public static void copyRequestProperty(Action action)  {
+    public static void copyRequestProperty(Action action) {
         if (action == null) {
             return;
         }
@@ -278,14 +279,11 @@ public final class TXWebUtil {
             copyRequestProperty((MultipartSupport) action);
             return;
         }
-
         Class<?> cls = ClassUtil.getClass(action.getClass());
-
         String[] requestNames = RequestUtil.getParameterNames(request);
         Method[] methods = ClassUtil.getDeclaredSetMethods(cls);
         for (Method method : methods) {
-            if (!Modifier.isPublic(method.getModifiers())&&!Modifier.isProtected(method.getModifiers()))
-            {
+            if (!Modifier.isPublic(method.getModifiers()) && !Modifier.isProtected(method.getModifiers())) {
                 //非公有的不设置
                 continue;
             }
@@ -307,15 +305,13 @@ public final class TXWebUtil {
             Type aType = types[0];
             Object propertyValue;
             if (aType.equals(JSONArray.class)) {
-                String[] reqArray = action.getArray(propertyName,false);
+                String[] reqArray = action.getArray(propertyName, false);
                 JSONArray array = new JSONArray();
-                if (reqArray!=null)
-                {
+                if (reqArray != null) {
                     Collections.addAll(array, reqArray);
                 }
                 propertyValue = array;
-            } else
-            if (ClassUtil.isArrayType(aType)) {
+            } else if (ClassUtil.isArrayType(aType)) {
                 if (aType.equals(int[].class)) {
                     propertyValue = action.getIntArray(propertyName);
                 } else if (aType.equals(Integer[].class)) {
@@ -334,7 +330,7 @@ public final class TXWebUtil {
                     propertyValue = action.getDoubleObjectArray(propertyName);
                 } else if (aType.equals(BigDecimal[].class)) {
                     propertyValue = action.getDoubleObjectArray(propertyName);
-                }  else {
+                } else {
                     propertyValue = action.getArray(propertyName, false);
                 }
             } else {
@@ -368,7 +364,7 @@ public final class TXWebUtil {
      * @param action action bean
      */
     private static void copyRequestProperty(MultipartSupport action) {
-        MultipartRequest multipartRequest = (MultipartRequest)action.getRequest();
+        MultipartRequest multipartRequest = (MultipartRequest) action.getRequest();
         String[] requestNames = action.getParameterNames();
         Class<?> cls = ClassUtil.getClass(action.getClass());
         Method[] methods = ClassUtil.getDeclaredSetMethods(cls);
@@ -452,7 +448,7 @@ public final class TXWebUtil {
      * @param action   action对象
      * @param valueMap ROC请求参数
      */
-    private static void putJsonProperty(Action action, Map<String, Object> valueMap)  {
+    public static void putValueProperty(Action action, Map<String, Object> valueMap) {
         if (action == null) {
             return;
         }
@@ -535,69 +531,70 @@ public final class TXWebUtil {
         );
     }
 
+
     /**
      * 步骤: 1:先放入请求参数,2:执行请求方法;3:如果有多个返回，继续执行多个返回,5：最后执行defaultExecute
      * 返回必须位真实的执行结果，不要返回错误提示信息。
-     *
-     * @param actionProxy action对象
+     * @param action action对象
+     * @param actionContext 上下文
      * @return 返回必须位真实的执行结果，不要返回错误提示信息。
      * @throws Exception 异常
      */
-    public static Object invokeJson(ActionProxy actionProxy) throws Exception {
-        Action action = actionProxy.getAction();
-        JSONObject callJson = actionProxy.getCallJson();
-        if (callJson == null) {
-            //避免空异常
-            callJson = new JSONObject();
-        }
+    public static Object invokeJson(Action action, ActionContext actionContext) throws Exception {
 
-        Method exeMethod = actionProxy.getMethod();
-        if (exeMethod == null) {
-            action.addFieldInfo(Environment.errorInfo, "not found method  " + actionProxy.getMethod());
+        if (actionContext == null) {
+            //避免空异常
             return null;
         }
-        JSONArray resultJson = callJson.getJSONArray(Environment.rocResult);
-        if (StringUtil.isNull(action.getActionResult())) {
-            action.setActionResult(ActionSupport.ROC);
+        Method exeMethod = actionContext.getMethod();
+        if (exeMethod == null) {
+            action.addFieldInfo(Environment.errorInfo, "not found method  " + exeMethod);
+            action.setActionResult(ActionSupport.ERROR);
+            return null;
         }
-
+        JSONObject callJson = (JSONObject) actionContext.get(ActionEnv.Key_CallRocJsonData);
         //ROC roc Json 根据指定调用返回
         Object[] paramObj = null;
-        Object rocParams;
-        if (ParamUtil.isRocRequest(callJson))
-        {
-            JSONObject methodJson = callJson.getJSONObject(Environment.rocMethod);
-            if (methodJson!=null&&methodJson.containsKey(Environment.rocParams))
-            {
-                rocParams = methodJson.get(Environment.rocParams);
-            } else
-            {
-                rocParams = callJson.get(Environment.rocParams);
+        Object rocParams = null;
+        if (ArrayUtil.inArray(new String[]{RocHandle.NAME, CommandHandle.NAME}, actionContext.getExeType(), true)) {
+
+            if (callJson == null) {
+                return null;
             }
-            if (methodJson != null &&  (rocParams instanceof JSONObject)) {
+            JSONObject methodJson = callJson.getJSONObject(Environment.rocMethod);
+            if (methodJson != null && methodJson.containsKey(Environment.rocParams)) {
+                rocParams = methodJson.get(Environment.rocParams);
+            }
+
+            if (methodJson!=null)
+            {
+                if (rocParams instanceof JSONObject) {
+                    rocParams = methodJson.getJSONObject(Environment.rocParams);
+                } else {
+                    rocParams = methodJson.getJSONArray(Environment.rocParams);
+                }
+            }
+            if (rocParams instanceof JSONArray) {
+                //采用数组方式对于进入
+                JSONArray paramsArray = (JSONArray) rocParams;
+                paramObj = ParamUtil.getMethodParameter(action, exeMethod, paramsArray);
+            } else {
                 //参数有三种方式  1:采用数组方式对于进入 2:采用方面名称对应json参数名称
                 //3.路径名称作为参数
                 //采用数组方式对于进入
                 //自动前后
-                JSONObject paramsJson = (JSONObject)rocParams;
+                JSONObject paramsJson = (JSONObject) rocParams;
                 paramObj = ParamUtil.getMethodParameter(action, exeMethod, paramsJson);
-
-            }  else if (rocParams instanceof JSONArray) {
-                //采用数组方式对于进入
-                JSONArray paramsArray = (JSONArray)rocParams;
-
-                paramObj = ParamUtil.getMethodParameter(action, exeMethod, paramsArray);
             }
         } else {
-            paramObj = ParamUtil.getMethodParameter(action, exeMethod, callJson);
+            paramObj = ParamUtil.getMethodParameter(action, exeMethod, actionContext.getCallJson());
         }
 
         //路径方式载入参数
         Operate operate = exeMethod.getAnnotation(Operate.class);
         if (operate != null && operate.method().contains(ParamUtil.VARIABLE_BEGIN) && operate.method().contains(ParamUtil.VARIABLE_END)) {
             paramObj = ParamUtil.getMethodParameter(action, exeMethod);
-            if (action.hasFieldInfo())
-            {
+            if (action.hasFieldInfo()) {
                 return null;
             }
         }
@@ -609,30 +606,30 @@ public final class TXWebUtil {
             if (paramObj == null && exeMethod.getParameterCount() != 0 || (paramObj != null && paramObj.length != exeMethod.getParameterCount())) {
                 //一个参数都没有的情况
                 paramObj = ParamUtil.getMethodParameter(action, exeMethod);
-                if (action.hasFieldInfo())
-                {
+                if (action.hasFieldInfo()) {
                     return null;
                 }
             }
-
             try {
                 if (exeMethod.getGenericReturnType().equals(Void.TYPE)) {
                     //如果不用返回,直接执行
                     isVoid = true;
-                    TXWebUtil.invokeFun(action, exeMethod, paramObj);
+                    TXWebUtil.invokeFun(action, actionContext, paramObj);
                 } else {
-                    methodResult = TXWebUtil.invokeFun(action, exeMethod, paramObj);
+                    methodResult = TXWebUtil.invokeFun(action, actionContext, paramObj);
                 }
                 //执行完后已经执行 execute，确保和form方式一样
             } catch (Exception e) {
-
-                log.error(actionProxy.getMethod() + " params is " + ObjectUtil.toString(paramObj), e);
+                log.error(exeMethod + " params is " + ObjectUtil.toString(paramObj), e);
                 //RPC 2.0 标准  返回
-                throw  new RocException(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(),"参数错误," + ObjectUtil.toString(paramObj)));
+                actionContext.setResult(new RocException(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "参数错误," + ObjectUtil.toString(paramObj))));
+                actionContext.setActionResult(ActionSupport.ERROR);
+                throw (RocException) actionContext.getResult();
             }
         }
 
-        if (action.hasFieldInfo()||resultJson == null || resultJson.isEmpty()) {
+        JSONArray resultJson = callJson.getJSONArray(Environment.rocResult);
+        if (resultJson == null || resultJson.isEmpty()) {
             //交给后边处理
             return methodResult;
         }
@@ -650,7 +647,8 @@ public final class TXWebUtil {
             Method method = ClassUtil.getDeclaredMethod(actionClass, methodName);
             if (method == null) {
                 action.addFieldInfo(Environment.warningInfo, methodName + "不存在的方法");
-                continue;
+                action.setActionResult(ActionSupport.ERROR);
+                return null;
             }
             String methodFiled = ClassUtil.getMethodFiledName(methodName);
             if (StringUtil.isNull(methodFiled)) {
@@ -683,35 +681,37 @@ public final class TXWebUtil {
             }
         }
         //没有返回对象，就不添加了，后被统一返回信息
-        if (resultMap.isEmpty()) {
-            return null;
-        }
         return resultMap;
+
     }
     //------------------------------------------------------------------------------------------------------------------
 
     /**
-     * 步骤: 1:先放入请求参数,2:执行请求方法;3:如果有多个返回，继续执行多个返回,5：最后执行defaultExecute
+     * 将json 参数放入 action 内部变量
      *
-     * @param actionProxy action对象
+     * @param action   action对象
+     * @param callJson json 参数
      */
-
-    public static void putJsonParams(ActionProxy actionProxy)  {
+    public static void putJsonParams(Action action, JSONObject callJson) {
+        if (ObjectUtil.isEmpty(callJson)) {
+            return;
+        }
         //放入请求参数 begin
         Map<String, Object> actionParams = new HashMap<>();
-        JSONObject callJson = actionProxy.getCallJson();
-        Action action = actionProxy.getAction();
         //参数表示 set全局action参数
         JSONObject paramsJson = callJson.getJSONObject(Environment.rocParams);
         if (paramsJson != null) {
             for (Object key : paramsJson.keySet()) {
+                if (key == null) {
+                    continue;
+                }
                 Object objParam = paramsJson.get(key);
                 if (objParam instanceof JSONArray) {
                     objParam = ((JSONArray) objParam).toArray();
                 }
                 actionParams.put((String) key, objParam);
             }
-            putJsonProperty(action, actionParams);
+            putValueProperty(action, actionParams);
         }
         //放入请求参数 end
 
@@ -719,14 +719,14 @@ public final class TXWebUtil {
     //------------------------------------------------------------------------------------------------------------------
 
     /**
-     * 得到要执行的方法，多种匹配方式
-     *
      * @param actionProxy action代理
      * @param actionClass 类对象,方便识别
+     * @param callJson    参数
      * @param method      方法名称
+     * @param namespace   命名空间
      * @return 返回方法
      */
-    static public Method getExeMethod(ActionProxy actionProxy,Class<?> actionClass, String method) {
+    static public Method getExeMethod(ActionProxy actionProxy, Class<?> actionClass, JSONObject callJson, String method, String namespace) {
         if (actionProxy == null) {
             return null;
         }
@@ -740,18 +740,8 @@ public final class TXWebUtil {
             return null;
         }
         //method 有可能是action名称，而这个方法是使用路径方式
-        //默认能直接得到的
-        Method exeMethod = null;
-        if (method.startsWith(TXWebUtil.AT) && method.length() > 1) {
-            try {
-                method = action.getString(method.substring(1), true);
-            } catch (Exception e) {
-                method = StringUtil.empty;
-            }
-        }
 
         //参数在前边已经放入,这里只需要执行后返回
-        JSONObject callJson = actionProxy.getCallJson();
         //ROC roc Json 根据指定调用返回
         JSONObject rocMethodJson = null;
         if (callJson != null) {
@@ -761,8 +751,7 @@ public final class TXWebUtil {
         boolean isArray = true;
         JSONObject paramsObject = null;
         JSONArray paramsArray = null;
-        if (rocMethodJson != null && !rocMethodJson.isEmpty() && rocMethodJson.containsKey(Environment.rocParams))
-        {
+        if (rocMethodJson != null && !rocMethodJson.isEmpty() && rocMethodJson.containsKey(Environment.rocParams)) {
             paramsArray = rocMethodJson.getJSONArray(Environment.rocParams);
             if (paramsArray == null) {
                 paramsObject = rocMethodJson.getJSONObject(Environment.rocParams);
@@ -778,60 +767,19 @@ public final class TXWebUtil {
         }
         //配置了Operate
 
-        //这里只用判断存在于方法命名空间之后就可以了
-        Map<Operate, Method> operateMap = getClassOperateList(actionClass);
-        for (Operate operate : operateMap.keySet()) {
-            //处理通配符情况
-            if (TXWebUtil.AT.equals(operate.method())) {
-                Method tmpMethod = operateMap.get(operate);
-                if (tmpMethod != null && tmpMethod.getName().equalsIgnoreCase(method) &&   tmpMethod.getParameterCount() == iParam)
-                {
-                    exeMethod = operateMap.get(operate);
-                    if (exeMethod != null) {
-                        break;
-                    }
-                }
-            } else if (operate.method().equalsIgnoreCase(method) || operate.method().equalsIgnoreCase(StringUtil.BACKSLASH + method)) {
-                //直接配置
-                exeMethod = operateMap.get(operate);
-                if (exeMethod != null) {
-                    break;
-                }
-            } else if (operate.method().contains(StringUtil.BACKSLASH)) {
-                String urlNamespace = StringUtil.BACKSLASH + actionProxy.getNamespace();
-                //URL外部路径
-                String url = URLUtil.getUrlPath(action.getRequest().getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
-                //当前允许执行的方法
-                String operateUrl = urlNamespace + (operate.method().startsWith(StringUtil.BACKSLASH) ? operate.method() : (StringUtil.BACKSLASH + operate.method()));
-                if (url.startsWith(urlNamespace) && operate.method().contains(ParamUtil.VARIABLE_BEGIN)) {
-                    //方法配置的路径 路径参数方式${} {}
-                    String methodUrl = StringUtil.substringBefore(operate.method(), ParamUtil.VARIABLE_BEGIN);
-                    if (url.toLowerCase().contains(methodUrl.toLowerCase())) {
-                        return operateMap.get(operate);
-                    }
-                    //多级目录情况
-                } else if (url.startsWith(operateUrl.toLowerCase())) {
-                    //最直接的比对
-                    return operateMap.get(operate);
-                } else if (url.startsWith(urlNamespace) && StringUtil.getPatternFind(StringUtil.substringAfter(url, urlNamespace), operate.method())) {
-                    //通配符方式
-                    return operateMap.get(operate);
-                }
-            }
-        }
+        String url = URLUtil.deleteUrlSuffix(action.getRequest().getRequestURI());
+        Method exeMethod = getExeMethodForOperate(url, actionClass, method, namespace, iParam);
 
         //这里要添加路径方式
         //先判断映射，在判断方法
         if (exeMethod == null) {
-            Method[] methodList = ClassUtil.getDeclaredMethodList(actionClass, method);
-
+            Method[] methodList = ClassUtil.getDeclaredMethodList(actionClass, method, true);
             if (methodList != null && methodList.length == 1) {
                 //只有一个方法匹配
                 exeMethod = methodList[0];
             } else if (methodList != null && methodList.length > 1) {
                 //这里有继承关系 多个方法匹配
-                for (Method theMethod : methodList)
-                {
+                for (Method theMethod : methodList) {
                     if (ClassUtil.isDeclaredMethod(actionClass, theMethod)) {
                         if (isArray) {
                             if ((paramsArray == null || paramsArray.isEmpty()) && theMethod.getParameterTypes().length == 0) {
@@ -855,33 +803,80 @@ public final class TXWebUtil {
             }
             if (exeMethod == null && methodList != null && ClassUtil.isProxy(action.getClass())) {
                 for (Method met : methodList) {
-                    if (met.getName().equals(method))
-                    {
+                    if (met.getName().equals(method)) {
                         exeMethod = met;
                         break;
                     }
                 }
             }
         }
+        return exeMethod;
+    }
 
+
+    /**
+     * @param url         url 路径
+     * @param actionClass action类型
+     * @param method      方法名称
+     * @param namespace   命名空间
+     * @param iParam      参数个数
+     * @return 方法
+     */
+    public static Method getExeMethodForOperate(String url, Class<?> actionClass, String method, String namespace, int iParam) {
+        //这里只用判断存在于方法命名空间之后就可以了
+        Method exeMethod = null;
+        Map<Operate, Method> operateMap = getClassOperateList(actionClass);
+        for (Operate operate : operateMap.keySet()) {
+            //处理通配符情况
+            if (TXWebUtil.AT.equals(operate.method())) {
+                Method tmpMethod = operateMap.get(operate);
+                if (tmpMethod != null && tmpMethod.getName().equalsIgnoreCase(method) && tmpMethod.getParameterCount() == iParam) {
+                    exeMethod = operateMap.get(operate);
+                    if (exeMethod != null) {
+                        break;
+                    }
+                }
+            } else if (operate.method().equalsIgnoreCase(method) || operate.method().equalsIgnoreCase(StringUtil.BACKSLASH + method)) {
+                //直接配置
+                exeMethod = operateMap.get(operate);
+                if (exeMethod != null) {
+                    break;
+                }
+            } else if (operate.method().contains(StringUtil.BACKSLASH)) {
+                String urlNamespace = StringUtil.BACKSLASH + namespace;//actionProxy.getNamespace();
+                //当前允许执行的方法
+                String operateUrl = urlNamespace + (operate.method().startsWith(StringUtil.BACKSLASH) ? operate.method() : (StringUtil.BACKSLASH + operate.method()));
+                if (url.startsWith(urlNamespace) && operate.method().contains(ParamUtil.VARIABLE_BEGIN)) {
+                    //方法配置的路径 路径参数方式${} {}
+                    String methodUrl = StringUtil.substringBefore(operate.method(), ParamUtil.VARIABLE_BEGIN);
+                    if (url.toLowerCase().contains(methodUrl.toLowerCase())) {
+                        return operateMap.get(operate);
+                    }
+                    //多级目录情况
+                } else if (url.startsWith(operateUrl.toLowerCase())) {
+                    //最直接的比对
+                    return operateMap.get(operate);
+                } else if (url.startsWith(urlNamespace) && StringUtil.getPatternFind(StringUtil.substringAfter(url, urlNamespace), operate.method())) {
+                    //通配符方式
+                    return operateMap.get(operate);
+                }
+            }
+        }
         return exeMethod;
     }
 
 
     /**
      * 这里是执行可返回函数的地方,返回的数据主要是做ROC返回
-     * {@code Object[] paramObj = getMethodParameter(action, exeMethod, paramsArray); }
-     *
-     * @param action    action
-     * @param exeMethod 调用方法
-     * @param paramObj  参数
-     * @return 返回结果
-     * @throws Exception 异常
+     * @param action action
+     * @param actionContext 上下文
+     * @param paramObj 参数对象
+     * @return  返回结果
+     * @throws Exception 参数
      */
-    public static Object invokeFun(Action action, Method exeMethod, Object[] paramObj) throws Exception {
+    public static Object invokeFun(Action action, ActionContext actionContext,Object[] paramObj ) throws Exception {
         //安全检查begin
-        //执行方法为空
-        if (exeMethod == null) {
+        if (actionContext.getMethod() == null) {
             return null;
         }
 
@@ -889,12 +884,12 @@ public final class TXWebUtil {
             log.error("invoke execute action is Null ,action 不能为空,请检查配置");
             throw new ClassNotFoundException("action is null");
         }
-
         //有异常就不在执行
-        if (action.hasFieldInfo()) {
+        if (actionContext.hasFieldInfo()) {
             return null;
         }
 
+        Method exeMethod =  actionContext.getMethod();
         //判断是否满足执行条件
         log.debug("执行方法:{} 进入参数:{}", exeMethod.getName(), ObjectUtil.toString(paramObj));
         Object result = null;
@@ -905,14 +900,15 @@ public final class TXWebUtil {
             } else {
                 result = exeMethod.invoke(action, paramObj);
             }
+
             //事务标签处理 end
         } catch (InvocationTargetException exception) {
+            action.setActionResult(ActionSupport.ERROR);
             Throwable e = exception.getTargetException();
             if (e instanceof TransactionException) {
                 TransactionException transactionException = (TransactionException) e;
                 Transaction transaction = transactionException.getTransaction();
-                if (transaction != null&&!StringUtil.isEmpty(transaction.message()))
-                {
+                if (transaction != null && !StringUtil.isEmpty(transaction.message())) {
                     String msg = transaction.message();
                     if (msg.contains(ParamUtil.VARIABLE_BEGIN) && msg.contains(ParamUtil.VARIABLE_END)) {
                         Map<String, Object> valueMap = new HashMap<>();
@@ -927,18 +923,15 @@ public final class TXWebUtil {
                 //--------------------------
                 RocException rocException = (RocException) e;
                 action.setResult(rocException.getResponse());
-            }  else {
+            } else {
                 Transaction transaction = exeMethod.getAnnotation(Transaction.class);
-                if (transaction != null&&!StringUtil.isEmpty(transaction.message()))
-                {
+                if (transaction != null && !StringUtil.isEmpty(transaction.message())) {
                     action.addFieldInfo(Environment.errorInfo, transaction.message());
-                } else
-                {
+                } else {
                     action.addFieldInfo(Environment.errorInfo, exeMethod.getName() + " " + ThrowableUtil.getThrowableMessage(e));
                 }
+
             }
-        } finally {
-            action.put(ActionEnv.Key_CallMethodName, exeMethod);
         }
         return result;
     }
@@ -953,33 +946,32 @@ public final class TXWebUtil {
      * @throws Exception 异常
      */
     public static boolean checkOperate(Action action, Method exeMethod) throws Exception {
-         //验证 begin
+        //验证 begin
         Operate operate = exeMethod.getAnnotation(Operate.class);
         if (operate == null) {
             log.debug("action:{},exeMethod:{}", action.getClass(), exeMethod);
-            throw new Exception("不允许执行的操作," + exeMethod.getName());
+            action.setActionResult(ActionSupport.ERROR);
+            action.addFieldInfo(exeMethod.getName(), "不允许执行的操作");
+            return false;
         }
         //没有Operate标记的不允许对外访问
         //注意，档位GET的时候 submit 为 false
         if (operate.post() && TXWeb.httpGET.equalsIgnoreCase(action.getRequest().getMethod())) {
+            action.setActionResult(ActionSupport.ERROR);
+            action.addFieldInfo(exeMethod.getName(), "错误的请求方式");
             return false;
-            //throw new Exception("错误的请求方式,方法名称:" + exeMethod.getName());
         }
 
         //验证防止重复提交 begin
         if (operate.repeat() > 0) {
-            String keyValue = ClassUtil.getClass(action.getClass()).getName() + StringUtil.DOT + exeMethod.getName() + StringUtil.DOT + action.getUserSession().getId();
-            keyValue = EncryptUtil.getMd5(keyValue);
+            String keyValue = EncryptUtil.getMd5(ClassUtil.getClass(action.getClass()).getName() + StringUtil.DOT + exeMethod.getName() + StringUtil.DOT + action.getUserSession().getId());
             String key = String.format(REPEAT_VERIFY_KEY, keyValue);
-            BeanFactory beanFactory = EnvFactory.getBeanFactory();
-            RedissonClient redissonClient = (RedissonClient) beanFactory.getBean(RedissonClientConfig.class);
-            if (redissonClient != null) {
-                RBucket<String> bucket = redissonClient.getBucket(key);
-                if (bucket.isExists()) {
-                    throw new Exception(operate.repeat() + "秒后再试");
-                } else {
-                    bucket.set(key, operate.repeat(), TimeUnit.SECONDS);
-                }
+            Object check = JSCacheManager.get(DefaultCache.class, key);
+            if (ObjectUtil.isEmpty(check)) {
+                JSCacheManager.put(DefaultCache.class, key, operate.repeat(), operate.repeat());
+            } else {
+                action.addFieldInfo(exeMethod.getName(), "不运行重复提交," + operate.repeat() + "秒后在来");
+                return false;
             }
         }
         //验证防止重复提交 end
@@ -1028,31 +1020,23 @@ public final class TXWebUtil {
         String contentType = null;
         if (WebOutEnumType.JSON.getValue() == type) {
             contentType = "application/json";
-        } else
-        if (WebOutEnumType.JAVASCRIPT.getValue() == type) {
+        } else if (WebOutEnumType.JAVASCRIPT.getValue() == type) {
             contentType = "text/javascript";
-        } else
-        if (WebOutEnumType.XML.getValue() == type) {
+        } else if (WebOutEnumType.XML.getValue() == type) {
             contentType = "text/xml";
-        } else
-        if (WebOutEnumType.TEXT.getValue() == type) {
+        } else if (WebOutEnumType.TEXT.getValue() == type) {
             contentType = "text/plain";
-        } else
-        if (WebOutEnumType.HTML.getValue() == type) {
+        } else if (WebOutEnumType.HTML.getValue() == type) {
             contentType = "text/html";
-        } else
-        if (WebOutEnumType.CSS.getValue() == type) {
+        } else if (WebOutEnumType.CSS.getValue() == type) {
             contentType = "text/css";
         }
-        if (StringUtil.isEmpty(contentType))
-        {
+        if (StringUtil.isEmpty(contentType)) {
             contentType = "application/json";
         }
-        StringBuilder sb = new StringBuilder(contentType);
-        sb.append(";charset=").append(StringUtil.isNull(response.getCharacterEncoding())?"UTF-8":response.getCharacterEncoding());
-        response.setContentType(sb.toString());
+        response.setContentType(contentType + ";charset=" + (StringUtil.isNull(response.getCharacterEncoding()) ? "UTF-8" : response.getCharacterEncoding()));
 
-        if (status!=null&&status>0&&status != 200) {
+        if (status != null && status > 0 && status != 200) {
             response.setStatus(status);
         }
         PrintWriter out;
@@ -1079,8 +1063,7 @@ public final class TXWebUtil {
      * @param status   状态
      */
     public static void print(JSONObject json, int type, HttpServletResponse response, Integer status) {
-        if (WebOutEnumType.JSON.getValue() == type)
-        {
+        if (WebOutEnumType.JSON.getValue() == type) {
             print(json.toString(4), type, response, status);
         } else if (WebOutEnumType.XML.getValue() == type) {
             try {
@@ -1097,65 +1080,37 @@ public final class TXWebUtil {
         }
     }
 
-    /**
-     * @return 创建默认环境
-     */
-    public static Map<String, Object> createEnvironment() {
-        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        Map<String, Object> venParams = new HashMap<>();
-        venParams.put(Environment.filterSuffix, envTemplate.getString(Environment.filterSuffix));
-        venParams.put(Environment.ApiFilterSuffix, envTemplate.getString(Environment.ApiFilterSuffix));
-        venParams.put(Environment.templateSuffix, envTemplate.getString(Environment.templateSuffix));
-        venParams.put(Environment.encode, Dispatcher.getEncode());
-        venParams.put(Environment.remoteHostUrl, envTemplate.getString(Environment.remoteHostUrl, StringUtil.empty));
-        venParams.put(Environment.scriptPath, envTemplate.getString(Environment.scriptPath, "/script"));
-        venParams.put(Environment.sitePath, envTemplate.getString(Environment.sitePath, "/"));
-        venParams.put(Environment.userLoginUrl, envTemplate.getString(Environment.userLoginUrl, "/user/login." + envTemplate.getString(Environment.filterSuffix)));
-        venParams.put(Environment.DEBUG, envTemplate.getBoolean(Environment.DEBUG));
-        venParams.put("date", new Date());
-        return venParams;
-    }
-
 
     public static void errorPrint(String info, Map<String, String> fieldInfo, HttpServletResponse response, int status) {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         TemplateConfigurable configurable = new TemplateConfigurable();
         configurable.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
         AbstractSource fileSource = null;
-        File f = new File(envTemplate.getString(Environment.templatePath,new File(Dispatcher.getRealPath(),"template").getPath()), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
-        if (!f.isFile())
-        {
-            f = new File(new File(Dispatcher.getRealPath(),envTemplate.getString(Environment.templatePath,"template")).getPath(), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+        File f = new File(envTemplate.getString(Environment.templatePath, new File(Dispatcher.getRealPath(), "template").getPath()), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+        if (!f.isFile()) {
+            f = new File(new File(Dispatcher.getRealPath(), envTemplate.getString(Environment.templatePath, "template")).getPath(), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
         }
-        if (f.isFile())
-        {
+        if (f.isFile()) {
             fileSource = new FileSource(f, envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"), envTemplate.getString(Environment.encode, Environment.defaultEncode));
-        } else
-        {
-            InputStream inputStream = TXWebUtil.class.getResourceAsStream("/resources/template/"+envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
-            if (inputStream==null)
-            {
-                inputStream = TXWebUtil.class.getResourceAsStream("/template/"+envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+        } else {
+            InputStream inputStream = TXWebUtil.class.getResourceAsStream("/resources/template/" + envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+            if (inputStream == null) {
+                inputStream = TXWebUtil.class.getResourceAsStream("/template/" + envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
             }
-            if (inputStream!=null)
-            {
-                fileSource = new InputStreamSource(inputStream,envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"), envTemplate.getString(Environment.encode, Environment.defaultEncode));
+            if (inputStream != null) {
+                fileSource = new InputStreamSource(inputStream, envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"), envTemplate.getString(Environment.encode, Environment.defaultEncode));
             }
 
         }
-        if (fileSource==null)
-        {
-            if (envTemplate.getBoolean(Environment.DEBUG))
-            {
+        if (fileSource == null) {
+            if (envTemplate.getBoolean(Environment.DEBUG)) {
                 TXWebUtil.print("error template page not found,错误信息显示模版没有配置" + f.getPath(), WebOutEnumType.HTML.getValue(), response);
-            } 
-            else
-            {
+            } else {
                 TXWebUtil.print("error template page not found,错误信息显示模版没有配置", WebOutEnumType.HTML.getValue(), response);
             }
             return;
         }
-        configurable.setSearchPath(new String[]{envTemplate.getString(Environment.templatePath,"template"), Dispatcher.getRealPath()});
+        configurable.setSearchPath(new String[]{envTemplate.getString(Environment.templatePath, "template"), Dispatcher.getRealPath()});
         ScriptMark scriptMark;
         try {
             scriptMark = new ScriptMarkEngine(EncryptUtil.getMd5(f.getPath()), fileSource, configurable);
@@ -1168,7 +1123,7 @@ public final class TXWebUtil {
         scriptMark.setRootDirectory(Dispatcher.getRealPath());
         scriptMark.setCurrentPath(envTemplate.getString(Environment.templatePath));
         //输出模板数据
-        Map<String, Object> valueMap = createEnvironment();
+        Map<String, Object> valueMap = TXWebUtil.createEnvironment();
         valueMap.put(Environment.message, info);
         valueMap.put(Environment.FieldInfoList, fieldInfo);
         valueMap.put(ActionEnv.Key_Response, RequestUtil.getResponseMap(response));
@@ -1178,5 +1133,24 @@ public final class TXWebUtil {
         } catch (Exception e) {
             log.error("打印错误信息发生错误", e);
         }
+    }
+
+    /**
+     * @return 创建默认环境
+     */
+    public static Map<String, Object> createEnvironment() {
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        Map<String, Object> venParams = new HashMap<>(50);
+        venParams.put(Environment.filterSuffix, envTemplate.getString(Environment.filterSuffix));
+        venParams.put(Environment.ApiFilterSuffix, envTemplate.getString(Environment.ApiFilterSuffix));
+        venParams.put(Environment.templateSuffix, envTemplate.getString(Environment.templateSuffix));
+        venParams.put(Environment.encode, Dispatcher.getEncode());
+        venParams.put(Environment.remoteHostUrl, envTemplate.getString(Environment.remoteHostUrl, StringUtil.empty));
+        venParams.put(Environment.scriptPath, envTemplate.getString(Environment.scriptPath, "/script"));
+        venParams.put(Environment.sitePath, envTemplate.getString(Environment.sitePath, "/"));
+        venParams.put(Environment.userLoginUrl, envTemplate.getString(Environment.userLoginUrl, "/user/login." + envTemplate.getString(Environment.filterSuffix)));
+        venParams.put(Environment.DEBUG, envTemplate.getBoolean(Environment.DEBUG));
+        venParams.put("date", new Date());
+        return venParams;
     }
 }

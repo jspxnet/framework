@@ -55,7 +55,7 @@ public class CacheEntry implements Serializable, Cloneable {
     private long lastTime = System.currentTimeMillis();
 
     /**
-     * 生命周期
+     * 生命周期, 单位秒
      */
     private int live = 0;
 

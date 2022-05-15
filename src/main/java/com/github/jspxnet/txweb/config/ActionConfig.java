@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.config;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ import java.util.Map;
  * date: 11-10-14
  * Time: 下午3:53
  */
-public interface ActionConfig {
+public interface ActionConfig extends Serializable {
 
     /**
      *

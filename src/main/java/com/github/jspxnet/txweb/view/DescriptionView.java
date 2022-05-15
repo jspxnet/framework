@@ -78,7 +78,7 @@ public class DescriptionView extends ActionSupport {
 
     @Override
     public String execute() throws Exception {
-        PrintWriter pw = response.getWriter();
+        PrintWriter pw = getResponse().getWriter();
         if ("tags".equalsIgnoreCase(type)) {
             pw.print(getTags());
         } else {

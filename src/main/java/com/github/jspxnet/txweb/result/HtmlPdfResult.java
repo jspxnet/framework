@@ -11,6 +11,8 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.txweb.Action;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.itextpdf.text.pdf.BaseFont;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.HtmlUtil;
@@ -64,11 +66,13 @@ public class HtmlPdfResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
+
         Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin
-        checkCache(action, response);
+        checkCache(actionContext);
         //浏览器缓存控制end
 
         File f = new File(action.getTemplatePath(), action.getTemplateFile());

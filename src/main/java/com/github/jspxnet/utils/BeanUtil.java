@@ -940,4 +940,76 @@ public final class BeanUtil {
             return method.invoke(object,string,args);
         }
     }
+
+
+    /**
+     * 设置数据对象,如果为空的字符串转换为""
+     * @param o 数据对象
+     */
+    public static void stringNullToEmpty(Object o) {
+        if (o==null)
+        {
+            return;
+        }
+        if (ClassUtil.isStandardProperty(o.getClass()))
+        {
+            return;
+        }
+        if (ClassUtil.isArrayType(o.getClass()))
+        {
+            int length = ArrayUtil.getLength(o);
+            for (int i=0;i<length;i++)
+            {
+                stringNullToEmpty(ArrayUtil.get((Object[])o,i));
+            }
+        }
+
+        if (ClassUtil.isCollection(o)&& o instanceof Collection)
+        {
+            Collection<Object> collection = (Collection<Object>)o;
+            for (Object obj:collection)
+            {
+                stringNullToEmpty(obj);
+            }
+        }
+        Field[] fields = ClassUtil.getDeclaredFields(o.getClass());
+        if (fields != null) {
+            for (Field field : fields) {
+                if (ArrayUtil.indexOf(STOP_MODIFIERS, field.getModifiers()) != -1) {
+                    continue;
+                }
+
+                try {
+                    Type aType = field.getGenericType();
+                    if (aType.equals(String.class))
+                    {
+                        field.setAccessible(true);
+                        Object v = field.get(o);
+                        if (v==null)
+                        {
+                            field.set(o,StringUtil.empty);
+                        }
+                    } else if (ClassUtil.isArrayType(aType))
+                    {
+                        int length = ArrayUtil.getLength(o);
+                        for (int i=0;i<length;i++)
+                        {
+                            stringNullToEmpty(ArrayUtil.get((Object[])o,i));
+                        }
+                    } else
+                    if (ClassUtil.isCollection(aType) && o instanceof Collection)
+                    {
+                        Collection<Object> collection = (Collection<Object>)o;
+                        for (Object obj:collection)
+                        {
+                            stringNullToEmpty(obj);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error(o + "   method=" + field.getName(), e);
+                }
+            }
+        }
+
+    }
 }

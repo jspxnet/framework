@@ -131,7 +131,7 @@ public interface Action extends Serializable {
     //环境数据
     Map<String, Object> getEnv();
 
-    void initEnv(Map<String, Object> paraMap);
+    void initEnv(Map<String, Object> paramMap, String exeType);
 
     void put(String key, Object obj);
 
@@ -154,9 +154,9 @@ public interface Action extends Serializable {
     boolean hasFieldInfo();
 
     //file 容器对象
-    void setRequest(HttpServletRequest request);
+    //void setRequest(HttpServletRequest request);
 
-    void setResponse(HttpServletResponse response);
+    //void setResponse(HttpServletResponse response);
 
     HttpServletRequest getRequest();
 
@@ -238,18 +238,6 @@ public interface Action extends Serializable {
     String[] getAttributeNames();
 
     String getRemoteAddr();
-
-/*
-    boolean isRepeatPost(String formHash);
-W
-
-    boolean isRepeatPost();
-
-    String getFormHash();
-*/
-
-    //void setProcess(boolean process);
-    //boolean isProcess();
 
     void setEnv(Map<String, Object> environment);
 

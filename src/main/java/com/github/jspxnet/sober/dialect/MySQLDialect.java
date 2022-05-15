@@ -197,11 +197,7 @@ public class MySQLDialect extends Dialect {
 
             ////////////时间
             if ("time".equalsIgnoreCase(typeName)) {
-                Time t = rs.getTime(index);
-                if (t == null) {
-                    return null;
-                }
-                return t;
+                return rs.getTime(index);
             }
 
             ///////短字符串

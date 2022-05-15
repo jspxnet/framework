@@ -14,8 +14,9 @@ import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.scriptmark.core.script.ScriptTypeConverter;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.util.AnnotationUtil;
-import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
@@ -24,6 +25,7 @@ import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -78,23 +80,24 @@ public class ExcelResult extends ResultSupport {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception
     {
-        Action action = actionInvocation.getActionProxy().getAction();
-        action.setActionResult(ActionSupport.NONE);
-        HttpServletResponse response = action.getResponse();
-        String browserCache = action.getEnv(ActionEnv.BROWSER_CACHE);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.setActionResult(ActionSupport.NONE);
+        HttpServletResponse response = actionContext.getResponse();
+        HttpServletRequest request = actionContext.getRequest();
+        String browserCache = actionContext.getString(ActionEnv.BROWSER_CACHE);
         if (!StringUtil.isNull(browserCache) && !StringUtil.toBoolean(browserCache)) {
             response.setHeader("Pragma", "No-cache");
             response.setHeader("Cache-Control", "no-cache, must-revalidate");
             response.setDateHeader("Expires", 0);
         }
-        Object obj = action.getResult();
+        Object obj = actionContext.getResult();
         if (obj == null) {
             TXWebUtil.errorPrint("无数据",null,response, HttpStatusType.HTTP_status_404);
             return;
         }
 
         String encode = Environment.defaultEncode;
-        if (RequestUtil.isIeBrowser(action.getRequest()))
+        if (RequestUtil.isIeBrowser(request))
         {
             encode = "GBK";
         }

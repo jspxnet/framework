@@ -9,13 +9,13 @@
  */
 package com.github.jspxnet.txweb.proxy;
 
-import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
-import com.github.jspxnet.txweb.dispatcher.handle.CommandHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.HessianHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
@@ -34,35 +34,7 @@ import java.lang.reflect.Method;
  * action 代理执行容器
  */
 public class DefaultActionProxy implements ActionProxy {
-
-    private Method method = null;
-
-    private String exeType;
-
-    private String namespace;
-
-    @Override
-    public String getExeType() {
-        return exeType;
-    }
-
-    @Override
-    public void setExeType(String exeType) {
-        this.exeType = exeType;
-    }
-
     private Action action;
-
-    @Override
-    public void setCallJson(JSONObject callJson) {
-        action.put(ActionEnv.Key_CallRocJsonData, callJson);
-    }
-
-    @Override
-    public JSONObject getCallJson() {
-        return (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
-    }
-
 
     @Override
     public void destroy() {
@@ -80,53 +52,38 @@ public class DefaultActionProxy implements ActionProxy {
     }
 
     @Override
-    public Method getMethod() {
-        if (method == null) {
-            try {
-                return ClassUtil.getClass(action.getClass()).getMethod(ActionEnv.DEFAULT_EXECUTE);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-        return method;
-    }
-
-    @Override
     public void setMethod(String method) {
         Class<?> cls = ClassUtil.getClass(action.getClass());
-        if (StringUtil.hasLength(method) && !HessianHandle.NAME.equalsIgnoreCase(exeType)) {
-            this.method = TXWebUtil.getExeMethod(this,cls, method);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (StringUtil.hasLength(method) && !HessianHandle.NAME.equalsIgnoreCase(actionContext.getExeType())) {
+            Method methodTmp = TXWebUtil.getExeMethod(this,cls,actionContext.getCallJson(),method,actionContext.getNamespace());
+            if (methodTmp!=null)
+            {
+                actionContext.setMethod(methodTmp);
+            }
         }
         //添加模版为空的时候能执行方法
-        if (this.method ==null)
+        if (actionContext.getMethod() ==null)
         {
-            String actionName = getActionName();
+            String actionName = actionContext.getActionName();
             HttpMethod httpMethod = cls.getAnnotation(HttpMethod.class);
-            if (httpMethod!=null&&StringUtil.ASTERISK.equals(httpMethod.actionName())&&(ActionHandle.NAME.equalsIgnoreCase(exeType)|| CommandHandle.NAME.equalsIgnoreCase(exeType))&&ValidUtil.isGoodName(actionName,1,30))
+            if (httpMethod!=null&&StringUtil.ASTERISK.equals(httpMethod.actionName())&&ValidUtil.isGoodName(actionName,1,30))
             {
-                Method methodTmp = TXWebUtil.getExeMethod(this,cls, actionName);
-               // if (methodTmp!=null&&methodTmp.getGenericReturnType().equals(Void.TYPE))
+                Method methodTmp = TXWebUtil.getExeMethod(this,cls, actionContext.getCallJson(),actionName,actionContext.getNamespace());
                 if (methodTmp!=null)
                 {
-                    this.method  = methodTmp;
+                    actionContext.setMethod(methodTmp);
                 }
             }
         }
-    }
 
-    @Override
-    public String getActionName() {
-        return action.getEnv(ActionEnv.Key_ActionName);
-    }
-
-    @Override
-    public String getNamespace() {
-        return namespace;
-    }
-    @Override
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
+        if (actionContext.getMethod() == null) {
+            try {
+                actionContext.setMethod(ClassUtil.getClass(action.getClass()).getMethod(ActionEnv.DEFAULT_EXECUTE));
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private String caption = "none";
@@ -150,11 +107,12 @@ public class DefaultActionProxy implements ActionProxy {
      */
     @Override
     public String getMethodCaption() {
+        ActionContext actionContext = ThreadContextHolder.getContext();
         try {
-            if (method == null) {
+            if (actionContext.getMethod() == null) {
                 return StringUtil.empty;
             }
-            Operate operate = method.getAnnotation(Operate.class);
+            Operate operate = actionContext.getMethod().getAnnotation(Operate.class);
             if (operate != null) {
                 return operate.caption();
             }
@@ -164,7 +122,6 @@ public class DefaultActionProxy implements ActionProxy {
         return StringUtil.empty;
     }
 
-
     /**
      * 执行action方法
      *
@@ -172,40 +129,50 @@ public class DefaultActionProxy implements ActionProxy {
      * @throws Exception 异常
      */
     @Override
-    public String execute() throws Exception {
+    public String execute(ActionContext actionContext) throws Exception {
         action.initialize();
-
-        if (HessianHandle.NAME.equals(exeType)) {
+        if (HessianHandle.NAME.equals(actionContext.getExeType())) {
             //远程调用
             HessianHandle.execute(this);
             //执行最后的清理动作
             action.execute();
             return ActionSupport.NONE;
         }
+        String result;
+        try {
+            //下边是roc，和传统方式调用
+            if (ActionHandle.NAME.equalsIgnoreCase(actionContext.getExeType()))
+            {
+                TXWebUtil.setTurnPage(action);
+            }
+            if (!ActionEnv.DEFAULT_EXECUTE.equals(actionContext.getMethod().getName())&&TXWebUtil.checkOperate(action, actionContext.getMethod())) {
 
-        //下边是roc，和传统方式调用
-        if (method == null) {
-            method = ClassUtil.getClass(action.getClass()).getMethod(ActionEnv.DEFAULT_EXECUTE);
+                if (RocHandle.NAME.equalsIgnoreCase(actionContext.getExeType())) {
+                    //ROC 普通调用
+                    RocHandle.execute(action,actionContext);
+                }
+                else
+                {
+                    //默认模版方式调用
+                    ActionHandle.execute(action,actionContext);
+                }
+            }
+        } finally {
+            //这个方法什么时候都会执行
+            result =  action.execute();
         }
-
-        TXWebUtil.setTurnPage(action);
-        if (!ActionEnv.DEFAULT_EXECUTE.equals(method.getName())&&TXWebUtil.checkOperate(action, method)) {
-            if (exeType.equalsIgnoreCase(RocHandle.NAME)) {
-                //ROC 普通调用
-                RocHandle.execute(this);
-            }
-            else {
-                //默认模版方式调用
-                ActionHandle.execute(this);
-            }
-            if (ActionSupport.NONE.equals(action.getActionResult())) {
-                return ActionSupport.NONE;
-            }
-        }
-
-        //这个方法什么时候都会执行
-        return action.execute();
+        return result;
     }
 
+    /**
+     * 只为了兼容
+     * @return 返回需要执行的方法
+     */
+    @Deprecated
+    @Override
+    public Method getMethod() {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return actionContext.getMethod();
+    }
 
 }

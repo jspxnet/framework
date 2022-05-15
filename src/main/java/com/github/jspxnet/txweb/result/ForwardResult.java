@@ -3,6 +3,8 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.StringUtil;
@@ -17,14 +19,14 @@ public class ForwardResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
-        HttpServletRequest request = action.getRequest();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.setActionResult(ActionSupport.NONE);
+        HttpServletRequest request = actionContext.getRequest();
+        HttpServletResponse response = actionContext.getResponse();
         response.setContentType("text/html; charset=" + Dispatcher.getEncode());
         String url = getConfigLocationUrl(actionInvocation);
         if (!StringUtil.isNull(url)) {
             request.getRequestDispatcher(url).forward(request, response);
-            action.setActionResult(ActionSupport.NONE);
         }
     }
 }

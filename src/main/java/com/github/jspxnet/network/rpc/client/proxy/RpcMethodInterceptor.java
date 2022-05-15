@@ -15,6 +15,8 @@ import com.github.jspxnet.network.rpc.model.transfer.IocResponse;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.util.HessianSerializableUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -22,6 +24,9 @@ import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.InetSocketAddress;
@@ -35,37 +40,25 @@ import java.net.InetSocketAddress;
  **/
 @Slf4j
 public class RpcMethodInterceptor implements MethodInterceptor {
-    private RequestTo request;
-    private ResponseTo response;
     private String serviceName;
     private InetSocketAddress address;
     //ioc 名称,类名
     private String url;
+
+    private HttpServletRequest request = null;
+    private HttpServletResponse response = null;
 
     public RpcMethodInterceptor()
     {
 
     }
 
-
-    public RequestTo getRequest() {
-        return request;
-    }
-
-    public void setRequest(RequestTo request) {
+    public void setRequest(HttpServletRequest request) {
         this.request = request;
     }
 
-    public ResponseTo getResponse() {
-        return response;
-    }
-
-    public void setResponse(ResponseTo response) {
+    public void setResponse(HttpServletResponse response) {
         this.response = response;
-    }
-
-    public String getServiceName() {
-        return serviceName;
     }
 
     public void setServiceName(String serviceName) {
@@ -101,12 +94,21 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             }
             i++;
         }
+
+        if (request==null||response==null)
+        {
+            ActionContext actionContext = ThreadContextHolder.getContext();
+            request = actionContext.getRequest();
+            response = actionContext.getResponse();
+        }
+
         IocRequest iocRequest = new IocRequest();
         iocRequest.setMethodName(method.getName());
         iocRequest.setParameters(parameterJson.toString());
-        iocRequest.setRequest(request);
-        iocRequest.setResponse(response);
+        iocRequest.setRequest(new RequestTo(request));
+        iocRequest.setResponse(new ResponseTo(response));
         iocRequest.setUrl(url);
+
         command.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(iocRequest)));
 
         if (StringUtil.isEmpty(serviceName))

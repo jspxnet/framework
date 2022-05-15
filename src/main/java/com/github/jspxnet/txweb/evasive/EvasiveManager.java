@@ -52,13 +52,13 @@ public class EvasiveManager {
 
     final private static String BLACK_RESULT = "black";
     final private static String PASSWORD = "password";
-    final private static String folderIndex = "index";
+    final private static String FOLDER_INDEX = "index";
 
     private static boolean evasiveExcludeFilter = true;
     private static String[] insecureUrlKeys = null;
     private static String[] insecureQueryStringKeys = null;
 
-    private static EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
+    private static final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
 
 
     //判断程序
@@ -164,7 +164,6 @@ public class EvasiveManager {
         envParams.put("remoteHost", request.getRemoteHost());
         envParams.put("method", request.getMethod());
 
-
         int[] logicArray = ArrayUtil.getInitedIntArray(conditions.size(), 0);
         for (int i = 0; i < logicArray.length; i++) {
             Condition condition = conditions.get(i);
@@ -254,6 +253,7 @@ public class EvasiveManager {
      * ip 查询黑名单,根据条件查询数据库，ip访问记录表，来分析是否有拦截
      */
     private static void runQueryBlack() {
+        Map<String, Object> envParams = TXWebUtil.createEnvironment();
         for (QueryBlack queryBlack : QUERY_BLACK_RULE_LIST) {
             //执行周期为5分钟执行一次
             if (System.currentTimeMillis() - queryBlack.getLastQueryTimeMillis() < DateUtil.MINUTE * 2) {
@@ -272,7 +272,7 @@ public class EvasiveManager {
             }
 
             try {
-                sql = EnvFactory.getPlaceholder().processTemplate(TXWebUtil.createEnvironment(), sql);
+                sql = EnvFactory.getPlaceholder().processTemplate(envParams, sql);
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error(queryBlack.getName() + " sql " + sql, e);
@@ -458,7 +458,7 @@ public class EvasiveManager {
             TXWebUtil.errorPrint("安全目录,需要密码访问",null, response, HttpStatusType.HTTP_status_405);
             return true;
         } else
-        if (!StringUtil.isNull(password) && password.equalsIgnoreCase(request.getParameter(PASSWORD)) && folderIndex.equalsIgnoreCase(URLUtil.getFileNamePart(localUrl)))
+        if (!StringUtil.isNull(password) && password.equalsIgnoreCase(request.getParameter(PASSWORD)) && FOLDER_INDEX.equalsIgnoreCase(URLUtil.getFileNamePart(localUrl)))
         {
             //列表目录
             File path;
@@ -553,6 +553,7 @@ public class EvasiveManager {
     }
 
     private static void printError(HttpServletRequest request, HttpServletResponse response, EvasiveIp blackEvasiveIp) {
+
         String ip = RequestUtil.getRemoteAddr(request);
         //为了支持脚本和更多功能
         Map<String, Object> envParams = TXWebUtil.createEnvironment();
@@ -560,7 +561,12 @@ public class EvasiveManager {
         envParams.put("response", response);
         envParams.put("ip", ip);
         long currentTimeMillis = System.currentTimeMillis();
-        long waitTime = blackEvasiveIp.getImprisonSecond() * DateUtil.SECOND - (currentTimeMillis - blackEvasiveIp.getCreateTimeMillis());
+        int second = 30;
+        if (blackEvasiveIp!=null)
+        {
+            second = blackEvasiveIp.getImprisonSecond();
+        }
+        long waitTime = second * DateUtil.SECOND - (currentTimeMillis - blackEvasiveIp.getCreateTimeMillis());
         if (waitTime < 0) {
             waitTime = 0;
         }

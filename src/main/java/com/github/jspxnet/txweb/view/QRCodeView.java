@@ -24,6 +24,7 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -101,7 +102,7 @@ public class QRCodeView extends ActionSupport {
         if (StringUtil.isNull(txt)) {
             return NONE;
         }
-        if (RequestUtil.isPirated(request)) {
+        if (RequestUtil.isPirated(getRequest())) {
             return NONE;
         }
         Encrypt encrypt = EnvFactory.getSymmetryEncrypt();
@@ -151,7 +152,7 @@ public class QRCodeView extends ActionSupport {
                 bFormat = BarcodeFormat.QR_CODE;
             }
         }
-
+        HttpServletResponse response = getResponse();
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);

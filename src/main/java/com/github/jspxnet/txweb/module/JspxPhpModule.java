@@ -17,6 +17,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.txweb.Action;
+import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.utils.URLUtil;
@@ -94,7 +95,7 @@ public class JspxPhpModule extends AbstractQuercusModule {
 
     public Action getAction(Env env, String classname) throws ValidException {
         HttpServletRequest request = (HttpServletRequest) env.getRequest();
-        String namespace = URLUtil.getNamespace(request.getServletPath());
+        String namespace = URLUtil.getNamespace(request.getRequestURI());
         if (classname == null) {
             return null;
         }
@@ -120,10 +121,9 @@ public class JspxPhpModule extends AbstractQuercusModule {
         Map<String, Object> envParams = TXWebUtil.createEnvironment();
         envParams.put(ActionEnv.Key_ActionName, namePart);
         envParams.put(ActionEnv.Key_Namespace, namespace);
-        envParams.put(ActionEnv.Key_RealPath, request.getServletPath());
+        envParams.put(ActionEnv.Key_RealPath, Dispatcher.getRealPath());
         envParams.put(ActionEnv.CONTENT_TYPE, "text/html; charset=" + request.getCharacterEncoding());
         ///////////////////////////////////环境参数 end
-
         ////////////////////ajax begin
         WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         try {

@@ -1,7 +1,6 @@
 package com.github.jspxnet.txweb.dispatcher;
 
 import com.github.jspxnet.boot.JspxNetApplication;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 

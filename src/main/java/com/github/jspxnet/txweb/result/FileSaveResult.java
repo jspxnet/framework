@@ -18,6 +18,8 @@ import com.github.jspxnet.scriptmark.core.ScriptMarkEngine;
 import com.github.jspxnet.scriptmark.load.FileSource;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.FileUtil;
@@ -56,12 +58,12 @@ public class FileSaveResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
         Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
-        HttpServletRequest request = action.getRequest();
-        String defaultEncode = ENV_TEMPLATE.getString(Environment.encode, Environment.defaultEncode);
+
         File f = new File(action.getTemplatePath(), action.getTemplateFile());
-        FileSource fileSource = new FileSource(f, action.getTemplateFile(), defaultEncode);
+        FileSource fileSource = new FileSource(f, action.getTemplateFile(), Dispatcher.getEncode());
         //如果使用cache 就使用uri
 
         CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), TEMPLATE_PATH});
@@ -87,7 +89,7 @@ public class FileSaveResult extends ResultSupport {
         File saveFileName = new File(action.getEnv(SAVE_FILE));
         //输出模板数据
         FileUtil.makeDirectory(saveFileName.getParent());
-        Writer out = new OutputStreamWriter(new FileOutputStream(saveFileName), defaultEncode);
+        Writer out = new OutputStreamWriter(new FileOutputStream(saveFileName), Dispatcher.getEncode());
         Map<String, Object> valueMap = action.getEnv();
         initPageEnvironment(action, valueMap);
         try {

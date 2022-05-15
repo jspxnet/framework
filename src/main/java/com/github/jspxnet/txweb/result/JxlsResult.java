@@ -4,6 +4,8 @@ import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.component.jxls.JxlsUtil;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -31,16 +33,18 @@ public class JxlsResult extends ResultSupport {
     public final static String EXCEL_TEMPLATE = "EXCEL_TEMPLATE";
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.setActionResult(ActionSupport.NONE);
+        HttpServletResponse response = actionContext.getResponse();
         Action action = actionInvocation.getActionProxy().getAction();
-        action.setActionResult(ActionSupport.NONE);
-        HttpServletResponse response = action.getResponse();
-        String browserCache = action.getEnv(ActionEnv.BROWSER_CACHE);
+
+        String browserCache = actionContext.getString(ActionEnv.BROWSER_CACHE);
         if (!StringUtil.isNull(browserCache) && !StringUtil.toBoolean(browserCache)) {
             response.setHeader("Pragma", "No-cache");
             response.setHeader("Cache-Control", "no-cache, must-revalidate");
             response.setDateHeader("Expires", 0);
         }
-        Object obj = action.getResult();
+        Object obj = actionContext.getResult();
         if (obj == null) {
             TXWebUtil.errorPrint("无数据",null,response, HttpStatusType.HTTP_status_404);
             return;

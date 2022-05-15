@@ -113,11 +113,9 @@ public class RsaRocHandle extends RocHandle {
     @Override
     public void doing(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String callStr = getRequestReader(request, response);
-
         if (StringUtil.isNull(callStr)) {
             return;
         }
-
         String rpc = StringUtil.trim(callStr);
         JSONObject jsonData = null;
         if (StringUtil.isXml(rpc)) {

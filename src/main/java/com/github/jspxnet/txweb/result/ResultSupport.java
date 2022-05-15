@@ -22,6 +22,8 @@ import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.Result;
 import com.github.jspxnet.txweb.annotation.Redirect;
 import com.github.jspxnet.txweb.config.ResultConfigBean;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.*;
 import com.github.jspxnet.utils.BeanUtil;
@@ -126,16 +128,17 @@ public abstract class ResultSupport implements Result {
      * @return JSONObject
      */
     public static Object getRocAutoResult(ActionInvocation actionInvocation) {
+        ActionContext actionContext = ThreadContextHolder.getContext();
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         Action action = actionProxy.getAction();
-        String resultMethods = action.getEnv(ActionEnv.Key_ResultMethods);
+        String resultMethods = actionContext.getString(ActionEnv.Key_ResultMethods);
         if (StringUtil.isNull(resultMethods)) {
-            resultMethods = action.getString(ActionEnv.Key_ResultMethods);
+            resultMethods = actionContext.getString(ActionEnv.Key_ResultMethods);
         }
         //如果有错误信息，先返回错误信息
         //什么都没有的情况返回提示信息
-        if (action.hasFieldInfo()) {
-            return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), action.getFieldInfo());
+        if (actionContext.hasFieldInfo()) {
+            return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), actionContext.getFieldInfo());
         }
         if (KEY_GRID.equalsIgnoreCase(resultMethods)) {
             //默认的表格调用方式
@@ -170,26 +173,26 @@ public abstract class ResultSupport implements Result {
                 }
             }
             return json;
-        } else if (action.getResult()!=null) {
+        } else if (actionContext.getResult()!=null) {
             //程序设置后指定返回，roc 配置的返回会在这里返回
             //发现一个问题JSONObject在这里会变成HashMap
-             return action.getResult();
+             return actionContext.getResult();
         } else {
             //什么都没有的情况返回提示信息
-            Method method = actionProxy.getMethod();
-            if (action.hasFieldInfo())
+            Method method = actionContext.getMethod();
+            if (actionContext.hasFieldInfo())
             {
                 //有错误信息
-                return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), action.getFailureMessage());
+                return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), actionContext.getFailureMessage());
             } else
-            if (method==null||ActionEnv.DEFAULT_EXECUTE.equals(method.getName())&&action.getResult()==null)
+            if (method==null||ActionEnv.DEFAULT_EXECUTE.equals(method.getName())&&actionContext.getResult()==null)
             {
                 //没有找到执行的方法
                 return RocResponse.error(ErrorEnumType.CALL_API.getValue(), "未知的接口").setStatus(HttpStatusType.HTTP_status_404);
             }
             else
             {
-                return RocResponse.success(action.getResult(), action.getSuccessMessage());
+                return RocResponse.success(actionContext.getResult(), actionContext.getSuccessMessage());
             }
         }
     }
@@ -202,9 +205,10 @@ public abstract class ResultSupport implements Result {
      * @param valueMap 环境变量
      */
     static void initPageEnvironment(Action action, Map<String, Object> valueMap) {
-        valueMap.put(ActionEnv.Key_Request, new RequestMap(action.getRequest()));
-        valueMap.put(ActionEnv.Key_Response, RequestUtil.getResponseMap(action.getResponse()));
-        valueMap.put(ActionEnv.Key_Session, new SessionMap(action.getSession()));
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        valueMap.put(ActionEnv.Key_Request, new RequestMap(actionContext.getRequest()));
+        valueMap.put(ActionEnv.Key_Response, RequestUtil.getResponseMap(actionContext.getResponse()));
+        valueMap.put(ActionEnv.Key_Session, new SessionMap(actionContext.getRequest().getSession()));
         valueMap.put(ActionEnv.Key_Config, action.getConfig());
         valueMap.put(ActionEnv.Key_Language, action.getLanguage());
         valueMap.put(ActionEnv.Key_Option, action.getOption());
@@ -214,13 +218,12 @@ public abstract class ResultSupport implements Result {
 
     /**
      * 判断是否让浏览器保持缓存
-     *
-     * @param action   action
-     * @param response 请求
+     * @param actionContext 上下文
      */
-    static void checkCache(Action action, HttpServletResponse response) {
-        String browserCache = action.getEnv(ActionEnv.BROWSER_CACHE);
+    static void checkCache(ActionContext actionContext) {
+        String browserCache = actionContext.getString(ActionEnv.BROWSER_CACHE);
         if (!StringUtil.isNull(browserCache) && !StringUtil.toBoolean(browserCache)) {
+            HttpServletResponse response = actionContext.getResponse();
             response.setHeader("Pragma", "No-cache");
             response.setHeader("Cache-Control", "no-cache,must-revalidate");
             response.setDateHeader("Expires", 0);

@@ -22,6 +22,7 @@ import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 
 /**
@@ -101,10 +102,10 @@ public class ValidateExpImgView extends ActionSupport {
 
     @Override
     public String execute() throws Exception {
-        if (safe && RequestUtil.isPirated(request)) {
+        if (safe && RequestUtil.isPirated(getRequest())) {
             return NONE;
         }
-
+        HttpServletResponse response = getResponse();
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);

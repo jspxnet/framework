@@ -153,6 +153,7 @@ public class TomcatApplication {
         connector.setMaxSavePostSize(-1);
         connector.setEnableLookups(false);
         connector.setMaxCookieCount(threads*100000);
+        connector.setUseBodyEncodingForURI(true);
 
         Http11NioProtocol protocol = (Http11NioProtocol)connector.getProtocolHandler();
         //设置最大连接数
@@ -212,7 +213,6 @@ public class TomcatApplication {
             tomcat.addServlet("", "jspxServlet", new ServletDispatcher());
             standardContext.addServletMappingDecoded("/*", "jspxServlet");
         }
-
 
         //放入环境变量begin
         for (Object key:properties.keySet())

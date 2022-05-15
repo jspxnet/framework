@@ -12,9 +12,13 @@ package com.github.jspxnet.txweb.result;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
+import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.StringUtil;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -37,13 +41,13 @@ public class FusionChartsXmlResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws IOException, ServletException {
-        Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
-        Object o = action.getResult();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
+        Object o = actionContext.getResult();
         if (o == null) {
             return;
         }
-        String browserCache = action.getEnv(ActionEnv.BROWSER_CACHE);
+        String browserCache = actionContext.getString(ActionEnv.BROWSER_CACHE);
         boolean noCache = (!StringUtil.isNull(browserCache) && ("false".equalsIgnoreCase(browserCache) || "0".equals(browserCache)));
         if (noCache) {
             response.setHeader("Pragma", "No-cache");
@@ -62,8 +66,7 @@ public class FusionChartsXmlResult extends ResultSupport {
         }
         out.flush();
         out.close();
-        action.setResult(null);
-
+        actionContext.setResult(null);
     }
 
 }

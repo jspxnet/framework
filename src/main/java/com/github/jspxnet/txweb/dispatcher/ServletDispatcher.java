@@ -17,16 +17,18 @@ import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.txweb.evasive.Configuration;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.txweb.evasive.EvasiveManager;
+import com.github.jspxnet.txweb.util.RequestUtil;
+import com.github.jspxnet.txweb.util.RequestWrapper;
 import com.github.jspxnet.txweb.util.TXWebUtil;
+import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.StreamUtil;
 import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -63,7 +65,6 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
             evasiveConfiguration.setFileName(envTemplate.getString(Environment.evasive_config));
             evasiveManager = EvasiveManager.getInstance();
         }
-
     }
 
     /**
@@ -72,34 +73,57 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
      */
     @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) {
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
-
         try {
-            request.setCharacterEncoding(Dispatcher.getEncode());
-            response.setCharacterEncoding(Dispatcher.getEncode());
+            servletRequest.setCharacterEncoding(Dispatcher.getEncode());
+            servletResponse.setCharacterEncoding(Dispatcher.getEncode());
         } catch (UnsupportedEncodingException e) {
-            TXWebUtil.errorPrint("系统编码错误", null, response, HttpStatusType.HTTP_status_403);
+            TXWebUtil.errorPrint("系统编码错误", null, (HttpServletResponse)servletResponse, HttpStatusType.HTTP_status_403);
             log.debug("系统编码错误", e);
             return;
         }
+        //必须在evasiveManager 前边
+        //getParameter()、getInputStream()和getReader() 三个是冲突的,调用一个,其他的会数据错误
+        HttpServletRequest request = null;
+        try {
+            if (!RequestUtil.isMultipart((HttpServletRequest)servletRequest))
+            {
+                request = new RequestWrapper((HttpServletRequest)servletRequest);
+            } else
+            {
+                request = (HttpServletRequest)servletRequest;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            request = (HttpServletRequest)servletRequest;
+        }
+        //
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
         if (useEvasive && JspxNetApplication.checkRun() && evasiveManager.execute(request, response)) {
             return;
         }
-        String suffix = URLUtil.getFileType(request.getRequestURI());
+
+        String url = request.getRequestURI();
+        String suffix = URLUtil.getFileType(url);
         if (suffix != null) {
             suffix = suffix.toLowerCase();
         }
         if (Dispatcher.hasSuffix(suffix)) {
             Dispatcher.getInstance().wrapRequest(request, response);
         } else {
-            try {
-                super.service(servletRequest, servletResponse);
-            } catch (Exception e) {
+            //不支持过滤功能,只能自己实现
+            File file = new File(Dispatcher.getRealPath(), URLUtil.getNamespace(url) + "/" + URLUtil.getFileName(url));
+            if (!file.isFile()) {
+                TXWebUtil.errorPrint("不存在的资源", null, response, HttpStatusType.HTTP_status_403);
+                return;
+            }
+            String contentType = FileUtil.getContentType(file);
+            response.setContentType(contentType);
+            try (InputStream in = new FileInputStream(file); OutputStream out = response.getOutputStream();) {
+                StreamUtil.copy(in, out);
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
     }
 
     /**

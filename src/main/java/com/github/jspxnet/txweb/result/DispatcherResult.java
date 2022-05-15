@@ -10,8 +10,8 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.ActionInvocation;
-import com.github.jspxnet.txweb.Action;
-
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,9 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 public class DispatcherResult extends RedirectResult {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
-        HttpServletRequest request = action.getRequest();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        HttpServletResponse response = actionContext.getResponse();
         request.getRequestDispatcher(getConfigLocationUrl(actionInvocation)).forward(request, response);
     }
 }

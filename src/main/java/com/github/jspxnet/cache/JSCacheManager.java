@@ -220,7 +220,8 @@ public class JSCacheManager implements CacheManager {
      */
     static public boolean put(String cacheName, String key, Object o, int timeToLive) {
         Cache cache = CACHE_MANAGER.getCache(cacheName);
-        if (cache == null) {
+        if (cache == null || key==null)
+        {
             return false;
         }
         CacheEntry cacheEntry = new CacheEntry();

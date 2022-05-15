@@ -15,7 +15,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "jspx_master_table_meta",cache = false)
+@Table(name = "jspx_child_table_meta",cache = false)
 public class ChildTableMeta extends OperateTable{
 
     @Id
@@ -31,7 +31,6 @@ public class ChildTableMeta extends OperateTable{
     //中文的表明描述，可以作为关键字识别
     @Column(caption = "表名描述", length = 100)
     private String caption = StringUtil.empty;
-
 
     @Column(caption = "关键字名")
     private String primary = StringUtil.empty;

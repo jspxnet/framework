@@ -11,6 +11,8 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.StringUtil;
@@ -18,6 +20,7 @@ import com.thetransactioncompany.cors.CORSResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ResponseFacade;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -39,8 +42,8 @@ public class RedirectResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
         response.setContentType("text/html; charset=" + Dispatcher.getEncode());
         if (!(response instanceof ResponseFacade) && !(response instanceof CORSResponseWrapper) && response.isCommitted()) {
             log.error("redirect response.isCommitted():" + response.isCommitted());
@@ -55,10 +58,10 @@ public class RedirectResult extends ResultSupport {
             if (!StringUtil.isNull(url))
             {
                 response.sendRedirect(url);
-                action.setActionResult(ActionSupport.NONE);
+                actionContext.setActionResult(ActionSupport.NONE);
             }
         } catch (Exception e) {
-            log.error(actionInvocation.getActionName() + "检查跳转配置是否正确,check redirect config action is:" + url, e);
+            log.error(actionContext.getActionName() + "检查跳转配置是否正确,check redirect config action is:" + url, e);
         }
     }
 }
