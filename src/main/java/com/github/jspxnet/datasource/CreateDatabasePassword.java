@@ -1,7 +1,5 @@
 package com.github.jspxnet.datasource;
 
-import com.github.jspxnet.boot.JspxNetApplication;
-import com.github.jspxnet.utils.ArrayUtil;
 
 /**
  * Created by ChenYuan on 2017/5/12.

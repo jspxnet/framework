@@ -28,10 +28,10 @@ public class LimitDataSource extends DriverManagerDataSource {
     private int mailSendTimes = 0;
     private int minPoolSize = 3;
     private int sleepSecond = 1;
-    private String smtp = "mail.gzec.com.cn:26";
-    private String mailFrom = "public@gzec.com.cn";
-    private String mailUser = "public@gzec.com.cn";
-    private String mailPassword = "111111";
+    private String smtp = "";
+    private String mailFrom = "";
+    private String mailUser = "";
+    private String mailPassword = "";
     private String mailSendTo = "39793751@qq.com";
     private int current = 0;
 

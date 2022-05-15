@@ -1,4 +1,4 @@
-package com.github.jspxnet.txweb.table;
+package com.github.jspxnet.component.formula.table;
 
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;

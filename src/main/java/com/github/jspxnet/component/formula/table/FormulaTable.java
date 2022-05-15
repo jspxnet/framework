@@ -1,4 +1,4 @@
-package com.github.jspxnet.txweb.table;
+package com.github.jspxnet.component.formula.table;
 
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
@@ -41,7 +41,7 @@ public class FormulaTable implements Serializable {
 
     //default:默认从 cache表起数据,acsColSum:热网的一列合计;sql:是用sql起数据
     @Nexus(mapping = MappingType.OneToOne, field = "calcCode", targetField = "code", targetEntity = FormulaCalcType.class)
-    private FormulaCalcType formulaCalcType = new FormulaCalcType();
+    private FormulaCalcType calcType = new FormulaCalcType();
 
     @Column(caption = "公式", length = 1000,notNull = true)
     private String content = StringUtil.empty;
