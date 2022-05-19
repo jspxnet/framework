@@ -1,15 +1,11 @@
 package com.github.jspxnet.json;
 
 
-import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.util.TypeReference;
 import com.github.jspxnet.utils.*;
 import com.google.gson.Gson;
-
 import lombok.extern.slf4j.Slf4j;
-
-
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -778,7 +774,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         Object o = get(key);
         if (o ==null||o instanceof Collections || ClassUtil.isArrayType(o.getClass()))
         {
-            return null;
+            return new JSONObject();
         }
         if (o instanceof JSONObject) {
             return (JSONObject) o;
@@ -786,10 +782,20 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (o instanceof String && StringUtil.isJsonObject((String)o)) {
             return new JSONObject((String)o) ;
         }
+        if (o instanceof Serializable && !ClassUtil.isStandardProperty(o.getClass()) &&
+                !(ClassUtil.isCollection(o)|| ClassUtil.isArrayType(o))
+        ) {
+            try {
+                return new JSONObject(o);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
         if (o instanceof Map) {
             return new JSONObject(o) ;
         }
-        return null;
+        return new JSONObject();
     }
 
     public JSONObject getIgnoreJSONObject(String key) {
@@ -1488,16 +1494,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 return NumberUtil.getNumberStdFormat((Number) value);
             }
         }
-        if (value instanceof InputStream) {
-            InputStream in = (InputStream) value;
-            try {
-                byte[] data = new byte[in.available()];
-                in.read(data, 0, data.length);
-                return StringUtil.quote(BIN_DATA_START + EncryptUtil.getBase64Encode(data, EncryptUtil.NO_WRAP), true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+
 
         if (!(value instanceof JSONArray) && (ClassUtil.isCollection(value)|| ClassUtil.isArrayType(value))) {
             JSONArray array = new JSONArray(value);
@@ -1507,7 +1504,9 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (value instanceof JSONObject) {
             return ((JSONObject) value).toString(indentFactor, indent, classInfo);
         }
-
+        if (value instanceof JSONArray) {
+            return ((JSONArray) value).toString(indentFactor, indent);
+        }
         if (value instanceof Map) {
             return new JSONObject((Map) value).toString(indentFactor, indent, classInfo);
         }
@@ -1521,6 +1520,16 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 return new JSONObject(value).toString(indentFactor, indent, classInfo);
             } catch (Exception e)
             {
+                e.printStackTrace();
+            }
+        }
+
+        if (value instanceof InputStream) {
+            try (InputStream in = (InputStream) value){
+                byte[] data = new byte[in.available()];
+                in.read(data, 0, data.length);
+                return StringUtil.quote(BIN_DATA_START + EncryptUtil.getBase64Encode(data, EncryptUtil.NO_WRAP), true);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

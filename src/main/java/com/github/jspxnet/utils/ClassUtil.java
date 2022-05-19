@@ -732,7 +732,7 @@ public class ClassUtil {
     /**
      * 判断一个对象是否为数组
      * @param obj 对象
-     * @return
+     * @return 判断一个对象是否为数组
      */
     public static boolean isArrayType(Object obj) {
         if (obj==null)

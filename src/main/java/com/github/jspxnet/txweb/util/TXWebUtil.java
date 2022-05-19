@@ -759,7 +759,7 @@ public final class TXWebUtil {
             }
         }
 
-        int iParam = 0;
+        int iParam;
         if (isArray) {
             iParam = paramsArray == null ? 0 : paramsArray.length();
         } else {
@@ -943,7 +943,6 @@ public final class TXWebUtil {
      * @param action    action
      * @param exeMethod 执行方法
      * @return 是否继续执行这个方法
-     * @throws Exception 异常
      */
     public static boolean checkOperate(Action action, Method exeMethod)  {
         //验证 begin
