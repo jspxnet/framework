@@ -20,6 +20,8 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -82,24 +84,48 @@ public class SoberColumn implements Serializable {
         return  javaType;
     }
 
+    private static String[] baseType = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
+
+    private static Map<String,String> codeTypeMap = new HashMap<>();
+    static{
+        codeTypeMap.put("int","int");
+        codeTypeMap.put("integer","integer");
+        codeTypeMap.put("BigInteger","BigInteger");
+        codeTypeMap.put("long","long");
+        codeTypeMap.put("bool","boolean");
+        codeTypeMap.put("float","float");
+        codeTypeMap.put("BigDecimal","BigDecimal");
+        codeTypeMap.put("date","Date");
+        codeTypeMap.put("double","double");
+        codeTypeMap.put("string","String");
+        codeTypeMap.put("map","Map");
+
+    }
 
     @JsonField
     public String getBeanField() {
+
         StringBuilder sb = new StringBuilder();
         sb.append("@Column(caption = \"").append(caption).append("\", length = ").append(length).append(",notNull=").append(notNull).append(")").append("\r\n");
         //StringUtil.empty
-        String typeString = getTypeString();
+        String typeStr = getTypeString();
+
+        String typeString = codeTypeMap.get(typeStr);
+        if (StringUtil.isNull(typeString))
+        {
+            typeString = typeStr;
+        }
         if (ClassUtil.isNumberType(typeString))
         {
-            sb.append("private ").append(getTypeString()).append(" ").append(name).append(" = 0;");
+            sb.append("private ").append(typeString).append(" ").append(name).append(" = 0;");
         } else
         if (typeString.equals(Date.class.getName()) || typeString.equals(Date.class.getSimpleName()) )
         {
-            sb.append("private ").append(getTypeString()).append(" ").append(name).append(" = new Date();");
+            sb.append("private ").append(typeString).append(" ").append(name).append(" = new Date();");
         }
         else
         {
-            sb.append("private ").append(getTypeString()).append(" ").append(name).append(" = StringUtil.empty;");
+            sb.append("private ").append(typeString).append(" ").append(name).append(" = StringUtil.empty;");
         }
         return sb.toString();
     }

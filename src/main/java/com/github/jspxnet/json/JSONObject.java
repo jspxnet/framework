@@ -1,6 +1,7 @@
 package com.github.jspxnet.json;
 
 
+import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.util.TypeReference;
 import com.github.jspxnet.utils.*;
@@ -9,10 +10,7 @@ import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -335,7 +333,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         }
 
         Field[] fields = ClassUtil.getDeclaredFields(lass);
-
         if (!ObjectUtil.isEmpty(fields))
         {
             for (Field field : fields) {
@@ -787,7 +784,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             return (JSONObject) o;
         }
         if (o instanceof String && StringUtil.isJsonObject((String)o)) {
-            return new JSONObject(o) ;
+            return new JSONObject((String)o) ;
         }
         if (o instanceof Map) {
             return new JSONObject(o) ;
@@ -1490,7 +1487,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             {
                 return NumberUtil.getNumberStdFormat((Number) value);
             }
-
         }
         if (value instanceof InputStream) {
             InputStream in = (InputStream) value;
@@ -1503,36 +1499,31 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             }
         }
 
-        if (value instanceof JSONString) {
-            return ((JSONString) value).toJSONString();
-        }
-        if (value instanceof List) {
+        if (!(value instanceof JSONArray) && (ClassUtil.isCollection(value)|| ClassUtil.isArrayType(value))) {
             JSONArray array = new JSONArray(value);
             return array.toString(indentFactor, indent);
         }
 
         if (value instanceof JSONObject) {
-
             return ((JSONObject) value).toString(indentFactor, indent, classInfo);
         }
 
         if (value instanceof Map) {
             return new JSONObject((Map) value).toString(indentFactor, indent, classInfo);
         }
-
-        if (value instanceof Iterable || value.getClass().isArray()) {
-            return new JSONArray(value).toString(indentFactor, indent);
+        if (value instanceof JSONString) {
+            return ((JSONString) value).toJSONString();
         }
-        if (value instanceof Serializable && !ClassUtil.isStandardProperty(value.getClass())) {
+        if (value instanceof Serializable && !ClassUtil.isStandardProperty(value.getClass()) &&
+                !(ClassUtil.isCollection(value)|| ClassUtil.isArrayType(value))
+        ) {
             try {
                 return new JSONObject(value).toString(indentFactor, indent, classInfo);
             } catch (Exception e)
             {
                 e.printStackTrace();
             }
-
         }
-
         return StringUtil.quote(value.toString(), true);
     }
 
@@ -1597,10 +1588,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (method!=null)
         {
             JsonField jsonField = method.getAnnotation(JsonField.class);
-            if (jsonField!=null)
-            {
-                return jsonField;
-            }
+            return jsonField;
         }
         return null;
     }
@@ -1687,4 +1675,5 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     public <T> T parseObject(TypeReference<T> typeReference) {
         return parseObject(this, typeReference);
     }
+
 }

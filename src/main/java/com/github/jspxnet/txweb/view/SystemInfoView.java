@@ -19,9 +19,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.boot.EnvFactory;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;

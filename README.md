@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.57</version>
+    <version>6.62</version>
 </dependency>
 ```
     
@@ -126,4 +126,4 @@
 * 2022年03月：Jspx.net Framework 6.54 分布式调用稳定性完善，金蝶星空字段映射功能(后期重新归类)，json功能扩展支持不区分大小写方式。异步action支持.
 * 2022年04月：Jspx.net Framework 6.55 修复单利模式下不释放bug,加强安全过滤功能,提供后缀和配置密码,嵌入运行模式配置优化,添加tomcat上传支持.
 * 2022年05月：Jspx.net Framework 6.56 最后一个非线程方式版本.
-* 2022年05月：Jspx.net Framework 6.57 提供本地线程方式版本,并发会更好,内核优化性能提升.交大的调整变动.
+* 2022年05月：Jspx.net Framework 6.60-62 提供本地线程方式版本,并发会更好,内核优化性能提升.交大的调整变动62后基本稳定.

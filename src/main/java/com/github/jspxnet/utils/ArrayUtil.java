@@ -9,13 +9,14 @@
  */
 package com.github.jspxnet.utils;
 
-import static java.lang.System.arraycopy;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
+import static java.lang.System.arraycopy;
 
 /**
  *
@@ -1226,7 +1227,7 @@ public final class ArrayUtil {
      * @since 2.1
      */
     public static int getLength(Object array) {
-        if (array == null) {
+        if (array == null || array.getClass().isArray() ) {
             return 0;
         }
         return Array.getLength(array);

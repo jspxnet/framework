@@ -455,6 +455,10 @@ public class SoberMappingBean implements SoberFactory {
         }
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         String defaultPath = envTemplate.getString(Environment.defaultPath);
+        if (defaultPath==null)
+        {
+            defaultPath = System.getProperty(FileUtil.KEY_userPath);
+        }
         List<File> fileList = new ArrayList<>();
         if (strings != null) {
             for (String file : strings) {

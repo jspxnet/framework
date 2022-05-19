@@ -12,8 +12,11 @@ package com.github.jspxnet.txweb.interceptor;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.boot.sign.HttpStatusType;
+import com.github.jspxnet.cache.DefaultCache;
+import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.io.IoUtil;
@@ -56,6 +59,8 @@ import java.util.Date;
 @Slf4j
 @Bean(bind = PermissionInterceptor.class)
 public class PermissionInterceptor extends InterceptorSupport {
+    private final static String GUEST_STOP_URL_TXT = "guest_stop_url_txt";
+    private final static String ADMIN_RULE_URL_TXT = "admin_rule_url_txt";
 
 
     private String guestUrlFile = "guesturl.properties";
@@ -65,6 +70,8 @@ public class PermissionInterceptor extends InterceptorSupport {
     private String adminUrlFile = "adminurl.properties";
     private static String[] adminRuleUrl = null;
     private static String[] adminRuleOutUrl = null;
+
+    private boolean useAppolloConfig = false;
 
     public PermissionInterceptor() {
 
@@ -106,6 +113,14 @@ public class PermissionInterceptor extends InterceptorSupport {
     }
 
 
+    public boolean isUseAppolloConfig() {
+        return useAppolloConfig;
+    }
+
+    public void setUseAppolloConfig(boolean useAppolloConfig) {
+        this.useAppolloConfig = useAppolloConfig;
+    }
+
     @Override
     public void destroy() {
 
@@ -113,72 +128,111 @@ public class PermissionInterceptor extends InterceptorSupport {
 
     @Override
     public void init() {
-        if (!ArrayUtil.isEmpty(guestStopUrl)) {
-            return;
-        }
-        File file = null;
-        try {
-            if (guestUrlFile != null && !guestUrlFile.startsWith("http")) {
-                file = EnvFactory.getFile(guestUrlFile);
-                if (file == null) {
-                    log.error(guestUrlFile + "没有找到");
-                }
+
+        if (useAppolloConfig)
+        {
+            //配置中心读取begin
+            EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+            if (envTemplate.containsName(GUEST_STOP_URL_TXT))
+            {
+                String txt = envTemplate.getString(GUEST_STOP_URL_TXT);
+                decodeGuestUrl(txt);
             }
-            log.info("载入guestUrlFile:{}", guestUrlFile);
-
-            if (file != null) {
-                String txt = IoUtil.autoReadText(file);
-                String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
-                for (String str : array) {
-                    if (str == null) {
-                        continue;
-                    }
-                    if (str.startsWith("!")) {
-                        guestStopUrl = ArrayUtil.add(guestStopUrl, StringUtil.substringAfter(str, "!"));
-                    } else {
-                        ruleOutUrl = ArrayUtil.add(ruleOutUrl, str);
-                    }
-                }
+            if (envTemplate.containsName(ADMIN_RULE_URL_TXT))
+            {
+                String txt = envTemplate.getString(ADMIN_RULE_URL_TXT);
+                decodeAdminUrl(txt);
             }
+            //配置中心读取end
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } else
+        {
+            //换成中读取begin
+            String txt = (String) JSCacheManager.get(DefaultCache.class,GUEST_STOP_URL_TXT);
+            decodeGuestUrl(txt);
+            txt = (String) JSCacheManager.get(DefaultCache.class,ADMIN_RULE_URL_TXT);
+            decodeAdminUrl(txt);
+            //换成中读取end
 
-        //---------------------------
-
-        if (!ArrayUtil.isEmpty(adminRuleUrl)) {
-            return;
-        }
-
-        try {
-            if (adminUrlFile != null && !adminUrlFile.startsWith("http")) {
-                file = EnvFactory.getFile(adminUrlFile);
-                if (file == null) {
-                    log.error(guestUrlFile + "没有找到");
-                }
+            if (!ArrayUtil.isEmpty(guestStopUrl) || !ArrayUtil.isEmpty(ruleOutUrl)) {
+                return;
             }
-            log.info("adminUrlFile:{}", guestUrlFile);
-
-            if (file != null) {
-                String txt = IoUtil.autoReadText(file);
-                String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
-                for (String str : array) {
-                    if (str == null) {
-                        continue;
-                    }
-                    if (str.startsWith("!")) {
-                        adminRuleOutUrl = ArrayUtil.add(adminRuleOutUrl, StringUtil.substringAfter(str, "!"));
-                    } else {
-                        adminRuleUrl = ArrayUtil.add(adminRuleUrl, str);
+            File file = null;
+            try {
+                if (guestUrlFile != null && !guestUrlFile.startsWith("http")) {
+                    file = EnvFactory.getFile(guestUrlFile);
+                    if (file == null) {
+                        log.error(guestUrlFile + "没有找到");
                     }
                 }
+                log.info("载入guestUrlFile:{}", file);
+
+                if (file != null) {
+                    txt = IoUtil.autoReadText(file);
+                    JSCacheManager.put(DefaultCache.class,GUEST_STOP_URL_TXT,txt);
+                    decodeGuestUrl(txt);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            //---------------------------
 
+            if (!ArrayUtil.isEmpty(adminRuleUrl)||!ArrayUtil.isEmpty(adminRuleOutUrl)) {
+                return;
+            }
+
+            try {
+                if (adminUrlFile != null && !adminUrlFile.startsWith("http")) {
+                    file = EnvFactory.getFile(adminUrlFile);
+                    if (file == null) {
+                        log.error(guestUrlFile + "没有找到");
+                    }
+                }
+                log.info("adminUrlFile:{}", file);
+
+                if (file != null) {
+                    txt = IoUtil.autoReadText(file);
+                    decodeAdminUrl(txt);
+                    JSCacheManager.put(DefaultCache.class,ADMIN_RULE_URL_TXT,txt);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void decodeGuestUrl(String txt)
+    {
+
+        String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
+        for (String str : array) {
+            if (str == null) {
+                continue;
+            }
+            if (str.startsWith("!")) {
+                guestStopUrl = ArrayUtil.add(guestStopUrl, StringUtil.substringAfter(str, "!"));
+            } else {
+                ruleOutUrl = ArrayUtil.add(ruleOutUrl, str);
+            }
+        }
+    }
+
+    private static void decodeAdminUrl(String txt)
+    {
+
+        String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
+        for (String str : array) {
+            if (str == null) {
+                continue;
+            }
+            if (str.startsWith("!")) {
+                adminRuleOutUrl = ArrayUtil.add(adminRuleOutUrl, StringUtil.substringAfter(str, "!"));
+            } else {
+                adminRuleUrl = ArrayUtil.add(adminRuleUrl, str);
+            }
+        }
     }
 
     @Override
@@ -208,7 +262,7 @@ public class PermissionInterceptor extends InterceptorSupport {
 
         String organizeId = null;
         if (autoOrganizeId) {
-            organizeId = actionContext.getString(ActionEnv.KEY_organizeId);
+            organizeId = action.getString(ActionEnv.KEY_organizeId);
         }
         //is admin url
         if (isAdminRuleUrl(checkUrl)) {
@@ -381,12 +435,4 @@ public class PermissionInterceptor extends InterceptorSupport {
         return false;
     }
 
-    public static void main(String[] args) {
-        PermissionInterceptor permissionInterceptor = new PermissionInterceptor();
-        permissionInterceptor.setPermission(true);
-        permissionInterceptor.setGuestUrlFile("D:\\website\\webapps\\root\\WEB-INF\\classes\\guesturl.properties");
-        permissionInterceptor.init();
-        boolean b = PermissionInterceptor.isRuleOutUrl("/organize/save");
-        System.out.println("--------------" + b);
-    }
 }

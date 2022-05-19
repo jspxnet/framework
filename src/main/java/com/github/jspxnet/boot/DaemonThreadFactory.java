@@ -60,7 +60,12 @@ public final class DaemonThreadFactory implements ThreadFactory {
                         try {
                             thread.interrupt();
                         } catch (Exception e) {
-                            thread.stop(e);
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
+                            thread.interrupt();
                         }
                     }
                 }

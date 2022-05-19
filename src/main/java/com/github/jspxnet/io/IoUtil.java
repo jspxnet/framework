@@ -14,6 +14,8 @@ import java.io.File;
  * description: 封装一下都起单元
  **/
 public class IoUtil {
+    public final static String[] WORD_FILE_TYPE =  new String[]{"doc","docx"};
+    public final static String[] PDF_FILE_TYPE =  new String[]{"pdf"};
     private IoUtil()
     {
 
@@ -50,11 +52,11 @@ public class IoUtil {
     {
         String fileType = FileUtil.getTypePart(file);
         AbstractRead abstractRead;
-        if (ArrayUtil.inArray(ReadWordTextFile.FILE_TYPE,fileType,true))
+        if (ArrayUtil.inArray(WORD_FILE_TYPE,fileType,true))
         {
             abstractRead = (AbstractRead)ClassUtil.newInstance(ReadWordTextFile.class.getName());
         } else
-        if (ArrayUtil.inArray(ReadPdfTextFile.FILE_TYPE,fileType,true))
+        if (ArrayUtil.inArray(PDF_FILE_TYPE,fileType,true))
         {
             abstractRead = (AbstractRead)ClassUtil.newInstance(ReadPdfTextFile.class.getName());
         } else

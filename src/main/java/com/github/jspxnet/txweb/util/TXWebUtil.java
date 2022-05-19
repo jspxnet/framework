@@ -554,7 +554,7 @@ public final class TXWebUtil {
         }
         JSONObject callJson = (JSONObject) actionContext.get(ActionEnv.Key_CallRocJsonData);
         //ROC roc Json 根据指定调用返回
-        Object[] paramObj = null;
+        Object[] paramObj;
         Object rocParams = null;
         if (ArrayUtil.inArray(new String[]{RocHandle.NAME, CommandHandle.NAME}, actionContext.getExeType(), true)) {
 
@@ -945,7 +945,7 @@ public final class TXWebUtil {
      * @return 是否继续执行这个方法
      * @throws Exception 异常
      */
-    public static boolean checkOperate(Action action, Method exeMethod) throws Exception {
+    public static boolean checkOperate(Action action, Method exeMethod)  {
         //验证 begin
         Operate operate = exeMethod.getAnnotation(Operate.class);
         if (operate == null) {
@@ -1054,6 +1054,15 @@ public final class TXWebUtil {
         }
     }
 
+    /**
+     * 简化调用
+     * @param json  json数据
+     * @param response 应答
+     */
+    public static void print(JSONObject json,  HttpServletResponse response)
+    {
+        print( json, WebOutEnumType.JSON.getValue(),  response, 200);
+    }
     /**
      * 格式兼容
      *

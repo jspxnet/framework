@@ -16,7 +16,7 @@ import java.util.jar.JarFile;
 
 
 public class JarScanner implements ScanJar {
-    public static final String[] NO_SEARCH_CLASS = new String[]{"com.seeyon.ctp.common.po.BasePO","org.apache","net.sf.cglib","com.aliyuncs"};
+    public static final String[] NO_SEARCH_CLASS = new String[]{"com.seeyon.ctp.common.po.BasePO","org.junit","com.github.jspxnet.component.jxls","org.apache","org.jxls","net.sf.cglib","com.aliyuncs"};
 
 
 

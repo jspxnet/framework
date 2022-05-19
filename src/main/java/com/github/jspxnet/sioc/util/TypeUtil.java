@@ -37,7 +37,7 @@ public final class TypeUtil {
     }
 
     final private static Map<String, TypeSerializer> typeMap = new HashMap<>();
-    private static String[] baseType = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float", "long", "BigDecimal", "date", "double", "string", "ref", "map"};
+    private static final String[] baseType = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
 
     static {
 

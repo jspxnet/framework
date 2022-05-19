@@ -106,7 +106,7 @@ public class TemplateResult extends ResultSupport {
                 response.setCharacterEncoding(tempEncode);
             }
         } else {
-            String actionName = actionContext.getString(ActionEnv.Key_ActionName);
+            String actionName = actionContext.getActionName();
             String fileType = StringUtil.substringAfterLast(actionName, StringUtil.DOT);
             if (StringUtil.hasLength(fileType)) {
                 response.setContentType( MimeTypesUtil.getContentType(fileType,Dispatcher.getEncode()));

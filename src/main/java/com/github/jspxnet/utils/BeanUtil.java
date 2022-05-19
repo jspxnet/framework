@@ -955,7 +955,7 @@ public final class BeanUtil {
         {
             return;
         }
-        if (ClassUtil.isArrayType(o.getClass()))
+        if (ClassUtil.isArrayType(o.getClass()) && o.getClass().isArray())
         {
             int length = ArrayUtil.getLength(o);
             for (int i=0;i<length;i++)
@@ -989,7 +989,7 @@ public final class BeanUtil {
                         {
                             field.set(o,StringUtil.empty);
                         }
-                    } else if (ClassUtil.isArrayType(aType))
+                    } else if (ClassUtil.isArrayType(aType) && ClassUtil.isArrayType(o))
                     {
                         int length = ArrayUtil.getLength(o);
                         for (int i=0;i<length;i++)
@@ -1010,6 +1010,6 @@ public final class BeanUtil {
                 }
             }
         }
-
     }
+
 }

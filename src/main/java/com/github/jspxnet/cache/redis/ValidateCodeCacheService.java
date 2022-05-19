@@ -5,11 +5,14 @@ import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
+
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -64,7 +67,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
     }
 
     private String getTimesKey(String id) {
-        return String.format(VALIDATE_TIMES_KEY,id);
+        return String.format(VALIDATE_TIMES_KEY, id);
     }
 
     /**
@@ -82,7 +85,8 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         entry.setValue(code);
         RMap<String, StringEntry> map = redissonClient.getMap(SMS_STORE_KEY);
         map.put(entry.getKey(), entry);
-        return map.expire(smsTimeOutSecond, TimeUnit.SECONDS);
+        return map.expire(Instant.now().plusSeconds(smsTimeOutSecond));
+        //return map.expire(smsTimeOutSecond, TimeUnit.SECONDS);
     }
 
 
@@ -110,19 +114,19 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
             }
             times++;
             bucket.set(times);
-            bucket.expire(10, TimeUnit.MINUTES);
+            bucket.expire(Instant.now().plusSeconds(10000));
         }
         return result;
     }
 
     /**
      * 为了方便复杂的验证方式
-     * @param mobile  电话
+     *
+     * @param mobile 电话
      * @return 验证码
      */
     @Override
-    public String querySms(String mobile)
-    {
+    public String querySms(String mobile) {
         RMap<String, StringEntry> map = redissonClient.getMap(SMS_STORE_KEY);
         StringEntry entry = map.get(mobile);
         if (entry == null) {
@@ -130,8 +134,10 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         }
         return entry.getValue();
     }
+
     /**
      * 正式的验证
+     *
      * @param mobile 手机号
      * @param code   验证码
      * @return 添加是否成功
@@ -149,13 +155,11 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
             return false;
         }
         String value = entry.getValue();
-        if (StringUtil.isNull(value))
-        {
+        if (StringUtil.isNull(value)) {
             return false;
         }
-        if (value.contains("[")&&value.contains("]"))
-        {
-            return code.equalsIgnoreCase(StringUtil.substringBetween(value,"[","]"));
+        if (value.contains("[") && value.contains("]")) {
+            return code.equalsIgnoreCase(StringUtil.substringBetween(value, "[", "]"));
         }
         return code.equalsIgnoreCase(entry.getValue());
     }
@@ -169,8 +173,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
      */
     @Override
     public boolean addImgCode(String sessionId, String code) {
-        if (sessionId==null)
-        {
+        if (sessionId == null) {
             return false;
         }
         StringEntry entry = new StringEntry();
@@ -178,36 +181,36 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         entry.setValue(code);
         RMap<String, StringEntry> map = redissonClient.getMap(IMG_STORE_KEY);
         map.put(entry.getKey(), entry);
-        return map.expire(imgTimeOutSecond, TimeUnit.SECONDS);
+        return map.expire(Instant.now().plusSeconds(imgTimeOutSecond));
+        //map.expire(imgTimeOutSecond, TimeUnit.SECONDS);
     }
 
     /**
-     *  验证图片方式验证码,删除方式
+     * 验证图片方式验证码,删除方式
      *
      * @param sessionId 用户sessionId 默认方式 EncryptUtil.getMd5(userSession.getId())
-     * @param code 验证码
+     * @param code      验证码
      * @return 验证是否成功
      */
     @Override
-    public boolean validateImg(String sessionId, String code)
-    {
-        return validateImg(sessionId, code,true);
+    public boolean validateImg(String sessionId, String code) {
+        return validateImg(sessionId, code, true);
     }
+
     /**
-     *  验证图片方式验证码
+     * 验证图片方式验证码
+     *
      * @param sessionId 用户sessionId
-     * @param code 验证码
-     * @param delete  验证后是否删除
+     * @param code      验证码
+     * @param delete    验证后是否删除
      * @return 验证是否成功
      */
     @Override
-    public boolean validateImg(String sessionId, String code,boolean delete)
-    {
+    public boolean validateImg(String sessionId, String code, boolean delete) {
         if (StringUtil.isEmpty(code)) {
             return false;
         }
-        if (!delete)
-        {
+        if (!delete) {
             //注册的时候只验证不删除
             RMap<String, StringEntry> map = redissonClient.getMap(IMG_STORE_KEY);
             StringEntry entry = map.get(sessionId);
@@ -218,8 +221,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
                 return false;
             }
             return code.equalsIgnoreCase(entry.getValue());
-        } else
-        {
+        } else {
 
             String timeKey = getTimesKey(sessionId);
             boolean result = validateImgCheck(sessionId, code);
@@ -236,7 +238,7 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
                 }
                 times++;
                 bucket.set(times);
-                bucket.expire(10, TimeUnit.MINUTES);
+                bucket.expire(Instant.now().plusSeconds(10* DateUtil.MINUTE));
             }
             return result;
         }
@@ -260,26 +262,24 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
 
     @Override
     public boolean addGeneralCode(String type, String id, String code) {
-        if (id==null)
-        {
+        if (id == null) {
             return false;
         }
-        String key = EncryptUtil.getMd5(type+id);
+        String key = EncryptUtil.getMd5(type + id);
         StringEntry entry = new StringEntry();
         entry.setKey(key);
         entry.setValue(code);
         RMap<String, StringEntry> map = redissonClient.getMap(GENERAL_VERIFY_KEY);
         map.put(entry.getKey(), entry);
-        return map.expire(generalTimeOutSecond, TimeUnit.SECONDS);
+        return map.expire(Instant.now().plusSeconds(generalTimeOutSecond));
     }
 
     @Override
-    public boolean validateGeneralCheck(String type, String id, String code)
-    {
+    public boolean validateGeneralCheck(String type, String id, String code) {
         if (StringUtil.isEmpty(code)) {
             return false;
         }
-        String key = EncryptUtil.getMd5(type+id);
+        String key = EncryptUtil.getMd5(type + id);
 
         RMap<String, StringEntry> map = redissonClient.getMap(GENERAL_VERIFY_KEY);
         StringEntry entry = map.remove(key);
@@ -290,18 +290,15 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
             return false;
         }
         String value = entry.getValue();
-        if (StringUtil.isNull(value))
-        {
+        if (StringUtil.isNull(value)) {
             return false;
         }
-        if (value.contains("[")&&value.contains("]"))
-        {
-            return code.equalsIgnoreCase(StringUtil.substringBetween(value,"[","]"));
+        if (value.contains("[") && value.contains("]")) {
+            return code.equalsIgnoreCase(StringUtil.substringBetween(value, "[", "]"));
         }
         boolean check = code.equalsIgnoreCase(entry.getValue());
-        if (!check)
-        {
-            log.info("code验证失败1:{}\r\n2:{}",code,entry.getValue());
+        if (!check) {
+            log.info("code验证失败1:{}\r\n2:{}", code, entry.getValue());
         }
         return check;
     }
@@ -313,13 +310,12 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         Integer times = bucket.get();
         if (times == null) {
             times = 0;
-            bucket.set(times);
-            bucket.expire(10, TimeUnit.MINUTES);
+            bucket.set(times,10,TimeUnit.MINUTES);
         }
         return times;
     }
 
-   /**
+    /**
      * @param id 更新次数
      */
     @Override
@@ -327,12 +323,9 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
         String timeKey = getTimesKey(id);
         RBucket<Integer> bucket = redissonClient.getBucket(timeKey);
         Integer value = bucket.get();
-        if (value==null)
-        {
+        if (value == null) {
             value = 0;
         }
-        bucket.set(value + 1,10, TimeUnit.MINUTES);
+        bucket.set(value + 1, 10, TimeUnit.MINUTES);
     }
-
-
 }

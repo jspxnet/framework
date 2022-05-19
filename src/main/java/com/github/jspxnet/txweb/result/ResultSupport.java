@@ -131,9 +131,9 @@ public abstract class ResultSupport implements Result {
         ActionContext actionContext = ThreadContextHolder.getContext();
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         Action action = actionProxy.getAction();
-        String resultMethods = actionContext.getString(ActionEnv.Key_ResultMethods);
+        String resultMethods = action.getString(ActionEnv.Key_ResultMethods);
         if (StringUtil.isNull(resultMethods)) {
-            resultMethods = actionContext.getString(ActionEnv.Key_ResultMethods);
+            resultMethods = action.getString(ActionEnv.Key_ResultMethods);
         }
         //如果有错误信息，先返回错误信息
         //什么都没有的情况返回提示信息

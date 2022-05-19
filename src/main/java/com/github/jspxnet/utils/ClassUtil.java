@@ -719,13 +719,27 @@ public class ClassUtil {
         {
             return false;
         }
-        return type.equals(String[].class) || type.equals(int[].class) || type.equals(Integer[].class) ||
+
+        return  type.equals(String[].class) || type.equals(int[].class) || type.equals(Integer[].class) ||
                 type.equals(long[].class) || type.equals(Long[].class) ||
                 type.equals(float[].class) || type.equals(Float[].class) ||
                 type.equals(double[].class) || type.equals(Double[].class) ||
                 type.equals(char[].class) || type.equals(Character[].class) ||
                 type.equals(byte[].class) || type.equals(BigInteger[].class) ||
                 type.equals(BigDecimal[].class) || type.equals(Object[].class);
+    }
+
+    /**
+     * 判断一个对象是否为数组
+     * @param obj 对象
+     * @return
+     */
+    public static boolean isArrayType(Object obj) {
+        if (obj==null)
+        {
+            return false;
+        }
+        return obj.getClass().isArray();
     }
 
     public static boolean isCollection(Type o) {
@@ -738,7 +752,7 @@ public class ClassUtil {
      * @return 判断是否对象为一个集合，列表 类型
      */
     public static boolean isCollection(Object o) {
-        return o != null && (o.getClass().isArray() || o instanceof Collection );
+        return (o instanceof Collection);
     }
 
 

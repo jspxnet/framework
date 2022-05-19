@@ -60,7 +60,7 @@ public class JScriptContext implements SingletonContext {
         }
         try {
             Context context = JScriptContextEnter.getContext();
-            context.setLanguageVersion(Context.VERSION_ES6);
+           // context.setLanguageVersion(Context.VERSION_ES6);
             context.setOptimizationLevel(-1);
             context.setWrapFactory(ScriptWrapFactory.getInstance());
             globalScope = context.initStandardObjects();
