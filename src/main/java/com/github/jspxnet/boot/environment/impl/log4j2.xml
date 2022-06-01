@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="GBK" ?>
 <Configuration>
+    <logger name="org.apache" level="ERROR" />
+    <logger name="httpclient" level="ERROR" />
+
     <!-- 输出日志到控制台  ConsoleAppender -->
     <Properties>
         <!--申明全局别名，下面可以直接使用-->

@@ -1,11 +1,8 @@
 package com.github.jspxnet.network.rpc.client.proxy;
 
-import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
-import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.InetSocketAddress;

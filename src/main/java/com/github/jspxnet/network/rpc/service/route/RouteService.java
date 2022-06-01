@@ -31,6 +31,8 @@ public class RouteService implements Runnable {
     //第一次使用配置服务器地址,以后将切换到路由表
     //有被误判拦截ip的可能
 
+    private static int debugTimes = 0;
+
 
     private void init() {
         RpcConfig rpcConfig = RpcConfig.getInstance();
@@ -68,6 +70,7 @@ public class RouteService implements Runnable {
             } catch (Exception e) {
                 if (rpcConfig.isDebug()) {
                     log.debug("检测,netty rpc 服务没有启动:{}",IpUtil.getIp(routeSession.getSocketAddress()));
+                    debugTimes++;
                 }
             }
             if (reply != null && INetCommand.TYPE_JSON.equals(reply.getType())) {
@@ -93,12 +96,12 @@ public class RouteService implements Runnable {
         init();
         NettyClientPool nettyClient = NettyClientPool.getInstance();
         int routeTableCharLength = 0;
-        boolean debug = RpcConfig.getInstance().isDebug();
 
+        boolean debug = RpcConfig.getInstance().isDebug();
         while (nettyClient.isRun()) {
             try {
 
-                if (debug) {
+                if (debug&&debugTimes<50) {
                     String routeInfo = RouteChannelManage.getInstance().getSendRouteTable();
                     if (routeTableCharLength != routeInfo.length())
                     {
@@ -115,9 +118,7 @@ public class RouteService implements Runnable {
                 checkRouteJoin();
             } catch (Exception e) {
                 //...
-                if (debug) {
-                    log.debug("路由检测异常",e);
-                }
+                log.error("路由检测异常",e);
             }
         }
         nettyClient.shutdown();
@@ -132,14 +133,16 @@ public class RouteService implements Runnable {
         {
             return;
         }
-        boolean debug = RpcConfig.getInstance().isDebug();
-        if (debug) {
+        RpcConfig rpcConfig = RpcConfig.getInstance();
+        boolean debug = rpcConfig.isDebug();
+        if (debug&debugTimes<50) {
             log.debug("测试进入的路由表:{}", ObjectUtil.toString(checkRouteSessionList));
+            debugTimes++;
         }
 
         //可以使用的路由表
         List<RouteSession> canUseList = new ArrayList<>();
-        RpcConfig rpcConfig = RpcConfig.getInstance();
+
         NettyClientPool nettyClient = NettyClientPool.getInstance();
         //交换路由表
         for (RouteSession routeSession : checkRouteSessionList) {
@@ -161,7 +164,7 @@ public class RouteService implements Runnable {
 
                     String md5V = EncryptUtil.getMd5(str + rpcConfig.getJoinKey());
                     if (StringUtil.isNull(reply.getMd5()) && !reply.getMd5().equalsIgnoreCase(md5V)) {
-                        if (rpcConfig.isDebug()) {
+                        if (debug&&debugTimes<50) {
                             log.debug("netty rpc join key 验证错误不允许加入:{}", routeSession.getSocketAddress());
                         }
                     } else
@@ -179,16 +182,18 @@ public class RouteService implements Runnable {
                 //把路由表自己保管起来
             } catch (Exception e) {
                 routeManage.routeOff(routeSession.getSocketAddress());
-                if (rpcConfig.isDebug()) {
+                if (debug&&debugTimes<50) {
                     log.debug("netty rpc 路由网络中存在异常服务器:{},\r\n错误:{}", ObjectUtil.toString(routeSession),e.getMessage());
+
                 }
             }
         }
 
         if (!ObjectUtil.isEmpty(canUseList))
         {
-            if (debug) {
+            if (debug&&debugTimes<50) {
                 log.debug("添加路由表:{}", ObjectUtil.toString(canUseList));
+                debugTimes++;
             }
             routeManage.joinRoute(canUseList);
         }
@@ -218,7 +223,7 @@ public class RouteService implements Runnable {
                 //把路由表自己保管起来
             } catch (Exception e) {
                 routeManage.routeOff(routeSession.getSocketAddress());
-                if (RpcConfig.getInstance().isDebug()) {
+                if (RpcConfig.getInstance().isDebug()&&debugTimes<50) {
                     log.debug("心跳检查无连接:{},\r\n错误:{}", IpUtil.getIp(routeSession.getSocketAddress()),e.getLocalizedMessage());
                 }
             }

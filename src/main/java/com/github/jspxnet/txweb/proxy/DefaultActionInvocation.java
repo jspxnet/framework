@@ -396,7 +396,7 @@ public class DefaultActionInvocation implements ActionInvocation {
                     interceptor.destroy();
                 }
             } else {
-                actionContext.setExecuted(true);
+
                 Method method = actionContext.getMethod();
                 if (method != null && method.getAnnotation(Async.class)!=null) {
                     //开启异步执行

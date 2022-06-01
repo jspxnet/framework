@@ -24,7 +24,7 @@ public class SymmetryEncryptFactory {
     static private String defaultCipherIv = envTemplate.getString(Environment.cipherIv);
 
     //对称加密算法
-    public static final Character Encrypt_NONE = '0'; //非加密
+    public static final Character NONE = '0'; //非加密
     public static final Character AES = '1';
     public static final Character DES = '2';
     public static final Character DES3 = '3';

@@ -5,10 +5,8 @@ import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
-import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.context.ActionContext;
-import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.WebHandle;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
@@ -29,6 +27,7 @@ import java.util.Map;
  * date 2017/6/17
  * 默认的模版执行
  *
+ * @author ChenYuan
  */
 @Slf4j
 public class ActionHandle extends WebHandle {
@@ -50,7 +49,6 @@ public class ActionHandle extends WebHandle {
         {
             //缓存中有数据就直接执行返回
             String key = actionConfig.getCacheName() + PAGE_KEY + EncryptUtil.getMd5(request.getRequestURL().toString()+ "?"+request.getQueryString() + ObjectUtil.toString(RequestUtil.getSortMap(request)));
-            log.debug("get page cache url:{}",request.getRequestURL().toString()+ "?"+request.getQueryString() );
             String out = (String)JSCacheManager.get(actionConfig.getCacheName(),key);
             if (!StringUtil.isEmpty(out))
             {

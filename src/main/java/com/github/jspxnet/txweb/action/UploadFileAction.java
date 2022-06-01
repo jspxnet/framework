@@ -43,10 +43,7 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
-import com.thetransactioncompany.cors.CORSResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.ResponseFacade;
-
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;

@@ -95,9 +95,9 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             i++;
         }
 
-        if (request==null||response==null)
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext!=null &&(request==null||response==null))
         {
-            ActionContext actionContext = ThreadContextHolder.getContext();
             request = actionContext.getRequest();
             response = actionContext.getResponse();
         }
@@ -127,7 +127,7 @@ public class RpcMethodInterceptor implements MethodInterceptor {
         }
         if (address==null)
         {
-            Thread.sleep(500);
+            Thread.sleep(100);
             address = DiscoveryServiceAddress.getSocketAddress(serviceName);
         }
 
@@ -136,7 +136,6 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             log.error("TCP RPC 调用没有配置服务器地址:{}",serviceName);
             throw new Exception("TCP RPC 调用没有分组服务器地址:" + serviceName);
         }
-
 
         SendCmd reply = NettyClientPool.getInstance().send(address, command);
         if (reply == null) {
@@ -150,13 +149,8 @@ public class RpcMethodInterceptor implements MethodInterceptor {
             routeSession.setGroupName(serviceName);
             routeSession.setSocketAddress(address);
             routeManage.joinCheckRoute(routeSession);
-            Thread.sleep(100);
-            reply = NettyClientPool.getInstance().send(address, command);
-            if (reply==null)
-            {
-                log.error("TCP RPC 调用没有得到返回数据，已经重复过一次:{}",address);
-                return null;
-            }
+            log.error("TCP RPC 调用没有得到返回数据，已经重复过一次:{}",address);
+            return null;
         }
 
         //返回结果

@@ -58,6 +58,7 @@ public class RpcInvokerFactory {
             return;
         }
 
+
         SendCmd command = GsonUtil.createGson().fromJson(jsonStr,SendCmd.class);
         if (command==null)
         {

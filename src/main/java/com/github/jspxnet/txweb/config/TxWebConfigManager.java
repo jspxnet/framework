@@ -168,7 +168,6 @@ public class TxWebConfigManager implements WebConfigManager {
                 continue;
             }
             scanPackageList.add(scanConfig.getPackageName());
-            log.debug("start san action package " + scanConfig.getPackageName());
             sanAction(scanConfig.getPackageName());
         }
 

@@ -817,6 +817,10 @@ public class StringUtil {
         boolean allowSigns = false;
         boolean foundDigit = false;
         // deal with any possible sign up front
+        if(chars.length<=0)
+        {
+            return false;
+        }
         int start = (chars[0] == '-') ? 1 : 0;
         if (sz > start + 1) {
             if (chars[start] == '0' && chars[start + 1] == 'x') {

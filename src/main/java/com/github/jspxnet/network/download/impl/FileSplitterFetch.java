@@ -126,7 +126,7 @@ public class FileSplitterFetch extends Thread {
                 }
                 downOver = true;
 
-                log.debug("download Thread " + nThreadID + " is over!");
+               // log.debug("download Thread " + nThreadID + " is over!");
 
                 uc.disconnect();
                 if (bStop) {

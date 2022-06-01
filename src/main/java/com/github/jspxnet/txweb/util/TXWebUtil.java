@@ -614,9 +614,9 @@ public final class TXWebUtil {
                 if (exeMethod.getGenericReturnType().equals(Void.TYPE)) {
                     //如果不用返回,直接执行
                     isVoid = true;
-                    TXWebUtil.invokeFun(action, actionContext, paramObj);
+                    invokeFun(action, actionContext, paramObj);
                 } else {
-                    methodResult = TXWebUtil.invokeFun(action, actionContext, paramObj);
+                    methodResult = invokeFun(action, actionContext, paramObj);
                 }
                 //执行完后已经执行 execute，确保和form方式一样
             } catch (Exception e) {
@@ -932,6 +932,8 @@ public final class TXWebUtil {
                 }
 
             }
+        } finally {
+            actionContext.setExecuted(true);
         }
         return result;
     }
