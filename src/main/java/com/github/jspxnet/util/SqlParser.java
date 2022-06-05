@@ -244,11 +244,9 @@ public class SqlParser {
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 
         Matcher matcher = pattern.matcher(text);
-
-        while (matcher.find()) {
+        if (matcher.find()) {
             return matcher.group(2);
         }
-
         return null;
     }
 

@@ -891,7 +891,6 @@ public final class TXWebUtil {
 
         Method exeMethod =  actionContext.getMethod();
         //判断是否满足执行条件
-        log.debug("执行方法:{} 进入参数:{}", exeMethod.getName(), ObjectUtil.toString(paramObj));
         Object result = null;
         try {
             //事务标签处理 begin
@@ -900,9 +899,9 @@ public final class TXWebUtil {
             } else {
                 result = exeMethod.invoke(action, paramObj);
             }
-
             //事务标签处理 end
         } catch (InvocationTargetException exception) {
+            log.error("执行方法:{} 进入参数:{}", exeMethod.getName(), ObjectUtil.toString(paramObj));
             action.setActionResult(ActionSupport.ERROR);
             Throwable e = exception.getTargetException();
             if (e instanceof TransactionException) {

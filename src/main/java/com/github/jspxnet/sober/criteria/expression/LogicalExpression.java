@@ -12,6 +12,8 @@ package com.github.jspxnet.sober.criteria.expression;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.util.JdbcUtil;
+import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 
 import java.util.List;
 
@@ -70,7 +72,6 @@ public class LogicalExpression implements Criterion {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-
         sb.append("(");
         for (int i = 0; i < list.size(); i++) {
             Criterion criterion = list.get(i);
@@ -85,7 +86,18 @@ public class LogicalExpression implements Criterion {
 
     @Override
     public String[] getFields() {
-        return null;
+        if (ObjectUtil.isEmpty(list))
+        {
+            return null;
+        }
+        String[] fields = null;
+        for (Criterion criterion : list) {
+            if (criterion == null) {
+                continue;
+            }
+            fields = ArrayUtil.join(fields, criterion.getFields());
+        }
+        return fields;
     }
 
     @Override

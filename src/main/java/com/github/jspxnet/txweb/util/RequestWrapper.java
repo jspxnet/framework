@@ -1,6 +1,8 @@
 package com.github.jspxnet.txweb.util;
 
+
 import com.github.jspxnet.util.HttpUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StreamUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
@@ -14,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class RequestWrapper extends HttpServletRequestWrapper {
+    private final static String KEY_JSON = "json";
     private final String encode;
     private final byte[] body;
     protected final Hashtable<String, List<String>> parameters = new Hashtable<>();  // name - Vector of values
@@ -23,27 +26,34 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         encode = StringUtil.isNull(getCharacterEncoding())? StandardCharsets.UTF_8.name():getCharacterEncoding();
         body = this.toByteArray(request.getInputStream());
     }
+
     private byte[] toByteArray(ServletInputStream inputStream) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        StreamUtil.copy(inputStream,out);
-        return out.toByteArray();
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            StreamUtil.copy(inputStream,out);
+            return out.toByteArray();
+        }
     }
 
     private void initParameters()
     {
         String queryString = getQueryString();
-        if (queryString!= null) {
+        if (StringUtil.hasLength(queryString)) {
             queryString = URLUtil.getUrlDecoder(queryString,encode);
             // Let HttpUtils create a name->String[] structure
             Map<String, String[]> queryParameters = HttpUtil.parseQueryString(queryString);
             // For our own use, name it a name->Vector structure
-            for (String paramName : queryParameters.keySet()) {
-                String[] values = queryParameters.get(paramName);
-                parameters.put(paramName, new Vector<>(Arrays.asList(values)));
+            if (!ObjectUtil.isEmpty(queryParameters))
+            {
+                for (String paramName : queryParameters.keySet()) {
+                    String[] values = queryParameters.get(paramName);
+                    parameters.put(paramName, new Vector<>(Arrays.asList(values)));
+                }
             }
         }
 
-        if (body!=null)
+        String contentType = super.getContentType();
+        //不是json请求的方式才去解析参数,否则可能出现解析错误
+        if (body!=null && contentType!=null && !contentType.toLowerCase().contains(KEY_JSON))
         {
             String paramValue;
             try {
@@ -52,12 +62,14 @@ public class RequestWrapper extends HttpServletRequestWrapper {
                 e.printStackTrace();
                 paramValue = new String(body,StandardCharsets.UTF_8);
             }
-            paramValue = URLUtil.getUrlDecoder(paramValue,encode);
             Map<String, String[]> queryParameters = HttpUtil.parseQueryString(paramValue);
             // For our own use, name it a name->Vector structure
-            for (String paramName : queryParameters.keySet()) {
-                String[] values = queryParameters.get(paramName);
-                parameters.put(paramName, new Vector<>(Arrays.asList(values)));
+            if (!ObjectUtil.isEmpty(queryParameters))
+            {
+                for (String paramName : queryParameters.keySet()) {
+                    String[] values = queryParameters.get(paramName);
+                    parameters.put(paramName, new Vector<>(Arrays.asList(values)));
+                }
             }
         }
     }
@@ -122,15 +134,12 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         } catch (Exception e) {
             return null;
         }
-
     }
-
 
     @Override
     public BufferedReader getReader() throws IOException {
         return new BufferedReader(new InputStreamReader(getInputStream(),encode));
     }
-
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
@@ -150,7 +159,6 @@ public class RequestWrapper extends HttpServletRequestWrapper {
             public void setReadListener(ReadListener readListener) {
 
             }
-
             @Override
             public int read() throws IOException {
                 return bais.read();

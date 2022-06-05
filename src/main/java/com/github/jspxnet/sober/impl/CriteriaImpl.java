@@ -799,7 +799,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         }
 
         //放入cache
-        if (soberFactory.isUseCache() && soberTable.isUseCache() && resultList != null && !resultList.isEmpty()) {
+        if (soberFactory.isUseCache() && soberTable.isUseCache() && !resultList.isEmpty()) {
             if (!JSCacheManager.put(criteriaClass, cacheKey, resultList)) {
                 log.error(criteriaClass + " put cache key " + cacheKey);
             }
@@ -824,6 +824,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
         if (soberTable == null) {
             log.error("no fond sober Config :" + criteriaClass.getName());
+            return StringUtil.empty;
         }
 
         StringBuilder groupText = new StringBuilder();
