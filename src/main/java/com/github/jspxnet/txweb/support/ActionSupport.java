@@ -388,7 +388,7 @@ public abstract class ActionSupport implements Action {
     @Override
     public void setResult(Object value) {
         ActionContext actionContext = ThreadContextHolder.getContext();
-        if (!actionContext.hasFieldInfo() && ActionSupport.ERROR.equalsIgnoreCase(actionContext.getActionResult()))
+        if (actionContext!=null&&!actionContext.hasFieldInfo() && ActionSupport.ERROR.equalsIgnoreCase(actionContext.getActionResult()))
         {
             actionContext.setResult(value);
         }

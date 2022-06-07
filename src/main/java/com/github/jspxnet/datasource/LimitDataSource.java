@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 @Slf4j
 public class LimitDataSource extends DriverManagerDataSource {
 
-    final private transient com.github.jspxnet.datasource.ConnectionProxy[] connectionPool = new com.github.jspxnet.datasource.ConnectionProxy[8];
+    final private transient ConnectionProxy[] connectionPool = new ConnectionProxy[8];
     final private int maxPoolSize = connectionPool.length;
     private int maxConnectionTime = DateUtil.MINUTE;  //8小时
     private String checkSql = "SELECT 1";

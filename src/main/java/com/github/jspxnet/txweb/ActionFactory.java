@@ -9,8 +9,11 @@
  */
 package com.github.jspxnet.txweb;
 
+import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
+import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.DefultContextHolderStrategy;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
@@ -25,6 +28,7 @@ import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sober.exception.ValidException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -86,8 +90,13 @@ public class ActionFactory {
         ActionContext actionContext = ThreadContextHolder.getContext();
         //参数说明 1 isIgnoreParams， 2 Execute
         if (action != null && result != null) {
-
-            action.initEnv(actionContext.getEnvironment(),actionContext.getExeType());
+            if (actionContext!=null)
+            {
+                action.initEnv(actionContext.getEnvironment(),actionContext.getExeType());
+            } else
+            {
+                DefultContextHolderStrategy.createContext(new RequestTo(new HashMap<>()),new ResponseTo(new HashMap<>()),new HashMap<>());
+            }
             action.setActionResult(null);
             action.setResult(null);
             result.put(ActionEnv.Key_ActionName, className);

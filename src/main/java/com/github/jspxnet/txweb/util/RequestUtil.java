@@ -1144,7 +1144,6 @@ public class RequestUtil {
         Map<String, Object> resultMap = new HashMap<>();
         if (request==null)
         {
-            log.error("getTransferMap 方法出现 空 request");
             return resultMap;
         }
         Enumeration<String> requestParams = request.getParameterNames();
@@ -1213,7 +1212,6 @@ public class RequestUtil {
         {
             resultMap.put(HEADER+".scheme","http");
         }
-
         HttpSession httpSession = request.getSession();
         if (httpSession==null)
         {
@@ -1225,6 +1223,5 @@ public class RequestUtil {
         }
         return resultMap;
     }
-
 
 }

@@ -25,7 +25,7 @@ public class ChildTableMeta extends OperateTable{
     @Column(caption = "主表ID", notNull = true)
     private long masterId = 0;
 
-    @Column(caption = "表名称")
+    @Column(caption = "表名称",length = 255)
     private String tableName;
 
     //中文的表明描述，可以作为关键字识别

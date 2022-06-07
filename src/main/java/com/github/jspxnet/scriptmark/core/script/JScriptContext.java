@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.scriptmark.core.script;
 
+import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.boot.environment.Environment;
@@ -23,6 +24,7 @@ import java.net.URL;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.WrapFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -60,9 +62,16 @@ public class JScriptContext implements SingletonContext {
         }
         try {
             Context context = JScriptContextEnter.getContext();
-           // context.setLanguageVersion(Context.VERSION_ES6);
+            if (ClassUtil.haveMethodsName(Context.class,"setLanguageVersion"))
+            {
+                //太老的系统没这个东西
+                BeanUtil.setSimpleProperty(context,"setLanguageVersion",Context.VERSION_ES6);
+            }
             context.setOptimizationLevel(-1);
-            context.setWrapFactory(ScriptWrapFactory.getInstance());
+            WrapFactory wrapFactory = ScriptWrapFactory.getInstance();
+            wrapFactory.setJavaPrimitiveWrap(true);
+            context.setWrapFactory(wrapFactory);
+
             globalScope = context.initStandardObjects();
             globalScope.put(Catalina.VAR_CATALINA, globalScope, new Catalina());
             globalScope.put(ScriptConverter.var_converter, globalScope, ScriptConverter.getInstance());

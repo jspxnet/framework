@@ -113,8 +113,6 @@ public class BaseConfigurationImpl implements JspxConfiguration {
                         path = null;
                     }
                 }
-
-
             }
         }
 

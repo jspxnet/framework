@@ -223,6 +223,13 @@ public class JspxCoreListener implements ServletContextListener {
         }
         //rpc服务器,提供外部rpctcp调用 end
 
+        boolean dbLog = envTemplate.getBoolean(Environment.DB_LOG);
+        if (dbLog)
+        {
+            //切换到
+            log.info("日志切换到数据库保存");
+            LogBackConfigUtil.changeDbLogBackConfig();
+        }
         log.info("-" + copyright + " start completed " + (isAndroid ? "for Android" : " J2SDK"));
         isRun = true;
     }

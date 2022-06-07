@@ -97,6 +97,8 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
+    <logger name="io.netty.buffer.PooledByteBufAllocator" level="WARN" />
+    <logger name="org.redisson.connection.DNSMonitor" level="WARN" />
     <logger name="org.redisson.connection" level="WARN" />
     <logger name="org.redisson.command.RedisExecutor" level="WARN" />
     <logger name="org.redisson.connection.ClientConnectionsEntry" level="WARN" />

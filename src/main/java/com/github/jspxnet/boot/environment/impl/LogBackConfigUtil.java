@@ -63,7 +63,6 @@ public class LogBackConfigUtil {
         lc.reset();
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
-
         boolean isDefaultConfig = false;
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         File file = new File(envTemplate.getString(Environment.defaultPath),Environment.DEFAULT_LOAD_LOG_NAME);
@@ -78,7 +77,8 @@ public class LogBackConfigUtil {
         }
         if (StringUtil.isEmpty(defaultConfigTxt))
         {
-            InputStream stream = LogBackConfigUtil.class.getResourceAsStream(Environment.DEFAULT_LOG_NAME);
+
+            InputStream  stream = LogBackConfigUtil.class.getResourceAsStream(Environment.DEFAULT_LOG_NAME);
             if (stream!=null)
             {
                 byte[] bytes = FileUtil.getBytesFromInputStream(stream);
@@ -118,6 +118,60 @@ public class LogBackConfigUtil {
         }
         lc.setPackagingDataEnabled(true);
     }
+
+    public static void changeDbLogBackConfig()
+    {
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        boolean isDefaultConfig = false;
+        String defaultConfigTxt = null;
+        InputStream  stream = LogBackConfigUtil.class.getResourceAsStream(Environment.DB_LOG_NAME);
+        if (stream!=null)
+        {
+            byte[] bytes = FileUtil.getBytesFromInputStream(stream);
+            if (bytes==null)
+            {
+                bytes = new byte[0];
+            }
+            try {
+                defaultConfigTxt = new String(bytes,Environment.defaultEncode);
+                isDefaultConfig = true;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+
+        lc.reset();
+        JoranConfigurator configurator = new JoranConfigurator();
+        configurator.setContext(lc);
+
+        if (StringUtil.isNull(defaultConfigTxt))
+        {
+            System.err.println("LogBack defaultConfig:" + defaultConfigTxt);
+        }
+        Map<String, Object> valueMap = envTemplate.getVariableMap();
+        if (!valueMap.containsKey("logMaxHistory"))
+        {
+            valueMap.put("logMaxHistory",60);
+        }
+
+        String confTxt = isDefaultConfig?EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt):defaultConfigTxt;
+        if (!StringUtil.isEmpty(confTxt))
+        {
+            org.xml.sax.InputSource inputSource = new InputSource(new StringReader(confTxt));
+            try {
+                configurator.doConfigure(inputSource);
+            } catch (JoranException e) {
+                System.err.println("1.默认路径是否配置错误;2.检查defaultlog.xml文件是否存在");
+                e.printStackTrace();
+                StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
+            }
+        }
+        lc.setPackagingDataEnabled(true);
+
+    }
+
+
 
     public static void createLog4jConfig() {
 

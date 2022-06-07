@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="60 seconds" debug="${debug}">
+    <!-- 定义日志文件 输入位置 -->
+    <property name="logPath" value="${logPath}" />
+    <!-- ConsoleAppender 控制台输出日志 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 对日志进行格式化 -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger -%msg%n</pattern>
+        </encoder>
+    </appender>
+    <!-- 将日志写入日志文件 -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${logPath}/jspx.log</file>
+        <append>true</append><!-- 日志追加 -->
+        <encoder>
+            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+    <!-- 将日志写入数据库 -->
+    <appender name="DATABASE" class="com.github.jspxnet.boot.environment.dblog.JspxDBAppender">
+    </appender>
+    <logger name="org.redisson.connection.DNSMonitor" level="WARN" />
+    <logger name="io.netty.buffer.PooledByteBufAllocator" level="WARN" />
+    <logger name="org.redisson.connection" level="WARN" />
+    <logger name="org.redisson.command.RedisExecutor" level="WARN" />
+    <logger name="org.redisson.connection.ClientConnectionsEntry" level="WARN" />
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.hibernate.type.descriptor.sql" level="TRACE" />
+    <root level="${debug=='true'?'DEBUG':'DATABASE'}">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+        <appender-ref ref="DATABASE" />
+    </root>
+</configuration>

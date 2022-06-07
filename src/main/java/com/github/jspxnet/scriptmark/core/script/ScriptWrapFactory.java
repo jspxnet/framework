@@ -22,13 +22,14 @@ import java.util.Date;
  */
 public class ScriptWrapFactory extends WrapFactory {
 
-    final private static WrapFactory instance = new ScriptWrapFactory();
+    final private static WrapFactory INSTANCE = new ScriptWrapFactory();
 
     public static WrapFactory getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     private ScriptWrapFactory() {
+        super.setJavaPrimitiveWrap(false);
 
     }
 
@@ -42,6 +43,7 @@ public class ScriptWrapFactory extends WrapFactory {
             char[] a = {(Character) obj};
             return new String(a);
         }
+
         return super.wrap(cx, scope, obj, staticType);
     }
 }

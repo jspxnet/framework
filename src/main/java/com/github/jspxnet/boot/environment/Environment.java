@@ -89,12 +89,18 @@ public abstract class Environment {
 
     final public static String libPath = "libPath";
 
+
     final public static String DEFAULT_LOAD_LOG_NAME = "logback.xml";
 
     final public static String LOG4J_CONFIG_NAME = "log4j2.xml";
 
 
+    //开启日志保存到数据库
+    final public static String DB_LOG = "dbLog";
+
     final public static String DEFAULT_LOG_NAME = "defaultlog.xml";
+
+    final public static String DB_LOG_NAME = "dblog.xml";
 
 
     final public static String webInfPath = "webInfPath";

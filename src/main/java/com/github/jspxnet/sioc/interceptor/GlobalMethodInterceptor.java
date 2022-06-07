@@ -12,7 +12,6 @@ import com.github.jspxnet.sober.enums.QueryModelEnumType;
 import com.github.jspxnet.sober.exception.TransactionException;
 import com.github.jspxnet.sober.transaction.TransactionController;
 import com.github.jspxnet.txweb.annotation.Transaction;
-import com.github.jspxnet.txweb.result.RocException;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
@@ -99,17 +98,18 @@ public class GlobalMethodInterceptor implements MethodInterceptor  {
             {
                 invokeTransaction.commit();
             }
-        } catch (Throwable e)
+        } catch (Exception e)
         {
+            Exception newException = e;
             if (transaction!=null&&invokeTransaction!=null)
             {
                 invokeTransaction.rollback();
+                if (!StringUtil.isNull(transaction.message()))
+                {
+                    newException = new TransactionException(e,transaction,transaction.message());
+                }
             }
-            if (e instanceof RocException)
-            {
-                throw e;
-            }
-            throw new TransactionException(e,transaction,exeMethod.getName());
+            throw newException;
         }
         return result;
     }

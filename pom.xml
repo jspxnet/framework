@@ -22,7 +22,7 @@
         <poi.version>5.2.2</poi.version>
         <jxls.version>2.11.0</jxls.version>
         <spring.version>5.3.20</spring.version>
-
+        <logback.version>1.2.11</logback.version>
         <!--
         查看依赖树：mvn dependency:tree
         分析依赖树：mvn dependency:analyze
@@ -602,14 +602,24 @@
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.11</version>
+            <version>${logback.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

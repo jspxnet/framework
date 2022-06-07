@@ -547,7 +547,6 @@ public final class EntryFactory implements BeanFactory {
             if (!beanElement.getNamespace().equalsIgnoreCase(namespace) && Sioc.global.equalsIgnoreCase(beanElement.getNamespace())) {
                 lifecycleObject.setRefNamespace(nameK);
             }
-
             LIFE_CYCLE.put(beanName, lifecycleObject);
             //如果没有就创建
         } catch (Exception e) {

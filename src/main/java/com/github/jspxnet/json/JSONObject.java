@@ -429,7 +429,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                                 || result.getClass().getClassLoader() == null) {
                             super.put(displayKey, result);
                         } else {
-                            if (includeSuperClass && !ClassUtil.isStandardProperty(result.getClass())&&result instanceof Serializable) {
+                            if ( includeSuperClass && !ClassUtil.isStandardProperty(result.getClass())&&result instanceof Serializable) {
                                 String[] childShowField = null;
                                 if (dataField!=null&&!dataField.isEmpty())
                                 {
@@ -440,7 +440,13 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                                         childShowField =  fieldArray.toArray(new String[size]);
                                     }
                                 }
-                                super.put(displayKey, new JSONObject(result, childShowField,includeSuperClass,dataField));
+                                if (!(result instanceof JSONObject) )
+                                {
+                                    super.put(displayKey, new JSONObject(result, childShowField,includeSuperClass,dataField));
+                                } else
+                                {
+                                    super.put(displayKey, result);
+                                }
                             } else {
                                 super.put(displayKey, result);
                             }

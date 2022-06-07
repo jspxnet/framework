@@ -171,10 +171,12 @@ public class ScriptConverter {
      * @return UBB 代码 转换
      */
     public static String toUbb(String str) {
+
+
         try {
-            return (String) ClassUtil.callStaticMethod(ClassUtil.loadClass("com.github.jspxnet.components.java.jubb.UBBFilter"), "decode", str);
+            return (String) ClassUtil.callStaticMethod(ClassUtil.loadClass("com.github.jspxnet.component.jubb.UBBFilter"), "decode", str);
         } catch (ClassNotFoundException e) {
-            log.error("no fount com.github.jspxnet.components.java.jubb.UBBFilter", e);
+            log.error("no com.github.jspxnet.component.jubb.UBBFilter", e);
         }
         return StringUtil.empty;
     }
@@ -432,16 +434,18 @@ public class ScriptConverter {
     }
 
 
-    public static String show(Object obj, String sel, String keyF) {
-        if (keyF == null || "undefined".equalsIgnoreCase(keyF)) {
-            keyF = StringUtil.COLON;
+    public static String show(Object obj, Object selObj, Object key) {
+        if (key == null || "undefined".equalsIgnoreCase(key.toString())) {
+            key = StringUtil.COLON;
         }
-        if (sel == null || "undefined".equalsIgnoreCase(sel)) {
-            sel = StringUtil.SEMICOLON;
-        }
+        String keyF = key.toString();
 
+        if (selObj == null || "undefined".equalsIgnoreCase(selObj.toString())) {
+            selObj = StringUtil.SEMICOLON;
+        }
+        String sel = selObj.toString();
         if (obj instanceof String || obj.getClass().getName().contains("NativeString")) {
-            String str = (String) obj;
+            String str = obj.toString();
             if (isJsonArray(str)) {
                 try {
                     JSONArray jsonArray = JSONArray.parse(str);
@@ -468,11 +472,11 @@ public class ScriptConverter {
                 }
                 return StringUtil.empty;
             }
-            StringMap<String, String> stringMap = new StringMap();
+            StringMap<String, String> stringMap = new StringMap<>();
             stringMap.setString(str);
-            for (String key : stringMap.keySet()) {
-                if (key.equals(sel)) {
-                    return stringMap.get(key);
+            for (String k : stringMap.keySet()) {
+                if (k.equals(sel)) {
+                    return stringMap.getString(k);
                 }
             }
             return StringUtil.empty;
@@ -488,9 +492,9 @@ public class ScriptConverter {
         }
         if (obj instanceof Map) {
             Map stringMap = (Map) obj;
-            for (Object key : stringMap.keySet()) {
-                if (key.equals(sel)) {
-                    return (String) stringMap.get(key);
+            for (Object keyx : stringMap.keySet()) {
+                if (keyx.equals(sel)) {
+                    return (String) stringMap.get(keyx);
                 }
             }
             return StringUtil.empty;
