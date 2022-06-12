@@ -81,4 +81,10 @@ public final class ActionEnv {
     public final static String CHAIN_TYPE = "chain";
     public final static String REDIRECT_TYPE = "redirect";
     public final static String DEFAULT_EXECUTE = "execute";
+
+    //运行模式,区分页面嵌入方式
+    public final static String ACTION_RUN_MODEL = "ACTION_RUN_MODEL";
+
+    //组件方式
+    public final static  String COMPONENT_MODEL = "COMPONENT";
 }

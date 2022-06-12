@@ -49,17 +49,17 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ScriptConverter {
 
 
-    final static char[] nameIncertitudeChars = {
+    final static char[] NAME_INCERTITUDE_CHARS = {
             '\\', '/', '\r', '\n', '$', '&', '\'', '(', ')', '&', '#', '!', '=', '\"', '<', '>', '.'
     };
 
 
     final static public String var_converter = "converter";
-    static private ScriptConverter instance = new ScriptConverter();
+    static private final ScriptConverter INSTANCE = new ScriptConverter();
     private static final String[] imgTypes = new String[]{"jpg", "png", "gif", "bmp"};
 
     public static ScriptConverter getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
 
@@ -853,7 +853,7 @@ public class ScriptConverter {
         }
         Action action = (Action) arg[0];
         String className = arg[1].toString();
-        List<Object> list = new ArrayList();
+        List<Object> list = new ArrayList<>();
         if (arg.length > 2) {
             list.addAll(Arrays.asList(arg).subList(2, arg.length));
         }
@@ -974,7 +974,7 @@ public class ScriptConverter {
      * @return 创建一个拼音的ID号，不能保证不重复
      */
     public static String makePinYinName(String txt) {
-        String text = StringUtil.getPolicyName(StringUtil.fullToHalf(txt), 100, nameIncertitudeChars);
+        String text = StringUtil.getPolicyName(StringUtil.fullToHalf(txt), 100, NAME_INCERTITUDE_CHARS);
         text = StringUtil.replace(text, " ", "");
         return getPinYin(text);
     }

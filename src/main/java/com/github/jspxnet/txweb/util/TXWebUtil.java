@@ -36,6 +36,7 @@ import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.handle.CommandHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
+import com.github.jspxnet.txweb.dispatcher.handle.RsaRocHandle;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
@@ -537,16 +538,17 @@ public final class TXWebUtil {
      * 返回必须位真实的执行结果，不要返回错误提示信息。
      * @param action action对象
      * @param actionContext 上下文
+     * @param exeMethod 调用方法,这里需要独立出来,因为有组件模式
      * @return 返回必须位真实的执行结果，不要返回错误提示信息。
      * @throws Exception 异常
      */
-    public static Object invokeJson(Action action, ActionContext actionContext) throws Exception {
+    public static Object invokeJson(Action action, ActionContext actionContext,Method exeMethod) throws Exception {
 
         if (actionContext == null) {
             //避免空异常
             return null;
         }
-        Method exeMethod = actionContext.getMethod();
+        
         if (exeMethod == null) {
             action.addFieldInfo(Environment.errorInfo, "not found method  " + exeMethod);
             action.setActionResult(ActionSupport.ERROR);
@@ -614,9 +616,9 @@ public final class TXWebUtil {
                 if (exeMethod.getGenericReturnType().equals(Void.TYPE)) {
                     //如果不用返回,直接执行
                     isVoid = true;
-                    invokeFun(action, actionContext, paramObj);
+                    invokeFun(action, actionContext, exeMethod,paramObj);
                 } else {
-                    methodResult = invokeFun(action, actionContext, paramObj);
+                    methodResult = invokeFun(action, actionContext,exeMethod,paramObj);
                 }
                 //执行完后已经执行 execute，确保和form方式一样
             } catch (Exception e) {
@@ -705,11 +707,12 @@ public final class TXWebUtil {
                 if (key == null) {
                     continue;
                 }
-                Object objParam = paramsJson.get(key);
+                String keyStr = ObjectUtil.toString(key);
+                Object objParam = paramsJson.get(keyStr);
                 if (objParam instanceof JSONArray) {
                     objParam = ((JSONArray) objParam).toArray();
                 }
-                actionParams.put((String) key, objParam);
+                actionParams.put(keyStr, objParam);
             }
             putValueProperty(action, actionParams);
         }
@@ -870,13 +873,14 @@ public final class TXWebUtil {
      * 这里是执行可返回函数的地方,返回的数据主要是做ROC返回
      * @param action action
      * @param actionContext 上下文
+     * @param exeMethod 执行方法,主要是有组件方式
      * @param paramObj 参数对象
      * @return  返回结果
      * @throws Exception 参数
      */
-    public static Object invokeFun(Action action, ActionContext actionContext,Object[] paramObj ) throws Exception {
+    public static Object invokeFun(Action action, ActionContext actionContext,Method exeMethod,Object[] paramObj ) throws Exception {
         //安全检查begin
-        if (actionContext.getMethod() == null) {
+        if (exeMethod == null) {
             return null;
         }
 
@@ -889,7 +893,6 @@ public final class TXWebUtil {
             return null;
         }
 
-        Method exeMethod =  actionContext.getMethod();
         //判断是否满足执行条件
         Object result = null;
         try {
@@ -956,10 +959,15 @@ public final class TXWebUtil {
         }
         //没有Operate标记的不允许对外访问
         //注意，档位GET的时候 submit 为 false
+        //Template 方式跳过这个判断
         if (operate.post() && TXWeb.httpGET.equalsIgnoreCase(action.getRequest().getMethod())) {
-            action.setActionResult(ActionSupport.ERROR);
-            action.addFieldInfo(exeMethod.getName(), "错误的请求方式");
-            return false;
+            ActionContext actionContext = ThreadContextHolder.getContext();
+            if (actionContext!=null && (RocHandle.NAME.equalsIgnoreCase (actionContext.getExeType())|| RsaRocHandle.NAME.equalsIgnoreCase (actionContext.getExeType())))
+            {
+                action.setActionResult(ActionSupport.ERROR);
+                action.addFieldInfo(exeMethod.getName(), "错误的请求方式");
+                return false;
+            }
         }
 
         //验证防止重复提交 begin
@@ -993,6 +1001,13 @@ public final class TXWebUtil {
 
 
     //------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * 简单的打印信息
+     * @param string 打印数据
+     * @param type 类型
+     * @param response 应答
+     */
     public static void print(String string, int type, HttpServletResponse response) {
         print(string, type, response, 0);
     }
@@ -1162,4 +1177,15 @@ public final class TXWebUtil {
         venParams.put("date", new Date());
         return venParams;
     }
+
+    /**
+     * action在组建模式下运行 保存的key
+     * @param clas 类书籍
+     * @param hashCode hash
+     * @return key
+     */
+    public static String getComponentEnvKey(Class<?> clas,int hashCode) {
+        return clas.getName() + "_" + hashCode;
+    }
+
 }

@@ -14,9 +14,9 @@ import java.util.function.Predicate;
 @Slf4j
 public class FileScanner implements ScanJar {
 
-    private String defaultClassPath;
+    private  String defaultClassPath;
     private static final String CLASS_SUFFIX = ".class";
-    private static final String[] JUMP_CLASS_LIST = {"Big5", "GB2Big5"};
+    private static final String[] JUMP_CLASS_LIST = {"Big5", "GB2Big5","com\\github\\jspxnet\\component\\jxls\\MergeCell"};
 
 
     public String getDefaultClassPath() {
@@ -59,7 +59,7 @@ public class FileScanner implements ScanJar {
                 }
             } else {//标准文件
                 //标准文件我们就判断是否是class文件
-                if (file.getName().endsWith(CLASS_SUFFIX) && !isJumpClass(file.getName())) {
+                if (file.getName().endsWith(CLASS_SUFFIX) && !isJumpClass(file.getPath())) {
                     //如果是class文件我们就放入我们的集合中。
                     String className = null;
                     try {

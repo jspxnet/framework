@@ -244,24 +244,38 @@ public abstract class JdbcUtil {
     /**
      * equest 从参数传入Bean对象  MultipartRequest HttpServletRequest 两种情况
      *
-     * @param request 请求
+     * @param rs 请求
      * @param cla     类
      * @param dialect 数据库适配器
      * @param <T>     泛型
      * @return 实体bean
      * @throws Exception 异常
      */
-    public static <T> T getBean(ResultSet request, Class<T> cla, Dialect dialect) throws Exception {
+    public static <T> T getBean(ResultSet rs, Class<T> cla, Dialect dialect) throws Exception {
         if (dialect == null) {
             dialect = new GeneralDialect();
         }
+
+        if (cla==null||cla.isAssignableFrom(String.class)||cla.isAssignableFrom(Map.class)|| ClassUtil.findRemoteApi(cla).isAssignableFrom(Map.class) )
+        {
+            Map<String,Object> result = new HashMap<>();
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                String name = resultSetMetaData.getColumnLabel(i);
+                String field = StringUtil.underlineToCamel(name);
+                Object value = dialect.getResultSetValue(rs, name);
+                result.put(field,value);
+            }
+            return (T)result;
+        }
+
         T result = cla.newInstance();
         Field[] fields = ClassUtil.getDeclaredFields(cla);
         for (Field field : fields) {
             String propertyName = field.getName();
             Object value = null;
             try {
-                value = dialect.getResultSetValue(request, propertyName);
+                value = dialect.getResultSetValue(rs, propertyName);
             } catch (Exception e) {
                 log.error("错误的字段getResultSetValue:" + propertyName, e);
             }
@@ -286,9 +300,9 @@ public abstract class JdbcUtil {
         }
         Dialect dialect = jdbcOperations.getSoberFactory().getDialect();
         Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
-            ResultSet rs = null;
             if (DatabaseEnumType.find(jdbcOperations.getSoberFactory().getDatabaseType()).equals(DatabaseEnumType.ORACLE)||DatabaseEnumType.find(jdbcOperations.getSoberFactory().getDatabaseType()).equals(DatabaseEnumType.DB2))
             {
                 rs = conn.getMetaData().getColumns(null, getSchema(conn), table.toUpperCase(), "%");
@@ -303,6 +317,7 @@ public abstract class JdbcUtil {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            JdbcUtil.closeResultSet(rs);
             JdbcUtil.closeConnection(conn);
         }
         return columnList;
@@ -315,11 +330,5 @@ public abstract class JdbcUtil {
             throw new Exception("ORACLE数据库模式不允许为空");
         }
         return schema.toUpperCase();
-    }
-
-
-
-    public static void main(String[] args) {
-        System.out.println(StringUtil.toBoolean("YES"));
     }
 }

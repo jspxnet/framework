@@ -180,7 +180,7 @@ public final class ParamUtil {
      * @param max    最大
      * @return 是否满足, 在这个范围类返回 true
      */
-    public static boolean isSafe(Number number, int min, long max) {
+    public static boolean isSafe(Number number, long min, long max) {
         if (number == null) {
             return true;
         }
@@ -432,15 +432,14 @@ public final class ParamUtil {
                         paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
                     }
                     //-------------
+                    //判断是否需要放入默认参数
+                    if (isPutDefaultValue(paramObj[i],param,pType)) {
+                        //放入默认参数
+                        paramObj[i] = getDefaultParam(param, pType);
+                    }
                     isRequired(action, param, paramName, paramObj[i]);
                     if (action.hasFieldInfo()) {
                         return paramObj;
-                    }
-                    if (paramObj[i] == null && !StringUtil.empty.equals(param.value())) {
-                        //放入默认参数
-                        paramObj[i] = getDefaultParam(param, pType);
-                    } else if (paramObj[i] == null && ClassUtil.isBaseNumberType(pType)) {
-                        paramObj[i] = 0;
                     }
 
                 }
@@ -563,13 +562,13 @@ public final class ParamUtil {
                             paramObj[i] = BeanUtil.getTypeValue(action.getString(paramName, false), pType);
                         }
                         //放入默认参数
+                        if (isPutDefaultValue(paramObj[i],param,pType)) {
+                            //放入默认参数
+                            paramObj[i] = getDefaultParam(param, pType);
+                        }
                         isRequired(action, param, paramName, paramObj[i]);
                         if (action.hasFieldInfo()) {
                             return paramObj;
-                        }
-                        if (paramObj[i] == null) {
-                            //放入默认参数
-                            paramObj[i] = getDefaultParam(param, pType);
                         }
                     }
                 }
@@ -1104,4 +1103,23 @@ public final class ParamUtil {
         return json;
     }
 
+    /**
+     * 判断是否放入默认值
+     * @param obj 对象
+     * @param param  参数注释
+     * @param type  变量类型
+     * @return   判断是否放入默认值
+     */
+    public static boolean isPutDefaultValue(Object obj,Param param,Type type)
+    {
+        if (StringUtil.empty.equals(param.value()))
+        {
+            return false;
+        }
+        if (obj==null)
+        {
+            return true;
+        }
+        return ClassUtil.isNumberType(type) && obj instanceof Number && !isSafe((Number) obj, param.min(), param.max());
+    }
 }

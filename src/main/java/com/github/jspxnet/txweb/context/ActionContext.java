@@ -6,6 +6,7 @@ import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.RequestUtil;
+import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +30,8 @@ public class ActionContext implements Serializable {
     private Method method = null;
     private String exeType;
 
+    //用来保存action自己的子变量, key 为类名_hashCode_变量名
+    final private Map<String, Object> componentEnvironment = new HashMap<>(1);
 
     public boolean containsKey(String key)
     {
@@ -88,7 +91,7 @@ public class ActionContext implements Serializable {
     public Map<String, String> getFieldInfo() {
         Map<String, String> fieldErrors = (Map<String, String>) environment.get(ActionEnv.Key_FieldInfo);
         if (fieldErrors == null) {
-            fieldErrors = new HashMap<>();
+            fieldErrors = new HashMap<>(0);
             environment.put(ActionEnv.Key_FieldInfo, fieldErrors);
         }
         return fieldErrors;
@@ -117,7 +120,7 @@ public class ActionContext implements Serializable {
     public void addFieldInfo(Map<String, String> errors) {
         Map<String, String> fieldError = (Map<String, String>) environment.get(ActionEnv.Key_FieldInfo);
         if (fieldError == null) {
-            fieldError = new HashMap<>();
+            fieldError = new HashMap<>(0);
             environment.put(ActionEnv.Key_FieldInfo, errors);
         }
         fieldError.putAll(errors);
@@ -129,6 +132,10 @@ public class ActionContext implements Serializable {
     @SuppressWarnings("unchecked")
     public boolean hasFieldInfo() {
         Map<String, String> fieldError = (Map<String, String>) environment.get(ActionEnv.Key_FieldInfo);
+        if (!ObjectUtil.isEmpty(fieldError))
+        {
+            System.out.println("---------fieldError=" + ObjectUtil.toString(fieldError));
+        }
         return !ObjectUtil.isEmpty(fieldError);
     }
 
@@ -270,6 +277,31 @@ public class ActionContext implements Serializable {
         this.environment.putAll(environment);
     }
 
+    @SuppressWarnings("unchecked")
+    public void setComponentEnvironment(Class<?> clas,int hashCode,Map<String, Object> env)
+    {
+        Map<String, Object> map = (Map<String, Object>)componentEnvironment.get(TXWebUtil.getComponentEnvKey(clas,hashCode));
+        if (ObjectUtil.isEmpty(map))
+        {
+            map = new HashMap<>();
+            componentEnvironment.put(TXWebUtil.getComponentEnvKey(clas,hashCode),map);
+        }
+        map.clear();
+        map.putAll(env);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getComponentEnvironment(Class<?> clas,int hashCode)
+    {
+        Map<String, Object> map = (Map<String, Object>)componentEnvironment.get(TXWebUtil.getComponentEnvKey(clas,hashCode));
+        if (ObjectUtil.isEmpty(map))
+        {
+            map = new HashMap<>();
+            componentEnvironment.put(TXWebUtil.getComponentEnvKey(clas,hashCode),map);
+        }
+        return map;
+    }
+
     public HttpServletRequest getRequest() {
         return request;
     }
@@ -317,4 +349,16 @@ public class ActionContext implements Serializable {
     public void setExeType(String exeType) {
         this.exeType = exeType;
     }
+
+    /**
+     * 释放内存
+     */
+    public void clean()
+    {
+        ObjectUtil.free(environment);
+        ObjectUtil.free(componentEnvironment);
+    }
+
+
+
 }

@@ -25,7 +25,7 @@ import java.util.List;
 public interface TemplateDAO<T> extends SoberSupport {
     String getNamespace();
 
-    Class getClassType();
+    Class<T> getClassType();
 
     Object load(Serializable id) throws Exception;
 

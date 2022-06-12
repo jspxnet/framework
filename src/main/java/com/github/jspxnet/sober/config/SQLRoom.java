@@ -14,6 +14,7 @@ import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.sober.config.xml.*;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -177,7 +178,7 @@ public class SQLRoom implements Serializable {
     private static SqlMapConfig getMapSql(Map<String,Map<String, SqlMapConfig>> confMap,String id, String db)
     {
         Map<String, SqlMapConfig> map = confMap.get(id);
-        if (map==null)
+        if (ObjectUtil.isEmpty(map))
         {
             return null;
         }
@@ -201,6 +202,10 @@ public class SQLRoom implements Serializable {
         if (result!=null&&!StringUtil.isEmpty(result.getQuote())&&!result.getQuote().equalsIgnoreCase(id))
         {
            return  getMapSql2(confMap,result.getQuote(), db);
+        }
+        if (ObjectUtil.isEmpty(result))
+        {
+            result = getDefaultMap(map);
         }
         return result;
     }
@@ -226,8 +231,23 @@ public class SQLRoom implements Serializable {
         SqlMapConfig result = map.get(db);
         if (result==null)
         {
-            result = map.get(Environment.defaultValue);
+            result = getDefaultMap(map);
         }
         return result;
     }
+
+    private static SqlMapConfig getDefaultMap(Map<String, SqlMapConfig> map)
+    {
+        for (String key:map.keySet())
+        {
+            if (StringUtil.isNull(key) || Environment.defaultValue.equalsIgnoreCase(key))
+            {
+                return map.get(key);
+            }
+        }
+        return map.values().iterator().next();
+    }
+
+
+
 }

@@ -64,12 +64,10 @@ public final  class ObjectUtil {
         if (value instanceof Collection) {
              ((Collection)value).clear();
         }
-
         if (value instanceof Map)
         {
             ((Map)value).clear();
         }
-
     }
 
     public static Object deepCopy(Object oldValue) {
@@ -525,7 +523,7 @@ public final  class ObjectUtil {
      * @return json 的对象转换
      */
     public static String getJson(Object o) {
-        if (ClassUtil.isCollection(o)) {
+        if (ClassUtil.isArrayType(o)||ClassUtil.isCollection(o)) {
             return new JSONArray(o).toString();
         }
         return new JSONObject(o).toString();

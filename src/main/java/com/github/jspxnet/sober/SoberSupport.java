@@ -384,7 +384,7 @@ public interface SoberSupport extends Serializable {
      * @param totalCount 返回行数
      * @return 查询返回列表
      */
-    List<Object> query(String sql, Object[] param, int currentPage, int totalCount);
+    List<?> query(String sql, Object[] param, int currentPage, int totalCount);
     /**
      * 查询返回列表
      * 使用jdbc完成,比较浪费资源

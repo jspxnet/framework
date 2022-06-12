@@ -77,11 +77,11 @@ public class ActionHandle extends WebHandle {
         Method exeMethod = actionContext.getMethod();
         Object result;
         if (exeMethod.getParameterCount() == 0) {
-            result = TXWebUtil.invokeFun(action, actionContext,null);
+            result = TXWebUtil.invokeFun(action, actionContext,exeMethod,null);
         } else {
             //jdk 8 需要添加编译参数 javac -parameters
             Object[] params = ParamUtil.getMethodParameter(action, exeMethod);
-            result = TXWebUtil.invokeFun(action, actionContext, params);
+            result = TXWebUtil.invokeFun(action, actionContext,exeMethod,params);
         }
         //默认模版方式调用
         if (!Void.TYPE.equals(exeMethod.getGenericReturnType())) {

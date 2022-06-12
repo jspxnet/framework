@@ -52,6 +52,8 @@ import java.util.*;
  */
 public abstract class ActionSupport implements Action {
 
+
+
     public ActionSupport() {
 
     }
@@ -70,12 +72,7 @@ public abstract class ActionSupport implements Action {
             {
                 return;
             }
-            Map<String, Object>  environment = actionContext.getEnvironment();
-            if (environment==null)
-            {
-                return;
-            }
-            ObjectUtil.free(environment);
+            actionContext.clean();
             actionContext.setResult(null);
             actionContext.setActionResult(null);
             actionContext.setRequest(null);
@@ -113,6 +110,7 @@ public abstract class ActionSupport implements Action {
 
     //这里要放置ajax方式调用出去
 
+    //兼容页面模式用的
     /**
      *
      * @return 配置
@@ -164,6 +162,14 @@ public abstract class ActionSupport implements Action {
     public String getRootNamespace() {
         ActionContext actionContext = ThreadContextHolder.getContext();
         return URLUtil.getRootNamespace(actionContext.getNamespace());
+    }
+
+    @Override
+    public boolean isComponent()
+    {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        Map<String, Object> actionEnv = actionContext.getComponentEnvironment(this.getClass(),this.hashCode());
+        return ActionEnv.COMPONENT_MODEL.equalsIgnoreCase((String)actionEnv.get(ActionEnv.ACTION_RUN_MODEL));
     }
 
     /**
@@ -285,6 +291,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public boolean hasFieldInfo() {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return false;
+        }
         return actionContext.hasFieldInfo();
     }
 
@@ -318,12 +328,20 @@ public abstract class ActionSupport implements Action {
     @Override
     public List<String> getActionMessage() {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return new ArrayList<>(0);
+        }
         return actionContext.getActionMessage();
     }
 
     @Override
     public String getSuccessMessage() {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return StringUtil.empty;
+        }
         return actionContext.getSuccessMessage();
     }
 
@@ -333,6 +351,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public boolean hasActionMessage() {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return false;
+        }
         return actionContext.hasActionMessage();
     }
 
@@ -427,9 +449,6 @@ public abstract class ActionSupport implements Action {
         ActionContext actionContext = ThreadContextHolder.getContext();
         return actionContext.getResponse();
     }
-
-
-
 
     @Override
     public <T> T getBean(Class<T> cla) {

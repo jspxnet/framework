@@ -213,6 +213,8 @@ public abstract class ResultSupport implements Result {
         valueMap.put(ActionEnv.Key_Language, action.getLanguage());
         valueMap.put(ActionEnv.Key_Option, action.getOption());
         valueMap.put(ActionEnv.Key_This, action);
+        valueMap.put(ActionEnv.Key_FieldInfo, action.getFieldInfo());
+        valueMap.put(ActionEnv.Key_ActionMessages, action.getActionMessage());
     }
 
 

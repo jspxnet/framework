@@ -101,7 +101,7 @@ public class RouteService implements Runnable {
         while (nettyClient.isRun()) {
             try {
 
-                if (debug&&debugTimes<50) {
+                if (debug&&debugTimes<20) {
                     String routeInfo = RouteChannelManage.getInstance().getSendRouteTable();
                     if (routeTableCharLength != routeInfo.length())
                     {
@@ -135,7 +135,7 @@ public class RouteService implements Runnable {
         }
         RpcConfig rpcConfig = RpcConfig.getInstance();
         boolean debug = rpcConfig.isDebug();
-        if (debug&debugTimes<50) {
+        if (debug&debugTimes<20) {
             log.debug("测试进入的路由表:{}", ObjectUtil.toString(checkRouteSessionList));
             debugTimes++;
         }
@@ -164,7 +164,7 @@ public class RouteService implements Runnable {
 
                     String md5V = EncryptUtil.getMd5(str + rpcConfig.getJoinKey());
                     if (StringUtil.isNull(reply.getMd5()) && !reply.getMd5().equalsIgnoreCase(md5V)) {
-                        if (debug&&debugTimes<50) {
+                        if (debug&&debugTimes<20) {
                             log.debug("netty rpc join key 验证错误不允许加入:{}", routeSession.getSocketAddress());
                         }
                     } else
@@ -182,7 +182,7 @@ public class RouteService implements Runnable {
                 //把路由表自己保管起来
             } catch (Exception e) {
                 routeManage.routeOff(routeSession.getSocketAddress());
-                if (debug&&debugTimes<50) {
+                if (debug&&debugTimes<20) {
                     log.debug("netty rpc 路由网络中存在异常服务器:{},\r\n错误:{}", ObjectUtil.toString(routeSession),e.getMessage());
 
                 }
@@ -191,7 +191,7 @@ public class RouteService implements Runnable {
 
         if (!ObjectUtil.isEmpty(canUseList))
         {
-            if (debug&&debugTimes<50) {
+            if (debug&&debugTimes<20) {
                 log.debug("添加路由表:{}", ObjectUtil.toString(canUseList));
                 debugTimes++;
             }

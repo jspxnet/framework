@@ -208,7 +208,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @SuppressWarnings("unchecked")
     public <T> T loadColumnsValue(Class<T> tClass, ResultSet resultSet) throws Exception {
         T result;
-        if (Map.class.isAssignableFrom(tClass)||HashMap.class.isAssignableFrom(tClass))
+        if (Map.class.isAssignableFrom(tClass)||HashMap.class.isAssignableFrom(tClass)||List.class.isAssignableFrom(tClass))
         {
             ResultSetMetaData metaData = resultSet.getMetaData();
             Map<String, Object> beanMap = new HashMap<>();
@@ -235,7 +235,10 @@ public abstract class JdbcOperations implements SoberSupport {
                 }
             }
         }
-
+        if (String.class.isAssignableFrom(tClass))
+        {
+            return (T)ObjectUtil.getJson(result);
+        }
         return result;
     }
 
@@ -1782,8 +1785,8 @@ public abstract class JdbcOperations implements SoberSupport {
                 loadNexusList(soberTable, result);
             }
         } catch (Exception e) {
-            log.error(soberTable.toString() + ",SQL:" + sql, e);
-            throw new IllegalArgumentException(soberTable.toString() + ",SQL:" + sql);
+            log.error(soberTable + ",SQL:" + sql, e);
+            throw new IllegalArgumentException(soberTable + ",SQL:" + sql);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -1852,7 +1855,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return List  查询返回列表
      */
     @Override
-    public List<Object> query(String sqlText, Object[] param, int currentPage, int totalCount) {
+    public List<?> query(String sqlText, Object[] param, int currentPage, int totalCount) {
         if (totalCount > getMaxRows()) {
             totalCount = getMaxRows();
         }
@@ -2154,16 +2157,16 @@ public abstract class JdbcOperations implements SoberSupport {
                 valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
                 valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
                 valueMap.put(Dialect.COLUMN_NAME, soberColumn.getName());
-                valueMap.put(Dialect.COLUMN_CAPTION, soberColumn.getCaption());
+                valueMap.put(Dialect.COLUMN_CAPTION, StringUtil.replace(soberColumn.getCaption(),StringUtil.SEMICOLON,"_"));
                 commentPatchSql.append(dialect.processTemplate(Dialect.SQL_COMMENT, valueMap)).append(StringUtil.SEMICOLON).append(StringUtil.CRLF);
                 valueMap.clear();
             }
             valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
             valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-            valueMap.put(Dialect.SQL_TABLE_COMMENT, soberTable.getCaption());
+            valueMap.put(Dialect.SQL_TABLE_COMMENT, StringUtil.replace(soberTable.getCaption(),StringUtil.SEMICOLON,"_"));
             valueMap.put(Dialect.KEY_TABLE_CAPTION, soberTable.getCaption());
 
-            commentPatchSql.append(dialect.processTemplate(Dialect.SQL_TABLE_COMMENT, valueMap)).append(StringUtil.SEMICOLON);
+            commentPatchSql.append(dialect.processTemplate(Dialect.SQL_TABLE_COMMENT, valueMap)).append(StringUtil.SEMICOLON).append(StringUtil.CRLF);
         }
         ///修补建表注释主要是pgsql   end
 
@@ -2270,7 +2273,6 @@ public abstract class JdbcOperations implements SoberSupport {
             } else {
                 statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             }
-
             resultSet = statement.executeQuery(sqlText);
             while (resultSet.next()) {
                 result = ArrayUtil.add(result, (String) dialect.getResultSetValue(resultSet, 1));

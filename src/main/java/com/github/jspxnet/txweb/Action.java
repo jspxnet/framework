@@ -128,8 +128,11 @@ public interface Action extends Serializable {
     //执行
     String execute() throws Exception;
 
+    boolean isComponent();
+
     //环境数据
     Map<String, Object> getEnv();
+
 
     void initEnv(Map<String, Object> paramMap, String exeType);
 

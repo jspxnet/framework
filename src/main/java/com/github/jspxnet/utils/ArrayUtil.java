@@ -1227,7 +1227,7 @@ public final class ArrayUtil {
      * @since 2.1
      */
     public static int getLength(Object array) {
-        if (array == null || array.getClass().isArray() ) {
+        if (array == null) {
             return 0;
         }
         return Array.getLength(array);
@@ -2750,7 +2750,7 @@ public final class ArrayUtil {
     private static Object remove(Object array, int index) {
         int length = getLength(array);
         if (index < 0 || index >= length) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Length: " + length);
+            throw new IndexOutOfBoundsException("删除超过数组长度,Index: " + index + ", Length: " + length);
         }
 
         Object result = Array.newInstance(array.getClass().getComponentType(), length - 1);
@@ -2764,8 +2764,12 @@ public final class ArrayUtil {
 
     private static String[] remove(String[] array, int index) {
         int length = getLength(array);
+        if (length==0 && index==0)
+        {
+            return new String[0];
+        }
         if (index < 0 || index >= length) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Length: " + length);
+            throw new IndexOutOfBoundsException("删除超过数组长度,Index: " + index + ", Length: " + length);
         }
         String[] result = new String[length - 1];
         arraycopy(array, 0, result, 0, index);

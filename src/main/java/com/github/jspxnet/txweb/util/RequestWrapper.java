@@ -53,7 +53,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
 
         String contentType = super.getContentType();
         //不是json请求的方式才去解析参数,否则可能出现解析错误
-        if (body!=null && contentType!=null && !contentType.toLowerCase().contains(KEY_JSON))
+        if (body!=null && contentType!=null && !contentType.toLowerCase().contains(KEY_JSON) )
         {
             String paramValue;
             try {
@@ -61,6 +61,10 @@ public class RequestWrapper extends HttpServletRequestWrapper {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
                 paramValue = new String(body,StandardCharsets.UTF_8);
+            }
+            if (!RequestUtil.isMultipart(this))
+            {
+                paramValue = URLUtil.getUrlDecoder(paramValue,encode);
             }
             Map<String, String[]> queryParameters = HttpUtil.parseQueryString(paramValue);
             // For our own use, name it a name->Vector structure

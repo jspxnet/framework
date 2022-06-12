@@ -144,6 +144,6 @@ public class RocHandle extends WebHandle {
     }
 
     static public void execute(Action action,ActionContext actionContext) throws Exception {
-        actionContext.setResult(TXWebUtil.invokeJson(action,actionContext));
+        actionContext.setResult(TXWebUtil.invokeJson(action,actionContext,actionContext.getMethod()));
     }
 }

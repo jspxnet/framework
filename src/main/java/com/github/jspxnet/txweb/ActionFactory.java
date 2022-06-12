@@ -30,6 +30,7 @@ import com.github.jspxnet.sober.exception.ValidException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -90,17 +91,20 @@ public class ActionFactory {
         ActionContext actionContext = ThreadContextHolder.getContext();
         //参数说明 1 isIgnoreParams， 2 Execute
         if (action != null && result != null) {
-            if (actionContext!=null)
-            {
-                action.initEnv(actionContext.getEnvironment(),actionContext.getExeType());
-            } else
+            if (actionContext==null)
             {
                 DefultContextHolderStrategy.createContext(new RequestTo(new HashMap<>()),new ResponseTo(new HashMap<>()),new HashMap<>());
+                actionContext = ThreadContextHolder.getContext();
             }
-            action.setActionResult(null);
-            action.setResult(null);
-            result.put(ActionEnv.Key_ActionName, className);
+            if (actionContext!=null)
+            {
+                Map<String, Object> componentEnv = actionContext.getComponentEnvironment(result.getClass(),result.hashCode());
+                componentEnv.put(ActionEnv.ACTION_RUN_MODEL,ActionEnv.COMPONENT_MODEL);
+                componentEnv.put(ActionEnv.Key_ActionName,className);
+                result.initEnv(actionContext.getEnvironment(),actionContext.getExeType());
+            }
         }
+
         if (arguments == null || arguments.isEmpty()) {
             return;
         }
@@ -146,7 +150,7 @@ public class ActionFactory {
             if (action != null && result != null) {
                 Method method = ClassUtil.getDeclaredMethod(result.getClass(), exeMethod);
                 if (method != null) {
-                    TXWebUtil.invokeFun(result, actionContext, null);
+                    TXWebUtil.invokeFun(result, actionContext, method,null);
                 }
             } else {
                 BeanUtil.invoke(result, exeMethod);

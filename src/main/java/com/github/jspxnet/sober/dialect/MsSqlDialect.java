@@ -36,10 +36,19 @@ public class MsSqlDialect extends Dialect {
 
         //oracle 和 pgsql 设置注释方式begin
         //字段注释
-        put(SQL_COMMENT, "sp_addextendedproperty 'MS_Description', N'${" + COLUMN_CAPTION + "}','SCHEMA', N'dbo','TABLE', N'${" + KEY_TABLE_NAME + "}','COLUMN', N'${" + COLUMN_NAME + "}'");
+        put(SQL_COMMENT, "EXEC sp_addextendedproperty 'MS_Description', N'${" + COLUMN_CAPTION + "}','SCHEMA', N'dbo','TABLE', N'${" + KEY_TABLE_NAME + "}','COLUMN', N'${" + COLUMN_NAME + "}'");
+
+      //  put(SQL_COMMENT, "sp_updateextendedproperty 'MS_Description', N'${" + COLUMN_CAPTION + "}','SCHEMA', N'dbo','TABLE', N'${" + KEY_TABLE_NAME + "}','COLUMN', N'${" + COLUMN_NAME + "}'");
 
         //表注释
-        put(SQL_TABLE_COMMENT, "sp_addextendedproperty 'MS_Description', N'${" + SQL_TABLE_COMMENT + "}','SCHEMA', N'dbo','TABLE', N'${" + KEY_TABLE_NAME + "}'");
+        put(SQL_TABLE_COMMENT, "EXEC sp_addextendedproperty 'MS_Description', N'${" + SQL_TABLE_COMMENT + "}','SCHEMA', N'dbo','TABLE', N'${" + KEY_TABLE_NAME + "}'");
+
+        /*
+        EXEC sp_addextendedproperty 'MS_Description', N'触发日志记录', 'SCHEMA', N'dbo','TABLE', N'jspx_test_demo'
+         */
+        //put(SQL_TABLE_COMMENT, "sp_addextendedproperty 'MS_Description', N'${" + SQL_TABLE_COMMENT + "}','SCHEMA', N'dbo','TABLE', N'${" + KEY_TABLE_NAME + "}'");
+
+        //put(SQL_TABLE_COMMENT, "sp_updateextendedproperty 'MS_Description', N'${" + SQL_TABLE_COMMENT + "}','SCHEMA', N'dbo','TABLE', N'${" + KEY_TABLE_NAME + "}'");
         //oracle 和 pgsql 设置注释方式end
 
 

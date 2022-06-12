@@ -17,8 +17,8 @@ import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.BeanFactory;
-import com.github.jspxnet.txweb.annotation.Async;
 import com.github.jspxnet.txweb.*;
+import com.github.jspxnet.txweb.annotation.Async;
 import com.github.jspxnet.txweb.annotation.Intercept;
 import com.github.jspxnet.txweb.annotation.Redirect;
 import com.github.jspxnet.txweb.config.ActionConfig;
@@ -27,18 +27,19 @@ import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.DefultContextHolderStrategy;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
-import com.github.jspxnet.txweb.dispatcher.handle.CommandHandle;
-import com.github.jspxnet.txweb.dispatcher.handle.MarkdownHandle;
-import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
-import com.github.jspxnet.txweb.dispatcher.handle.RsaRocHandle;
+import com.github.jspxnet.txweb.dispatcher.handle.*;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.result.*;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.*;
+import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.utils.BeanUtil;
+import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
@@ -207,11 +208,11 @@ public class DefaultActionInvocation implements ActionInvocation {
         //设置执行方法 end
 
         //设置默认的返回方式 begin
-        if (exeType.equalsIgnoreCase(RocHandle.NAME)) {
+        if (exeType.equalsIgnoreCase(RocHandle.NAME)||exeType.equalsIgnoreCase(RsaRocHandle.NAME)) {
             action.setActionResult(ActionSupport.ROC);
         } else if (exeType.equalsIgnoreCase(MarkdownHandle.NAME)) {
             action.setActionResult(ActionSupport.Markdown);
-        } else {
+        }  else if (exeType.equalsIgnoreCase(ActionHandle.NAME)) {
             action.setActionResult(ActionSupport.INPUT);
         }
         //设置默认的返回方式 end

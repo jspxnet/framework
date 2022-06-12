@@ -160,6 +160,11 @@ public class DefaultActionProxy implements ActionProxy {
         } finally {
             //这个方法什么时候都会执行
             result =  action.execute();
+            //做状态标识
+            if (actionContext.getMethod()!=null&&ActionEnv.DEFAULT_EXECUTE.equals(actionContext.getMethod().getName()))
+            {
+                actionContext.setExecuted(true);
+            }
         }
         return result;
     }

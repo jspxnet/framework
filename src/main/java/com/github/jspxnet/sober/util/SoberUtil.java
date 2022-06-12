@@ -396,7 +396,8 @@ public class SoberUtil {
                 //oracle只能一个; 一个; 的执行
                 if (DatabaseEnumType.inArray(oracleDatabaseEnumType,soberSupport.getSoberFactory().getDatabaseType()))
                 {
-                    String[] sqlLines = StringUtil.split(sql,StringUtil.SEMICOLON);
+
+                    String[] sqlLines = StringUtil.split(sql,StringUtil.SEMICOLON + StringUtil.CRLF);
                     for (String sqlLine:sqlLines)
                     {
                         if (StringUtil.isNull(sqlLine))

@@ -5,7 +5,6 @@ package com.github.jspxnet.boot.environment.dblog;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.annotation.Scheduled;
 import com.github.jspxnet.sober.SoberFactory;
