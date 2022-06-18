@@ -74,17 +74,44 @@ public class SoberUtil {
         return true;
     }
 
+    /**
+     *
+     * @param aClass 类对象
+     * @param field 字段
+     * @param find 查询
+     * @param loadChild 载入子对象
+     * @return 返回缓存key
+     */
     public static String getLoadKey(Class<?> aClass, Serializable field, Object find, boolean loadChild) {
         return aClass.getName() + CACHE_TREM_LOAD +
                 //满足redis 规范
                 field + CACHE_TREM_EQUALS + find + CACHE_TREM_CHILD + loadChild;
     }
 
-
+    public static String getLoadKey(Class<?> aClass, Serializable field, Object find) {
+        return aClass.getName() + CACHE_TREM_LOAD +
+                //满足redis 规范
+                field + CACHE_TREM_EQUALS + find + CACHE_TREM_CHILD + ".*";
+    }
+    /**
+     *
+     * @param aClass 类对象
+     * @param term 条件
+     * @param sort 排序
+     * @param begin  开始行
+     * @param end  结束行
+     * @param loadChild 载入子对象
+     * @return 返回缓存key
+     */
     public static String getListKey(Class<?> aClass, String term,String sort,int begin,int end, boolean loadChild) {
         //满足redis 规范
+        String ck = term;
+        if (ck!=null && ck.length()>2)
+        {
+            ck = ck.substring(0,2);
+        }
         String sb = aClass.getName() + CACHE_TREM_LIST +
-                EncryptUtil.getMd5(term) + "_T_" + sort + CACHE_TREM_CHILD + "_L" + begin + "_" + end + loadChild;
+                ck + EncryptUtil.getMd5(term) + "_T_" + sort + CACHE_TREM_CHILD + "_L" + begin + "_" + end + loadChild;
         return StringUtil.replace(sb," ","");
     }
 

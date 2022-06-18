@@ -40,6 +40,7 @@ public final class BeanUtil {
      * @param methodName 方法名称,如果存在set就不加set
      * @param obj        参数
      */
+    @SuppressWarnings("unchecked")
     public static void setSimpleProperty(Object object, String methodName, Object obj) {
         if (object == null) {
             throw new NullPointerException(object + methodName + " is NULL");
@@ -49,13 +50,13 @@ public final class BeanUtil {
         }
         //map 的
         if (object instanceof Map) {
-            Map<String,Object> map = (Map) object;
+            Map<String,Object> map = (Map<String,Object>) object;
             map.put(methodName, obj);
             return;
         }
         if ((object instanceof List) && (obj instanceof List)) {
-            List<Object> list = (List) object;
-            list.addAll((List) obj);
+            List<Object> list = (List<Object>) object;
+            list.addAll((List<Object>) obj);
             return;
         }
         if (methodName.contains(StringUtil.DOT)) {
@@ -84,13 +85,6 @@ public final class BeanUtil {
             try {
                 pObject[0] = getTypeValue(obj, aType);
                 (new java.beans.Expression(object, methodName, pObject)).execute();
-                /*
-                if (SystemUtil.isAndroid()) {
-                    method.invoke(object, pObject);
-                } else
-                {
-                    (new java.beans.Expression(object, methodName, pObject)).execute();
-                }*/
             } catch (Exception e) {
                 log.error(object.getClass().getName() + StringUtil.DOT + methodName + " setProperty  type=" + aType + " value=" + obj, e);
                 e.printStackTrace();
@@ -102,6 +96,7 @@ public final class BeanUtil {
 
     }
 
+    @SuppressWarnings("unchecked")
     public static void setFieldValue(Object object, String fieldName, Object obj) {
         if (object == null || !StringUtil.hasLength(fieldName)) {
             return;
@@ -157,6 +152,7 @@ public final class BeanUtil {
      * @param <D> 数据
      * @return 类型转换
      */
+    @SuppressWarnings("unchecked")
     public static <T, D> T getTypeValue(D obj, Type cls) {
         return (T) getTypeValueObject(obj, cls);
     }
@@ -167,6 +163,7 @@ public final class BeanUtil {
      * @param aType 类型
      * @return 类型转换
      */
+    @SuppressWarnings("unchecked")
     private static Object getTypeValueObject(Object obj, Type aType) {
 
         if (aType==null||ClassUtil.isBaseNumberType(aType)&&(obj==null))
@@ -306,7 +303,6 @@ public final class BeanUtil {
             }
         }
         else if (ClassUtil.isArrayType(aType) && (ClassUtil.isStandardType(obj.getClass()))) {
-
             if (aType.equals(int[].class)||aType.equals(Integer[].class)) {
                 int[] vv = new int[1];
                 vv[0] = ObjectUtil.toInt(obj);
@@ -338,12 +334,19 @@ public final class BeanUtil {
                 BigDecimal[] vv = new BigDecimal[1];
                 vv[0] = BigDecimal.valueOf(ObjectUtil.toDouble(obj));
                 return vv;
-
             } else if (aType.equals(String[].class)) {
+                if (StringUtil.empty.equals(obj)|| "[]".equals(obj))
+                {
+                    return new String[0];
+                }
                 String[] vv = new String[1];
                 vv[0] = obj+"";
                 return vv;
             } else {
+                if (StringUtil.empty.equals(obj) || "[]".equals(obj))
+                {
+                    return new Object[0];
+                }
                 Object[] vv = new Object[1];
                 vv[0] = obj;
                 return vv;
@@ -419,6 +422,7 @@ public final class BeanUtil {
      * @param jump      跳过不满足条件的方法,并且不会报错
      * @return 返回对象
      */
+    @SuppressWarnings("unchecked")
     public static Object getProperty(Object object, String name, Object[] parameter, boolean jump) {
         if (!StringUtil.hasLength(name)) {
             return null;
@@ -494,6 +498,7 @@ public final class BeanUtil {
      * @param <T> 类型
      * @return 得到字段的值
      */
+    @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object object, String name,Class<T> cls,boolean anyField)
     {
         if (!StringUtil.hasLength(name)) {
@@ -560,6 +565,7 @@ public final class BeanUtil {
      * @param <D>    数据对象，赋给新的对象
      * @return 拷贝到新的对象
      */
+    @SuppressWarnings("unchecked")
     public static <T, D> T copy(D object, Class<T> cls) {
         if (null == cls) {
             return null;
@@ -618,6 +624,7 @@ public final class BeanUtil {
      * @param out 源bean
      * @param in  得到属性的bean
      */
+    @SuppressWarnings("unchecked")
     public static void copyMethodValue(Object out, Object in) {
         if (out instanceof JSONObject) {
             out = ((JSONObject) out).toMap();
@@ -673,6 +680,7 @@ public final class BeanUtil {
      * @param getData  得到属性的bean
      * @param oldData 源bean
      */
+    @SuppressWarnings("unchecked")
     public static void copyFiledValue(Object getData,Object oldData) {
 
         if (getData instanceof JSONObject) {

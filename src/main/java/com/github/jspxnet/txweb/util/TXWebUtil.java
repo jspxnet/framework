@@ -12,6 +12,7 @@ package com.github.jspxnet.txweb.util;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.ErrorEnumType;
@@ -624,7 +625,18 @@ public final class TXWebUtil {
             } catch (Exception e) {
                 log.error(exeMethod + " params is " + ObjectUtil.toString(paramObj), e);
                 //RPC 2.0 标准  返回
-                actionContext.setResult(new RocException(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "参数错误," + ObjectUtil.toString(paramObj))));
+
+                RocResponse<?> rocResponse = RocResponse.error(ErrorEnumType.PARAMETERS);
+                if (paramObj!=null)
+                {
+                    Map<String,Object> error = new LinkedHashMap<>();
+                    for (int i=0;i<paramObj.length;i++)
+                    {
+                        error.put("arg" + i, paramObj[i]);
+                    }
+                    rocResponse.setError(error);
+                }
+                actionContext.setResult(new RocException(rocResponse));
                 actionContext.setActionResult(ActionSupport.ERROR);
                 throw (RocException) actionContext.getResult();
             }
@@ -930,7 +942,7 @@ public final class TXWebUtil {
                 if (transaction != null && !StringUtil.isEmpty(transaction.message())) {
                     action.addFieldInfo(Environment.errorInfo, transaction.message());
                 } else {
-                    action.addFieldInfo(Environment.errorInfo, exeMethod.getName() + " " + ThrowableUtil.getThrowableMessage(e));
+                    action.addFieldInfo(Environment.errorInfo,  ThrowableUtil.getThrowableMessage(e));
                 }
 
             }
@@ -978,7 +990,7 @@ public final class TXWebUtil {
             if (ObjectUtil.isEmpty(check)) {
                 JSCacheManager.put(DefaultCache.class, key, operate.repeat(), operate.repeat());
             } else {
-                action.addFieldInfo(exeMethod.getName(), "不运行重复提交," + operate.repeat() + "秒后在来");
+                action.addFieldInfo(exeMethod.getName(), "不允许重复提交," + operate.repeat() + "秒后在来");
                 return false;
             }
         }
@@ -1076,7 +1088,7 @@ public final class TXWebUtil {
      */
     public static void print(JSONObject json,  HttpServletResponse response)
     {
-        print( json, WebOutEnumType.JSON.getValue(),  response, 200);
+        print( json, WebOutEnumType.JSON.getValue(),  response, HttpStatusType.HTTP_status_OK);
     }
     /**
      * 格式兼容

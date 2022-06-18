@@ -34,7 +34,7 @@ public interface TableModels extends Serializable {
 
     boolean isUseCache();
 
-    Class getEntity();
+    Class<?> getEntity();
 
     String getPrimary();
 

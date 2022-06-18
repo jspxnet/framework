@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -136,6 +136,28 @@ public interface SoberSupport extends Serializable {
      * @return 查询返回
      */
     <T> List<T> load(Class<T> aClass, Serializable[] serializables);
+
+    /**
+     *
+     * @param aClass 返回实体
+     * @param values 字段值
+     * @param loadChild 是否载入映射
+     * @param <T> 类型
+     * @return 返回列表
+     */
+    <T> List<T> load(Class<T> aClass, Collection<?> values, boolean loadChild);
+
+    /**
+     *
+     * @param aClass 返回实体
+     * @param field 查询字段
+     * @param values 字段值
+     * @param loadChild 是否载入映射
+     * @param <T> 类型
+     * @return 返回列表
+     */
+    <T> List<T> load(Class<T> aClass, String field, Collection<?> values, boolean loadChild);
+
     /**
      *
      * @param aClass 返回实体
@@ -435,12 +457,12 @@ public interface SoberSupport extends Serializable {
      */
     Object getUniqueResult(Class<?> cla, String sql, Object o);
     /**
-     * 计算合计,这个标签会占用大量的CPU计算资源，谨慎使用
-     *
+     *  计算合计,这个标签会占用大量的CPU计算资源，谨慎使用
      * @param soberTable 结果关系表
-     * @param obj        对象
+     * @param obj 对象
+     * @return 计算结果
      */
-    void calcUnique(TableModels soberTable, Object obj);
+    Object calcUnique(TableModels soberTable, Object obj);
     /**
      * 创建标准查询
      *

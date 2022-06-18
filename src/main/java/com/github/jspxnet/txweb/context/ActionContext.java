@@ -22,6 +22,7 @@ public class ActionContext implements Serializable {
     private Object result;
     //如果执行了完整的一次变成 true
     private boolean executed = false;
+
     //执行过程中 resultCode 会不断的变动,最后为返回需要的
   //  private String resultCode;
     //action执行返回
@@ -132,10 +133,6 @@ public class ActionContext implements Serializable {
     @SuppressWarnings("unchecked")
     public boolean hasFieldInfo() {
         Map<String, String> fieldError = (Map<String, String>) environment.get(ActionEnv.Key_FieldInfo);
-        if (!ObjectUtil.isEmpty(fieldError))
-        {
-            System.out.println("---------fieldError=" + ObjectUtil.toString(fieldError));
-        }
         return !ObjectUtil.isEmpty(fieldError);
     }
 

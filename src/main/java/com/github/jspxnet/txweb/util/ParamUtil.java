@@ -433,15 +433,21 @@ public final class ParamUtil {
                     }
                     //-------------
                     //判断是否需要放入默认参数
-                    if (isPutDefaultValue(paramObj[i],param,pType)) {
+                    if (paramObj[i] == null && !StringUtil.empty.equals(param.value())) {
                         //放入默认参数
                         paramObj[i] = getDefaultParam(param, pType);
+                    } else if (paramObj[i] == null && ClassUtil.isBaseNumberType(pType)) {
+                        paramObj[i] = 0;
                     }
+                    if (isPutDefaultValue(paramObj[i] , param,pType))
+                    {
+                        paramObj[i] = getDefaultParam(param, pType);
+                    }
+
                     isRequired(action, param, paramName, paramObj[i]);
                     if (action.hasFieldInfo()) {
                         return paramObj;
                     }
-
                 }
 
                 if (annotation instanceof PathVar) {
@@ -519,6 +525,7 @@ public final class ParamUtil {
                 if (annotation instanceof Param) {
                     isParam = true;
                     Param param = (Param) annotation;
+
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
                         if (ParamModeType.RocMode.getValue() == param.modeType().getValue())
                         {
@@ -562,10 +569,19 @@ public final class ParamUtil {
                             paramObj[i] = BeanUtil.getTypeValue(action.getString(paramName, false), pType);
                         }
                         //放入默认参数
-                        if (isPutDefaultValue(paramObj[i],param,pType)) {
+
+                        if (paramObj[i] == null && !StringUtil.empty.equals(param.value())) {
                             //放入默认参数
                             paramObj[i] = getDefaultParam(param, pType);
+                        } else if (paramObj[i] == null && ClassUtil.isBaseNumberType(pType)) {
+                            paramObj[i] = 0;
                         }
+
+                        if (isPutDefaultValue(paramObj[i] , param,pType))
+                        {
+                            paramObj[i] = getDefaultParam(param, pType);
+                        }
+
                         isRequired(action, param, paramName, paramObj[i]);
                         if (action.hasFieldInfo()) {
                             return paramObj;
@@ -987,8 +1003,6 @@ public final class ParamUtil {
         SIGN_TYPE_MAP.put("Sm3", "Sm3");
         SIGN_TYPE_MAP.put("sha256", "sha256");
     }
-
-
     /**
      * 创建带参签名的参数字符串
      *
@@ -1063,10 +1077,7 @@ public final class ParamUtil {
      */
     public static Object getDefaultParam(Param param, Type pType) {
         String value = param.value();
-        if (value == null) {
-            return null;
-        }
-        if (value.contains("${") && value.contains("}")) {
+        if (value != null && value.contains("${") && value.contains("}")) {
             Map<String, Object> valueMap = new HashMap<>();
             valueMap.put("date", new Date());
             valueMap.put("max", param.max());
@@ -1104,7 +1115,8 @@ public final class ParamUtil {
     }
 
     /**
-     * 判断是否放入默认值
+     * 判断是否放入默认值,判断 param.value() 不为空,就需要放入默认值
+     * 先放入默认值,在设置请求参数
      * @param obj 对象
      * @param param  参数注释
      * @param type  变量类型
@@ -1112,14 +1124,10 @@ public final class ParamUtil {
      */
     public static boolean isPutDefaultValue(Object obj,Param param,Type type)
     {
-        if (StringUtil.empty.equals(param.value()))
+        if (param==null||StringUtil.empty.equals(param.value()))
         {
             return false;
         }
-        if (obj==null)
-        {
-            return true;
-        }
-        return ClassUtil.isNumberType(type) && obj instanceof Number && !isSafe((Number) obj, param.min(), param.max());
+        return param.required()&&ClassUtil.isNumberType(type) && obj instanceof Number && !isSafe((Number) obj, param.min(), param.max());
     }
 }

@@ -4,11 +4,13 @@ import com.github.jspxnet.enums.EnumType;
 
 /**
  * Created by jspx.net
- *
+ * @author chenYuan
  * author: chenYuan
  * date: 2020/6/30 22:37
  * description: 分布式远程调用方式
- **/
+ *
+ *
+ * */
 public enum RpcProtocolEnumType  implements EnumType {
 
     //http hessian 方式

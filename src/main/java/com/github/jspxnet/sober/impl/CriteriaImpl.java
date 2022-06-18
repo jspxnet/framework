@@ -1,12 +1,3 @@
-/*
- * Copyright © 2004-2014 chenYuan. All rights reserved.
- * @Website:wwww.jspx.net
- * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
- * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
- * @jvm:jdk1.6+  x86/amd64
- *
- */
 package com.github.jspxnet.sober.impl;
 
 import com.github.jspxnet.cache.JSCacheManager;
@@ -36,13 +27,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-/**
- * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
- * date: 2007-1-8
- * Time: 10:28:37
- * hibernate 的 Criteria 方式扩展
+/*
+ * Copyright © 2004-2014 chenYuan. All rights reserved.
+ * @Website:wwww.jspx.net
+ * @Mail:39793751@qq.com
+ * author: chenYuan , 陈原
+ * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
+ * @jvm:jdk1.6+  x86/amd64
+ *
  */
 @Slf4j
 public class CriteriaImpl<T> implements Criteria, Serializable {
@@ -76,19 +68,29 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
     /**
      *
-     * @return 类对象
+     * @return 查询器
      */
     @Override
     public Class<T> getCriteriaClass() {
         return criteriaClass;
     }
 
+    /**
+     *
+     * @param currentPage  页数
+     * @return 查询器
+     */
     @Override
     public Criteria setCurrentPage(Integer currentPage) {
         this.currentPage = currentPage;
         return this;
     }
 
+    /**
+     *
+     * @return 得到行数
+     */
+    @Override
     public int getTotalCount() {
         return totalCount;
     }
@@ -102,6 +104,11 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         return this;
     }
 
+    /**
+     *
+     * @return 得到页数
+     */
+    @Override
     public Integer getCurrentPage() {
         return currentPage;
     }
@@ -111,17 +118,32 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         return this;
     }
 
+    /**
+     *
+     * @param criterion 查询条件
+     * @return 查询器
+     */
     @Override
     public Criteria add(Criterion criterion) {
         return add(this, criterion);
     }
 
+    /**
+     *
+     * @param order 排序字段
+     * @return 查询器
+     */
     @Override
-    public Criteria addOrder(Order ordering) {
-        orderEntries.add(new OrderEntry(ordering, this));
+    public Criteria addOrder(Order order) {
+        orderEntries.add(new OrderEntry(order, this));
         return this;
     }
 
+    /**
+     *
+     * @param group 分组字段
+     * @return  查询器
+     */
     @Override
     public Criteria addGroup(String group) {
         groupList.add(group);
@@ -242,7 +264,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
         //取出cache  begin
         String cacheKey = null;
-       if (soberFactory.isUseCache() && soberTable.isUseCache()) {
+        if (soberFactory.isUseCache() && soberTable.isUseCache()) {
             StringBuilder termKey = new StringBuilder();
             termKey.append("_").append(termText).append("_p_").append(projection == null ? "" : projection.toSqlString(soberFactory.getDatabaseType())).append("_g_").append(groupText).append("_o_").append(orderText);
             if (objectArray != null) {
@@ -273,7 +295,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             }
-
+            JdbcUtil.setFetchSize(statement,1);
             statement.setMaxRows(1);
             if (objectArray != null) {
                 for (int i = 0; i < objectArray.length; i++) {
@@ -358,11 +380,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         return result;
     }
 
-
     /**
      * 更新
-     *
-     * @return boolean 是否成功
+     * @param updateMap 参数
+     * @return 是否成功
      */
     @Override
     public int update(Map<String, Object> updateMap) {
@@ -585,13 +606,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             }
-            if (totalCount>10&&totalCount<24)
-            {
-                statement.setFetchSize(30);
-            } else if (totalCount>=24)
-            {
-                statement.setFetchSize(100);
-            }
+
+            JdbcUtil.setFetchSize(statement,iEnd);
             statement.setMaxRows(iEnd);
             if (objectArray != null) {
                 for (int i = 0; i < objectArray.length; i++) {
@@ -760,13 +776,9 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             }
-            if (totalCount>10&&totalCount<24)
-            {
-                statement.setFetchSize(30);
-            } else if (totalCount>=24)
-            {
-                statement.setFetchSize(100);
-            }
+
+            JdbcUtil.setFetchSize(statement,iEnd);
+
             statement.setMaxRows(iEnd);
             if (objectArray != null) {
                 for (int i = 0; i < objectArray.length; i++) {
@@ -852,7 +864,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         if (StringUtil.hasLength(groupText.toString())) {
             termKey.append("_g_").append(groupText.toString());
         }
-         if (termKey.toString().endsWith("_")) {
+        if (termKey.toString().endsWith("_")) {
             termKey.setLength(termKey.length() - 1);
         }
         return StringUtil.substringBefore(SoberUtil.getListKey(soberTable.getEntity(), StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),StringUtil.empty,1,1,false),"_T_")+StringUtil.ASTERISK;
@@ -865,7 +877,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      */
     @Override
     public <T> T autoSum() {
-           return  autoSum(null);
+        return  autoSum(null);
     }
 
     /**
@@ -979,7 +991,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             }
-
+            JdbcUtil.setFetchSize(statement,500);
             statement.setMaxRows(1);
             if (objectArray != null) {
                 for (int i = 0; i < objectArray.length; i++) {
@@ -1031,6 +1043,12 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         return autoAvg(null) ;
     }
 
+    /**
+     *  对一个类对象里边的数字求平均数,在保存到对象返回
+     * @param fields 字段
+     * @param <T> 类型
+     * @return 类实体对象
+     */
     @Override
     public <T> T autoAvg(String[] fields) {
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
@@ -1135,6 +1153,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             }
+
+            JdbcUtil.setFetchSize(statement,500);
             statement.setMaxRows(1);
             if (objectArray != null) {
                 for (int i = 0; i < objectArray.length; i++) {
@@ -1142,6 +1162,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                     dialect.setPreparedStatementValue(statement, i + 1, objectArray[i]);
                 }
             }
+
             resultSet = statement.executeQuery();
             ResultSetMetaData metaData = resultSet.getMetaData();
             if (resultSet.next()) {

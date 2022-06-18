@@ -54,8 +54,6 @@ public class SqlMapClientImpl implements SqlMapClient {
         this.jdbcOperations = jdbcOperations;
         this.soberFactory = jdbcOperations.getSoberFactory();
     }
-
-
     /**
      * @param o bean对象
      * @return 对象转换为Map提供查询参数
@@ -409,8 +407,6 @@ public class SqlMapClientImpl implements SqlMapClient {
             throw new IllegalArgumentException("ERROR SQL IS NULL:" + sql);
         }
         sql = StringUtil.removeOrders(sql);
-
-
         sql = "SELECT count(1) as countNum FROM (" + sql + ") queryCount";
         jdbcOperations.debugPrint(sql);
         return ObjectUtil.toLong(jdbcOperations.getUniqueResult(sql));

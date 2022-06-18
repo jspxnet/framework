@@ -176,6 +176,10 @@ public class RocResponse<T> implements Serializable {
         return property.get(key);
     }
 
+    public RocResponse<T> setError(Map<String, ?> error) {
+        this.error = error;
+        return this;
+    }
     /**
      * 成功时候的调用
      *

@@ -286,7 +286,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             super.put("class", ((Class) bean).getName());
             return;
         }
-
         if (ClassUtil.isProxy(bean.getClass())) {
             bean = ReflectUtil.getValueMap(bean);
         }
@@ -294,7 +293,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             Map map = (Map) bean;
             for (Object objKey : map.keySet()) {
                 String key = ObjectUtil.toString(objKey);
-
                 //判断是否需要返回
                 if (!ArrayUtil.isEmpty(showField)&&!ArrayUtil.contains(showField,key))
                 {
@@ -304,14 +302,17 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 if (v==null)
                 {
                     super.put(key, null);
+                } /*else if (v instanceof JSONArray)
+                {
+                    super.put(key, v);
                 } else
-                if (ClassUtil.isCollection(v))
+                if (ClassUtil.isArrayType(v)|| ClassUtil.isCollection(v))
                 {
                     super.put(key, new JSONArray(v,includeSuperClass));
                 } else
                 if (!ClassUtil.isStandardProperty(v.getClass())&&!(v instanceof JSONObject)) {
                     super.put(key, new JSONObject(v, includeSuperClass,dataField));
-                } else {
+                }*/ else {
                     super.put(key, v);
                 }
             }
@@ -767,6 +768,14 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return getJSONArray(key);
     }
 
+    public Object get(String key) {
+        Object o = super.get(key);
+        if (o ==null|| NULL.equals(o))
+        {
+            return null;
+        }
+        return o;
+    }
 
     /**
      * Get the JSONObject value associated with a key.
@@ -777,8 +786,12 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      *                       if the value is not a JSONObject.
      */
     public JSONObject getJSONObject(String key) {
-        Object o = get(key);
-        if (o ==null||o instanceof Collections || ClassUtil.isArrayType(o.getClass()))
+        Object o = super.get(key);
+        if (o ==null|| NULL.equals(o))
+        {
+            return null;
+        }
+        if (o instanceof Collections || ClassUtil.isArrayType(o.getClass()))
         {
             return new JSONObject();
         }

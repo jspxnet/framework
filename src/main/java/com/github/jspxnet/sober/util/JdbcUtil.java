@@ -38,7 +38,11 @@ import java.util.Map;
  * Time: 18:09:10
  */
 @Slf4j
-public abstract class JdbcUtil {
+public final class JdbcUtil {
+    private JdbcUtil()
+    {
+
+    }
 
     public static Object[] appendArray(Object[] array, Object append) {
         if (array == null) {
@@ -175,7 +179,7 @@ public abstract class JdbcUtil {
      * @return 得到字段信息
      */
     public static Map<String, SoberColumn> getFieldType(final ResultSet resultSet) {
-        Map<String, SoberColumn> result = new HashMap<String, SoberColumn>();
+        Map<String, SoberColumn> result = new HashMap<>();
         try {
             ResultSetMetaData rsm = resultSet.getMetaData();
             for (int i = 1; i <= rsm.getColumnCount(); i++) {
@@ -255,7 +259,6 @@ public abstract class JdbcUtil {
         if (dialect == null) {
             dialect = new GeneralDialect();
         }
-
         if (cla==null||cla.isAssignableFrom(String.class)||cla.isAssignableFrom(Map.class)|| ClassUtil.findRemoteApi(cla).isAssignableFrom(Map.class) )
         {
             Map<String,Object> result = new HashMap<>();
@@ -331,4 +334,41 @@ public abstract class JdbcUtil {
         }
         return schema.toUpperCase();
     }
+
+    static public void setFetchSize(PreparedStatement preparedStatement,int count)
+    {
+        if (preparedStatement==null)
+        {
+            return;
+        }
+        int size = 20;
+        if (count>=30 && count<60)
+        {
+            size = 40;
+        } else
+        if (count>=60&&count<100)
+        {
+            size = 60;
+        } else
+        if (count>=100&&count<200)
+        {
+            size = 80;
+        }
+        else if (count>=200&&count<300)
+        {
+            size = 100;
+        } else if (count>=300&&count<500)
+        {
+            size = 120;
+        } else if (count>=500)
+        {
+            size = 150;
+        }
+        try {
+            preparedStatement.setFetchSize(size);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

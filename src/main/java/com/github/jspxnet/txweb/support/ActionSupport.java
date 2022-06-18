@@ -879,8 +879,16 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public boolean isMethodInvoked() {
+        if (isComponent())
+        {
+            return false;
+        }
         ActionContext actionContext = ThreadContextHolder.getContext();
-        return actionContext.isExecuted();
+        if (actionContext==null || actionContext.getMethod()==null)
+        {
+            return false;
+        }
+        return actionContext.isExecuted() && actionContext.getMethod().toString().contains("Action." + actionContext.getMethod().getName());
     }
 
     private String templatePath = null;
