@@ -255,7 +255,7 @@ public class ScriptMarkUtil {
                     idx += 2;
                     int x = idx;
                     int y = 0;
-                    int z = lidx > idx + 3 ? idx + 3 : lidx;
+                    int z = (lidx > idx + 3) ? (idx + 3) : lidx;
                     while (idx <= z) {
                         char b = s.charAt(idx);
                         if (b >= '0' && b <= '9') {

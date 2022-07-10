@@ -306,7 +306,6 @@ public final class EntryFactory implements BeanFactory {
                     }
                 } else if (!ref.test()) {
                     method.invoke(o, getBean(beanId, mNamespace));
-
                     setRefField = ArrayUtil.add(setRefField, method.toString());
                 }
             }
@@ -695,6 +694,10 @@ public final class EntryFactory implements BeanFactory {
         //扫描得到的 begin
         Map<String, String> map = iocContext.getSchedulerMap();
         for (String name : map.keySet()) {
+            if (StringUtil.isNull(name))
+            {
+                continue;
+            }
             Object o = getBean(name, map.get(name));
             if (o != null) {
                 log.info("init Scheduler " + o.getClass());
@@ -707,8 +710,13 @@ public final class EntryFactory implements BeanFactory {
         //扫描注册的bean里边是否存在 begin
         List<BeanElement> elementList = iocContext.getElementList();
         for (BeanElement beanElement : elementList) {
+            if (StringUtil.isNull(beanElement.getClassName()))
+            {
+                continue;
+            }
             try {
                 Class<?> cls = ClassUtil.loadClass(beanElement.getClassName());
+
                 if (AnnotationUtil.hasScheduled(cls)) {
                     Object o = getBean(beanElement.getId(), beanElement.getNamespace());
                     schedulerManager.add(o);

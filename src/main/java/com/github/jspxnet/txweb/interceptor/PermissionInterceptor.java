@@ -176,13 +176,10 @@ public class PermissionInterceptor extends InterceptorSupport {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
             //---------------------------
-
             if (!ArrayUtil.isEmpty(adminRuleUrl)||!ArrayUtil.isEmpty(adminRuleOutUrl)) {
                 return;
             }
-
             try {
                 if (adminUrlFile != null && !adminUrlFile.startsWith("http")) {
                     file = EnvFactory.getFile(adminUrlFile);
@@ -191,7 +188,6 @@ public class PermissionInterceptor extends InterceptorSupport {
                     }
                 }
                 log.info("adminUrlFile:{}", file);
-
                 if (file != null) {
                     txt = IoUtil.autoReadText(file);
                     decodeAdminUrl(txt);

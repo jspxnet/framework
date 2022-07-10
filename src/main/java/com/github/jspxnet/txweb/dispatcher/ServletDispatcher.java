@@ -114,6 +114,7 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
             File file = new File(Dispatcher.getRealPath(), URLUtil.getNamespace(url) + "/" + URLUtil.getFileName(url));
             if (!file.isFile()) {
                 TXWebUtil.errorPrint("不存在的资源", null, response, HttpStatusType.HTTP_status_403);
+                log.debug("not find file:{}",file.getPath());
                 return;
             }
             String contentType = FileUtil.getContentType(file);

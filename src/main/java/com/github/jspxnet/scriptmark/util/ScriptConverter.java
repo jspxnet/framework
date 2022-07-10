@@ -378,7 +378,7 @@ public class ScriptConverter {
 
             }
 
-            StringMap<String, String> stringMap = new StringMap();
+            StringMap<String, String> stringMap = new StringMap<>();
             stringMap.setString(str);
             StringBuilder sb = new StringBuilder();
             for (String key : stringMap.keySet()) {
@@ -923,7 +923,7 @@ public class ScriptConverter {
      * @param field 字段
      * @return 选项
      */
-    public static String getOptions(Class cla, String field) {
+    public static String getOptions(Class<?>cla, String field) {
         List<SoberColumn> soberColumns = AnnotationUtil.getColumnList(cla);
         for (SoberColumn column : soberColumns) {
             if (column.getName().equalsIgnoreCase(field)) {
@@ -940,7 +940,7 @@ public class ScriptConverter {
      * @param clear 清空括号
      * @return 选项
      */
-    public static String getOptions(Class cla, String field, boolean clear) {
+    public static String getOptions(Class<?> cla, String field, boolean clear) {
         String option = getOptions(cla, field);
         if (option.startsWith("(") && option.endsWith(")") && clear) {
             return StringUtil.substringBetween(option, "(", ")");

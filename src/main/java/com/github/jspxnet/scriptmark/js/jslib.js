@@ -883,6 +883,9 @@ Object.prototype.show = function (sel) {
 Object.prototype.toBoolean = function () {
     return converter.toBoolean(this);
 };
+Object.prototype.toString = function () {
+    return converter.toJson(this);
+};
 //--------------------------------------全局函数
 //判断是否为空
 function isEmpty(v) {

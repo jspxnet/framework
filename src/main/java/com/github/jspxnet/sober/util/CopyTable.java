@@ -59,7 +59,7 @@ public class CopyTable {
     }
 
 
-    public void copy(String sql, Class toTable) throws Exception {
+    public void copy(String sql, Class<?> toTable) throws Exception {
         PreparedStatement accessState = formDataSource.getConnection().prepareStatement(sql);
         ResultSet resultSet = accessState.executeQuery();
         BeanFactory beanFactory = EnvFactory.getBeanFactory();

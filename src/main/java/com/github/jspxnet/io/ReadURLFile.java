@@ -66,7 +66,7 @@ public class ReadURLFile extends AbstractRead {
                     nbRead = -1;
                 }
             }
-        } catch (NoClassDefFoundError ignoreSSL) { // javax/net/ssl/SSLSocket
+        } catch (NoClassDefFoundError ignore) { // javax/net/ssl/SSLSocket
         }
         result = new StringBuilder(message.toString());
     }

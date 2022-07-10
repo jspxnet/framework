@@ -9,13 +9,15 @@
  */
 package com.github.jspxnet.sober.annotation;
 
+import com.github.jspxnet.enums.EnumType;
+
 /**
  * Created by IntelliJ IDEA.
  * User: chenYuan
  * date: 2008-8-12
  * Time: 11:44:57
  */
-public abstract class NullClass {
+public abstract class NullClass implements EnumType {
     private NullClass() {
 
     }

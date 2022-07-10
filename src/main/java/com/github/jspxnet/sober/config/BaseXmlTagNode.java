@@ -16,7 +16,17 @@ public abstract class BaseXmlTagNode extends TagNode {
 
     public String getId()
     {
-        return XMLUtil.deleteQuote(getStringAttribute("id"));
+        String name = XMLUtil.deleteQuote(getStringAttribute("id"));
+        if (StringUtil.isNull(name))
+        {
+            name = XMLUtil.deleteQuote(getStringAttribute("name"));
+        }
+        return name;
+    }
+
+    public String getCaption()
+    {
+        return XMLUtil.deleteQuote(getStringAttribute("caption"));
     }
 
     public String getResultType()
@@ -52,6 +62,12 @@ public abstract class BaseXmlTagNode extends TagNode {
     public String getQuote()
     {
         return XMLUtil.deleteQuote(getStringAttribute("quote"));
+    }
+
+
+    public String getTerm()
+    {
+        return XMLUtil.deleteQuote(getStringAttribute("term"));
     }
 
 }

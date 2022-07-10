@@ -11,6 +11,7 @@ import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -33,6 +34,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
             return out.toByteArray();
         }
     }
+
 
     private void initParameters()
     {

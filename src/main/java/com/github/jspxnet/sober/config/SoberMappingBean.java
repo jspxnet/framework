@@ -22,6 +22,7 @@ import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.DialectFactory;
+import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
 import com.github.jspxnet.sober.transaction.JDBCTransaction;
 import com.github.jspxnet.sober.transaction.JTATransaction;
@@ -30,6 +31,7 @@ import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -62,7 +64,7 @@ public class SoberMappingBean implements SoberFactory {
     //事务管理器
     private static final TransactionManager TRANSACTION_MANAGER = TransactionManager.getInstance();
     //初始化表 用于比较是否重复
-    private final static Map<Class<?>,SqlMapConfig> INIT_TABLE_MAP = new HashMap<>();
+    private final static Map<Class<?>, SqlMapConf> INIT_TABLE_MAP = new HashMap<>();
     //sql映射表
     private static final  Map<String, SQLRoom> SQL_MAP = new HashMap<>();
     //表结果映射
@@ -121,7 +123,6 @@ public class SoberMappingBean implements SoberFactory {
     }
 
     public void setCacheName(String cacheName) {
-
         try {
             this.cacheName = ClassUtil.loadClass(cacheName);
             BeanFactory beanFactory = EnvFactory.getBeanFactory();
@@ -148,7 +149,7 @@ public class SoberMappingBean implements SoberFactory {
         this.context = context;
     }
 
-    public void setDatabaseType(String databaseName) {
+    public void setDatabaseType(String databaseType) {
         this.databaseType = databaseType;
     }
 

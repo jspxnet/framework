@@ -16,7 +16,7 @@ public class CreateDatabasePassword extends JspxDataSource {
         }*/
 
         CreateDatabasePassword createDatabasePassword = new CreateDatabasePassword();
-        String ps = createDatabasePassword.makePassword("pw519420");
+        String ps = createDatabasePassword.makePassword("xxxx");
         System.out.println(ps);
     }
 /*

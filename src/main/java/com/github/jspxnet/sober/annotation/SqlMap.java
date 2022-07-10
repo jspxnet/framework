@@ -8,6 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 /**
  * Created by jspx.net
  *
@@ -15,7 +16,8 @@ import java.lang.annotation.Target;
  * date: 2020/10/17 23:20
  * description: jspbox
  *
- * */
+ *
+ * @author Administrator*/
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SqlMap
@@ -37,5 +39,9 @@ public @interface SqlMap
 
     //载入映射对象
     boolean nexus() default false;
+
+    //拦截器,多个用分号隔开
+    String[] intercept() default StringUtil.empty;
+
 
 }

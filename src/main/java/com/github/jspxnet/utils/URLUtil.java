@@ -79,6 +79,10 @@ public final class URLUtil {
             return StringUtil.empty;
         }
         try {
+            if (text.contains("%"))
+            {
+                text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+            }
             return URLDecoder.decode(text, encode);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -198,10 +202,6 @@ public final class URLUtil {
             url = url.substring(0, url.lastIndexOf(StringUtil.DOT));
         }
         return url;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(deleteUrlSuffix("/jcommon/program/tree/create/treeid"));
     }
     /**
      * @param str 完整的域名地址
@@ -474,7 +474,10 @@ public final class URLUtil {
         }
         return namespace;
     }
-/*    public static void main(String[] args) {
-        System.out.println(getFixHessianUrl("/jcompany/menu/tree","http://www.jspxn.net","jcompany","http://127.0.0.1/xxx/222"));
-    }*/
+   public static void main(String[] args) {
+        String str = "测试中文1%。此的AA";
+        String out1 = getUrlEncoder(str,"UTF8");
+        System.out.println(out1);
+        System.out.println(getUrlDecoder(out1,"UTF8"));
+    }
 }

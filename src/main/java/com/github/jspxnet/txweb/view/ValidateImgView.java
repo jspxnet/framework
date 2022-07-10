@@ -10,15 +10,12 @@
 package com.github.jspxnet.txweb.view;
 
 import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-
 import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
-
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
@@ -34,7 +31,7 @@ import com.github.jspxnet.txweb.util.ValidateCode;
 public class ValidateImgView extends ActionSupport {
 
     public ValidateImgView() {
-
+        setActionResult(NONE);
     }
 
     @Ref
@@ -102,6 +99,7 @@ public class ValidateImgView extends ActionSupport {
         if (safe && RequestUtil.isPirated(getRequest())) {
             return NONE;
         }
+        IUserSession userSession = getUserSession();
         HttpServletResponse response = getResponse();
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
@@ -109,14 +107,11 @@ public class ValidateImgView extends ActionSupport {
         response.setContentType("image/" + fileType);
         ValidateCode validateCode = new ValidateCode(width, height, length, lineCount);
         String code = validateCode.makeCode();
-        try (ServletOutputStream out = response.getOutputStream()) {
-            ImageIO.write(validateCode.getBufferImage(), fileType, out);
-            IUserSession userSession = getUserSession();
-            if (userSession != null) {
-                validateCodeCache.addImgCode(EncryptUtil.getMd5(userSession.getId()), code);
-            }
-            out.flush();
+        ImageIO.write(validateCode.getBufferImage(), fileType, response.getOutputStream());
+
+        if (userSession != null) {
+            validateCodeCache.addImgCode(EncryptUtil.getMd5(userSession.getId()), code);
         }
-        return NONE;
+        return super.execute();
     }
 }

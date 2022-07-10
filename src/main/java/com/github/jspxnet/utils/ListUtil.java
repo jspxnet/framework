@@ -22,7 +22,7 @@ public final class ListUtil {
     private ListUtil() {
 
     }
-
+    public static final List<Object> EMPTY_LIST = new ArrayList<>(0);
     /**
      * @param list 列表
      * @param fen  分割

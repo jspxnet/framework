@@ -1780,22 +1780,30 @@ public final class FileUtil {
             {
                 path = StringUtil.substringBefore(file.getPath(),".jar!") + ".jar";
             }
-            try (JarInputStream zis = new JarInputStream(new FileInputStream(path))) {
-                List<File> list = new ArrayList<>();
-                JarEntry e;
-                while ((e = zis.getNextJarEntry()) != null) {
-                    if (e.isDirectory() || "..\\".equals(e.getName()) || "../".equals(e.getName())) {
-                        continue;
+            if (path.contains("file:"))
+            {
+                path = path.substring(path.indexOf("file:"));
+            }
+
+            if (FileUtil.isFileExist(path))
+            {
+                try (JarInputStream zis = new JarInputStream(new FileInputStream(path))) {
+                    List<File> list = new ArrayList<>();
+                    JarEntry e;
+                    while ((e = zis.getNextJarEntry()) != null) {
+                        if (e.isDirectory() || "..\\".equals(e.getName()) || "../".equals(e.getName())) {
+                            continue;
+                        }
+                        Matcher fMatcher = p.matcher(FileUtil.getFileName(e.getName()));
+                        if (fMatcher.matches()) {
+                            list.add(new File(path + "!/" + e.getName()));
+                        }
                     }
-                    Matcher fMatcher = p.matcher(FileUtil.getFileName(e.getName()));
-                    if (fMatcher.matches()) {
-                        list.add(new File(path + "!/" + e.getName()));
-                    }
+                    zis.closeEntry();
+                    return list;
+                } catch (Exception e) {
+                    log.error("path=" + path + " file=" + file, e);
                 }
-                zis.closeEntry();
-                return list;
-            } catch (Exception e) {
-                log.error("path=" + path + " file=" + file, e);
             }
         } else {
             if (file.isFile()) {
@@ -2506,14 +2514,10 @@ public final class FileUtil {
     final private static float JAVA_VERSION = StringUtil.toFloat(System.getProperty("java.vm.specification.version"));
     public static String getContentType(File file)
     {
-        if (JAVA_VERSION >= 1.7) {
-            try {
-                return Files.probeContentType(Paths.get(file.getPath()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (file==null)
+        {
+            return "text/html";
         }
-
         String fileType = FileUtil.getTypePart(file.getName());
         String contentType = null;
         //为了兼容 jdk 1.6
@@ -2543,8 +2547,13 @@ public final class FileUtil {
             contentType = "image/" + fileType;
         } else if ("js".equalsIgnoreCase(fileType)) {
             contentType = "application/x-javascript";
-        } else {
-            contentType = "application/msword";
+        } else if (JAVA_VERSION >= 1.7)
+        {
+            try {
+                return Files.probeContentType(Paths.get(file.getPath()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         if (StringUtil.isNull(contentType)) {
             contentType = "application/octet-stream";

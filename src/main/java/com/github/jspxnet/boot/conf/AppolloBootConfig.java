@@ -11,7 +11,6 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.enums.BootConfigEnumType;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.Properties;
 import java.util.Set;
 

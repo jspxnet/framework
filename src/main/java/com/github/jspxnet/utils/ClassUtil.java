@@ -855,6 +855,7 @@ public class ClassUtil {
         if (implClass == null || implClass.equals(com.caucho.services.server.GenericService.class) || ClassUtil.isStandardProperty(implClass)
                 || implClass.equals(Serializable.class) || implClass.equals(Map.class) || implClass.equals(List.class) || implClass.equals(Runnable.class)
                 || implClass.equals(SoberSupport.class) || implClass.equals(Action.class) || implClass.equals(ActionSupport.class)
+                || implClass.equals(com.github.jspxnet.sober.Interceptor.class)
                 || implClass.equals(InterceptorSupport.class)
         ) {
             return null;
@@ -1163,10 +1164,9 @@ public class ClassUtil {
                 {
                     resultList.add(Map.class);
                 }
-
                 else
                 {
-                    if (name.contains(StringUtil.DOT)&&!name.endsWith("[]"))
+                    if (name.contains(StringUtil.DOT)&&!name.endsWith("[]")&&!name.contains("$"))
                     {
                         resultList.add(ClassUtil.loadClass(name));
                     }

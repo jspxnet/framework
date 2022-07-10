@@ -23,16 +23,39 @@ import java.util.Map;
  * Time: 15:56:31
  */
 public interface IocContext {
-
+    /**
+     * @param beanName  得到 bean名称
+     * @param namespace 命名空间
+     * @return 返回配置
+     */
     BeanElement getBeanElement(String beanName, String namespace);
-
-    boolean containsBean(String beanName, String namespace) throws Exception;
-
+    /**
+     * @param beanName  名称
+     * @param namespace 命名空间
+     * @return 判断是否存在
+     */
+    boolean containsBean(String beanName, String namespace);
+    /**
+     *
+     * @return 得到元素列表
+     */
     List<BeanElement> getElementList();
 
-    void reload() throws Exception;
+    /**
+     *
+     * @return 扫描包列表
+     */
+    List<String> getScanPackageList();
 
-    //void registryRpcClientBean(Class<?> cla);
+    /**
+     * {@code
+     * Map<String,Map<String,BeanElement>>  Map<命名空间,Map<bean name,BeanElement>>
+     * }
+     * 得到bean 命名空间
+     *
+     * @throws Exception 异常
+     */
+    void reload() throws Exception;
 
     void setConfigFile(String file);
 
@@ -43,16 +66,32 @@ public interface IocContext {
     BeanElement getBeanElementForNamespace(String beanName, String namespace);
 
     Map<String, String> getApplicationMap();
-
+    /**
+     * 注册在registerBeanMap 中的bean对象不会清除，将一直保留在系统中
+     *
+     * @param beanElement bean
+     */
     void registerBean(BeanElement beanElement);
-
-    void sanIocBean(String className) throws IOException;
-
+    /**
+     * 扫描载入
+     *
+     * @param className 类名称
+     */
+    void sanIocBean(String className);
+    /**
+     * 注册class
+     *
+     * @param cla 类对象
+     */
     void registryIocBean(Class<?> cla);
-
+    /**
+     *
+     * @return 得到定时器map
+     */
     Map<String, String> getSchedulerMap();
 
     List<BeanElement> getInjectionBeanElements();
+
 
     void shutdown();
 }

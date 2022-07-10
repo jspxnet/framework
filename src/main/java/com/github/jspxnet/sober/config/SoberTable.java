@@ -9,10 +9,12 @@
  */
 package com.github.jspxnet.sober.config;
 
+import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
+import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.IDType;
-
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ArrayUtil;
 import java.util.*;
@@ -24,9 +26,9 @@ import java.util.*;
  * Time: 23:07:57
  */
 public class SoberTable implements TableModels {
+
     //数据库名 ，这里不是数据库类型
     private String databaseName = StringUtil.empty;
-
     //数据库表名
     private String name = StringUtil.empty;
     //表别名
@@ -48,11 +50,11 @@ public class SoberTable implements TableModels {
     //是否使用数据库自增
     private String idType = StringUtil.empty;
     //映射对应关系
-    private Map<String, SoberNexus> nexusMap = new LinkedHashMap<String, SoberNexus>();
+    private Map<String, SoberNexus> nexusMap = new LinkedHashMap<>();
     //字段
-    private List<SoberColumn> columns = new LinkedList<SoberColumn>();
+    private List<SoberColumn> columns = new LinkedList<>();
     //字段
-    private Map<String, SoberCalcUnique> calcUniqueMap = new LinkedHashMap<String, SoberCalcUnique>();
+    private Map<String, SoberCalcUnique> calcUniqueMap = new LinkedHashMap<>();
     //最后访问时间
     private long lastDate = System.currentTimeMillis();
 
@@ -242,12 +244,37 @@ public class SoberTable implements TableModels {
     }
 
     @Override
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("<table caption=\"").append(caption).append("\" ");
-        sb.append("name=\"").append(name).append("\" ");
-        sb.append("create=\"").append(create).append("\" ");
-        sb.append("useCache=\"").append(useCache).append("\" ");
-        return sb.toString();
+    public int hashCode() {
+        return toString().hashCode();
     }
+
+    @Override
+    public String toString()
+    {
+        return new JSONObject(this,false).toString();
+    }
+
+    @Override
+    public boolean equals(TableModels models)
+    {
+        return (this.toString()).equals(models.toString());
+    }
+
+    @JsonField(name="className")
+    public String getClassName()
+    {
+        return entity.getName();
+    }
+
+    @Override
+    @JsonField(caption = "id")
+    public String getId()
+    {
+        JSONObject json = new JSONObject();
+        json.put("d",databaseName);
+        json.put("n",name);
+        json.put("c",columns.size());
+        return EncryptUtil.getMd5(json.toString());
+    }
+
 }

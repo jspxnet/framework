@@ -137,6 +137,9 @@ public final class ScriptTypeConverter {
             }
             return sb.toString();
         }
+        if (o instanceof JSONObject) {
+            return o.toString();
+        }
         if (o instanceof Map) {
             return new JSONObject(o, true).toString();
         }

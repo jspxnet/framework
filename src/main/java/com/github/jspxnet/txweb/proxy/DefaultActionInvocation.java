@@ -19,6 +19,7 @@ import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.txweb.*;
 import com.github.jspxnet.txweb.annotation.Async;
+import com.github.jspxnet.txweb.annotation.IgnoreIntercept;
 import com.github.jspxnet.txweb.annotation.Intercept;
 import com.github.jspxnet.txweb.annotation.Redirect;
 import com.github.jspxnet.txweb.config.ActionConfig;
@@ -34,10 +35,7 @@ import com.github.jspxnet.txweb.result.*;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
@@ -190,7 +188,6 @@ public class DefaultActionInvocation implements ActionInvocation {
             }
             actionProxy.setMethod(requestMethodName);
         } else {
-
             //传统方式,如果发现是一个Roc配置的
             String methodName = actionConfig.getMethod();
             if (TXWebUtil.AT.equals(methodName) && !StringUtil.isEmpty(actionName)) {
@@ -198,7 +195,10 @@ public class DefaultActionInvocation implements ActionInvocation {
             } else if(methodName!=null&&methodName.startsWith(TXWebUtil.AT)&&!StringUtil.isEmpty(StringUtil.substringAfter(methodName,TXWebUtil.AT)))
             {
                 String reqMethod = StringUtil.substringAfter(methodName,TXWebUtil.AT);
-                actionProxy.setMethod(RequestUtil.getString(request,reqMethod,true));
+                if (!StringUtil.isEmpty(reqMethod))
+                {
+                    actionProxy.setMethod(RequestUtil.getString(request,reqMethod,true));
+                }
             } else
             {
                 actionProxy.setMethod(methodName);
@@ -208,9 +208,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         //设置执行方法 end
 
         //设置默认的返回方式 begin
-        if (exeType.equalsIgnoreCase(RocHandle.NAME)||exeType.equalsIgnoreCase(RsaRocHandle.NAME)) {
-            action.setActionResult(ActionSupport.ROC);
-        } else if (exeType.equalsIgnoreCase(MarkdownHandle.NAME)) {
+        if (exeType.equalsIgnoreCase(MarkdownHandle.NAME)) {
             action.setActionResult(ActionSupport.Markdown);
         }  else if (exeType.equalsIgnoreCase(ActionHandle.NAME)) {
             action.setActionResult(ActionSupport.INPUT);
@@ -218,10 +216,15 @@ public class DefaultActionInvocation implements ActionInvocation {
         //设置默认的返回方式 end
 
         this.actionConfig = actionConfig;
-        createInterceptorList(namespace);
+        interceptors = createInterceptorList(namespace);
     }
 
-    private void createInterceptorList(String namespace) {
+    /**
+     * 拦截器初始化
+     * @param namespace 命名空间
+     * @return 拦截器列表
+     */
+    private Iterator<Interceptor> createInterceptorList(String namespace) {
 
         LinkedList<String> interceptNameList = new LinkedList<>();
         List<String> tmpList = WEB_CONFIG_MANAGER.getDefaultInterceptors(namespace);
@@ -258,7 +261,7 @@ public class DefaultActionInvocation implements ActionInvocation {
             }
         }
 
-        LinkedList<Interceptor> interceptList = new LinkedList<>();
+        final LinkedList<Interceptor> interceptList = new LinkedList<>();
         for (String name : interceptNameList) {
             Interceptor interceptor = (Interceptor) BEAN_FACTORY.getBean(name, namespace);
             if (interceptor == null) {
@@ -270,17 +273,43 @@ public class DefaultActionInvocation implements ActionInvocation {
 
         //放入标签注入的拦截器
         ActionContext actionContext = ThreadContextHolder.getContext();
-        if (actionContext.getMethod() != null) {
-            Intercept intercept = actionContext.getMethod().getAnnotation(Intercept.class);
-            if (intercept != null) {
-                Interceptor interceptor = EnvFactory.getBeanFactory().getBean(intercept.value(), intercept.namespace());
-                if (interceptor != null) {
-                    interceptList.addLast(interceptor);
+        if (actionContext!=null)
+        {
+            Method exeMethod = actionContext.getMethod();
+            if (exeMethod != null) {
+                Intercept intercept = actionContext.getMethod().getAnnotation(Intercept.class);
+                if (intercept != null) {
+                    String interceptNamespace = intercept.namespace();
+                    if (StringUtil.isNull(interceptNamespace))
+                    {
+                        interceptNamespace = namespace;
+                    }
+                    Interceptor interceptor = EnvFactory.getBeanFactory().getBean(intercept.value(), interceptNamespace);
+                    if (interceptor != null) {
+                        interceptList.addLast(interceptor);
+                    }
+                }
+
+                IgnoreIntercept ignoreIntercept = exeMethod.getAnnotation(IgnoreIntercept.class);
+                if (ignoreIntercept != null && ignoreIntercept.value() !=null) {
+                    String name = ignoreIntercept.value().getName();
+                    for (int i=interceptList.size()-1;i>=0;i--)
+                    {
+                        Interceptor interceptor = interceptList.get(i);
+                        if (interceptor.getClass().getName().equals(name))
+                        {
+                            synchronized (this)
+                            {
+                                interceptList.remove(interceptor);
+                            }
+                        }
+                    }
                 }
             }
         }
-        interceptors = interceptList.iterator();
+
         /////////放入拦截器 end
+        return interceptList.iterator();
     }
 
     /**
@@ -348,7 +377,6 @@ public class DefaultActionInvocation implements ActionInvocation {
                 return null;
             }
         }
-
 
         if (resultBean == null) {
             return null;
@@ -540,4 +568,5 @@ public class DefaultActionInvocation implements ActionInvocation {
         ActionContext actionContext = ThreadContextHolder.getContext();
         return actionContext.getActionName();
     }
+
 }

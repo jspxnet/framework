@@ -10,6 +10,7 @@
 package com.github.jspxnet.sober.util;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.enums.DocumentFormatType;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.*;
@@ -22,7 +23,6 @@ import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -40,6 +40,7 @@ public class AnnotationUtil {
     private AnnotationUtil() {
 
     }
+
 
     /**
      * postgre 数据库seq修复
@@ -188,12 +189,18 @@ public class AnnotationUtil {
                 soberColumn.setName(field.getName());
                 soberColumn.setClassType(field.getType());
                 soberColumn.setCaption(column.caption());
-                soberColumn.setOption(column.option());
                 soberColumn.setLength(column.length());
                 soberColumn.setDefaultValue(column.defaultValue());
                 soberColumn.setNotNull(column.notNull());
                 soberColumn.setDataType(column.dataType());
                 soberColumn.setHidden(column.hidden());
+                soberColumn.setInput(column.input());
+                if (!NullClass.class.equals(column.enumType()))
+                {
+                    soberColumn.setOption(ObjectUtil.toString(column.enumType().getEnumConstants()));
+                } else {
+                    soberColumn.setOption(column.option());
+                }
                 soberColumns.add(soberColumn);
                 Table table = cls.getAnnotation(Table.class);
                 if (field.getType() == String.class && column.length() < 1 && table != null && table.create()) {
@@ -279,7 +286,6 @@ public class AnnotationUtil {
         }
         return null;
     }
-
     /**
      * @param cls 类
      * @return 得到的显示名称
@@ -415,7 +421,7 @@ public class AnnotationUtil {
         for (String name : classList) {
             Class<?> cls = ClassUtil.loadClass(name);
             Table table = cls.getAnnotation(Table.class);
-            if (table != null) {
+            if (table != null && table.create()) {
                 result.add(cls);
             }
         }
@@ -427,7 +433,7 @@ public class AnnotationUtil {
                 continue;
             }
             Table table = cls.getAnnotation(Table.class);
-            if (table != null && !result.contains(cls)) {
+            if (table != null && table.create() && !result.contains(cls)) {
                 result.add(cls);
             }
         }

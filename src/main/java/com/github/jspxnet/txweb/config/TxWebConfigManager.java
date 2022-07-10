@@ -678,9 +678,9 @@ public class TxWebConfigManager implements WebConfigManager {
         //为了区分分布式多处部署
         String cacheKey = namespace + "_" + IpUtil.getIpEnd();
         List<OperateVo> list = (List<OperateVo>) JSCacheManager.get(OperateVo.class, cacheKey);
-    /*    if (!ObjectUtil.isEmpty(list)) {
+        if (!ObjectUtil.isEmpty(list)) {
             return list;
-        }*/
+        }
         Map<String, OperateVo> checkMap = new HashMap<>();
         String[] spaceList = StringUtil.split(namespace, StringUtil.SEMICOLON);
         for (String space : spaceList) {

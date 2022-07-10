@@ -752,6 +752,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (o instanceof JSONArray) {
             return (JSONArray) o;
         }
+        if (o instanceof com.alibaba.fastjson.JSONArray) {
+            com.alibaba.fastjson.JSONArray fj = (com.alibaba.fastjson.JSONArray)o;
+            return new JSONArray(fj.toJSONString());
+        }
         if (o instanceof Collections || ClassUtil.isArrayType(o.getClass()))
         {
             return new JSONArray(o);

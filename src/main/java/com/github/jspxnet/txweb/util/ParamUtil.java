@@ -5,6 +5,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sober.enums.ParamModeType;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
+import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.enums.TalkEnumType;
 import com.github.jspxnet.json.JSONArray;
@@ -1100,6 +1101,8 @@ public final class ParamUtil {
         {
             return new JSONObject();
         }
+
+        JSONObject dataField = json.getJSONObject(RocHandle.DATA_FIELD);
         if (!isRocRequest(json))
         {
             //spring  转换成老的格式
@@ -1109,8 +1112,10 @@ public final class ParamUtil {
             jsonData.put(Environment.rocMethod, methodJson);
             jsonData.put(Environment.rocFormat, WebOutEnumType.JSON.getName());
             jsonData.put(Environment.Protocol,Environment.jspxNetRoc);
+            jsonData.put(RocHandle.DATA_FIELD,dataField);
             return jsonData;
         }
+        json.put(RocHandle.DATA_FIELD,dataField);
         return json;
     }
 

@@ -34,7 +34,7 @@ import java.util.*;
  * description: API 文档工具
  **/
 @Slf4j
-public class ApiDocUtil {
+public final class ApiDocUtil {
     private ApiDocUtil()
     {
 

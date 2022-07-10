@@ -9,31 +9,16 @@
  */
 package com.github.jspxnet.sober.impl;
 
-import com.github.jspxnet.cache.JSCacheManager;
-import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
-import com.github.jspxnet.sober.SoberEnv;
-import com.github.jspxnet.sober.SoberFactory;
-import com.github.jspxnet.sober.SqlMapClient;
-import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.sober.annotation.Table;
-import com.github.jspxnet.sober.config.SqlMapConfig;
-import com.github.jspxnet.sober.config.SQLRoom;
+import com.github.jspxnet.sober.*;
 import com.github.jspxnet.sober.dialect.Dialect;
-import com.github.jspxnet.sober.jdbc.JdbcOperations;
-import com.github.jspxnet.sober.util.AnnotationUtil;
-import com.github.jspxnet.sober.util.DataMap;
-import com.github.jspxnet.sober.util.JdbcUtil;
+import com.github.jspxnet.sober.enums.ExecuteEnumType;
+import com.github.jspxnet.sober.enums.QueryModelEnumType;
+import com.github.jspxnet.sober.proxy.InterceptorProxy;
+import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,25 +32,51 @@ import java.util.Map;
 @Slf4j
 public class SqlMapClientImpl implements SqlMapClient {
 
-    private final SoberFactory soberFactory;
-    private final JdbcOperations jdbcOperations;
+    private final SqlMapBase sqlMapBase;
 
-    public SqlMapClientImpl(JdbcOperations jdbcOperations) {
-        this.jdbcOperations = jdbcOperations;
-        this.soberFactory = jdbcOperations.getSoberFactory();
+    public SqlMapClientImpl(SqlMapBase sqlMapBase) {
+        this.sqlMapBase = sqlMapBase;
     }
+
     /**
-     * @param o bean对象
-     * @return 对象转换为Map提供查询参数
+     *
+     * @return 数据库支持
      */
-    private Map<String, Object> getValueMap(Object o) {
-        Map<String, Object> valueMap = ObjectUtil.getMap(o);
-        if (o != null) {
-            TableModels soberTable = jdbcOperations.getSoberTable(o.getClass());
-            valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-            valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
-        }
-        return valueMap;
+    @Override
+    public SoberSupport getSoberSupport() {
+        return sqlMapBase.getSoberSupport();
+    }
+
+    /**
+     *
+     * @return sql 方言
+     */
+    @Override
+    public Dialect getDialect() {
+        return sqlMapBase.getDialect();
+    }
+
+    /**
+     * sqlMap配置
+     * @param namespace 命名空间
+     * @param exeId 执行名称
+     * @param executeEnumType 执行类型
+     * @return 返回配置
+     * @throws Exception 异常
+     */
+    @Override
+    public SqlMapConf getSqlMapConf(String namespace, String exeId, ExecuteEnumType executeEnumType) throws Exception {
+        return sqlMapBase.getSqlMapConf(namespace,exeId,executeEnumType,null);
+    }
+
+    /**
+     *
+     * @param o 对象
+     * @return 返回变量数组
+     */
+    @Override
+    public Map<String, Object> getValueMap(Object o) {
+        return sqlMapBase.getValueMap(o);
     }
 
     /**
@@ -90,14 +101,14 @@ public class SqlMapClientImpl implements SqlMapClient {
      */
     @Override
     public Object getUniqueResult(String namespace, String exeId, Map<String, Object> valueMap) {
-        SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
-        SqlMapConfig mapSql = sqlRoom.getQueryMapSql(exeId,soberFactory.getDatabaseType());
-        if (mapSql == null) {
-            return null;
+        SqlMapConf mapSql;
+        try {
+            mapSql = getSqlMapConf(namespace,exeId,ExecuteEnumType.QUERY);
+            return SoberUtil.invokeSqlMapInvocation(getSoberSupport(),mapSql,valueMap) ;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>(0);
         }
-        Dialect dialect = soberFactory.getDialect();
-        String sql = dialect.processSql(sqlRoom.getReplenish(mapSql.getContext()), valueMap);
-        return jdbcOperations.getUniqueResult(sql);
     }
 
 
@@ -131,7 +142,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      */
     @Override
     public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
-        return query( namespace,  exeId,valueMap, 1, jdbcOperations.getMaxRows(), false,false);
+        return query( namespace,  exeId,valueMap, 1, getSoberSupport().getMaxRows(), false,false);
     }
 
     /**
@@ -146,7 +157,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      */
     @Override
     public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, Class<T> cls) throws Exception {
-        return query( namespace,  exeId,valueMap, 1, jdbcOperations.getMaxRows(), false,false,cls);
+        return query( namespace,  exeId,valueMap, 1, getSoberSupport().getMaxRows(), false,false,cls);
     }
 
     /**
@@ -207,7 +218,7 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @param exeId       查询ID
      * @param valueMap    参数MAP
      * @param currentPage 第几页
-     * @param totalCount  一页的行数
+     * @param count  一页的行数
      * @param loadChild   是否载入映射对象
      * @param rollRows    是否让程序执行滚动,如果不让程序执行滚动，那么在程序里边要自己判断滚动
      * @param cls 类型
@@ -216,159 +227,21 @@ public class SqlMapClientImpl implements SqlMapClient {
      * @throws Exception 异常
      */
     @Override
-    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception {
-        if (totalCount > jdbcOperations.getMaxRows()) {
-            totalCount = jdbcOperations.getMaxRows();
-        }
-        if (totalCount<1)
-        {
-            totalCount = 1;
-        }
-
-        if (currentPage <= 0) {
-            currentPage = 1;
-        }
-        if (valueMap==null)
-        {
-            valueMap = new HashMap<>();
-        }
-
-
-        int beginRow = currentPage * totalCount - totalCount;
-        if (beginRow < 0) {
-            beginRow = 0;
-        }
-        int endRow = beginRow + totalCount;
-
-        SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
-        if (sqlRoom == null) {
-            log.error("ERROR:not get sql map namespace " + namespace + ",sql映射中不能够得到相应的命名空间,检查你的sql配置");
-            return new ArrayList<>(0);
-        }
-        Dialect dialect = soberFactory.getDialect();
-        SqlMapConfig mapSql = sqlRoom.getQueryMapSql(exeId,soberFactory.getDatabaseType());
-        if (mapSql == null) {
-             log.error("ERROR:not get sql map namespace " + namespace + " query id " + exeId + ",此命名空间中不能够找到sql,检查你的sql配置 ");
-            return new ArrayList<>(0);
-        }
-        valueMap.put("currentPage", currentPage);
-        valueMap.put("totalCount", totalCount);
-        valueMap.put("loadChild", loadChild);
-        valueMap.put("rollRows", rollRows);
-        valueMap.put("beginRow", beginRow);
-        valueMap.put("endRow", endRow);
-        valueMap.put("namespace", namespace);
-
-        //修复变量,避免空异常 begin
-        ScriptMarkUtil.fixVarNull(valueMap,mapSql.getContext());
-        //修复变量,避免空异常 end
-
-        String sqlText  = dialect.processSql(sqlRoom.getReplenish(mapSql.getContext()), valueMap);
-        if (StringUtil.isNull(sqlText)) {
-            throw new Exception("ERROR SQL IS NULL");
-        }
-
-
-        //判断是否是用缓存
-        Table table = AnnotationUtil.getTable(cls);
-        String cacheKey = null;
-        if (table!=null&&soberFactory.isUseCache() && table.cache()) {
-            cacheKey = SoberUtil.getListKey(cls, sqlText,StringUtil.empty,beginRow,endRow, loadChild);
-            List<T> resultList = (List<T>) JSCacheManager.get(cls, cacheKey);
-            if (!ObjectUtil.isEmpty(resultList)) {
-                return resultList;
-            }
-        }
-
-        Connection conn = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        List<T> list = new ArrayList<>();
-        try {
-
-            jdbcOperations.debugPrint(sqlText);
-            conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
-            //结果集的游标只能向下滚动  并且为只读模式
-            if (!dialect.supportsConcurReadOnly()) {
-                preparedStatement = conn.prepareStatement(sqlText);
-            } else {
-                preparedStatement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            }
-            if (totalCount>10&&totalCount<24)
-            {
-                preparedStatement.setFetchSize(30);
-            } else if (totalCount>=24)
-            {
-                preparedStatement.setFetchSize(100);
-            }
-            preparedStatement.setMaxRows(endRow);
-            resultSet = preparedStatement.executeQuery();
-
-            if (cls==null && !StringUtil.isNull(mapSql.getResultClass()))
-            {
-                cls = (Class<T>) Class.forName(mapSql.getResultClass());
-            }
-
-            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-            if (rollRows && beginRow > 0) {
-                resultSet.absolute(beginRow);
-            }
-
-            while (resultSet.next()) {
-                if (cls==null&&StringUtil.isEmpty(mapSql.getResultType()))
-                {
-                    Map<String, Object> beanMap = SoberUtil.getHashMap(resultSetMetaData, dialect, resultSet);
-                    list.add((T) ReflectUtil.createDynamicBean(beanMap));
-                } else
-                if (Map.class.isAssignableFrom(cls) || cls.isInstance(Map.class) )
-                {
-                    DataMap<String, Object> map = SoberUtil.getDataHashMap(resultSetMetaData, dialect, resultSet);
-                    list.add((T)map);
-                }
-                else
-                {
-                    if (ClassUtil.isStandardProperty(cls))
-                    {
-                        list.add(BeanUtil.getTypeValue(dialect.getResultSetValue(resultSet,1),cls));
-                    } else
-                    {
-                        T resultObject;
-                        TableModels soberTable = soberFactory.getTableModels(cls, jdbcOperations);
-                        if (soberTable != null) {
-                            resultObject = jdbcOperations.loadColumnsValue(cls, resultSet);
-                        } else {
-                            resultObject = JdbcUtil.getBean(resultSet, cls, dialect);
-                        }
-                        if (loadChild) {
-                            jdbcOperations.loadNexusValue(soberTable, resultObject);
-                        }
-                        list.add(resultObject);
-                    }
-                }
-                if (list.size() > totalCount) {
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            log.error("error SQL:{},info:{}",sqlText, e.getMessage());
-            e.printStackTrace();
-            throw new Exception("SQL:" + sqlText);
-        } finally {
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(preparedStatement);
-            JdbcUtil.closeConnection(conn);
-        }
-        //放入cache
-
-        if (table!=null&&soberFactory.isUseCache() && table.cache()) {
-            JSCacheManager.put(cls, cacheKey,list);
-        }
-        return list;
+    public <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int count, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception {
+        valueMap.put(InterceptorProxy.KEY_LOAD_CHILD, loadChild);
+        valueMap.put(InterceptorProxy.KEY_ROLL_ROWS, rollRows);
+        valueMap.put(InterceptorProxy.KEY_NAMESPACE, namespace);
+        valueMap.put(InterceptorProxy.KEY_CURRENT_PAGE, currentPage);
+        valueMap.put(InterceptorProxy.KEY_COUNT, count);
+        valueMap.put(InterceptorProxy.KEY_RETURN_CLASS, cls);
+        SqlMapConf mapSql = sqlMapBase.getSqlMapConf(namespace,exeId,ExecuteEnumType.QUERY,null);
+        mapSql.setQueryModel(QueryModelEnumType.LIST.getValue());
+        return (List<T>)SoberUtil.invokeSqlMapInvocation(getSoberSupport(),mapSql,valueMap);
     }
 
     /**
      * 用来避免写两次SQL 来得到翻页的总数,这里映入查询,就自动封装得到行数
-     *
+     * 这个方法不会执行拦截器
      * @param namespace 命名空间
      * @param exeId     查询ID,是列表的id  不用在写一边查询总数的sql
      * @param valueMap  参数
@@ -376,42 +249,15 @@ public class SqlMapClientImpl implements SqlMapClient {
      */
     @Override
     public long queryCount(String namespace, String exeId, Map<String, Object> valueMap)  {
-        SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
-        if (sqlRoom == null) {
-            log.error("ERROR:not get sql map namespace " + namespace + ",sql映射中不能够得到相应的命名空间");
+        SqlMapConf sqlMapConf;
+        try {
+            sqlMapConf = sqlMapBase.getSqlMapConf(namespace,exeId,ExecuteEnumType.QUERY,null);
+        } catch (Exception e) {
+            e.printStackTrace();
             return 0;
         }
-        Dialect dialect = soberFactory.getDialect();
-        SqlMapConfig mapSql = sqlRoom.getQueryMapSql(exeId,soberFactory.getDatabaseType());
-        if (mapSql == null) {
-            log.error("ERROR:not get sql map namespace " + namespace + " query id " + exeId + ",此命名空间中不能够找到sql");
-            return 0;
-        }
-        valueMap.put("databaseType", soberFactory.getDatabaseType());
-        valueMap.put("currentPage", 1);
-        valueMap.put("totalCount", 1);
-        valueMap.put("loadChild", false);
-        valueMap.put("rollRows", false);
-        valueMap.put("namespace", namespace);
-        valueMap.put("beginRow", 0);
-        valueMap.put("endRow", soberFactory.getMaxRows());
-
-        String sqlTxt = sqlRoom.getReplenish(mapSql.getContext());
-
-        //修复变量,避免空异常 begin
-        ScriptMarkUtil.fixVarNull(valueMap,sqlTxt);
-        //修复变量,避免空异常 end
-
-        String sql = dialect.processSql(sqlTxt, valueMap);
-        if (StringUtil.isNull(sql)) {
-            throw new IllegalArgumentException("ERROR SQL IS NULL:" + sql);
-        }
-        sql = StringUtil.removeOrders(sql);
-        sql = "SELECT count(1) as countNum FROM (" + sql + ") queryCount";
-        jdbcOperations.debugPrint(sql);
-        return ObjectUtil.toLong(jdbcOperations.getUniqueResult(sql));
+        return sqlMapBase.queryCount(sqlMapConf,valueMap);
         //放入cache
-
     }
 
     /**
@@ -436,13 +282,9 @@ public class SqlMapClientImpl implements SqlMapClient {
      */
     @Override
     public boolean execute(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
-        SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
-        Dialect dialect = soberFactory.getDialect();
-        SqlMapConfig mapSql = sqlRoom.getExecuteMapSql(exeId,soberFactory.getDatabaseType());
-        if (mapSql == null) {
-            return false;
-        }
-        return jdbcOperations.execute(dialect.processSql(sqlRoom.getReplenish(mapSql.getContext()), valueMap));
+        SqlMapConf sqlMapConf = getSqlMapConf(namespace,exeId,ExecuteEnumType.EXECUTE);
+        Object result = SoberUtil.invokeSqlMapInvocation(getSoberSupport(),sqlMapConf,valueMap);
+        return ObjectUtil.toBoolean(result);
 
     }
 
@@ -468,13 +310,8 @@ public class SqlMapClientImpl implements SqlMapClient {
      */
     @Override
     public int update(String namespace, String exeId, Map<String, Object> valueMap) throws Exception {
-        SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
-        Dialect dialect = soberFactory.getDialect();
-        SqlMapConfig mapSql = sqlRoom.getUpdateMapSql(exeId,soberFactory.getDatabaseType());
-        if (mapSql == null) {
-            log.error("ERROR SQL map not config SQL update id:{},namespace:{}",exeId,namespace);
-            return -3;
-        }
-        return jdbcOperations.update(dialect.processSql(sqlRoom.getReplenish(mapSql.getContext()), valueMap));
+        SqlMapConf sqlMapConf = getSqlMapConf(namespace,exeId,ExecuteEnumType.UPDATE);
+        Object result = SoberUtil.invokeSqlMapInvocation(getSoberSupport(),sqlMapConf,valueMap);
+        return ObjectUtil.toInt(result);
     }
 }

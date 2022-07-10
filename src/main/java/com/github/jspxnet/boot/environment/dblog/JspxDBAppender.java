@@ -1,7 +1,5 @@
 package com.github.jspxnet.boot.environment.dblog;
 
-
-
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import com.github.jspxnet.boot.EnvFactory;
@@ -17,8 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public final class JspxDBAppender<E> extends UnsynchronizedAppenderBase<E> {
-    private final GenericDAO<E> genericDAO = new GenericDAOImpl<E>();
+public class JspxDBAppender<E> extends UnsynchronizedAppenderBase<E> {
+    private final GenericDAO genericDAO = new GenericDAOImpl();
     private final List<JspxLoggingEvent> CACHE =  new CopyOnWriteArrayList<>();
 
     @Override
@@ -56,7 +54,7 @@ public final class JspxDBAppender<E> extends UnsynchronizedAppenderBase<E> {
         jspxLoggingEvent.setMessage(vo.getFormattedMessage());
         jspxLoggingEvent.setCreateDate(new Date(vo.getTimeStamp()));
         CACHE.add(jspxLoggingEvent);
-        if (CACHE.size()>10)
+        if (CACHE.size()>5)
         {
             batchSave();
         }

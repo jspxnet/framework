@@ -59,7 +59,7 @@ public class MemberUtil {
             {
                 return true;
             }
-        } else
+        } else 
         {
             //兼容老密码
             return EncryptUtil.getHashEncode(password, EnvFactory.getHashAlgorithm()).equalsIgnoreCase(storePassword);

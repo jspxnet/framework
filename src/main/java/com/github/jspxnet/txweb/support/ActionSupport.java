@@ -955,6 +955,7 @@ public abstract class ActionSupport implements Action {
         ActionContext actionContext = ThreadContextHolder.getContext();
         if (actionContext!=null)
         {
+            //&&ObjectUtil.isEmpty(actionContext.getActionResult())
             actionContext.setActionResult(actionResult);
         }
     }

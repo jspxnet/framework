@@ -22,7 +22,8 @@ public interface Helper {
 
     void setId(String url);
 
+    String getXml() throws Exception;
+
     String getJson() throws Exception;
 
-    String getXML() throws Exception;
 }

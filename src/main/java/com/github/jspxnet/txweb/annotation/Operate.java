@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.annotation;
 
+import com.github.jspxnet.txweb.Interceptor;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.StringUtil;
 import java.lang.annotation.*;
@@ -39,6 +40,9 @@ public @interface Operate {
 
     //重复提交验证,0 表示不验证, 数字标识间隔时间,单位为秒
     int repeat() default 0;
+
+    //拦截器,多个用分号隔开,只拦截方法
+    String[] intercept() default StringUtil.empty;
 /*
     //返回类型,用于生成文档
     Class<?>[] returnType() default {RocResponse.class};

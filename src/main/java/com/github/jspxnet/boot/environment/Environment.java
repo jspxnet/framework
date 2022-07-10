@@ -34,6 +34,10 @@ public abstract class Environment {
 
     final public static String namespace = "namespace";
 
+    final public static String DEV_CENTER = "devcenter";
+
+    final public static String DYN_OUT = "dynout";
+
     final public static String none = "none";
 
     public static final String defaultValue = "default";
@@ -144,7 +148,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.66";
+    final static public String VERSION = "6.67";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -628,5 +632,11 @@ public abstract class Environment {
     final public static String forceExit = "forceExit";
 
     final public static String USER_SESSION = "userSession";
+
+    //开发这中心用户
+    public final static String KEY_DCV_ENTER_USER_LIST = "dev_center_user_list";
+
+    //表结构模型缓存
+    public static final String KEY_SOBER_TABLE_CACHE = "sober_table_cache";
 
 }

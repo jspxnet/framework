@@ -27,7 +27,7 @@ public class RangeIterator extends ScriptableObject implements ListIterator {
     private int index = 0;
     private int end = 0;
     private boolean isChar = false;
-    private boolean lowToheight = true;
+    private boolean lowToHeight = true;
 
     public RangeIterator() {
 
@@ -49,13 +49,13 @@ public class RangeIterator extends ScriptableObject implements ListIterator {
             end = ObjectUtil.toInt(send);
             isChar = false;
             if (begin > end) {
-                lowToheight = false;
+                lowToHeight = false;
             }
         } else if (sbegin instanceof Character || sbegin instanceof String || sbegin.getClass().getName().toLowerCase().contains("char")) {
             begin = sbegin.toString().charAt(0);
             end = send.toString().charAt(0);
             if (begin > end) {
-                lowToheight = false;
+                lowToHeight = false;
             }
             isChar = true;
         }
@@ -69,7 +69,7 @@ public class RangeIterator extends ScriptableObject implements ListIterator {
 
     @Override
     public boolean hasNext() {
-        if (lowToheight) {
+        if (lowToHeight) {
             return index < length;
         } else {
             return length - Math.abs(index) > 0;
@@ -82,7 +82,7 @@ public class RangeIterator extends ScriptableObject implements ListIterator {
             throw new java.util.NoSuchElementException();
         }
         int result;
-        if (lowToheight) {
+        if (lowToHeight) {
             result = begin + index;
             index++;
         } else {

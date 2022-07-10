@@ -35,9 +35,6 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * Created with IntelliJ IDEA.
  * User: chenyuan

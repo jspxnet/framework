@@ -9,19 +9,20 @@
  */
 package com.github.jspxnet.sober.config;
 
+import com.github.jspxnet.json.JSONArray;
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
+import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.ReflectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import lombok.Data;
-
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -128,5 +129,44 @@ public class SoberColumn implements Serializable {
             sb.append("private ").append(typeString).append(" ").append(name).append(" = StringUtil.empty;");
         }
         return sb.toString();
+    }
+
+
+    public List<Object> getOptionList()
+    {
+        if (StringUtil.isNull(option))
+        {
+            return new ArrayList<>(0);
+        }
+        List<Object> result = new ArrayList<>();
+        if (StringUtil.isJsonArray(option))
+        {
+            JSONArray array = new JSONArray(option);
+            for (int i=0;i<array.length();i++)
+            {
+                Object obj = array.get(i);
+                if (obj instanceof Map)
+                {
+                    result.add(ReflectUtil.createDynamicBean((Map)obj));
+                } else
+                {
+                    result.add(obj);
+                }
+            }
+        } else
+        {
+            StringMap<String,String> stringMap = new StringMap<>();
+            stringMap.setKeySplit(StringUtil.COLON);
+            stringMap.setLineSplit(StringUtil.SEMICOLON);
+            stringMap.setString(option);
+            for (String key:stringMap.keySet())
+            {
+                JSONObject json = new JSONObject();
+                json.put("value",key);
+                json.put("name",stringMap.getString(key));
+                result.add(ReflectUtil.createDynamicBean(json));
+            }
+        }
+        return result;
     }
 }

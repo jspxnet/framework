@@ -1,6 +1,7 @@
 package com.github.jspxnet.sober.config.xml;
 
 import com.github.jspxnet.scriptmark.core.TagNode;
+import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.XMLUtil;
 
 /**
@@ -16,11 +17,14 @@ public class SqlMapXml extends TagNode {
         super.setTagName(TAG_NAME);
     }
 
-
-
     public String getNamespace()
     {
         return XMLUtil.deleteQuote(getStringAttribute("namespace"));
+    }
+
+    public boolean getDatabase()
+    {
+        return StringUtil.toBoolean(XMLUtil.deleteQuote(getStringAttribute("database")));
     }
 
     public String getCaption()

@@ -49,7 +49,6 @@ public class HessianHandle extends ActionHandle {
         }
 
         Map<String, Object> envParams = createRocEnvironment(actionConfig,request, response);
-
         //synchronized 这里不能有同步,否则调用不成功
         ActionInvocation actionInvocation = null;
         try {

@@ -9,16 +9,19 @@
  */
 package com.github.jspxnet.sober.config;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
+import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.config.xml.*;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
+import com.github.jspxnet.sober.table.SqlMapConf;
+import com.github.jspxnet.sober.table.SqlMapInterceptorConf;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
-
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -31,16 +34,25 @@ import java.io.Serializable;
  * Time: 18:24:23
  */
 @Slf4j
+@Table(caption = "SqlMap配置",cache = true,create = false)
 public class SQLRoom implements Serializable {
+    //命名空间
     private String namespace;
 
+    //开启数据库配置
+    private boolean database = false;
+
+    //拦截器列表
+    private final LinkedList<SqlMapInterceptorConf> interceptorList = new LinkedList<>();
+
+    //包含
     private final Map<String,String> includeMap = new HashMap<>();
     //查询SQL表
-    private final Map<String,Map<String, SqlMapConfig>> queryMap = new HashMap<>();
+    private final Map<String,Map<String, SqlMapConf>> queryMap = new HashMap<>();
     //更新SQL表
-    private final Map<String, Map<String, SqlMapConfig>> updateMap = new HashMap<>();
+    private final Map<String, Map<String, SqlMapConf>> updateMap = new HashMap<>();
     //执行SQL表
-    private final Map<String, Map<String, SqlMapConfig>> executeMap = new HashMap<>();
+    private final Map<String, Map<String, SqlMapConf>> executeMap = new HashMap<>();
 
     /**
      * @return 命名空间
@@ -55,6 +67,14 @@ public class SQLRoom implements Serializable {
      */
     public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+
+    public boolean isDatabase() {
+        return database;
+    }
+
+    public void setDatabase(boolean database) {
+        this.database = database;
     }
 
     /**
@@ -87,22 +107,25 @@ public class SQLRoom implements Serializable {
         return sql;
     }
 
-    public SqlMapConfig getQueryMapSql(String id, String db)
+    public SqlMapConf getQueryMapSql(String id, String db)
     {
         return getMapSql( queryMap, id,  fixDbName(db));
     }
 
-    public SqlMapConfig getUpdateMapSql(String id, String db)
+    public SqlMapConf getUpdateMapSql(String id, String db)
     {
         return getMapSql( updateMap, id,  fixDbName(db));
     }
 
-    public SqlMapConfig getExecuteMapSql(String id, String db)
+    public SqlMapConf getExecuteMapSql(String id, String db)
     {
         return getMapSql( executeMap, id,  fixDbName(db));
     }
 
-
+    public LinkedList<SqlMapInterceptorConf>  getInterceptorList()
+    {
+        return interceptorList;
+    }
     /**
      *
      * @param key map key
@@ -112,46 +135,56 @@ public class SQLRoom implements Serializable {
     {
         includeMap.put(key,XMLUtil.xmlCdataDecrypt(value));
     }
+
+    /**
+     *
+     * @param sqlMapInterceptorConf 拦截器配置
+     */
+    public void addInterceptor(SqlMapInterceptorConf sqlMapInterceptorConf)
+    {
+        interceptorList.addLast(sqlMapInterceptorConf);
+    }
     /**
      * 添加查询配置
-     * @param sqlMapConfig 配置文件
+     * @param sqlMapConf 配置文件
      */
-    public void addQuery(SqlMapConfig sqlMapConfig)
+    public void addQuery(SqlMapConf sqlMapConf)
     {
-        Map<String, SqlMapConfig> configMap = queryMap.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
-        configMap.put(StringUtil.toLowerCase(sqlMapConfig.getDatabase()),sqlMapConfig);
+        Map<String, SqlMapConf> configMap = queryMap.computeIfAbsent(sqlMapConf.getName(), k -> new HashMap<>());
+        configMap.put(StringUtil.toLowerCase(sqlMapConf.getDatabaseType()),sqlMapConf);
     }
 
 
     /**
      *  添加跟新配置
-     * @param sqlMapConfig 配置文件
+     * @param sqlMapConf 配置文件
      */
-    public void addUpdate(SqlMapConfig sqlMapConfig)
+    public void addUpdate(SqlMapConf sqlMapConf)
     {
-        Map<String, SqlMapConfig> configMap = updateMap.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
-        configMap.put(StringUtil.toLowerCase(sqlMapConfig.getDatabase()),sqlMapConfig);
+        Map<String, SqlMapConf> configMap = updateMap.computeIfAbsent(sqlMapConf.getName(), k -> new HashMap<>());
+        configMap.put(StringUtil.toLowerCase(sqlMapConf.getDatabaseType()),sqlMapConf);
     }
     /**
      *  添加跟新执行配置
-     * @param sqlMapConfig 配置文件
+     * @param sqlMapConf 配置文件
      */
-    public void addExecute(SqlMapConfig sqlMapConfig)
+    public void addExecute(SqlMapConf sqlMapConf)
     {
-        Map<String, SqlMapConfig> configMap = executeMap.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
-        configMap.put(StringUtil.toLowerCase(sqlMapConfig.getDatabase()),sqlMapConfig);
+        Map<String, SqlMapConf> configMap = executeMap.computeIfAbsent(sqlMapConf.getName(), k -> new HashMap<>());
+        configMap.put(StringUtil.toLowerCase(sqlMapConf.getDatabaseType()),sqlMapConf);
     }
+
 
     /**
      * 提供给解析器是用,放入配置信息
      * @param map 配置列表
-     * @param sqlMapConfig 配置文件
+     * @param sqlMapConf 配置文件
      * @return sql配置,一般不用
      */
-    private static SqlMapConfig addConfig(Map<String, Map<String, SqlMapConfig>> map,SqlMapConfig sqlMapConfig)
+    private static SqlMapConf addConfig(Map<String, Map<String, SqlMapConf>> map,SqlMapConf sqlMapConf)
     {
-        Map<String, SqlMapConfig> configMap = map.computeIfAbsent(sqlMapConfig.getId(), k -> new HashMap<>());
-        return configMap.put(StringUtil.toLowerCase(sqlMapConfig.getDatabase()),sqlMapConfig);
+        Map<String, SqlMapConf> configMap = map.computeIfAbsent(sqlMapConf.getName(), k -> new HashMap<>());
+        return configMap.put(StringUtil.toLowerCase(sqlMapConf.getDatabaseType()),sqlMapConf);
     }
 
     /**
@@ -163,7 +196,7 @@ public class SQLRoom implements Serializable {
     {
         if (db==null)
         {
-            db = Environment.defaultValue;
+            db = DatabaseEnumType.General.getName();
         }
         return db.toLowerCase();
     }
@@ -175,14 +208,14 @@ public class SQLRoom implements Serializable {
      * @param db 数据库名称
      * @return 得到配置
      */
-    private static SqlMapConfig getMapSql(Map<String,Map<String, SqlMapConfig>> confMap,String id, String db)
+    private static SqlMapConf getMapSql(Map<String,Map<String, SqlMapConf>> confMap,String id, String db)
     {
-        Map<String, SqlMapConfig> map = confMap.get(id);
+        Map<String, SqlMapConf> map = confMap.get(id);
         if (ObjectUtil.isEmpty(map))
         {
             return null;
         }
-        SqlMapConfig result = null;
+        SqlMapConf result = null;
         if (map.size()==1)
         {
             result = map.values().iterator().next();
@@ -217,9 +250,9 @@ public class SQLRoom implements Serializable {
      * @param db 数据库名称
      * @return 得到配置
      */
-    private static SqlMapConfig getMapSql2(Map<String,Map<String, SqlMapConfig>> confMap,String id, String db)
+    private static SqlMapConf getMapSql2(Map<String,Map<String, SqlMapConf>> confMap,String id, String db)
     {
-        Map<String, SqlMapConfig> map = confMap.get(id);
+        Map<String, SqlMapConf> map = confMap.get(id);
         if (map==null)
         {
             return null;
@@ -228,7 +261,7 @@ public class SQLRoom implements Serializable {
         {
             return map.values().iterator().next();
         }
-        SqlMapConfig result = map.get(db);
+        SqlMapConf result = map.get(db);
         if (result==null)
         {
             result = getDefaultMap(map);
@@ -236,18 +269,21 @@ public class SQLRoom implements Serializable {
         return result;
     }
 
-    private static SqlMapConfig getDefaultMap(Map<String, SqlMapConfig> map)
+    /**
+     *
+     * @param map 配置
+     * @return 得到默认配置
+     */
+    private static SqlMapConf getDefaultMap(Map<String, SqlMapConf> map)
     {
         for (String key:map.keySet())
         {
-            if (StringUtil.isNull(key) || Environment.defaultValue.equalsIgnoreCase(key))
+            if (StringUtil.isNull(key) || DatabaseEnumType.General.getName().equalsIgnoreCase(key))
             {
                 return map.get(key);
             }
         }
         return map.values().iterator().next();
     }
-
-
 
 }

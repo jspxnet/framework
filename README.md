@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.66</version>
+    <version>6.67</version>
 </dependency>
 ```
     
@@ -18,13 +18,10 @@
 
     技术网站:http://www.jspx.net
 
-    参考手册:http://www.jspx.net/help
-    
-    例子: https://github.com/jspxnet/demo
+    参考手册:http://www.jspx.net/help/
 
-    https://github.com.cnpmjs.org/jspxnet/framework
+    https://gitee.com/jspx/jspx-framework
     
-    https://github.com.cnpmjs.org/jspxnet/framework.git
 
 ##名称说明
 	
@@ -126,3 +123,4 @@
 * 2022年04月：Jspx.net Framework 6.55 修复单利模式下不释放bug,加强安全过滤功能,提供后缀和配置密码,嵌入运行模式配置优化,添加tomcat上传支持.
 * 2022年05月：Jspx.net Framework 6.56 最后一个非本地线程方式版本.
 * 2022年06月：Jspx.net Framework 6.60-66 提供本地线程方式版本,并发会更好,内核优化性能提升.交大的调整变动66完整重新测试稳定.
+* 2022年07月：Jspx.net Framework 6.67 添加了开发者中心功能,能够快速的配置开发页面,sqlmap配置支持在开发中心配置,不用在写xml.

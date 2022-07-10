@@ -64,7 +64,11 @@ public interface SoberFactory extends Serializable {
     int getTransactionIsolation();
 
     void setTransactionIsolation(int transactionIsolation);
-
+    /**
+     * 同时这里将初始化并创建索引
+     * @param namespace 得到命名空间的SQL
+     * @return sql空间
+     */
     SQLRoom getSqlRoom(String namespace);
 
     void setMappingResources(String[] strings) throws Exception;

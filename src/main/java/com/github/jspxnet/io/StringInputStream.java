@@ -50,13 +50,11 @@ public class StringInputStream extends java.io.InputStream {
 
     @Override
     public int read(byte[] bytes) throws java.io.IOException {
-
         return inputStream.read(bytes);
     }
 
     @Override
     public int read(byte[] bytes, int i, int i1) throws java.io.IOException {
-
         return inputStream.read(bytes, i, i1);
     }
 

@@ -26,55 +26,13 @@ import java.util.List;
  * 页面帮助提示
  */
 @Slf4j
-public class PageHelper implements Helper, Serializable {
+public class PageHelper implements Serializable {
     private String configFile = "help.xml";
     public static final String none = "none";
     public static final String Tag_HELP = "help";
     public static final String Tag_Helper = "helper";
     private String id = PageHelper.none;
-    private String encode = Environment.defaultEncode;
     private String path = StringUtil.empty;
-
-    @Override
-    public String getEncode() {
-        return encode;
-    }
-
-
-    @Override
-    public void setEncode(String encode) {
-        this.encode = encode;
-    }
-
-    @Override
-    public String getConfigFile() {
-        return configFile;
-    }
-
-    @Override
-    public void setConfigFile(String configFile) {
-        this.configFile = configFile;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    @Override
-    public String getPath() {
-        return path;
-    }
-
-    @Override
-    public void setPath(String path) {
-        this.path = path;
-    }
 
     /**
      * 文件路径支持多种方式,
@@ -111,7 +69,7 @@ public class PageHelper implements Helper, Serializable {
 
         //载入配置 begin
         AutoReadTextFile readTextFile = new AutoReadTextFile();
-        readTextFile.setEncode(encode);
+        readTextFile.setEncode(Environment.defaultEncode);
         readTextFile.setFile(fileNamePath);
 
         XmlEngine xmlEngine = new XmlEngineImpl();
@@ -129,29 +87,6 @@ public class PageHelper implements Helper, Serializable {
         return null;
     }
 
-
-    @Override
-    public String getXML() throws Exception {
-        HelpElement helpElement = getConfig();
-        if (helpElement == null) {
-            return StringUtil.empty;
-        }
-
-        StringBuilder sb = new StringBuilder("<help id=\"" + helpElement.getId() + "\" >\r\n");
-        if (ArrayUtil.inArray(new String[]{"md", "markdown"}, helpElement.getType(), true) || StringUtil.isNull(helpElement.getType())) {
-            sb.append("<![CDATA[").append(ScriptMarkUtil.getMarkdownHtml(helpElement.getBody())).append("]]>\r\n");
-        } else if (ArrayUtil.inArray(new String[]{"txt", "text"}, helpElement.getType(), true)) {
-            sb.append("<![CDATA[").append(StringUtil.toBrLine(helpElement.getBody())).append("]]>\r\n");
-        } else {
-            sb.append("<![CDATA[").append(helpElement.getBody()).append("]]>\r\n");
-        }
-
-        sb.append("<![CDATA[").append(helpElement.getBody()).append("]]>\r\n");
-        sb.append("</help>");
-        return sb.toString();
-    }
-
-    @Override
     public String getJson() throws Exception {
         HelpElement helpElement = getConfig();
         if (helpElement == null) {

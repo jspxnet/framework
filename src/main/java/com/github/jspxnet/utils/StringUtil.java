@@ -144,6 +144,29 @@ public class StringUtil {
 
     }
 
+    /**
+     * 主要用在代码生成后去除空白行
+     * @param txt 字符串
+     * @return 删除字符串里边的空行
+     */
+    public static String removeEmptyLine(String txt) {
+        if (txt == null) {
+            return empty;
+        }
+        txt = StringUtil.replace(txt,StringUtil.CRLF,StringUtil.CR);
+        String[] lines = StringUtil.split(txt,StringUtil.CR);
+        StringBuilder sb = new StringBuilder();
+        for (String line:lines)
+        {
+            if (!StringUtil.isEmpty(StringUtil.trim(line)))
+            {
+                sb.append(line).append(StringUtil.CR);
+            }
+        }
+        return sb.toString();
+
+    }
+
     // SubStringAfter/SubStringBefore
     //-----------------------------------------------------------------------
     public static String substringBefore(String str, String separator, int times) {
@@ -956,7 +979,6 @@ public class StringUtil {
         if (isEmpty(source)) {
             return new String[0];
         }
-
         if (ArrayUtil.contains(SPLIT_TRANSFERRED,cut))
         {
             cut = TRANSFERRED + cut;
@@ -2304,7 +2326,10 @@ public class StringUtil {
      * @return 得到变量列表
      */
     public static String[] getFreeMarkerVar(String str) {
-
+        if (str==null)
+        {
+            return new String[0];
+        }
         StringBuilder sb = new StringBuilder();
         int length = str.length();
         boolean isVar = false;
@@ -3293,14 +3318,5 @@ public class StringUtil {
         return newName;
     }
 
-    public static void main(String[] args) {
-
-        String str = "1969-02-21 01:02:03.20";
-
-        Date date = getDate(str);
-        System.out.println("---" + DateUtil.toString(date,DateUtil.FULL_ST_FORMAT));
-
-
-    }
 
 }

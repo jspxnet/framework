@@ -24,7 +24,7 @@ import java.util.Iterator;
  * Collection封装
  */
 public class CollectionIterator extends ScriptableObject implements ListIterator {
-    private Iterator array;
+    private Iterator<?> array;
 
     private int length;
 

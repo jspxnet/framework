@@ -21,7 +21,6 @@ public class CommandHandle extends ActionHandle {
     @Override
     public void doing(HttpServletRequest request, HttpServletResponse response) throws Exception {
         //////////////////////////////////环境参数 begin
-
         ActionConfig actionConfig = getActionConfig(request);
         if (actionConfig == null) {
             TXWebUtil.errorPrint("not found,找不到文件",null, response, HttpStatusType.HTTP_status_404);

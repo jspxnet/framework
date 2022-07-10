@@ -21,7 +21,6 @@ import com.github.jspxnet.utils.NumberUtil;
 import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
 import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 
@@ -34,7 +33,7 @@ import java.awt.*;
 public class ValidateExpImgView extends ActionSupport {
 
     public ValidateExpImgView() {
-
+        setActionResult(NONE);
     }
 
     @Ref
@@ -105,6 +104,7 @@ public class ValidateExpImgView extends ActionSupport {
         if (safe && RequestUtil.isPirated(getRequest())) {
             return NONE;
         }
+        IUserSession userSession = getUserSession();
         HttpServletResponse response = getResponse();
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
@@ -124,21 +124,12 @@ public class ValidateExpImgView extends ActionSupport {
             C = A + B;
             viewCode = NumberUtil.toString(A) + "+" + NumberUtil.toString(B) + StringUtil.EQUAL;
         }
-
         PhotoString validateCode = new PhotoString(width, height, new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(bgColor, "#", "")), 16)), StringUtil.isNull(color) ? null : new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(color, "#", "")), 16)), viewCode);
-        ServletOutputStream out = response.getOutputStream();
-        try {
-            ImageIO.write(validateCode.getBufferImage(), fileType, out);
-            IUserSession userSession = getUserSession();
-            if (userSession != null) {
-                validateCodeCache.addImgCode(EncryptUtil.getMd5(userSession.getId()), NumberUtil.toString(C));
-            }
-            out.flush();
-        } finally {
-            if (out != null) {
-                out.close();
-            }
+        ImageIO.write(validateCode.getBufferImage(), fileType, response.getOutputStream());
+
+        if (userSession != null) {
+            validateCodeCache.addImgCode(EncryptUtil.getMd5(userSession.getId()), NumberUtil.toString(C));
         }
-        return NONE;
+        return super.execute();
     }
 }

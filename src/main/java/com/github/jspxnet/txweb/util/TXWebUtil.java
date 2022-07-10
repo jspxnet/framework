@@ -27,10 +27,12 @@ import com.github.jspxnet.scriptmark.load.AbstractSource;
 import com.github.jspxnet.scriptmark.load.FileSource;
 import com.github.jspxnet.scriptmark.load.InputStreamSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.exception.TransactionException;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionProxy;
+import com.github.jspxnet.txweb.Interceptor;
 import com.github.jspxnet.txweb.annotation.*;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
@@ -549,7 +551,7 @@ public final class TXWebUtil {
             //避免空异常
             return null;
         }
-        
+
         if (exeMethod == null) {
             action.addFieldInfo(Environment.errorInfo, "not found method  " + exeMethod);
             action.setActionResult(ActionSupport.ERROR);
@@ -842,6 +844,8 @@ public final class TXWebUtil {
         Method exeMethod = null;
         Map<Operate, Method> operateMap = getClassOperateList(actionClass);
         for (Operate operate : operateMap.keySet()) {
+            /*String txt = operate.caption();
+            String txtmethod = operate.method();*/
             //处理通配符情况
             if (TXWebUtil.AT.equals(operate.method())) {
                 Method tmpMethod = operateMap.get(operate);
@@ -905,6 +909,8 @@ public final class TXWebUtil {
             return null;
         }
 
+
+
         //判断是否满足执行条件
         Object result = null;
         try {
@@ -916,6 +922,7 @@ public final class TXWebUtil {
             }
             //事务标签处理 end
         } catch (InvocationTargetException exception) {
+            exception.printStackTrace();
             log.error("执行方法:{} 进入参数:{}", exeMethod.getName(), ObjectUtil.toString(paramObj));
             action.setActionResult(ActionSupport.ERROR);
             Throwable e = exception.getTargetException();
@@ -1198,6 +1205,43 @@ public final class TXWebUtil {
      */
     public static String getComponentEnvKey(Class<?> clas,int hashCode) {
         return clas.getName() + "_" + hashCode;
+    }
+
+
+
+    /**
+     * 创建方法拦截器
+     * @param array 拦截器配置
+     * @param namespace 命名空间
+     * @return 返回拦截器列表
+     */
+    public static LinkedList<Interceptor> builderMethodInterceptor(String[] array,String namespace)
+    {
+        LinkedList<Interceptor> list = new LinkedList<>();
+        if (!ObjectUtil.isEmpty(array))
+        {
+            BeanFactory beanFactory = EnvFactory.getBeanFactory();
+            for (String className:array)
+            {
+                if (StringUtil.isNull(className))
+                {
+                    continue;
+                }
+                Interceptor interceptor;
+                if (className.contains(StringUtil.AT))
+                {
+                    interceptor = (Interceptor)beanFactory.getBean(className);
+                } else
+                {
+                    interceptor = (Interceptor)beanFactory.getBean(className,namespace);
+                }
+                if (interceptor!=null)
+                {
+                    list.addLast(interceptor);
+                }
+            }
+        }
+        return list;
     }
 
 }

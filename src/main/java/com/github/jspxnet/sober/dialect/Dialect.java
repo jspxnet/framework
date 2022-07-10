@@ -187,6 +187,7 @@ public abstract class Dialect extends HashMap<String,String> {
 
 
     public String processSql(String sql, Map<String, Object> valueMap) {
+
         try {
             if (sql.contains("<#"))
             {
@@ -194,7 +195,7 @@ public abstract class Dialect extends HashMap<String,String> {
             }
             return SQL_PLACEHOLDER.processTemplate(valueMap, sql);
         } catch (Exception e) {
-            log.error(sql + "  " + MapUtil.toString(valueMap), e);
+            log.error("processSql:{},valueMap:{}", sql,MapUtil.toString(valueMap), e);
             throw e;
         }
     }

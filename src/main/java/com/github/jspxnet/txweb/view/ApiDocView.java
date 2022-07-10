@@ -10,6 +10,7 @@ import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.tag.BeanElement;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.txweb.WebConfigManager;
@@ -31,7 +32,7 @@ import java.util.*;
 public class ApiDocView extends ActionSupport {
     final private static String[] NO_VIEW_CLASS = new String[]{
             com.github.jspxnet.txweb.support.DefaultTemplateAction.class.getName(),
-            com.github.jspxnet.txweb.view.HelperView.class.getName(),
+            HelpTipView.class.getName(),
             com.github.jspxnet.txweb.view.DownloadFileView.class.getName(),
             com.github.jspxnet.txweb.ueditor.adaptor.UEditorAdaptor.class.getName(),
             ApiDocView.class.getName(),
@@ -40,10 +41,8 @@ public class ApiDocView extends ActionSupport {
             TemplateView.class.getName(),
     };
 
-
     final private WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
     final private BeanFactory beanFactory = EnvFactory.getBeanFactory();
-    //final private String API_INDEX_CACHE = "api:index:cache:%s";
     final private String API_FIELD_CACHE = "api:field:cache:%s";
 
     @Operate(caption = "应用名称", post = false, method = "appname")
@@ -165,7 +164,7 @@ public class ApiDocView extends ActionSupport {
         //过滤重复的类对象begin
         List<Class<?>> classList = new ArrayList<>();
         for (String className : list) {
-            if (className.toLowerCase().endsWith("view") || className.toLowerCase().endsWith("action") || className.contains("com.github")) {
+            if (className.toLowerCase().endsWith("param") || className.toLowerCase().endsWith("view") || className.toLowerCase().endsWith("action") || className.contains("com.github")) {
                 continue;
             }
             if (!className.contains(softName)) {
@@ -176,7 +175,7 @@ public class ApiDocView extends ActionSupport {
                 continue;
             }
             for (Class<?> cls : findClassList) {
-                if (cls == null) {
+                if (cls == null ) {
                     continue;
                 }
                 if (!classList.contains(cls)) {
@@ -187,6 +186,15 @@ public class ApiDocView extends ActionSupport {
         //过滤重复的类对象end
         Map<String, ApiAction> resultMap = new HashMap<>();
         for (Class<?> cls : classList) {
+            Table table = cls.getAnnotation(Table.class);
+            if (table==null)
+            {
+                continue;
+            }
+            if (!table.create())
+            {
+                continue;
+            }
             ApiAction vo = new ApiAction();
             vo.setUrl("/" + softName + "/" + cls.getName());
             vo.setTitle(AnnotationUtil.getTableCaption(cls));
@@ -252,7 +260,7 @@ public class ApiDocView extends ActionSupport {
         AssertException.isNull(builderClass,"不存在的表结构");
         return AnnotationUtil.getSoberTable(builderClass);
     }
-
+/*
     public static void main(String[] arg) throws Exception {
 
         JspxNetApplication.autoRun();
@@ -263,5 +271,5 @@ public class ApiDocView extends ActionSupport {
         ApiDocument response = apiDocView.getDocument(id);
 
         System.out.println(new JSONObject(response, true).toString(4));
-    }
+    }*/
 }

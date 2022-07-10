@@ -10,7 +10,9 @@
 package com.github.jspxnet.sober.jdbc;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.Placeholder;
+import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.scriptmark.ScriptRunner;
@@ -19,6 +21,7 @@ import com.github.jspxnet.sober.*;
 import com.github.jspxnet.sober.config.SoberCalcUnique;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.config.SoberNexus;
+import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.dialect.Dialect;
@@ -27,6 +30,7 @@ import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.enums.MappingType;
 import com.github.jspxnet.sober.exception.ValidException;
 import com.github.jspxnet.sober.impl.CriteriaImpl;
+import com.github.jspxnet.sober.impl.SqlMapBaseImpl;
 import com.github.jspxnet.sober.impl.SqlMapClientImpl;
 import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.sober.util.AnnotationUtil;
@@ -50,6 +54,8 @@ import java.util.*;
 @Slf4j
 public abstract class JdbcOperations implements SoberSupport {
     private Dialect dialect = null;
+    private SqlMapClient sqlMapClient = null;
+    private SqlMapBase sqlMapBase = null;
     private SoberFactory soberFactory;
 
     /**
@@ -133,6 +139,30 @@ public abstract class JdbcOperations implements SoberSupport {
         return soberFactory.getTableModels(cla, this);
     }
 
+
+    /**
+     *
+     * @param dto 是否包含DTO
+     * @return 得到所有表结构的模型
+     */
+    @Override
+    public Map<String,TableModels> getAllTableModels(boolean dto)
+    {
+        String cacheKey = Environment.KEY_SOBER_TABLE_CACHE + "_"+ObjectUtil.toInt(dto);
+        Map<String,TableModels>  result = (Map<String,TableModels>)JSCacheManager.get(DefaultCache.class,cacheKey);
+        if (!ObjectUtil.isEmpty(result))
+        {
+            return result;
+        }
+        result = new HashMap<>();
+        List<SoberTable> list = SoberUtil.getScanTableAnnotationList(dto);
+        for (SoberTable table:list)
+        {
+            result.put(table.getId(),table);
+        }
+        JSCacheManager.put(DefaultCache.class,cacheKey,result);
+        return result;
+    }
     /**
      *
      * @param cla 类对象
@@ -291,7 +321,7 @@ public abstract class JdbcOperations implements SoberSupport {
                 }
                 if (obj instanceof Map)
                 {
-                    Map<String,Object> temp = (Map)obj;
+                    Map<String,Object> temp = (Map<String,Object>)obj;
                     temp.put(colName,getUniqueResult(sqlText, param));
                 } else
                 {
@@ -2726,15 +2756,37 @@ public abstract class JdbcOperations implements SoberSupport {
     }
     //-----------------------------------------------------------------
     /**
-     * sql map 查询器
+     * sql map 查询器,带拦截器等功能
      *
      * @return SqlMapClient
      */
     @Override
     public SqlMapClient buildSqlMap() {
-        return new SqlMapClientImpl(this);
+        if (sqlMapClient==null)
+        {
+            synchronized (this)
+            {
+                sqlMapClient = new SqlMapClientImpl(getBaseSqlMap());
+            }
+        }
+        return sqlMapClient;
     }
 
+    /**
+     *
+     * @return 基础的查询器
+     */
+    @Override
+    public SqlMapBase getBaseSqlMap() {
+        if (sqlMapBase==null)
+        {
+            synchronized (this)
+            {
+                sqlMapBase = new SqlMapBaseImpl(this);
+            }
+        }
+        return sqlMapBase;
+    }
     /**
      * @param info 控制台输出SQL
      */
@@ -2814,5 +2866,4 @@ public abstract class JdbcOperations implements SoberSupport {
             JSCacheManager.put(cla,cacheKey,data);
         }
     }
-
 }

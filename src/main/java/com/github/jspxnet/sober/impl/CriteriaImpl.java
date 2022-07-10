@@ -154,7 +154,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      * @param loadChild 是否载入映射
      * @return 载入单个对象
      */
-    @Override
+     @Override
     public T objectUniqueResult(boolean loadChild) {
         setCurrentPage(1);
         setTotalCount(1);
@@ -1043,8 +1043,9 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         return autoAvg(null) ;
     }
 
+
     /**
-     *  对一个类对象里边的数字求平均数,在保存到对象返回
+     * 对一个类对象里边的数字求平均数,在保存到对象返回
      * @param fields 字段
      * @param <T> 类型
      * @return 类实体对象

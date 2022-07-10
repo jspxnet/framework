@@ -47,6 +47,14 @@ public interface SoberSupport extends Serializable {
      * @return 表结构模型
      */
     TableModels getSoberTable(Class<?> cla);
+
+    /**
+     *
+     * @param dto 是否包含DTO
+     * @return 得到所有表结构的模型
+     */
+    Map<String,TableModels> getAllTableModels(boolean dto);
+
     /**
      *
      * @param cla 类对象
@@ -618,6 +626,13 @@ public interface SoberSupport extends Serializable {
      * @return 判断是否存在此字段
      */
     boolean containsField(Class<?> cla, String field);
+
+    /**
+     *
+     * @return 基础的查询器
+     */
+    SqlMapBase getBaseSqlMap();
+
     /**
      * @param info 控制台输出SQL
      */

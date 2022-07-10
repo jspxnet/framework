@@ -23,6 +23,7 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -210,7 +211,7 @@ public final class JdbcUtil {
             driverName = metaData.getDriverName().toLowerCase();
         } catch (Exception e) {
             e.printStackTrace();
-            return DatabaseEnumType.UNKNOWN;
+            return DatabaseEnumType.General;
         }
         if (driverName.contains(DatabaseEnumType.ORACLE.getName().toLowerCase())) {
             return DatabaseEnumType.ORACLE;
@@ -242,7 +243,7 @@ public final class JdbcUtil {
         if (driverName.contains("smalldb") || dbName.contains("smalldb") || dbName.contains("smallsql")) {
             return DatabaseEnumType.SMALLDB;
         }
-        return DatabaseEnumType.GENERAL;
+        return DatabaseEnumType.General;
     }
 
     /**
@@ -259,10 +260,11 @@ public final class JdbcUtil {
         if (dialect == null) {
             dialect = new GeneralDialect();
         }
-        if (cla==null||cla.isAssignableFrom(String.class)||cla.isAssignableFrom(Map.class)|| ClassUtil.findRemoteApi(cla).isAssignableFrom(Map.class) )
+        if (cla==null||cla.isAssignableFrom(List.class)||cla.isAssignableFrom(String.class)||cla.isAssignableFrom(Map.class))
         {
-            Map<String,Object> result = new HashMap<>();
+
             ResultSetMetaData resultSetMetaData = rs.getMetaData();
+            Map<String,Object> result = new HashMap<>(resultSetMetaData.getColumnCount()+1);
             for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
                 String name = resultSetMetaData.getColumnLabel(i);
                 String field = StringUtil.underlineToCamel(name);
@@ -275,6 +277,9 @@ public final class JdbcUtil {
         T result = cla.newInstance();
         Field[] fields = ClassUtil.getDeclaredFields(cla);
         for (Field field : fields) {
+            if (Modifier.isFinal(field.getModifiers()) || field.getModifiers() == 26 || field.getModifiers() == 18) {
+                continue;
+            }
             String propertyName = field.getName();
             Object value = null;
             try {
