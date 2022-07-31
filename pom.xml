@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.67</version>
+    <version>6.69</version>
     <description>jspx framework</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -254,19 +254,11 @@
             <version>R8</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.rometools</groupId>
-            <artifactId>rome</artifactId>
-            <version>1.18.0</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/com.rometools/rome-fetcher -->
         <dependency>
             <groupId>com.rometools</groupId>
             <artifactId>rome-fetcher</artifactId>
             <version>1.18.0</version>
-            <scope>provided</scope>
         </dependency>
 
         <!--     <dependency>
@@ -279,7 +271,6 @@
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
             <version>2.0.1</version>
-            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -314,25 +305,21 @@
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
             <version>2.2.1</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.83</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
             <version>3.15.0</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>transactions-jta</artifactId>
             <version>5.0.9</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jxls</groupId>
@@ -562,7 +549,6 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.0.0</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.beust</groupId>
@@ -599,7 +585,6 @@
             <groupId>org.bidib.jbidib.org.qbang.rxtx</groupId>
             <artifactId>rxtxcomm</artifactId>
             <version>2.2</version>
-            <scope>provided</scope>
         </dependency>
 
         <!--log4j2日志依赖开始-->
@@ -1011,12 +996,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.1.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jxr-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.2.0</version>
             </plugin>
         </plugins>
     </reporting>

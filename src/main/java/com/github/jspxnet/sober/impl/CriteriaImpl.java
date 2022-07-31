@@ -453,7 +453,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     public int delete(boolean delChild) {
         int result = 0;
         if (delChild) {
-            List<T> list = list(false);
+            List<T> list = list(delChild);
             for (T o : list) {
                 if (o == null) {
                     continue;
@@ -532,10 +532,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
             orderText.append(orderEntry.getOrder().toSqlString(databaseType));
             if (i != (orderEntries.size() - 1)) {
-                orderText.append(",");
+                orderText.append(StringUtil.COMMAS);
             }
         }
-        if (orderText.toString().endsWith(",")) {
+        if (orderText.toString().endsWith(StringUtil.COMMAS)) {
             orderText.setLength(orderText.length() - 1);
         }
         if (currentPage <= 0) {
@@ -588,7 +588,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
             cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),orderText.toString(),iBegin,iEnd, loadChild);
             resultList = (List<T>) JSCacheManager.get(criteriaClass, cacheKey);
-            if (resultList!=null) {
+            if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
             }
         }

@@ -97,9 +97,9 @@ public class DataCallAction extends DataCallView {
         actionContext.put(TABLE_MODELS,tableModels);
 
         if (genericDAO.delete(tableModels.getEntity(),ids,false)>=0) {
-            return RocResponse.success(ids,language.getLang(LanguageRes.updateSuccess));
+            return RocResponse.success(ids,language.getLang(LanguageRes.deleteSuccess));
         }
-        return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.updateFailure));
+        return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.deleteFailure));
     }
 
     @Override

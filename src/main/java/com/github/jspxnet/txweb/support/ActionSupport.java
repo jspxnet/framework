@@ -458,7 +458,7 @@ public abstract class ActionSupport implements Action {
         {
             JSONObject params = actionContext.getJsonParams();
             if (params != null) {
-                return params.parseObject(cla);
+                return params.parseObject(cla,true);
             }
         }
         return RequestUtil.getBean(request, cla, false);

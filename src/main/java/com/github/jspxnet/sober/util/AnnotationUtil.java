@@ -235,6 +235,7 @@ public class AnnotationUtil {
                 soberNexus.setSave(nexus.save());
                 soberNexus.setChain(nexus.chain());
                 soberNexus.setWhere(nexus.where());
+                soberNexus.setTerm(nexus.term());
                 soberNexus.setLength(nexus.length());
                 soberColumns.put(field.getName(), soberNexus);
             }

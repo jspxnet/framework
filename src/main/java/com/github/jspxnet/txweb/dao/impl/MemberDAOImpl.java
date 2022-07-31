@@ -150,7 +150,7 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
      */
     @Override
     public MemberCourt getMemberCourt(long uid) {
-        return (MemberCourt) createCriteria(MemberCourt.class).add(Expression.eq("uid", uid)).add(Expression.eq("def", YesNoEnumType.YES.getValue())).objectUniqueResult(false);
+        return createCriteria(MemberCourt.class).add(Expression.eq("uid", uid)).add(Expression.eq("def", YesNoEnumType.YES.getValue())).objectUniqueResult(false);
     }
 
     /**
@@ -176,7 +176,6 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
      * @return 得到部门主管, 采用两种方式  1:直接通过pid 查找;2:通过部门树结构
      */
     @Override
-
     public List<Member> getDepartmentMember(TreeItemDAO treeItemDAO, IMember member) {
         List<Member> result = new ArrayList<>();
         if (member == null) {

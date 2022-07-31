@@ -10,7 +10,7 @@ package com.github.jspxnet.enums;
 
 public enum RecycleEnumType implements EnumType {
     //未知
-    UNKNOWN(-1, "未知"),
+   // UNKNOWN(-1, "未知"),
     //是
     YES_RECYCLE(1, "是"),
     //否
@@ -30,7 +30,7 @@ public enum RecycleEnumType implements EnumType {
                 return c;
             }
         }
-        return RecycleEnumType.UNKNOWN;
+        return RecycleEnumType.NO_RECYCLE;
     }
 
     @Override

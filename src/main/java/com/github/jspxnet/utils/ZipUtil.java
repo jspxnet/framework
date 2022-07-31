@@ -116,6 +116,7 @@ public final class ZipUtil {
         if (txt == null) {
             return null;
         }
+
         try {
             return new String(unZip(EncryptUtil.getBase64Decode(txt, EncryptUtil.URL_SAFE + EncryptUtil.NO_WRAP)), Environment.defaultEncode);
         } catch (UnsupportedEncodingException e) {

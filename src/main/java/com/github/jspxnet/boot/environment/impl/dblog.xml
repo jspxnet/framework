@@ -19,8 +19,8 @@
         </encoder>
     </appender>
     <!-- 将日志写入数据库 -->
-    <appender name="DATABASE" class="com.github.jspxnet.boot.environment.dblog.JspxDBAppender">
-    </appender>
+<!--    <appender name="DATABASE" class="com.github.jspxnet.boot.environment.dblog.JspxDBAppender">
+    </appender>-->
     <logger name="org.redisson.connection.DNSMonitor" level="WARN" />
     <logger name="io.netty.buffer.PooledByteBufAllocator" level="WARN" />
     <logger name="org.redisson.connection" level="WARN" />

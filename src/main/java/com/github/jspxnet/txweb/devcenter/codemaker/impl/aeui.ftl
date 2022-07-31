@@ -19,7 +19,7 @@
 <body>
 <div class="formContainer mWrap">
     <div class="mTitPanel addBoardLogo">
-        ${title}
+        ${title#('')}
     </div>
     <div class="addConPanel mConPanel">
         <div id="helpTip"></div>
@@ -38,7 +38,8 @@
                 </div>
                 <#continue />
             </#if>
-            <#if where="column.option.toBoolean()">
+
+            <#if where="column.optionList">
             <#if where="'radio'==column.input">
             <div class="row">
                 <label class="tit" for="${column.name}">${column.caption}</label>
@@ -117,7 +118,7 @@
     </div>
 </div>
 <script>
-    //实体模型id
+    <!--# 实体模型id  #-->
     var modelId = '${modelId}';
     var app = false;
     window.addEvent('domready', function () {

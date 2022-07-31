@@ -174,7 +174,10 @@ public final class Dispatcher {
         } catch (Exception e) {
             e.printStackTrace();
             log.info(namespace + "/" + urlName, e);
-            printException(e, response, WebOutEnumType.HTML.getValue());
+            if (!response.isCommitted())
+            {
+                printException(e, response, WebOutEnumType.HTML.getValue());
+            }
         }
     }
 

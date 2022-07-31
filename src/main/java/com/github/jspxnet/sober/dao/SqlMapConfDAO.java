@@ -16,6 +16,14 @@ public interface SqlMapConfDAO extends SoberSupport {
      */
     SqlMapConf getSqlMap(String namespace, String name);
     /**
+     *
+     * @param namespace 命名空间
+     * @param name  sqlmap名称
+     * @return 判断sqlMap是否存在
+     */
+    boolean contains(String namespace, String name);
+
+    /**
      * 返回数据库中配置的拦截器
      * @param namespace 命名空间
      * @return 配置数据

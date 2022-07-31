@@ -147,6 +147,7 @@ public class MySQLDialect extends Dialect {
         try {
             typeName = rs.getMetaData().getColumnTypeName(index).toLowerCase();
             colSize = rs.getMetaData().getColumnDisplaySize(index);
+            String columnName = rs.getMetaData().getColumnName(index).toLowerCase();
 
             //短断整型
             if (("int".equals(typeName) && colSize < 4) || "tinyint".equalsIgnoreCase(typeName) || "short".equals(typeName) || "smallint".equals(typeName) || "int2".equals(typeName) || ("fixed".equalsIgnoreCase(typeName) && colSize < 4)) {

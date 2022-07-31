@@ -11,13 +11,18 @@ import com.github.jspxnet.txweb.dao.impl.GenericDAOImpl;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * 目前测试 在tomcat下lib是隔离的,加载不进来
+ * 如果是用打包为单一jar的时候可以正常是用
+ *
+ */
 public class JspxDBAppender<E> extends UnsynchronizedAppenderBase<E> {
     private final GenericDAO genericDAO = new GenericDAOImpl();
-    private final List<JspxLoggingEvent> CACHE =  new CopyOnWriteArrayList<>();
+    private final List<JspxLoggingEvent> CACHE =  new ArrayList<>();
 
     @Override
     public void start() {

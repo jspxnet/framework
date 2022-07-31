@@ -21,7 +21,7 @@ public class SqlMapView extends ActionSupport {
     protected SqlMapConfDAO sqlMapConfDAO;
 
 
-    @Operate(caption = "文档索引", method = "index", post = false)
+    @Operate(caption = "SqlMap配置", method = "index", post = false)
     public String index()  {
         return "SqlMap配置";
     }

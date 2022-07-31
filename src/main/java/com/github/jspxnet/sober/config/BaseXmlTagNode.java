@@ -1,6 +1,8 @@
 package com.github.jspxnet.sober.config;
 
 import com.github.jspxnet.scriptmark.core.TagNode;
+import com.github.jspxnet.sober.enums.QueryModelEnumType;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.XMLUtil;
 
@@ -22,6 +24,10 @@ public abstract class BaseXmlTagNode extends TagNode {
             name = XMLUtil.deleteQuote(getStringAttribute("name"));
         }
         return name;
+    }
+    public int getModel()
+    {
+        return QueryModelEnumType.find(ObjectUtil.toInt(XMLUtil.deleteQuote(getStringAttribute("model")))).getValue();
     }
 
     public String getCaption()

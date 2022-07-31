@@ -595,7 +595,10 @@ public abstract class Environment {
     static public final String APOLLO_APP_ID = "app.id";
     static public final String APOLLO_BOOTSTRAP_ENABLED = "apollo.bootstrap.enabled";
     static public final String APOLLO_BOOTSTRAP_NAMESPACES = "apollo.bootstrap.namespaces";
+    static public final String APOLLO_BOOTSTRAP_EAGERLOAD_ENABLED = "apollo.bootstrap.eagerLoad.enabled";
     static public final String APOLLO_META = "apollo.meta";
+    //static public final String APOLLO_IP = "apollo.ip";
+
 
     static public final String HTTP_RPC_DOMAIN = "http.rpc.domain";
     static public final String HTTP_RPC_ROUTES = "http.rpc.routes.";

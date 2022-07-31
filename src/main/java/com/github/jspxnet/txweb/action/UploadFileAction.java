@@ -11,6 +11,7 @@ package com.github.jspxnet.txweb.action;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.component.zhex.ChineseAnalyzer;
+import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.io.AbstractRead;
 import com.github.jspxnet.io.ReadPdfTextFile;
@@ -544,7 +545,7 @@ public class UploadFileAction extends MultipartSupport {
         boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
         Object[] objects = localUploadFile(userSession, thumbnail);
         if (ObjectUtil.isEmpty(objects)) {
-            printErrorInfo("上传失败");
+            printErrorInfo("上传失败",getFieldInfo());
             return NONE;
         }
 
@@ -578,7 +579,7 @@ public class UploadFileAction extends MultipartSupport {
         if (multipartRequest != null) {
             multipartRequest.destroy();
         }
-        multipartRequest = null;
+
         return NONE;
     }
 
@@ -602,12 +603,12 @@ public class UploadFileAction extends MultipartSupport {
             index++;
             if (ArrayUtil.inArray(STOP_EXS, uf.getFileType(), true)) {
                 FileUtil.delete(uf.getFile());
-                printErrorInfo(language.getLang(LanguageRes.notAllowedFileType) + StringUtil.COLON + uf.getFileType(), null);
+                addFieldInfo(Environment.warningInfo,language.getLang(LanguageRes.notAllowedFileType) + StringUtil.COLON + uf.getFileType());
                 return null;
             }
             if (!uf.isUpload()) {
                 FileUtil.delete(uf.getFile());
-                printErrorInfo(language.getLang(LanguageRes.notAllowedFileTypeOrUploadError), null);
+                addFieldInfo(Environment.warningInfo,language.getLang(LanguageRes.notAllowedFileTypeOrUploadError));
                 return null;
             }
             //分片上传
@@ -624,7 +625,7 @@ public class UploadFileAction extends MultipartSupport {
 
             if (!uf.moveToTypeDir()) {
                 //没有移动成功的文件
-                printErrorInfo(language.getLang(LanguageRes.folderWriteError), null);
+                addFieldInfo(Environment.warningInfo,language.getLang(LanguageRes.folderWriteError));
                 return null;
             }
 
@@ -1019,7 +1020,7 @@ public class UploadFileAction extends MultipartSupport {
      * @param info     打印错误信息
      * @param valueMap 其他数据
      */
-    protected void printErrorInfo(String info, Map<String, Object> valueMap) {
+    protected void printErrorInfo(String info, Map<String, ?> valueMap) {
 
         JSONObject json = new JSONObject();
         json.put("OK", YesNoEnumType.NO.getValue());

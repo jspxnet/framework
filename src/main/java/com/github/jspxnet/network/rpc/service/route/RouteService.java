@@ -223,7 +223,7 @@ public class RouteService implements Runnable {
                 //把路由表自己保管起来
             } catch (Exception e) {
                 routeManage.routeOff(routeSession.getSocketAddress());
-                if (RpcConfig.getInstance().isDebug()&&debugTimes<50) {
+                if (RpcConfig.getInstance().isDebug()&&debugTimes<20) {
                     log.debug("心跳检查无连接:{},\r\n错误:{}", IpUtil.getIp(routeSession.getSocketAddress()),e.getLocalizedMessage());
                 }
             }

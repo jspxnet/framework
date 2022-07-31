@@ -3,7 +3,6 @@ package com.github.jspxnet.txweb.devcenter.view;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.sober.dao.SqlMapConfDAO;
-import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.sober.table.SqlMapInterceptorConf;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;

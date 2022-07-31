@@ -183,7 +183,7 @@ public abstract class ResultSupport implements Result {
             if (actionContext.hasFieldInfo())
             {
                 //有错误信息
-                return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), actionContext.getFailureMessage());
+                return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), actionContext.getFieldInfo());
             } else
             if (method==null||ActionEnv.DEFAULT_EXECUTE.equals(method.getName())&&actionContext.getResult()==null)
             {

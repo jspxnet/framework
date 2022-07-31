@@ -20,10 +20,8 @@ import java.util.Map;
 @Bean(namespace = Environment.DEV_CENTER, singleton = true)
 public class CodeMakerView extends ActionSupport {
 
-
     @Ref
     private CodeMaker codeMaker;
-
 
     @Operate(caption = "生成窗体", method = "builder")
     public RocResponse<String> builder(@Param(caption = "模版页面", required = true) String templateName, @Param(caption = "模型ID",min = 2,max = 100, required = true) String modelId, @Param(caption = "跳过字段") List<String> jumpFields)

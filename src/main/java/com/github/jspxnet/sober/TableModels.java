@@ -9,11 +9,9 @@
  */
 package com.github.jspxnet.sober;
 
-import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.sober.config.SoberCalcUnique;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.config.SoberNexus;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;

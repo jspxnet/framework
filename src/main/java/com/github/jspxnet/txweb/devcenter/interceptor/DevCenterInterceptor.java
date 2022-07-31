@@ -20,7 +20,7 @@ import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
-@Bean(bind = DevCenterInterceptor.class, namespace = Environment.DEV_CENTER, singleton = true)
+
 @Slf4j
 public class DevCenterInterceptor extends InterceptorSupport {
 

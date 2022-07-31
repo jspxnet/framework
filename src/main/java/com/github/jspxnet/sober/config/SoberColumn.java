@@ -85,9 +85,11 @@ public class SoberColumn implements Serializable {
         return  javaType;
     }
 
-    private static String[] baseType = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
+    @JsonIgnore
+    private static final String[] baseType = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
 
-    private static Map<String,String> codeTypeMap = new HashMap<>();
+    @JsonIgnore
+    final private static Map<String,String> codeTypeMap = new HashMap<>();
     static{
         codeTypeMap.put("int","int");
         codeTypeMap.put("integer","integer");

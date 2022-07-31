@@ -20,7 +20,7 @@
 <body>
 <div class="formContainer mWrap">
     <div class="mTitPanel jboardLogo">
-        ${title}
+        ${title#('')}
     </div>
     <div class="addConPanel mConPanel">
         <div id="helpTip"></div>
@@ -39,7 +39,7 @@
                 <#continue />
             </#if>
 
-            <#if where="column.option.toBoolean()">
+            <#if where="column.optionList">
             <#if where="'radio'==column.input">
             <div class="row">
                 <label class="tit" for="${column.name}">${column.caption}</label>

@@ -159,7 +159,9 @@ public class JSCacheManager implements CacheManager {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return (Cache)beanFactory.getBean(DefaultCache.class, namespace);
+            Cache cache = (Cache)beanFactory.getBean(DefaultCache.class, namespace);
+            cache.setName(DefaultCache.class.getName());
+            return cache;
         }
         return null;
     }
@@ -173,6 +175,10 @@ public class JSCacheManager implements CacheManager {
         Cache cache = CACHE_MANAGER.getCache(cacheName);
         if (cache == null) {
             return null;
+        }
+        if (StringUtil.isNull(cache.getName()))
+        {
+            cache.setName(cacheName);
         }
         CacheEntry cacheEntry = cache.get(key);
         if (cacheEntry == null) {

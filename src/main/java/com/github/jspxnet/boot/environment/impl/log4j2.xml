@@ -43,7 +43,7 @@
                 <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
         </RollingFile>
-        <RollingFile name="FILE_ERROR" fileName="${logPath}/error-${APP_Name}.log"
+        <RollingFile name="FILE_ERROR" fileName="${logPath}/error.log"
                      filePattern="${logPath}/error-%d{yyyy-MM-dd}-%i.log">
             <!-- 当使用组合过滤器的时候，onMatch/onMismatch=NEUTRAL的时候 日志消息会继续往后面流转-->
             <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -55,7 +55,7 @@
                 <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
         </RollingFile>
-        <RollingFile name="FILE_WARN" fileName="${logPath}/warn-${APP_Name}.log"
+        <RollingFile name="FILE_WARN" fileName="${logPath}/warn.log"
                      filePattern="${logPath}/warn-%d{yyyy-MM-dd}-%i.log">
             <!-- 当使用组合过滤器的时候，onMatch/onMismatch=NEUTRAL的时候 日志消息会继续往后面流转-->
             <Filters>

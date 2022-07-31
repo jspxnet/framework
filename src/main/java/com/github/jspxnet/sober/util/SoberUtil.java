@@ -156,6 +156,14 @@ public final class SoberUtil {
         return resultMap;
     }
 
+    /**
+     *
+     * @param resultSetMetaData 返回对象
+     * @param dialect 适配器
+     * @param resultSet 返回集合
+     * @return 返回数据
+     * @throws SQLException 异常
+     */
     public static DataMap<String, Object> getDataHashMap(ResultSetMetaData resultSetMetaData, Dialect dialect, ResultSet resultSet) throws SQLException {
         int numColumns = resultSetMetaData.getColumnCount();
         DataMap<String, Object> resultMap = new DataMap<>();
@@ -235,6 +243,8 @@ public final class SoberUtil {
             config.setContext(StringUtil.trim(XMLUtil.xmlCdataDecrypt(beanEl.getBody())));
             config.setQuote(beanEl.getQuote());
             config.setCaption(beanEl.getCaption());
+
+
             if (TableXml.TAG_NAME.equalsIgnoreCase(node.getTagName()))
             {
                 config.setIndex(beanEl.getIndex());
@@ -262,6 +272,7 @@ public final class SoberUtil {
             if (QueryXml.TAG_NAME.equalsIgnoreCase(node.getTagName()))
             {
                 config.setExecuteType(ExecuteEnumType.QUERY.getValue());
+                config.setQueryModel(beanEl.getModel());
                 sqlRoom.addQuery(config);
             } else
             if (UpdateXml.TAG_NAME.equalsIgnoreCase(node.getTagName()))
@@ -539,6 +550,23 @@ public final class SoberUtil {
     }
 
 
+    /**
+     *
+     * @param namespace 命名空间
+     * @param exeName  sqlmap名称
+     * @return 判断sqlMap是否存在
+     */
+    public static boolean containsSqlMapConf(String namespace, String exeName) {
+        BeanFactory beanFactory = EnvFactory.getBeanFactory();
+        SqlMapConfDAO sqlMapConfDAO = beanFactory.getBean(SqlMapConfDAO.class);
+        if (sqlMapConfDAO==null)
+        {
+            log.error("SqlMapConfDAO 没有注册到ioc 不能是用db sqlMap功能:{}", SqlMapConfDAOImpl.class.getName());
+        } else {
+            return sqlMapConfDAO.contains(namespace,exeName);
+        }
+        return false;
+    }
     /**
      *
      * @param soberFactory 数据库对象

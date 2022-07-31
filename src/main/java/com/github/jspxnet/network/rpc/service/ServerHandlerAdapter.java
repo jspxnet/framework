@@ -112,7 +112,7 @@ public class ServerHandlerAdapter extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         Channel channel = ctx.channel();
         if (channel == null) {
-            log.debug("channel is null :{}", channel);
+            log.error("channel is null :{}", channel);
             cause.printStackTrace();
             return;
         }

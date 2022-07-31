@@ -73,7 +73,7 @@
                                 modelId:modelId,
                                 ids:selects
                             };
-                            new Request.ROC({'url':'/dynout/render/delete.jwc','data':posts,
+                            new Request.ROC({'url':'/dynout/call/delete.jwc','data':posts,
                                 onSuccess:function(obj)
                                 {
                                     if (obj.success) jtable.refresh();

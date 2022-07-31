@@ -48,6 +48,23 @@ public class SqlMapConfDAOImpl extends JdbcOperations implements SqlMapConfDAO {
     }
 
     /**
+     *
+     * @param namespace 命名空间
+     * @param name  sqlmap名称
+     * @return 判断sqlMap是否存在
+     */
+    @Override
+    public boolean contains(String namespace, String name)
+    {
+        Criteria criteria = createCriteria(SqlMapConf.class);
+        if (!StringUtil.isNull(namespace))
+        {
+            criteria = criteria.add(Expression.eq("namespace", namespace));
+        }
+        criteria = criteria.add(Expression.eq("name", name));
+        return criteria.setProjection(Projections.rowCount()).intUniqueResult()>0;
+    }
+    /**
      * 返回数据库中配置的拦截器
      * @param namespace 命名空间
      * @return 配置数据

@@ -523,7 +523,10 @@ public class DefaultActionInvocation implements ActionInvocation {
                         WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_401);
             }
             if (ActionSupport.UNTITLED.equalsIgnoreCase(resultCode)) {
-                TXWebUtil.print(new JSONObject(RocResponse.error(ErrorEnumType.POWER.getValue(), action.getFailureMessage())).toString(),
+
+                RocResponse<?> rocResponse = RocResponse.error(ErrorEnumType.POWER.getValue(), action.getFailureMessage());
+                rocResponse.setProperty("isGuest", NumberUtil.toString(ObjectUtil.toInt(action.isGuest())));
+                TXWebUtil.print(new JSONObject(rocResponse).toString(),
                         WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_403);
             }
         } else {

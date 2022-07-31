@@ -53,7 +53,7 @@ public @interface Nexus {
      * @return Class
      */
 
-    Class targetEntity();
+    Class<?> targetEntity();
 
     /**
      * 条件 使用 ssql表达式

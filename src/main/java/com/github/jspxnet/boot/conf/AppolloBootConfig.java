@@ -3,12 +3,18 @@ package com.github.jspxnet.boot.conf;
 
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
+import com.ctrip.framework.apollo.core.dto.ApolloConfig;
+import com.ctrip.framework.apollo.core.dto.ApolloNotificationMessages;
+import com.ctrip.framework.apollo.core.dto.ServiceDTO;
 import com.ctrip.framework.apollo.enums.PropertyChangeType;
+import com.ctrip.framework.apollo.internals.ConfigRepository;
+import com.ctrip.framework.apollo.internals.RemoteConfigRepository;
 import com.ctrip.framework.apollo.model.ConfigChange;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.enums.BootConfigEnumType;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Properties;
@@ -20,22 +26,24 @@ public class AppolloBootConfig {
     public void bind(Properties properties)
     {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-
+        String namespace = properties.getProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES,"application");
         System.setProperty(Environment.APOLLO_ENV,properties.getProperty(Environment.APOLLO_ENV));
         System.setProperty(Environment.APOLLO_APP_ID,properties.getProperty(Environment.APOLLO_APP_ID));
         System.setProperty(Environment.APOLLO_BOOTSTRAP_ENABLED,properties.getProperty(Environment.APOLLO_BOOTSTRAP_ENABLED));
-        System.setProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES,properties.getProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES));
+        System.setProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES,namespace);
+        System.setProperty(Environment.APOLLO_BOOTSTRAP_EAGERLOAD_ENABLED,properties.getProperty(Environment.APOLLO_BOOTSTRAP_EAGERLOAD_ENABLED));
         System.setProperty(Environment.APOLLO_META,properties.getProperty(Environment.APOLLO_META));
         envTemplate.put(Environment.BOOT_CONF_MODE, BootConfigEnumType.APPOLLO.getName());
+        log.debug("Apollo bootstrap namespaces: {},env: {}", namespace,properties.getProperty(Environment.APOLLO_ENV));
+        //"application" apollo.ip
 
-
-        Config config = ConfigService.getAppConfig();
+        Config config = ConfigService.getConfig(namespace);
         Set<String> names = config.getPropertyNames();
         for (String key:names)
         {
             envTemplate.put(key,config.getProperty(key, StringUtil.empty));
         }
-
+        //ConfigUtil
         config.addChangeListener(changeEvent -> {
             log.info("Changes for namespace {}", changeEvent.getNamespace());
             for (String key : changeEvent.changedKeys()) {

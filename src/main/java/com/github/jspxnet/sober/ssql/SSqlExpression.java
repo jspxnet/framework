@@ -17,8 +17,6 @@ import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.sober.Criteria;
-
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 

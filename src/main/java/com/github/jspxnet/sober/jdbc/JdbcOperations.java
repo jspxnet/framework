@@ -150,17 +150,17 @@ public abstract class JdbcOperations implements SoberSupport {
     {
         String cacheKey = Environment.KEY_SOBER_TABLE_CACHE + "_"+ObjectUtil.toInt(dto);
         Map<String,TableModels>  result = (Map<String,TableModels>)JSCacheManager.get(DefaultCache.class,cacheKey);
-        if (!ObjectUtil.isEmpty(result))
+      /*  if (!ObjectUtil.isEmpty(result))
         {
             return result;
-        }
+        }*/
         result = new HashMap<>();
         List<SoberTable> list = SoberUtil.getScanTableAnnotationList(dto);
         for (SoberTable table:list)
         {
             result.put(table.getId(),table);
         }
-        JSCacheManager.put(DefaultCache.class,cacheKey,result);
+        //JSCacheManager.put(DefaultCache.class,cacheKey,result);
         return result;
     }
     /**
@@ -376,10 +376,7 @@ public abstract class JdbcOperations implements SoberSupport {
                 criteria = criteria.add(Expression.in(soberNexus.getTargetField(), idList));
                 if (!StringUtil.isNull(soberNexus.getTerm())) {
                     String term = soberNexus.getTerm();
-                    if (term.contains("${") && term.contains("}"))
-                    {
-                        term = placeholder.processTemplate(ObjectUtil.getMap(list.get(0)), term);
-                    }
+                    term = AnnotationUtil.getNexusTerm(list.get(0),term);
                     criteria = SSqlExpression.getTermExpression(criteria, term);
                 }
                 criteria = criteria.setCurrentPage(1).setTotalCount(idList.size());
@@ -406,28 +403,28 @@ public abstract class JdbcOperations implements SoberSupport {
             }
             else if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
                 List<Object> idList = BeanUtil.copyFieldList(list,soberNexus.getField());
-                Criteria criteria = createCriteria(soberNexus.getTargetEntity());
-                criteria = criteria.add(Expression.in(soberNexus.getTargetField(), idList));
-                if (!StringUtil.isNull(soberNexus.getTerm())) {
-                    criteria = SSqlExpression.getTermExpression(criteria, soberNexus.getTerm());
-                }
-                criteria = criteria.setCurrentPage(1).setTotalCount(getMaxRows());
-                List<Object> loadObjectList = criteria.list(soberNexus.isChain());
-                for (Object object : list) {
-                    if (object==null)
-                    {
-                        continue;
+                for (Object obj:list)
+                {
+                    Criteria criteria = createCriteria(soberNexus.getTargetEntity());
+                    criteria = criteria.add(Expression.in(soberNexus.getTargetField(), idList));
+                    if (!StringUtil.isNull(soberNexus.getTerm())) {
+                        String term = soberNexus.getTerm();
+                        term = AnnotationUtil.getNexusTerm(obj,term);
+                        criteria = SSqlExpression.getTermExpression(criteria, term);
                     }
-                    //对应id对象
-                    Object objField = BeanUtil.getFieldValue(object, soberNexus.getField(),false);
-                    if (objField==null)
-                    {
-                        continue;
-                    }
+                    criteria = criteria.setCurrentPage(1).setTotalCount(getMaxRows());
+                    List<Object> loadObjectList = criteria.list(soberNexus.isChain());
                     List<Object> valueLstCache = new ArrayList<>();
                     for (Object loadObj:loadObjectList)
                     {
                         if (loadObj==null)
+                        {
+                            continue;
+                        }
+
+                        //对应id对象
+                        Object objField = BeanUtil.getFieldValue(obj, soberNexus.getField(),false);
+                        if (objField==null)
                         {
                             continue;
                         }
@@ -436,10 +433,9 @@ public abstract class JdbcOperations implements SoberSupport {
                         {
                             valueLstCache.add(loadObj);
                         }
+                        BeanUtil.setSimpleProperty(obj, colName, valueLstCache);
                     }
-                    BeanUtil.setSimpleProperty(object, colName, valueLstCache);
                 }
-
             }
         }
 
@@ -463,6 +459,7 @@ public abstract class JdbcOperations implements SoberSupport {
 
                     Object findValue = BeanUtil.getProperty(result, soberNexus.getField());
                     String term = AnnotationUtil.getNexusTerm(result, soberNexus.getTerm());
+
                     TableModels targetModels = getSoberTable(soberNexus.getTargetEntity());
                     SoberColumn soberColumn = targetModels.getColumn(soberNexus.getTargetField());
                     if (soberColumn == null) {
@@ -643,7 +640,6 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public <T> T get(Class<T> aClass, Serializable serializable, boolean loadChild) {
-
         return get(aClass, null, serializable, loadChild);
     }
 
@@ -929,7 +925,7 @@ public abstract class JdbcOperations implements SoberSupport {
                             {
                                 BeanUtil.setSimpleProperty(oneToOneObject, soberNexus.getTargetField(), oneToOneValue);
                             }
-                            result = result + save(oneToOneObject);
+                            result = result + save(oneToOneObject,soberNexus.isChain());
                         }
                         if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
                             Collection<?> oneToMayObjects = (Collection<?>) BeanUtil.getProperty(object, colName);
@@ -944,7 +940,7 @@ public abstract class JdbcOperations implements SoberSupport {
                                     BeanUtil.setSimpleProperty(o, soberNexus.getTargetField(), oneToManyValue);
                                 }
                             }
-                            int s = save(oneToMayObjects);
+                            int s = save(oneToMayObjects,soberNexus.isChain());
                             if (s != oneToMayObjects.size()) {
                                 return -2;
                             }
@@ -1027,13 +1023,12 @@ public abstract class JdbcOperations implements SoberSupport {
 
     /**
      * @param collection 批量快速保持
-     * @return jdbc 更新返回状态
      * @throws Exception 异常
      */
     @Override
-    public int batchSave(Collection<?> collection) throws Exception {
+    public void batchSave(Collection<?> collection) throws Exception {
         if (collection == null || collection.size() < 1) {
-            return -2;
+            return;
         }
         Object checkObj = collection.iterator().next();
         TableModels soberTable = getSoberTable(checkObj.getClass());
@@ -1055,7 +1050,7 @@ public abstract class JdbcOperations implements SoberSupport {
             fieldArray = soberTable.getFullFieldArray();
         }
         if (fieldArray == null || fieldArray.length < 1) {
-            return -2;
+            return;
         }
 
         valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
@@ -1100,7 +1095,6 @@ public abstract class JdbcOperations implements SoberSupport {
                 result = result + ArrayUtil.sum(statement.executeBatch());
                 conn.commit();
             }
-            return result;
         } catch (Exception e) {
             log.error("ERROR SQL:" + sqlText, e);
             e.printStackTrace();
@@ -1277,7 +1271,8 @@ public abstract class JdbcOperations implements SoberSupport {
                     log.error("映射关系错误:" + o.getClass().getName() + "  方法:" + soberNexus.getField() + "不存在", e);
                     return -2;
                 }
-                result = result + delete(soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) selfValue);
+                String term = AnnotationUtil.getNexusTerm(o,soberNexus.getTerm());
+                result = result + delete(soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) selfValue,term,soberNexus.isChain());
             }
         }
         return result;

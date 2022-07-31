@@ -12,11 +12,13 @@ package com.github.jspxnet.boot.environment.impl;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.boot.environment.dblog.JspxDBAppender;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -121,7 +123,10 @@ public class LogBackConfigUtil {
 
     public static void changeDbLogBackConfig()
     {
-        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        loggerContext.reset();
+
+
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         boolean isDefaultConfig = false;
         String defaultConfigTxt = null;
@@ -141,9 +146,11 @@ public class LogBackConfigUtil {
             }
         }
 
-        lc.reset();
+       // lc.reset();
+        //LoggerContext loggerContext = new LoggerContext();
+
         JoranConfigurator configurator = new JoranConfigurator();
-        configurator.setContext(lc);
+        configurator.setContext(loggerContext);
 
         if (StringUtil.isNull(defaultConfigTxt))
         {
@@ -164,10 +171,15 @@ public class LogBackConfigUtil {
             } catch (JoranException e) {
                 System.err.println("1.默认路径是否配置错误;2.检查defaultlog.xml文件是否存在");
                 e.printStackTrace();
-                StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
+
             }
         }
-        lc.setPackagingDataEnabled(true);
+
+        JspxDBAppender<ILoggingEvent> appender = new JspxDBAppender<>();
+        appender.setContext(loggerContext);
+        appender.start();
+        appender.setName("DATABASE");
+        loggerContext.setPackagingDataEnabled(true);
 
     }
 

@@ -1,7 +1,11 @@
 package com.github.jspxnet.json;
 
 
+import com.github.jspxnet.enums.EnumType;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.sober.config.SoberTable;
+import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.util.TypeReference;
 import com.github.jspxnet.utils.*;
 import com.google.gson.Gson;
@@ -324,6 +328,15 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             super.put(KEY_DATA, new JSONArray(bean,includeSuperClass,KEY_DATA, dataField));
             return;
         }
+
+
+        if (bean.getClass().isEnum() && EnumType.class.isAssignableFrom(bean.getClass())) {
+            EnumType en = (EnumType)bean;
+            super.put("value",en.getValue());
+            super.put("name",en.getName());
+            return;
+        }
+
         lass = bean.getClass();
         if (!isNull(bean)) {
             put(CLASS_NAME, lass.getName());
@@ -361,7 +374,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     if (ignore != null && ignore.isNull()&&result == null) {
                         continue;
                     }
-
+                    if (super.containsKey(key))
+                    {
+                        continue;
+                    }
                     if (result == null) {
                         super.put(displayKey, null);
                         continue;
@@ -484,6 +500,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     key = jsonField.name();
                 }
                 if (!ArrayUtil.isEmpty(showField)&&!ArrayUtil.contains(showField,key))
+                {
+                    continue;
+                }
+                if (super.containsKey(key))
                 {
                     continue;
                 }
@@ -1634,6 +1654,40 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return parseObject(this, clazz);
     }
 
+    /**
+     *
+     * @param clazz 类对象
+     * @param tableValue 是否载入 table注释的默认关系
+     * @param <T> 类关系
+     * @return 返回实体
+     */
+    public <T> T parseObject(Class<T> clazz,boolean tableValue) {
+        T t = parseObject(this, clazz);
+        if (tableValue)
+        {
+            SoberTable soberTable = AnnotationUtil.getSoberTable(clazz);
+            if (soberTable==null)
+            {
+                return t;
+            }
+
+            for (SoberColumn soberColumn:soberTable.getColumns())
+            {
+                if (soberColumn.isNotNull()&&BeanUtil.getProperty(t,soberColumn.getName())==null)
+                {
+                    Field field = ClassUtil.getDeclaredField(clazz,soberColumn.getName());
+                    if (field.getType()==Date.class)
+                    {
+                        BeanUtil.setFieldValue(t,soberColumn.getName(),new Date());
+                        continue;
+                    }
+                    Object value = BeanUtil.getTypeValue(soberColumn.getDefaultValue(),field.getType());
+                    BeanUtil.setFieldValue(t,soberColumn.getName(),value);
+                }
+            }
+        }
+        return t;
+    }
 
     public static <T> T parseObject(JSONObject json, Class<T> clazz) {
         String className = null;

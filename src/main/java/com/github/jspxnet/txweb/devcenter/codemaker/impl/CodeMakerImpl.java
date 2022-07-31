@@ -23,6 +23,7 @@ import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.PageCodeMaker;
 import com.github.jspxnet.txweb.table.UiTemplate;
 import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -113,6 +114,7 @@ public class CodeMakerImpl implements CodeMaker {
             html = StringUtil.removeEmptyLine(html);
             return RocResponse.success(html) ;
         } catch (Exception e) {
+            log.error(ObjectUtil.toString(tableModels));
             e.printStackTrace();
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(),e.getMessage());
         }
@@ -132,6 +134,10 @@ public class CodeMakerImpl implements CodeMaker {
     @Override
     public JSONArray builderColumn(TableModels tableModels, List<String> jumpFields)
     {
+        if (tableModels==null)
+        {
+            return new JSONArray();
+        }
         Class<?>  builderClass = tableModels.getEntity();
         AssertException.isNull(builderClass,"类模型ID对应的模型为空");
 
@@ -180,6 +186,10 @@ public class CodeMakerImpl implements CodeMaker {
      * @throws Exception 异常
      */
     private static Map<String, Object> createValueMap(TableModels tableModels,List<String> jumpFields) throws Exception {
+        if (tableModels==null)
+        {
+            return new HashMap<>(0);
+        }
         Class<?>  builderClass = tableModels.getEntity();
         List<SoberColumn> soberColumns = tableModels.getColumns();
         boolean haveDate = false;

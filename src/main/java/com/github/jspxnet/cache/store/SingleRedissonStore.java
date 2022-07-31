@@ -77,16 +77,18 @@ public class SingleRedissonStore extends Store implements IStore {
      */
     @Override
     public CacheEntry get(String key) {
-        if (!useCache)
+        if (!useCache || StringUtil.isNull(cacheKey))
         {
             return null;
         }
-        RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
-        if (rMap==null)
-        {
-            return null;
-        }
+
+        RMap<String, CacheEntry> rMap = null;
         try {
+            rMap = redisson.getMap(cacheKey);
+            if (rMap==null)
+            {
+                return null;
+            }
             CacheEntry cacheEntry = rMap.get(key);
             if (cacheEntry == null) {
                 return null;
@@ -104,7 +106,13 @@ public class SingleRedissonStore extends Store implements IStore {
             return cacheEntry;
         } catch (Exception e)
         {
-            rMap.remove(key);
+            if (rMap!=null)
+            {
+                rMap.remove(key);
+            } else
+            {
+                redisson.getMap(cacheKey).clear();
+            }
             return null;
         }
     }

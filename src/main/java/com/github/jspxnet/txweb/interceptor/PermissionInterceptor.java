@@ -161,9 +161,6 @@ public class PermissionInterceptor extends InterceptorSupport {
             try {
                 if (guestUrlFile != null && !guestUrlFile.startsWith("http")) {
                     file = EnvFactory.getFile(guestUrlFile);
-                    if (file == null) {
-                        log.error(guestUrlFile + "没有找到");
-                    }
                 }
                 log.info("载入guestUrlFile:{}", file);
 
@@ -171,8 +168,10 @@ public class PermissionInterceptor extends InterceptorSupport {
                     txt = IoUtil.autoReadText(file);
                     JSCacheManager.put(DefaultCache.class,GUEST_STOP_URL_TXT,txt);
                     decodeGuestUrl(txt);
+                } else
+                {
+                    log.error(guestUrlFile + "没有找到");
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -183,9 +182,6 @@ public class PermissionInterceptor extends InterceptorSupport {
             try {
                 if (adminUrlFile != null && !adminUrlFile.startsWith("http")) {
                     file = EnvFactory.getFile(adminUrlFile);
-                    if (file == null) {
-                        log.error(guestUrlFile + "没有找到");
-                    }
                 }
                 log.info("adminUrlFile:{}", file);
                 if (file != null) {
@@ -375,12 +371,6 @@ public class PermissionInterceptor extends InterceptorSupport {
 
         if (permission) {
             if (role.getUserType() < UserEnumType.INTENDANT.getValue()) {
-               /* if (role.getOfficeType() == YesNoEnumType.NO.getValue()) {
-                    //会员进入后，判断如果是办公模式，非工作人员都要求登陆，成为工作人员才能访问
-                    action.addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needOfficeWorkers));
-                    return ActionSupport.LOGIN;
-                }*/
-
                 //配置的权限,判断是否可执行
                 if (!role.checkOperate(pathNamespace, action.getClass().getName(), method)) {
                     //会员进入后，正常模式，完全通过后台权限判断是否能够操作
