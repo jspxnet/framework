@@ -42,7 +42,8 @@ class RunnableTask extends Task {
 	 * @throws InvalidPatternException
 	 *             If the supplied pattern is not valid.
 	 */
-	public RunnableTask(Runnable runnable) throws InvalidPatternException {
+	public RunnableTask(Runnable runnable,String id) throws InvalidPatternException {
+		super(id);
 		this.runnable = runnable;
 	}
 

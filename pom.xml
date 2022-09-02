@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.69</version>
+    <version>6.70</version>
     <description>jspx framework</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,14 +15,14 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.test.skip>true</maven.test.skip>
         <github.global.server>github</github.global.server>
-        <tomcat.version>9.0.62</tomcat.version>
+        <tomcat.version>9.0.65</tomcat.version>
         <jackson.version>2.13.3</jackson.version>
         <redisson.version>3.17.3</redisson.version>
-        <log4j2.version>2.17.2</log4j2.version>
+        <log4j2.version>2.18.0</log4j2.version>
         <poi.version>5.2.2</poi.version>
         <jxls.version>2.11.0</jxls.version>
         <spring.version>5.3.20</spring.version>
-        <logback.version>1.2.11</logback.version>
+        <logback.version>1.3.0</logback.version>
         <!--
         查看依赖树：mvn dependency:tree
         分析依赖树：mvn dependency:analyze
@@ -122,7 +122,8 @@
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
-            <version>4.9.3</version>
+            <version>4.9.4</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.belerweb</groupId>
@@ -140,38 +141,14 @@
                 </exclusion>
                 <exclusion>
                     <groupId>io.netty</groupId>
-                    <artifactId>netty-common</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec-dns</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-buffer</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-transport</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-resolver-dns</artifactId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.30</version>
+            <version>1.31</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
@@ -299,7 +276,7 @@
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-core</artifactId>
-            <version>4.6.0</version>
+            <version>4.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.aliyun</groupId>
@@ -314,7 +291,7 @@
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
-            <version>3.15.0</version>
+            <version>3.15.1</version>
         </dependency>
         <dependency>
             <groupId>com.atomikos</groupId>
@@ -376,12 +353,12 @@
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-core</artifactId>
-            <version>3.8.2</version>
+            <version>3.8.3</version>
         </dependency>
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-jpeg</artifactId>
-            <version>3.8.2</version>
+            <version>3.8.3</version>
         </dependency>
         <dependency>
             <groupId>com.drewnoakes</groupId>
@@ -441,12 +418,13 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.3.6</version>
+            <version>42.5.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.29</version>
+            <version>8.0.30</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
@@ -463,12 +441,12 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.21.1</version>
+            <version>3.21.5</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.9.0</version>
+            <version>2.9.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
         <dependency>
@@ -480,7 +458,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.77.Final</version>
+            <version>4.1.80.Final</version>
         </dependency>
         <!--测试基础支持end -->
         <!--maven tools begin -->
@@ -500,7 +478,7 @@
         <dependency>
             <groupId>com.thetransactioncompany</groupId>
             <artifactId>java-property-utils</artifactId>
-            <version>1.16</version>
+            <version>1.17</version>
             <scope>compile</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.redisson/redisson-tomcat-9 -->
@@ -517,31 +495,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
-                    <artifactId>netty-common</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec-dns</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-buffer</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-transport</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-resolver-dns</artifactId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -549,6 +503,7 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.0.0</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.beust</groupId>
@@ -708,7 +663,7 @@
         <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
-            <version>4.7.0</version>
+            <version>4.7.1</version>
         </dependency>
 
         <!--        <dependency>

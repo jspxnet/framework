@@ -10,9 +10,6 @@
 package com.github.jspxnet.sioc.scheduler.task;
 
 import com.github.jspxnet.sioc.annotation.Scheduled;
-
-
-
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +71,7 @@ public class DeleteFileTask {
     }
 
     //每天23:59执行一次
-    @Scheduled(cron = "* 59 23 * * *")
+    @Scheduled(name = "定时清理日志",cron = "* 59 23 * * *")
     public void run() {
         if (enable && !StringUtil.isNull(folder)) {
             try {

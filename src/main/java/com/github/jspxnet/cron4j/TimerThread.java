@@ -18,7 +18,7 @@
  */
 package com.github.jspxnet.cron4j;
 
-import com.github.jspxnet.utils.RandomUtil;
+import com.github.jspxnet.utils.SystemUtil;
 
 /**
  * <p>
@@ -35,7 +35,7 @@ class TimerThread extends Thread {
 	/**
 	 * A GUID for this object.
 	 */
-	private final String guid = RandomUtil.getRandomGUID(24);
+	final private String guid;
 
 	/**
 	 * The owner scheduler.
@@ -50,8 +50,9 @@ class TimerThread extends Thread {
 	 */
 	public TimerThread(Scheduler scheduler) {
 		this.scheduler = scheduler;
+		guid = SystemUtil.getPid() + "_" + scheduler.getGuid();
 		// Thread name.
-		final String name = "cron4j::scheduler[" + scheduler.getGuid() + "]::timer[" + guid + "]";
+		final String name = "cron4j::[" + scheduler.getTaskConf().getName() + "]::timer[" + guid + "]";
 		setName(name);
 	}
 
@@ -60,7 +61,7 @@ class TimerThread extends Thread {
 	 * 
 	 * @return The GUID for this object.
 	 */
-	public Object getGuid() {
+	public String getGuid() {
 		return guid;
 	}
 

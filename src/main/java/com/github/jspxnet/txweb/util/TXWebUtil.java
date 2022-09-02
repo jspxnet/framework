@@ -1170,11 +1170,17 @@ public final class TXWebUtil {
         valueMap.put(Environment.message, info);
         valueMap.put(Environment.FieldInfoList, fieldInfo);
         valueMap.put(ActionEnv.Key_Response, RequestUtil.getResponseMap(response));
-        try (PrintWriter out = response.getWriter()) {
-            response.setStatus(status);
-            scriptMark.process(out, valueMap);
-        } catch (Exception e) {
-            log.error("打印错误信息发生错误", e);
+
+        if (response.isCommitted())
+        {
+            log.info("异常信息:{},fieldInfo:{}", info,ObjectUtil.toString(fieldInfo));
+        } else {
+            try (PrintWriter out = response.getWriter()) {
+                response.setStatus(status);
+                scriptMark.process(out, valueMap);
+            } catch (Exception e) {
+                log.debug("打印错误信息发生错误", e);
+            }
         }
     }
 

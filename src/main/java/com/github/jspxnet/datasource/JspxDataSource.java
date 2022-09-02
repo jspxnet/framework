@@ -237,8 +237,11 @@ public class JspxDataSource extends DriverManagerDataSource {
         return Logger.getLogger(JspxDataSource.class.getName());
     }
 
-    @Scheduled(force = true)
+
+    private static long lastTime = System.currentTimeMillis();
+    @Scheduled(name = "连接池清理",force = true)
     public void run() {
+        lastTime = System.currentTimeMillis();
         if (!isRun || ArrayUtil.isEmpty(connectionPool)) {
             return;
         }

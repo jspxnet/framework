@@ -11,7 +11,6 @@ package com.github.jspxnet.txweb.action;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.component.zhex.ChineseAnalyzer;
-import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.io.AbstractRead;
 import com.github.jspxnet.io.ReadPdfTextFile;

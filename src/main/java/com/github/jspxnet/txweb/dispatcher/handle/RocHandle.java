@@ -17,8 +17,6 @@ import com.github.jspxnet.txweb.result.RocResult;
 import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.util.HttpUtil;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.XMLUtil;
 import lombok.extern.slf4j.Slf4j;

@@ -3,7 +3,6 @@ package com.github.jspxnet.txweb.devcenter.interceptor;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
-import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
@@ -15,6 +14,7 @@ import com.github.jspxnet.txweb.interceptor.InterceptorSupport;
 import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.UserSession;
+import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -52,24 +52,35 @@ public class DevCenterInterceptor extends InterceptorSupport {
         ActionContext actionContext = ThreadContextHolder.getContext();
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         Action action = actionProxy.getAction();
+
+        String requestUri = actionContext.getRequest().getRequestURI();
+        if (requestUri==null) {
+            requestUri = StringUtil.empty;
+        }
+        if (ENV_TEMPLATE.getBoolean(Environment.USE_SCHEDULER_REGISTER) && (requestUri.startsWith("/devcenter/task/")  || requestUri.startsWith("/devcenter/tasklocal") || requestUri.startsWith("/devcenter/taskserv"))) {
+            String schedulerRegisterToken = ENV_TEMPLATE.getString(Environment.SCHEDULER_REGISTER_TOKEN);
+            String token = action.getString(Environment.SCHEDULER_REGISTER_TOKEN, true);
+            if (token.equals(schedulerRegisterToken)) {
+                return actionInvocation.invoke();
+            }
+        }
+
         UserSession userSession = onlineManager.getUserSession(actionContext);
-
         String userListStr = ENV_TEMPLATE.getString(Environment.KEY_DCV_ENTER_USER_LIST);
-        if (StringUtil.isNull(userListStr))
-        {
+        if (StringUtil.isNull(userListStr)) {
             action.addFieldInfo(Environment.warningInfo, "配置文件中先配置dev_user_list,用户名授权后才可进入");
             return ActionSupport.UNTITLED;
         }
 
-        String[] userList = StringUtil.split(userListStr,StringUtil.SEMICOLON);
-        if (ObjectUtil.isEmpty(userList))
-        {
+        String[] userList = StringUtil.split(userListStr, StringUtil.SEMICOLON);
+        if (ObjectUtil.isEmpty(userList)) {
             action.addFieldInfo(Environment.warningInfo, "配置文件中先配置dev_user_list,用户名授权后才可进入");
             return ActionSupport.UNTITLED;
         }
 
-        if (!ArrayUtil.inArray(userList,userSession.getName(),true)) {
+        if (!ArrayUtil.inArray(userList, userSession.getName(), true)) {
             action.addFieldInfo(Environment.warningInfo, "没有权限不允许进入");
+            log.debug("没有权限不允许进入 requestUri:{}",requestUri);
             return ActionSupport.UNTITLED;
         }
         return actionInvocation.invoke();

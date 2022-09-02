@@ -1,5 +1,7 @@
 package com.github.jspxnet.sioc.annotation;
 
+import com.github.jspxnet.utils.StringUtil;
+
 import java.lang.annotation.*;
 /**
  *
@@ -27,6 +29,9 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Scheduled {
+    //定时器名称
+    String name() default StringUtil.empty;
+
     String cron() default "0 */1 * * * *";
 
     boolean once() default false;
@@ -36,5 +41,7 @@ public @interface Scheduled {
 
     //不受外部配置控制,一定会启动
     boolean force() default false;
+
+    
 
 }

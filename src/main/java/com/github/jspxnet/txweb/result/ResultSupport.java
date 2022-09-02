@@ -16,6 +16,8 @@ import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
+import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
@@ -30,6 +32,8 @@ import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -134,6 +138,11 @@ public abstract class ResultSupport implements Result {
         String resultMethods = action.getString(ActionEnv.Key_ResultMethods);
         if (StringUtil.isNull(resultMethods)) {
             resultMethods = action.getString(ActionEnv.Key_ResultMethods);
+        }
+
+        HttpServletRequest request = actionContext.getRequest();
+        if (request instanceof RequestTo || INetCommand.RPC.equals(request.getAttribute(ActionEnv.Key_REMOTE_TYPE))) {
+            return actionContext.getResult();
         }
         //如果有错误信息，先返回错误信息
         //什么都没有的情况返回提示信息

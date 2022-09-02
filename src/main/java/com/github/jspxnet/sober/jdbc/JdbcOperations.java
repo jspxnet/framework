@@ -12,8 +12,8 @@ package com.github.jspxnet.sober.jdbc;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.Placeholder;
-import com.github.jspxnet.cache.DefaultCache;
-import com.github.jspxnet.cache.JSCacheManager;
+import com.github.jspxnet.cache.*;
+import com.github.jspxnet.cache.core.JSCache;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.scriptmark.ScriptRunner;
 import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
@@ -141,26 +141,46 @@ public abstract class JdbcOperations implements SoberSupport {
 
 
     /**
-     *
+     * 并且根据数据模型自动创建缓存,
      * @param dto 是否包含DTO
      * @return 得到所有表结构的模型
      */
     @Override
-    public Map<String,TableModels> getAllTableModels(boolean dto)
-    {
-        String cacheKey = Environment.KEY_SOBER_TABLE_CACHE + "_"+ObjectUtil.toInt(dto);
-        Map<String,TableModels>  result = (Map<String,TableModels>)JSCacheManager.get(DefaultCache.class,cacheKey);
-      /*  if (!ObjectUtil.isEmpty(result))
+    public Map<String,TableModels> getAllTableModels(boolean dto) {
+
+        String cacheKey = Environment.KEY_SOBER_TABLE_CACHE + "_" + ObjectUtil.toInt(dto);
+        Map<String, TableModels> result = null;
+        if (soberFactory.isUseCache())
         {
-            return result;
-        }*/
+            result = (Map<String,TableModels>)JSCacheManager.get(DefaultCache.class,cacheKey);
+            if (!ObjectUtil.isEmpty(result))
+            {
+                return result;
+            }
+        }
         result = new HashMap<>();
         List<SoberTable> list = SoberUtil.getScanTableAnnotationList(dto);
         for (SoberTable table:list)
         {
             result.put(table.getId(),table);
+            CacheManager cacheManager = JSCacheManager.getCacheManager();
+            if (table.isUseCache() && cacheManager.containsKey(table.getClassName()))
+            {
+                Cache cache = cacheManager.getCache(DefaultCache.class);
+                Map<String,String> configMap = new HashMap<>();
+                configMap.put("name",table.getClassName());
+                configMap.put("keepTime",ObjectUtil.toString(cache.getSecond()));
+                configMap.put("maxElements",ObjectUtil.toString(cache.getMaxElements()));
+                configMap.put("eternal",ObjectUtil.toString(cache.isEternal()));
+                configMap.put("diskStorePath",null);
+                IStore store = (IStore)EnvFactory.getBeanFactory().getBean(Environment.DEFAULT_STORE,Environment.CACHE);
+                JSCacheManager.getCacheManager().createCache(store,configMap);
+            }
         }
-        //JSCacheManager.put(DefaultCache.class,cacheKey,result);
+        if (soberFactory.isUseCache())
+        {
+            JSCacheManager.put(DefaultCache.class,cacheKey,result);
+        }
         return result;
     }
     /**
@@ -1022,13 +1042,15 @@ public abstract class JdbcOperations implements SoberSupport {
     }
 
     /**
-     * @param collection 批量快速保持
+     *
+     * @param collection  批量快速保持 集合
+     * @return 更新数量,如果错误 返回 负数
      * @throws Exception 异常
      */
     @Override
-    public void batchSave(Collection<?> collection) throws Exception {
+    public int batchSave(Collection<?> collection) throws Exception {
         if (collection == null || collection.size() < 1) {
-            return;
+            return -2;
         }
         Object checkObj = collection.iterator().next();
         TableModels soberTable = getSoberTable(checkObj.getClass());
@@ -1050,7 +1072,7 @@ public abstract class JdbcOperations implements SoberSupport {
             fieldArray = soberTable.getFullFieldArray();
         }
         if (fieldArray == null || fieldArray.length < 1) {
-            return;
+            return -2;
         }
 
         valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
@@ -1105,6 +1127,7 @@ public abstract class JdbcOperations implements SoberSupport {
             JdbcUtil.closeConnection(conn);
             valueMap.clear();
         }
+        return result;
     }
 
     /**

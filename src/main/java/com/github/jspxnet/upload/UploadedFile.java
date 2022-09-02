@@ -181,7 +181,7 @@ public class UploadedFile implements Serializable {
      * @return 只有目录
      */
     public String getChunkFolderName(String yz) {
-        String body = StringUtil.getPolicyName(FileUtil.getNamePart(original), 40, FileRenamePolicy.special);
+        String body = StringUtil.getPolicyName(FileUtil.getNamePart(original), 40, FileRenamePolicy.SPECIAL);
         StringBuilder sb = new StringBuilder();
         sb.append(Environment.NAME_TYPE_CHUNK).append("-").append(yz).append("-").append(body);
         return sb.toString().toLowerCase();
@@ -204,7 +204,7 @@ public class UploadedFile implements Serializable {
         }
         File newDir = new File(dir, getChunkFolderName(yz));
         FileUtil.makeDirectory(newDir);
-        String body = StringUtil.getPolicyName(FileUtil.getNamePart(original), 40, FileRenamePolicy.special);
+        String body = StringUtil.getPolicyName(FileUtil.getNamePart(original), 40, FileRenamePolicy.SPECIAL);
         String typePart = FileUtil.getTypePart(original);
         File newFile = new File(newDir, body + "-[" + chunk + "]" + StringUtil.DOT + typePart);
         File oldFile = getFile();
@@ -238,7 +238,7 @@ public class UploadedFile implements Serializable {
         if (fileType == null) {
             return null;
         }
-        String body = StringUtil.getPolicyName(FileUtil.getNamePart(original), 12, FileRenamePolicy.special);
+        String body = StringUtil.getPolicyName(FileUtil.getNamePart(original), 12, FileRenamePolicy.SPECIAL);
         File newDir = new File(dir, getChunkFolderName(yz));
         File[] listFiles = newDir.listFiles();
         if (listFiles != null && listFiles.length <= 0) {
@@ -310,7 +310,7 @@ public class UploadedFile implements Serializable {
         if (fileType == null) {
             return false;
         }
-        String body = StringUtil.getPolicyName(FileUtil.getNamePart(original), 12, FileRenamePolicy.special);
+        String body = StringUtil.getPolicyName(FileUtil.getNamePart(original), 12, FileRenamePolicy.SPECIAL);
         File newDir = new File(dir, getChunkFolderName(yz));
         File[] listFiles = newDir.listFiles();
         if (listFiles == null || listFiles.length <= 0) {

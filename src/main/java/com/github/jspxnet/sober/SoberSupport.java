@@ -209,10 +209,11 @@ public interface SoberSupport extends Serializable {
 
     /**
      *
-     * @param collection 批量快速保持
+     * @param collection  批量快速保持 集合
+     * @return 更新数量,如果错误 返回 负数
      * @throws Exception 异常
      */
-    void batchSave(Collection<?> collection) throws Exception;
+    int batchSave(Collection<?> collection) throws Exception;
 
     /**
      * 删除对象

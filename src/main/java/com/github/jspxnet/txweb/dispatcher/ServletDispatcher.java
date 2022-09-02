@@ -96,8 +96,8 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
             e.printStackTrace();
             request = (HttpServletRequest)servletRequest;
         }
-        //
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
+        HttpServletResponse   response = (HttpServletResponse) servletResponse;
+
         if (useEvasive && JspxNetApplication.checkRun() && evasiveManager.execute(request, response)) {
             return;
         }

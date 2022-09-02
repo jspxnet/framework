@@ -166,7 +166,7 @@ public class SingleRedissonStore extends Store implements IStore {
     @Override
     public Collection<CacheEntry> getAll() {
         if (!useCache||redisson==null||redisson.isShutdown()) {
-            return new ArrayList(0);
+            return new ArrayList<>(0);
         }
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         if (rMap!=null)
@@ -174,7 +174,7 @@ public class SingleRedissonStore extends Store implements IStore {
            return rMap.values();
 
         }
-        return new ArrayList(0);
+        return new ArrayList<>(0);
     }
     /**
      *

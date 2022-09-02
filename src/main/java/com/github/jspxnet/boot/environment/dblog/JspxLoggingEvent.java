@@ -1,6 +1,5 @@
 package com.github.jspxnet.boot.environment.dblog;
 
-import ch.qos.logback.classic.Level;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Table;

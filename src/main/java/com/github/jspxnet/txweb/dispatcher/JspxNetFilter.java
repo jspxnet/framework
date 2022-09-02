@@ -63,7 +63,7 @@ public class JspxNetFilter implements Filter {
         }
         //必须在evasiveManager 前边
         //getParameter()、getInputStream()和getReader() 三个是冲突的,调用一个,其他的会数据错误
-        HttpServletRequest request;
+        HttpServletRequest request = null;
         try {
             if (!RequestUtil.isMultipart((HttpServletRequest)servletRequest))
             {
@@ -76,7 +76,7 @@ public class JspxNetFilter implements Filter {
             e.printStackTrace();
             request = (HttpServletRequest)servletRequest;
         }
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
+        HttpServletResponse   response = (HttpServletResponse) servletResponse;
         if (useEvasive && JspxNetApplication.checkRun() && evasiveManager.execute(request, response)) {
             return;
         }

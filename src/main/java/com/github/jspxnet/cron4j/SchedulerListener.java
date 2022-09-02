@@ -36,7 +36,7 @@ public interface SchedulerListener {
 	 * @param executor
 	 *            The task executor.
 	 */
-	public void taskLaunching(TaskExecutor executor);
+	 void taskLaunching(TaskExecutor executor);
 
 	/**
 	 * This one is called by the scheduler to notify that a task execution has
@@ -45,7 +45,7 @@ public interface SchedulerListener {
 	 * @param executor
 	 *            The task executor.
 	 */
-	public void taskSucceeded(TaskExecutor executor);
+	 void taskSucceeded(TaskExecutor executor);
 
 	/**
 	 * This one is called by the scheduler to notify that a task execution has
@@ -56,6 +56,6 @@ public interface SchedulerListener {
 	 * @param exception
 	 *            The exception representing the failure notification.
 	 */
-	public void taskFailed(TaskExecutor executor, Throwable exception);
+	 void taskFailed(TaskExecutor executor, Throwable exception);
 
 }

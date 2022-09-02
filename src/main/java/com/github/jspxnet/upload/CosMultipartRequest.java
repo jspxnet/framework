@@ -128,7 +128,7 @@ public class CosMultipartRequest extends MultipartRequest {
         // Some people like transfer fetch query string parameters from
         // MultipartRequest, so here we make that possible.  Thanks transfer
         // Ben Johnson, ben.johnson@merrillcorp.com, for the idea.
-        if (request.getQueryString() != null) {
+        if (!StringUtil.isNull(request.getQueryString())) {
             // Let HttpUtils create a name->String[] structure
             String queryString = URLUtil.getUrlDecoder(request.getQueryString(),encoding);
             Map<String, String[]> queryParameters = HttpUtil.parseQueryString(queryString);

@@ -63,10 +63,13 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 {
                     throw new Exception(targetObject + " Rpc 创建远程调用对象失败,确认远程服务器已经启动");
                 }
-                Object result = method.invoke(targetObject, args);
-                if (result==null)
+                Object result = null;
+                if (args==null)
                 {
-                    throw new Exception(targetObject + " Rpc 创建远程调用对象失败,确认远程服务器已经启动,并且对应参数运行无异常");
+                    result = method.invoke(targetObject);
+                } else
+                {
+                    result =  method.invoke(targetObject, args);
                 }
                 return result;
             }
@@ -91,12 +94,7 @@ public class RpcClientInvocationHandler implements InvocationHandler {
                 try {
                     HessianClient hessianClient = HessianClientFactory.getInstance();
                     Object targetObject = hessianClient.create(target,hessianUrl,RequestUtil.getToken(request));
-                    Object result = method.invoke(targetObject, args);
-                    if (result==null)
-                    {
-                        throw new Exception(targetObject + " http 创建远程调用对象失败,确认远程服务器已经启动,并且对应参数运行无异常");
-                    }
-                    return result;
+                    return method.invoke(targetObject, args);
                 } catch (Exception e)
                 {
                     log.error("检查http rpc 调用路径是否正确:{},error:{}",hessianUrl,e.getLocalizedMessage());

@@ -521,7 +521,7 @@ public class DefaultActionInvocation implements ActionInvocation {
 
                 TXWebUtil.print(new JSONObject(RocResponse.error(ErrorEnumType.NEED_LOGIN.getValue(), action.getFailureMessage())),
                         WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_401);
-            }
+            } else
             if (ActionSupport.UNTITLED.equalsIgnoreCase(resultCode)) {
 
                 RocResponse<?> rocResponse = RocResponse.error(ErrorEnumType.POWER.getValue(), action.getFailureMessage());
@@ -531,21 +531,21 @@ public class DefaultActionInvocation implements ActionInvocation {
             }
         } else {
             String loginUrl = EnvFactory.getEnvironmentTemplate().getString(Environment.userLoginUrl);
+            String untitledUrl = EnvFactory.getEnvironmentTemplate().getString(Environment.untitledUrl);
             if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode) && !StringUtil.isEmpty(loginUrl)) {
                 RedirectResult redirectResult = new RedirectResult();
                 redirectResult.setUrl(loginUrl);
                 redirectResult.execute(this);
-                return;
-            }
-            String untitledUrl = EnvFactory.getEnvironmentTemplate().getString(Environment.untitledUrl);
+            } else
             if (ActionSupport.UNTITLED.equalsIgnoreCase(resultCode) && !StringUtil.isEmpty(untitledUrl)) {
                 RedirectResult redirectResult = new RedirectResult();
                 redirectResult.setUrl(untitledUrl);
                 redirectResult.execute(this);
-                return;
+            } else
+            {
+                Result result = new ErrorResult();
+                result.execute(this);
             }
-            Result result = new ErrorResult();
-            result.execute(this);
         }
     }
 

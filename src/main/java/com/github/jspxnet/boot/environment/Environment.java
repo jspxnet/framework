@@ -135,7 +135,7 @@ public abstract class Environment {
 
     final public static String remote = "remote";
 
-    final public static String frameworkName = "jspx.net framework";
+    final public static String frameworkName = "jspx cloud framework";
 
     final public static String useEvasive = "useEvasive";
 
@@ -148,7 +148,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.67";
+    final static public String VERSION = "6.70";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -172,7 +172,6 @@ public abstract class Environment {
 
     final public static String logFatalFile = "logFatalFile";
 
-
     final public static String log_info_file = "sys_info.log";
 
     final public static String log_error_file = "sys_error.log";
@@ -180,6 +179,8 @@ public abstract class Environment {
     final public static String jspxProperties = "jspxProperties";
 
     final public static String jspx_properties_file = "jspx.properties";
+
+    final public static String jspx_properties_template = "jspx-${active}.properties";
 
     final public static String logInfo = "info";
 
@@ -383,6 +384,9 @@ public abstract class Environment {
     static public final String mailActive = "mailActive";
 
     static public final String CACHE = "cache";
+
+    static public final String DEFAULT_STORE = "defaultStore";
+
 
 
     static public final String useCache = "useCache";
@@ -641,5 +645,17 @@ public abstract class Environment {
 
     //表结构模型缓存
     public static final String KEY_SOBER_TABLE_CACHE = "sober_table_cache";
+
+
+    //配置文件方式的启动环境
+    public static final String JSPX_ENV_ACTIVE = "jspx.env.active";
+
+    //任务注册中心begin
+    public static final String USE_SCHEDULER_REGISTER = "useSchedulerRegister";
+    public static final String SCHEDULER_REGISTER_URL = "schedulerRegisterUrl";
+    public static final String SCHEDULER_REGISTER_API = "schedulerRegisterApi";
+    public static final String SCHEDULER_REGISTER_NAME = "schedulerRegisterName";
+    public static final String SCHEDULER_REGISTER_TOKEN = "schedulerRegisterToken";
+    //任务注册中心end
 
 }

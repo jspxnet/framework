@@ -22,18 +22,17 @@ public class JspxNetFileRenamePolicy extends FileRenamePolicy {
         body = StringUtil.fullToHalf(body);
         if (StringUtil.isChinese(body)) {
             try {
-                    body = ChineseUtil.getFJFilter(body);
                     body = ChineseUtil.firstSpell(body, "");
             } catch (Exception e) {
                 log.warn("没有载入中文支持包jspx-zhex-*.jar,不能正确转换中文名", e);
             }
         }
-        body = StringUtil.trim(StringUtil.getPolicyName(StringUtil.deleteChinese(body), 10, special));
+        body = StringUtil.trim(StringUtil.getPolicyName(StringUtil.deleteChinese(body), 10, SPECIAL));
         File newFile = new File(f.getParentFile(), body + DateUtil.toString(new Date(),DateUtil.DATE_GUID) + ext);
         if (createNewFile(newFile)) {
             return newFile;
         }
-        body = StringUtil.trim(StringUtil.getPolicyName(StringUtil.deleteChinese(body), 6, special));
+        body = StringUtil.trim(StringUtil.getPolicyName(StringUtil.deleteChinese(body), 6, SPECIAL));
         String newName = body + DateUtil.toString(new Date(),DateUtil.DATE_GUID) + RandomUtil.getRandomGUID(4);
 
         newFile = new File(f.getParentFile(), newName+ ext);
@@ -52,5 +51,4 @@ public class JspxNetFileRenamePolicy extends FileRenamePolicy {
         }
         return f;
     }
-
 }

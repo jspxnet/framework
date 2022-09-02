@@ -55,7 +55,6 @@ public class ShellAutoRun {
         this.enable = enable;
     }
 
-
     public void run() {
         if (enable && StringUtil.hasLength(startShell)) {
             try {

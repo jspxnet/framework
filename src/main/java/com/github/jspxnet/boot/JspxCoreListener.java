@@ -52,6 +52,8 @@ import java.util.*;
  * date: 2007-12-1
  * Time: 17:51:48
  * author chenyuan
+ *
+ * jspx.env.active=dev  配置启动环境
  */
 @Slf4j
 public class JspxCoreListener implements ServletContextListener {
@@ -107,6 +109,7 @@ public class JspxCoreListener implements ServletContextListener {
             jspxConfiguration.setDefaultPath(defaultPath);
         }
 
+
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         Properties properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
         String bootConfMode = properties.getProperty(Environment.BOOT_CONF_MODE,Environment.defaultValue);
@@ -125,7 +128,16 @@ public class JspxCoreListener implements ServletContextListener {
         }
         else
         {
-           envTemplate.createJspxEnv(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
+           String active_config =  System.getenv(Environment.JSPX_ENV_ACTIVE);
+           String jspx_properties_file = Environment.jspx_properties_file;
+           if (!StringUtil.isNull(active_config))
+           {
+              Map<String,Object> valueMap = new HashMap<>();
+              valueMap.put("active",active_config);
+              jspx_properties_file = EnvFactory.getPlaceholder().processTemplate(valueMap,Environment.jspx_properties_template);
+              jspxConfiguration.setDefaultConfigFile(jspx_properties_file);
+           }
+           envTemplate.createJspxEnv(StringUtil.isNull(jspxConfiguration.getDefaultPath())?"":jspxConfiguration.getDefaultPath() + jspx_properties_file);
         }
 
         //默认方式
@@ -137,7 +149,6 @@ public class JspxCoreListener implements ServletContextListener {
             log.info("你需要放入" + Environment.jspx_properties_file + "配置文件,然后重新启动java服务器");
             return;
         }
-
 
         log.info("create jspx.net system Environment");
         //环境配置
@@ -206,7 +217,6 @@ public class JspxCoreListener implements ServletContextListener {
             JSCacheManager.getCacheManager().registeredCache(cache);
         }
 
-
         com.github.jspxnet.txweb.config.Configuration configuration = DefaultConfiguration.getInstance();
         try {
             configuration.loadConfigMap();
@@ -244,7 +254,6 @@ public class JspxCoreListener implements ServletContextListener {
         EvasiveConfiguration.getInstance().shutdown();
         log.info("Evasive config clean");
         //Evasive配置卸载begin
-
 
         //定时任务
         SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();

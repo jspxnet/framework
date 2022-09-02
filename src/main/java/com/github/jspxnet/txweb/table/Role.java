@@ -64,11 +64,11 @@ public class Role extends OperateTable implements IRole {
     @Column(caption = "图片", length = 250, notNull = true)
     private String images = StringUtil.empty;
 
-    @Param(caption = "办公角色", max = 2, enumType = YesNoEnumType.class)
+    @Column(caption = "办公角色", length = 10000)
     private int officeType = YesNoEnumType.NO.getValue();
 
     //是否允许上传
-    @Param(caption = "是否允许上传", max = 2, enumType = YesNoEnumType.class)
+    @Column(caption = "是否允许上传", enumType = YesNoEnumType.class)
     private int useUpload = YesNoEnumType.NO.getValue();
 
     @Column(caption = "上传的文件大小", notNull = true)

@@ -18,7 +18,7 @@ import com.github.jspxnet.cache.store.MemoryStore;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
-import com.github.jspxnet.sober.config.SQLRoom;
+import com.github.jspxnet.sioc.scheduler.TaskProxy;
 import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.DateUtil;
@@ -106,7 +106,7 @@ public class JSCacheManager implements CacheManager {
         if (!containsKey(cache.getName())) {
             if (cache.getSecond() > 0 && cache.getStore().isUseTimer()) {
                 SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
-                schedulerManager.add(cache.getName(), "* * * * * *", cache);
+                schedulerManager.add(cache.getName(),"缓存清理","0 */1 * * * *", TaskProxy.SYS_TYPE, cache);
             }
             caches.add(cache);
         }
@@ -326,7 +326,6 @@ public class JSCacheManager implements CacheManager {
      */
     static public long getSize(Class<?> cacheName) {
         return CACHE_MANAGER.getCache(cacheName).getSize();
-
     }
 
     /**

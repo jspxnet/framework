@@ -182,11 +182,6 @@ public class TemplateResult extends ResultSupport {
 
         StringWriter out = new StringWriter();
         scriptMark.process(out, valueMap);
-        PrintWriter writer = response.getWriter();
-        writer.print(out);
-        writer.flush();
-        writer.close();
-
         //页面缓存支持begin
         ActionConfig actionConfig = actionInvocation.getActionConfig();
         if (actionConfig!=null&&actionConfig.isCache())
@@ -200,6 +195,10 @@ public class TemplateResult extends ResultSupport {
             }
         }
         //页面缓存支持end
+        PrintWriter writer = response.getWriter();
+        writer.print(out);
+        writer.flush();
+        writer.close();
         out.close();
     }
 }

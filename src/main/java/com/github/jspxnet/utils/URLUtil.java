@@ -10,7 +10,6 @@
 package com.github.jspxnet.utils;
 
 import com.github.jspxnet.boot.environment.Environment;
-
 import java.io.File;
 import java.net.*;
 import java.io.UnsupportedEncodingException;
@@ -474,10 +473,10 @@ public final class URLUtil {
         }
         return namespace;
     }
-   public static void main(String[] args) {
+   /* public static void main(String[] args) {
         String str = "测试中文1%。此的AA";
         String out1 = getUrlEncoder(str,"UTF8");
         System.out.println(out1);
         System.out.println(getUrlDecoder(out1,"UTF8"));
-    }
+    }*/
 }

@@ -55,12 +55,12 @@ import java.util.*;
  */
 @Slf4j
 public class HtmlPdfResult extends ResultSupport {
-    private final static TemplateConfigurable configurable = new TemplateConfigurable();
-    private static final String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
-    private static final String fontsPath = ENV_TEMPLATE.getString(Environment.fontsPath);
+    private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
+    private static final String TEMPLATE_PATH = ENV_TEMPLATE.getString(Environment.templatePath);
+    private static final String FONTS_PATH =  ENV_TEMPLATE.getString(Environment.fontsPath,"").endsWith("/")?ENV_TEMPLATE.getString(Environment.fontsPath):(ENV_TEMPLATE.getString(Environment.fontsPath)+"/");
 
     static {
-        configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
+        CONFIGURABLE.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
     }
 
 
@@ -80,10 +80,10 @@ public class HtmlPdfResult extends ResultSupport {
         //如果使用cache 就使用uri
 
         String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
-        configurable.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), templatePath});
+        CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), TEMPLATE_PATH});
         ScriptMark scriptMark;
         try {
-            scriptMark = new ScriptMarkEngine(cacheKey, fileSource, configurable);
+            scriptMark = new ScriptMarkEngine(cacheKey, fileSource, CONFIGURABLE);
         } catch (Exception e) {
             if (DEBUG) {
                 log.debug("file not found:" + f.getAbsolutePath(), e);
@@ -116,7 +116,7 @@ public class HtmlPdfResult extends ResultSupport {
             ITextRenderer renderer = new ITextRenderer();
             // 解决中文支持问题
             ITextFontResolver fontResolver = renderer.getFontResolver();
-            fontResolver.addFont(fontsPath + "simsun.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+            fontResolver.addFont(FONTS_PATH + "simsun.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
             //解决图片的相对路径问题
             renderer.getSharedContext().setBaseURL(new URL(action.getTemplatePath()).toString());
             renderer.setDocumentFromString(HtmlUtil.getSafeFilter(out.toString()));

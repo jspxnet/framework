@@ -5,10 +5,14 @@ import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.table.OperateTable;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Created by chenyuan on 2016/1/14.
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 @Table(name = "jspx_download_file_client", caption = "附件下载记录")
 public class DownloadFileClient extends OperateTable {
     @Id
@@ -36,67 +40,4 @@ public class DownloadFileClient extends OperateTable {
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getFid() {
-        return fid;
-    }
-
-    public void setFid(long fid) {
-        this.fid = fid;
-    }
-
-    public String getNetType() {
-        return netType;
-    }
-
-    public void setNetType(String netType) {
-        this.netType = netType;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getBrowser() {
-        return browser;
-    }
-
-    public void setBrowser(String browser) {
-        this.browser = browser;
-    }
-
-    public String getSystem() {
-        return system;
-    }
-
-    public void setSystem(String system) {
-        this.system = system;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
 }

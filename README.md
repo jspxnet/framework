@@ -1,8 +1,25 @@
-#Jspx Framework 6.6x
+#Jspx Framework 6.7x
 
 ##简介
 
-一套开源的 Jspx Framework (简实构架)是一套开源的java一体化构架, 完整的架构体系,ioc、cache、DAO、连接池、验证、模板、sqlmap持久层，b/s,c/s ,分布式集群调用支持, 语言上只使用了标准的 java 和javascript,模板语言呈现页面和API接口方式无缝结合,支持读写分。支持resetFull和传统模板呈现页面。自动API文档生成, 其中融入了很多作者开发软件碰到的问题解决方法。可替代sping cloud构架的的一套解决方案,同时也可以嵌入到spring中是用持久层。 主体结构和spring类似,但功能细节点的设计上不同,更多的添加易性,简化和实用性。 这套框架不但提供了技术实现,同时也提供了一套开发规范,让系统的结构分层,代码规范,文档一体化的实现。 
+一套开源的 Jspx Framework (简实构架)是一套开源的java一体化构架, 完整的架构体系,ioc、cache、DAO、连接池、验证、模板、sqlmap持久层，b/s,c/s ,分布式集群调用支持, 语言上只使用了标准的 java 和javascript,模板语言呈现页面和API接口方式无缝结合,支持读写分。支持resetFull和传统模板呈现页面。自动API文档生成, 其中融入了很多作者开发软件碰到的问题解决方法。可替代sping cloud构架的的一套解决方案,同时也可以嵌入到spring中是用持久层。 主体结构和spring类似,但功能细节点的设计上不同,更多的添加易性,简化和实用性。
+这套框架不但提供了技术实现,同时也提供了一套开发规范,让系统的结构分层,代码规范,文档一体化的实现。
+
+1.内部支持tcp,http方式分布式调用
+
+2.内置网络服务注册中心,目前支持consul外联
+
+3.配置中心支持整合apollo.
+
+4.根据代码自动生成API接口文档,不用向swagger那样只是换个地方写注释.注释是根据提示等信息自动生成.
+
+5.支持sql在线配置,类似mybatis的sql可以在线修改的功能.
+
+6.内存结构自动化,不用在做麻烦的内存保存结构管理,系统自动分类保存.
+
+7.定时任务分布式管理,类似xxl-job 分布式管理任务调度.
+
+
 
 ##仓库地址
 
@@ -10,7 +27,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.69</version>
+    <version>6.70</version>
 </dependency>
 ```
     
@@ -124,3 +141,4 @@
 * 2022年05月：Jspx.net Framework 6.56 最后一个非本地线程方式版本.
 * 2022年06月：Jspx.net Framework 6.60-66 提供本地线程方式版本,并发会更好,内核优化性能提升.交大的调整变动66完整重新测试稳定.
 * 2022年07月：Jspx.net Framework 6.67-69 添加了开发者中心功能,能够快速的配置开发页面,sqlmap配置支持在开发中心配置,不用在写xml.修复bug
+* 2022年09月：Jspx cloud Framework 6.70 添加开发中心,支持sql在线配置,内存结构自动化,定时任务分布式管理,满足不重启的情况最大范围调整逻辑

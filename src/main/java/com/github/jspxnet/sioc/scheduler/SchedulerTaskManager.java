@@ -1,17 +1,21 @@
 package com.github.jspxnet.sioc.scheduler;
 
-
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.cron4j.Scheduler;
 import com.github.jspxnet.cron4j.SchedulingPattern;
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.annotation.Scheduled;
+import com.github.jspxnet.txweb.model.dto.SchedulerDto;
+import com.github.jspxnet.txweb.turnpage.TurnPageButton;
+import com.github.jspxnet.txweb.turnpage.impl.TurnPageButtonImpl;
+import com.github.jspxnet.utils.BooleanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.XMLUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -34,13 +38,15 @@ public class SchedulerTaskManager implements SchedulerManager {
 
     /**
      *
-     * @param id 任务id
-     * @param pattern 时间表达式
-     * @param runnable 执行类
-     * @return 添加是否成功
+     * @param id  任务id
+     * @param name 任务名称
+     * @param pattern  时间表达式
+     * @param taskType  任务类型
+     * @param runnable  执行类
+     * @return  添加是否成功
      */
     @Override
-    public boolean add(String id, String pattern, Runnable runnable) {
+    public boolean add(String id, String name, String pattern,int taskType, Runnable runnable) {
         if (SCHEDULER_MAP.containsKey(id)) {
             //已经有这个任务了，不重复
             return false;
@@ -48,13 +54,16 @@ public class SchedulerTaskManager implements SchedulerManager {
         if (StringUtil.isEmpty(pattern)) {
             pattern = "* * * * * *";
         }
-        Scheduler scheduler = new Scheduler();
-        //声明线程后调用setDeamon(true)，将该线程设置为守护线程，则容器关闭后，这些守护线程会立即关闭
-        scheduler.setDaemon(true);
-        scheduler.schedule(pattern, runnable);
-        scheduler.start();
-        SCHEDULER_MAP.put(id, scheduler);
-        return true;
+
+        TaskProxy taskProxy = new TaskProxy();
+        taskProxy.setTaskType(taskType);
+        taskProxy.setName(name);
+        taskProxy.setOnce(YesNoEnumType.NO.getValue());
+        taskProxy.setBean(runnable);
+        taskProxy.setPattern(pattern);
+        taskProxy.setMethodName("run");
+        return add(taskProxy);
+
     }
 
     /**
@@ -80,18 +89,20 @@ public class SchedulerTaskManager implements SchedulerManager {
             TaskProxy taskProxy = new TaskProxy();
             taskProxy.setBean(bean);
             taskProxy.setMethodName(method.getName());
+            taskProxy.setName(scheduled.name());
+            if (StringUtil.isNull(taskProxy.getName())) {
+                taskProxy.setName(method.getName());
+            }
             //scheduled.cron() 变量替换
             String cron = scheduled.cron();
-            if (scheduled.cron().contains("${"))
-            {
-                cron = EnvFactory.getPlaceholder().processTemplate(valueMap,cron);
-                if (StringUtil.isEmpty(cron))
-                {
+            if (scheduled.cron().contains("${")) {
+                cron = EnvFactory.getPlaceholder().processTemplate(valueMap, cron);
+                if (StringUtil.isEmpty(cron)) {
                     cron = "0 */1 * * * *";
                 }
             }
             taskProxy.setPattern(cron);
-            taskProxy.setOnce(scheduled.once());
+            taskProxy.setOnce(BooleanUtil.toInt(scheduled.once()));
             taskProxy.setDelayed(scheduled.delayed());
             add(taskProxy);
         }
@@ -117,26 +128,22 @@ public class SchedulerTaskManager implements SchedulerManager {
             //已经有这个任务了，不重复
             return false;
         }
-
-        log.debug("定时任务加入:id={},{}",taskProxy.getScheduledId(),taskProxy.toString());
-        if (!SchedulingPattern.validate(taskProxy.getPattern())) {
-            log.error("Scheduled cron is cron4j,定时器表达式错误，查看cron4j表达式," + taskProxy.getBean().getClass());
-            return false;
-        }
-
-        Scheduler scheduler = new Scheduler();
-        scheduler.setDaemon(true);
         String cron = taskProxy.getPattern();
-        if (cron.contains("${"))
-        {
+        if (cron.contains("${")) {
+            cron = XMLUtil.deleteQuote(cron);
             Map<String, Object> valueMap = EnvFactory.getEnvironmentTemplate().getVariableMap();
-            cron = EnvFactory.getPlaceholder().processTemplate(valueMap,cron);
-            if (StringUtil.isEmpty(cron))
-            {
+            cron = EnvFactory.getPlaceholder().processTemplate(valueMap, cron);
+            if (StringUtil.isEmpty(cron)) {
                 cron = "0 */1 * * * *";
             }
+            taskProxy.setPattern(cron);
         }
-        scheduler.schedule(cron, taskProxy);
+        log.debug("定时任务加入:id={},{}", taskProxy.getScheduledId(), taskProxy);
+        if (!SchedulingPattern.validate(taskProxy.getPattern())) {
+            log.error("Scheduled cron is cron4j,定时器表达式错误:{}，类对象:{}",taskProxy.getPattern(),taskProxy.getBean().getClass());
+            return false;
+        }
+        Scheduler scheduler = new Scheduler(taskProxy);
         scheduler.start();
         SCHEDULER_MAP.put(scheduledId, scheduler);
         return true;
@@ -169,14 +176,51 @@ public class SchedulerTaskManager implements SchedulerManager {
 
 
     /**
+     *
+     * @param find 查询
+     * @param page 页面
+     * @param count 行数
+     * @return 返回列表
+     */
+    @Override
+    public List<SchedulerDto> getList(String find, int page, int count) {
+
+        TurnPageButton turnPageButton = new TurnPageButtonImpl();
+        turnPageButton.setCurrentPage(page);
+        turnPageButton.setCount(count);
+        List<SchedulerDto> result = new ArrayList<>();
+        Collection<Scheduler> collation = SCHEDULER_MAP.values();
+        turnPageButton.setTotalCount(collation.size());
+        int firstRow = (int) turnPageButton.getFristRow();
+        int i = -1;
+        for (Scheduler scheduler : collation) {
+            i++;
+            if (scheduler == null) {
+                continue;
+            }
+            if (i>=firstRow) {
+                SchedulerDto dto = scheduler.getTaskConf();
+                if (StringUtil.isNull(find) || dto.getMethodName().contains(find)||dto.getName().contains(find)
+                        ||dto.getClassName().contains(find))
+                {
+                    result.add(scheduler.getTaskConf());
+                }
+            }
+            if (result.size() >= count) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
      * @param id 任务id
      * @return 删除定时任务
      */
     @Override
-     public Scheduler stopRemove(String id) {
+    public Scheduler stopRemove(String id) {
         Scheduler scheduler = SCHEDULER_MAP.get(id);
-        if (scheduler!=null&&scheduler.isStarted())
-        {
+        if (scheduler != null && scheduler.isStarted()) {
             scheduler.stop();
         }
         return SCHEDULER_MAP.remove(id);
@@ -188,22 +232,12 @@ public class SchedulerTaskManager implements SchedulerManager {
     @Override
     public void shutdown() {
         for (Scheduler scheduler : SCHEDULER_MAP.values()) {
-            if (scheduler==null)
-            {
+            if (scheduler == null) {
                 continue;
             }
-            if (scheduler.isStarted())
-            {
+            if (scheduler.isStarted()) {
                 scheduler.stop();
             }
-        }
-    }
-
-    public void debugPrint()
-    {
-        for (String id:SCHEDULER_MAP.keySet())
-        {
-          System.out.println("task id=" + id );
         }
     }
 

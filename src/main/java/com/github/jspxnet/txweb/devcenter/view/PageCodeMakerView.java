@@ -40,13 +40,11 @@ public class PageCodeMakerView extends ActionSupport {
         return RocResponse.success(genericDAO.load(PageCodeMaker.class,id));
     }
 
-
     public PageCodeMaker getLastVersion(String urlId,String namespace) {
         return genericDAO.createCriteria(PageCodeMaker.class)
                 .add(Expression.eq("namespace", namespace))
                 .add(Expression.eq("urlId", urlId))
                 .addOrder(Order.desc("version")).objectUniqueResult(false);
     }
-
 
 }

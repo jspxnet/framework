@@ -1,9 +1,6 @@
 package com.github.jspxnet.sober.util;
 
 
-import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.cache.redis.RedissonClientConfig;
 import com.github.jspxnet.sioc.annotation.Bean;
@@ -29,9 +26,6 @@ public class SequenceFactory {
 
     @Ref(bind = RedissonClientConfig.class)
     protected RedissonClient redissonClient;
-
-
-    private boolean useSchedule = true;
 
 
     private static final String SEQUENCE_KEY = "sober:sequence:%s";
@@ -66,8 +60,6 @@ public class SequenceFactory {
         {
             synchronized (this)
             {
-                EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
-                useSchedule = environmentTemplate.getBoolean(Environment.USE_SCHEDULE);
                 tableSequences = jdbcOperations.get(Sequences.class, keyName);
                 if (tableSequences==null)
                 {

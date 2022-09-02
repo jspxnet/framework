@@ -5,7 +5,6 @@ import com.github.jspxnet.network.mac.NetworkInfo;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ILicense;
-import com.github.jspxnet.txweb.Interceptor;
 import com.github.jspxnet.utils.StringUtil;
 import javax.servlet.http.HttpServletRequest;
 
