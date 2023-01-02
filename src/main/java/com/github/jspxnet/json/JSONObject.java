@@ -5,10 +5,19 @@ import com.github.jspxnet.enums.EnumType;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.config.SoberTable;
+<<<<<<< HEAD
 import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.util.TypeReference;
 import com.github.jspxnet.utils.*;
 import com.google.gson.Gson;
+=======
+import com.github.jspxnet.sober.model.container.PropertyContainer;
+import com.github.jspxnet.sober.util.AnnotationUtil;
+import com.github.jspxnet.txweb.result.RocResponse;
+import com.github.jspxnet.utils.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+>>>>>>> dev
 import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.lang.reflect.Field;
@@ -24,8 +33,9 @@ ConcurrentHashMap
  */
 @Slf4j
 public class JSONObject extends LinkedHashMap<String, Object> {
-
+    final static private String KEY_ENUM_TYPE = "enumTypes";
     final static private String KEY_DATA = "data";
+
     //final static private String KEY_ROOT = "root";
     static public String[] NO_JSON_PACKAGE = new String[]{
             "java.lang.Package","com.seeyon.ctp.common.po.BasePO","org.apache.commons","org.apache.logging.log4j.message"
@@ -33,6 +43,13 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 
     static public String FULL_ST_FORMAT = DateUtil.FULL_ST_FORMAT;
     static public String CLASS_NAME = "@class";
+
+    //如果是可扩展类型
+    final static private String KEY_IS_EXTEND = "@isExtend";
+
+    //扩展字段map
+    final static private String KEY_EXTEND_FIELDS = "values";
+
     static public String BIN_DATA_START = "data:stream/byte;base64,";
 
 
@@ -270,7 +287,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         this(bean,null, includeSuperClass,dataField);
     }
     //保存对象格式化
-    private Class lass;
+    private Class<?> lass;
     private JSONObject dataField = null;
 
     /**
@@ -293,35 +310,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (ClassUtil.isProxy(bean.getClass())) {
             bean = ReflectUtil.getValueMap(bean);
         }
-        if (bean instanceof Map) {
-            Map map = (Map) bean;
-            for (Object objKey : map.keySet()) {
-                String key = ObjectUtil.toString(objKey);
-                //判断是否需要返回
-                if (!ArrayUtil.isEmpty(showField)&&!ArrayUtil.contains(showField,key))
-                {
-                    continue;
-                }
-                Object v = map.get(objKey);
-                if (v==null)
-                {
-                    super.put(key, null);
-                } /*else if (v instanceof JSONArray)
-                {
-                    super.put(key, v);
-                } else
-                if (ClassUtil.isArrayType(v)|| ClassUtil.isCollection(v))
-                {
-                    super.put(key, new JSONArray(v,includeSuperClass));
-                } else
-                if (!ClassUtil.isStandardProperty(v.getClass())&&!(v instanceof JSONObject)) {
-                    super.put(key, new JSONObject(v, includeSuperClass,dataField));
-                }*/ else {
-                    super.put(key, v);
-                }
-            }
-            return;
-        }
 
         if (bean.getClass().isArray() || bean instanceof Collection) {
             //正常使用不应该使用JSONObject，应该直接使用JSONArray
@@ -337,6 +325,60 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             return;
         }
 
+        if (bean instanceof Map) {
+            Map map = (Map) bean;
+            for (Object objKey : map.keySet()) {
+                String key = ObjectUtil.toString(objKey);
+                //判断是否需要返回
+                if (!ArrayUtil.isEmpty(showField)&&!ArrayUtil.contains(showField,key))
+                {
+                    continue;
+                }
+                Object v = map.get(objKey);
+                if (v==null)
+                {
+                    super.put(key, null);
+<<<<<<< HEAD
+                } /*else if (v instanceof JSONArray)
+                {
+                    super.put(key, v);
+                } else
+                if (ClassUtil.isArrayType(v)|| ClassUtil.isCollection(v))
+                {
+                    super.put(key, new JSONArray(v,includeSuperClass));
+                } else
+                if (!ClassUtil.isStandardProperty(v.getClass())&&!(v instanceof JSONObject)) {
+                    super.put(key, new JSONObject(v, includeSuperClass,dataField));
+                }*/ else {
+=======
+                } else {
+>>>>>>> dev
+                    super.put(key, v);
+                }
+            }
+            if (!(bean instanceof PropertyContainer))
+            {
+                return;
+            }
+        }
+
+<<<<<<< HEAD
+        if (bean.getClass().isArray() || bean instanceof Collection) {
+            //正常使用不应该使用JSONObject，应该直接使用JSONArray
+            super.put(KEY_DATA, new JSONArray(bean,includeSuperClass,KEY_DATA, dataField));
+            return;
+        }
+
+
+        if (bean.getClass().isEnum() && EnumType.class.isAssignableFrom(bean.getClass())) {
+            EnumType en = (EnumType)bean;
+            super.put("value",en.getValue());
+            super.put("name",en.getName());
+            return;
+        }
+=======
+>>>>>>> dev
+
         lass = bean.getClass();
         if (!isNull(bean)) {
             put(CLASS_NAME, lass.getName());
@@ -346,7 +388,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (!ObjectUtil.isEmpty(fields))
         {
             for (Field field : fields) {
-                if (field.getModifiers() > 25) {
+                if (field.getModifiers()== Modifier.FINAL || field.getModifiers() >= 24) {
                     continue;
                 }
                 String key = field.getName();
@@ -383,7 +425,11 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                         continue;
                     }
                     if (ClassUtil.isStandardProperty(result.getClass())) {
+<<<<<<< HEAD
                         super.put(key, result);
+=======
+                        super.put(displayKey, result);
+>>>>>>> dev
                         continue;
                     }
 
@@ -476,6 +522,18 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         }
         //-------------------------------方法需要输出的注释
 
+        //放入注释标签里边的枚举类型begin
+        if (!RocResponse.class.equals(lass))
+        {
+            Map<String,JSONArray> enumTypeList = AnnotationUtil.getEnumType(lass);
+            if (!ObjectUtil.isEmpty(enumTypeList))
+            {
+                super.put(KEY_ENUM_TYPE,enumTypeList);
+            }
+        }
+        //放入注释标签里边的枚举类型end
+
+        //----
         Method[] methods = ClassUtil.getDeclaredReturnMethods(lass, 0);
         if (methods!=null)
         {
@@ -1377,7 +1435,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         {
             map = valueMap;
         }
-
+        boolean isExtend = lass!=null&&(PropertyContainer.class.isAssignableFrom(lass) && map.containsKey(KEY_EXTEND_FIELDS) && map.get(KEY_EXTEND_FIELDS) instanceof Map);
         StringBuilder sb = new StringBuilder("{");
         try {
             int j;
@@ -1404,6 +1462,13 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     if (!needClass && CLASS_NAME.equals(o)) {
                         continue;
                     }
+                    if (isExtend && KEY_EXTEND_FIELDS.equals(o))
+                    {
+                        //放入扩展标识 begin
+                        o = KEY_IS_EXTEND;
+                        v = true;
+                        //放入扩展标识 end
+                    }
                     if (sb.length() > 1) {
                         sb.append(",");
                         if (indentFactor > 0) {
@@ -1426,6 +1491,42 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     }
                     sb.append(StringUtil.COLON);
                     sb.append(valueToString(getJsonField(lass,o.toString()),v, indentFactor, newIndent, needClass));
+                }
+
+                if (isExtend)
+                {
+                    Map<String,Object> pMap = (Map)map.get(KEY_EXTEND_FIELDS);
+                    keys = pMap.keySet().iterator();
+                    newIndent = indent + indentFactor;
+                    while (keys.hasNext()) {
+                        o = keys.next();
+                        v = pMap.get(o);
+                        if (!needClass && CLASS_NAME.equals(o)) {
+                            continue;
+                        }
+                        if (sb.length() > 1) {
+                            sb.append(",");
+                            if (indentFactor > 0) {
+                                sb.append('\n');
+                            }
+                        } else {
+                            if (indentFactor > 0) {
+                                sb.append('\n');
+                            }
+                        }
+                        for (j = 0; j < newIndent; j += 1) {
+                            sb.append(' ');
+                        }
+                        if (isNull(o))
+                        {
+                            sb.append(o.toString());
+                        } else
+                        {
+                            sb.append(StringUtil.quote(o.toString(), true));
+                        }
+                        sb.append(StringUtil.COLON);
+                        sb.append(valueToString(getJsonField(lass,o.toString()),v, indentFactor, newIndent, needClass));
+                    }
                 }
                 if (sb.length() > 1) {
                     if (indentFactor > 0) {
@@ -1556,6 +1657,10 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (value instanceof JSONString) {
             return ((JSONString) value).toJSONString();
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev
         if (value instanceof Serializable && !ClassUtil.isStandardProperty(value.getClass()) &&
                 !(ClassUtil.isCollection(value)|| ClassUtil.isArrayType(value))
         ) {
@@ -1591,6 +1696,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      */
     public Writer write(Writer writer) throws Exception {
         try {
+            boolean isExtend = (PropertyContainer.class.isAssignableFrom(lass) && super.containsKey(KEY_EXTEND_FIELDS) && super.get(KEY_EXTEND_FIELDS) instanceof Map);
             boolean b = false;
             Iterator<String> keys = super.keySet().iterator();
             writer.write('{');
@@ -1599,9 +1705,16 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     writer.write(',');
                 }
                 Object k = keys.next();
+                Object v = super.get(k);
+                if (isExtend && KEY_EXTEND_FIELDS.equals(k))
+                {
+                    //放入扩展标识 begin
+                    k = KEY_IS_EXTEND;
+                    v = true;
+                    //放入扩展标识 end
+                }
                 writer.write(StringUtil.quote(k.toString(), true));
                 writer.write(':');
-                Object v = super.get(k);
                 if (v==null)
                 {
                     writer.write(valueToString(getJsonField(lass,k.toString()),NULL));
@@ -1611,6 +1724,32 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     writer.write(valueToString(getJsonField(lass,k.toString()),v));
                 }
                 b = true;
+            }
+
+            //扩展类
+            if (isExtend)
+            {
+
+                Map<String,Object> pMap = (Map)super.remove(KEY_EXTEND_FIELDS);
+                keys = pMap.keySet().iterator();
+                while (keys.hasNext()) {
+                    if (b) {
+                        writer.write(',');
+                    }
+                    Object k = keys.next();
+                    writer.write(StringUtil.quote(k.toString(), true));
+                    writer.write(':');
+                    Object v = pMap.get(k);
+                    if (v==null)
+                    {
+                        writer.write(valueToString(getJsonField(lass,k.toString()),NULL));
+                    }
+                    else
+                    {
+                        writer.write(valueToString(getJsonField(lass,k.toString()),v));
+                    }
+                    b = true;
+                }
             }
             writer.write('}');
             return writer;
@@ -1665,7 +1804,11 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         T t = parseObject(this, clazz);
         if (tableValue)
         {
+<<<<<<< HEAD
             SoberTable soberTable = AnnotationUtil.getSoberTable(clazz);
+=======
+            SoberTable soberTable = AnnotationUtil.getSoberTable(clazz,0);
+>>>>>>> dev
             if (soberTable==null)
             {
                 return t;
@@ -1685,6 +1828,24 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     BeanUtil.setFieldValue(t,soberColumn.getName(),value);
                 }
             }
+<<<<<<< HEAD
+=======
+
+            //扩展方式支持 begin
+            if (t!=null&&PropertyContainer.class.isAssignableFrom(clazz))
+            {
+                PropertyContainer p = (PropertyContainer)t;
+                for (String key:this.keys())
+                {
+                    //判断名称是正常的,又是上边没有放入的,统一在这里放入
+                    if (ValidUtil.isGoodName(key) && !soberTable.containsField(key))
+                    {
+                        p.put(key,this.get(key));
+                    }
+                }
+            }
+            //扩展方式支持 end
+>>>>>>> dev
         }
         return t;
     }
@@ -1744,21 +1905,21 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @param <T>           泛型
      * @return 泛型装置，这里使用了
      */
-    public static <T> T parseObject(JSONObject json, TypeReference<T> typeReference) {
+    public static <T> T parseObject(JSONObject json, TypeToken<T> typeReference) {
         Gson gson = GsonUtil.createGson();
         return gson.fromJson(json.toString(),typeReference.getType());
     }
 
     /**
      * 是用例子
-     * <pre>{@code RocResponse<List<Matter>> rocResponse2 = jsonObject.parseObject(new TypeReference<RocResponse<List<Matter>>>(){});
+     * <pre>{@code RocResponse<List<Matter>> rocResponse2 = jsonObject.parseObject(new TypeToken<RocResponse<List<Matter>>>(){});
      *  }</pre>
      *
      * @param typeReference 资源方式
      * @param <T>           泛型
      * @return 是用例子
      */
-    public <T> T parseObject(TypeReference<T> typeReference) {
+    public <T> T parseObject(TypeToken<T> typeReference) {
         return parseObject(this, typeReference);
     }
 

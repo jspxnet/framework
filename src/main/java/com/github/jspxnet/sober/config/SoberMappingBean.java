@@ -22,6 +22,10 @@ import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.DialectFactory;
+<<<<<<< HEAD
+=======
+import com.github.jspxnet.sober.model.container.PropertyContainer;
+>>>>>>> dev
 import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
 import com.github.jspxnet.sober.transaction.JDBCTransaction;
@@ -29,6 +33,7 @@ import com.github.jspxnet.sober.transaction.JTATransaction;
 import com.github.jspxnet.sober.transaction.TransactionManager;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
+import com.github.jspxnet.txweb.table.meta.TableMeta;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -88,8 +93,11 @@ public class SoberMappingBean implements SoberFactory {
     //jdni数据源绑定
     private String dataSourceLoop = null;
 
-    //Sioc数据库名
+    //Sioc数据库类型，mysql，oracle，不是库名称
     private String databaseType;
+
+    //数据库名称
+    private String databaseName;
 
     //保存的时候是否要验证
     private boolean valid = false;
@@ -218,6 +226,11 @@ public class SoberMappingBean implements SoberFactory {
     @Override
     public String getDatabaseType() {
         return databaseType;
+    }
+
+    @Override
+    public String getDatabaseName() {
+        return databaseName;
     }
 
     @Override
@@ -354,6 +367,7 @@ public class SoberMappingBean implements SoberFactory {
                 this.dialect = DialectFactory.createDialect(databaseType);
             }
             DatabaseMetaData databaseMetaData = conn.getMetaData();
+            databaseName = conn.getCatalog();
             this.dialect.setSupportsSavePoints(databaseMetaData.supportsSavepoints());
             this.dialect.setSupportsGetGeneratedKeys(databaseMetaData.supportsGetGeneratedKeys());
         } finally {
@@ -555,7 +569,7 @@ public class SoberMappingBean implements SoberFactory {
      * @return 得到表结构
      */
     @Override
-    public TableModels getTableModels(Class<?> cla, final SoberSupport soberSupport) {
+    public TableModels getTableModels(Class<?> cla,  SoberSupport soberSupport) {
         if (!INIT_TABLE_MAP.isEmpty())
         {
             SoberUtil.initTable(new ArrayList<>(INIT_TABLE_MAP.values()),soberSupport);
@@ -570,10 +584,65 @@ public class SoberMappingBean implements SoberFactory {
             soberTable = SoberUtil.createTableAndIndex(cla,null,soberSupport);
             if (soberTable!=null)
             {
+                //放入扩展字段begin
+                List<SoberColumn> columnList =  soberSupport.getTableColumns(soberTable.getName());
+                for (SoberColumn soberColumn:columnList)
+                {
+                    if (!soberTable.containsField(soberColumn.getName()))
+                    {
+                        soberTable.addColumns(soberColumn);
+                    }
+                    else
+                    {
+                        //放入不一致的数据
+                        SoberColumn oldSoberColumn = soberTable.getColumn(soberColumn.getName());
+                        if (oldSoberColumn==null || ObjectUtil.isEmpty(oldSoberColumn.getName()))
+                        {
+                            continue;
+                        }
+                        oldSoberColumn.setCaption(soberColumn.getCaption());
+                        oldSoberColumn.setNotNull(soberColumn.isNotNull());
+                        oldSoberColumn.setOption(soberColumn.getOption());
+                        oldSoberColumn.setLength(soberColumn.getLength());
+                        oldSoberColumn.setDefaultValue(soberColumn.getDefaultValue());
+                    }
+                }
+                soberTable.setCanExtend(PropertyContainer.class.isAssignableFrom(cla));
+
+
+                //放入扩展字段end
                 TABLE_MAP.put(cla, soberTable);
             }
         }
         return soberTable;
+    }
+
+    /**
+     *
+     * @param tableName  表明
+     * @param soberSupport 数据库操作对象
+     * @return 返回模型
+     */
+    @Override
+    public TableModels getTableModels(String tableName, SoberSupport soberSupport)
+    {
+        if (TABLE_MAP.isEmpty())
+        {
+             getTableModels(TableMeta.class,  soberSupport);
+        }
+        for (TableModels tableModels:TABLE_MAP.values())
+        {
+            if (tableModels.getName().equalsIgnoreCase(tableName))
+            {
+                return tableModels;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void evictTableModels (Class < ? > cla) {
+        TABLE_MAP.remove(cla);
     }
 
 
@@ -581,6 +650,5 @@ public class SoberMappingBean implements SoberFactory {
     public void clear() {
         TABLE_MAP.clear();
     }
-
 
 }

@@ -1,5 +1,7 @@
 package com.github.jspxnet.cache.redis;
 
+import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.container.StringEntry;
 import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.security.utils.EncryptUtil;

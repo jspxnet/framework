@@ -10,8 +10,11 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.ClassUtil;
 
 import java.io.InputStream;
+import java.sql.Time;
 import java.util.Date;
 
 /**
@@ -24,6 +27,14 @@ import java.util.Date;
  */
 public class InformixDialect extends Dialect {
     public InformixDialect() {
+
+
+        //todo 这个不确定 begin
+        put(SQL_COMMENT, "COMMENT ON COLUMN ${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
+        put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
+        //这个不确定 end
+
+
         put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nPRIMARY KEY (${" + KEY_PRIMARY_KEY + "})\n)");
@@ -53,7 +64,6 @@ public class InformixDialect extends Dialect {
         put(FUN_TABLE_EXISTS, "SELECT count(name) FROM sysibm.systables WHERE name LIKE upper('${" + KEY_TABLE_NAME + "}')");
     }
 
-
     @Override
     public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
         int length = end - begin;
@@ -67,6 +77,69 @@ public class InformixDialect extends Dialect {
         sb.insert(pos + "select".length(), " skip " + begin + " first " + length);
         return sb.toString();
 
+    }
+    @Override
+    public String getFieldType(SoberColumn soberColumn) {
+
+        if (ClassUtil.isNumberType(soberColumn.getClassType()))
+        {
+            if (soberColumn.getClassType()==int.class || soberColumn.getClassType()==Integer.class)
+            {
+                return "int";
+            }
+
+            if (soberColumn.getClassType()==long.class || soberColumn.getClassType()==Long.class)
+            {
+                return "bigint";
+            }
+
+            if (soberColumn.getClassType()==float.class || soberColumn.getClassType()==Float.class)
+            {
+                return "real";
+            }
+
+            if (soberColumn.getClassType()==double.class || soberColumn.getClassType()==Double.class)
+            {
+                if (soberColumn.getLength()<1)
+                {
+                    return "double(15,3)";
+                }
+                return "double("+soberColumn.getLength()+",3)";
+            }
+        }
+        if (soberColumn.getClassType()==boolean.class || soberColumn.getClassType()==Boolean.class)
+        {
+            return "smallint";
+        }
+        if (soberColumn.getClassType()==String.class)
+        {
+            if (soberColumn.getLength()<512)
+            {
+                return "varchar("+soberColumn.getLength()+")";
+            }
+            return "LONG VARCHAR";
+        }
+
+        if (soberColumn.getClassType()==Date.class)
+        {
+            return "timestamp";
+        }
+
+        if (soberColumn.getClassType()== Time.class)
+        {
+            return "time";
+        }
+
+        if (soberColumn.getClassType()==InputStream.class)
+        {
+            return "bytea";
+        }
+
+        if (soberColumn.getClassType()==char.class)
+        {
+            return "char("+soberColumn.getLength()+")";
+        }
+        return "varchar(512)";
     }
 
     @Override

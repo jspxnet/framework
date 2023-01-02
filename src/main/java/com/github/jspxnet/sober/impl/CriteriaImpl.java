@@ -203,7 +203,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             return null;
         }
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
-        String databaseName = soberFactory.getDatabaseType();
+        String databaseName = soberFactory.getDatabaseName();
         if (soberTable == null) {
             return null;
         }
@@ -499,7 +499,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
-            if (!(criterionEntry.getCriterion() instanceof LogicalExpression)&& !SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
+            if (!(criterionEntry.getCriterion() instanceof LogicalExpression)&&!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields()))
+            {
                 errorInfo = ObjectUtil.toString(criterionEntry.getCriterion().getFields());
                 continue;
             }
@@ -581,7 +582,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 termKey.setLength(termKey.length() - 1);
             }
             if (StringUtil.hasLength(groupText.toString())) {
-                termKey.append("_g_").append(groupText.toString());
+                termKey.append("_g_").append(groupText);
             }
             if (termKey.toString().endsWith("_")) {
                 termKey.setLength(termKey.length() - 1);
@@ -889,7 +890,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     @Override
     public <T> T autoSum(String[] fields) {
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
-        String databaseName = soberFactory.getDatabaseType();
+        String databaseName = soberFactory.getDatabaseName();
         if (soberTable == null) {
             return null;
         }
@@ -1053,7 +1054,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     @Override
     public <T> T autoAvg(String[] fields) {
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
-        String databaseName = soberFactory.getDatabaseType();
+        String databaseName = soberFactory.getDatabaseName();
         if (soberTable == null) {
             return null;
         }

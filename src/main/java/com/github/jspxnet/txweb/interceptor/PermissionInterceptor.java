@@ -43,7 +43,6 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -58,41 +57,21 @@ import java.util.Date;
  */
 @Slf4j
 @Bean(bind = PermissionInterceptor.class)
+<<<<<<< HEAD
 public class PermissionInterceptor extends InterceptorSupport {
     private final static String GUEST_STOP_URL_TXT = "guest_stop_url_txt";
     private final static String ADMIN_RULE_URL_TXT = "admin_rule_url_txt";
 
+=======
+public class PermissionInterceptor extends BasePermissionInterceptor {
+>>>>>>> dev
 
-    private String guestUrlFile = "guesturl.properties";
-    private static String[] guestStopUrl = null;
-    private static String[] ruleOutUrl = null;
-
-    private String adminUrlFile = "adminurl.properties";
-    private static String[] adminRuleUrl = null;
-    private static String[] adminRuleOutUrl = null;
+    private boolean useAppolloConfig = false;
 
     private boolean useAppolloConfig = false;
 
     public PermissionInterceptor() {
 
-    }
-
-    private boolean permission = true;
-
-    public void setPermission(boolean permission) {
-        this.permission = permission;
-    }
-
-    private boolean autoOrganizeId = true;
-
-    public void setAutoOrganizeId(boolean autoOrganizeId) {
-        this.autoOrganizeId = autoOrganizeId;
-    }
-
-    private boolean useGuestUrl = true;
-
-    public void setUseGuestUrl(boolean useGuestUrl) {
-        this.useGuestUrl = useGuestUrl;
     }
 
     /**
@@ -104,14 +83,12 @@ public class PermissionInterceptor extends InterceptorSupport {
     @Ref
     private PermissionDAO permissionDAO;
 
-    public String getGuestUrlFile() {
-        return guestUrlFile;
+
+    public boolean isUseAppolloConfig() {
+        return useAppolloConfig;
     }
 
-    public void setGuestUrlFile(String guestUrlFile) {
-        this.guestUrlFile = guestUrlFile;
-    }
-
+<<<<<<< HEAD
 
     public boolean isUseAppolloConfig() {
         return useAppolloConfig;
@@ -124,6 +101,10 @@ public class PermissionInterceptor extends InterceptorSupport {
     @Override
     public void destroy() {
 
+=======
+    public void setUseAppolloConfig(boolean useAppolloConfig) {
+        this.useAppolloConfig = useAppolloConfig;
+>>>>>>> dev
     }
 
     @Override
@@ -132,6 +113,7 @@ public class PermissionInterceptor extends InterceptorSupport {
         if (useAppolloConfig)
         {
             //配置中心读取begin
+<<<<<<< HEAD
             EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
             if (envTemplate.containsName(GUEST_STOP_URL_TXT))
             {
@@ -223,9 +205,70 @@ public class PermissionInterceptor extends InterceptorSupport {
                 adminRuleOutUrl = ArrayUtil.add(adminRuleOutUrl, StringUtil.substringAfter(str, "!"));
             } else {
                 adminRuleUrl = ArrayUtil.add(adminRuleUrl, str);
+=======
+            if (ENV_TEMPLATE.containsName(GUEST_STOP_URL_TXT))
+            {
+                String txt = ENV_TEMPLATE.getString(GUEST_STOP_URL_TXT);
+                decodeGuestUrl(txt);
+            }
+            if (ENV_TEMPLATE.containsName(ADMIN_RULE_URL_TXT))
+            {
+                String txt = ENV_TEMPLATE.getString(ADMIN_RULE_URL_TXT);
+                decodeAdminUrl(txt);
+            }
+            //配置中心读取end
+
+        } else
+        {
+            //换成中读取begin
+            String txt = (String) JSCacheManager.get(DefaultCache.class,GUEST_STOP_URL_TXT);
+            decodeGuestUrl(txt);
+            txt = (String) JSCacheManager.get(DefaultCache.class,ADMIN_RULE_URL_TXT);
+            decodeAdminUrl(txt);
+            //换成中读取end
+
+            if (!ArrayUtil.isEmpty(guestStopUrl) || !ArrayUtil.isEmpty(ruleOutUrl)) {
+                return;
+            }
+            File file = null;
+            try {
+                if (guestUrlFile != null) {
+                    file = EnvFactory.getFile(guestUrlFile);
+                }
+                log.info("载入guestUrlFile:{}", file);
+
+                if (file != null) {
+                    txt = IoUtil.autoReadText(file);
+                    JSCacheManager.put(DefaultCache.class,GUEST_STOP_URL_TXT,txt);
+                    decodeGuestUrl(txt);
+                } else
+                {
+                    log.error(guestUrlFile + "没有找到");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //---------------------------
+            if (!ArrayUtil.isEmpty(adminRuleUrl)||!ArrayUtil.isEmpty(adminRuleOutUrl)) {
+                return;
+            }
+            try {
+                if (adminUrlFile != null) {
+                    file = EnvFactory.getFile(adminUrlFile);
+                }
+                log.info("adminUrlFile:{}", file);
+                if (file != null) {
+                    txt = IoUtil.autoReadText(file);
+                    decodeAdminUrl(txt);
+                    JSCacheManager.put(DefaultCache.class,ADMIN_RULE_URL_TXT,txt);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+>>>>>>> dev
             }
         }
     }
+
 
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {
@@ -391,34 +434,6 @@ public class PermissionInterceptor extends InterceptorSupport {
         //也可以 return Action.ERROR; 终止action的运行
     }
 
-    private static boolean isRuleOutUrl(String url) {
-        if (url == null) {
-            return true;
-        }
-        if (ObjectUtil.isEmpty(ruleOutUrl)) {
-            return false;
-        }
-        for (String ruleUrl : ruleOutUrl) {
-            if (ruleUrl.equals(url) || StringUtil.getPatternFind(url, ruleUrl)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    private static boolean isAdminRuleUrl(String url) {
-        if (url == null) {
-            return true;
-        }
-        if (ObjectUtil.isEmpty(adminRuleUrl)) {
-            return false;
-        }
-        for (String ruleUrl : adminRuleUrl) {
-            if (ruleUrl.equals(url) || StringUtil.getPatternFind(url, ruleUrl)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
 }

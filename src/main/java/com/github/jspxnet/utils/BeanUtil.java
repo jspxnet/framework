@@ -5,6 +5,7 @@ import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
+import com.github.jspxnet.sober.model.container.PropertyContainer;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.beans.BeanCopier;
@@ -49,7 +50,12 @@ public final class BeanUtil {
             return;
         }
         //map 的
+<<<<<<< HEAD
         if (object instanceof Map) {
+=======
+
+        if (object instanceof Map && !(object instanceof PropertyContainer)) {
+>>>>>>> dev
             Map<String,Object> map = (Map<String,Object>) object;
             map.put(methodName, obj);
             return;
@@ -102,8 +108,9 @@ public final class BeanUtil {
             return;
         }
 
-        //map 的
-        if (object instanceof Map) {
+        //map 的    if (!(bean instanceof PropertyContainer))
+
+        if (object instanceof Map && !(object instanceof PropertyContainer)) {
             Map map = (Map) object;
             map.put(fieldName, obj);
             return;
@@ -121,6 +128,11 @@ public final class BeanUtil {
             fieldName = "$cglib_prop_" + fieldName;
         }
         Field field = ClassUtil.getDeclaredField(cls, fieldName);
+        if (field ==null && (object instanceof PropertyContainer)) {
+            PropertyContainer container = (PropertyContainer) object;
+            container.put(fieldName, obj);
+            return;
+        }
         if (field == null) {
             log.debug(object.getClass() + " set field {} not find", fieldName);
             return;
@@ -422,7 +434,11 @@ public final class BeanUtil {
      * @param jump      跳过不满足条件的方法,并且不会报错
      * @return 返回对象
      */
+<<<<<<< HEAD
     @SuppressWarnings("unchecked")
+=======
+    //@SuppressWarnings("unchecked")
+>>>>>>> dev
     public static Object getProperty(Object object, String name, Object[] parameter, boolean jump) {
         if (!StringUtil.hasLength(name)) {
             return null;
@@ -430,10 +446,20 @@ public final class BeanUtil {
         if (object == null || ClassUtil.isStandardProperty(object.getClass())) {
             return object;
         }
-        if (object instanceof Map && parameter == null) {
+        if (object instanceof Map && !(object instanceof  PropertyContainer) && parameter == null) {
             Map map = (Map) object;
             return map.get(name);
         }
+
+        if (object instanceof  PropertyContainer)
+        {
+            PropertyContainer container = (PropertyContainer)object;
+            if (container.containsKey(name))
+            {
+                return container.get(name);
+            }
+        }
+
         if (ClassUtil.isProxy(object.getClass())&&parameter==null)
         {
             BeanMap beanMap = BeanMap.create(object);
@@ -587,6 +613,12 @@ public final class BeanUtil {
                 //相同类型,快速拷贝
                 BeanCopier beanCopier = BeanCopier.create(cls, cls,false);
                 beanCopier.copy(object, result, null);
+                if (object instanceof PropertyContainer && result instanceof PropertyContainer )
+                {
+                    PropertyContainer propertyContainer = (PropertyContainer)object;
+                    PropertyContainer resultPropertyContainer = (PropertyContainer)result;
+                    resultPropertyContainer.putAll(propertyContainer.getValues());
+                }
             } else
             {
                 copyFiledValue(object,result);
@@ -677,11 +709,15 @@ public final class BeanUtil {
     /**
      * 拷贝属性, 后边的数据拷贝到前边
      *
-     * @param getData  得到属性的bean
-     * @param oldData 源bean
+     * @param getData  源bean
+     * @param newData 得到属性的bean
      */
     @SuppressWarnings("unchecked")
+<<<<<<< HEAD
     public static void copyFiledValue(Object getData,Object oldData) {
+=======
+    public static void copyFiledValue(Object getData,Object newData) {
+>>>>>>> dev
 
         if (getData instanceof JSONObject) {
             getData = ((JSONObject) getData).toMap();
@@ -690,15 +726,20 @@ public final class BeanUtil {
         if (ClassUtil.isProxy(getData.getClass())) {
             getData = ReflectUtil.getValueMap(getData);
         }
+
         if (getData instanceof Map) {
             Map<String,Object> map = (Map) getData;
-            Class<?> getClass = oldData.getClass();
+            Class<?> getClass = newData.getClass();
             for (Object keyObj : map.keySet()) {
                 if (keyObj == null) {
                     continue;
                 }
                 String key = ObjectUtil.toString(keyObj);
-                Field field = ClassUtil.getDeclaredField(getClass, key);
+                Field field = ClassUtil.getDeclaredField(getClass, key,true);
+                if (field == null && (newData instanceof PropertyContainer)) {
+                    PropertyContainer propertyContainer = (PropertyContainer)newData;
+                    propertyContainer.put(key,map.get(key));
+                }
                 if (field == null) {
                     continue;
                 }
@@ -707,16 +748,19 @@ public final class BeanUtil {
                 }
                 try {
                     field.setAccessible(true);
-                    field.set(oldData, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
+                    field.set(newData, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
                 } catch (Exception e) {
                     log.error("class={},field={},data={}",getClass,field.getName(),map.get(key), e);
                     e.printStackTrace();
                 }
             }
-            return;
+            if (!(getData instanceof PropertyContainer))
+            {
+                return;
+            }
         }
 
-        Field[] fieldGet = ClassUtil.getDeclaredFields(oldData.getClass());
+        Field[] fieldGet = ClassUtil.getDeclaredFields(newData.getClass());
         Field[] fieldSet = ClassUtil.getDeclaredFields(getData.getClass());
         for (Field setField : fieldSet) {
             for (Field field : fieldGet) {
@@ -734,32 +778,61 @@ public final class BeanUtil {
                         Object o = setField.get(getData);
                         if (o==null && ClassUtil.isBaseNumberType(field.getType()))
                         {
-                            field.set(oldData, 0);
-                        } else
-                        if (setField.getType().equals(field.getType()) || ClassUtil.isNumberType(setField.getType()) && ClassUtil.isNumberType(field.getType())) {
+                            field.set(newData, 0);
+                        }
+                        else if (setField.getGenericType().equals(field.getGenericType()) || ClassUtil.isNumberType(setField.getType()) && ClassUtil.isNumberType(field.getType())) {
                             //todo字符串 和数字类型需要避开
+<<<<<<< HEAD
                             Object col =field.get(oldData);
+=======
+                            Object col =field.get(newData);
+>>>>>>> dev
                             if ((col instanceof Collection)&& !ObjectUtil.isEmpty(col))
                             {
                                 Collection coll = (Collection)col;
                                 Object obj = coll.iterator().next();
                                 if (obj!=null)
                                 {
+<<<<<<< HEAD
                                     Class<?> type = obj.getClass();
                                     field.set(oldData, copyList((Collection)o,type));
+=======
+
+                                    Class<?> type = obj.getClass();
+                                    field.set(newData, copyList((Collection)o,type));
+>>>>>>> dev
                                 }
                             }
                             else
                             {
+<<<<<<< HEAD
                                 field.set(oldData, o);
+=======
+
+                                field.set(newData, o);
+>>>>>>> dev
                             }
                         }
                         else
                         {
                             //对象二次拷贝
-                            field.set(oldData,copy(o, field.getType()));
+                            String typeModel = field.getGenericType().getTypeName();
+                            typeModel = StringUtil.substringOutBetween(typeModel,"<",">");
+                            if (ClassUtil.isCollection(field.getType()) && !StringUtil.isEmpty(typeModel))
+                            {
+                                field.set(newData,copyList((Collection<?>)o,ClassUtil.loadClass(typeModel)));
+                            }
+                            else if (field.getType().equals(Map.class))
+                            {
+                                JSONObject json = new JSONObject(newData);
+                                field.set(newData,json);
+                            }
+                            else
+                            {
+                                field.set(newData,copy(o, (Class<?>)field.getType()));
+                            }
                         }
-                    } catch (IllegalAccessException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
                     }

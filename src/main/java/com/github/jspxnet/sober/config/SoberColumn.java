@@ -14,10 +14,14 @@ import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
+import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Table;
+<<<<<<< HEAD
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ReflectUtil;
+=======
+>>>>>>> dev
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import lombok.Data;
@@ -32,8 +36,15 @@ import java.util.*;
  * 字段属性
  */
 @Data
-@Table(name = "jspx_sober_column",caption = "字段关系",cache = false)
+@Table(name = "jspx_sober_column",caption = "字段关系")
 public class SoberColumn implements Serializable {
+
+    @Id
+    @Column(caption = "ID", notNull = true)
+    private long id;
+
+    @Column(caption = "数据库名",length = 100)
+    private String databaseName;
 
     //同时也是关联关系
     @Column(caption = "表名称",length = 100)
@@ -46,7 +57,6 @@ public class SoberColumn implements Serializable {
     @JsonIgnore
     //Column(caption = "类对象")
     private Class<?> classType;
-
 
     @Column(caption = "是否空")
     private boolean notNull = false;
@@ -63,8 +73,17 @@ public class SoberColumn implements Serializable {
     @Column(caption = "验证",length = 1000)
     private String dataType = StringUtil.empty;
 
+<<<<<<< HEAD
+=======
+    //和WebComponent 名称对应
+>>>>>>> dev
     @Column(caption = "输入框",length = 100)
     private String input = "text";
+
+    //添加的时候使用
+    @JsonIgnore
+    @Column(caption = "前一个字段",length = 100)
+    private String oldColumn = "";
 
     @Column(caption = "长度")
     private int length = 0;
@@ -73,8 +92,14 @@ public class SoberColumn implements Serializable {
     @Column(caption = "隐藏")
     private boolean hidden = false;
 
+<<<<<<< HEAD
     @Column(caption = "java类型",length = 100)
     private String javaType = StringUtil.empty;
+=======
+    @Column(caption = "自动ID")
+    private boolean autoincrement = false;
+
+>>>>>>> dev
 
     @JsonField
     public String getTypeString() {
@@ -82,9 +107,10 @@ public class SoberColumn implements Serializable {
         {
             return TypeUtil.getTypeString(classType);
         }
-        return  javaType;
+        return  "String";
     }
 
+<<<<<<< HEAD
     @JsonIgnore
     private static final String[] baseType = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
 
@@ -171,4 +197,12 @@ public class SoberColumn implements Serializable {
         }
         return result;
     }
+=======
+    public List<Object> getOptionList()
+    {
+        return TypeUtil.getOptionList(option);
+    }
+
+
+>>>>>>> dev
 }

@@ -9,13 +9,21 @@
  */
 package com.github.jspxnet.sioc.util;
 
+import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sioc.type.*;
 import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.scriptmark.core.TagNode;
+<<<<<<< HEAD
 import com.github.jspxnet.utils.ClassUtil;
+=======
+import com.github.jspxnet.util.StringMap;
+import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.ReflectUtil;
+>>>>>>> dev
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Array;
@@ -38,7 +46,30 @@ public final class TypeUtil {
     }
 
     final private static Map<String, TypeSerializer> TYPE_MAP = new HashMap<>();
+<<<<<<< HEAD
     private static final String[] BASE_TYPE = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
+=======
+
+    public static final String[] BASE_TYPE = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
+
+
+    final public static Map<String,String> CODE_TYPE_MAP = new HashMap<>();
+    static{
+        CODE_TYPE_MAP.put("int","int");
+        CODE_TYPE_MAP.put("integer","integer");
+        CODE_TYPE_MAP.put("BigInteger","BigInteger");
+        CODE_TYPE_MAP.put("long","long");
+        CODE_TYPE_MAP.put("bool","boolean");
+        CODE_TYPE_MAP.put("float","float");
+        CODE_TYPE_MAP.put("BigDecimal","BigDecimal");
+        CODE_TYPE_MAP.put("bigDecimal","BigDecimal");
+        CODE_TYPE_MAP.put("date","Date");
+        CODE_TYPE_MAP.put("double","double");
+        CODE_TYPE_MAP.put("string","String");
+        CODE_TYPE_MAP.put("map","Map");
+    }
+
+>>>>>>> dev
 
     static {
 
@@ -46,6 +77,10 @@ public final class TypeUtil {
         TYPE_MAP.put(boolean.class.getName(), typeSerializer);
         TYPE_MAP.put(Boolean.class.getName(), typeSerializer);
         TYPE_MAP.put("bool", typeSerializer);
+<<<<<<< HEAD
+=======
+        TYPE_MAP.put("boolean", typeSerializer);
+>>>>>>> dev
 
         typeSerializer = new IntXmlType();
         TYPE_MAP.put(int.class.getName(), typeSerializer);
@@ -172,6 +207,13 @@ public final class TypeUtil {
      */
     public static Type getJavaType(String typeString) {
         TypeSerializer typeSerializer = TYPE_MAP.get(typeString);
+<<<<<<< HEAD
+=======
+        if (typeSerializer==null && CODE_TYPE_MAP.containsKey(typeString))
+        {
+            typeSerializer = TYPE_MAP.get(CODE_TYPE_MAP.get(typeString));
+        }
+>>>>>>> dev
         if (typeSerializer!=null)
         {
             return typeSerializer.getJavaType();
@@ -352,5 +394,41 @@ public final class TypeUtil {
         return namespace;
     }
 
-
+    public static List<Object> getOptionList(String option)
+    {
+        if (StringUtil.isNull(option))
+        {
+            return new ArrayList<>(0);
+        }
+        List<Object> result = new ArrayList<>();
+        if (StringUtil.isJsonArray(option))
+        {
+            JSONArray array = new JSONArray(option);
+            for (int i=0;i<array.length();i++)
+            {
+                Object obj = array.get(i);
+                if (obj instanceof Map)
+                {
+                    result.add(ReflectUtil.createDynamicBean((Map)obj));
+                } else
+                {
+                    result.add(obj);
+                }
+            }
+        } else
+        {
+            StringMap<String,String> stringMap = new StringMap<>();
+            stringMap.setKeySplit(StringUtil.COLON);
+            stringMap.setLineSplit(StringUtil.SEMICOLON);
+            stringMap.setString(option);
+            for (String key:stringMap.keySet())
+            {
+                JSONObject json = new JSONObject();
+                json.put("value",key);
+                json.put("name",stringMap.getString(key));
+                result.add(ReflectUtil.createDynamicBean(json));
+            }
+        }
+        return result;
+    }
 }

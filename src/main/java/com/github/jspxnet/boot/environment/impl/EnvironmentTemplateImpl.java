@@ -10,6 +10,8 @@
 package com.github.jspxnet.boot.environment.impl;
 
 
+import com.caucho.hessian.io.EnvelopeFactory;
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Placeholder;
@@ -18,10 +20,9 @@ import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.security.symmetry.impl.XOREncrypt;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.SystemUtil;
+import com.github.jspxnet.sioc.CatalinaObject;
+import com.github.jspxnet.util.StringMap;
+import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.util.*;
@@ -324,7 +325,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             System.setProperty("user.timezone", timezone);
         }
 
-
         //系统密钥
         if (VALUE_MAP.containsKey(Environment.secretKey)) {
             System.setProperty(Environment.secretKey, (String) VALUE_MAP.get(Environment.secretKey));
@@ -407,10 +407,11 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
      * @return 得到配置属性, 注意这里只是在内存中
      */
     @Override
-    public Properties readDefaultProperties(String fileName) {
-        Properties p = new Properties();
-        if (!FileUtil.isFileExist(fileName)) {
-            return p;
+    public Map<String,String> readDefaultProperties(String fileName) {
+
+        if (!FileUtil.isFileExist(fileName))
+        {
+            return new HashMap<>(0);
         }
         try {
             String cont = IoUtil.autoReadText(fileName);
@@ -419,13 +420,31 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (encrypt.isEncrypt(cont)) {
                 cont = encrypt.getDecode(cont);
             }
-            p.load(new StringReader(cont));
+
+            //这里只是为了劲量的修复系统变量.的 写法
+            String[] varNameList = StringUtil.getFreeMarkerVar(cont);
+            if (!ObjectUtil.isEmpty(varNameList))
+            {
+                for (String varName:varNameList)
+                {
+                    if (System.getProperties().containsKey(varName))
+                    {
+                        cont = StringUtil.replace(cont,"${" + varName + "}",System.getProperty(varName,StringUtil.empty));
+                    }
+                }
+            }
+            //放入系统变量end
+            StringMap<String,String> valueMap = new StringMap<>();
+            valueMap.setKeySplit(StringUtil.EQUAL);
+            valueMap.setLineSplit(StringUtil.CRLF);
+            valueMap.setString(cont);
+            return valueMap;
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
             e.printStackTrace();
         }
         //创建配置 begin
-        return p;
+        return new HashMap<>(0);
     }
 
     @Override
@@ -437,31 +456,47 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (encrypt.isEncrypt(cont)) {
                 cont = encrypt.getDecode(cont);
             }
-            Properties p = new Properties();
-            p.load(new StringReader(cont));
-            for (Object key : p.keySet()) {
-                Object o = p.get(key);
-                if (o == null) {
-                    continue;
+
+            //放入系统变量begin
+            //这里只是为了劲量的修复系统变量.的 写法
+            String[] varNameList = StringUtil.getFreeMarkerVar(cont);
+            if (!ObjectUtil.isEmpty(varNameList))
+            {
+                for (String varName:varNameList)
+                {
+                    if (System.getProperties().containsKey(varName))
+                    {
+                        cont = StringUtil.replace(cont,"${" + varName + "}",System.getProperty(varName,StringUtil.empty));
+                    }
                 }
-                VALUE_MAP.put((String) key, o);
             }
+            //放入系统变量end
+
+            StringMap<String,String> valueMap = new StringMap<>();
+            valueMap.setKeySplit(StringUtil.EQUAL);
+            valueMap.setLineSplit(StringUtil.CRLF);
+            valueMap.setString(cont);
+
+            VALUE_MAP.putAll(valueMap);
+
             VALUE_MAP.put(Environment.jspxProperties, fileName);
             if (!VALUE_MAP.containsKey("jspxDebug"))
             {
-                VALUE_MAP.put("jspxDebug",p.getProperty(Environment.DEBUG,"false"));
+                VALUE_MAP.put("jspxDebug",valueMap.getString(Environment.DEBUG,"false"));
             }
             if (!VALUE_MAP.containsKey(Environment.DEBUG))
             {
-                VALUE_MAP.put(Environment.DEBUG,p.getProperty(Environment.DEBUG,"false"));
+                VALUE_MAP.put(Environment.DEBUG,valueMap.getString(Environment.DEBUG,"false"));
             }
+
+            VALUE_MAP.put("catalina",new CatalinaObject());
             if (!VALUE_MAP.containsKey("catalina.base")) {
-                VALUE_MAP.put("catalina.base", System.getProperty("CATALINA_BASE", System.getProperty("user.dir")));
+                VALUE_MAP.put("catalina.base", System.getProperty("CATALINA_HOME", System.getProperty("user.dir")));
             }
             if (!VALUE_MAP.containsKey("catalina.home")) {
                 VALUE_MAP.put("catalina.home", System.getProperty("CATALINA_HOME", System.getProperty("user.dir")));
             }
-            p.clear();
+            valueMap.clear();
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
             e.printStackTrace();
@@ -474,8 +509,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         configurable.put(ScriptmarkEnv.NumberFormat,VALUE_MAP.getOrDefault(ScriptmarkEnv.NumberFormat, "####.##"));
         configurable.put(ScriptmarkEnv.DateTimeFormat,VALUE_MAP.getOrDefault(ScriptmarkEnv.DateTimeFormat, "yyyy-MM-dd HH:mm"));
         configurable.put(ScriptmarkEnv.TimeFormat,VALUE_MAP.getOrDefault(ScriptmarkEnv.TimeFormat, "HH:mm:ss"));
-
-
     }
 
     @Override
@@ -542,4 +575,5 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         }
         log.debug(sb.toString());
     }
+
 }

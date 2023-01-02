@@ -269,7 +269,7 @@ public class StringMap<K, V> extends LinkedHashMap<K, V> implements Serializable
                 } else if (filter && !str.contains(keySplit)) {
                     //..
                 } else {
-                    String keys = StringUtil.substringBefore(str, keySplit);
+                    String keys = StringUtil.trim(StringUtil.substringBefore(str, keySplit));
                     if (keys.contains("/~")) {
                         StringUtil.replace(keys, "/~", keySplit);
                     }

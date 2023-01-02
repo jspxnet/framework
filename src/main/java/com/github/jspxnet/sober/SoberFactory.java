@@ -31,6 +31,8 @@ public interface SoberFactory extends Serializable {
 
     String getDatabaseType();
 
+    String getDatabaseName();
+
     Dialect getDialect();
 
     DataSource getDataSource();
@@ -53,12 +55,31 @@ public interface SoberFactory extends Serializable {
      */
     Connection getConnection(int type, String tid) throws SQLException;
 
+    /**
+     *
+     * @param conn 关闭连接
+     * @param release 是否彻底关闭
+     */
     void closeConnection(Connection conn, boolean release);
-
+    /**
+     * 得到表结构,如果数据库中不存在表，就创建表
+     *
+     * @param cla          类
+     * @param soberSupport 支持对象
+     * @return 得到表结构
+     */
     TableModels getTableModels(Class<?> cla, final SoberSupport soberSupport);
 
+    /**
+     *
+     * @return 调试开启显示sql
+     */
     boolean isShowsql();
 
+    /**
+     *
+     * @return 是否自动提交
+     */
     boolean isAutoCommit();
 
     int getTransactionIsolation();
@@ -76,6 +97,10 @@ public interface SoberFactory extends Serializable {
     boolean isValid();
 
     void setValid(boolean valid);
+
+    TableModels getTableModels(String tableName, SoberSupport soberSupport);
+
+    void evictTableModels(Class<?> cla);
 
     void clear();
 

@@ -79,7 +79,12 @@ public class HtmlPdfResult extends ResultSupport {
         FileSource fileSource = new FileSource(f, action.getTemplateFile(), Dispatcher.getEncode());
         //如果使用cache 就使用uri
 
+<<<<<<< HEAD
         String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
+=======
+        //为了防止特殊符号错误，转换为md5 格式, + 加长度避免 碰撞到以前
+        String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath() + "" + f.length());
+>>>>>>> dev
         CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), TEMPLATE_PATH});
         ScriptMark scriptMark;
         try {

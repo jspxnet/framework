@@ -13,6 +13,7 @@ package com.github.jspxnet.utils;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.annotation.NullClass;
+import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.interceptor.InterceptorSupport;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -403,7 +404,7 @@ public class ClassUtil {
     public static Field[] getDeclaredFields(Class<?> cls) {
         Class<?> superclass =  ClassUtil.getClass(cls);
         Field[] result = null;
-        while (!(superclass == null || superclass.equals(Object.class) || superclass.equals(Serializable.class)  || superclass.isInterface()
+        while (!(superclass == null || superclass.equals(Object.class) || superclass.equals(Serializable.class)  || superclass.isInterface() || superclass.equals(DataMap.class)
                 || superclass.getName().contains("net.sf.cglib.empty.Object")  || superclass.getName().contains("com.seeyon.ctp.common.po.BasePO"))) {
             Field[] fields = superclass.getDeclaredFields();
             result = addFieldArray(result, fields);
@@ -440,7 +441,13 @@ public class ClassUtil {
         return result;
     }
 
-    public static Field getDeclaredField(Class<?> cls, String fieldName) {
+    public static Field getDeclaredField(Class<?> cls, String fieldName)
+    {
+        return getDeclaredField(cls,  fieldName,false);
+    }
+
+    public static Field getDeclaredField(Class<?> cls, String fieldName,boolean ignore)
+    {
         if (fieldName == null) {
             return null;
         }
@@ -451,6 +458,10 @@ public class ClassUtil {
             }
             Field[] fields = childClass.getDeclaredFields();
             for (Field f : fields) {
+                if (ignore && fieldName.equalsIgnoreCase(f.getName()))
+                {
+                    return f;
+                } else
                 if (fieldName.equals(f.getName())) {
                     return f;
                 }
@@ -468,7 +479,7 @@ public class ClassUtil {
         Class<?> childClass = ClassUtil.getClass(cls);
         Method[] result = null;
         while (childClass != null) {
-            if (childClass.equals(Object.class) || childClass.equals(Serializable.class)) {
+            if (childClass.equals(Object.class) || childClass.equals(Serializable.class) || childClass.equals(DataMap.class)  || childClass.equals(Map.class)) {
                 break;
             }
             result = BeanUtil.joinMethodArray(result, childClass.getDeclaredMethods());
@@ -857,6 +868,7 @@ public class ClassUtil {
                 || implClass.equals(SoberSupport.class) || implClass.equals(Action.class) || implClass.equals(ActionSupport.class)
                 || implClass.equals(com.github.jspxnet.sober.Interceptor.class)
                 || implClass.equals(InterceptorSupport.class)
+                || implClass.equals(DataMap.class)
         ) {
             return null;
         }
@@ -1095,6 +1107,7 @@ public class ClassUtil {
     }
 
 
+
     /**
      * 通过泛型模版得到类
      * @param typeModel 泛型模版
@@ -1227,4 +1240,42 @@ public class ClassUtil {
         }
         return result;
     }
+
+    public static String getClassMethodName(StackTraceElement[] stackTraceElementArray) {
+        if (stackTraceElementArray==null)
+        {
+            return null;
+        }
+        StackTraceElement stackTraceElement = stackTraceElementArray[2];
+        if (stackTraceElement == null) {
+            return null;
+        }
+        String className = stackTraceElement.getClassName();
+        if (StringUtil.isEmpty(className)) {
+            return null;
+        }
+        className = ClassUtil.getClassName(className);
+        for (StackTraceElement stackTrace :stackTraceElementArray)
+        {
+            if (stackTrace.getClassName().equals(className))
+            {
+                stackTraceElement = stackTrace;
+            }
+        }
+        Class<?> cls;
+        try {
+            cls = ClassUtil.loadClass(className);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            log.error(className + " not found", e);
+            return null;
+        }
+        Class<?> iClass = ClassUtil.getImplements(cls);
+        if (iClass == null) {
+            iClass = cls;
+        }
+        return iClass.getName() + StringUtil.DOT + stackTraceElement.getMethodName();
+    }
+
+
 }

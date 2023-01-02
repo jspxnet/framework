@@ -37,6 +37,8 @@ public interface TableModels extends Serializable {
 
     String getPrimary();
 
+    void setPrimary(String primary);
+
     boolean isAutoId();
 
     String getIdType();
@@ -55,13 +57,24 @@ public interface TableModels extends Serializable {
 
     String[] getFieldArray();
 
+    void setAutoId(boolean autoId);
+
     List<SoberColumn> getColumns();
 
     void setColumns(List<SoberColumn> columns);
 
+    void addColumns(SoberColumn column);
+
     boolean containsField(String keys);
 
     boolean equals(TableModels models);
+<<<<<<< HEAD
+=======
+
+    boolean isCanExtend();
+
+    void setCanExtend(boolean canExtend);
+>>>>>>> dev
 
     String getId();
 }

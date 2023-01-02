@@ -26,6 +26,7 @@ import java.io.Serializable;
  * DataMap特点，key不区分大小写，提供类型转换功能
  */
 public class DataMap<K extends String, V> extends HashMap<K, V> implements Serializable {
+    private final Map<String, String> keyMap = new HashMap<>();
     public DataMap() {
 
     }
@@ -151,68 +152,6 @@ public class DataMap<K extends String, V> extends HashMap<K, V> implements Seria
         return StringUtil.toBrLine(getValue(name));
     }
 
-    /**
-     * html 图片
-     *
-     * @param fname  字段
-     * @param width  宽
-     * @param height 高
-     * @return 输出图片
-     */
-    public String getImageHtml(String fname, int width, int height) {
-        Object o = get(fname);
-        if (o == null) {
-            return StringUtil.empty;
-        }
-        String result = (String) o;
-        if (StringUtil.isNull(result)) {
-            return StringUtil.empty;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("<img src=").append(result).append(" border=0 ");
-        if (width > 0) {
-            sb.append("width=").append(NumberUtil.toString(width)).append(" ");
-        }
-
-        if (width > 0) {
-            sb.append("height=").append(NumberUtil.toString(height)).append(" ");
-        }
-        sb.append("/>");
-        return sb.toString();
-    }
-
-    /**
-     * 输出图片
-     *
-     * @param fname  字段
-     * @param width  宽
-     * @param height 高
-     * @param path   路径
-     * @return 输出图片
-     */
-    public String getImageHtml(String fname, int width, int height, String path) {
-        Object o = get(fname);
-        if (o == null) {
-            return StringUtil.empty;
-        }
-        String result = (String) o;
-        if (StringUtil.isNull(result)) {
-            return StringUtil.empty;
-        }
-        result = path + result;
-        StringBuilder sb = new StringBuilder();
-        sb.append("<img src=").append(result).append(" border=0 ");
-        if (width > 0) {
-            sb.append("width=").append(NumberUtil.toString(width)).append(" ");
-        }
-
-        if (width > 0) {
-            sb.append("height=").append(NumberUtil.toString(height)).append(" ");
-        }
-        sb.append("/>");
-
-        return sb.toString();
-    }
 
     /**
      * @param fname     字段名称
@@ -242,26 +181,47 @@ public class DataMap<K extends String, V> extends HashMap<K, V> implements Seria
         if (key == null) {
             return null;
         }
-        return super.get(key.toLowerCase());
+        key = keyMap.get(key.toLowerCase());
+        return super.get(key);
     }
 
     @Override
+    public boolean containsKey(Object key) {
+        return keyMap.containsKey(((String)key).toLowerCase());
+    }
+
+
+    @Override
     public V put(K k, V v) {
+        if (k==null)
+        {
+           return null;
+        }
         String key = k.toLowerCase();
-        return super.put((K) key, v);
+        keyMap.put(key,k);
+        return super.put(k, v);
     }
 
     @Override
     public V remove(java.lang.Object o) {
         String key = (String) o;
-        return super.remove(key.toLowerCase());
+        key = keyMap.get(key.toLowerCase());
+        return super.remove(key);
     }
 
     @Override
     public void putAll(java.util.Map<? extends K, ? extends V> inmap) {
         Map<K, V> xmap = (Map<K, V>) inmap;
         for (K myk : xmap.keySet()) {
-            super.put((K) myk.toLowerCase(), xmap.get(myk));
+            put(myk, xmap.get(myk));
         }
     }
+
+    @Override
+    public void clear()
+    {
+        keyMap.clear();
+        super.clear();
+    }
+
 }

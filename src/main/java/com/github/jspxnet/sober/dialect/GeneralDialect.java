@@ -10,6 +10,11 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.ClassUtil;
+import java.io.InputStream;
+import java.sql.Time;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -44,4 +49,74 @@ public class GeneralDialect extends Dialect {
         return false;
     }
 
+    @Override
+    public String getFieldType(SoberColumn soberColumn) {
+
+        if (ClassUtil.isNumberType(soberColumn.getClassType()))
+        {
+            if (soberColumn.getClassType()==int.class || soberColumn.getClassType()==Integer.class)
+            {
+                if (soberColumn.getLength()<3)
+                {
+                    return "tinyint("+soberColumn.getLength()+")";
+                }
+                return "integer";
+            }
+
+            if (soberColumn.getClassType()==long.class || soberColumn.getClassType()==Long.class)
+            {
+                if (soberColumn.getLength()>8)
+                {
+                    return "bigint("+soberColumn.getLength()+")";
+                }
+                return "bigint(16)";
+            }
+
+            if (soberColumn.getClassType()==float.class || soberColumn.getClassType()==Float.class||soberColumn.getClassType()==double.class || soberColumn.getClassType()==Double.class)
+            {
+                if (soberColumn.getLength()>8)
+                {
+                    return "decimal("+soberColumn.getLength()+",2)";
+                }
+                return "decimal";
+            }
+        }
+        if (soberColumn.getClassType()==boolean.class || soberColumn.getClassType()==Boolean.class)
+        {
+            return "int(1)";
+        }
+        if (soberColumn.getClassType()==String.class)
+        {
+            if (soberColumn.getLength()<512)
+            {
+                return "varchar("+soberColumn.getLength()+")";
+            }
+            if (soberColumn.getLength()<3000)
+            {
+                return "mediumtext";
+            }
+            return "text";
+        }
+
+        if (soberColumn.getClassType()== Date.class)
+        {
+            return "datetime";
+        }
+
+        if (soberColumn.getClassType()== Time.class)
+        {
+            return "time";
+        }
+
+        if (soberColumn.getClassType()== InputStream.class)
+        {
+            return "LONGBLOB";
+        }
+
+        if (soberColumn.getClassType()==char.class)
+        {
+            return "char("+soberColumn.getLength()+")";
+        }
+        return "varchar(512)";
+    }
 }

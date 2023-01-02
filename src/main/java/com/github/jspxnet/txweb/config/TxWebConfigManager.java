@@ -153,7 +153,7 @@ public class TxWebConfigManager implements WebConfigManager {
                     if (actionConfigBean == null) {
                         log.error("出现空：ActionConfigBean for " + namespace);
                     } else if (!StringUtil.hasLength(actionConfigBean.getActionName())) {
-                        log.error("发现配置中存在错误,不能找到name:" + actionConfigBean.toString());
+                        log.error("发现配置中存在错误,不能找到name:" + actionConfigBean);
                     } else {
                         initActionConfigBean(actionConfigBean, namespace);
                     }
@@ -175,7 +175,7 @@ public class TxWebConfigManager implements WebConfigManager {
         IocContext iocContext = ConfigureContext.getInstance();
         List<BeanElement> beanElements = iocContext.getElementList();
         for (BeanElement beanElement : beanElements) {
-            Class<?> cls = null;
+            Class<?> cls;
             try {
                 cls = ClassUtil.loadClass(beanElement.getClassName());
                 registerAction(cls);
@@ -183,7 +183,6 @@ public class TxWebConfigManager implements WebConfigManager {
                 e.printStackTrace();
                 log.error("配置错误,不能载入:{}", beanElement.getClassName());
             }
-
         }
         //补充ioc中扫描到的end
     }
@@ -363,7 +362,6 @@ public class TxWebConfigManager implements WebConfigManager {
 
     /**
      * 命名空间第一层表示软件名称
-     *
      * @return 得到部署了那些软件
      */
     @Override

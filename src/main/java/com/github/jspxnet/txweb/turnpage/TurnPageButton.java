@@ -20,6 +20,8 @@ public interface TurnPageButton {
 
     int getCount();
 
+    long getFirstRow();
+
     void setCurrentPage(int currentPage);
 
     int getCurrentPage();
@@ -44,7 +46,6 @@ public interface TurnPageButton {
 
     int getTotalPage();
 
-    long getFristRow();
 
     void setCurrentPath(String currentPath);
 

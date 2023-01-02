@@ -53,6 +53,7 @@ public class CodeMakerView extends ActionSupport {
     }
 
     @Operate(caption = "实体列表", method = "list/table",post = false)
+<<<<<<< HEAD
     public RocResponse< List<TableModels>  > getTableList(@Param(caption = "查询",max = 200)String find,@Param(caption = "是否包含DTO",value = "false") boolean dto)
     {
         Map<String, TableModels>  map = codeMaker.getSoberTableList(dto);
@@ -63,14 +64,50 @@ public class CodeMakerView extends ActionSupport {
         List<TableModels> result = new ArrayList<>();
         for (TableModels tableModels:map.values())
         {
+=======
+    public RocResponse< List<TableModels>> getTableList(@Param(caption = "查询",max = 200)String find,@Param(caption = "是否包含DTO",value = "false") boolean dto,@Param(caption = "0:任意1:扩展;2:不可扩展",value = "0") int extend,@Param(caption = "页数",value = "1") int currentPage,@Param(caption = "页数",value = "12") int count)
+    {
+        Map<String, TableModels>  map = codeMaker.getSoberTableList(dto,extend);
+        int firstRow = currentPage * count - count;
+        if (firstRow < 0) {
+            firstRow = 1;
+        }
+
+        int i = 0;
+        List<TableModels> result = new ArrayList<>();
+        for (TableModels tableModels:map.values())
+        {
+            i++;
+            if (StringUtil.isEmpty(find))
+            {
+                if (i>=firstRow)
+                {
+                    result.add(tableModels);
+                }
+            } else
+>>>>>>> dev
             if (tableModels.getName()!=null&&tableModels.getName().contains(find)||
                     tableModels.getCaption()!=null&&tableModels.getCaption().contains(find)
             || tableModels.getEntity()!=null&&tableModels.getEntity().getName().contains(find))
             {
+<<<<<<< HEAD
                 result.add(tableModels);
             }
         }
         return RocResponse.success(result);
+=======
+                if (i>=firstRow)
+                {
+                    result.add(tableModels);
+                }
+            }
+            if (result.size()>=count)
+            {
+                break;
+            }
+        }
+        return RocResponse.success(result).setCurrentPage(currentPage).setCount(count).setTotalCount(map.size());
+>>>>>>> dev
     }
 
 }

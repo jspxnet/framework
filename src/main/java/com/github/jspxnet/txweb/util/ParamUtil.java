@@ -432,6 +432,29 @@ public final class ParamUtil {
                         //没有值的保留为空
                         paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
                     }
+<<<<<<< HEAD
+=======
+                    else
+                    {
+                        Operate operate = exeMethod.getAnnotation(Operate.class);
+                        if (operate!=null)
+                        {
+                            //这里主要为了安全,避免参数乱进入
+                            HttpServletRequest request = actionContext.getRequest();
+                            if (RequestUtil.isParameter(request,paramName))
+                            {
+                                boolean checkSql = !SafetyEnumType.NONE.equals(param.level());
+                                if (ClassUtil.isArrayType(pType) || ClassUtil.isCollection(pType))
+                                {
+                                    paramObj[i] = BeanUtil.getTypeValue(RequestUtil.getArray(action.getRequest(),paramName,checkSql), pType);
+                                } else
+                                {
+                                    paramObj[i] = BeanUtil.getTypeValue(RequestUtil.getString(action.getRequest(),paramName,null,checkSql), pType);
+                                }
+                            }
+                        }
+                    }
+>>>>>>> dev
                     //-------------
                     //判断是否需要放入默认参数
                     if (paramObj[i] == null && !StringUtil.empty.equals(param.value())) {
@@ -445,6 +468,14 @@ public final class ParamUtil {
                         paramObj[i] = getDefaultParam(param, pType);
                     }
 
+<<<<<<< HEAD
+=======
+                    if (isPutDefaultValue(paramObj[i] , param,pType))
+                    {
+                        paramObj[i] = getDefaultParam(param, pType);
+                    }
+
+>>>>>>> dev
                     isRequired(action, param, paramName, paramObj[i]);
                     if (action.hasFieldInfo()) {
                         return paramObj;

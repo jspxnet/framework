@@ -10,6 +10,8 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.DateUtil;
 
 import java.io.*;
@@ -48,6 +50,67 @@ public class SmallDBDialect extends Dialect {
         put(FUN_TABLE_EXISTS, "exists table ${" + KEY_TABLE_NAME + "}");
     }
 
+    @Override
+    public String getFieldType(SoberColumn soberColumn) {
+
+        if (ClassUtil.isNumberType(soberColumn.getClassType()))
+        {
+            if (soberColumn.getClassType()==int.class || soberColumn.getClassType()==Integer.class)
+            {
+
+                return "integer";
+            }
+
+            if (soberColumn.getClassType()==long.class || soberColumn.getClassType()==Long.class)
+            {
+                return "bigint";
+            }
+
+            if (soberColumn.getClassType()==float.class || soberColumn.getClassType()==Float.class)
+            {
+
+                return "float";
+            }
+            if (soberColumn.getClassType()==double.class || soberColumn.getClassType()==Double.class)
+            {
+
+                return "double";
+            }
+        }
+        if (soberColumn.getClassType()==boolean.class || soberColumn.getClassType()==Boolean.class)
+        {
+            return "smallint";
+        }
+        if (soberColumn.getClassType()==String.class)
+        {
+            if (soberColumn.getLength()<512)
+            {
+                return "varchar("+soberColumn.getLength()+")";
+            }
+            return "text";
+        }
+
+        if (soberColumn.getClassType()==Date.class)
+        {
+            return "datetime";
+        }
+
+        if (soberColumn.getClassType()==Time.class)
+        {
+            return "datetime";
+        }
+
+        if (soberColumn.getClassType()==InputStream.class)
+        {
+            return "LONGvarbinary";
+        }
+
+        if (soberColumn.getClassType()==char.class)
+        {
+            return "char("+soberColumn.getLength()+")";
+        }
+        return "varchar(512)";
+    }
     /**
      * @param rs    数据对象
      * @param index 索引

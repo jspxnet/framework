@@ -69,7 +69,11 @@ public class JScriptContext implements SingletonContext {
             }
             context.setOptimizationLevel(-1);
             WrapFactory wrapFactory = ScriptWrapFactory.getInstance();
+<<<<<<< HEAD
             wrapFactory.setJavaPrimitiveWrap(true);
+=======
+            //wrapFactory.setJavaPrimitiveWrap(true);
+>>>>>>> dev
             context.setWrapFactory(wrapFactory);
 
             globalScope = context.initStandardObjects();
@@ -82,6 +86,7 @@ public class JScriptContext implements SingletonContext {
             ScriptableObject.defineClass(globalScope, com.github.jspxnet.scriptmark.core.iterator.NullIterator.class);
             ScriptableObject.defineClass(globalScope, com.github.jspxnet.scriptmark.core.iterator.RangeIterator.class);
             ScriptableObject.defineClass(globalScope, com.github.jspxnet.scriptmark.core.iterator.StringIterator.class);
+            //todo 添加容器类型支持
 
             useDynamicScope = false;
             //路径是正确的，但中安卓下 执行异常

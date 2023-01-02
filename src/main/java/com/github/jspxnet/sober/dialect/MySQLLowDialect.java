@@ -27,5 +27,4 @@ public class MySQLLowDialect extends MySQLDialect {
         return sql + " limit " + begin + "," + length;
     }
 
-
 }

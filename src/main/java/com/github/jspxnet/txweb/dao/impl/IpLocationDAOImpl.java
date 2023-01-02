@@ -149,6 +149,4 @@ public class IpLocationDAOImpl extends JdbcOperations implements IpLocationDAO {
         }
         return ipLocation;
     }
-
-
 }

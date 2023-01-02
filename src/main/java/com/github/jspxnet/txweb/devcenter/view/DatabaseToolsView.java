@@ -9,8 +9,14 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.GenericDAO;
+import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
+<<<<<<< HEAD:src/main/java/com/github/jspxnet/txweb/devcenter/view/DatabaseToolsView.java
+=======
+import com.github.jspxnet.utils.BeanUtil;
+
+>>>>>>> dev:src/main/java/com/github/jspxnet/txweb/view/DatabaseToolsView.java
 import java.util.List;
 
 @HttpMethod(caption = "数据库工具",namespace = Environment.DEV_CENTER+"/db",actionName = "*")
@@ -33,7 +39,8 @@ public class DatabaseToolsView  extends ActionSupport {
         StringBuilder sb = new StringBuilder();
         for (SoberColumn column:list)
         {
-            sb.append(column.getBeanField()).append("\r\n");
+            SoberColumnDto dto = BeanUtil.copy(column, SoberColumnDto.class);
+            sb.append(dto.getBeanField()).append("\r\n");
         }
         return RocResponse.success(sb.toString());
     }

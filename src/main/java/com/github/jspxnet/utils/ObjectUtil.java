@@ -13,6 +13,7 @@ package com.github.jspxnet.utils;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.sober.model.container.AbstractObjectValue;
 import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.lang.reflect.Array;
@@ -20,6 +21,8 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.SocketAddress;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -262,7 +265,7 @@ public final  class ObjectUtil {
 
     public static Date toDate(Object obj) {
         if (obj == null) {
-            return DateUtil.empty;
+            return null;
         }
         if (obj.getClass().isAssignableFrom(Date.class)) {
             return (Date) obj;
@@ -278,7 +281,7 @@ public final  class ObjectUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return DateUtil.empty;
+        return null;
     }
 
     public static java.sql.Date toSqlDate(Object obj) {
@@ -593,5 +596,94 @@ public final  class ObjectUtil {
         return valueMap;
     }
 
+    /**
+     * 比较两个对象相同
+     * @param obj1 对象1
+     * @param obj2 对象2
+     * @return 是否相等
+     */
+    public static boolean compare(Object obj1, Object obj2) {
+        if (obj1 == null&&obj2 == null) {
+            return true;
+        }
+        if (obj1 == obj2) {
+            return true;
+        }
+        else if (obj1 instanceof Collection && obj2 instanceof Collection)
+        {
+            JSONArray array1 = new JSONArray(obj1);
+            JSONArray array2 = new JSONArray(obj2);
+            return array1.toString().equals(array2.toString());
+        }
+        else if (obj1 instanceof Map && obj2 instanceof Map) {
+            JSONObject json1 = new JSONObject(obj1);
+            JSONObject json2 = new JSONObject(obj2);
+            return json1.toString().equals(json2.toString());
+        } else {
+            return compareValue(obj1, obj2) ;
+        }
+    }
 
+
+    private static boolean compareValue(Object value1, Object value2) {
+        if (!(value1 instanceof Boolean) && !(value2 instanceof Boolean)) {
+            if (isEmptyObject(value1) && isEmptyObject(value2)) {
+                return true;
+            } else if (!isEmptyObject(value1) && !isEmptyObject(value2)) {
+                if (value1 instanceof Byte) {
+                    return ((Byte)value1).compareTo((Byte)value2) == 0;
+                } else if (value1 instanceof Short) {
+                    return ((Short)value1).compareTo((Short)value2) == 0;
+                } else if (value1 instanceof Integer) {
+                    return ((Integer)value1).compareTo((Integer)value2) == 0;
+                } else if (value1 instanceof Long) {
+                    return ((Long)value1).compareTo((Long)value2) == 0;
+                } else if (value1 instanceof Float) {
+                    return ((Float)value1).compareTo((Float)value2) == 0;
+                } else if (value1 instanceof Double) {
+                    return ((Double)value1).compareTo((Double)value2) == 0;
+                } else if (value1 instanceof BigDecimal) {
+                    return ((BigDecimal)value1).compareTo((BigDecimal)value2) == 0;
+                } else if (value1 instanceof String) {
+                    return (value1).equals(value2);
+                } else if (value1 instanceof Date) {
+                    return  DateUtil.dayEquals((Date)value1, (Date)value2);
+                } else if (value1 instanceof Time) {
+                    return ((Time)value1).compareTo((Time)value2) == 0;
+                } else if (value1 instanceof Timestamp) {
+                    return DateUtil.dayEquals((Date)value1, (Date)value2);
+                } else if (value1.getClass().isArray()&&value2.getClass().isArray()) {
+                    Object[] arrValue1 = (Object[])value1;
+                    Object[] arrValue2 = (Object[])value2;
+                    if (arrValue1.length != arrValue2.length) {
+                        return false;
+                    } else {
+                        boolean retValue = true;
+                        for(int i = 0; i < arrValue1.length && retValue; ++i) {
+                            retValue = compareValue(arrValue1[i], arrValue2[i]);
+                        }
+
+                        return retValue;
+                    }
+                } else
+                {
+                    return value1.equals(value2);
+                }
+            } else {
+                return false;
+            }
+        } else {
+            Boolean bool1 = value1 == null ? Boolean.FALSE : (Boolean)value1;
+            Boolean bool2 = value2 == null ? Boolean.FALSE : (Boolean)value2;
+            return bool1.equals(bool2);
+        }
+    }
+
+    private static boolean isEmptyObject(Object s) {
+        if (s instanceof String) {
+            return ((String)s).trim().length() == 0;
+        } else {
+            return s == null || s == JSONObject.NULL;
+        }
+    }
 }

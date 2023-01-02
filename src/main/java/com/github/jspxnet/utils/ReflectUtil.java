@@ -3,9 +3,6 @@ package com.github.jspxnet.utils;
 import com.github.jspxnet.util.DynamicBean;
 import net.sf.cglib.beans.BeanGenerator;
 import net.sf.cglib.beans.BeanMap;
-import org.apache.commons.beanutils.PropertyUtilsBean;
-
-import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,50 +45,28 @@ public final  class ReflectUtil {
     }
 
     /**
-     *
-     * @param dest 要增加属性的对象
-     * @param addProperties 要增加的属性名及值
-     * @return 返回增加了属性的新对象
-     */
-    public static Object createDynamicBean(Object dest, Map<String, ?> addProperties) {
-        return createDynamicBean(dest, addProperties, true);
-    }
-
-    /**
      * 动态为对象增加属性
      *
      * @param dest            要增加属性的对象
      * @param addProperties   要增加的属性名及值，属性名可以和原有属性重名，但如果重名的话，值的类型必须一致，否则抛异常
-     * @param discardOldValue 是否舍弃原有属性的值，如果true，则原有属性的值将都被置为默认值
      * @return 返回增加了属性的新对象
      */
-    public static Object createDynamicBean(Object dest, Map<String, ?> addProperties, boolean discardOldValue) {
-        Map<String, Class<?>> propertyMap = new HashMap<>();
+    public static Object createDynamicBean(Object dest, Map<String, Object> addProperties) {
+        Map<String, Class<?>> propertyMap = getMapPropertiesType(addProperties);
+        DynamicBean dynamicBean = new DynamicBean(dest.getClass(),propertyMap);
 
-        PropertyUtilsBean utilsBean = new PropertyUtilsBean();
-
-        PropertyDescriptor[] descriptors = utilsBean.getPropertyDescriptors(dest);
-        for (PropertyDescriptor desc : descriptors) {
-            if (!"class".equalsIgnoreCase(desc.getName())) {
-                propertyMap.put(desc.getName(), desc.getPropertyType());
-            }
-        }
-
-        addProperties.forEach((k, v) -> propertyMap.put(k, v.getClass()));
-
-        DynamicBean dynamicBean = new DynamicBean(propertyMap);
+        String[] fieldNames = ClassUtil.getDeclaredFieldNames(dest.getClass());
 
         // 添加旧属性值
-        if (!discardOldValue) {
-            propertyMap.forEach((k, v) -> {
-                try {
-                    if (!addProperties.containsKey(k)) {
-                        dynamicBean.setValue(k, utilsBean.getNestedProperty(dest, k));
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException("对象添加旧属性失败，" + e.getMessage());
+        for (String fieldName:fieldNames)
+        {
+            try {
+                if (!addProperties.containsKey(fieldName)) {
+                    dynamicBean.setValue(fieldName, BeanUtil.getProperty(dest,fieldName));
                 }
-            });
+            } catch (Exception e) {
+                throw new RuntimeException("对象添加旧属性失败，" + e.getMessage());
+            }
         }
 
         // 添加新属性值
@@ -113,7 +88,6 @@ public final  class ReflectUtil {
      */
     public static Object createDynamicBean(Map<String, Object> addProperties) {
         Map<String, Class<?>> propertyMap = getMapPropertiesType(addProperties);
-        addProperties.forEach((k, v) -> propertyMap.put(k, v != null ? v.getClass() : Object.class));
         DynamicBean dynamicBean = new DynamicBean(propertyMap);
         // 添加新属性值
         addProperties.forEach((k, v) -> {

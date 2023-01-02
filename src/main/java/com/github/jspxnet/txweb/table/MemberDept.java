@@ -4,7 +4,7 @@ import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Table;
-import com.github.jspxnet.sober.table.OperateTable;
+import com.github.jspxnet.sober.model.container.PropertyContainer;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Table(name = "jspx_member_dept", caption = "用户部门信息表",cache = false)
-public class MemberDept extends OperateTable {
+public class MemberDept extends PropertyContainer {
     @Id
     @Column(caption = "ID", notNull = true)
     private long id;

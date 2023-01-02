@@ -9,7 +9,6 @@
 package com.github.jspxnet.ui.style;
 
 import com.github.jspxnet.ui.icon.IconPath;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicArrowButton;

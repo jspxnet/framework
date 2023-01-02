@@ -1,9 +1,13 @@
 package com.github.jspxnet.io;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.network.http.HttpClient;
+import com.github.jspxnet.network.http.HttpClientFactory;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.File;
 
 /**
@@ -50,6 +54,14 @@ public class IoUtil {
      */
     public static String autoReadText(String file,String encode) throws Exception
     {
+
+        if (file!=null&&file.startsWith("http"))
+        {
+            HttpClient httpClient = HttpClientFactory.createHttpClient(file);
+            httpClient.setEncode(StringUtil.isNull(encode)?"UTF-8":encode);
+            return httpClient.getString();
+        }
+
         String fileType = FileUtil.getTypePart(file);
         AbstractRead abstractRead;
         if (ArrayUtil.inArray(WORD_FILE_TYPE,fileType,true))

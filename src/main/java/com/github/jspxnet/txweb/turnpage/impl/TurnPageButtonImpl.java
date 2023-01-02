@@ -100,7 +100,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
     }
 
     @Override
-    public long getFristRow() {
+    public long getFirstRow() {
         long temp = currentPage * count - count;
         if (temp < 0) {
             temp = 1;
@@ -240,7 +240,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
         Map<String, Object> turnPageMap = new HashMap<>();
         turnPageMap.put("defaultCount", getDefaultCount());
         turnPageMap.put("count", getCount());
-        turnPageMap.put("fristRow", getFristRow());
+        turnPageMap.put("firstRow", getFirstRow());
         turnPageMap.put("currentPage", currentPage);
         turnPageMap.put("totalCount", getTotalCount());
         turnPageMap.put("totalPage", getTotalPage());

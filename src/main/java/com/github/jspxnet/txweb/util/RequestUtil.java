@@ -14,6 +14,10 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
+<<<<<<< HEAD
+=======
+import com.github.jspxnet.sober.model.container.PropertyContainer;
+>>>>>>> dev
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.util.StringMap;
@@ -153,8 +157,8 @@ public class RequestUtil {
         {
             return false;
         }
-        String requestedWith = request.getHeader("X-Requested-With");
-        return requestedWith != null && requestedWith.toLowerCase().contains("-roc");
+        String requestedWith = request.getHeader("Content-Type");
+        return requestedWith != null && requestedWith.toLowerCase().contains("application/json");
     }
 
     /**
@@ -422,7 +426,7 @@ public class RequestUtil {
      * @return 变量数组
      */
     public static String[] getArray(HttpServletRequest request, String name, boolean checkSql) {
-        if (request == null || isRocRequest(request)) {
+        if (request == null) {
             return null;
         }
         String[] s = null;
@@ -747,9 +751,13 @@ public class RequestUtil {
             if (names == null) {
                 return result;
             }
+
+            List<String> propertyList = new ArrayList<>();
+            Collections.addAll(propertyList, names);
             Method[] methods = ClassUtil.getDeclaredSetMethods(cla);
             for (Method method : methods) {
                 String propertyName = method.getName();
+                propertyList.remove(propertyName);
                 if (StringUtil.isNull(propertyName) || propertyName.startsWith("get") || propertyName.startsWith("is")) {
                     continue;
                 }
@@ -771,7 +779,23 @@ public class RequestUtil {
                         BeanUtil.setSimpleProperty(result, method.getName(),BeanUtil.getTypeValue( getString(request, propertyName, safe),type[0]));
                     }
                 }
+
             }
+
+            //扩展方式支持 begin
+            if (result!=null&&!ObjectUtil.isEmpty(propertyList)&& PropertyContainer.class.isAssignableFrom(cla))
+            {
+                PropertyContainer p = (PropertyContainer)result;
+                for (String key:propertyList)
+                {
+                    //判断名称是正常的,又是上边没有放入的,统一在这里放入
+                    if (ValidUtil.isGoodName(key))
+                    {
+                        p.put(key,getString(request, key, safe));
+                    }
+                }
+            }
+            //扩展方式支持 end
         }
         return result;
     }

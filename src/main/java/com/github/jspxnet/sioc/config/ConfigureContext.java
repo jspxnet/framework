@@ -191,14 +191,14 @@ public class ConfigureContext implements IocContext {
     @Override
     public void registryIocBean(Class<?> cla) {
         //注册bean标签
+        String id = null;
+        String namespace = null;
+        Bean iocBean = cla.getAnnotation(Bean.class);
+        RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
+        if (iocBean == null&&rpcClient==null) {
+            return;
+        }
         try {
-            Bean iocBean = cla.getAnnotation(Bean.class);
-            RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
-            if (iocBean == null&&rpcClient==null) {
-                return;
-            }
-            String id;
-            String namespace;
             BeanModel beanModel = new BeanModel();
             if (rpcClient!=null)
             {
@@ -226,9 +226,13 @@ public class ConfigureContext implements IocContext {
             }
             beanModel.setNamespace(namespace);
             beanModel.setClassName(cla.getName());
+<<<<<<< HEAD
             log.debug("registry Ioc Bean class=" + cla + " id=" + id + " namespace=" + namespace);
+=======
+>>>>>>> dev
             registerBean(beanModel);
         } catch (Exception e) {
+            log.error("registry Ioc Bean class=" + cla + " id=" + id + " namespace=" + namespace);
             log.error("ioc load error" + cla, e);
         }
     }

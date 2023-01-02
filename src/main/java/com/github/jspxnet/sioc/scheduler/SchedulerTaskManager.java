@@ -9,10 +9,14 @@ import com.github.jspxnet.sioc.annotation.Scheduled;
 import com.github.jspxnet.txweb.model.dto.SchedulerDto;
 import com.github.jspxnet.txweb.turnpage.TurnPageButton;
 import com.github.jspxnet.txweb.turnpage.impl.TurnPageButtonImpl;
+<<<<<<< HEAD
 import com.github.jspxnet.utils.BooleanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.XMLUtil;
+=======
+import com.github.jspxnet.utils.*;
+>>>>>>> dev
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -95,12 +99,28 @@ public class SchedulerTaskManager implements SchedulerManager {
             }
             //scheduled.cron() 变量替换
             String cron = scheduled.cron();
+<<<<<<< HEAD
             if (scheduled.cron().contains("${")) {
+=======
+            if (scheduled.cron()!=null&&scheduled.cron().contains("${")) {
+                String[] varNameList = StringUtil.getFreeMarkerVar(scheduled.cron());
+                for (String varName:varNameList)
+                {
+                    if (!valueMap.containsKey(varName))
+                    {
+                        valueMap.put(varName,"0 */1 * * * *");
+                    }
+                }
+>>>>>>> dev
                 cron = EnvFactory.getPlaceholder().processTemplate(valueMap, cron);
                 if (StringUtil.isEmpty(cron)) {
                     cron = "0 */1 * * * *";
                 }
             }
+            if (StringUtil.isEmpty(cron)) {
+                cron = "0 */1 * * * *";
+            }
+
             taskProxy.setPattern(cron);
             taskProxy.setOnce(BooleanUtil.toInt(scheduled.once()));
             taskProxy.setDelayed(scheduled.delayed());
@@ -137,12 +157,21 @@ public class SchedulerTaskManager implements SchedulerManager {
                 cron = "0 */1 * * * *";
             }
             taskProxy.setPattern(cron);
+<<<<<<< HEAD
         }
         log.debug("定时任务加入:id={},{}", taskProxy.getScheduledId(), taskProxy);
         if (!SchedulingPattern.validate(taskProxy.getPattern())) {
             log.error("Scheduled cron is cron4j,定时器表达式错误:{}，类对象:{}",taskProxy.getPattern(),taskProxy.getBean().getClass());
             return false;
         }
+=======
+        }
+        log.debug("定时任务加入:id={},{}", taskProxy.getScheduledId(), taskProxy);
+        if (!SchedulingPattern.validate(taskProxy.getPattern())) {
+            log.error("Scheduled cron is cron4j,定时器表达式错误:{}，类对象:{}",taskProxy.getPattern(),taskProxy.getBean().getClass());
+            return false;
+        }
+>>>>>>> dev
         Scheduler scheduler = new Scheduler(taskProxy);
         scheduler.start();
         SCHEDULER_MAP.put(scheduledId, scheduler);
@@ -191,7 +220,11 @@ public class SchedulerTaskManager implements SchedulerManager {
         List<SchedulerDto> result = new ArrayList<>();
         Collection<Scheduler> collation = SCHEDULER_MAP.values();
         turnPageButton.setTotalCount(collation.size());
+<<<<<<< HEAD
         int firstRow = (int) turnPageButton.getFristRow();
+=======
+        int firstRow = (int) turnPageButton.getFirstRow();
+>>>>>>> dev
         int i = -1;
         for (Scheduler scheduler : collation) {
             i++;

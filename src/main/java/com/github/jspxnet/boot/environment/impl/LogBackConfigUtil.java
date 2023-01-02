@@ -27,6 +27,7 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.xml.XmlConfigurationFactory;
+
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -43,8 +44,12 @@ import java.util.Map;
  */
 
 public class LogBackConfigUtil {
+    static boolean init = false;
     public static void createConfig() {
-
+        if (init)
+        {
+            return;
+        }
         ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
         if (loggerFactory instanceof ch.qos.logback.classic.LoggerContext)
         {
@@ -54,10 +59,12 @@ public class LogBackConfigUtil {
             {
                 createLogBackConfig(lc);
             }
-        } else
+        }
+        else
         {
             createLog4jConfig();
         }
+        init = true;
     }
 
     public static void createLogBackConfig(LoggerContext lc)
@@ -123,10 +130,23 @@ public class LogBackConfigUtil {
 
     public static void changeDbLogBackConfig()
     {
+<<<<<<< HEAD
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         loggerContext.reset();
 
 
+=======
+        Object logContext = LoggerFactory.getILoggerFactory();
+        if (logContext==null || logContext.getClass().getName().contains("Log4jLoggerFactory"))
+        {
+            System.out.println("日志配置错误,不能切换到数据库");
+            return;
+        }
+
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        loggerContext.reset();
+
+>>>>>>> dev
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         boolean isDefaultConfig = false;
         String defaultConfigTxt = null;
@@ -146,9 +166,12 @@ public class LogBackConfigUtil {
             }
         }
 
+<<<<<<< HEAD
        // lc.reset();
         //LoggerContext loggerContext = new LoggerContext();
 
+=======
+>>>>>>> dev
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(loggerContext);
 

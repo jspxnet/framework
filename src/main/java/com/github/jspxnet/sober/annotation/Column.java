@@ -11,7 +11,6 @@ package com.github.jspxnet.sober.annotation;
 
 import com.github.jspxnet.enums.EnumType;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.lang.annotation.Target;
 import java.lang.annotation.Retention;
 import java.lang.annotation.ElementType;

@@ -1,6 +1,8 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
@@ -25,8 +27,8 @@ public class DmDialect extends Dialect {
                 " \nCONSTRAINT \"${" + KEY_TABLE_NAME + "}_key\" PRIMARY KEY  (\"${" + KEY_PRIMARY_KEY + "}\")\n)");
 
 
-        //oracle 和 pgsql 一样
-        //oracle 和 pgsql 设置注释方式begin
+        //oracle , pgsql ,db2,dm一样
+        //oracle , pgsql ,db2,dm设置注释方式begin
         put(SQL_COMMENT, "COMMENT ON COLUMN \"${"+ KEY_DATABASE_NAME +"}\".\"${" + KEY_TABLE_NAME + "}\".\"${" + COLUMN_NAME + "}\" IS '${" + COLUMN_CAPTION + "}'");
         put(SQL_TABLE_COMMENT, "COMMENT ON TABLE \"${"+ KEY_DATABASE_NAME +"}\".\"${" + KEY_TABLE_NAME + "}\" IS '${" + SQL_TABLE_COMMENT + "}'");
         //oracle 和 pgsql 设置注释方式end
@@ -77,6 +79,68 @@ public class DmDialect extends Dialect {
         put(char.class.getName(), "\"${" + COLUMN_NAME + "}\" char(2) NOT NULL default ''");
         put(SQL_DROP_TABLE, "DROP TABLE  \"${"+ KEY_DATABASE_NAME +"}\".\"${" + KEY_TABLE_NAME + "}\"");
         put(FUN_TABLE_EXISTS, " SELECT COUNT(1)  FROM all_tables WHERE OWNER='${"+KEY_DATABASE_NAME+"}' AND TABLE_NAME='${" + KEY_TABLE_NAME + "}'");
+    }
+
+    @Override
+    public String getFieldType(SoberColumn soberColumn) {
+
+        if (ClassUtil.isNumberType(soberColumn.getClassType()))
+        {
+            if (soberColumn.getClassType()==int.class || soberColumn.getClassType()==Integer.class)
+            {
+                if (soberColumn.getLength()<3)
+                {
+                    return "NUMBER("+soberColumn.getLength()+")";
+                }
+                return "NUMBER(10)";
+            }
+
+            if (soberColumn.getClassType()==long.class || soberColumn.getClassType()==Long.class)
+            {
+                return "NUMBER(16)";
+            }
+
+            if (soberColumn.getClassType()==float.class || soberColumn.getClassType()==Float.class)
+            {
+                return "BINARY_FLOAT";
+            }
+            if (soberColumn.getClassType()==double.class || soberColumn.getClassType()==Double.class)
+            {
+                return "BINARY_DOUBLE";
+            }
+        }
+        if (soberColumn.getClassType()==boolean.class || soberColumn.getClassType()==Boolean.class)
+        {
+            return "number(1)";
+        }
+        if (soberColumn.getClassType()==String.class)
+        {
+            if (soberColumn.getLength()<2000)
+            {
+                return "varchar2("+soberColumn.getLength()+")";
+            }
+            return "long";
+        }
+
+        if (soberColumn.getClassType()==Date.class)
+        {
+            return "timestamp";
+        }
+
+        if (soberColumn.getClassType()== Time.class)
+        {
+            return "time";
+        }
+
+        if (soberColumn.getClassType()==InputStream.class)
+        {
+            return "blob";
+        }
+        if (soberColumn.getClassType()==char.class)
+        {
+            return "char("+soberColumn.getLength()+")";
+        }
+        return "varchar2(512)";
     }
 
     @Override

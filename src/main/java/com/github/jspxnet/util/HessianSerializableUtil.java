@@ -6,10 +6,13 @@ import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.SerializerFactory;
 import com.github.jspxnet.security.utils.Base64;
 import com.github.jspxnet.utils.StringUtil;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public final class HessianSerializableUtil {
 
@@ -89,4 +92,10 @@ public final class HessianSerializableUtil {
         }
     }
 
+    public static <T> T getUnSerializable(ByteBuf buf) throws IOException {
+        try (ByteBufInputStream inputStream = new ByteBufInputStream(buf)) {
+            AbstractHessianInput input = factory.getHessian2Input(inputStream);
+            return (T)input.readObject();
+        }
+    }
 }

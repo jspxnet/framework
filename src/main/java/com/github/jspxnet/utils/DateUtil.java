@@ -652,6 +652,23 @@ public final  class DateUtil {
     }
 
     /**
+     *
+     * @param dt 日期1
+     * @param dt1 日期2
+     * @return 判断两个日期号数相同,同一天
+     */
+    public static boolean dayEquals(Date dt, Date dt1) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(dt);
+        int year = c.get(1);
+        int date = c.get(6);
+        c.setTime(dt1);
+        int year1 = c.get(1);
+        int date1 = c.get(6);
+        return year == year1 && date == date1;
+    }
+
+    /**
      * @param date 日期
      * @return 判断是否为今天
      */

@@ -11,6 +11,9 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
+
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -55,7 +58,7 @@ public class SingleRedissonStore extends Store implements IStore {
         rMap.put(entry.getKey(), entry);
         if (getSecond()>1)
         {
-            rMap.expire(getSecond(), TimeUnit.SECONDS);
+            rMap.expire(Instant.now().plusSeconds(getSecond()));
         }
     }
 

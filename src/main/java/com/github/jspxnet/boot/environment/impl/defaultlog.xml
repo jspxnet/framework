@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="60 seconds" debug="${debug}">
+<configuration scan="true" scanPeriod="120 seconds" debug="${debug}">
     <!-- 定义日志文件 输入位置 -->
     <property name="logPath" value="${logPath}" />
     <!-- 日志最大的历史 30天 -->
@@ -12,6 +12,26 @@
         </encoder>
     </appender>
     <!-- ERROR级别日志 -->
+    <!-- INFO级别日志 appender -->
+    <appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 过滤器，只记录INFO级别的日志 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 按天回滚 daily -->
+            <fileNamePattern>${logPath}/debug-%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+            <!-- 日志最大的历史 60天 -->
+            <maxHistory>${logMaxHistory}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
     <!-- 滚动记录文件，先将日志记录到指定文件，当符合某个条件时，将日志记录到其他文件 RollingFileAppender-->
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- 过滤器，只记录WARN级别的日志 -->
@@ -108,17 +128,11 @@
     <root level="${debug=='true'?'DEBUG':'INFO'}">
         <!-- 控制台输出 -->
         <#if where="debug=='true'">
-              <!-- this only enable in local -->
-              <appender-ref ref="STDOUT"/>
+              <appender-ref ref="DEBUG"/>
         </#if>
-        <#if where="error=='true'">
-             <!-- this only enable in local -->
-             <appender-ref ref="ERROR"/>
-        </#if>
-        <#if where="info=='true'">
-        <!-- this only enable in local -->
-            <appender-ref ref="INFO"/>
-        </#if>
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="ERROR"/>
+        <appender-ref ref="INFO"/>
         <appender-ref ref="WARN" />
         <appender-ref ref="TRACE" />
     </root>

@@ -24,6 +24,8 @@ import java.util.*;
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2007-1-6
  * Time: 23:07:57
+ *
+ * SoberTableModel
  */
 public class SoberTable implements TableModels {
 
@@ -55,6 +57,13 @@ public class SoberTable implements TableModels {
     private List<SoberColumn> columns = new LinkedList<>();
     //字段
     private Map<String, SoberCalcUnique> calcUniqueMap = new LinkedHashMap<>();
+<<<<<<< HEAD
+=======
+
+    //可扩展
+    private boolean canExtend = false;
+
+>>>>>>> dev
     //最后访问时间
     private long lastDate = System.currentTimeMillis();
 
@@ -117,9 +126,20 @@ public class SoberTable implements TableModels {
 
     @Override
     public String getPrimary() {
+        if (StringUtil.isNull(primary))
+        {
+            for (SoberColumn column:columns)
+            {
+                if (column.isAutoincrement())
+                {
+                    return column.getName();
+                }
+            }
+        }
         return primary;
     }
 
+    @Override
     public void setPrimary(String primary) {
         this.primary = primary;
     }
@@ -129,6 +149,7 @@ public class SoberTable implements TableModels {
         return autoId;
     }
 
+    @Override
     public void setAutoId(boolean autoId) {
         this.autoId = autoId;
     }
@@ -141,6 +162,12 @@ public class SoberTable implements TableModels {
     @Override
     public void setColumns(List<SoberColumn> columns) {
         this.columns = columns;
+    }
+
+    @Override
+    public void addColumns(SoberColumn column)
+    {
+        this.columns.add(column);
     }
 
     @Override
@@ -232,8 +259,14 @@ public class SoberTable implements TableModels {
 
     public void setDatabaseName(String databaseName) {
         this.databaseName = databaseName;
+        for (SoberColumn column : columns) {
+            if (column==null)
+            {
+                continue;
+            }
+            column.setDatabaseName(databaseName);
+        }
     }
-
     @Override
     public boolean isCreate() {
         return create;
@@ -246,6 +279,7 @@ public class SoberTable implements TableModels {
     @Override
     public int hashCode() {
         return toString().hashCode();
+<<<<<<< HEAD
     }
 
     @Override
@@ -255,6 +289,17 @@ public class SoberTable implements TableModels {
     }
 
     @Override
+=======
+    }
+
+    @Override
+    public String toString()
+    {
+        return new JSONObject(this,false).toString();
+    }
+
+    @Override
+>>>>>>> dev
     public boolean equals(TableModels models)
     {
         return (this.toString()).equals(models.toString());
@@ -266,6 +311,19 @@ public class SoberTable implements TableModels {
         return entity.getName();
     }
 
+<<<<<<< HEAD
+=======
+    @JsonField(name="isCanExtend")
+    @Override
+    public boolean isCanExtend() {
+        return canExtend;
+    }
+    @Override
+    public void setCanExtend(boolean canExtend) {
+        this.canExtend = canExtend;
+    }
+
+>>>>>>> dev
     @Override
     @JsonField(caption = "id")
     public String getId()
@@ -273,6 +331,10 @@ public class SoberTable implements TableModels {
         JSONObject json = new JSONObject();
         json.put("d",databaseName);
         json.put("n",name);
+<<<<<<< HEAD
+=======
+        json.put("p",primary);
+>>>>>>> dev
         json.put("c",columns.size());
         return EncryptUtil.getMd5(json.toString());
     }

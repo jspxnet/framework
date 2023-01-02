@@ -111,8 +111,8 @@ public class JspxCoreListener implements ServletContextListener {
 
 
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        Properties properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
-        String bootConfMode = properties.getProperty(Environment.BOOT_CONF_MODE,Environment.defaultValue);
+        Map<String,String> properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
+        String bootConfMode = properties.getOrDefault(Environment.BOOT_CONF_MODE,Environment.defaultValue);
         if (BootConfigEnumType.VCS.getName().equalsIgnoreCase(bootConfMode))
         {
             synchronized (this) {
@@ -191,8 +191,7 @@ public class JspxCoreListener implements ServletContextListener {
         EntryFactory beanFactory = (EntryFactory) com.github.jspxnet.boot.EnvFactory.getBeanFactory();
         beanFactory.setIocContext(iocContext);
 
-        //载入定时任务
-        beanFactory.initScheduler();
+
 
         //系统默认超时时间begin
         System.setProperty("sun.net.client.defaultConnectTimeout", "5000");
@@ -233,6 +232,12 @@ public class JspxCoreListener implements ServletContextListener {
         }
         //rpc服务器,提供外部rpctcp调用 end
 
+<<<<<<< HEAD
+=======
+        //载入定时任务
+        beanFactory.initScheduler();
+
+>>>>>>> dev
         boolean dbLog = envTemplate.getBoolean(Environment.DB_LOG);
         if (dbLog)
         {
@@ -276,7 +281,6 @@ public class JspxCoreListener implements ServletContextListener {
         //关闭缓存和线程end
 
         Dispatcher.shutdown();
-
 
         //卸载jdbc驱动begin
         Enumeration<Driver> drivers = DriverManager.getDrivers();

@@ -215,7 +215,7 @@ public final class JxlsUtil {
             Object org = objectList.get(i);
             Map<String, Object > newFieldMap = new HashMap<>(5);
             newFieldMap.put(mergeNumFieldName,rowValue[i]);
-            list.add(ReflectUtil.createDynamicBean(org,newFieldMap,false));
+            list.add(ReflectUtil.createDynamicBean(org,newFieldMap));
         }
         return list;
     }

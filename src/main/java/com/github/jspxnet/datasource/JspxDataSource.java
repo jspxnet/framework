@@ -144,7 +144,7 @@ public class JspxDataSource extends DriverManagerDataSource {
             }
         } catch (SQLException e) {
             close();
-            log.error("连接发生异常,当前最大连接数为:" + maxPoolSize + "当前连接数:" + getPoolSize() + ",已经不能分配连接," + System.getenv("user.dir"), e);
+            log.error("连接发生异常,当前最大连接数为:" + maxPoolSize + "当前连接数:" + getPoolSize() + ",已经不能分配连接," + System.getProperty("user.dir"), e);
         }
         //留一个作为备用链接begin
         int outI = connectionPool.length - 1;
@@ -153,7 +153,7 @@ public class JspxDataSource extends DriverManagerDataSource {
         if (connectionPool[outI].open()) {
             return connectionPool[outI];
         }
-        log.error("连接发生异常,不能创建连接,请检查数据库连接配置是否正确:" + getJdbcUrl() + " " + System.getenv("user.dir"));
+        log.error("连接发生异常,不能创建连接,请检查数据库连接配置是否正确:" + getJdbcUrl() + " " + System.getProperty("user.dir"));
         return null;
     }
 

@@ -32,6 +32,8 @@ public interface K3cloudService {
 
     JSONObject createQuery(Class<?> cls, String filter, int index, int limit);
 
+    JSONObject createQuery(Class<?> cls, String filter, String orderString, int index, int limit);
+
     <T> List<T> copyList(List<List<Object>> list, Class<T> cls);
 
     <T> List<T> copyList(List<List<Object>> list, Class<T> cls, boolean hashMd5);

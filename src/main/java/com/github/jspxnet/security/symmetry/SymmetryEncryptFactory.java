@@ -21,6 +21,7 @@ import java.util.Map;
  */
 public class SymmetryEncryptFactory {
     public static EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+    public static Character Encrypt_NONE;
     static private String defaultCipherIv = envTemplate.getString(Environment.cipherIv);
 
     //对称加密算法

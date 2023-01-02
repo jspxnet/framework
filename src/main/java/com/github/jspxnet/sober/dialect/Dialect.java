@@ -17,7 +17,6 @@ import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -41,11 +40,13 @@ public abstract class Dialect extends HashMap<String,String> {
     public static final String ORACLE_CREATE_SEQ_TIGGER = "oracle_create_seq_tigger";
     public static final String ORACLE_HAVE_SEQ = "oracle_have_seq";
 
+    //数据库名称
     public static final String KEY_DATABASE_NAME = "database_name";
     public static final String KEY_TABLE_NAME = "table_name";
     public static final String KEY_TABLE_CAPTION = "table_caption";
 
     public static final String KEY_FIELD_NAME = "field_name";
+
     public static final String KEY_FIELD_SERIAL = "field_serial";
 
     public static final String KEY_SEQUENCE_RESTART = "field_sequence_restart";
@@ -55,9 +56,9 @@ public abstract class Dialect extends HashMap<String,String> {
     //是否为唯一索引
     public static final String KEY_IS_UNIQUE = "isUnique";
 
-
     public static final String FIELD_QUOTE = "_quote";
     public static final String KEY_FIELD_VALUE = "field_value";
+
     public static final String KEY_FIELD_LIST = "field_list";
     public static final String KEY_FIELD_COUNT = "field_count";
     public static final String KEY_TERM = "field_term";
@@ -75,7 +76,8 @@ public abstract class Dialect extends HashMap<String,String> {
     public static final String SQL_INSERT = "sql_insert";
     public static final String SQL_DELETE = "sql_delete";
     public static final String SQL_UPDATE = "sql_update";
-    //public static final String SQL_UPDATE_FIELD = "sql_update_field";
+
+
 
     public static final String SQL_RESULT_BEGIN_ROW = "sql_result_begin_row";
     public static final String SQL_RESULT_END_ROW = "sql_result_end_row";
@@ -92,11 +94,21 @@ public abstract class Dialect extends HashMap<String,String> {
     public static final String SQL_COMMENT = "sql_comment";
     public static final String SQL_TABLE_COMMENT = "sql_table_comment";
 
+    //添加字段
+    public static final String SQL_ADD_COLUMN = "sql_add_column";
+    //删除字段
+    public static final String SQL_DROP_COLUMN = "sql_drop_column";
+    //修改字段
+    public static final String SQL_MODIFY_COLUMN = "sql_modify_column";
+
+    public static final String OLD_COLUMN = "old_column";
+
     public static final String COLUMN_NAME = "column_name";
     public static final String COLUMN_LENGTH = "column_length";
     public static final String COLUMN_NOT_NULL = "column_not_null";
     public static final String COLUMN_DEFAULT = "column_default";
     public static final String COLUMN_CAPTION = "column_caption";
+    public static final String COLUMN_TYPE = "column_type";
 
     public static final String FUN_TABLE_EXISTS = "fun_table_exists";
 
@@ -153,10 +165,12 @@ public abstract class Dialect extends HashMap<String,String> {
         put(TABLE_MAX_ID, "SELECT MAX(${" + KEY_PRIMARY_KEY + "}) AS maxId FROM ${" + KEY_TABLE_NAME + "}");
         put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX ${"+KEY_INDEX_NAME+"}(${"+KEY_INDEX_FIELD+"})");
 
-
-
-
+        //
+        //SQL_MODIFY_COLUMN
     }
+
+
+    public abstract String getFieldType(SoberColumn soberColumn);
 
     public abstract boolean supportsSequenceName();
 
@@ -439,32 +453,32 @@ public abstract class Dialect extends HashMap<String,String> {
      * @param map    数据
      * @return 返回查询结果
      *
-     * {
-     * 		"numPrecRadix": 10,
-     * 		"sourceDataType": 0,
-     * 		"isAutoincrement": "NO",
-     * 		"nullable": 0,
-     * 		"dataType": 12,
-     * 		"tableCat": null,
-     * 		"typeName": "varchar",
-     * 		"ordinalPosition": 5,
-     * 		"scopeTable": null,
-     * 		"tableName": "jbbs_journey",
-     * 		"scopeCatalog": null,
-     * 		"tableSchem": "public",
-     * 		"sqlDataType": 0,
-     * 		"charOctetLength": "200",
-     * 		"sqlDatetimeSub": 0,
-     * 		"columnSize": 200,
-     * 		"isNullable": "NO",
-     * 		"bufferLength": null,
-     * 		"isGeneratedcolumn": "",
-     * 		"decimalDigits": 0,
-     * 		"columnDef": null,
-     * 		"scopeSchema": null,
-     * 		"remarks": "城市",
-     * 		"columnName": "city"
-     *  }
+     *{
+     *     "numPrecRadix":10,
+     *     "sourceDataType":0,
+     *     "isAutoincrement":"NO",
+     *     "nullable":0,
+     *     "dataType":93,
+     *     "tableCat":"dev",
+     *     "typeName":"DATETIME",
+     *     "ordinalPosition":8,
+     *     "scopeTable":null,
+     *     "tableName":"user_friend",
+     *     "scopeCatalog":null,
+     *     "tableSchem":null,
+     *     "sqlDataType":0,
+     *     "charOctetLength":0,
+     *     "sqlDatetimeSub":0,
+     *     "columnSize":19,
+     *     "isNullable":"NO",
+     *     "bufferLength":65535,
+     *     "isGeneratedcolumn":"YES",
+     *     "decimalDigits":0,
+     *     "columnDef":"CURRENT_TIMESTAMP",
+     *     "scopeSchema":null,
+     *     "remarks":"创建时间",
+     *     "columnName":"createDate"
+     * }
      */
     public SoberColumn getJavaType(Map<String,Object> map)
     {
@@ -473,14 +487,22 @@ public abstract class Dialect extends HashMap<String,String> {
         }
         DataMap<String,Object> rs = new DataMap<>();
         rs.putAll(map);
-        SoberColumn column = new SoberColumn();
-        String typeName = StringUtil.toLowerCase(rs.getValue("typeName"));
 
+        SoberColumn column = new SoberColumn();
+        //统一全小写
+        column.setTableName(rs.getValue("tableName"));
+
+        //数据库名
+        column.setDatabaseName(rs.getValue("tableCat"));
+        //rs.getValue("table_cat");
         int colSize = rs.getInt("columnSize");
         column.setLength(colSize);
         column.setCaption(rs.getValue("remarks"));
         column.setName(rs.getValue("columnName"));
         column.setNotNull(!ObjectUtil.toBoolean(rs.getValue("isNullable")));
+        column.setDefaultValue(rs.getValue("columnDef"));
+        column.setAutoincrement(ObjectUtil.toBoolean(rs.getValue("isAutoincrement")));
+        String typeName = StringUtil.toLowerCase(rs.getValue("typeName"));
 
         //短断整型
         if (("int".equals(typeName) && colSize < 4) || "short".equals(typeName) || "smallint".equals(typeName) || "int2".equals(typeName) || "tinyint".equals(typeName) || ("fixed".equals(typeName) && colSize < 4)) {
@@ -561,4 +583,7 @@ public abstract class Dialect extends HashMap<String,String> {
         this.supportsGetGeneratedKeys = supportsGetGeneratedKeys;
     }
     //能够自动获取的配置数据end
+
+
+
 }

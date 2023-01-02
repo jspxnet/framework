@@ -1949,7 +1949,13 @@ public class StringUtil {
         } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "-") == 2) {
             format = DateUtil.DAY_FORMAT;
         } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "/") == 2) {
-            format = "yyyy/MM/dd";
+            if (date.indexOf("/")==2)
+            {
+                format = "dd/MM/yyyy";
+            } else
+            {
+                format = "yyyy/MM/dd";
+            }
         } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, StringUtil.DOT) == 2) {
             format = "yyyy.MM.dd";
         } else if (date.length() > 5 && date.length() < 9 && countMatches(date, "-") == 2) {
@@ -3291,6 +3297,34 @@ public class StringUtil {
         }
         return newName;
     }
+
+<<<<<<< HEAD
+=======
+
+    public static Map<String, String> queryStringToMap(String str)
+    {
+        Map<String, String> result = new HashMap<String, String>();
+        String[] results =  split(str,'&');
+        if (!ObjectUtil.isEmpty(results))
+        {
+            for (String pair : results) {
+                if (StringUtil.isNull(pair)) {
+                    continue;
+                }
+                int pos = pair.indexOf("=");
+                if (pos == -1) {
+                    continue;
+                }
+                String name = pair.substring(0, pos);
+                String value = pair.substring(pos + 1);
+                if (!StringUtil.isNull(name)) {
+                    result.put(name, value);
+                }
+            }
+        }
+        return result;
+    }
+>>>>>>> dev
 
 
 }

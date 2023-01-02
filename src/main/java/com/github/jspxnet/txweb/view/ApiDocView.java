@@ -1,16 +1,19 @@
 package com.github.jspxnet.txweb.view;
 
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
-import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.tag.BeanElement;
+<<<<<<< HEAD
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.Table;
+=======
+import com.github.jspxnet.sober.annotation.Table;
+import com.github.jspxnet.sober.config.SoberTable;
+>>>>>>> dev
 import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.txweb.WebConfigManager;
@@ -20,6 +23,7 @@ import com.github.jspxnet.txweb.bundle.action.EditConfigAction;
 import com.github.jspxnet.txweb.bundle.action.EditLanguageAction;
 import com.github.jspxnet.txweb.config.ActionConfigBean;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
+import com.github.jspxnet.txweb.model.dto.SoberTableDto;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ApiDocUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -241,12 +245,11 @@ public class ApiDocView extends ActionSupport {
             String cont = ApiDocUtil.getDescribeValue(cla.getName(),describe,apiDocument.getNamespace());
             apiDocument.setDescribe(cont);
         }
-
         return apiDocument;
     }
 
     @Operate(caption = "字段文档", method = "/table/${id}", post = false)
-    public TableModels getTable(@PathVar String id) throws Exception {
+    public SoberTableDto getTable(@PathVar String id) throws Exception {
         Map<String, ApiAction> fieldCache = (Map<String, ApiAction>) JSCacheManager.get(DefaultCache.class, String.format(API_FIELD_CACHE, getRootNamespace()));
         if (fieldCache == null || fieldCache.isEmpty()) {
             fielding();
@@ -258,8 +261,14 @@ public class ApiDocView extends ActionSupport {
 
         Class<?> builderClass = ClassUtil.loadClass(apiAction.getClassName());
         AssertException.isNull(builderClass,"不存在的表结构");
-        return AnnotationUtil.getSoberTable(builderClass);
+        SoberTable soberTable = AnnotationUtil.getSoberTable(builderClass,0);
+        return BeanUtil.copy(soberTable,SoberTableDto.class);
     }
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 /*
     public static void main(String[] arg) throws Exception {
 

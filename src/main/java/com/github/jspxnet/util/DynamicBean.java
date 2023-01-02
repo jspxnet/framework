@@ -16,7 +16,10 @@ public class DynamicBean implements Serializable {
      */
     @JsonIgnore
     private final Object target;
-
+    public DynamicBean(Class<?> cls,Map<String, Class<?>> propertyMap) {
+        this.target = ReflectUtil.generateBean(cls,propertyMap);
+        this.propertyMap = BeanMap.create(this.target);
+    }
 
     public DynamicBean(Map<String, Class<?>> propertyMap) {
 

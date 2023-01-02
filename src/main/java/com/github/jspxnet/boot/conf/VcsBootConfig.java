@@ -14,15 +14,22 @@ import java.util.Properties;
 
 @Slf4j
 public class VcsBootConfig {
-    public void bind(Properties properties)
+    public void bind(Map<String,String> properties)
     {
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         try {
             log.info("配置检测到是用vcs分布式配置");
+<<<<<<< HEAD
             String url = StringUtil.trim(properties.getProperty(Environment.VCS_URL));
             String localPath = StringUtil.trim(properties.getProperty(Environment.VCS_LOCAL_PATH));
             String name = StringUtil.trim(properties.getProperty(Environment.VCS_USER_NAME));
             String password = StringUtil.trim(properties.getProperty(Environment.VCS_USER_PASSWORD));
+=======
+            String url = StringUtil.trim(properties.get(Environment.VCS_URL));
+            String localPath = StringUtil.trim(properties.get(Environment.VCS_LOCAL_PATH));
+            String name = StringUtil.trim(properties.get(Environment.VCS_USER_NAME));
+            String password = StringUtil.trim(properties.get(Environment.VCS_USER_PASSWORD));
+>>>>>>> dev
             Map<String, Object> valueMap =  new HashMap<String, Object>((Map) properties);
             valueMap.put(Environment.defaultPath, jspxConfiguration.getDefaultPath());
             localPath = EnvFactory.getPlaceholder().processTemplate(valueMap, localPath);

@@ -16,6 +16,10 @@ import java.util.*;
  * description: thermo-model
  **/
 public final class KingdeeUtil {
+    private KingdeeUtil()
+    {
+
+    }
 
     /**
      * 金蝶API接口字段解析
@@ -125,17 +129,18 @@ public final class KingdeeUtil {
         }
         return sb.toString();
     }
+
     /**
      * 创建k3 星空查询
-     * @param tableId 表ID
+     * @param tableId  表ID
      * @param fieldKeys 字段
      * @param filter 过滤条件
      * @param index 开始行
-     * @return 返回查询结构
+     * @return 创建k3 星空查询
      */
     public static JSONObject createQuery(String tableId,String fieldKeys,String filter,int index)
     {
-        return createQuery( tableId, fieldKeys, filter, index,500);
+        return createQuery( tableId, fieldKeys, filter,StringUtil.empty,index,500);
     }
 
     /**
@@ -143,11 +148,26 @@ public final class KingdeeUtil {
      * @param tableId 表ID
      * @param fieldKeys 字段
      * @param filter 过滤条件
+     * @param orderString 排序
+     * @param index 开始行
+     * @return 返回查询结构
+     */
+    public static JSONObject createQuery(String tableId,String fieldKeys,String filter,String orderString,int index)
+    {
+        return createQuery( tableId, fieldKeys, filter,orderString,index,500);
+    }
+
+    /**
+     * 创建k3 星空查询
+     * @param tableId 表ID
+     * @param fieldKeys 字段
+     * @param filter 过滤条件
+     * @param orderString 排序
      * @param index 开始行
      * @param limit  最大行数 500
      * @return 返回查询结构
      */
-    public static JSONObject createQuery(String tableId,String fieldKeys,String filter,int index,int limit)
+    public static JSONObject createQuery(String tableId,String fieldKeys,String filter,String orderString,int index,int limit)
     {
         JSONObject data = new JSONObject();
 
@@ -160,7 +180,7 @@ public final class KingdeeUtil {
         data.put("FilterString", filter);
 
         //OrderString：排序字段，字符串类型（非必录）
-        data.put("OrderString", "");
+        data.put("OrderString", orderString);
 
         //TopRowCount：返回总行数，整型（非必录）
         data.put("TopRowCount", "0");

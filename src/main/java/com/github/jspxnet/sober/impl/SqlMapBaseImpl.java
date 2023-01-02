@@ -124,16 +124,25 @@ public class SqlMapBaseImpl implements SqlMapBase {
      * @param o           查询对象条件
      * @param currentPage 当前页数
      * @param totalCount  最大行数
+<<<<<<< HEAD
      * @param loadChild   是否载入
+=======
+>>>>>>> dev
      * @param rollRows    是否滚动
      * @param <T>         返回类型
      * @return 返回列表
      * @throws Exception 异常
      */
     @Override
+<<<<<<< HEAD
     public <T> List<T> query(SqlMapConf sqlMapConf, Object o, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception {
         Map<String, Object> valueMap = getValueMap(o);
         return query(sqlMapConf, valueMap, currentPage, totalCount, loadChild, rollRows);
+=======
+    public <T> List<T> query(SqlMapConf sqlMapConf, Object o, int currentPage, int totalCount, boolean rollRows) throws Exception {
+        Map<String, Object> valueMap = getValueMap(o);
+        return query(sqlMapConf, valueMap, currentPage, totalCount,  rollRows);
+>>>>>>> dev
     }
 
     /**
@@ -145,7 +154,11 @@ public class SqlMapBaseImpl implements SqlMapBase {
      */
     @Override
     public <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws Exception {
+<<<<<<< HEAD
         return query(sqlMapConf, valueMap, 1, jdbcOperations.getMaxRows(), false, false);
+=======
+        return query(sqlMapConf, valueMap, 1, jdbcOperations.getMaxRows(), false, null);
+>>>>>>> dev
     }
 
     /**
@@ -158,6 +171,7 @@ public class SqlMapBaseImpl implements SqlMapBase {
      */
     @Override
     public <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, Class<T> cls) throws Exception {
+<<<<<<< HEAD
         return query(sqlMapConf, valueMap, 1, jdbcOperations.getMaxRows(), false, false, cls);
     }
 
@@ -176,21 +190,34 @@ public class SqlMapBaseImpl implements SqlMapBase {
     public <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, Class<T> cls) throws Exception {
         return query(sqlMapConf, valueMap, currentPage, totalCount, loadChild, false, cls);
     }
+=======
+        return query(sqlMapConf, valueMap, 1, jdbcOperations.getMaxRows(), false, cls);
+    }
+
+>>>>>>> dev
 
     /**
      * @param sqlMapConf  sql配置
      * @param valueMap    参数对象
      * @param currentPage 页数
      * @param totalCount  页数
+<<<<<<< HEAD
      * @param loadChild   返回行数
+=======
+>>>>>>> dev
      * @param rollRows    是否行滚
      * @param <T>         类
      * @return 返回查询列表
      * @throws Exception 异常
      */
     @Override
+<<<<<<< HEAD
     public <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception {
         return query(sqlMapConf, valueMap, currentPage, totalCount, loadChild, rollRows, null);
+=======
+    public <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean rollRows) throws Exception {
+        return query(sqlMapConf, valueMap, currentPage, totalCount,  rollRows, null);
+>>>>>>> dev
     }
 
     /**
@@ -204,7 +231,11 @@ public class SqlMapBaseImpl implements SqlMapBase {
      */
     @Override
     public <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount) throws Exception {
+<<<<<<< HEAD
         return query(sqlMapConf, valueMap, currentPage, totalCount, false, false, null);
+=======
+        return query(sqlMapConf, valueMap, currentPage, totalCount, false, null);
+>>>>>>> dev
     }
 
     /**
@@ -215,7 +246,11 @@ public class SqlMapBaseImpl implements SqlMapBase {
      * @param valueMap    参数MAP
      * @param currentPage 第几页
      * @param totalCount  一页的行数
+<<<<<<< HEAD
      * @param loadChild   是否载入映射对象
+=======
+//     * @param loadChild   是否载入映射对象
+>>>>>>> dev
      * @param rollRows    是否让程序执行滚动,如果不让程序执行滚动，那么在程序里边要自己判断滚动
      * @param cls         类型
      * @param <T>         类型
@@ -223,7 +258,11 @@ public class SqlMapBaseImpl implements SqlMapBase {
      * @throws Exception 异常
      */
     @Override
+<<<<<<< HEAD
     public <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception {
+=======
+    public <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean rollRows, Class<T> cls) throws Exception {
+>>>>>>> dev
         if (totalCount > jdbcOperations.getMaxRows()) {
             totalCount = jdbcOperations.getMaxRows();
         }
@@ -247,7 +286,11 @@ public class SqlMapBaseImpl implements SqlMapBase {
 
 
         Dialect dialect = soberFactory.getDialect();
+<<<<<<< HEAD
 
+=======
+        boolean loadChild = ObjectUtil.toBoolean(sqlMapConf.getNexus());
+>>>>>>> dev
         valueMap.put("currentPage", currentPage);
         valueMap.put("totalCount", totalCount);
         valueMap.put("loadChild", loadChild);

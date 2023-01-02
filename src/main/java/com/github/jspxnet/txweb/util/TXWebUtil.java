@@ -16,6 +16,7 @@ import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.ErrorEnumType;
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.json.JSONObject;
@@ -29,6 +30,10 @@ import com.github.jspxnet.scriptmark.load.InputStreamSource;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sober.SoberSupport;
+import com.github.jspxnet.sober.annotation.NullClass;
+import com.github.jspxnet.txweb.table.meta.AbstractBillPlug;
+import com.github.jspxnet.txweb.table.meta.BillEvent;
+import com.github.jspxnet.txweb.table.meta.OperatePlug;
 import com.github.jspxnet.sober.exception.TransactionException;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionProxy;
@@ -36,6 +41,10 @@ import com.github.jspxnet.txweb.Interceptor;
 import com.github.jspxnet.txweb.annotation.*;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
+<<<<<<< HEAD
+=======
+import com.github.jspxnet.txweb.dao.GenericDAO;
+>>>>>>> dev
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.handle.CommandHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
@@ -52,6 +61,7 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.support.ApacheMultipartRequest;
 import com.github.jspxnet.txweb.support.MultipartRequest;
 import com.github.jspxnet.txweb.support.MultipartSupport;
+import com.github.jspxnet.txweb.table.meta.OperationResult;
 import com.github.jspxnet.txweb.turnpage.TurnPageButton;
 import com.github.jspxnet.txweb.turnpage.impl.TurnPageButtonImpl;
 import com.github.jspxnet.upload.CosMultipartRequest;
@@ -135,6 +145,7 @@ public final class TXWebUtil {
 
             if (action.getRequest() instanceof MultipartRequest) {
                 continue;
+<<<<<<< HEAD
             }
             FileCoveringPolicyEnumType fileCoveringPolicy = mulRequest.covering();
             if (FileCoveringPolicyEnumType.Method.equals(mulRequest.covering()) && ClassUtil.isDeclaredMethod(action.getClass(), "covering")) {
@@ -142,6 +153,15 @@ public final class TXWebUtil {
                 int covering = ObjectUtil.toInt(BeanUtil.getProperty(action, "covering"));
                 fileCoveringPolicy = FileCoveringPolicyEnumType.find(covering);
             }
+=======
+            }
+            FileCoveringPolicyEnumType fileCoveringPolicy = mulRequest.covering();
+            if (FileCoveringPolicyEnumType.Method.equals(mulRequest.covering()) && ClassUtil.isDeclaredMethod(action.getClass(), "covering")) {
+
+                int covering = ObjectUtil.toInt(BeanUtil.getProperty(action, "covering"));
+                fileCoveringPolicy = FileCoveringPolicyEnumType.find(covering);
+            }
+>>>>>>> dev
 
             MultipartRequest multipartRequest;
             if ("cos".equalsIgnoreCase(mulRequest.component())) {
@@ -275,7 +295,7 @@ public final class TXWebUtil {
         if (action == null) {
             return;
         }
-        if (action.getRequest() == null || RequestUtil.isRocRequest(action.getRequest())) {
+        if (action.getRequest() == null) {
             return;
         }
         HttpServletRequest request = action.getRequest();
@@ -829,8 +849,13 @@ public final class TXWebUtil {
         }
         return exeMethod;
     }
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> dev
     /**
      * @param url         url 路径
      * @param actionClass action类型
@@ -913,7 +938,57 @@ public final class TXWebUtil {
 
         //判断是否满足执行条件
         Object result = null;
+        LinkedList<AbstractBillPlug> billPlugLinkedList = new LinkedList<>();
+        BillEvent billEvent = new BillEvent();
+        billEvent.setParam(paramObj);
+
+        boolean doOperatePlug = false;
+        List<OperatePlug> operatePlugList = null;
         try {
+            OperationResult operationResult = new OperationResult();
+            Operate operate = exeMethod.getAnnotation(Operate.class);
+            if (operate!=null && operate.form()!=null && !NullClass.class.equals(operate.form()))
+            {
+                doOperatePlug = true;
+               
+                BeanFactory beanFactory = EnvFactory.getBeanFactory();
+                GenericDAO genericDAO = beanFactory.getBean(GenericDAO.class);
+                Class<?> formClass =  operate.form();
+                operatePlugList = genericDAO.getOperatePlugList(formClass);
+
+                for (OperatePlug operatePlug:operatePlugList)
+                {
+                    AbstractBillPlug billPlug = null;
+                    if (!StringUtil.isNull(operatePlug.getNamespace()))
+                    {
+                        billPlug = (AbstractBillPlug)beanFactory.getBean(operatePlug.getRefName(),operatePlug.getNamespace());
+                    } else
+                    {
+                        billPlug = (AbstractBillPlug)beanFactory.getBean(operatePlug.getRefName());
+                    }
+                    if (billPlug==null)
+                    {
+                        continue;
+                    }
+
+                    //构建参数
+                    billEvent.setOperationResult(operationResult);
+                    billEvent.setOperate(operate);
+                    billEvent.setTableMeta(formClass);
+                    billPlugLinkedList.add(billPlug);
+                    try {
+                        billPlug.before(billEvent);
+                        operationResult = billEvent.getOperationResult();
+                    } catch (Exception e)
+                    {
+                        //产生异常将返回
+                        operationResult.setMessage(e.getMessage());
+                        operationResult.setSuccess(YesNoEnumType.NO.getValue());
+                        return operationResult;
+                    }
+                }
+            }
+
             //事务标签处理 begin
             if (paramObj == null) {
                 result = exeMethod.invoke(action);
@@ -921,6 +996,26 @@ public final class TXWebUtil {
                 result = exeMethod.invoke(action, paramObj);
             }
             //事务标签处理 end
+
+
+            if (doOperatePlug&& !ObjectUtil.isEmpty(billPlugLinkedList))
+            {
+                for (AbstractBillPlug billPlug:billPlugLinkedList)
+                {
+                    try {
+                        billPlug.after(billEvent);
+                        operationResult = billEvent.getOperationResult();
+                    } catch (Exception e)
+                    {
+                        //产生异常将返回
+                        operationResult.setMessage(e.getMessage());
+                        operationResult.setSuccess(YesNoEnumType.NO.getValue());
+                        return operationResult;
+                    }
+                }
+                billPlugLinkedList.clear();
+            }
+
         } catch (InvocationTargetException exception) {
             exception.printStackTrace();
             log.error("执行方法:{} 进入参数:{}", exeMethod.getName(), ObjectUtil.toString(paramObj));
@@ -1181,9 +1276,80 @@ public final class TXWebUtil {
             } catch (Exception e) {
                 log.debug("打印错误信息发生错误", e);
             }
+<<<<<<< HEAD
         }
     }
 
+    /**
+     * @return 创建默认环境
+     */
+    public static Map<String, Object> createEnvironment() {
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        Map<String, Object> venParams = new HashMap<>(50);
+        venParams.put(Environment.filterSuffix, envTemplate.getString(Environment.filterSuffix));
+        venParams.put(Environment.ApiFilterSuffix, envTemplate.getString(Environment.ApiFilterSuffix));
+        venParams.put(Environment.templateSuffix, envTemplate.getString(Environment.templateSuffix));
+        venParams.put(Environment.encode, Dispatcher.getEncode());
+        venParams.put(Environment.remoteHostUrl, envTemplate.getString(Environment.remoteHostUrl, StringUtil.empty));
+        venParams.put(Environment.scriptPath, envTemplate.getString(Environment.scriptPath, "/script"));
+        venParams.put(Environment.sitePath, envTemplate.getString(Environment.sitePath, "/"));
+        venParams.put(Environment.userLoginUrl, envTemplate.getString(Environment.userLoginUrl, "/user/login." + envTemplate.getString(Environment.filterSuffix)));
+        venParams.put(Environment.DEBUG, envTemplate.getBoolean(Environment.DEBUG));
+        venParams.put("date", new Date());
+        return venParams;
+    }
+
+    /**
+     * action在组建模式下运行 保存的key
+     * @param clas 类书籍
+     * @param hashCode hash
+     * @return key
+     */
+    public static String getComponentEnvKey(Class<?> clas,int hashCode) {
+        return clas.getName() + "_" + hashCode;
+    }
+
+
+
+    /**
+     * 创建方法拦截器
+     * @param array 拦截器配置
+     * @param namespace 命名空间
+     * @return 返回拦截器列表
+     */
+    public static LinkedList<Interceptor> builderMethodInterceptor(String[] array,String namespace)
+    {
+        LinkedList<Interceptor> list = new LinkedList<>();
+        if (!ObjectUtil.isEmpty(array))
+        {
+            BeanFactory beanFactory = EnvFactory.getBeanFactory();
+            for (String className:array)
+            {
+                if (StringUtil.isNull(className))
+                {
+                    continue;
+                }
+                Interceptor interceptor;
+                if (className.contains(StringUtil.AT))
+                {
+                    interceptor = (Interceptor)beanFactory.getBean(className);
+                } else
+                {
+                    interceptor = (Interceptor)beanFactory.getBean(className,namespace);
+                }
+                if (interceptor!=null)
+                {
+                    list.addLast(interceptor);
+                }
+            }
+=======
+>>>>>>> dev
+        }
+        return list;
+    }
+
+<<<<<<< HEAD
+=======
     /**
      * @return 创建默认环境
      */
@@ -1250,4 +1416,5 @@ public final class TXWebUtil {
         return list;
     }
 
+>>>>>>> dev
 }

@@ -14,6 +14,12 @@ import com.github.jspxnet.txweb.model.param.SqlMapConfParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.BeanUtil;
 
+<<<<<<< HEAD
+=======
+import java.util.HashMap;
+import java.util.Map;
+
+>>>>>>> dev
 /**
  * @author chenYuan
  *
@@ -65,6 +71,17 @@ public class SqlMapAction extends SqlMapView {
         return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.deleteFailure));
     }
 
+<<<<<<< HEAD
+=======
+    @Operate(caption = "测试get方法",post = false,method = "testget")
+    public RocResponse<Map<String,Object>> testget(@Param(caption = "id列表",required = true) Long[] ids,@Param(caption = "id列表") String id)  {
+        Map<String,Object> result = new HashMap<>();
+        result.put("ids",ids);
+        result.put("id",id);
+        return RocResponse.success(result);
+    }
+
+>>>>>>> dev
     @Override
     public String execute() throws Exception {
         if (isMethodInvoked()) {

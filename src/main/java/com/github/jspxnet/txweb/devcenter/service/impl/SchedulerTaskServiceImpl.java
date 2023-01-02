@@ -14,7 +14,12 @@ import com.github.jspxnet.txweb.model.dto.SchedulerDto;
 import com.github.jspxnet.txweb.model.dto.SchedulerRegisterDto;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.SchedulerTaskLog;
+<<<<<<< HEAD
 import com.github.jspxnet.util.TypeReference;
+=======
+import com.google.gson.reflect.TypeToken;
+
+>>>>>>> dev
 import java.util.*;
 
 @Bean(namespace = Environment.DEV_CENTER, singleton = true)
@@ -323,7 +328,11 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
         try {
             actionResult = httpClient.post(param);
             JSONObject json = new JSONObject(actionResult);
+<<<<<<< HEAD
             return json.parseObject(new TypeReference<RocResponse<List<SchedulerDto>>>(){});
+=======
+            return json.parseObject(new TypeToken<RocResponse<List<SchedulerDto>>>(){});
+>>>>>>> dev
         } catch (Exception e) {
             e.printStackTrace();
             SchedulerTaskLog log = new SchedulerTaskLog();
