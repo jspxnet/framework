@@ -5,6 +5,9 @@ import com.github.jspxnet.sober.criteria.projection.Criterion;
 
 import java.io.Serializable;
 
+/**
+ * @author chenyuan
+ */
 public class CriterionEntry  implements Serializable {
     private final Criterion criterion;
     private final Criteria criteria;

@@ -1,5 +1,7 @@
 package com.github.jspxnet.txweb.model.dto;
 
+import com.github.jspxnet.json.JsonField;
+import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.utils.StringUtil;
@@ -51,5 +53,6 @@ public class AttachmentDto implements Serializable {
 
     @Column(caption = "关联ID")
     private long pid = 0;
+
 
 }

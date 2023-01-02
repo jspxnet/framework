@@ -9,7 +9,8 @@
  */
 package com.github.jspxnet.txweb;
 
-import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.txweb.context.ActionContext;
+
 import java.lang.reflect.Method;
 
 /**
@@ -22,33 +23,26 @@ public interface ActionProxy {
 
     void setAction(Action action);
 
-    Method getMethod();
-
     Action getAction();
-
-    String execute() throws Exception;
 
     void destroy();
 
     void setMethod(String method);
 
-
-    String getNamespace();
-
-    String getActionName();
-
-    void setNamespace(String namespace);
-
     String getCaption();
+    /**
+     * @return 得到方法描述
+     */
+    String getMethodCaption();
 
-    String getMethodCaption() throws NoSuchMethodException;
+    String execute(ActionContext actionContext) throws Exception;
 
-    void setCallJson(JSONObject callJson);
+    /**
+     * 只为了兼容
+     * @return 返回需要执行的方法
+     */
+    @Deprecated
+    Method getMethod();
 
-    JSONObject getCallJson();
-
-    void setExeType(String exeType);
-
-    String getExeType();
 
 }

@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.utils;
 
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.util.StringMap;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
@@ -144,6 +145,29 @@ public class StringUtil {
 
     }
 
+    /**
+     * 主要用在代码生成后去除空白行
+     * @param txt 字符串
+     * @return 删除字符串里边的空行
+     */
+    public static String removeEmptyLine(String txt) {
+        if (txt == null) {
+            return empty;
+        }
+        txt = StringUtil.replace(txt,StringUtil.CRLF,StringUtil.CR);
+        String[] lines = StringUtil.split(txt,StringUtil.CR);
+        StringBuilder sb = new StringBuilder();
+        for (String line:lines)
+        {
+            if (!StringUtil.isEmpty(StringUtil.trim(line)))
+            {
+                sb.append(line).append(StringUtil.CR);
+            }
+        }
+        return sb.toString();
+
+    }
+
     // SubStringAfter/SubStringBefore
     //-----------------------------------------------------------------------
     public static String substringBefore(String str, String separator, int times) {
@@ -215,7 +239,7 @@ public class StringUtil {
      * @since 2.0
      */
     public static String substringBefore(String str, String separator) {
-        if (StringUtil.isNull(str) || separator == null) {
+        if (isNull(str) || separator == null) {
             return empty;
         }
         if (separator.length() == 0) {
@@ -817,6 +841,10 @@ public class StringUtil {
         boolean allowSigns = false;
         boolean foundDigit = false;
         // deal with any possible sign up front
+        if(chars.length<=0)
+        {
+            return false;
+        }
         int start = (chars[0] == '-') ? 1 : 0;
         if (sz > start + 1) {
             if (chars[start] == '0' && chars[start + 1] == 'x') {
@@ -952,7 +980,6 @@ public class StringUtil {
         if (isEmpty(source)) {
             return new String[0];
         }
-
         if (ArrayUtil.contains(SPLIT_TRANSFERRED,cut))
         {
             cut = TRANSFERRED + cut;
@@ -1922,7 +1949,13 @@ public class StringUtil {
         } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "-") == 2) {
             format = DateUtil.DAY_FORMAT;
         } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "/") == 2) {
-            format = "yyyy/MM/dd";
+            if (date.indexOf("/")==2)
+            {
+                format = "dd/MM/yyyy";
+            } else
+            {
+                format = "yyyy/MM/dd";
+            }
         } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, StringUtil.DOT) == 2) {
             format = "yyyy.MM.dd";
         } else if (date.length() > 5 && date.length() < 9 && countMatches(date, "-") == 2) {
@@ -2300,7 +2333,10 @@ public class StringUtil {
      * @return 得到变量列表
      */
     public static String[] getFreeMarkerVar(String str) {
-
+        if (str==null)
+        {
+            return new String[0];
+        }
         StringBuilder sb = new StringBuilder();
         int length = str.length();
         boolean isVar = false;
@@ -2931,33 +2967,6 @@ public class StringUtil {
         return s;
     }
 
-/*
-    public static String comp(String str) {
-        int i = 1;
-        StringBuilder buf = new StringBuilder();
-        int count = 1;
-        char ch = str.charAt(0);
-        for(;;){
-            char c = i==str.length() ? '\10':str.charAt(i);
-            if(c==ch){
-                count++;
-            }else{
-                if(count == 1)
-                    buf.append(ch);
-                else
-                    buf.append(count).append(ch);
-                count=1;
-                ch = c;
-            }
-            i++;
-            if(i==str.length()+1){
-                break;
-            }
-        }
-        return buf.toString();
-    }
-
- */
 
     /**
      * 判断是否为json数组
@@ -3144,10 +3153,10 @@ public class StringUtil {
      * @return 是否相同
      */
     public static boolean getPatternFind(String url, String find) {
-        if (find == null || url == null) {
+        if (find == null || url == null || "{".equals(find) || "(".equals(find)) {
             return false;
         }
-        if (url.equals(find))
+        if (url.equals(find)||"*".equals(find))
         {
             return true;
         }
@@ -3289,14 +3298,30 @@ public class StringUtil {
         return newName;
     }
 
-    public static void main(String[] args) {
 
-        String str = "1969-02-21 01:02:03.20";
-
-        Date date = getDate(str);
-        System.out.println("---" + DateUtil.toString(date,DateUtil.FULL_ST_FORMAT));
-
-
+    public static Map<String, String> queryStringToMap(String str)
+    {
+        Map<String, String> result = new HashMap<String, String>();
+        String[] results =  split(str,'&');
+        if (!ObjectUtil.isEmpty(results))
+        {
+            for (String pair : results) {
+                if (StringUtil.isNull(pair)) {
+                    continue;
+                }
+                int pos = pair.indexOf("=");
+                if (pos == -1) {
+                    continue;
+                }
+                String name = pair.substring(0, pos);
+                String value = pair.substring(pos + 1);
+                if (!StringUtil.isNull(name)) {
+                    result.put(name, value);
+                }
+            }
+        }
+        return result;
     }
+
 
 }

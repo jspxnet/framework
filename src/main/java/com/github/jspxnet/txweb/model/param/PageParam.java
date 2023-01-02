@@ -40,6 +40,9 @@ public class PageParam implements Serializable  {
     @Param(caption = "父ID")
     private long pid = 0;
 
+    @Param(caption = "载入映射")
+    private boolean load = false;
+
     @Param(caption = "条件",max = 100)
     private String term = StringUtil.empty;
 

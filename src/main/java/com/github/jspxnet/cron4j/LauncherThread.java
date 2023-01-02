@@ -18,7 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
-import com.github.jspxnet.utils.RandomUtil;
+import com.github.jspxnet.utils.SystemUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * LauncherThreads are used by {@link Scheduler} instances. A LauncherThread
@@ -29,12 +30,13 @@ import com.github.jspxnet.utils.RandomUtil;
  * @author Carlo Pelliccia
  * @since 2.0
  */
+@Slf4j
 class LauncherThread extends Thread {
 
 	/**
 	 * A GUID for this object.
 	 */
-	private final String guid = RandomUtil.getRandomGUID(32);
+	private final String guid;
 
 	/**
 	 * The owner scheduler.
@@ -67,8 +69,8 @@ class LauncherThread extends Thread {
 		this.collectors = collectors;
 		this.referenceTimeInMillis = referenceTimeInMillis;
 		// Thread name.
-		String name = "cron4j::scheduler[" + scheduler.getGuid()
-				+ "]::launcher[" + guid + "]";
+		guid = SystemUtil.getPid() + "_" + scheduler.getGuid();
+		String name = "cron4j::[" + scheduler.getTaskConf().getName() + "]::launcher[" + guid + "]";
 		setName(name);
 	}
 

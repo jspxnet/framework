@@ -24,7 +24,7 @@ import java.io.*;
  * the basic idea
  */
 public abstract class FileRenamePolicy implements RenamePolicy {
-    final static public char[] special = {
+    final static public char[] SPECIAL = {
             '\\', '/', '\r', '\n', '$', '&', '\'', '(', ')', '&', '#', '!', '=', '\"', '<', '>', '.', '（', '）'
             , '）', '【', '】', '、', '~', '！', '*', '%', '|', ' ', '\\', '{', '}', '“', '”', '；', '?', '%', ',', '_', ':', ';', '《', '》'
     };

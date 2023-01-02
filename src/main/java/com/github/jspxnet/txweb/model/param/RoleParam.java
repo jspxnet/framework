@@ -38,8 +38,8 @@ public class RoleParam  implements Serializable {
     @Param(caption = "图片", max = 250)
     private String images = StringUtil.empty;
 
-    @Param(caption = "办公角色", max = 2, enumType = YesNoEnumType.class)
-    private int officeType = YesNoEnumType.NO.getValue();
+    @Param(caption = "办公角色", min = -1,max = 10000)
+    private int officeType = 0;
 
     //是否允许上传
     @Param(caption = "是否允许上传", max = 2, enumType = YesNoEnumType.class)

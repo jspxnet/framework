@@ -1,15 +1,14 @@
 package com.github.jspxnet.txweb.view;
 
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
-import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.tag.BeanElement;
-import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.annotation.Table;
+import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.txweb.WebConfigManager;
@@ -19,6 +18,7 @@ import com.github.jspxnet.txweb.bundle.action.EditConfigAction;
 import com.github.jspxnet.txweb.bundle.action.EditLanguageAction;
 import com.github.jspxnet.txweb.config.ActionConfigBean;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
+import com.github.jspxnet.txweb.model.dto.SoberTableDto;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ApiDocUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -31,7 +31,7 @@ import java.util.*;
 public class ApiDocView extends ActionSupport {
     final private static String[] NO_VIEW_CLASS = new String[]{
             com.github.jspxnet.txweb.support.DefaultTemplateAction.class.getName(),
-            com.github.jspxnet.txweb.view.HelperView.class.getName(),
+            HelpTipView.class.getName(),
             com.github.jspxnet.txweb.view.DownloadFileView.class.getName(),
             com.github.jspxnet.txweb.ueditor.adaptor.UEditorAdaptor.class.getName(),
             ApiDocView.class.getName(),
@@ -40,10 +40,8 @@ public class ApiDocView extends ActionSupport {
             TemplateView.class.getName(),
     };
 
-
     final private WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
     final private BeanFactory beanFactory = EnvFactory.getBeanFactory();
-    //final private String API_INDEX_CACHE = "api:index:cache:%s";
     final private String API_FIELD_CACHE = "api:field:cache:%s";
 
     @Operate(caption = "应用名称", post = false, method = "appname")
@@ -165,7 +163,7 @@ public class ApiDocView extends ActionSupport {
         //过滤重复的类对象begin
         List<Class<?>> classList = new ArrayList<>();
         for (String className : list) {
-            if (className.toLowerCase().endsWith("view") || className.toLowerCase().endsWith("action") || className.contains("com.github")) {
+            if (className.toLowerCase().endsWith("param") || className.toLowerCase().endsWith("view") || className.toLowerCase().endsWith("action") || className.contains("com.github")) {
                 continue;
             }
             if (!className.contains(softName)) {
@@ -176,7 +174,7 @@ public class ApiDocView extends ActionSupport {
                 continue;
             }
             for (Class<?> cls : findClassList) {
-                if (cls == null) {
+                if (cls == null ) {
                     continue;
                 }
                 if (!classList.contains(cls)) {
@@ -187,6 +185,15 @@ public class ApiDocView extends ActionSupport {
         //过滤重复的类对象end
         Map<String, ApiAction> resultMap = new HashMap<>();
         for (Class<?> cls : classList) {
+            Table table = cls.getAnnotation(Table.class);
+            if (table==null)
+            {
+                continue;
+            }
+            if (!table.create())
+            {
+                continue;
+            }
             ApiAction vo = new ApiAction();
             vo.setUrl("/" + softName + "/" + cls.getName());
             vo.setTitle(AnnotationUtil.getTableCaption(cls));
@@ -233,12 +240,11 @@ public class ApiDocView extends ActionSupport {
             String cont = ApiDocUtil.getDescribeValue(cla.getName(),describe,apiDocument.getNamespace());
             apiDocument.setDescribe(cont);
         }
-
         return apiDocument;
     }
 
     @Operate(caption = "字段文档", method = "/table/${id}", post = false)
-    public TableModels getTable(@PathVar String id) throws Exception {
+    public SoberTableDto getTable(@PathVar String id) throws Exception {
         Map<String, ApiAction> fieldCache = (Map<String, ApiAction>) JSCacheManager.get(DefaultCache.class, String.format(API_FIELD_CACHE, getRootNamespace()));
         if (fieldCache == null || fieldCache.isEmpty()) {
             fielding();
@@ -250,9 +256,12 @@ public class ApiDocView extends ActionSupport {
 
         Class<?> builderClass = ClassUtil.loadClass(apiAction.getClassName());
         AssertException.isNull(builderClass,"不存在的表结构");
-        return AnnotationUtil.getSoberTable(builderClass);
+        SoberTable soberTable = AnnotationUtil.getSoberTable(builderClass,0);
+        return BeanUtil.copy(soberTable,SoberTableDto.class);
     }
 
+
+/*
     public static void main(String[] arg) throws Exception {
 
         JspxNetApplication.autoRun();
@@ -263,5 +272,5 @@ public class ApiDocView extends ActionSupport {
         ApiDocument response = apiDocView.getDocument(id);
 
         System.out.println(new JSONObject(response, true).toString(4));
-    }
+    }*/
 }

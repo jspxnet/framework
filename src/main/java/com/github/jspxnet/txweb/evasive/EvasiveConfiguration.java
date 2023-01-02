@@ -7,8 +7,6 @@ import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.txweb.config.ResultConfigBean;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
-
 import java.io.File;
 import java.net.URL;
 import java.util.*;
@@ -18,14 +16,24 @@ import java.util.*;
  */
 @Slf4j
 public class EvasiveConfiguration implements Configuration {
-    final private List<EvasiveRule> evasiveRuleList = new ArrayList<EvasiveRule>();
-    private List<ResultConfigBean> resultConfigList = new ArrayList<ResultConfigBean>();
+    final private List<EvasiveRule> evasiveRuleList = new ArrayList<>();
+    private List<ResultConfigBean> resultConfigList = new ArrayList<>();
+    //白名单
     private String[] whiteList = null;
-    private String[] blackList = null;
     //黑名单
-    final private List<String> blacklist = new ArrayList<String>();
+    private String[] blackList = null;
+
+    //黑名后缀
+    private String[] blackSuffixList = null;
+
+    //密码访问目录
+    private Map<String,String> passwordFolderList = null;
+
+    //不安全的url
     private String[] insecureUrlKeys = null;
+    //不安全的外来参数
     private String[] insecureQueryStringKeys = null;
+    //规则列表
     final private List<QueryBlack> queryBlackRuleList = new ArrayList<QueryBlack>();
     //包含的文件,用作判断，如果已经载入的文件将不再载入
     private String[] includeFiles = null;
@@ -36,7 +44,6 @@ public class EvasiveConfiguration implements Configuration {
     public List<EvasiveRule> getEvasiveRuleList() {
         return evasiveRuleList;
     }
-
 
     @Override
     public String[] getWhiteList() {
@@ -68,9 +75,27 @@ public class EvasiveConfiguration implements Configuration {
         return insecureQueryStringKeys;
     }
 
-    private static Configuration instance = new EvasiveConfiguration();
+    @Override
+    public String[] getBlackSuffixList() {
+        return blackSuffixList;
+    }
+
+    @Override
+    public Map<String, String> getPasswordFolderList() {
+        return passwordFolderList;
+    }
+
+    private static Configuration instance = null;
 
     public static Configuration getInstance() {
+        if (instance != null) {
+            return instance;
+        }
+        synchronized (EvasiveConfiguration.class) {
+            if (instance == null) {
+                instance = new EvasiveConfiguration();
+            }
+        }
         return instance;
     }
 
@@ -125,7 +150,7 @@ public class EvasiveConfiguration implements Configuration {
         }
 
         if (!FileUtil.isFileExist(defaultFile)) {
-            URL url = Environment.class.getResource("/resources/"+fileName);
+            URL url = Environment.class.getResource("/resources/" + fileName);
             if (url != null) {
                 defaultFile = URLUtil.getUrlDecoder(url.getPath(), Environment.defaultEncode);
             }
@@ -150,7 +175,7 @@ public class EvasiveConfiguration implements Configuration {
         if (StringUtil.isNull(defaultPath)) {
             defaultPath = envTemplate.getString(Environment.defaultPath);
         }
-        readIncludeFile(defaultPath,new String[]{fileName} );
+        readIncludeFile(defaultPath, new String[]{fileName});
 
     }
 
@@ -168,55 +193,63 @@ public class EvasiveConfiguration implements Configuration {
             if (StringUtil.isNull(file)) {
                 continue;
             }
-            log.info("evasive load config file:" + file);
 
             File readFile = EnvFactory.getFile(file);
-            if (readFile==null) {
+            if (readFile == null) {
                 continue;
             }
 
-            String fileId = readFile.getName()+"_" + readFile.length();
+            String fileId = readFile.getName() + "_" + readFile.length();
             if (ArrayUtil.inArray(includeFiles, fileId, true)) {
                 continue;
             }
             includeFiles = ArrayUtil.add(includeFiles, fileId);
-
-
             String txt = IoUtil.autoReadText(readFile);
-            ReadEvasiveRuleConfig readConfig = new ReadEvasiveRuleConfig();
-            if (XMLUtil.parseXmlString(readConfig, txt)) {
-                String[] includeFixedFiles = null;
-                String[] iFiles = readConfig.getInclude();
+            log.info("evasive load config file:" + file);
+            readIncludeContent(txt, defaultPath);
+        }
+    }
 
-                evasiveRuleList.addAll(readConfig.getEvasiveRuleList());
-                this.insecureUrlKeys = ArrayUtil.join(this.insecureUrlKeys, readConfig.getInsecureUrlKeys());
-                this.insecureQueryStringKeys = ArrayUtil.join(this.insecureQueryStringKeys, readConfig.getInsecureQueryStringKeys());
-                this.whiteList = ArrayUtil.join(this.whiteList, readConfig.getWhiteList());
-                this.blackList = ArrayUtil.join(this.blackList, readConfig.getBlackList());
-                this.queryBlackRuleList.addAll(readConfig.getQueryBlackRuleList());
-                this.resultConfigList = readConfig.getResultConfigList();
 
-                if (iFiles != null) {
-                    for (String mif : iFiles) {
-                        if (FileUtil.isPatternFileName(mif)) {
-                            List<File> fileName = FileUtil.getPatternFiles(defaultPath, mif);
-                            if (defaultPath!=null)
-                            {
-                                fileName.addAll(FileUtil.getPatternFiles(null, mif));
-                            }
-                            for (File f : fileName) {
-                                includeFixedFiles = ArrayUtil.add(includeFixedFiles, f.getName());
-                            }
-                        } else {
-                            includeFixedFiles = ArrayUtil.add(includeFixedFiles, mif);
+    public void readIncludeContent(String txt, String defaultPath) throws Exception {
+        if (StringUtil.isEmpty(txt)) {
+            return;
+        }
+
+        ReadEvasiveRuleConfig readConfig = new ReadEvasiveRuleConfig();
+        if (XMLUtil.parseXmlString(readConfig, txt)) {
+            String[] includeFixedFiles = null;
+            String[] iFiles = readConfig.getInclude();
+
+            evasiveRuleList.addAll(readConfig.getEvasiveRuleList());
+            this.insecureUrlKeys = ArrayUtil.join(this.insecureUrlKeys, readConfig.getInsecureUrlKeys());
+            this.insecureQueryStringKeys = ArrayUtil.join(this.insecureQueryStringKeys, readConfig.getInsecureQueryStringKeys());
+            this.whiteList = ArrayUtil.join(this.whiteList, readConfig.getWhiteList());
+            this.blackList = ArrayUtil.join(this.blackList, readConfig.getBlackList());
+            this.blackSuffixList = ArrayUtil.join(this.blackSuffixList, readConfig.getBlackSuffixList());
+            this.queryBlackRuleList.addAll(readConfig.getQueryBlackRuleList());
+            this.resultConfigList = readConfig.getResultConfigList();
+            this.passwordFolderList = readConfig.getPasswordFolderList();
+
+            if (iFiles != null) {
+                for (String mif : iFiles) {
+                    if (FileUtil.isPatternFileName(mif)) {
+                        List<File> fileName = FileUtil.getPatternFiles(defaultPath, mif);
+                        if (defaultPath != null) {
+                            fileName.addAll(FileUtil.getPatternFiles(null, mif));
                         }
+                        for (File f : fileName) {
+                            includeFixedFiles = ArrayUtil.add(includeFixedFiles, f.getName());
+                        }
+                    } else {
+                        includeFixedFiles = ArrayUtil.add(includeFixedFiles, mif);
                     }
                 }
-
-                readIncludeFile(defaultPath, includeFixedFiles);
-            } else {
-                log.error("evasive load config file xml error:" + file);
             }
+
+            readIncludeFile(defaultPath, includeFixedFiles);
+        } else {
+            log.error("evasive load config file xml error:" + txt);
         }
     }
 

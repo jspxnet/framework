@@ -18,8 +18,12 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.utils.ObjectUtil;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.Security;
 
 /**
  * This kind of task can be used to invoke a static method of a Java class. The
@@ -58,10 +62,12 @@ class StaticMethodTask extends Task {
 	 *            Arguments for the static method. The array can be empty, but
 	 *            it can't be null.
 	 */
-	public StaticMethodTask(String className, String methodName, String[] args) {
+	public StaticMethodTask(String className, String methodName, String[] args,String id) {
+		super(id);
 		this.className = className;
 		this.methodName = methodName;
 		this.args = args;
+
 	}
 
 	/**

@@ -29,7 +29,7 @@ public class JspxHessianProxy extends HessianProxy {
      * Variable for saving cookie list
      */
     private List<String> cookies = null;
-    private String token = null;
+    private String token;
 
     /**
      * @param url       url

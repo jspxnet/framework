@@ -69,7 +69,7 @@ public class JumpFilterView extends ActionSupport {
     @Override
     public String execute() throws Exception {
         if (promptly == 1 && isSafe()) {
-            response.sendRedirect(url);
+            getResponse().sendRedirect(url);
         }
         return NONE;
     }

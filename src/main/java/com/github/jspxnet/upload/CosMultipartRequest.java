@@ -13,17 +13,18 @@
 
 package com.github.jspxnet.upload;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
 import com.github.jspxnet.txweb.support.MultipartRequest;
 import com.github.jspxnet.upload.multipart.*;
-import com.github.jspxnet.upload.multipart.Part;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.util.HttpUtil;
+import com.github.jspxnet.utils.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * A utility class transfer handle [code]multipart/form-data } requests,
@@ -127,9 +128,10 @@ public class CosMultipartRequest extends MultipartRequest {
         // Some people like transfer fetch query string parameters from
         // MultipartRequest, so here we make that possible.  Thanks transfer
         // Ben Johnson, ben.johnson@merrillcorp.com, for the idea.
-        if (request.getQueryString() != null) {
+        if (!StringUtil.isNull(request.getQueryString())) {
             // Let HttpUtils create a name->String[] structure
-            Map<String, String[]> queryParameters = parseQueryString(request.getQueryString());
+            String queryString = URLUtil.getUrlDecoder(request.getQueryString(),encoding);
+            Map<String, String[]> queryParameters = HttpUtil.parseQueryString(queryString);
             // For our own use, name it a name->Vector structure
             for (String paramName : queryParameters.keySet()) {
                 String[] values = queryParameters.get(paramName);
@@ -163,14 +165,12 @@ public class CosMultipartRequest extends MultipartRequest {
                         filePart.setRenamePolicy(policy);  // null policy is OK
                         long length = filePart.writeTo(dir);
                         UploadedFile yesUploadedFile = new UploadedFile(name, dir.toString(), filePart.getFileName(), fileName, filePart.getContentType(), type);
-                        yesUploadedFile.setUpload(length > 0);
-
                         yesUploadedFile.setChunk(ObjectUtil.toInt(getParameter("chunk")));
                         yesUploadedFile.setChunks(ObjectUtil.toInt(getParameter("chunks")));
                         yesUploadedFile.setLength(length);
                         yesUploadedFile.setChunkUpload(parameters.containsKey("chunks") && ObjectUtil.toInt(getParameter("chunks")) > 0);
                         fileList.add(yesUploadedFile);
-                        if (length > 0) {
+                        if (length >= 0) {
                             yesUploadedFile.setUpload(true);
                         }
                     } else {
@@ -184,8 +184,5 @@ public class CosMultipartRequest extends MultipartRequest {
             }
         }
         //////////////代码安全检查
-
-
     }
-
 }

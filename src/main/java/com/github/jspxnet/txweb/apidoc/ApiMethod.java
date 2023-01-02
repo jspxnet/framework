@@ -2,7 +2,6 @@ package com.github.jspxnet.txweb.apidoc;
 
 import com.github.jspxnet.json.JsonIgnore;
 import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Map;
 

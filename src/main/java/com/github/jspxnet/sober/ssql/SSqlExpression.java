@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author chenYuan
  */
-public class SSqlExpression {
+public final class SSqlExpression {
     private SSqlExpression() {
 
     }

@@ -75,7 +75,7 @@ public class HessianClientFactory extends HessianProxyFactory implements Hessian
         Class<?> cls = ClassUtil.getClass(api);
         if (cls!=null)
         {
-            cls = ClassUtil.findRemoteAPI(cls);
+            cls = ClassUtil.findRemoteApi(cls);
         }
         if (cls==null)
         {

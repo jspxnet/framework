@@ -89,7 +89,7 @@ public class PostCalendarDAOImpl extends JdbcOperations implements PostCalendarD
             sql.append(" AND organizeId=").append(StringUtil.quote(organizeId,false));
         }
         sql.append(" GROUP BY dateMonth ORDER BY dateMonth DESC");
-        List<Object> list = query(sql.toString(), null, 1, 5000);
+        List<?> list = query(sql.toString(), null, 1, 5000);
         Map<String, Integer> result = new HashMap<>();
         for (Object bean : list) {
             if (bean == null) {

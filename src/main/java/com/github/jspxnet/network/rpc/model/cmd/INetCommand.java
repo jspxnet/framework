@@ -12,6 +12,7 @@ package com.github.jspxnet.network.rpc.model.cmd;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.rpc.env.RpcConfig;
 import com.github.jspxnet.network.util.PacketUtil;
+import com.github.jspxnet.security.symmetry.SymmetryEncryptFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
@@ -54,9 +55,10 @@ public abstract class INetCommand implements ICmd {
     static public final String TYPE_BASE64 = "base64";
     static public final String TYPE_TXT = "txt";
 
-
     private static String secretKey = RpcConfig.getInstance().getSecretKey();
     private static String cipherIv = RpcConfig.getInstance().getCipherIv();
+    private static boolean useRpcZip = RpcConfig.getInstance().getUseRpcZip();
+    private static boolean useRpcSecret = RpcConfig.getInstance().getUseRpcSecret();
 
     static public void setSecretKey(String key) {
         secretKey = key;
@@ -74,11 +76,28 @@ public abstract class INetCommand implements ICmd {
         return cipherIv;
     }
 
+    public static boolean isUseRpcZip() {
+        return useRpcZip;
+    }
+
+    public static void setUseRpcZip(boolean useRpcZip) {
+        INetCommand.useRpcZip = useRpcZip;
+    }
+
+    public static boolean isUseRpcSecret() {
+        return useRpcSecret;
+    }
+
+    public static void setUseRpcSecret(boolean useRpcSecret) {
+        INetCommand.useRpcSecret = useRpcSecret;
+    }
+
     public static String getDecodePacket(String text)
     {
         try {
-            return PacketUtil.getDecodePacket(text,getSecretKey());
+            return PacketUtil.getDecodePacket(text,secretKey);
         } catch (Exception e) {
+            log.error("getDecodePacket secretKey:{},text:{}",secretKey, text);
             e.printStackTrace();
         }
         return null;
@@ -89,11 +108,14 @@ public abstract class INetCommand implements ICmd {
         {
             throw new Exception("channel为空");
         }
-        String sendData = PacketUtil.getEncodePacket(new JSONObject(cmd).toString(),secretKey);
+        String data = new JSONObject(cmd).toString();
         try {
+            String sendData = PacketUtil.getEncodePacket(data,' ',PacketUtil.Charset_UTF_8,useRpcZip?PacketUtil.ZIP:PacketUtil.NONE,
+                    useRpcSecret?SymmetryEncryptFactory.AES:SymmetryEncryptFactory.NONE,secretKey);
             channel.writeAndFlush(sendData);
         } catch (Exception e)
         {
+            log.error("sendEncodePacket:{}",data);
             throw new Exception("发送信息发生掉线");
         }
     }

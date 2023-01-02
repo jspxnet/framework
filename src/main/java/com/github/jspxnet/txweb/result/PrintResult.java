@@ -10,11 +10,14 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -27,12 +30,12 @@ import javax.servlet.http.HttpServletResponse;
 public class PrintResult extends ResultSupport {
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        Action action = actionInvocation.getActionProxy().getAction();
+
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
         String contentType = "text/html; charset=" + Dispatcher.getEncode();
-        HttpServletResponse response = action.getResponse();
-        response.setCharacterEncoding(Dispatcher.getEncode());
         response.setContentType(contentType);
-        TXWebUtil.print(action.getResult() == null ? StringUtil.empty : (String) action.getResult(), WebOutEnumType.HTML.getValue(), response);
+        TXWebUtil.print(actionContext.getResult() == null ? StringUtil.empty : (String) actionContext.getResult(), WebOutEnumType.HTML.getValue(), response);
 
     }
 }

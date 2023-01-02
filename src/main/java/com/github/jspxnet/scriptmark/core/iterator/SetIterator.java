@@ -23,7 +23,7 @@ import java.util.Set;
  * Time: 14:38:56
  */
 public class SetIterator extends ScriptableObject implements ListIterator {
-    private Iterator array;
+    private Iterator<?> array;
 
     private int length;
 

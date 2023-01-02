@@ -43,13 +43,13 @@ public class ActionLog extends OperateTable {
     @Column(caption = "类名", length = 200, dataType = "isLengthBetween(2,200)", notNull = true)
     private String classMethod = StringUtil.empty;
 
-    @Column(caption = "返回", length = 200, dataType = "isLengthBetween(2,100)", notNull = true)
+    @Column(caption = "返回", length = 200)
     private String actionResult = StringUtil.empty;
 
-    @Column(caption = "说明", length = 250, dataType = "isLengthBetween(2,250)", notNull = false)
+    @Column(caption = "说明", length = 250, dataType = "isLengthBetween(2,250)")
     private String title = StringUtil.empty;
 
-    @Column(caption = "正文", length = 20000, dataType = "isLengthBetween(2,20000)", notNull = false)
+    @Column(caption = "正文", length = 20000, dataType = "isLengthBetween(2,20000)")
     private String content = StringUtil.empty;
 
     @Column(caption = "类型", length = 100)

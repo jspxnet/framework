@@ -15,9 +15,9 @@ import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.txweb.dao.GenericDAO;
+import com.github.jspxnet.txweb.model.param.PageParam;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.util.List;
 
 /**
@@ -27,7 +27,7 @@ import java.util.List;
  * Time: 17:27:49
  * com.github.jspxnet.txweb.dao.impl.GenericDAOImpl
  */
-public class GenericDAOImpl<T> extends JdbcOperations implements GenericDAO<T> {
+public class GenericDAOImpl extends JdbcOperations implements GenericDAO {
     public GenericDAOImpl() {
 
     }
@@ -42,11 +42,12 @@ public class GenericDAOImpl<T> extends JdbcOperations implements GenericDAO<T> {
      * @param page       页数
      * @param count      行数
      * @param load       载入关联
+     * @param <T>        类型
      * @return 返回列表
      */
     @Override
     public <T> List<T> getList(
-            T cls,
+            Class<T> cls,
             String[] field,
             String[] find,
             String term,
@@ -59,7 +60,7 @@ public class GenericDAOImpl<T> extends JdbcOperations implements GenericDAO<T> {
         } else {
             sort = sortString;
         }
-        Criteria criteria = createCriteria((Class<T>)cls);
+        Criteria criteria = createCriteria(cls);
         if (!ObjectUtil.isEmpty(field) && !ObjectUtil.isEmpty(find)) {
             criteria = criteria.add(Expression.find(field, find));
         }
@@ -78,17 +79,16 @@ public class GenericDAOImpl<T> extends JdbcOperations implements GenericDAO<T> {
      * @param term  条件
      * @param uid   用户id
      * @return 得到长度
-     * @throws Exception 异常
      */
     @Override
     public int getCount(
-            T cls,
+            Class<?> cls,
             String[] field,
             String[] find,
             String term,
             long uid
-    ) throws Exception {
-        Criteria criteria = createCriteria((Class<T>)cls);
+    )  {
+        Criteria criteria = createCriteria(cls);
         if (!ObjectUtil.isEmpty(field) && !ObjectUtil.isEmpty(find)) {
             criteria = criteria.add(Expression.find(field, find));
         }
@@ -98,5 +98,56 @@ public class GenericDAOImpl<T> extends JdbcOperations implements GenericDAO<T> {
 
         return SSqlExpression.getTermExpression(criteria, term).setProjection(Projections.rowCount()).intUniqueResult();
     }
+
+
+    /**
+     *
+     * @param cls 对象类型
+     * @param param 翻页参数
+     * @param <T> 类型
+     * @return 返回列表
+     */
+    @Override
+    public <T> List<T> getList(
+            Class<T> cls, PageParam param)  {
+        String sort;
+        if (StringUtil.isNull(param.getSort())) {
+            sort = "createDate:D";
+        } else {
+            sort = param.getSort();
+        }
+        Criteria criteria = createCriteria(cls);
+        if (!ObjectUtil.isEmpty(param.getField()) && !ObjectUtil.isEmpty(param.getFind())) {
+            criteria = criteria.add(Expression.find(param.getField(), param.getFind()));
+        }
+        if (param.getUid() > 0) {
+            criteria = criteria.add(Expression.eq("putUid", param.getUid()));
+        }
+        criteria = SSqlExpression.getTermExpression(criteria, param.getTerm());
+        criteria = SSqlExpression.getSortOrder(criteria, sort);
+        return criteria.setCurrentPage(param.getCurrentPage()).setTotalCount(param.getCount()).list(param.isLoad());
+    }
+
+    /**
+     *
+     * @param cls 对象类型
+     * @param param 翻页参数
+     * @return 得到长度
+     */
+    @Override
+    public int getCount(Class<?> cls,PageParam param) {
+        Criteria criteria = createCriteria(cls);
+        if (!ObjectUtil.isEmpty(param.getField()) && !ObjectUtil.isEmpty(param.getFind())) {
+            criteria = criteria.add(Expression.find(param.getField(), param.getFind()));
+        }
+        if (param.getUid() > 0) {
+            criteria = criteria.add(Expression.eq("putUid", param.getUid()));
+        }
+        return SSqlExpression.getTermExpression(criteria, param.getTerm()).setProjection(Projections.rowCount()).intUniqueResult();
+    }
+
+
+
+
 
 }

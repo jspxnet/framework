@@ -3,6 +3,8 @@ package com.github.jspxnet.datasource;
 import com.github.jspxnet.network.mail.core.SendEmailAdapter;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.utils.DateUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
@@ -13,10 +15,12 @@ import java.util.logging.Logger;
  * Created by yuan on 14-4-17.
  * 压力测试通过，不要随便调整
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 @Slf4j
 public class LimitDataSource extends DriverManagerDataSource {
 
-    final private transient com.github.jspxnet.datasource.ConnectionProxy[] connectionPool = new com.github.jspxnet.datasource.ConnectionProxy[8];
+    final private transient ConnectionProxy[] connectionPool = new ConnectionProxy[8];
     final private int maxPoolSize = connectionPool.length;
     private int maxConnectionTime = DateUtil.MINUTE;  //8小时
     private String checkSql = "SELECT 1";
@@ -24,85 +28,20 @@ public class LimitDataSource extends DriverManagerDataSource {
     private int mailSendTimes = 0;
     private int minPoolSize = 3;
     private int sleepSecond = 1;
-    private String smtp = "mail.gzec.com.cn:26";
-    private String mailFrom = "public@gzec.com.cn";
-    private String mailUser = "public@gzec.com.cn";
-    private String mailPassword = "111111";
+    private String smtp = "";
+    private String mailFrom = "";
+    private String mailUser = "";
+    private String mailPassword = "";
     private String mailSendTo = "39793751@qq.com";
     private int current = 0;
 
     //是否允许高并发的时候使用不安全连接 false 表示使用 true表示不使用
     public LimitDataSource() {
 
-
-    }
-
-    public boolean isMailTips() {
-        return mailTips;
-    }
-
-    public void setMailTips(boolean mailTips) {
-        this.mailTips = mailTips;
-    }
-
-    public String getSmtp() {
-        return smtp;
-    }
-
-    public void setSmtp(String smtp) {
-        this.smtp = smtp;
-    }
-
-    public String getMailFrom() {
-        return mailFrom;
-    }
-
-    public void setMailFrom(String mailFrom) {
-        this.mailFrom = mailFrom;
-    }
-
-    public String getMailUser() {
-        return mailUser;
-    }
-
-    public void setMailUser(String mailUser) {
-        this.mailUser = mailUser;
-    }
-
-    public String getMailPassword() {
-        return mailPassword;
-    }
-
-    public void setMailPassword(String mailPassword) {
-        this.mailPassword = mailPassword;
-    }
-
-    public String getMailSendTo() {
-        return mailSendTo;
-    }
-
-    public void setMailSendTo(String mailSendTo) {
-        this.mailSendTo = mailSendTo;
     }
 
     public int getPoolSize() {
         return 2;
-    }
-
-    public int getMaxPoolSize() {
-        return maxPoolSize;
-    }
-
-    public int getSleepSecond() {
-        return sleepSecond;
-    }
-
-    public void setSleepSecond(int sleepSecond) {
-        this.sleepSecond = sleepSecond;
-    }
-
-    public void setMaxPoolSize(int maxPoolSize) {
-
     }
 
     //兼容c3p0
@@ -111,21 +50,6 @@ public class LimitDataSource extends DriverManagerDataSource {
         this.minPoolSize = minPoolSize;
     }
 
-    public int getMinPoolSize() {
-        return minPoolSize;
-    }
-
-    public int getMaxConnectionTime() {
-        return maxConnectionTime;
-    }
-
-    public String getCheckSql() {
-        return checkSql;
-    }
-
-    public void setCheckSql(String checkSql) {
-        this.checkSql = checkSql;
-    }
 
     public void setMaxConnectionTime(int maxConnectionTime) {
         if (maxConnectionTime < 1000) {
@@ -232,7 +156,7 @@ public class LimitDataSource extends DriverManagerDataSource {
      */
     @Override
     public Logger getParentLogger() {
-        return Logger.getLogger(JspxDataSource.class.getName());
+        return Logger.getLogger(LimitDataSource.class.getName());
     }
 
 

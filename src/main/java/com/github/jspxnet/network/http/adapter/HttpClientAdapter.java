@@ -48,6 +48,10 @@ public class HttpClientAdapter implements HttpClient {
     protected int bufferSize = 512;
     protected int connectionTimeout = 20000;
     protected int readTimeout = 20000;
+
+    final private static String CREDENTIAL_CHARSET = "http.protocol.credential-charset";
+    final private static String HTTP_CONTENT_CHARSET = "http.protocol.content-charset";
+
     //当前实体对象
     protected HttpResponse httpResponse;
     final private String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
@@ -158,8 +162,7 @@ public class HttpClientAdapter implements HttpClient {
     @Override
     public HttpClient build(String url) {
 
-        final String CREDENTIAL_CHARSET = "http.protocol.credential-charset";
-        final String HTTP_CONTENT_CHARSET = "http.protocol.content-charset";
+
         //HttpClients.
        // ContentType.APPLICATION_ATOM_XML
         defaultHeaders.put(CREDENTIAL_CHARSET, encode);

@@ -15,9 +15,9 @@ package com.github.jspxnet.upload;
 
 import com.github.jspxnet.utils.StringUtil;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.*;
+import javax.servlet.ServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.util.Vector;
 
 /**
  * A class transfer simplify parameter handling.  It can return parameters of
@@ -68,7 +68,7 @@ import javax.servlet.*;
  */
 public class ParameterParser {
 
-    private ServletRequest req;
+   final private ServletRequest req;
     private String encoding;
 
     /**

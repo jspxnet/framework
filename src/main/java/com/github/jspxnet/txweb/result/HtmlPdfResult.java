@@ -11,6 +11,8 @@ package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.txweb.Action;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.itextpdf.text.pdf.BaseFont;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.HtmlUtil;
@@ -53,33 +55,36 @@ import java.util.*;
  */
 @Slf4j
 public class HtmlPdfResult extends ResultSupport {
-    private final static TemplateConfigurable configurable = new TemplateConfigurable();
-    private static final String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
-    private static final String fontsPath = ENV_TEMPLATE.getString(Environment.fontsPath);
+    private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
+    private static final String TEMPLATE_PATH = ENV_TEMPLATE.getString(Environment.templatePath);
+    private static final String FONTS_PATH =  ENV_TEMPLATE.getString(Environment.fontsPath,"").endsWith("/")?ENV_TEMPLATE.getString(Environment.fontsPath):(ENV_TEMPLATE.getString(Environment.fontsPath)+"/");
 
     static {
-        configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
+        CONFIGURABLE.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
     }
 
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
+
         Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin
-        checkCache(action, response);
+        checkCache(actionContext);
         //浏览器缓存控制end
 
         File f = new File(action.getTemplatePath(), action.getTemplateFile());
         FileSource fileSource = new FileSource(f, action.getTemplateFile(), Dispatcher.getEncode());
         //如果使用cache 就使用uri
 
-        String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
-        configurable.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), templatePath});
+        //为了防止特殊符号错误，转换为md5 格式, + 加长度避免 碰撞到以前
+        String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath() + "" + f.length());
+        CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), TEMPLATE_PATH});
         ScriptMark scriptMark;
         try {
-            scriptMark = new ScriptMarkEngine(cacheKey, fileSource, configurable);
+            scriptMark = new ScriptMarkEngine(cacheKey, fileSource, CONFIGURABLE);
         } catch (Exception e) {
             if (DEBUG) {
                 log.debug("file not found:" + f.getAbsolutePath(), e);
@@ -112,7 +117,7 @@ public class HtmlPdfResult extends ResultSupport {
             ITextRenderer renderer = new ITextRenderer();
             // 解决中文支持问题
             ITextFontResolver fontResolver = renderer.getFontResolver();
-            fontResolver.addFont(fontsPath + "simsun.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+            fontResolver.addFont(FONTS_PATH + "simsun.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
             //解决图片的相对路径问题
             renderer.getSharedContext().setBaseURL(new URL(action.getTemplatePath()).toString());
             renderer.setDocumentFromString(HtmlUtil.getSafeFilter(out.toString()));

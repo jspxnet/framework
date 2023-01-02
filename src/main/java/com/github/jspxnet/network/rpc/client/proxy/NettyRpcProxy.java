@@ -1,11 +1,10 @@
 package com.github.jspxnet.network.rpc.client.proxy;
 
-import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
-import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
-
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.net.InetSocketAddress;
 
 /**
@@ -23,16 +22,16 @@ public class NettyRpcProxy {
     }
 
 
-    static  public <T>T create(Class<T>  target,String url, String serviceName)
+    static  public <T>T create(Class<T>  target,String url, HttpServletRequest request, HttpServletResponse response)
     {
-        return create(target,url,null,null,serviceName);
-    }
+        RpcMethodInterceptor clientInvocationHandler = new RpcMethodInterceptor();
+        clientInvocationHandler.setUrl(url);
+        clientInvocationHandler.setRequest(request);
+        clientInvocationHandler.setResponse(response);
+        //目前还没有继承接口,后边看是否需要
+        return createProxyInstance(target,clientInvocationHandler);
 
-    static  public <T>T create(Class<T>  target,String url, RequestTo requestTo, ResponseTo responseTo)
-    {
-        return create(target,url,requestTo,responseTo,null);
     }
-
     /**
      *
      * @param target 类对象
@@ -53,18 +52,14 @@ public class NettyRpcProxy {
      *
      * @param target 类对象
      * @param url 路径
-     * @param requestTo web请求
-     * @param responseTo web应答
      * @param serviceName 服务器分组服务, 默认就是网关路径
      * @param <T> 类型
      * @return 代理对象
      */
-    static  public <T>T create(Class<T> target,String url, RequestTo requestTo, ResponseTo responseTo, String serviceName)
+    static  public <T>T create(Class<T> target,String url,  String serviceName)
     {
         RpcMethodInterceptor clientInvocationHandler = new RpcMethodInterceptor();
         clientInvocationHandler.setUrl(url);
-        clientInvocationHandler.setRequest(requestTo);
-        clientInvocationHandler.setResponse(responseTo);
         clientInvocationHandler.setServiceName(serviceName);
         clientInvocationHandler.setAddress(null);
         //目前还没有继承接口,后边看是否需要

@@ -26,14 +26,10 @@ public class DiscoveryService implements Serializable {
     private int port;
     @Column(caption = "健康监控路径")
     private String path;
-
     @Column(caption = "script")
     private String script;
-
     @Column(caption = "shell")
     private String shell;
-
     @Column(caption = "shell")
     private String interval = "10s";
-
 }

@@ -40,7 +40,9 @@ import java.util.Map;
 @Slf4j
 public class SpringMethodInterceptor implements MethodInterceptor {
 
+    //触发类型
     private Class<?> targetClass;
+    //触发对象
     private Object targetObject;
     /**
      *

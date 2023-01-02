@@ -13,6 +13,7 @@ package com.github.jspxnet.utils;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.annotation.NullClass;
+import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.interceptor.InterceptorSupport;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -66,14 +67,17 @@ public class ClassUtil {
     public static boolean isStandardType(Type clazz) {
         return isNumberType(clazz) || clazz.equals(Byte.class) || clazz.equals(Character.class)
                 || clazz.equals(String.class) || clazz.equals(char.class) || clazz.equals(boolean.class) || clazz.equals(Boolean.class) ||
-                clazz.equals(Date.class) || clazz.equals(Timestamp.class)  || clazz.equals(Time.class);
+                clazz.equals(Date.class) || clazz.equals(Timestamp.class)  || clazz.equals(Time.class) || clazz.equals(java.util.Locale.class);
     }
-
 
     public static boolean isStandardProperty(Class<?> clazz) {
         return clazz.isPrimitive() || isNumberProperty(clazz) || clazz.isAssignableFrom(Byte.class) || clazz.isAssignableFrom(Character.class)
                 || clazz.isAssignableFrom(String.class) || clazz.isAssignableFrom(char.class) || clazz.isAssignableFrom(Boolean.class) ||
-                clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(Timestamp.class) || clazz.isAssignableFrom(Time.class)|| clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(String.class);
+                clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(Timestamp.class) ||
+                clazz.isAssignableFrom(Time.class)|| clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(String.class)
+                || clazz.isAssignableFrom(java.util.Locale.class)
+
+                ;
     }
 
 
@@ -400,7 +404,7 @@ public class ClassUtil {
     public static Field[] getDeclaredFields(Class<?> cls) {
         Class<?> superclass =  ClassUtil.getClass(cls);
         Field[] result = null;
-        while (!(superclass == null || superclass.equals(Object.class) || superclass.equals(Serializable.class)  || superclass.isInterface()
+        while (!(superclass == null || superclass.equals(Object.class) || superclass.equals(Serializable.class)  || superclass.isInterface() || superclass.equals(DataMap.class)
                 || superclass.getName().contains("net.sf.cglib.empty.Object")  || superclass.getName().contains("com.seeyon.ctp.common.po.BasePO"))) {
             Field[] fields = superclass.getDeclaredFields();
             result = addFieldArray(result, fields);
@@ -437,7 +441,13 @@ public class ClassUtil {
         return result;
     }
 
-    public static Field getDeclaredField(Class<?> cls, String fieldName) {
+    public static Field getDeclaredField(Class<?> cls, String fieldName)
+    {
+        return getDeclaredField(cls,  fieldName,false);
+    }
+
+    public static Field getDeclaredField(Class<?> cls, String fieldName,boolean ignore)
+    {
         if (fieldName == null) {
             return null;
         }
@@ -448,6 +458,10 @@ public class ClassUtil {
             }
             Field[] fields = childClass.getDeclaredFields();
             for (Field f : fields) {
+                if (ignore && fieldName.equalsIgnoreCase(f.getName()))
+                {
+                    return f;
+                } else
                 if (fieldName.equals(f.getName())) {
                     return f;
                 }
@@ -465,7 +479,7 @@ public class ClassUtil {
         Class<?> childClass = ClassUtil.getClass(cls);
         Method[] result = null;
         while (childClass != null) {
-            if (childClass.equals(Object.class) || childClass.equals(Serializable.class)) {
+            if (childClass.equals(Object.class) || childClass.equals(Serializable.class) || childClass.equals(DataMap.class)  || childClass.equals(Map.class)) {
                 break;
             }
             result = BeanUtil.joinMethodArray(result, childClass.getDeclaredMethods());
@@ -561,24 +575,34 @@ public class ClassUtil {
     }
 
     /**
-     * @param cls  类
+     *
+     * @param cls 类
      * @param name 名称
+     * @param ignore 不分大小写
      * @return 得到同名的方法列表
      */
-    public static Method[] getDeclaredMethodList(Class<?> cls, String name) {
+    public static Method[] getDeclaredMethodList(Class<?> cls, String name,boolean ignore) {
         if (name == null) {
             return null;
         }
         Method[] result = null;
         Method[] methods = getDeclaredMethods(cls);
         for (Method method : methods) {
-            if (method.getName().equals(name)) {
+            if (!ignore&&method.getName().equals(name) || ignore&&method.getName().equalsIgnoreCase(name)) {
                 result = BeanUtil.appendMethodArray(result, method);
             }
         }
         return result;
     }
 
+    /**
+     * @param cls  类
+     * @param name 名称
+     * @return 得到同名的方法列表
+     */
+    public static Method[] getDeclaredMethodList(Class<?> cls, String name) {
+        return getDeclaredMethodList(cls, name,false);
+    }
     /**
      * @param cls  类
      * @param name 方法名称
@@ -706,13 +730,27 @@ public class ClassUtil {
         {
             return false;
         }
-        return type.equals(String[].class) || type.equals(int[].class) || type.equals(Integer[].class) ||
+
+        return  type.equals(String[].class) || type.equals(int[].class) || type.equals(Integer[].class) ||
                 type.equals(long[].class) || type.equals(Long[].class) ||
                 type.equals(float[].class) || type.equals(Float[].class) ||
                 type.equals(double[].class) || type.equals(Double[].class) ||
                 type.equals(char[].class) || type.equals(Character[].class) ||
                 type.equals(byte[].class) || type.equals(BigInteger[].class) ||
                 type.equals(BigDecimal[].class) || type.equals(Object[].class);
+    }
+
+    /**
+     * 判断一个对象是否为数组
+     * @param obj 对象
+     * @return 判断一个对象是否为数组
+     */
+    public static boolean isArrayType(Object obj) {
+        if (obj==null)
+        {
+            return false;
+        }
+        return obj.getClass().isArray();
     }
 
     public static boolean isCollection(Type o) {
@@ -725,7 +763,7 @@ public class ClassUtil {
      * @return 判断是否对象为一个集合，列表 类型
      */
     public static boolean isCollection(Object o) {
-        return o != null && (o.getClass().isArray() || o instanceof Collection );
+        return (o instanceof Collection);
     }
 
 
@@ -766,10 +804,6 @@ public class ClassUtil {
      */
     public static Object invokeStaticMethod(String className, String methodName, Object[] args) throws Exception {
         Class<?> ownerClass = loadClass(className);
-        if (ownerClass==null)
-        {
-            return null;
-        }
         if (args==null)
         {
             return ownerClass.getMethod(methodName).invoke(null);
@@ -802,7 +836,7 @@ public class ClassUtil {
      * @param implClass 对象
      * @return hessian 查询调用接口方法
      */
-    public static Class<?> findRemoteAPI(Class<?> implClass) {
+    public static Class<?> findRemoteApi(Class<?> implClass) {
  		if (implClass == null) {
             return null;
         }
@@ -818,7 +852,7 @@ public class ClassUtil {
         if (interfaces.length == 1) {
             return interfaces[0];
         }
-        return findRemoteAPI(implClass.getSuperclass());
+        return findRemoteApi(implClass.getSuperclass());
     }
 
 
@@ -832,7 +866,9 @@ public class ClassUtil {
         if (implClass == null || implClass.equals(com.caucho.services.server.GenericService.class) || ClassUtil.isStandardProperty(implClass)
                 || implClass.equals(Serializable.class) || implClass.equals(Map.class) || implClass.equals(List.class) || implClass.equals(Runnable.class)
                 || implClass.equals(SoberSupport.class) || implClass.equals(Action.class) || implClass.equals(ActionSupport.class)
+                || implClass.equals(com.github.jspxnet.sober.Interceptor.class)
                 || implClass.equals(InterceptorSupport.class)
+                || implClass.equals(DataMap.class)
         ) {
             return null;
         }
@@ -1043,12 +1079,16 @@ public class ClassUtil {
         if (type == null || inNoCheckProxyClass(type)) {
             return false;
         }
+        if (ClassUtil.isStandardProperty(type))
+        {
+            return false;
+        }
         try {
             return type.getName().contains("CGLIB$$") || Enhancer.isEnhanced(type);
         } catch (Exception e)
         {
             e.printStackTrace();
-            log.info(type.getName(),e);
+            log.info("判断代理异常:{}",type,e);
         }
         return false;
     }
@@ -1065,6 +1105,7 @@ public class ClassUtil {
         }
         return cls;
     }
+
 
 
     /**
@@ -1136,10 +1177,9 @@ public class ClassUtil {
                 {
                     resultList.add(Map.class);
                 }
-
                 else
                 {
-                    if (name.contains(StringUtil.DOT)&&!name.endsWith("[]"))
+                    if (name.contains(StringUtil.DOT)&&!name.endsWith("[]")&&!name.contains("$"))
                     {
                         resultList.add(ClassUtil.loadClass(name));
                     }
@@ -1200,4 +1240,42 @@ public class ClassUtil {
         }
         return result;
     }
+
+    public static String getClassMethodName(StackTraceElement[] stackTraceElementArray) {
+        if (stackTraceElementArray==null)
+        {
+            return null;
+        }
+        StackTraceElement stackTraceElement = stackTraceElementArray[2];
+        if (stackTraceElement == null) {
+            return null;
+        }
+        String className = stackTraceElement.getClassName();
+        if (StringUtil.isEmpty(className)) {
+            return null;
+        }
+        className = ClassUtil.getClassName(className);
+        for (StackTraceElement stackTrace :stackTraceElementArray)
+        {
+            if (stackTrace.getClassName().equals(className))
+            {
+                stackTraceElement = stackTrace;
+            }
+        }
+        Class<?> cls;
+        try {
+            cls = ClassUtil.loadClass(className);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            log.error(className + " not found", e);
+            return null;
+        }
+        Class<?> iClass = ClassUtil.getImplements(cls);
+        if (iClass == null) {
+            iClass = cls;
+        }
+        return iClass.getName() + StringUtil.DOT + stackTraceElement.getMethodName();
+    }
+
+
 }

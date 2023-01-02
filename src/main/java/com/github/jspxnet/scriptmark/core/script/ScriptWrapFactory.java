@@ -9,8 +9,10 @@
  */
 package com.github.jspxnet.scriptmark.core.script;
 
+import com.github.jspxnet.sober.model.container.PropertyContainer;
+import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.ReflectUtil;
 import org.mozilla.javascript.*;
-
 import java.util.Date;
 
 /**
@@ -22,19 +24,26 @@ import java.util.Date;
  */
 public class ScriptWrapFactory extends WrapFactory {
 
-    final private static WrapFactory instance = new ScriptWrapFactory();
+    final private static WrapFactory INSTANCE = new ScriptWrapFactory();
 
     public static WrapFactory getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     private ScriptWrapFactory() {
-
+        super.setJavaPrimitiveWrap(true);
     }
 
+    /**
+     *
+     * @param cx 上下文
+     * @param scope 变量空间
+     * @param obj java对象
+     * @param staticType 类型
+     * @return 返回
+     */
     @Override
     public Object wrap(Context cx, Scriptable scope, Object obj, Class staticType) {
-
         if (obj instanceof java.util.Date) {
             long time = ((Date) obj).getTime();
             return cx.evaluateString(scope, "new Date(" + time + ")", "<wrap-Date>", 0, null);
@@ -43,5 +52,27 @@ public class ScriptWrapFactory extends WrapFactory {
             return new String(a);
         }
         return super.wrap(cx, scope, obj, staticType);
+    }
+
+    /**
+     * 处理java对象
+     * @param cx 上下文
+     * @param scope 变量空间
+     * @param obj java对象
+     * @param staticType 类型
+     * @return 返回
+     */
+    @Override
+    public Scriptable wrapAsJavaObject(Context cx, Scriptable scope, Object obj, Class<?> staticType) {
+        if (PropertyContainer.class.isAssignableFrom(obj.getClass()))
+        {
+            PropertyContainer propertyContainer = (PropertyContainer)obj;
+            if (!ObjectUtil.isEmpty(propertyContainer.getValues()))
+            {
+                Object newObj = ReflectUtil.createDynamicBean(obj,propertyContainer.getValues());
+                return new NativeJavaObject(scope,newObj,staticType);
+            }
+        }
+        return super.wrapAsJavaObject(cx,scope,obj,staticType);
     }
 }

@@ -34,8 +34,6 @@ public final class ActionEnv {
 
     //static public final String BOM = "bom"; //UTF-8 带BOM输出,图形报表使用
 
-    //保存调用方法，用来判断是否发生了操作，例如发生操作后是否清空刷新缓存
-    static public final String Key_CallMethodName = "callMethodName";
     static public final String Key_CallRocJsonData = "callRocDataJson";
 
     static public final String Key_Session = "session";
@@ -74,7 +72,19 @@ public final class ActionEnv {
     //日志记录对象end
 
     //返回数据对象
-    static public final String KEY_ACTION_RESULT_OBJECT = "ActionResultObject";
+    //static public final String KEY_ACTION_RESULT_OBJECT = "ActionResultObject";
 
-    static public final String KEY_ACTION_RESULT = "keyActionResult";
+    //static public final String KEY_ACTION_RESULT = "keyActionResult";
+
+
+    //--------------TXWebUtil用到
+    public final static String CHAIN_TYPE = "chain";
+    public final static String REDIRECT_TYPE = "redirect";
+    public final static String DEFAULT_EXECUTE = "execute";
+
+    //运行模式,区分页面嵌入方式
+    public final static String ACTION_RUN_MODEL = "ACTION_RUN_MODEL";
+
+    //组件方式
+    public final static  String COMPONENT_MODEL = "COMPONENT";
 }

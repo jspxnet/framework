@@ -23,6 +23,7 @@ import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.model.vo.OperateVo;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -152,7 +153,7 @@ public class TxWebConfigManager implements WebConfigManager {
                     if (actionConfigBean == null) {
                         log.error("出现空：ActionConfigBean for " + namespace);
                     } else if (!StringUtil.hasLength(actionConfigBean.getActionName())) {
-                        log.error("发现配置中存在错误,不能找到name:" + actionConfigBean.toString());
+                        log.error("发现配置中存在错误,不能找到name:" + actionConfigBean);
                     } else {
                         initActionConfigBean(actionConfigBean, namespace);
                     }
@@ -167,7 +168,6 @@ public class TxWebConfigManager implements WebConfigManager {
                 continue;
             }
             scanPackageList.add(scanConfig.getPackageName());
-            log.debug("start san action package " + scanConfig.getPackageName());
             sanAction(scanConfig.getPackageName());
         }
 
@@ -175,7 +175,7 @@ public class TxWebConfigManager implements WebConfigManager {
         IocContext iocContext = ConfigureContext.getInstance();
         List<BeanElement> beanElements = iocContext.getElementList();
         for (BeanElement beanElement : beanElements) {
-            Class<?> cls = null;
+            Class<?> cls;
             try {
                 cls = ClassUtil.loadClass(beanElement.getClassName());
                 registerAction(cls);
@@ -183,7 +183,6 @@ public class TxWebConfigManager implements WebConfigManager {
                 e.printStackTrace();
                 log.error("配置错误,不能载入:{}", beanElement.getClassName());
             }
-
         }
         //补充ioc中扫描到的end
     }
@@ -363,7 +362,6 @@ public class TxWebConfigManager implements WebConfigManager {
 
     /**
      * 命名空间第一层表示软件名称
-     *
      * @return 得到部署了那些软件
      */
     @Override
@@ -600,7 +598,7 @@ public class TxWebConfigManager implements WebConfigManager {
                             operateVO.setClassName(cls.getName());
                             operateVO.setNamespace(childNamespace);
                             operateVO.setClassMethod(method.getName());
-                            if (TXWebUtil.defaultExecute.equals(method.getName())) {
+                            if (ActionEnv.DEFAULT_EXECUTE.equals(method.getName())) {
                                 addExecute = false;
                             }
                             result.add(operateVO);
@@ -617,7 +615,7 @@ public class TxWebConfigManager implements WebConfigManager {
                             if (StringUtil.isNull(operateVO.getClassName())) {
                                 operateVO.setClassName(actionBean.getIocBean());
                             }
-                            operateVO.setClassMethod(TXWebUtil.defaultExecute);
+                            operateVO.setClassMethod(ActionEnv.DEFAULT_EXECUTE);
                             result.add(operateVO);
                             //一个什么都没有的类，保留浏览控制 end
                         }
@@ -678,9 +676,9 @@ public class TxWebConfigManager implements WebConfigManager {
         //为了区分分布式多处部署
         String cacheKey = namespace + "_" + IpUtil.getIpEnd();
         List<OperateVo> list = (List<OperateVo>) JSCacheManager.get(OperateVo.class, cacheKey);
-    /*    if (!ObjectUtil.isEmpty(list)) {
+        if (!ObjectUtil.isEmpty(list)) {
             return list;
-        }*/
+        }
         Map<String, OperateVo> checkMap = new HashMap<>();
         String[] spaceList = StringUtil.split(namespace, StringUtil.SEMICOLON);
         for (String space : spaceList) {

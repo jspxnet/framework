@@ -11,7 +11,6 @@ import com.github.jspxnet.txweb.view.GenericView;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -98,7 +97,8 @@ public class GenericAction  extends GenericView {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needSelect));
             return;
         }
-        if (genericDAO.delete(ids)>=0) {
+        Class<?> cls = ClassUtil.loadClass(className);
+        if (genericDAO.delete(cls,ids,false)>=0) {
             addActionMessage(language.getLang(LanguageRes.deleteSuccess));
         } else {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.deleteFailure));

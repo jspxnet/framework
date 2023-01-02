@@ -5,8 +5,8 @@ import java.lang.reflect.Type;
 
 public class DefaultTargetType<T> {
 
-    private Type type;
-    private Class<T> classType;
+    private final Type type;
+    private final Class<T> classType;
 
     @SuppressWarnings("unchecked")
     public DefaultTargetType() {

@@ -9,10 +9,14 @@
  */
 package com.github.jspxnet.txweb;
 
+import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
+import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.txweb.config.ActionConfig;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.DefultContextHolderStrategy;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
-
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.BeanUtil;
@@ -24,9 +28,9 @@ import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sober.exception.ValidException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Created by IntelliJ IDEA.
@@ -84,16 +88,23 @@ public class ActionFactory {
      * @throws ValidException 验证错误
      */
     static private void putArg(Action action, Action result, String className, List<?> arguments) throws Exception {
+        ActionContext actionContext = ThreadContextHolder.getContext();
         //参数说明 1 isIgnoreParams， 2 Execute
         if (action != null && result != null) {
-            result.setRequest(action.getRequest());
-            result.setResponse(action.getResponse());
-            Map<String, Object> actionMap = new HashMap<String, Object>(action.getEnv());
-            action.setActionResult(null);
-            action.setResult(null);
-            result.put(ActionEnv.Key_ActionName, className);
-            result.setEnv(actionMap);
+            if (actionContext==null)
+            {
+                DefultContextHolderStrategy.createContext(new RequestTo(new HashMap<>()),new ResponseTo(new HashMap<>()),new HashMap<>());
+                actionContext = ThreadContextHolder.getContext();
+            }
+            if (actionContext!=null)
+            {
+                Map<String, Object> componentEnv = actionContext.getComponentEnvironment(result.getClass(),result.hashCode());
+                componentEnv.put(ActionEnv.ACTION_RUN_MODEL,ActionEnv.COMPONENT_MODEL);
+                componentEnv.put(ActionEnv.Key_ActionName,className);
+                result.initEnv(actionContext.getEnvironment(),actionContext.getExeType());
+            }
         }
+
         if (arguments == null || arguments.isEmpty()) {
             return;
         }
@@ -102,10 +113,7 @@ public class ActionFactory {
         if (ObjectUtil.toBoolean(reParam)) {
             //如果两边的请求方式不同将不能够设置请求参数,所以要判断
             //第一个参数  boolean 类型, 表示接受参数，并且放入 当前系统的内置变量
-            assert result != null;
-            assert action != null;
-            BeanUtil.copyFiledValue(action, result);
-            result.put(ActionEnv.Key_ActionName, className);
+            TXWebUtil.copyRequestProperty(result);
         }
         /////////////设置请求数据end
         ////////////运行方法begin
@@ -113,7 +121,7 @@ public class ActionFactory {
         if (arguments.size() > 1) {
             Object exec = arguments.get(1).toString();
             if ("true".equals(exec) || StringUtil.empty.equals(exec)) {
-                exeMethod = TXWebUtil.defaultExecute;
+                exeMethod = ActionEnv.DEFAULT_EXECUTE;
             } else {
                 exeMethod = exec.toString();
                 if ("false".equalsIgnoreCase(exeMethod) || "0".equals(exeMethod)) {
@@ -142,7 +150,7 @@ public class ActionFactory {
             if (action != null && result != null) {
                 Method method = ClassUtil.getDeclaredMethod(result.getClass(), exeMethod);
                 if (method != null) {
-                    TXWebUtil.invokeFun(result, method, null);
+                    TXWebUtil.invokeFun(result, actionContext, method,null);
                 }
             } else {
                 BeanUtil.invoke(result, exeMethod);

@@ -10,7 +10,9 @@ import java.util.concurrent.ThreadFactory;
  * author: chenYuan
  * date: 2021/1/23 17:15
  * description: 守护线程
- **/
+ *
+ * @author chenYuan
+ * */
 public final class DaemonThreadFactory implements ThreadFactory {
     static final private List<Thread> THREAD_LIST = new ArrayList<>();
     private String name;
@@ -35,10 +37,13 @@ public final class DaemonThreadFactory implements ThreadFactory {
         {
             return null;
         }
-       Thread thread = new Thread(runnable,name + "_" + runnable.hashCode());
+        Thread thread = new Thread(runnable,name + "_" + runnable.hashCode());
         //设置守护线程
         thread.setDaemon(true);
-        THREAD_LIST.add(thread);
+        synchronized (THREAD_LIST)
+        {
+            THREAD_LIST.add(thread);
+        }
         return thread;
     }
 
@@ -46,12 +51,23 @@ public final class DaemonThreadFactory implements ThreadFactory {
     {
         for (Thread thread:THREAD_LIST)
         {
-            if (!thread.isInterrupted())
+            if (thread!=null)
             {
-                try {
-                    thread.interrupt();
-                } catch (Exception e) {
-                    thread.stop(e);
+                synchronized(THREAD_LIST)
+                {
+                    if (!thread.isInterrupted())
+                    {
+                        try {
+                            thread.interrupt();
+                        } catch (Exception e) {
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
+                            thread.interrupt();
+                        }
+                    }
                 }
             }
         }

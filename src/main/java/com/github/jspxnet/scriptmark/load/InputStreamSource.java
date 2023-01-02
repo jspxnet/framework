@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.scriptmark.load;
 
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -29,5 +31,11 @@ public class InputStreamSource extends AbstractSource {
     @Override
     protected InputStream getInputStream() throws IOException {
         return inputStream;
+    }
+
+    @Override
+    public boolean isFile()
+    {
+        return inputStream!=null;
     }
 }

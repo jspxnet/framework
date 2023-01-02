@@ -30,8 +30,7 @@ public interface HttpDownloadWork {
 
     boolean containsKey(String key);
 
-    void CloseAll();
-
     void clearFailAndFinish(long hour, String namespace);
 
+    void closeAll();
 }

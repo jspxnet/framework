@@ -15,6 +15,8 @@ import org.redisson.config.Config;
 
 
 import java.io.File;
+import java.io.Serializable;
+
 /**
  * threads（线程池数量）
  *
@@ -27,7 +29,7 @@ import java.io.File;
  */
 @Slf4j
 @Bean(singleton = true)
-public class RedissonClientConfig {
+public class RedissonClientConfig implements Serializable {
     private static RedissonClient redisson = null;
     private String config = StringUtil.empty;
     private Config redisConfig = null;
@@ -71,13 +73,12 @@ public class RedissonClientConfig {
 
     @Init
      public void init() {
-        if (!EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useCache))
-        {
-            return;
-        }
         if (redisson == null) {
             if (StringUtil.isNull(config) && StringUtil.isNull(config)) {
-                log.error("not config Redis cache link, 没有正确配置Redis 链接");
+                if (EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useCache))
+                {
+                    log.error("not config Redis cache link, 没有正确配置Redis 链接");
+                }
                 return;
             }
             try {

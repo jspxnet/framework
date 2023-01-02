@@ -83,11 +83,7 @@ public final class JspxNetApplication {
         runInEmbed(null,fileName,null);
     }
 
-    /**
-     * 最小嵌入方式，实用二开环境
-     * @param path 默认配置路径
-     * @param fileName 默认配置文件
-     */
+
     /**
      * 最小嵌入方式，实用二开环境,嵌入致远OA类似系统
      * @param path 默认配置路径
@@ -151,9 +147,7 @@ public final class JspxNetApplication {
         }
         //载入定时任务
         beanFactory.initScheduler();
-
     }
-
 
     /**
      * 嵌入spring方式运行

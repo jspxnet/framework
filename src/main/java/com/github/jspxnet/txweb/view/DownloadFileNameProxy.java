@@ -65,14 +65,14 @@ public class DownloadFileNameProxy extends ActionSupport {
     @Override
     public String execute() throws Exception {
         setActionResult(NONE);
-        if (RequestUtil.isPirated(request)) {
+        if (RequestUtil.isPirated(getRequest())) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notAllowedExternalLinks));
-            TXWebUtil.print(language.getLang(LanguageRes.notAllowedExternalLinks), WebOutEnumType.HTML.getValue(), response);
+            TXWebUtil.print(language.getLang(LanguageRes.notAllowedExternalLinks), WebOutEnumType.HTML.getValue(), getResponse());
             return NONE;
         }
         if (config.getInt(Environment.openSite) == 0) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.closeSite));
-            TXWebUtil.print(language.getLang(LanguageRes.closeSite), WebOutEnumType.HTML.getValue(), response);
+            TXWebUtil.print(language.getLang(LanguageRes.closeSite), WebOutEnumType.HTML.getValue(), getResponse());
             return NONE;
         }
 
@@ -99,7 +99,7 @@ public class DownloadFileNameProxy extends ActionSupport {
         uploadFile.setDownTimes(uploadFile.getDownTimes() + 1);
         uploadFileDAO.update(uploadFileObject, new String[]{"downTimes"});
         String setupPath = FileUtil.mendPath(config.getString(Environment.setupPath));
-        PrintWriter out = response.getWriter();
+        PrintWriter out = getResponse().getWriter();
         out.write("/" + uploadFileDAO.getNamespace() + "/" + FileUtil.mendFile(FileUtil.getDecrease(setupPath, fileName.getAbsolutePath())));
         out.flush();
         out.close();

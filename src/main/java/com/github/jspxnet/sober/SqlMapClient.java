@@ -9,6 +9,10 @@
  */
 package com.github.jspxnet.sober;
 
+import com.github.jspxnet.sober.dialect.Dialect;
+import com.github.jspxnet.sober.enums.ExecuteEnumType;
+import com.github.jspxnet.sober.table.SqlMapConf;
+
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +23,32 @@ import java.util.Map;
  * Time: 20:42:20
  */
 public interface SqlMapClient {
+    /**
+     *
+     * @return 数据库支持
+     */
+    SoberSupport getSoberSupport();
+    /**
+     *
+     * @return sql 方言
+     */
+    Dialect getDialect();
+    /**
+     * sqlMap配置
+     * @param namespace 命名空间
+     * @param exeId 执行名称
+     * @param executeEnumType 执行类型
+     * @return 返回配置
+     * @throws Exception 异常
+     */
+    SqlMapConf getSqlMapConf(String namespace, String exeId, ExecuteEnumType executeEnumType) throws Exception;
+    /**
+     *
+     * @param o 对象
+     * @return 返回变量数组
+     */
+    Map<String, Object> getValueMap(Object o);
+
     /**
      * @param namespace 命名空间
      * @param exeId     sqlId
@@ -156,7 +186,7 @@ public interface SqlMapClient {
      * @param exeId       查询ID
      * @param valueMap    参数MAP
      * @param currentPage 第几页
-     * @param totalCount  一页的行数
+     * @param count  一页的行数
      * @param loadChild   是否载入映射对象
      * @param rollRows    是否让程序执行滚动,如果不让程序执行滚动，那么在程序里边要自己判断滚动
      * @param cls 类型
@@ -164,7 +194,7 @@ public interface SqlMapClient {
      * @return 返回查询列表
      * @throws Exception 异常
      */
-    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception;
+    <T> List<T> query(String namespace, String exeId, Map<String, Object> valueMap, int currentPage, int count, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception;
 
     /**
      * 用来避免写两次SQL 来得到翻页的总数,这里映入查询,就自动封装得到行数

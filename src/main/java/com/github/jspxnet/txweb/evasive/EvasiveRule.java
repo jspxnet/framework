@@ -50,7 +50,7 @@ public class EvasiveRule implements Serializable {
     @Column(caption = "返回", length = 50)
     private String result = "";
 
-    private List<Condition> conditions = new ArrayList<Condition>();
+    private List<Condition> conditions = new ArrayList<>();
 
     public List<Condition> getConditions() {
         return conditions;

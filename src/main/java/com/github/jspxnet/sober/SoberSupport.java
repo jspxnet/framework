@@ -2,14 +2,16 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
  */
 package com.github.jspxnet.sober;
 
+import com.github.jspxnet.txweb.table.meta.OperatePlug;
 import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.exception.ValidException;
 import java.io.Serializable;
 import java.util.Collection;
@@ -33,6 +35,12 @@ public interface SoberSupport extends Serializable {
     String getClassMethodName();
     /**
      *
+     * @return sql 适配器
+     */
+    Dialect getDialect();
+
+    /**
+     *
      * @param soberFactory 数据工厂
      */
     void setSoberFactory(SoberFactory soberFactory);
@@ -47,6 +55,17 @@ public interface SoberSupport extends Serializable {
      * @return 表结构模型
      */
     TableModels getSoberTable(Class<?> cla);
+
+    TableModels getTableModels(String tableName);
+
+    /**
+     *
+     * @param dto 是否包含DTO
+     * @param extend  0:所有;1:可扩展;2:不可扩展
+     * @return  得到所有表结构的模型
+     */
+    Map<String,TableModels> getAllTableModels(boolean dto,int extend);
+
     /**
      *
      * @param cla 类对象
@@ -59,6 +78,8 @@ public interface SoberSupport extends Serializable {
      */
     int getMaxRows();
 
+
+    <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild);
 
     /**
      *  load from id
@@ -103,7 +124,7 @@ public interface SoberSupport extends Serializable {
      * @param <T> 类型
      * @return 得到对象
      */
-    <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild, boolean loadUseCache);
+   // <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild, boolean loadUseCache);
     /**
      * @param aClass       类
      * @param <T> 类型
@@ -112,7 +133,7 @@ public interface SoberSupport extends Serializable {
      * @param loadChild    是否载入关联
      * @return 返回对象，如果为空就创建对象，不会有null 返回
      */
-    <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild);
+   // <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild);
     /**
      * @param aClass       类
      * @param serializable 字段值
@@ -136,17 +157,39 @@ public interface SoberSupport extends Serializable {
      * @return 查询返回
      */
     <T> List<T> load(Class<T> aClass, Serializable[] serializables);
+
+    /**
+     *
+     * @param aClass 返回实体
+     * @param values 字段值
+     * @param loadChild 是否载入映射
+     * @param <T> 类型
+     * @return 返回列表
+     */
+    <T> List<T> load(Class<T> aClass, Collection<?> values, boolean loadChild);
+
+    /**
+     *
+     * @param aClass 返回实体
+     * @param field 查询字段
+     * @param values 字段值
+     * @param loadChild 是否载入映射
+     * @param <T> 类型
+     * @return 返回列表
+     */
+    <T> List<T> load(Class<T> aClass, String field, Collection<?> values, boolean loadChild);
+
     /**
      *
      * @param aClass 返回实体
      * @param field 查询字段
      * @param serializables 字段值
      * @param loadChild 是否载入映射
-     * @param loadUseCache 载入换成
      * @param <T> 类型
      * @return 查询返回
      */
-    <T> List<T> load(Class<T> aClass, String field, Serializable[] serializables, boolean loadChild, boolean loadUseCache);
+    <T> List<T> load(Class<T> aClass, String field, Serializable[] serializables, boolean loadChild);
+
     /**
      *
      * @param object 实体对象
@@ -179,8 +222,8 @@ public interface SoberSupport extends Serializable {
 
     /**
      *
-     * @param collection 批量快速保持
-     * @return jdbc 更新返回状态
+     * @param collection  批量快速保持 集合
+     * @return 更新数量,如果错误 返回 负数
      * @throws Exception 异常
      */
     int batchSave(Collection<?> collection) throws Exception;
@@ -384,7 +427,7 @@ public interface SoberSupport extends Serializable {
      * @param totalCount 返回行数
      * @return 查询返回列表
      */
-    List<Object> query(String sql, Object[] param, int currentPage, int totalCount);
+    List<?> query(String sql, Object[] param, int currentPage, int totalCount);
     /**
      * 查询返回列表
      * 使用jdbc完成,比较浪费资源
@@ -435,12 +478,12 @@ public interface SoberSupport extends Serializable {
      */
     Object getUniqueResult(Class<?> cla, String sql, Object o);
     /**
-     * 计算合计,这个标签会占用大量的CPU计算资源，谨慎使用
-     *
+     *  计算合计,这个标签会占用大量的CPU计算资源，谨慎使用
      * @param soberTable 结果关系表
-     * @param obj        对象
+     * @param obj 对象
+     * @return 计算结果
      */
-    void calcUnique(TableModels soberTable, Object obj);
+    Object calcUnique(TableModels soberTable, Object obj);
     /**
      * 创建标准查询
      *
@@ -451,15 +494,39 @@ public interface SoberSupport extends Serializable {
 
     //-----------------------------------------------------------------
     /**
+     * 添加字段
+     * @param cls 实体类
+     * @param soberColumn 列对象
+     * @return 是否成功
+     * @throws Exception 异常
+     */
+    boolean addColumn(Class<?> cls, SoberColumn soberColumn) throws Exception;
+    /**
+     *  修改字段
+     * @param cls 实体类
+     * @param soberColumn 列对象
+     * @return 是否成功
+     * @throws Exception 异常
+     */
+    boolean modifyColumn(Class<?> cls, SoberColumn soberColumn) throws Exception;
+    /**
+     *  删除字段
+     * @param cls 实体类
+     * @param soberColumn 列对象
+     * @return 是否成功
+     * @throws Exception 异常
+     */
+    boolean dropColumn(Class<?> cls, SoberColumn soberColumn) throws Exception;
+
+    /**
      * 创建索引
-     * @param databaseName 库名
      * @param tableName 表名
      * @param name 索引名称
      * @param field 字段
      * @return 是否创建成功
      * @throws Exception 异常
      */
-    boolean createIndex(String databaseName, String tableName, String name, String field) throws Exception;
+    boolean createIndex(String tableName, String name, String field) throws Exception;
 
     /**
      * 将表对象转换为实体对象，用于辅助代码
@@ -482,7 +549,7 @@ public interface SoberSupport extends Serializable {
      * @param soberTable 库名等信息
      * @return 得到创建表的SQL
      */
-    String getCreateTableSql(Class<?> createClass, TableModels soberTable);
+   // String getCreateTableSql(Class<?> createClass, TableModels soberTable);
 
     /**
      * 删除表
@@ -596,6 +663,13 @@ public interface SoberSupport extends Serializable {
      * @return 判断是否存在此字段
      */
     boolean containsField(Class<?> cla, String field);
+
+    /**
+     *
+     * @return 基础的查询器
+     */
+    SqlMapBase getBaseSqlMap();
+
     /**
      * @param info 控制台输出SQL
      */
@@ -625,10 +699,26 @@ public interface SoberSupport extends Serializable {
      */
     void evictLoad(Class<?> cla, String field, Serializable id);
 
+    void evictTableModels(Class<?> cla);
+
     /**
      *
      * @param data 更新缓存数据
      * @param loadChild 是否为载入子对象
      */
     void updateLoadCache(Object data, boolean loadChild);
+
+    //----------------锁定
+    /**
+     *
+     * @param tableMeta 表单类
+     * @return 插件列表
+     */
+    List<OperatePlug> getOperatePlugList(Class<?> tableMeta);
+
+    boolean lock(Object obj) throws Exception;
+
+    boolean isLock(Object obj) throws Exception;
+
+    boolean unLock(Object obj);
 }

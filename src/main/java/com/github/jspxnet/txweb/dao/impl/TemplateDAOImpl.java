@@ -38,7 +38,7 @@ import java.util.List;
  * com.github.jspxnet.txweb.dao.impl.TemplateDAOImpl
  */
 @Slf4j
-public class TemplateDAOImpl<T> extends JdbcOperations implements TemplateDAO {
+public class TemplateDAOImpl<T> extends JdbcOperations implements TemplateDAO<T> {
 
     private Class<T> tableClass;
 

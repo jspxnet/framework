@@ -18,8 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
-import com.github.jspxnet.utils.RandomUtil;
 
+import com.github.jspxnet.utils.SystemUtil;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,11 +58,11 @@ class MemoryTaskCollector implements TaskCollector {
 	 * @return An ID for the scheduled operation.
 	 */
 	public synchronized String add(SchedulingPattern pattern, Task task) {
-		String id = RandomUtil.getRandomGUID(32);
+		//String id = SystemUtil.getPid() + "_" + task.getId();
 		patterns.add(pattern);
 		tasks.add(task);
-		ids.add(id);
-		return id;
+		ids.add(task.getId());
+		return task.getId();
 	}
 
 	/**
@@ -71,11 +71,13 @@ class MemoryTaskCollector implements TaskCollector {
 	 * @param id
 	 *            The ID of the scheduled couple.
 	 */
-	public synchronized void update(String id, SchedulingPattern pattern) {
+	public synchronized SchedulingPattern update(String id, SchedulingPattern pattern) {
 		int index = ids.indexOf(id);
 		if (index > -1) {
 			patterns.set(index, pattern);
+			return pattern;
 		}
+		return null;
 	}
 
 	/**

@@ -11,7 +11,6 @@ package com.github.jspxnet.txweb.dao;
 
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.txweb.annotation.Param;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
 public interface TemplateDAO<T> extends SoberSupport {
     String getNamespace();
 
-    Class getClassType();
+    Class<T> getClassType();
 
     Object load(Serializable id) throws Exception;
 

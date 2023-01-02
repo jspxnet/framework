@@ -12,8 +12,8 @@ import org.springframework.transaction.*;
  * description: sober 在spring中的事物管理器
  **/
 public class SpringPlatformTransactionManager implements PlatformTransactionManager {
-    com.github.jspxnet.sober.transaction.TransactionManager TRANSACTION_MANAGER = TransactionManager.getInstance();
-    private SoberFactory soberFactory;
+    private final com.github.jspxnet.sober.transaction.TransactionManager transactionManager = TransactionManager.getInstance();
+    private final SoberFactory soberFactory;
     public SpringPlatformTransactionManager(SoberFactory soberFactory)
     {
         this.soberFactory = soberFactory;
@@ -27,7 +27,7 @@ public class SpringPlatformTransactionManager implements PlatformTransactionMana
             AbstractTransaction abstractTransaction = soberFactory.createTransaction();
             String transactionId = abstractTransaction.getTransactionId();
             abstractTransaction.begin();
-            return new SpringTransactionStatus(transactionId,!TRANSACTION_MANAGER.containsKey(transactionId));
+            return new SpringTransactionStatus(transactionId,!transactionManager.containsKey(transactionId));
         } catch (Throwable throwables) {
             throwables.printStackTrace();
         }
@@ -37,7 +37,7 @@ public class SpringPlatformTransactionManager implements PlatformTransactionMana
     @Override
     public void commit(TransactionStatus transactionStatus) throws TransactionException {
         SpringTransactionStatus springTransactionStatus = (SpringTransactionStatus)transactionStatus;
-        AbstractTransaction transaction = TRANSACTION_MANAGER.get(springTransactionStatus.getTransactionId());
+        AbstractTransaction transaction = transactionManager.get(springTransactionStatus.getTransactionId());
         if (transaction==null)
         {
             throw new NoTransactionException(springTransactionStatus.getTransactionId());
@@ -54,7 +54,7 @@ public class SpringPlatformTransactionManager implements PlatformTransactionMana
     @Override
     public void rollback(TransactionStatus transactionStatus) throws TransactionException {
         SpringTransactionStatus springTransactionStatus = (SpringTransactionStatus)transactionStatus;
-        AbstractTransaction transaction = TRANSACTION_MANAGER.get(springTransactionStatus.getTransactionId());
+        AbstractTransaction transaction = transactionManager.get(springTransactionStatus.getTransactionId());
         if (transaction==null)
         {
             throw new NoTransactionException(springTransactionStatus.getTransactionId());

@@ -14,10 +14,14 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.cache.core.JSCache;
 import com.github.jspxnet.cache.event.CacheEventListener;
+import com.github.jspxnet.cache.store.MemoryStore;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
+import com.github.jspxnet.sioc.scheduler.TaskProxy;
+import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.util.*;
@@ -102,7 +106,7 @@ public class JSCacheManager implements CacheManager {
         if (!containsKey(cache.getName())) {
             if (cache.getSecond() > 0 && cache.getStore().isUseTimer()) {
                 SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
-                schedulerManager.add(cache.getName(), "* * * * * *", cache);
+                schedulerManager.add(cache.getName(),"缓存清理","0 */1 * * * *", TaskProxy.SYS_TYPE, cache);
             }
             caches.add(cache);
         }
@@ -142,13 +146,22 @@ public class JSCacheManager implements CacheManager {
                     if ((o instanceof Cache)) {
                         return (Cache) o;
                     }
-                } else {
-                    Object o = beanFactory.getBean(DefaultCache.class, namespace);
-                    return (Cache) o;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            try {
+                Class<?> cls = ClassUtil.loadClass(key);
+                if (cls.equals(SqlMapConf.class))
+                {
+                    return createCache(new MemoryStore(), cls, DateUtil.MINUTE,1000,false,null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Cache cache = (Cache)beanFactory.getBean(DefaultCache.class, namespace);
+            cache.setName(DefaultCache.class.getName());
+            return cache;
         }
         return null;
     }
@@ -162,6 +175,10 @@ public class JSCacheManager implements CacheManager {
         Cache cache = CACHE_MANAGER.getCache(cacheName);
         if (cache == null) {
             return null;
+        }
+        if (StringUtil.isNull(cache.getName()))
+        {
+            cache.setName(cacheName);
         }
         CacheEntry cacheEntry = cache.get(key);
         if (cacheEntry == null) {
@@ -220,7 +237,8 @@ public class JSCacheManager implements CacheManager {
      */
     static public boolean put(String cacheName, String key, Object o, int timeToLive) {
         Cache cache = CACHE_MANAGER.getCache(cacheName);
-        if (cache == null) {
+        if (cache == null || key==null)
+        {
             return false;
         }
         CacheEntry cacheEntry = new CacheEntry();
@@ -308,7 +326,6 @@ public class JSCacheManager implements CacheManager {
      */
     static public long getSize(Class<?> cacheName) {
         return CACHE_MANAGER.getCache(cacheName).getSize();
-
     }
 
     /**

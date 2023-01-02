@@ -48,6 +48,7 @@ public class JSCache implements Runnable, Cache {
 
     public void setStore(IStore store) {
         this.store = store;
+        this.store.setName(name);
     }
 
     /**

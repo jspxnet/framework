@@ -10,6 +10,8 @@
 package com.github.jspxnet.boot.environment.impl;
 
 
+import com.caucho.hessian.io.EnvelopeFactory;
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Placeholder;
@@ -18,10 +20,9 @@ import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.security.symmetry.impl.XOREncrypt;
-import com.github.jspxnet.utils.ArrayUtil;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.SystemUtil;
+import com.github.jspxnet.sioc.CatalinaObject;
+import com.github.jspxnet.util.StringMap;
+import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.util.*;
@@ -41,6 +42,10 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     }
 
+    /**
+     *
+     * @return 得到环境变量表
+     */
     @Override
     public Map<String, Object> getVariableMap() {
         return new Hashtable<>(VALUE_MAP);
@@ -52,6 +57,11 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         return VALUE_MAP.get(keys);
     }
 
+    /**
+     *
+     * @param key 变量名称
+     * @return 得到环境变量
+     */
     @Override
     public String getString(String key) {
         Object o = VALUE_MAP.get(key);
@@ -66,6 +76,12 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         return VALUE_MAP.containsKey(key);
     }
 
+    /**
+     *
+     * @param keys 变量名称
+     * @param def 默认值
+     * @return 得到环境变量
+     */
     @Override
     public String getString(String keys, String def) {
         String result = getString(keys);
@@ -113,27 +129,29 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         }
         VALUE_MAP.put(Environment.defaultPath, defaultPath);
         VALUE_MAP.put(Environment.ConfigFile, defaultPath + Environment.config_file);
-        String logPath;
+        String webInfPath = null;
         if (SystemUtil.isAndroid()) {
             //安卓方式目录环境
             String tmpDir = FileUtil.mendPath(System.getProperty("java.io.tmpdir"));
-            logPath = tmpDir;
             VALUE_MAP.put(Environment.templatePath, defaultPath);
-            //VALUE_MAP.put(Environment.loaderPath, defaultPath);
             VALUE_MAP.put(Environment.resPath, defaultPath);
-            //VALUE_MAP.put(Environment.cachePath, tmpDir);
             VALUE_MAP.put(Environment.tempPath, tmpDir);
-
-
-        } else {
+        }
+        else
+        {
             //WebInfPath
-            String webInfPath;
+
             if (defaultPath != null && defaultPath.toLowerCase().contains("file-inf")) {
                 ///jsp方式
                 webInfPath = defaultPath.substring(0, defaultPath.toLowerCase().indexOf("file-inf/") + 8);
-            } else if (defaultPath != null && defaultPath.contains(".jar") || defaultPath != null && defaultPath.contains(".zip") || defaultPath != null && defaultPath.contains(".apk")) {
+            }
+            else if (defaultPath != null && defaultPath.contains(".jar") || defaultPath != null && defaultPath.contains(".zip") || defaultPath != null && defaultPath.contains(".apk")) {
                 //////////文件在jar目录中的情况
                 webInfPath = FileUtil.getParentPath(FileUtil.getPathPart(StringUtil.substringBefore(defaultPath, "!/")));
+                if (webInfPath.length()<4)
+                {
+                    webInfPath = new File(defaultPath).getParent();
+                }
             } else {
                 webInfPath = FileUtil.getParentPath(defaultPath);
             }
@@ -146,7 +164,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (createWebInf&&!FileUtil.isDirectory(tempDir)) {
                 FileUtil.makeDirectory(tempDir);
             }
-
+            VALUE_MAP.put("lucenePath", webInfPath+"/lucene");
 
             //修复路径支持本级下
             File file = new File(tempDir);
@@ -208,25 +226,18 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 VALUE_MAP.put(Environment.tempPath, FileUtil.mendPath(System.getProperty("java.io.tmpdir")));
             }
 
-            //Log4jPath
-            logPath = getLog4jPath((String) VALUE_MAP.get(Environment.logPath));
-            if (!StringUtil.isNull(logPath)) {
-                VALUE_MAP.put(Environment.log4jPath, logPath);
-            } else {
-                //LogPath    日志保存目录
-                logPath = webInfPath + "logs/";
-                if (!FileUtil.isDirectory(tempDir)) {
-                    FileUtil.makeDirectory(tempDir);
-                }
-                VALUE_MAP.put(Environment.logPath, logPath);
-            }
+
+        }
+        //LogPath
+        if (StringUtil.isNull(webInfPath))
+        {
+            webInfPath = defaultPath;
         }
 
+        String logPath = getLogPath((String) VALUE_MAP.get(Environment.logPath),new File(webInfPath,"logs").getPath());
+        VALUE_MAP.put(Environment.logPath, logPath);
         VALUE_MAP.put(Environment.logInfoFile, logPath + Environment.log_info_file);
-
         VALUE_MAP.put(Environment.logErrorFile, logPath + Environment.log_error_file);
-
-
     }
 
     private String getEncode() {
@@ -267,18 +278,18 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         return System.getProperty("java.awt.graphicsenv");
     }
 
-    private String getLog4jPath(String log4jPath) {
-        if (log4jPath == null) {
-            return null;
+    private String getLogPath(String logPath,String defaultPath) {
+        if (StringUtil.isEmpty(logPath)) {
+            logPath = defaultPath;
         }
-        File f = new File(log4jPath);
+        File f = new File(logPath);
         if (f.isDirectory()) {
-            return FileUtil.mendPath(f.getAbsolutePath());
+            return FileUtil.mendPath(f.getPath());
         }
-        if (!StringUtil.isNull(log4jPath) && log4jPath.contains("$")) {
-            return processTemplate(log4jPath);
+        if (!StringUtil.isNull(logPath) && logPath.contains("$")) {
+            return processTemplate(logPath);
         }
-        return null;
+        return defaultPath;
     }
 
     /**
@@ -313,7 +324,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         if (!StringUtil.isNull(timezone)) {
             System.setProperty("user.timezone", timezone);
         }
-
 
         //系统密钥
         if (VALUE_MAP.containsKey(Environment.secretKey)) {
@@ -397,10 +407,11 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
      * @return 得到配置属性, 注意这里只是在内存中
      */
     @Override
-    public Properties readDefaultProperties(String fileName) {
-        Properties p = new Properties();
-        if (!FileUtil.isFileExist(fileName)) {
-            return p;
+    public Map<String,String> readDefaultProperties(String fileName) {
+
+        if (!FileUtil.isFileExist(fileName))
+        {
+            return new HashMap<>(0);
         }
         try {
             String cont = IoUtil.autoReadText(fileName);
@@ -409,13 +420,31 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (encrypt.isEncrypt(cont)) {
                 cont = encrypt.getDecode(cont);
             }
-            p.load(new StringReader(cont));
+
+            //这里只是为了劲量的修复系统变量.的 写法
+            String[] varNameList = StringUtil.getFreeMarkerVar(cont);
+            if (!ObjectUtil.isEmpty(varNameList))
+            {
+                for (String varName:varNameList)
+                {
+                    if (System.getProperties().containsKey(varName))
+                    {
+                        cont = StringUtil.replace(cont,"${" + varName + "}",System.getProperty(varName,StringUtil.empty));
+                    }
+                }
+            }
+            //放入系统变量end
+            StringMap<String,String> valueMap = new StringMap<>();
+            valueMap.setKeySplit(StringUtil.EQUAL);
+            valueMap.setLineSplit(StringUtil.CRLF);
+            valueMap.setString(cont);
+            return valueMap;
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
             e.printStackTrace();
         }
         //创建配置 begin
-        return p;
+        return new HashMap<>(0);
     }
 
     @Override
@@ -427,31 +456,47 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (encrypt.isEncrypt(cont)) {
                 cont = encrypt.getDecode(cont);
             }
-            Properties p = new Properties();
-            p.load(new StringReader(cont));
-            for (Object key : p.keySet()) {
-                Object o = p.get(key);
-                if (o == null) {
-                    continue;
+
+            //放入系统变量begin
+            //这里只是为了劲量的修复系统变量.的 写法
+            String[] varNameList = StringUtil.getFreeMarkerVar(cont);
+            if (!ObjectUtil.isEmpty(varNameList))
+            {
+                for (String varName:varNameList)
+                {
+                    if (System.getProperties().containsKey(varName))
+                    {
+                        cont = StringUtil.replace(cont,"${" + varName + "}",System.getProperty(varName,StringUtil.empty));
+                    }
                 }
-                VALUE_MAP.put((String) key, o);
             }
+            //放入系统变量end
+
+            StringMap<String,String> valueMap = new StringMap<>();
+            valueMap.setKeySplit(StringUtil.EQUAL);
+            valueMap.setLineSplit(StringUtil.CRLF);
+            valueMap.setString(cont);
+
+            VALUE_MAP.putAll(valueMap);
+
             VALUE_MAP.put(Environment.jspxProperties, fileName);
             if (!VALUE_MAP.containsKey("jspxDebug"))
             {
-                VALUE_MAP.put("jspxDebug",p.getProperty(Environment.DEBUG,"false"));
+                VALUE_MAP.put("jspxDebug",valueMap.getString(Environment.DEBUG,"false"));
             }
             if (!VALUE_MAP.containsKey(Environment.DEBUG))
             {
-                VALUE_MAP.put(Environment.DEBUG,p.getProperty(Environment.DEBUG,"false"));
+                VALUE_MAP.put(Environment.DEBUG,valueMap.getString(Environment.DEBUG,"false"));
             }
+
+            VALUE_MAP.put("catalina",new CatalinaObject());
             if (!VALUE_MAP.containsKey("catalina.base")) {
-                VALUE_MAP.put("catalina.base", System.getProperty("CATALINA_BASE", System.getProperty("user.dir")));
+                VALUE_MAP.put("catalina.base", System.getProperty("CATALINA_HOME", System.getProperty("user.dir")));
             }
             if (!VALUE_MAP.containsKey("catalina.home")) {
                 VALUE_MAP.put("catalina.home", System.getProperty("CATALINA_HOME", System.getProperty("user.dir")));
             }
-            p.clear();
+            valueMap.clear();
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
             e.printStackTrace();
@@ -464,8 +509,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         configurable.put(ScriptmarkEnv.NumberFormat,VALUE_MAP.getOrDefault(ScriptmarkEnv.NumberFormat, "####.##"));
         configurable.put(ScriptmarkEnv.DateTimeFormat,VALUE_MAP.getOrDefault(ScriptmarkEnv.DateTimeFormat, "yyyy-MM-dd HH:mm"));
         configurable.put(ScriptmarkEnv.TimeFormat,VALUE_MAP.getOrDefault(ScriptmarkEnv.TimeFormat, "HH:mm:ss"));
-
-
     }
 
     @Override
@@ -483,12 +526,12 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
     public void restorePlaceholder() {
 
         for (String key : VALUE_MAP.keySet()) {
-            Object o = VALUE_MAP.get(key);
             if (StringUtil.isNull(key)) {
                 continue;
             }
+            Object o = VALUE_MAP.get(key);
             if (o != null) {
-                String value = (String) o;
+                String value = o+"";
                 if (value.contains("${")) {
                     try {
                         VALUE_MAP.put(key, processTemplate(value));
@@ -532,4 +575,5 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         }
         log.debug(sb.toString());
     }
+
 }

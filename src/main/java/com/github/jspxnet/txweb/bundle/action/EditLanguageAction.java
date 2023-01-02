@@ -37,7 +37,7 @@ public class EditLanguageAction extends ActionSupport {
     public void save() throws Exception {
         boolean isSave = false;
         String[] noSaveArray = {"post", "submit", "formId"};
-        java.util.Enumeration<java.lang.String> enumeration = request.getParameterNames();
+        java.util.Enumeration<java.lang.String> enumeration = getRequest().getParameterNames();
         while (enumeration.hasMoreElements()) {
             String key = enumeration.nextElement();
             if (ArrayUtil.inArray(noSaveArray, key, true)) {

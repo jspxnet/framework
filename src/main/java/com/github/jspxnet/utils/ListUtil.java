@@ -11,6 +11,7 @@ package com.github.jspxnet.utils;
 
 import com.github.jspxnet.json.JSONObject;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,11 +20,10 @@ import java.util.*;
  * Time: 21:54:27
  */
 public final class ListUtil {
-    public static final List<?> EMPTY = new ArrayList<>(0);
     private ListUtil() {
 
     }
-
+    public static final List<Object> EMPTY_LIST = new ArrayList<>(0);
     /**
      * @param list 列表
      * @param fen  分割
@@ -88,6 +88,30 @@ public final class ListUtil {
             i++;
         }
         return result;
+    }
+
+    /**
+     * 求交集
+     * @param list1 列表1
+     * @param list2 列表2
+     * @param <T> 类型
+     * @return 交集
+     */
+    public <T> List<T> intersection(List<T> list1,List<T> list2)
+    {
+        return list1.stream().filter(list2::contains).collect(Collectors.toList());
+    }
+
+    /**
+     * 求差集
+     * @param list1  列表1
+     * @param list2  列表2
+     * @param <T>  类型
+     * @return 差集
+     */
+    public <T> List<T> difference(List<T> list1,List<T> list2)
+    {
+        return  list1.stream().filter(t-> !list2.contains(t)).collect(Collectors.toList());
     }
 
 }

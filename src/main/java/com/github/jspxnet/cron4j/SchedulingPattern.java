@@ -242,7 +242,7 @@ public class SchedulingPattern {
 	private ValueMatcher buildValueMatcher(String str, ValueParser parser)
 			throws Exception {
 
-		if (str.length() == 1 && str.equals(StringUtil.ASTERISK)) {
+		if (str==null||str.equals(StringUtil.ASTERISK)) {
 			return new AlwaysTrueValueMatcher();
 		}
 		List<Integer> values = new ArrayList<>();
@@ -331,7 +331,7 @@ public class SchedulingPattern {
 	 */
 	private List<Integer> parseRange(String str, ValueParser parser)
 			throws Exception {
-		if (str.equals(StringUtil.ASTERISK)) {
+		if (str.equals(StringUtil.ASTERISK)||str.equals(StringUtil.QUESTION)) {
 			int min = parser.getMinValue();
 			int max = parser.getMaxValue();
 			List<Integer> values = new ArrayList<>();

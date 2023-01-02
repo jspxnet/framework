@@ -18,6 +18,10 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.SystemUtil;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -453,7 +457,9 @@ public class CronParser {
 			for (int i = 0; i < argsList.size(); i++) {
 				args[i] = (String) argsList.get(i);
 			}
-			task = new StaticMethodTask(className, methodName, args);
+
+			String id = SystemUtil.getPid() + "_" + EncryptUtil.getMd5( className + methodName + ObjectUtil.toString(args));
+			task = new StaticMethodTask(className, methodName, args,id);
 		} else {
 			// External command.
 			String[] cmdarray = new String[1 + argsList.size()];
@@ -483,7 +489,8 @@ public class CronParser {
 				}
 			}
 			// Builds the task.
-			ProcessTask process = new ProcessTask(cmdarray, envs, dir);
+			String id = SystemUtil.getPid() + "_" + EncryptUtil.getMd5( ObjectUtil.toString(cmdarray) + ObjectUtil.toString(envs)+ dir==null?"":dir.getPath());
+			ProcessTask process = new ProcessTask(cmdarray, envs, dir,id);
 			// Channels.
 			if (stdinFile != null) {
 				process.setStdinFile(stdinFile);

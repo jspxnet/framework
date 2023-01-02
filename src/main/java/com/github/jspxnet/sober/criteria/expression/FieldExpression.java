@@ -9,9 +9,9 @@ import com.github.jspxnet.utils.StringUtil;
  * Created by chenyuan on 15-5-5.
  */
 public class FieldExpression implements Criterion {
-    private String field1;
-    private String compare;
-    private String field2;
+    private final String field1;
+    private final String compare;
+    private final String field2;
 
     public FieldExpression(String field1, String compare, String field2) {
         this.field1 = field1;

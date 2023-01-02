@@ -1,35 +1,61 @@
 package com.github.jspxnet.sioc.scheduler;
 
 
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.network.mac.NetworkInfo;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.utils.BeanUtil;
+import com.github.jspxnet.utils.SystemUtil;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
 
 
+@Data
 @Slf4j
 public class TaskProxy implements Runnable {
+    static public final int  SYS_TYPE = 1;
+
+    static public final int  DEFAULT_TYPE = 0;
+    //0 普通  1:系统级别
+    private int taskType = 0;
+
+    //起个名字,如果为空 就是 methodName
+    private String name;
+
+    //时间表达式
     private String pattern;
 
-    private boolean once = false;
+    //是否只执行异常
+    private int once = 0;
+
     //延时多少秒执行
     private int delayed = 0;
 
+    //调用方法名称
     private String methodName;
 
     private Object bean;
 
+    //运行次数
     private int runTimes = 0;
+
 
     @Override
     public String toString()
     {
         JSONObject json = new JSONObject();
-        json.put("pattern",pattern);
-        json.put("once",once);
-        json.put("delayed",delayed);
+        try {
+            json.put("mac", NetworkInfo.getMacAddress());
+        } catch (IOException e) {
+            //...
+            //e.printStackTrace();
+        }
+        json.put("taskType",taskType);
         json.put("methodName",methodName);
         if (bean!=null)
         {
@@ -43,47 +69,12 @@ public class TaskProxy implements Runnable {
         return EncryptUtil.getMd5(toString());
     }
 
-    public String getPattern() {
-        return pattern;
-    }
-
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
-
-    public Object getBean() {
-        return bean;
-    }
-
-    public void setBean(Object bean) {
-        this.bean = bean;
-    }
-
-    public boolean isOnce() {
-        return once;
-    }
-
-    public void setOnce(boolean once) {
-        this.once = once;
-    }
-
-    public int getDelayed() {
-        return delayed;
-    }
-
-    public void setDelayed(int delayed) {
-        this.delayed = delayed;
-    }
-
     final private ReentrantLock lock = new ReentrantLock();
+
+    public void forceRun() throws Exception {
+        BeanUtil.invoke(bean, methodName);
+    }
+
 
     @Override
     public void run() {
@@ -91,15 +82,19 @@ public class TaskProxy implements Runnable {
             if (delayed > 0) {
                 Thread.sleep(delayed);
             }
+
             if (methodName!=null && !lock.isLocked())
             {
                 lock.lock();
                 try {
                     runTimes++;
                     BeanUtil.invoke(bean, methodName);
-
+                    if (bean.getClass().getName().contains("SchedulerRegisterTask"))
+                    {
+                        System.out.println(once);
+                    }
                     //关闭一次性任务 begin
-                    if (once&&runTimes==1)
+                    if (once== YesNoEnumType.YES.getValue()&&runTimes>=1)
                     {
                         SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
                         try {
@@ -116,7 +111,7 @@ public class TaskProxy implements Runnable {
                 }
             }
         } catch (Exception e) {
-            log.error(bean + "method" + methodName, e);
+            log.error(bean + " method " + methodName, e);
             e.printStackTrace();
         }
     }

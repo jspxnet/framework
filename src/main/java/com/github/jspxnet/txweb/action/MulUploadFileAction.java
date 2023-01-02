@@ -11,7 +11,6 @@ import com.github.jspxnet.io.ReadWordTextFile;
 import com.github.jspxnet.network.oss.CloudFileClient;
 import com.github.jspxnet.network.oss.CloudServiceFactory;
 import com.github.jspxnet.security.utils.EncryptUtil;
-import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.txweb.IRole;
@@ -20,6 +19,7 @@ import com.github.jspxnet.txweb.annotation.MulRequest;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.bundle.Bundle;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.ImageSysEnumType;
@@ -34,8 +34,8 @@ import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,7 +44,7 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
-public class MulUploadFileAction extends MultipartSupport {
+public abstract class MulUploadFileAction extends MultipartSupport {
     final static public String[] OFFICE_FILE_TYPES = FileSuffixUtil.OFFICE_TYPES;
     final static public String[] STOP_EXS = new String[]{"php", "jsp", "ftl", "html", "htm", "exe", "com", "bat", "asp", "aspx", "sh", "jar", "js", "dll"};
 
@@ -85,6 +85,7 @@ public class MulUploadFileAction extends MultipartSupport {
 
     private boolean useSave = true;
 
+    private boolean useTypeDir = true;
     //使用扩展功能， 裁剪，多图 等
     private boolean useExpand = true;
 
@@ -115,6 +116,10 @@ public class MulUploadFileAction extends MultipartSupport {
     @Param(request = false)
     public void setUseCloudFile(boolean useCloudFile) {
         this.useCloudFile = useCloudFile;
+    }
+    @Param(request = false)
+    public void setUseTypeDir(boolean useTypeDir) {
+        this.useTypeDir = useTypeDir;
     }
 
     @Param(caption = "是否是用快传", request = false)
@@ -285,9 +290,9 @@ public class MulUploadFileAction extends MultipartSupport {
      */
     @Override
     @Param(request = false)
-    @MulRequest(component = "apache", covering = FileCoveringPolicyEnumType.JSPX, saveDirectory = "@saveDirectory", fileTypes = "@fileTypes", maxPostSize = "@maxPostSize")
+    @MulRequest(component = "apache", covering = FileCoveringPolicyEnumType.Method, saveDirectory = "@saveDirectory", fileTypes = "@fileTypes", maxPostSize = "@maxPostSize")
     public void setMultipartRequest(MultipartRequest multipartRequest) {
-        request = this.multipartRequest = multipartRequest;
+        ThreadContextHolder.getContext().setRequest(multipartRequest);
     }
 
     /**
@@ -414,17 +419,20 @@ public class MulUploadFileAction extends MultipartSupport {
      * @return json 返回结果
      * @throws Exception 异常
      */
-    @Operate(caption = "上传", method = "upload")
+    //@Operate(caption = "上传", method = "upload")
     public RocResponse<IUploadFile[]> upload() throws Exception {
 
         if (useSave && uploadFileDAO == null) {
             return RocResponse.error(ErrorEnumType.CONFIG.getValue(), "DAO配置错误");
         }
+
+        HttpServletRequest request = ThreadContextHolder.getContext().getRequest();
         //验证环境
-        if (multipartRequest == null && !RequestUtil.isMultipart(request) && !response.isCommitted()) {
+        if (request != null && !RequestUtil.isMultipart(request)) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.uploadRequestError));
         }
 
+        MultipartRequest multipartRequest = (MultipartRequest) request;
         if (UploadVerifyEnumType.DEFAULT.getValue() == verifyType && isGuest()) {
             log.info(language.getLang(LanguageRes.needLogin));
             for (UploadedFile uf : multipartRequest.getFiles()) {
@@ -458,27 +466,18 @@ public class MulUploadFileAction extends MultipartSupport {
         return RocResponse.success(objects).setProperty("thumbnail", thumbnail).setProperty("namespace", uploadFileDAO.getNamespace()).setMessage(language.getLang(LanguageRes.success));
     }
 
-    @Destroy
-    @Override
-    public String execute() throws Exception {
-        uploadFileDAO.evict(uploadFileDAO.getClassType());
-        if (multipartRequest != null) {
-            multipartRequest.destroy();
-        }
-        multipartRequest = null;
-        return super.execute();
-    }
+
 
     /**
-     *
      * @param userSession 用户信息
-     * @param thumbnail 是否生成缩图
+     * @param thumbnail   是否生成缩图
      * @return 上传的数据列表
      * @throws Exception 异常
      */
     public IUploadFile[] localUploadFile(IUserSession userSession, boolean thumbnail) throws Exception {
         String setupPath = getSetupPath();
-
+        HttpServletRequest request = ThreadContextHolder.getContext().getRequest();
+        MultipartRequest multipartRequest = (MultipartRequest) request;
         String[] titleArray = multipartRequest.getParameterValues(TITLE_VAR_NAME);
         String[] contentArray = multipartRequest.getParameterValues(CONTENT_VAR_NAME);
         IUploadFile[] uploadObjArray = null;
@@ -491,10 +490,10 @@ public class MulUploadFileAction extends MultipartSupport {
             }
             if (!uf.isUpload()) {
                 FileUtil.delete(uf.getFile());
-                throw new Exception(language.getLang(LanguageRes.notAllowedFileTypeOrUploadError));
+                throw new Exception(language.getLang(LanguageRes.notAllowedFileTypeOrUploadError,"上传保存失败"));
             }
 
-            if (!uf.moveToTypeDir()) {
+            if (useTypeDir&&!uf.moveToTypeDir()) {
                 //没有移动成功的文件
                 throw new Exception(language.getLang(LanguageRes.folderWriteError));
             }
@@ -519,7 +518,7 @@ public class MulUploadFileAction extends MultipartSupport {
             upFile.setFileSize(uf.getFile().length());
             upFile.setFileType(StringUtil.toLowerCase(uf.getFileType()));
 
-            if (chineseAnalyzer != null) {
+            if (useExpand && chineseAnalyzer != null) {
                 try {
                     upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
                 } catch (IOException e) {
@@ -541,7 +540,7 @@ public class MulUploadFileAction extends MultipartSupport {
                 alreadyUploadFile = uploadFileDAO.getForHash(hashCode);
             }
             IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;
-            if (useFastUpload && checkUploadFile != null && checkUploadFile.getPid() == 0 && !StringUtil.isNull(upFile.getHash()) &&
+            if (useFastUpload && useExpand && checkUploadFile != null && checkUploadFile.getPid() == 0 && !StringUtil.isNull(upFile.getHash()) &&
                     fileEquals(checkUploadFile.getHash(), upFile.getHash()) && checkUploadFile.getPutUid() == userSession.getUid()
                     && (checkUploadFile.getOrganizeId() != null && checkUploadFile.getOrganizeId().equals(getOrganizeId())
                     && checkUploadFile.getFileSize() == upFile.getFileSize())) {
@@ -617,18 +616,18 @@ public class MulUploadFileAction extends MultipartSupport {
                             if (useSave) {
                                 try {
                                     uploadFileDAO.save(oneUploadObjArray[i]);
-                                    uploadObjArray = (IUploadFile[]) ArrayUtil.add(uploadObjArray, oneUploadObjArray[i]);
+                                    uploadObjArray = ArrayUtil.add(uploadObjArray, oneUploadObjArray[i]);
                                     pid = tmpUploadFile.getId();
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                     log.error("uploadFileDAO.save", e);
                                 }
                             }
-                        } else if (useSave) {
+                        } else if (useSave && useExpand) {
                             tmpUploadFile.setPid(pid);
                             try {
                                 uploadFileDAO.save(oneUploadObjArray[i]);
-                                uploadObjArray = (IUploadFile[]) ArrayUtil.add(uploadObjArray, oneUploadObjArray[i]);
+                                uploadObjArray = ArrayUtil.add(uploadObjArray, oneUploadObjArray[i]);
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 log.error("uploadFileDAO.save", e);
@@ -654,7 +653,14 @@ public class MulUploadFileAction extends MultipartSupport {
         String setupPath = FileUtil.mendPath(config.getString(Environment.setupPath));
         //没有上传过的
         //已经上传成功的,还没有的上传上去的就上传上去
-        IUploadFile[] result = new IUploadFile[2];
+        IUploadFile[] result;
+        if (useExpand)
+        {
+            result = new IUploadFile[2];
+        } else
+        {
+            result = new IUploadFile[1];
+        }
         File file = uf.getFile();
         upFile.setTempFilePath(file.getPath());
 
@@ -817,10 +823,11 @@ public class MulUploadFileAction extends MultipartSupport {
             objects[0] = copySaveUploadFile;
             return objects;
         }
+
         List<?> saveChildList = BeanUtil.copyList(childList, uploadFileDAO.getClassType());
         IUploadFile[] objects = new IUploadFile[saveChildList.size() + 1];
         objects[0] = copySaveUploadFile;
-        if (useSave) {
+        if (useSave && useExpand) {
             for (int i = 0; i < saveChildList.size(); i++) {
                 IUploadFile childUploadFile = (IUploadFile) childList.get(i);
                 childUploadFile.setOrganizeId(getOrganizeId());

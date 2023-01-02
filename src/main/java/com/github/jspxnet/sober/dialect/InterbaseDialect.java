@@ -10,10 +10,13 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 
 import java.io.InputStream;
 import java.sql.PreparedStatement;
+import java.sql.Time;
 import java.util.Date;
 
 /**
@@ -25,6 +28,12 @@ import java.util.Date;
  */
 public class InterbaseDialect extends Dialect {
     public InterbaseDialect() {
+
+
+        put(SQL_COMMENT, "UPDATE RDB$RELATION_FIELDS SET RDB$DESCRIPTION='${" + COLUMN_CAPTION + "}' WHERE (RDB$RELATION_NAME='${" + KEY_TABLE_NAME + "}') AND (RDB$FIELD_NAME='${" + COLUMN_NAME + "}')");
+        put(SQL_TABLE_COMMENT, "UPDATE RDB$RELATIONS SET RDB$DESCRIPTION='${" + SQL_TABLE_COMMENT + "}' WHERE RDB$RELATION_NAME = '${" + KEY_TABLE_NAME + "}'");
+
+
         put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nPRIMARY KEY (${" + KEY_PRIMARY_KEY + "})\n)");
@@ -47,6 +56,68 @@ public class InterbaseDialect extends Dialect {
         put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
         put(FUN_TABLE_EXISTS, "if (Exists(Select RDB$RELATION_NAME From RDB$RELATIONS WHERE (RDB$RELATION_NAME='${" + KEY_TABLE_NAME + "}') AND RDB$VIEW_SOURCE IS NULL))");
     }
+
+
+    @Override
+    public String getFieldType(SoberColumn soberColumn) {
+
+        if (ClassUtil.isNumberType(soberColumn.getClassType()))
+        {
+            if (soberColumn.getClassType()==int.class || soberColumn.getClassType()==Integer.class)
+            {
+                return "integer";
+            }
+
+            if (soberColumn.getClassType()==long.class || soberColumn.getClassType()==Long.class)
+            {
+                return "bigint";
+            }
+
+            if (soberColumn.getClassType()==float.class || soberColumn.getClassType()==Float.class)
+            {
+                return "float";
+            }
+
+            if (soberColumn.getClassType()==double.class || soberColumn.getClassType()==Double.class)
+            {
+                return "double precision";
+            }
+        }
+        if (soberColumn.getClassType()==boolean.class || soberColumn.getClassType()==Boolean.class)
+        {
+            return "smallint";
+        }
+        if (soberColumn.getClassType()==String.class)
+        {
+            if (soberColumn.getLength()<512)
+            {
+                return "varchar("+soberColumn.getLength()+")";
+            }
+            return "blob sub_type 1";
+        }
+
+        if (soberColumn.getClassType()==Date.class)
+        {
+            return "timestamp";
+        }
+
+        if (soberColumn.getClassType()== Time.class)
+        {
+            return "time";
+        }
+
+        if (soberColumn.getClassType()==InputStream.class)
+        {
+            return "blob";
+        }
+
+        if (soberColumn.getClassType()==char.class)
+        {
+            return "char("+soberColumn.getLength()+")";
+        }
+        return "varchar(512)";
+    }
+
 
     @Override
     public String getLimitString(String sql, int ibegin, int iend, TableModels soberTable) {
@@ -81,6 +152,6 @@ public class InterbaseDialect extends Dialect {
 
     @Override
     public boolean commentPatch() {
-        return false;
+        return true;
     }
 }

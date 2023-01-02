@@ -34,7 +34,6 @@ public abstract class OperateTable implements Serializable {
     @Column(caption = "创建时间", notNull = true)
     protected Date createDate = new Date();
 
-
     public void setIp(String ip) {
         if (ip != null && ip.startsWith("/")) {
             ip = ip.substring(1);

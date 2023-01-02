@@ -11,14 +11,13 @@ public class CreateDatabasePassword extends JspxDataSource {
 
     public static void main(String[] args)  {
 
-  /*      JspxNetApplication.autoRun();
+        JspxNetApplication.autoRun();
         if (ArrayUtil.isEmpty(args)) {
             args = new String[1];
             args[0] = "";
-        }*/
-
+        }
         CreateDatabasePassword createDatabasePassword = new CreateDatabasePassword();
-        String ps = createDatabasePassword.makePassword("pw519420");
+        String ps = createDatabasePassword.makePassword(args[0]);
         System.out.println(ps);
     }
 /*

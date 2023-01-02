@@ -12,6 +12,8 @@ package com.github.jspxnet.txweb.support;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.utils.*;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 
 /**
@@ -23,22 +25,18 @@ import java.io.*;
  */
 
 public abstract class MultipartSupport extends ActionSupport {
-    public MultipartSupport() {
 
-    }
 
     protected int covering = FileCoveringPolicyEnumType.DateRandom.getValue();
     protected int maxPostSize = -1;
     protected String saveDirectory = "d:/upload";
     protected String fileTypes = StringUtil.ASTERISK;
-    protected MultipartRequest multipartRequest = null;
+
 
     //外部接口，放入上传请求
     public abstract void setMultipartRequest(MultipartRequest multipartRequest);
 
-    public MultipartRequest getMultipartRequest() {
-        return multipartRequest;
-    }
+
 
     public String getFileTypes() {
         return fileTypes;
@@ -77,9 +75,10 @@ public abstract class MultipartSupport extends ActionSupport {
      * @return 判断上传的文件里边是否有代码数据
      */
     public int checkFileMatching(String fileTypes) {
+
         String[] types = StringUtil.split(fileTypes.toLowerCase(), StringUtil.SEMICOLON);
         int result = 0;
-        for (UploadedFile uploadFile : multipartRequest.getFiles()) {
+        for (UploadedFile uploadFile : ((MultipartRequest)getRequest()).getFiles()) {
             File f = uploadFile.getFile();
             if (!f.isFile()) {
                 continue;
@@ -100,9 +99,10 @@ public abstract class MultipartSupport extends ActionSupport {
 
     @Override
     public void destroy() {
-        if (multipartRequest!=null)
+        HttpServletRequest request =  getRequest();
+        if (request instanceof MultipartRequest)
         {
-            multipartRequest.destroy();
+            ((MultipartRequest)request).destroy();
         }
         super.destroy();
     }

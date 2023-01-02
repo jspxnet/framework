@@ -28,7 +28,6 @@ import java.util.List;
  * date: 12-11-30
  * Time: 下午4:18
  */
-@Deprecated
 @HttpMethod(caption = "默认页面浏览")
 public class TemplateView extends ActionSupport {
     protected TemplateDAO templateDAO;
@@ -136,7 +135,7 @@ public class TemplateView extends ActionSupport {
     }
 
     @Operate(caption = "列表")
-    public List getList() throws Exception {
+    public List<?> getList() throws Exception {
         return templateDAO.getList(field, find, getTerm(), getUid(), sort, getCurrentPage(), getCount());
     }
 

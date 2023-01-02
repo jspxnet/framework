@@ -1030,24 +1030,21 @@ public final  class ImageUtil {
     static public BufferedImage splice(BufferedImage imageA, BufferedImage imageB, int below) {
         int[] arrayImageA = handlePixels(imageA, 0, 0, imageA.getWidth(), imageA.getHeight());
         int[] arrayImageB = handlePixels(imageB, 0, 0, imageB.getWidth(), imageB.getHeight());
-        if (arrayImageB != null) {
 
-            int[] pixels = null;
-            if (below == 1) {
-                pixels = spliceBelow(arrayImageA, imageA.getWidth(), imageA.getHeight(), arrayImageB, imageB.getWidth(), imageB.getHeight());
-            } else {
-                pixels = spliceRight(arrayImageA, imageA.getWidth(), imageA.getHeight(), arrayImageB, imageB.getWidth(), imageB.getHeight());
-            }
-            JPanel jf = new JPanel();
-            Image img = jf.createImage(new MemoryImageSource(imageB.getWidth(), imageB.getHeight(), pixels, 0, imageB.getWidth()));
-            BufferedImage out = new BufferedImage(imageA.getWidth(), imageA.getHeight(), BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = out.createGraphics();
-            g2d.drawImage(img, 0, 0, null);
-            g2d.dispose();
-            return out;
-
+        int[] pixels = null;
+        if (below == 1) {
+            pixels = spliceBelow(arrayImageA, imageA.getWidth(), imageA.getHeight(), arrayImageB, imageB.getWidth(), imageB.getHeight());
+        } else {
+            pixels = spliceRight(arrayImageA, imageA.getWidth(), imageA.getHeight(), arrayImageB, imageB.getWidth(), imageB.getHeight());
         }
-        return null;
+        JPanel jf = new JPanel();
+        Image img = jf.createImage(new MemoryImageSource(imageB.getWidth(), imageB.getHeight(), pixels, 0, imageB.getWidth()));
+        BufferedImage out = new BufferedImage(imageA.getWidth(), imageA.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = out.createGraphics();
+        g2d.drawImage(img, 0, 0, null);
+        g2d.dispose();
+        return out;
+
     }
 
     /**
@@ -1107,7 +1104,7 @@ public final  class ImageUtil {
     }
 
 
-    static private int[] spliceBelow(int[] imageA, int Aw, int Ah, int[] imageB, int Bw, int Bh) {
+    static private int[] spliceBelow(int[] imageA, int aw, int Ah, int[] imageB, int Bw, int Bh) {
         int rangeFrom = Bh / 4;
         int rangeTo = Bh * 3 / 4;
         int range = Bh >> 1;
@@ -1127,8 +1124,8 @@ public final  class ImageUtil {
                 int blue = (pixel) & 0xff;
 
                 int red1, green1, blue1;
-                pixel = imageA[i * Aw + j];  //准备分离imageA象素
-                if (i > Aw || j > Ah) {    //imageA 的大小不够，用白色填充
+                pixel = imageA[i * aw + j];  //准备分离imageA象素
+                if (i > aw || j > Ah) {    //imageA 的大小不够，用白色填充
                     alpha = 0xff;
                     red1 = 0xff;
                     green1 = 0xff;

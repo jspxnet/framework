@@ -7,8 +7,6 @@ import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.result.MarkdownResult;
-import com.github.jspxnet.txweb.support.ActionSupport;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -29,11 +27,17 @@ public class MarkdownHandle extends ActionHandle {
         Map<String, Object> envParams = createEnvironment(request, response);
         WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         ActionConfig actionConfig = webConfigManager.getActionConfig((String) envParams.get(ActionEnv.Key_ActionName), MD_NAMESPACE, true);
-        ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
-        actionInvocation.initAction();
-        actionInvocation.invoke();
-        actionInvocation.setResultCode(ActionSupport.Markdown);
-        actionInvocation.executeResult(new MarkdownResult());
+        ActionInvocation actionInvocation = null;
+        try {
+            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
+            actionInvocation.initAction();
+            actionInvocation.invoke();
+        } finally {
+            if (actionInvocation!=null)
+            {
+                actionInvocation.executeResult(new MarkdownResult());
+            }
+        }
         ////////////////////action end
     }
 }

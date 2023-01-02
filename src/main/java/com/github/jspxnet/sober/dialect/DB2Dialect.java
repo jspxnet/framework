@@ -10,12 +10,15 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.NumberUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.io.InputStream;
 import java.sql.PreparedStatement;
+import java.sql.Time;
 import java.util.Date;
 
 /**
@@ -31,6 +34,13 @@ public class DB2Dialect extends Dialect {
         put(SQL_CREATE_TABLE, "CREATE TABLE ${" + KEY_TABLE_NAME + "} \n(\n" +
                 " <#list column=" + KEY_COLUMN_LIST + ">${column},\n</#list>" +
                 " \nPRIMARY KEY (${" + KEY_PRIMARY_KEY + "})\n)");
+
+        //oracle , pgsql ,db2,dm一样
+        //oracle , pgsql ,db2,dm设置注释方式begin
+        put(SQL_COMMENT, "COMMENT ON COLUMN ${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
+        put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
+        //oracle 和 pgsql 设置注释方式end
+
 
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255 >\"LONG VARCHAR\"<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default '${" + COLUMN_DEFAULT + "}'</#else></#if>");
 
@@ -50,13 +60,80 @@ public class DB2Dialect extends Dialect {
         put("double", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;15>double(${" + COLUMN_LENGTH + "},3)<#else>double(15,3)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#else></#if>");
 
         put(Date.class.getName(), "${" + COLUMN_NAME + "} timestamp default current timestamp");
+        put(Time.class.getName(), "${" + COLUMN_NAME + "} time default current timestamp");
         put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
         put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
         put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
         put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
         put(FUN_TABLE_EXISTS, "SELECT count(name) FROM sysibm.systables WHERE name LIKE upper('${" + KEY_TABLE_NAME + "}')");
+
+
+        put(SQL_ADD_COLUMN, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD COLUMN ${" + COLUMN_NAME + "} ${"+COLUMN_TYPE+"} <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+
+        put(SQL_MODIFY_COLUMN, "ALTER TABLE ${" + KEY_TABLE_NAME + "} MODIFY COLUMN ${" + COLUMN_NAME + "} ${"+COLUMN_TYPE+"} <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+
+        put(SQL_DROP_COLUMN, "ALTER TABLE ${" + KEY_TABLE_NAME + "} DROP COLUMN ${" + COLUMN_NAME + "}");
+
     }
 
+
+    @Override
+    public String getFieldType(SoberColumn soberColumn) {
+
+        if (ClassUtil.isNumberType(soberColumn.getClassType()))
+        {
+            if (soberColumn.getClassType()==int.class || soberColumn.getClassType()==Integer.class)
+            {
+                if (soberColumn.getLength()<3)
+                {
+                    return "smallint("+soberColumn.getLength()+")";
+                }
+                return "int";
+            }
+
+            if (soberColumn.getClassType()==long.class || soberColumn.getClassType()==Long.class)
+            {
+                return "bigint";
+            }
+
+            if (soberColumn.getClassType()==float.class || soberColumn.getClassType()==Float.class||soberColumn.getClassType()==double.class || soberColumn.getClassType()==Double.class)
+            {
+                return "real";
+            }
+        }
+        if (soberColumn.getClassType()==boolean.class || soberColumn.getClassType()==Boolean.class)
+        {
+            return "smallint";
+        }
+        if (soberColumn.getClassType()==String.class)
+        {
+            if (soberColumn.getLength()<1000)
+            {
+                return "varchar("+soberColumn.getLength()+")";
+            }
+            return "LONG VARCHAR";
+        }
+
+        if (soberColumn.getClassType()==Date.class)
+        {
+            return "timestamp";
+        }
+
+        if (soberColumn.getClassType()== Time.class)
+        {
+            return "time";
+        }
+
+        if (soberColumn.getClassType()==InputStream.class)
+        {
+            return "blob";
+        }
+        if (soberColumn.getClassType()==char.class)
+        {
+            return "char("+soberColumn.getLength()+")";
+        }
+        return "varchar(512)";
+    }
 
     private String getRowNumber(String sql) {
         StringBuilder row = new StringBuilder(50)
@@ -175,7 +252,7 @@ public class DB2Dialect extends Dialect {
 
     @Override
     public boolean commentPatch() {
-        return false;
+        return true;
     }
 
 }

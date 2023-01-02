@@ -7,6 +7,8 @@ import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.config.ActionConfig;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.service.client.HessianSkeleton;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -32,28 +34,33 @@ public class HessianHandle extends ActionHandle {
     final public static String POST = "POST";
 
     @Override
-    public void doing(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
+    public void doing(HttpServletRequest request, HttpServletResponse response) throws Exception {
         //安全判断 ,关闭远程端口，所有的都不能使用
-
         if (!POST.equals(request.getMethod())) {
             TXWebUtil.errorPrint("Service",null, response, 531);
             return;
         }
 
         //////////////////////////////////环境参数 begin
-        Map<String, Object> envParams = createEnvironment(request, response);
-        ActionConfig actionConfig = getActionConfig(envParams);
+        ActionConfig actionConfig = getActionConfig(request);
         if (actionConfig == null) {
             TXWebUtil.errorPrint("not found,找不到文件", null,response, HttpStatusType.HTTP_status_404);
-            log.debug("actionConfig  is NULL:{}", envParams.toString());
-            throw new Exception("actionConfig  is NULL :" + envParams.toString());
+            throw new Exception("actionConfig  is NULL :" + request.getRequestURI());
         }
 
+        Map<String, Object> envParams = createRocEnvironment(actionConfig,request, response);
         //synchronized 这里不能有同步,否则调用不成功
-        ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
-        actionInvocation.initAction();
-        actionInvocation.invoke();
-        actionInvocation.executeResult(null);
+        ActionInvocation actionInvocation = null;
+        try {
+            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
+            actionInvocation.initAction();
+            actionInvocation.invoke();
+        } finally {
+            if (actionInvocation!=null)
+            {
+                actionInvocation.executeResult(null);
+            }
+        }
         ////////////////////action end
 
     }
@@ -69,11 +76,11 @@ public class HessianHandle extends ActionHandle {
         if (objectId == null) {
             objectId = action.getString("ejbid");
         }
-        final HttpServletResponse response = action.getResponse();
-        final HttpServletRequest request = action.getRequest();
-
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        HttpServletResponse response = actionContext.getResponse();
         //替代原版HessianSkeleton  实现事务标签功能
-        HessianSkeleton objectSkeleton = new HessianSkeleton(action, Objects.requireNonNull(ClassUtil.findRemoteAPI(actionClass)));
+        HessianSkeleton objectSkeleton = new HessianSkeleton(action, Objects.requireNonNull(ClassUtil.findRemoteApi(actionClass)));
         boolean debug = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.DEBUG);
         objectSkeleton.setDebug(debug);
         try {
@@ -86,6 +93,7 @@ public class HessianHandle extends ActionHandle {
             log.error("serviceId:{},objectId:{},error:{}", objectId, objectId, e.getMessage());
         } finally {
             com.caucho.services.server.ServiceContext.end();
+            action.destroy();
         }
         //Hessian远程接口方式调用 end
 

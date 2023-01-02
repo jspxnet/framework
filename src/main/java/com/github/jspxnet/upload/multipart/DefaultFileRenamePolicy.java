@@ -37,7 +37,7 @@ public class DefaultFileRenamePolicy extends FileRenamePolicy {
         String name = f.getName();
         String body = FileUtil.getNamePart(name);
         String ext = FileUtil.getTypePart(name);
-        body = StringUtil.getPolicyName(body, 50, special);
+        body = StringUtil.getPolicyName(body, 50, SPECIAL);
         // Increase the count until an empty spot is found.
         // Max out at 9999 transfer avoid an infinite loop caused by a persistent
         // IOException, like when the destination dir becomes non-writable.

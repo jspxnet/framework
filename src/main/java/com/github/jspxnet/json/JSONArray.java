@@ -326,6 +326,10 @@ public class JSONArray extends LinkedList<Object> {
         if (o instanceof JSONObject) {
             return (JSONObject) o;
         }
+        if (o instanceof com.alibaba.fastjson.JSONObject) {
+            com.alibaba.fastjson.JSONObject fj = (com.alibaba.fastjson.JSONObject)o;
+            return new JSONObject(fj.toJSONString());
+        }
         return null;
     }
 
@@ -342,7 +346,6 @@ public class JSONArray extends LinkedList<Object> {
         return ObjectUtil.toLong(get(index));
     }
 
-
     /**
      * Get the string associated with an index.
      *
@@ -352,9 +355,14 @@ public class JSONArray extends LinkedList<Object> {
      */
     public String getString(int index) {
         Object obj = get(index);
+        if (obj==null)
+        {
+            return null;
+        }
         if (obj instanceof  Number)
         {
-            return (String)obj;
+            Number n = (Number)obj;
+            return n.toString();
         }
         return obj.toString();
     }

@@ -10,9 +10,7 @@
 package com.github.jspxnet.txweb.view;
 
 import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Param;
-
 import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.txweb.model.param.PageParam;
 import com.github.jspxnet.txweb.support.ActionSupport;

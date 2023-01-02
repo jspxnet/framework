@@ -22,8 +22,19 @@ import java.util.Properties;
 public interface EnvironmentTemplate extends Serializable {
     Object get(String keys);
 
+    /**
+     *
+     * @param keys 变量名称
+     * @return 得到环境变量
+     */
     String getString(String keys);
 
+    /**
+     *
+     * @param keys 变量名称
+     * @param def 默认值
+     * @return 得到环境变量
+     */
     String getString(String keys, String def);
 
     int getInt(String keys);
@@ -36,13 +47,17 @@ public interface EnvironmentTemplate extends Serializable {
 
     void put(String keys, Object value);
 
+    /**
+     *
+     * @return 得到环境变量表
+     */
     Map<String, Object> getVariableMap();
 
     void createPathEnv(String defaultPath);
 
     void createSystemEnv();
 
-    Properties readDefaultProperties(String fileName);
+    Map<String,String> readDefaultProperties(String fileName);
 
     void createJspxEnv(String fileName);
 

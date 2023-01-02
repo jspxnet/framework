@@ -1,6 +1,7 @@
 package com.github.jspxnet.txweb.util;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.table.Member;
 import com.github.jspxnet.utils.NumberUtil;
@@ -9,7 +10,7 @@ import com.github.jspxnet.utils.StringUtil;
 /**
  * 部分用户功能抽象出来，不要方舟TXWebUtil中
  */
-public class MemberUtil {
+public final class MemberUtil {
 
     private MemberUtil() {
 
@@ -59,7 +60,7 @@ public class MemberUtil {
             {
                 return true;
             }
-        } else
+        } else 
         {
             //兼容老密码
             return EncryptUtil.getHashEncode(password, EnvFactory.getHashAlgorithm()).equalsIgnoreCase(storePassword);
@@ -121,6 +122,35 @@ public class MemberUtil {
         return EncryptUtil.getHashEncode(sb + EnvFactory.getHashAlgorithmKey(),EnvFactory.getHashAlgorithm()).equalsIgnoreCase(member.getToken());
     }
 
+    /**
+     *
+     * @param userId 用户ID
+     * @param userName 用户名
+     * @return 返回用户格式
+     */
+    public static String makeUser(String userId,String userName) {
+        return Environment.marker_user_startTag + userId + Environment.marker_user_centerTag + userName + Environment.marker_user_endTag;
+    }
+
+    public static String getUserId(String str) {
+        return StringUtil.substringBetween(str,Environment.marker_user_startTag,Environment.marker_user_centerTag);
+    }
+
+    public static boolean isUser(String data) {
+        return !StringUtil.isNull(data) && data.startsWith(Environment.marker_user_startTag) && data.contains(Environment.marker_user_centerTag) && data.endsWith(Environment.marker_user_endTag);
+    }
+
+    public static  boolean isGroup(String data) {
+        return !StringUtil.isNull(data) && data.startsWith(Environment.marker_group_startTag) && data.contains(Environment.marker_group_centerTag) && data.endsWith(Environment.marker_group_endTag);
+    }
+
+    public static  boolean isContacts(String data) {
+        return !StringUtil.isNull(data) && data.startsWith(Environment.marker_contacts_startTag) && data.contains(Environment.marker_contacts_centerTag) && data.endsWith(Environment.marker_contacts_endTag);
+    }
+
+    public static  boolean isFollow(String data) {
+        return !StringUtil.isNull(data) && data.startsWith(Environment.marker_follow_startTag) && data.contains(Environment.marker_follow_centerTag) && data.endsWith(Environment.marker_follow_endTag);
+    }
 
 
 }

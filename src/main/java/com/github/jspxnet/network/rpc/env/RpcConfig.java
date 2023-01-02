@@ -28,6 +28,10 @@ public class RpcConfig {
 
     final static private String USE_NETTY_RPC = "useNettyRpc";
 
+    final static private String USE_RPC_SECRET = "useRpcSecret";
+
+    final static private String USE_RPC_ZIP = "useRpcZip";
+
     final static private String NETTY_RPC_DEBUG = "nettyRpcDebug";
 
     //包的最大长度
@@ -75,7 +79,6 @@ public class RpcConfig {
 
         return INSTANCE;
     }
-
 
     public boolean isUseNettyRpc() {
         return ENV_TEMPLATE.getBoolean(USE_NETTY_RPC);
@@ -162,6 +165,22 @@ public class RpcConfig {
     public String getSecretKey() {
         return ENV_TEMPLATE.getString(Environment.secretKey, Environment.defaultDrug);
     }
+
+    /**
+     *
+     * @return 是否加密传输
+     */
+    public boolean getUseRpcSecret()
+    {
+        return ENV_TEMPLATE.getBoolean(USE_RPC_SECRET);
+    }
+
+
+    public boolean getUseRpcZip()
+    {
+        return ENV_TEMPLATE.getBoolean(USE_RPC_ZIP);
+    }
+
 
     public String getCipherIv() {
         return ENV_TEMPLATE.getString(Environment.cipherIv);

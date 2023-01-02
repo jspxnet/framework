@@ -41,8 +41,6 @@ public class LifecycleObject implements Serializable {
     //虚拟命名空间
     private String refNamespace = Environment.Global;
 
-
-
     public void setParamMap(Map<String, Object> paramMap) {
         this.paramMap.putAll(paramMap);
     }

@@ -18,8 +18,6 @@
  */
 package com.github.jspxnet.cron4j;
 
-import com.github.jspxnet.utils.RandomUtil;
-
 /**
 
  * @author Carlo Pelliccia
@@ -27,24 +25,19 @@ import com.github.jspxnet.utils.RandomUtil;
  */
 public abstract class Task {
 
-	/**
-	 * The ID for this task. Also used as an instance synchronization lock.
-	 */
-	private final Object id = RandomUtil.getRandomGUID(32);
+	final private String id;
 
-	/**
-	 * Empty constructor, does nothing.
-	 */
-	public Task() {
+	public String getId()
+	{
+		return id;
 	}
 
 	/**
-	 * It returns the ID for this task.
-	 * 
-	 * @return The ID for this task.
+	 *
+	 * @param id 放个id号
 	 */
-	Object getId() {
-		return id;
+	public Task(String id) {
+		this.id = id;
 	}
 
 	/**

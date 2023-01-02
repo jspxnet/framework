@@ -198,32 +198,44 @@ public class K3cloudServiceImpl implements K3cloudService {
 
     /**
      *
-     * @param cls 表类
-     * @param filter  过滤条件
-     * @param index  开始条数， 每次500条
-     * @return 得到请求列表
+     * @param cls 类型对象
+     * @param filter 过滤条件
+     * @param limit 返回个数
+     * @return 对象列表
      */
-    @Override
-    public JSONObject createQuery(Class<?> cls, String filter, int index) {
-        return createQuery( cls,  filter,  index, 500);
+    public JSONObject createQuery(Class<?> cls, String filter,int limit) {
+        return createQuery(cls,  filter,StringUtil.empty, 0,limit);
+    }
+
+    /**
+     *
+     * @param cls 类型对象
+     * @param filter 过滤条件
+     * @param index 开始行
+     * @param limit 返回个数
+     * @return 对象列表
+     */
+    public JSONObject createQuery(Class<?> cls, String filter,int index, int limit) {
+        return createQuery(cls,  filter,StringUtil.empty, index,limit);
     }
     /**
      *
      * @param cls 表类
      * @param filter  过滤条件
+     * @param orderString  排序
      * @param index  开始条数， 每次500条
      * @param limit  每次500条
      * @return 得到请求列表
      */
     @Override
-    public JSONObject createQuery(Class<?> cls, String filter, int index,int limit) {
+    public JSONObject createQuery(Class<?> cls, String filter, String orderString, int index, int limit) {
         K3TableConf k3TableConf =  tableMap.get(cls.getName());
         if (k3TableConf==null)
         {
             return null;
         }
         String fieldKeys =  KingdeeUtil.getFieldKeys(k3TableConf.getContent());
-        return KingdeeUtil.createQuery(k3TableConf.getTableId(),fieldKeys,filter,index,limit);
+        return KingdeeUtil.createQuery(k3TableConf.getTableId(),fieldKeys,filter,orderString,index,limit);
     }
     /**
      *

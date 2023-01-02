@@ -18,6 +18,10 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.SystemUtil;
+
 import java.io.*;
 
 /**
@@ -64,58 +68,25 @@ public class ProcessTask extends Task {
 	 */
 	private File stderrFile = null;
 
+
 	/**
-	 * Creates the task.
-	 * 
-	 * @param command
-	 *            The command to launch and its arguments.
-	 * @param envs
-	 *            Environment variables for the spawned process, in the form
-	 *            <em>name=value</em>. If null the process will inherit the
-	 *            current JVM environment variables.
-	 * @param directory
-	 *            Working directory for the spawned process. If null the process
-	 *            will inherit the current JVM working directory.
+	 *
+	 * @param command  The command to launch and its arguments.
+	 * @param envs  Environment variables for the spawned process, in the form
+	 * 	             <em>name=value</em>. If null the process will inherit the
+	 * 	             current JVM environment variables.
+	 * @param directory Working directory for the spawned process. If null the process
+	 * 	 *            will inherit the current JVM working directory.
+	 * @param id 放个id号,让外部来生成
 	 */
-	public ProcessTask(String[] command, String[] envs, File directory) {
+	public ProcessTask(String[] command, String[] envs, File directory,String id) {
+		super(id);
 		this.command = command;
 		this.envs = envs;
 		this.directory = directory;
 	}
 
-	/**
-	 * Creates the task.
-	 * 
-	 * @param command
-	 *            The command to launch and its arguments.
-	 * @param envs
-	 *            Environment variables for the spawned process, in the form
-	 *            <em>name=value</em>. If null the process will inherit the
-	 *            current JVM environment variables.
-	 */
-	public ProcessTask(String[] command, String[] envs) {
-		this(command, envs, null);
-	}
 
-	/**
-	 * Creates the task.
-	 * 
-	 * @param command
-	 *            The command to launch and its arguments.
-	 */
-	public ProcessTask(String[] command) {
-		this(command, null, null);
-	}
-
-	/**
-	 * Creates the task.
-	 * 
-	 * @param command
-	 *            The command to launch.
-	 */
-	public ProcessTask(String command) {
-		this(new String[] { command }, null, null);
-	}
 
 	/**
 	 * Returns true.

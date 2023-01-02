@@ -1,15 +1,14 @@
 package com.github.jspxnet.txweb.model.param;
 
 import com.github.jspxnet.sober.config.SoberColumn;
-import com.github.jspxnet.sober.table.ChildTableMeta;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
-
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+
 
 @Data
 public class CreateTableParam implements Serializable  {
@@ -28,14 +27,14 @@ public class CreateTableParam implements Serializable  {
     @Param(caption = "实体对象")
     private String entityClass;
 
+    @Param(caption = "父表", min=1,max = 100,level = SafetyEnumType.HEIGHT)
+    private String parentTableName = StringUtil.empty;
+
     //一般默认为id
     @Param(caption = "关键字名")
     private String primary = StringUtil.empty;
 
     @Param(caption = "字段表")
     private List<SoberColumn> columns = new LinkedList<>();
-
-    @Param(caption = "子表")
-    private List<ChildTableMeta> childTables = new LinkedList<>();
 
 }

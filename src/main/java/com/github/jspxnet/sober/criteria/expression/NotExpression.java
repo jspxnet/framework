@@ -43,7 +43,11 @@ public class NotExpression implements Criterion {
 
     @Override
     public String[] getFields() {
-        return null;
+        if (criterion==null)
+        {
+            return null;
+        }
+        return criterion.getFields();
     }
 
     @Override

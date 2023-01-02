@@ -24,6 +24,7 @@ import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.table.OperateTable;
 import com.github.jspxnet.txweb.IRole;
 import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.Data;
@@ -63,11 +64,11 @@ public class Role extends OperateTable implements IRole {
     @Column(caption = "图片", length = 250, notNull = true)
     private String images = StringUtil.empty;
 
-    @Param(caption = "办公角色", max = 2, enumType = YesNoEnumType.class)
+    @Column(caption = "办公角色", length = 10000)
     private int officeType = YesNoEnumType.NO.getValue();
 
     //是否允许上传
-    @Param(caption = "是否允许上传", max = 2, enumType = YesNoEnumType.class)
+    @Column(caption = "是否允许上传", enumType = YesNoEnumType.class)
     private int useUpload = YesNoEnumType.NO.getValue();
 
     @Column(caption = "上传的文件大小", notNull = true)
@@ -169,7 +170,7 @@ public class Role extends OperateTable implements IRole {
             return false;
         }
         if (!StringUtil.hasLength(classMethod)) {
-            classMethod = TXWebUtil.defaultExecute;
+            classMethod = ActionEnv.DEFAULT_EXECUTE;
         }
 
         operateLines = getOperatesLines();
@@ -190,12 +191,12 @@ public class Role extends OperateTable implements IRole {
                 continue;
             }
 
-            String roleNamespace = TXWebUtil.getNamespace(url);
+            String roleNamespace = URLUtil.getNamespace(url);
             if (roleNamespace != null && !namespace.startsWith(roleNamespace)) {
                 continue;
             }
             String roleClassName = StringUtil.substringAfterLast(url,StringUtil.BACKSLASH);
-            if (!StringUtil.ASTERISK.equals(roleClassName) && !className.matches(roleClassName)) {
+            if (!StringUtil.ASTERISK.equals(roleClassName) && className!=null&&!className.matches(roleClassName)) {
                 continue;
             }
             if (line.endsWith(StringUtil.COLON + classMethod)) {

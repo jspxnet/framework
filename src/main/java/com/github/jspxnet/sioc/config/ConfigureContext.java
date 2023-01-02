@@ -48,6 +48,7 @@ public class ConfigureContext implements IocContext {
     //永远不清除这里表示动态扫描加载的目录，如果已经扫描了的，就不在扫描加载
     private final List<String> scanPackageList = new ArrayList<>();
 
+
     /**
      * 设计到定时任务的类注册
      * 放入格式，<bean名称，命名空间>
@@ -74,6 +75,14 @@ public class ConfigureContext implements IocContext {
 
     }
 
+    /**
+     *
+     * @return 扫描包列表
+     */
+    @Override
+    public List<String> getScanPackageList() {
+        return scanPackageList;
+    }
 
     /**
      * {@code
@@ -83,7 +92,6 @@ public class ConfigureContext implements IocContext {
      *
      * @throws Exception 异常
      */
-
     @Override
     public void reload() throws Exception {
         log.debug("ioc reload " + ObjectUtil.toString(configFile));
@@ -183,14 +191,14 @@ public class ConfigureContext implements IocContext {
     @Override
     public void registryIocBean(Class<?> cla) {
         //注册bean标签
+        String id = null;
+        String namespace = null;
+        Bean iocBean = cla.getAnnotation(Bean.class);
+        RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
+        if (iocBean == null&&rpcClient==null) {
+            return;
+        }
         try {
-            Bean iocBean = cla.getAnnotation(Bean.class);
-            RpcClient rpcClient = cla.getAnnotation(RpcClient.class);
-            if (iocBean == null&&rpcClient==null) {
-                return;
-            }
-            String id;
-            String namespace;
             BeanModel beanModel = new BeanModel();
             if (rpcClient!=null)
             {
@@ -218,9 +226,9 @@ public class ConfigureContext implements IocContext {
             }
             beanModel.setNamespace(namespace);
             beanModel.setClassName(cla.getName());
-            //log.info("registry Ioc Bean class=" + cla + " id=" + id + " namespace=" + namespace);
             registerBean(beanModel);
         } catch (Exception e) {
+            log.error("registry Ioc Bean class=" + cla + " id=" + id + " namespace=" + namespace);
             log.error("ioc load error" + cla, e);
         }
     }
@@ -447,6 +455,10 @@ public class ConfigureContext implements IocContext {
         return results;
     }
 
+    /**
+     *
+     * @return 得到元素列表
+     */
     @Override
     public List<BeanElement> getElementList() {
         return elementList;
@@ -540,7 +552,6 @@ public class ConfigureContext implements IocContext {
         return applicationMap;
     }
 
-
     /**
      *
      * @return 得到定时器map
@@ -555,6 +566,9 @@ public class ConfigureContext implements IocContext {
     public List<BeanElement> getInjectionBeanElements() {
         return injectionBeanElements;
     }
+
+
+
 
     @Override
     public void shutdown()

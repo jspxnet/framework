@@ -10,6 +10,8 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.Action;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
@@ -18,6 +20,7 @@ import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -36,17 +39,18 @@ public class PdfPageImgResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
         Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin
-        checkCache(action, response);
+        checkCache(actionContext);
         //浏览器缓存控制end
 
         response.setContentType("image/x-png");
         response.setCharacterEncoding(Dispatcher.getEncode());
 
-        File file = (File) action.getResult();
+        File file = (File) actionContext.getResult();
         if (file == null || !file.isFile()) {
             return;
         }

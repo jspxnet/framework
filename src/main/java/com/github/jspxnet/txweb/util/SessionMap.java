@@ -24,8 +24,9 @@ import java.util.Map;
  * User: chenYuan
  * date: 2010-11-19
  * Time: 16:54:11
+ * @author chenYuan
  */
-public class SessionMap extends HashMap implements Map, Cloneable, Serializable {
+public class SessionMap extends HashMap<String,Object> implements Map<java.lang.String, java.lang.Object>, Serializable {
     final private HttpSession session;
 
     public SessionMap(HttpSession session) {
@@ -34,7 +35,6 @@ public class SessionMap extends HashMap implements Map, Cloneable, Serializable 
 
     @Override
     public Object get(Object key) {
-
         if (key == null) {
             return null;
         }

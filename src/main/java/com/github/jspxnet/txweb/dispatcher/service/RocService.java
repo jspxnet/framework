@@ -17,6 +17,7 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -71,15 +72,7 @@ public class RocService extends IService {
         }
         //判断是XML还是JSON end
 
-
-        JSONObject methodCall = jsonData.getJSONObject(Environment.rocMethodCall);
-        //兼容格式调整
-        if (methodCall != null && jsonData.containsKey(Environment.rocMethodCall)) {
-            jsonData = methodCall;
-        }
-
         //////////////////初始end
-
         String namespace;
         String namePart = jsonData.getString(Environment.rocId);
         if (StringUtil.isNull(namePart)) {
@@ -92,10 +85,10 @@ public class RocService extends IService {
             namespace = jsonData.getString(Environment.namespace);
         }
         if (namespace == null) {
-            namespace = TXWebUtil.getNamespace(request.getServletPath());
+            namespace = URLUtil.getNamespace(request.getRequestURI());
         }
         ///////////////////////////////////环境参数 begin
-        Map<String, Object> envParams = TXWebUtil.createEnvironment();
+        Map<String, Object> envParams = new HashMap<>();
         envParams.put(ActionEnv.Key_RealPath, Dispatcher.getRealPath());
         envParams.put(ActionEnv.Key_Request, request);
         envParams.put(ActionEnv.Key_Response, response);

@@ -54,10 +54,11 @@ public class RpcInvokerFactory {
         String jsonStr = INetCommand.getDecodePacket(str);
         if (!StringUtil.isJsonObject(jsonStr))
         {
-            log.error("str 不是有效的json");
+            log.info("str 不是有效的json,请求:{} \r\n返回:{}",str,jsonStr);
             return;
-
         }
+
+
         SendCmd command = GsonUtil.createGson().fromJson(jsonStr,SendCmd.class);
         if (command==null)
         {

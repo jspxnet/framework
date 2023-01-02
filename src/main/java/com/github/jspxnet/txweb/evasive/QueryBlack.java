@@ -37,7 +37,7 @@ public class QueryBlack implements Serializable {
     @Column(caption = "监禁时间", length = 250)
     private String sql = "";
 
-    @Column(caption = "最后执行时间", notNull = false)
+    @Column(caption = "最后执行时间")
     private long lastQueryTimeMillis = 0;
 
     @Column(caption = "返回方式", length = 250)

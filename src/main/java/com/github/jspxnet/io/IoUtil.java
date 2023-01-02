@@ -1,9 +1,13 @@
 package com.github.jspxnet.io;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.network.http.HttpClient;
+import com.github.jspxnet.network.http.HttpClientFactory;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.io.File;
 
 /**
@@ -14,6 +18,8 @@ import java.io.File;
  * description: 封装一下都起单元
  **/
 public class IoUtil {
+    public final static String[] WORD_FILE_TYPE =  new String[]{"doc","docx"};
+    public final static String[] PDF_FILE_TYPE =  new String[]{"pdf"};
     private IoUtil()
     {
 
@@ -48,13 +54,21 @@ public class IoUtil {
      */
     public static String autoReadText(String file,String encode) throws Exception
     {
+
+        if (file!=null&&file.startsWith("http"))
+        {
+            HttpClient httpClient = HttpClientFactory.createHttpClient(file);
+            httpClient.setEncode(StringUtil.isNull(encode)?"UTF-8":encode);
+            return httpClient.getString();
+        }
+
         String fileType = FileUtil.getTypePart(file);
         AbstractRead abstractRead;
-        if (ArrayUtil.inArray(ReadWordTextFile.FILE_TYPE,fileType,true))
+        if (ArrayUtil.inArray(WORD_FILE_TYPE,fileType,true))
         {
             abstractRead = (AbstractRead)ClassUtil.newInstance(ReadWordTextFile.class.getName());
         } else
-        if (ArrayUtil.inArray(ReadPdfTextFile.FILE_TYPE,fileType,true))
+        if (ArrayUtil.inArray(PDF_FILE_TYPE,fileType,true))
         {
             abstractRead = (AbstractRead)ClassUtil.newInstance(ReadPdfTextFile.class.getName());
         } else

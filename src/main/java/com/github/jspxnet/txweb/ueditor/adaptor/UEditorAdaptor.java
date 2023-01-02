@@ -10,11 +10,14 @@ import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.action.UploadFileAction;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.support.ActionSupport;
+import com.github.jspxnet.txweb.support.MultipartRequest;
 import com.github.jspxnet.txweb.table.IUploadFile;
 import com.github.jspxnet.txweb.ueditor.ConfigManager;
 import com.github.jspxnet.txweb.ueditor.StorageManager;
@@ -26,6 +29,8 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
 import com.github.jspxnet.utils.*;
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -178,7 +183,7 @@ public class UEditorAdaptor extends ActionSupport {
                 conf = this.configManager.getConfig(actionCode);
                 String filedName = (String) conf.get("fieldName");
                 if ("true".equals(conf.get("isBase64"))) {
-                    state = base64Save(this.request.getParameter(filedName), saveDirectory, setupPath, maxSize);
+                    state = base64Save(getRequest().getParameter(filedName), saveDirectory, setupPath, maxSize);
                 } else {
                     //saveDirectory,setupPath,maxSize,fileTypes
                     state = binarySave();
@@ -186,7 +191,7 @@ public class UEditorAdaptor extends ActionSupport {
                 break;
             case ActionMap.CATCH_IMAGE:
                 conf = configManager.getConfig(actionCode);
-                String[] list = this.request.getParameterValues((String) conf.get("fieldName"));
+                String[] list = getRequest().getParameterValues((String) conf.get("fieldName"));
                 String[] filter = (String[]) conf.get("filter");
                 state = new ImageHunter(saveDirectory, System.currentTimeMillis() + "", maxSize, fileTypes, filter).capture(list);
                 break;
@@ -208,6 +213,9 @@ public class UEditorAdaptor extends ActionSupport {
     }
 
     private State binarySave() {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        HttpServletResponse response = actionContext.getResponse();
         boolean isAjaxUpload = request.getHeader("X_Requested_With") != null;
         if (isAjaxUpload) {
             try {
@@ -222,12 +230,11 @@ public class UEditorAdaptor extends ActionSupport {
         try {
             uploadFileAction.setEditorUpload(true);
             uploadFileAction.setUseFastUpload(false);
-            uploadFileAction.setRequest(request);
-            uploadFileAction.setResponse(response);
             uploadFileAction.setConfig(config);
             uploadFileAction.setLanguage(language);
+            uploadFileAction.initEnv(actionContext.getEnvironment(),actionContext.getExeType());
             uploadFileAction.initialize();
-            uploadFileAction.setMultipartRequest(uploadFileAction.getMultipartRequest());
+            uploadFileAction.setMultipartRequest((MultipartRequest) uploadFileAction.getRequest());
             uploadFileAction.execute();
             Object obj = uploadFileAction.getResult();
             if (obj==null)
@@ -370,7 +377,8 @@ public class UEditorAdaptor extends ActionSupport {
         } else {
             result = this.invoke();
         }
-        TXWebUtil.print(result, WebOutEnumType.JSON.getValue(), response);
+
+        TXWebUtil.print(result, WebOutEnumType.JSON.getValue(), getResponse());
         return NONE;
     }
 

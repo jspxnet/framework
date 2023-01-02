@@ -12,7 +12,6 @@ package com.github.jspxnet.sober;
 import com.github.jspxnet.sober.config.SoberCalcUnique;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.config.SoberNexus;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +33,11 @@ public interface TableModels extends Serializable {
 
     boolean isUseCache();
 
-    Class getEntity();
+    Class<?> getEntity();
 
     String getPrimary();
+
+    void setPrimary(String primary);
 
     boolean isAutoId();
 
@@ -56,11 +57,21 @@ public interface TableModels extends Serializable {
 
     String[] getFieldArray();
 
+    void setAutoId(boolean autoId);
+
     List<SoberColumn> getColumns();
 
     void setColumns(List<SoberColumn> columns);
 
+    void addColumns(SoberColumn column);
+
     boolean containsField(String keys);
 
+    boolean equals(TableModels models);
 
+    boolean isCanExtend();
+
+    void setCanExtend(boolean canExtend);
+
+    String getId();
 }

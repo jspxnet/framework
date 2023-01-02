@@ -39,11 +39,10 @@ public abstract class AbstractWrite {
     public boolean setContent(String value, boolean append, boolean bom) {
         this.append = append;
         this.bom = bom;
-        boolean result = false;
         if (!open(append)) {
             return false;
         }
-        result = writeContent(value);
+        boolean result = writeContent(value);
         close();
         return result;
     }

@@ -9,13 +9,14 @@
  */
 package com.github.jspxnet.utils;
 
-import static java.lang.System.arraycopy;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
+import static java.lang.System.arraycopy;
 
 /**
  *
@@ -2749,7 +2750,7 @@ public final class ArrayUtil {
     private static Object remove(Object array, int index) {
         int length = getLength(array);
         if (index < 0 || index >= length) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Length: " + length);
+            throw new IndexOutOfBoundsException("删除超过数组长度,Index: " + index + ", Length: " + length);
         }
 
         Object result = Array.newInstance(array.getClass().getComponentType(), length - 1);
@@ -2763,8 +2764,12 @@ public final class ArrayUtil {
 
     private static String[] remove(String[] array, int index) {
         int length = getLength(array);
+        if (length==0 && index==0)
+        {
+            return new String[0];
+        }
         if (index < 0 || index >= length) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Length: " + length);
+            throw new IndexOutOfBoundsException("删除超过数组长度,Index: " + index + ", Length: " + length);
         }
         String[] result = new String[length - 1];
         arraycopy(array, 0, result, 0, index);

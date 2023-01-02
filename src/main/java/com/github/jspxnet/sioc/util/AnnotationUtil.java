@@ -25,6 +25,7 @@ public final class AnnotationUtil {
         if (bean == null) {
             return;
         }
+
         //如果没有配置就检查是否有标签方式的
         Method[] methods = ClassUtil.getDeclaredMethods(bean.getClass());
         for (Method method : methods) {

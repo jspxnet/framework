@@ -11,6 +11,7 @@ import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.google.gson.*;
 import java.lang.reflect.Type;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -28,13 +29,28 @@ public class TimestampAdapter implements JsonSerializer<Timestamp>, JsonDeserial
                                  JsonDeserializationContext context) throws JsonParseException {
         if(json == null){
             return null;
-        } else {
-            try {
-                Date data = StringUtil.getDate(json.getAsString());
-                return new Timestamp(data.getTime());
-            } catch (Exception e) {
-                return null;
+        }
+        String src = json.getAsString();
+        if (src != null && src.contains("Timestamp(") && src.contains(")")) {
+            String dateStr = StringUtil.substringBetween(src, "Timestamp(", ")");
+            if (dateStr != null && dateStr.contains("+")) {
+                dateStr = StringUtil.substringBefore(dateStr, "+");
             }
+            if (dateStr != null && dateStr.contains("-")) {
+                dateStr = StringUtil.substringBefore(dateStr, "-");
+            }
+            if (!StringUtil.isNull(dateStr)) {
+                long time = StringUtil.toLong(dateStr);
+                if (time > 0) {
+                    return new Timestamp(time);
+                }
+            }
+        }
+        try {
+            Date data = StringUtil.getDate(json.getAsString());
+            return new Timestamp(data.getTime());
+        } catch (Exception e) {
+            return null;
         }
     }
 

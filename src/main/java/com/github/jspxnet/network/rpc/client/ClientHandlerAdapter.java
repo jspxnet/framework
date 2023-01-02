@@ -40,37 +40,34 @@ public class ClientHandlerAdapter extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-
         if (!(msg instanceof String)) {
-            log.debug("接收到非法数据");
+            log.info("接收到非法数据");
             return;
         }
         String jsonStr = INetCommand.getDecodePacket((String) msg);
-
-        if (StringUtil.isNull(jsonStr)) {
-            log.error("接收到非法数据,解密不能识别");
+        if (StringUtil.isEmpty(jsonStr)||StringUtil.isNull(jsonStr)) {
+            log.info("接收到非法数据,解密不能识别");
             return;
         }
         SendCmd reply = GsonUtil.createGson().fromJson(jsonStr,SendCmd.class);
         if (reply == null || StringUtil.isNull(reply.getId())) {
-            log.debug("无调用ID");
+            log.info("无调用ID");
             return;
         }
-
         //接收到的数据都放在这里
         ResultHashMap resultHashMap = ResultHashMap.getInstance();
         ArrayBlockingQueue<SendCmd> queue = resultHashMap.get(reply.getId());
         if (queue == null) {
-            log.debug("队列中无此ID:{}", ObjectUtil.toString(reply));
+            log.info("队列中无此ID:{}", ObjectUtil.toString(reply));
             return;
         }
         try {
             queue.put(reply);
-            resultHashMap.remove(reply.getId());
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            resultHashMap.remove(reply.getId());
         }
-
     }
 
 

@@ -5,6 +5,7 @@ import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import java.lang.annotation.Annotation;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
@@ -16,13 +17,15 @@ import java.util.jar.JarFile;
 
 
 public class JarScanner implements ScanJar {
-    public static final String[] NO_SEARCH_CLASS = new String[]{"com.seeyon.ctp.common.po.BasePO","org.apache","net.sf.cglib","com.aliyuncs"};
-
-
-
+    public static final String[] NO_SEARCH_CLASS = new String[]{"com.seeyon.ctp.common.po.BasePO","org.junit","com.github.jspxnet.component.jxls","org.apache","org.jxls","net.sf.cglib","com.aliyuncs"};
 
     @Override
     public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath) {
+        return search( packageName, predicate,  defaultPath,null) ;
+    }
+
+    @Override
+    public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath,Class<?> annotationClass) {
 
         Set<Class<?>> classes = new HashSet<>();
         try {
@@ -62,7 +65,17 @@ public class JarScanner implements ScanJar {
                                     String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(StringUtil.DOT)).replace("/", StringUtil.DOT);
                                     Class<?> cls = ClassUtil.loadClass(className);
                                     if (predicate == null || predicate.test(cls)) {
-                                        classes.add(cls);
+                                        if (annotationClass==null)
+                                        {
+                                            classes.add(cls);
+                                        } else
+                                        {
+                                            Class<Annotation>  annotation = (Class<Annotation>)annotationClass;
+                                            if (cls.getAnnotation(annotation)!=null)
+                                            {
+                                                classes.add(cls);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -78,4 +91,7 @@ public class JarScanner implements ScanJar {
         }
         return classes;
     }
+
+
+
 }

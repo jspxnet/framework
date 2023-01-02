@@ -8,14 +8,12 @@
 
 package com.github.jspxnet.sober.dialect;
 
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
-
-
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.InputStream;
 import java.sql.*;
 import java.util.Date;
@@ -70,8 +68,81 @@ public class SqliteDialect extends Dialect {
         put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
         put(char.class.getName(), "${" + COLUMN_NAME + "} char <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
+        put(SQL_TABLE_NAMES, "SELECT tbl_name FROM sqlite_master WHERE type = 'table'");
+
         put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + "}");
+
         put(FUN_TABLE_EXISTS, "SELECT COUNT(1) AS NUM FROM sqlite_master WHERE type='table' AND name='${" + KEY_TABLE_NAME + "}'");
+
+        //创建索引
+        put(SQL_CREATE_TABLE_INDEX, "CREATE INDEX ${"+KEY_INDEX_NAME+"} ON ${" + KEY_TABLE_NAME + "}(${"+KEY_INDEX_FIELD+"})");
+
+        put(SQL_ADD_COLUMN, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD COLUMN ${" + COLUMN_NAME + "} ${"+COLUMN_TYPE+"} <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+
+        //sqlite 不能删除字段,不能修复字段
+
+    }
+
+    @Override
+    public String getFieldType(SoberColumn soberColumn) {
+
+        if (ClassUtil.isNumberType(soberColumn.getClassType()))
+        {
+            if (soberColumn.getClassType()==int.class || soberColumn.getClassType()==Integer.class)
+            {
+
+                return "integer";
+            }
+
+            if (soberColumn.getClassType()==long.class || soberColumn.getClassType()==Long.class)
+            {
+                return "integer";
+            }
+
+            if (soberColumn.getClassType()==float.class || soberColumn.getClassType()==Float.class)
+            {
+
+                return "REAL";
+            }
+            if (soberColumn.getClassType()==double.class || soberColumn.getClassType()==Double.class)
+            {
+
+                return "REAL";
+            }
+        }
+        if (soberColumn.getClassType()==boolean.class || soberColumn.getClassType()==Boolean.class)
+        {
+            return "integer";
+        }
+        if (soberColumn.getClassType()==String.class)
+        {
+            if (soberColumn.getLength()<512)
+            {
+                return "varchar("+soberColumn.getLength()+")";
+            }
+            return "text";
+        }
+
+        if (soberColumn.getClassType()==Date.class)
+        {
+            return "datetime";
+        }
+
+        if (soberColumn.getClassType()==Time.class)
+        {
+            return "datetime";
+        }
+
+        if (soberColumn.getClassType()==InputStream.class)
+        {
+            return "blob";
+        }
+
+        if (soberColumn.getClassType()==char.class)
+        {
+            return "char("+soberColumn.getLength()+")";
+        }
+        return "varchar(512)";
     }
 
     @Override

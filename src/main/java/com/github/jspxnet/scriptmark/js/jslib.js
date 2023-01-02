@@ -154,7 +154,7 @@ String.prototype.toInt = function () {
 String.prototype.toNumber = function (dec) {
     var f = this;
     if (dec <= 0) return parseInt(this);
-    var result = parseInt(this) + (dec == 0 ? "" : StringUtil.DOT);
+    var result = parseInt(this) + (dec == 0 ? "" : ".");
     f -= parseInt(f);
     if (f == 0)
         for (var i = 0; i < dec; i++) result += '0';
@@ -882,6 +882,9 @@ Object.prototype.show = function (sel) {
 };
 Object.prototype.toBoolean = function () {
     return converter.toBoolean(this);
+};
+Object.prototype.toString = function () {
+    return converter.toJson(this);
 };
 //--------------------------------------全局函数
 //判断是否为空

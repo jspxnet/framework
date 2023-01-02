@@ -22,6 +22,8 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +97,7 @@ public class RestoreAction extends ActionSupport {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notDataFind));
             return;
         }
-
+        HttpServletRequest request = getRequest();
         if (StringUtil.isNull(namespace) || "auto".equalsIgnoreCase(namespace)) {
             String licenseVersion = getEnv(Environment.versionType);
             namespace = Environment.versionEnterprise.equalsIgnoreCase(licenseVersion) ? request.getServerName() : null;
@@ -120,7 +122,7 @@ public class RestoreAction extends ActionSupport {
 
     @Operate(caption = "备份数据")
     public void backup() throws Exception {
-
+        HttpServletRequest request = getRequest();
         if (StringUtil.isNull(namespace) || "auto".equalsIgnoreCase(namespace)) {
             String licenseVersion = getEnv(Environment.versionType);
             namespace = Environment.versionEnterprise.equalsIgnoreCase(licenseVersion) ? request.getServerName() : null;

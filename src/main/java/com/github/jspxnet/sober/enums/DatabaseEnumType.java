@@ -1,6 +1,7 @@
 package com.github.jspxnet.sober.enums;
 
 import com.github.jspxnet.enums.EnumType;
+import com.github.jspxnet.utils.ArrayUtil;
 
 /**
  * 数据库类型
@@ -8,7 +9,7 @@ import com.github.jspxnet.enums.EnumType;
 public enum  DatabaseEnumType implements EnumType {
 
     //枚举
-    UNKNOWN(0,"General"),
+    General(0,"General"),
 
     MYSQL(1,"MySQL"),
 
@@ -32,9 +33,7 @@ public enum  DatabaseEnumType implements EnumType {
 
     SQLITE(10,"Sqlite"),
 
-    SMALLDB(11,"Smalldb"),
-
-    GENERAL(100,"General");
+    SMALLDB(11,"Smalldb");
 
     final private int value;
     final private String name;
@@ -50,7 +49,7 @@ public enum  DatabaseEnumType implements EnumType {
                 return c;
             }
         }
-        return DatabaseEnumType.UNKNOWN;
+        return DatabaseEnumType.General;
     }
 
     static public DatabaseEnumType find(String name) {
@@ -59,7 +58,7 @@ public enum  DatabaseEnumType implements EnumType {
                 return c;
             }
         }
-        return DatabaseEnumType.UNKNOWN;
+        return DatabaseEnumType.General;
     }
 
     static public boolean inArray(DatabaseEnumType[] enumTypes,String name) {
@@ -75,6 +74,14 @@ public enum  DatabaseEnumType implements EnumType {
         return false;
     }
 
+    static public String[] getNameList()
+    {
+        String[] array = null;
+        for (DatabaseEnumType c : DatabaseEnumType.values()) {
+            array = ArrayUtil.add(array,c.name);
+        }
+        return array;
+    }
 
     @Override
     public int getValue() {

@@ -11,10 +11,13 @@ package com.github.jspxnet.component.zhex.bg2big5;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.io.IoUtil;
+import com.github.jspxnet.io.StringInputStream;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.util.Objects;
 
@@ -33,9 +36,9 @@ import java.util.Objects;
 
 @Slf4j
 public class GB2Big5 {
-    private final static String zhtwusedFile = "gbbig5word.txt";
-    private final static String gb2Big5File = "gb-big5.txt";
-    private final static String big52gb2File = "big5-gb.txt";
+    private final static String ZHTWUSED_FILE = "gbbig5word.txt";
+    private final static String GB2_BIG5_FILE = "gb-big5.txt";
+    private final static String BIG52GB2_FILE = "big5-gb.txt";
 
     private static byte[] b_big5Table;
     private static byte[] b_gbTable = null;
@@ -135,13 +138,13 @@ public class GB2Big5 {
         twZhUsedMap.setKeySplit(StringUtil.EQUAL);
         twZhUsedMap.setLineSplit(StringUtil.CRLF);
 
-        InputStream inputStream = GB2Big5.class.getResourceAsStream(zhtwusedFile);
+        InputStream inputStream = GB2Big5.class.getResourceAsStream(ZHTWUSED_FILE);
         if (inputStream==null)
         {
-            inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +zhtwusedFile);
+            inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +ZHTWUSED_FILE);
         }
         if (inputStream == null) {
-            File file = EnvFactory.getFile(zhtwusedFile);
+            File file = EnvFactory.getFile(ZHTWUSED_FILE);
             if (file != null) {
                 try {
                     inputStream = new FileInputStream(file);
@@ -158,15 +161,19 @@ public class GB2Big5 {
             }
         }
 
-        inputStream = GB2Big5.class.getResourceAsStream(gb2Big5File);
+        inputStream = GB2Big5.class.getResourceAsStream(GB2_BIG5_FILE);
         if (inputStream==null)
         {
-            inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +gb2Big5File);
+            inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +GB2_BIG5_FILE);
+        }
+        if (inputStream==null)
+        {
+            inputStream = GB2Big5.class.getResourceAsStream("/reslib/table/" +GB2_BIG5_FILE);
         }
         if (inputStream==null)
         {
             try {
-                File file = new File(System.getProperty("user.dir"),"/reslib/table/" +gb2Big5File);
+                File file = new File(System.getProperty("user.dir"),"/reslib/table/" +GB2_BIG5_FILE);
                 if (FileUtil.isFileExist(file))
                 {
                     inputStream = new FileInputStream(file);
@@ -178,11 +185,11 @@ public class GB2Big5 {
         }
 
         if (inputStream == null) {
-            File file = EnvFactory.getFile(gb2Big5File);
+            File file = EnvFactory.getFile(GB2_BIG5_FILE);
             if (FileUtil.isFileExist(file)) {
                 try {
-                    inputStream = new FileInputStream(file);
-                } catch (FileNotFoundException e) {
+                    inputStream = new StringInputStream(IoUtil.autoReadText(file));
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -191,18 +198,18 @@ public class GB2Big5 {
             b_gbTable = getBytesFromFile(inputStream);
         }
 
-        inputStream = GB2Big5.class.getResourceAsStream(big52gb2File);
+        inputStream = GB2Big5.class.getResourceAsStream(BIG52GB2_FILE);
         if (inputStream==null)
         {
-            inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +big52gb2File);
+            inputStream = GB2Big5.class.getResourceAsStream("/resources/reslib/table/" +BIG52GB2_FILE);
         }
         if (inputStream==null)
         {
-            File file = new File(System.getProperty("user.dir"),"/reslib/table/" +big52gb2File);
+            File file = new File(System.getProperty("user.dir"),"/reslib/table/" +BIG52GB2_FILE);
             if (FileUtil.isFileExist(file)) {
                 try {
 
-                    inputStream = new FileInputStream( new File(System.getProperty("user.dir"),"/reslib/table/" +big52gb2File));
+                    inputStream = new FileInputStream( new File(System.getProperty("user.dir"),"/reslib/table/" +BIG52GB2_FILE));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -210,18 +217,19 @@ public class GB2Big5 {
         }
 
         if (inputStream == null) {
-            File file = EnvFactory.getFile(big52gb2File);
+            File file = EnvFactory.getFile(BIG52GB2_FILE);
             if (file != null) {
                 try {
-                    inputStream = new FileInputStream(file);
-                } catch (FileNotFoundException e) {
+
+                    inputStream = new StringInputStream(IoUtil.autoReadText(file));
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
         b_big5Table = getBytesFromFile(inputStream);
         if (null == b_gbTable) {
-            log.error("No gb table can be load:{}",big52gb2File);
+            log.error("No gb table can be load:{}",BIG52GB2_FILE);
         }
         if (null == b_big5Table) {
             log.error("No big5 table can be load:{}",b_big5Table);

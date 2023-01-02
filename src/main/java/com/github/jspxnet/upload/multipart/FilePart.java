@@ -13,6 +13,7 @@
 
 package com.github.jspxnet.upload.multipart;
 
+import com.github.jspxnet.utils.StreamUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.io.File;
@@ -61,17 +62,6 @@ public class FilePart extends Part {
      */
     private FileRenamePolicy policy;
 
- /*
-    private UploadStats.FileStats fileStats;
-    public UploadStats.FileStats getFileStats() {
-        return fileStats;
-    }
-
-    public void setFileStats(UploadStats.FileStats fileStats) {
-        this.fileStats = fileStats;
-    }
-
-  */
 
     /**
      * Construct a file part; this is called by the parser.
@@ -209,7 +199,7 @@ public class FilePart extends Part {
      * @return number of bytes written.
      * @throws IOException if an input or output exception has occurred.
      */
-    public long writeTo(OutputStream out) throws IOException {
+  /*  public long writeTo(OutputStream out) throws IOException {
         long size = 0;
         // Only do something if this troop contains a file
         if (fileName != null) {
@@ -217,7 +207,7 @@ public class FilePart extends Part {
             size = write(out);
         }
         return size;
-    }
+    }*/
 
     /**
      * Internal method transfer write this file part; doesn't check transfer see
@@ -234,7 +224,7 @@ public class FilePart extends Part {
         }
         long size = 0;
         int read;
-        byte[] buf = new byte[8 * 1024];
+        byte[] buf = new byte[10 * 1024];
         while ((read = partInput.read(buf)) != -1) {
             out.write(buf, 0, read);
             size += read;
@@ -249,6 +239,6 @@ public class FilePart extends Part {
      */
     @Override
     public boolean isFile() {
-        return true;
+        return partInput!=null;
     }
 }

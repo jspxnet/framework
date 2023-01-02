@@ -35,6 +35,7 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,7 +60,7 @@ import java.nio.file.Paths;
 public class DownloadFileView extends ActionSupport {
     private String[] stopArray = new String[]{"sourceforge.net", "xunlei", "flashget", "dirbuster", "nikto", "sqlmap", "whatweb", "openvas", "jbrofuzz", "libwhisker", "webshag", "baiduspider", "googlebot", "yahoo", "msnbot", "scooter", "docin", "douban", "eapoo", "doc88", "baidu", "renrendoc"};
     final private static int BUFFER_SIZE = 1024;
-    final private static float version = StringUtil.toFloat(System.getProperty("java.vm.specification.version"));
+
     private static int downloadUser = 0;
 
     final private static String NAME_TYPE_ID = "id";
@@ -99,6 +100,7 @@ public class DownloadFileView extends ActionSupport {
     @Override
     public String execute() throws Exception {
         AssertException.isNull(uploadFileDAO,"uploadFileDAO没有配置");
+        HttpServletRequest request = getRequest();
         if (RequestUtil.isPirated(request)) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notAllowedExternalLinks));
             return NONE;
@@ -164,7 +166,7 @@ public class DownloadFileView extends ActionSupport {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.fileNotFind) + "," + uploadFile.getFileName());
             boolean debug = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.DEBUG);
             if (debug) {
-                TXWebUtil.print(language.getLang(LanguageRes.fileNotFind) + "," + fileName, WebOutEnumType.HTML.getValue(), response);
+                TXWebUtil.print(language.getLang(LanguageRes.fileNotFind) + "," + fileName, WebOutEnumType.HTML.getValue(), getResponse());
             } else {
                 addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.fileNotFind));
             }
@@ -197,47 +199,10 @@ public class DownloadFileView extends ActionSupport {
             uploadFileDAO.save(downloadFileClient);
         }
 
+        HttpServletResponse response = getResponse();
         String fileType = FileUtil.getTypePart(fileName.getName());
-        String contentType = StringUtil.empty;
-        if (version >= 1.7) {
-            contentType = Files.probeContentType(Paths.get(fileName.getAbsolutePath()));
-        } else {
-            //为了兼容 jdk 1.6
-            if ("mp4".equalsIgnoreCase(fileType)) {
-                contentType = "video/mpeg4";
-            } else if ("bt".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-bittorrent";
-            } else if ("swftools".equalsIgnoreCase(fileType)) {
-                contentType = "application/swftools";
-            } else if ("xls".equalsIgnoreCase(fileType)) {
-                contentType = "application/vnd.ms-excel";
-            } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
-                contentType = "application/msword";
-            } else if ("mdb".equalsIgnoreCase(fileType)) {
-                contentType = "application/msaccess";
-            } else if ("ppt".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-ppt";
-            } else if ("xml".equalsIgnoreCase(fileType)) {
-                contentType = "application/xml";
-            } else if ("txt".equalsIgnoreCase(fileType) || "htm".equalsIgnoreCase(fileType) || "html".equalsIgnoreCase(fileType)) {
-                contentType = "text/html";
-            } else if ("zip".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-zip-compressed";
-            } else if ("rar".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-rar-compressed";
-            } else if (FileSuffixUtil.isImageSuffix(fileType)) {
-                contentType = "image/" + fileType;
-            } else if ("js".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-javascript";
-            } else {
-                contentType = "application/msword";
-            }
-        }
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
+        String contentType = FileUtil.getContentType(fileName);
         response.reset();
-
         response.setHeader("framework", Environment.frameworkName + " " + Environment.VERSION);
         response.setContentType(contentType);
         response.setBufferSize(BUFFER_SIZE);
@@ -272,6 +237,7 @@ public class DownloadFileView extends ActionSupport {
     }
 
     private void singleDownFile(File file) throws IOException {
+        HttpServletResponse response = getResponse();
         ServletOutputStream out = response.getOutputStream();
         FileInputStream fin = new FileInputStream(file);
         byte[] bytes = new byte[BUFFER_SIZE];
@@ -296,7 +262,8 @@ public class DownloadFileView extends ActionSupport {
     private void manyDownFile(File file)  {
         long l = file.length();
         long p = 0;
-
+        HttpServletResponse response = getResponse();
+        HttpServletRequest request = getRequest();
         response.setHeader(RequestUtil.requestAcceptRanges, "bytes");
         if (request.getHeader("Range") != null) {
             response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);

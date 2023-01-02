@@ -330,6 +330,8 @@ public class SM2 {
         return ZA;
     }
 
+
+
     /**
      * 签名
      *
@@ -338,7 +340,8 @@ public class SM2 {
      * @param keyPair  签名方密钥对
      * @return 签名
      */
-    public Signature sign(byte[] userId, byte[] idaBytes, KeyPairGen keyPair) {
+    public Signature sign(byte[] userId, byte[] idaBytes, KeyPairGen keyPair)
+    {
         byte[] ZA = ZA(idaBytes, keyPair.getPublicKey());
         byte[] M_ = join(ZA, userId);
         BigInteger e = new BigInteger(1, sm3hash(M_));
@@ -618,6 +621,12 @@ public class SM2 {
 
     public static void main(String[] args) throws UnsupportedEncodingException {
 
+        //头信息
+        String SM2_KEY_TITLE = "3059301306072a8648ce3d020106082a811ccf5501822d03420004";
+
+        //签名信息用户
+        String USER_ID = "1234567812345678";
+
         SM2 sm02 = new SM2();
         // BigInteger px = new BigInteger(
         // "0AE4C779 8AA0F119 471BEE11 825BE462 02BB79E2 A5844495 E97C04FF
@@ -636,6 +645,7 @@ public class SM2 {
         // sm02.exportPublicKey(publicKey, "E:/publickey.pem");
         // sm02.exportPrivateKey(privateKey, "E:/privatekey.pem");
         KeyPairGen aKeyPair = sm02.generateKeyPair();
+
         System.out.println("-----------------公钥加密与解密-----------------");
         byte[] data = sm02.encrypt("测试加密aaaaaaaaaaa123aabb", aKeyPair.getPublicKey());
         System.out.print("密文:");
@@ -643,8 +653,9 @@ public class SM2 {
         System.out.println("解密后明文:" + sm02.decrypt(data, aKeyPair.getPrivateKey()));
 
         System.out.println("-----------------签名与验签-----------------");
-        byte[] IDA = "Heartbeats".getBytes(StandardCharsets.UTF_8);
-        byte[] M = "chenYuan".getBytes(StandardCharsets.UTF_8);
+
+        byte[] IDA = SM2_KEY_TITLE.getBytes(StandardCharsets.UTF_8);
+        byte[] M = USER_ID.getBytes(StandardCharsets.UTF_8);
         Signature signature = sm02.sign(M, IDA, aKeyPair);
         System.out.println("用户标识:" + new String(IDA, StandardCharsets.UTF_8));
         System.out.println("签名信息:" + new String(M, StandardCharsets.UTF_8));
@@ -655,11 +666,11 @@ public class SM2 {
         byte[] aID = "AAAAAAAAAAAAA".getBytes(StandardCharsets.UTF_8);
         aKeyPair = sm02.generateKeyPair();
         KeyExchange aKeyExchange = new KeyExchange(aID, aKeyPair);
+        TransportEntity entity1 = aKeyExchange.keyExchange_1();
 
         byte[] bID = "BBBBBBBBBBBBB".getBytes(StandardCharsets.UTF_8);
         KeyPairGen bKeyPair = sm02.generateKeyPair();
         KeyExchange bKeyExchange = new KeyExchange(bID, bKeyPair);
-        TransportEntity entity1 = aKeyExchange.keyExchange_1();
         TransportEntity entity2 = bKeyExchange.keyExchange_2(entity1);
         TransportEntity entity3 = aKeyExchange.keyExchange_3(entity2);
         bKeyExchange.keyExchange_4(entity3);

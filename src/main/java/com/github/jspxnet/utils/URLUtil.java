@@ -10,7 +10,6 @@
 package com.github.jspxnet.utils;
 
 import com.github.jspxnet.boot.environment.Environment;
-
 import java.io.File;
 import java.net.*;
 import java.io.UnsupportedEncodingException;
@@ -79,6 +78,10 @@ public final class URLUtil {
             return StringUtil.empty;
         }
         try {
+            if (text.contains("%"))
+            {
+                text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+            }
             return URLDecoder.decode(text, encode);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -180,7 +183,25 @@ public final class URLUtil {
         return url.substring(0, url.lastIndexOf("/") + 1);
     }
 
-
+    /**
+     *
+     * @param url rul
+     * @return 删除文件路径的后缀
+     */
+    public static String deleteUrlSuffix(String url) {
+        if (StringUtil.isNull(url)) {
+            return StringUtil.empty;
+        }
+        int whao = url.indexOf("?");
+        if (whao != -1) {
+            url = url.substring(0, whao);
+        }
+        if (url.contains(StringUtil.DOT))
+        {
+            url = url.substring(0, url.lastIndexOf(StringUtil.DOT));
+        }
+        return url;
+    }
     /**
      * @param str 完整的域名地址
      * @return 返回域名名称部分代http的 例如:http://www.jspx.net
@@ -329,7 +350,7 @@ public final class URLUtil {
             host = new URL("http://" + host).getHost().toLowerCase();
             Pattern pattern = Pattern.compile(patternReg);
             Matcher matcher = pattern.matcher(host);
-            while (matcher.find()) {
+            if (matcher.find()) {
                 return StringUtil.trim(matcher.group());
             }
         } catch (Exception e) {
@@ -349,21 +370,6 @@ public final class URLUtil {
             return false;
         }
         return str.startsWith("http://") || str.startsWith("https://") || str.startsWith("ftp://") || str.startsWith("ftps://") || str.startsWith("file://");
-    }
-
-
-    public static String getRootNamespace(String namespace) {
-        if (namespace == null) {
-            return StringUtil.empty;
-        }
-        if (namespace.startsWith("/"))
-        {
-            namespace = namespace.substring(1);
-        }
-        if (namespace.contains("/")) {
-            return StringUtil.substringBefore(namespace, "/");
-        }
-        return namespace;
     }
 
 
@@ -416,7 +422,61 @@ public final class URLUtil {
         }
         return result;
     }
-/*    public static void main(String[] args) {
-        System.out.println(getFixHessianUrl("/jcompany/menu/tree","http://www.jspxn.net","jcompany","http://127.0.0.1/xxx/222"));
+
+
+    /**
+     * 得到namespace
+     *
+     * @param servletPath 传入 request.servletPath
+     * @return namespace 命名空间
+     */
+    public static String getNamespace(String servletPath) {
+        String namespace = URLUtil.getUrlPath(servletPath);
+        if (namespace.endsWith(StringUtil.ASTERISK)) {
+            namespace = namespace.substring(0, namespace.length() - 1);
+        }
+        if (namespace.endsWith(StringUtil.BACKSLASH)) {
+            namespace = namespace.substring(0, namespace.length() - 1);
+        }
+        if (namespace.startsWith(StringUtil.BACKSLASH)) {
+            namespace = namespace.substring(1);
+        }
+        if (StringUtil.BACKSLASH.equals(namespace)) {
+            return StringUtil.empty;
+        }
+        return namespace;
+    }
+
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @param servletPath 得到方法
+     * @return 得到更目录
+     */
+    public static String getRootNamespace(String servletPath) {
+        if (servletPath == null) {
+            return StringUtil.empty;
+        }
+        if (!servletPath.contains("/")) {
+            return servletPath;
+        }
+        if (servletPath.startsWith("http")) {
+            servletPath = StringUtil.substringAfter(servletPath, URLUtil.getHostUrl(servletPath));
+        }
+        String namespace = URLUtil.getUrlPath(servletPath);
+        if (namespace.startsWith("/")) {
+            namespace = namespace.substring(1);
+        }
+        if (namespace.contains("/")) {
+            return StringUtil.substringBefore(namespace, "/");
+        }
+        return namespace;
+    }
+   /* public static void main(String[] args) {
+        String str = "测试中文1%。此的AA";
+        String out1 = getUrlEncoder(str,"UTF8");
+        System.out.println(out1);
+        System.out.println(getUrlDecoder(out1,"UTF8"));
     }*/
 }

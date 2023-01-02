@@ -29,7 +29,6 @@ public class BundleIpFilter implements Filter {
     private String errorLink = "nopower.jsp";
     private String expression = StringUtil.ASTERISK;
 
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws ServletException, IOException {

@@ -9,8 +9,9 @@
  */
 package com.github.jspxnet.txweb.result;
 
-import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,21 +47,13 @@ public class RpcResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
-        Action action = actionInvocation.getActionProxy().getAction();
-        if (ActionSupport.NONE.equalsIgnoreCase(action.getActionResult()))
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (ActionSupport.NONE.equalsIgnoreCase(actionContext.getActionResult()))
         {
             return;
         }
         //返回类型必须一致
         result = getRocAutoResult(actionInvocation);
-/*
-        Method exeMethod = actionInvocation.getActionProxy().getMethod();
-        if (!exeMethod.getGenericReturnType().equals(Void.TYPE))
-        {
-            result = BeanUtil.getTypeValue(action.getResult(),exeMethod.getGenericReturnType());
-        } else {
-            result = Boolean.TRUE;
-        }*/
     }
 
 }

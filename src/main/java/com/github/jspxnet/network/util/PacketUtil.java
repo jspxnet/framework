@@ -145,7 +145,7 @@ public class PacketUtil {
      * @return 非加密打包
      */
     static public String getEncodePacket(String data) {
-        return getEncodePacket(data, ' ', PacketUtil.Charset_UTF_8, PacketUtil.ZIP, SymmetryEncryptFactory.Encrypt_NONE, "");
+        return getEncodePacket(data, ' ', PacketUtil.Charset_UTF_8, PacketUtil.ZIP, SymmetryEncryptFactory.NONE, "");
     }
 
     /**
@@ -189,7 +189,8 @@ public class PacketUtil {
      * @param secretKey    key
      * @return 解压
      */
-    static public String getEncodePacket(String data, Character exp, Character character, Character zip, Character encryptClass, String secretKey) {
+    static public String getEncodePacket(String data, Character exp, Character character, Character zip, Character encryptClass, String secretKey)
+    {
         if (data == null) {
             data = StringUtil.empty;
         }
@@ -199,7 +200,7 @@ public class PacketUtil {
         }
         byte[] byteData = data.getBytes(charset);
         //压缩
-        if (ZIP.equals(zip)) {
+        if (ZIP.equals(zip) && byteData!=null) {
             byteData = ZipUtil.zip(data.getBytes(charset));
             zip = ZIP;
         } else {
@@ -248,13 +249,11 @@ public class PacketUtil {
         Character encryptClass = data.charAt(1);
         Character character = data.charAt(2);
         String dataHash = data.substring(3, 7);
-
         String dataBase = data.substring(8);
 
         //验证
         String hash = getHash(dataBase);
         if (!dataHash.equalsIgnoreCase(hash)) {
-            data = null;
             throw new Exception("非法的数据格式");
         }
 
@@ -270,16 +269,21 @@ public class PacketUtil {
             }
         }
 
+
         //解缩
         if (ZIP.equals(zip)&&byteData!=null) {
             byteData = ZipUtil.unZip(byteData);
         }
 
         Charset charset = charsetMap.get(character);
-        if (charset == null) {
+        if (charset==null)
+        {
             charset = defaultCharset;
         }
-
+        if (byteData==null)
+        {
+            return StringUtil.empty;
+        }
         //  [Zip-1][Encrypt-1][Charset-1][hash-4][第8位自定义]
         //传输的是base64
         return new String(byteData, charset);

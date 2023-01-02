@@ -31,25 +31,25 @@ public class NettyClientPool {
     /**
      * volatile保持线程之间的可见性，连接池的创建是单例，在这里可加可不加
      */
-    private static NettyClientPool instance = null;
+    private static volatile NettyClientPool instance = null;
     private static ChannelPoolMap<SocketAddress,FixedChannelPool> pools;
     private final Bootstrap bootstrap = new Bootstrap();
     private final NioEventLoopGroup workersGroup;
+    private static final RpcConfig RPC_CONFIG = RpcConfig.getInstance();
 
     private NettyClientPool(){
-        RpcConfig rpcConfig = RpcConfig.getInstance();
-        workersGroup = new NioEventLoopGroup(rpcConfig.getWorkThread(),new DaemonThreadFactory("NettyRpcClientPool"));
+        workersGroup = new NioEventLoopGroup(RPC_CONFIG.getWorkThread(),new DaemonThreadFactory("NettyRpcClientPool"));
         bootstrap.group(workersGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new ClientChannelInitializer())
-                .option(ChannelOption.SO_RCVBUF, rpcConfig.getBufferSize())
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, rpcConfig.getTimeout()* DateUtil.SECOND);
+                .option(ChannelOption.SO_RCVBUF, RPC_CONFIG.getBufferSize())
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, RPC_CONFIG.getTimeout()* DateUtil.SECOND);
 
         pools = new AbstractChannelPoolMap<SocketAddress, FixedChannelPool>() {
             @Override
             protected FixedChannelPool newPool(SocketAddress key) {
                 //lastRecentUsed: true就是后进先出，false 就是先进先出
-                return new FixedChannelPool(bootstrap.remoteAddress(key),new NettyChannelPoolHandler(), ChannelHealthChecker.ACTIVE, FixedChannelPool.AcquireTimeoutAction.NEW, RpcConfig.getInstance().getTimeout()* DateUtil.SECOND, 30, 2147483647, true, false);
+                return new FixedChannelPool(bootstrap.remoteAddress(key),new NettyChannelPoolHandler(), ChannelHealthChecker.ACTIVE, FixedChannelPool.AcquireTimeoutAction.NEW, RPC_CONFIG.getTimeout()* DateUtil.SECOND, 50, 2147483647, true, false);
             }
         };
     }
@@ -95,6 +95,7 @@ public class NettyClientPool {
             {
                 pool.release(channel);
             }
+
         }
     }
 
@@ -107,8 +108,7 @@ public class NettyClientPool {
         ResultHashMap resultHashMap = ResultHashMap.getInstance();
         resultHashMap.put(command.getId(),queue);
         INetCommand.sendEncodePacket(channel,command);
-        RpcConfig rpcConfig = RpcConfig.getInstance();
-        return queue.poll(rpcConfig.getTimeout(), TimeUnit.SECONDS);
+        return queue.poll(RPC_CONFIG.getTimeout(), TimeUnit.SECONDS);
     }
 
     public void shutdown() {

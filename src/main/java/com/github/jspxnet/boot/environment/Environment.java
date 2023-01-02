@@ -34,6 +34,10 @@ public abstract class Environment {
 
     final public static String namespace = "namespace";
 
+    final public static String DEV_CENTER = "devcenter";
+
+    final public static String DYN_OUT = "dynout";
+
     final public static String none = "none";
 
     public static final String defaultValue = "default";
@@ -89,12 +93,18 @@ public abstract class Environment {
 
     final public static String libPath = "libPath";
 
+
     final public static String DEFAULT_LOAD_LOG_NAME = "logback.xml";
 
     final public static String LOG4J_CONFIG_NAME = "log4j2.xml";
 
 
+    //开启日志保存到数据库
+    final public static String DB_LOG = "dbLog";
+
     final public static String DEFAULT_LOG_NAME = "defaultlog.xml";
+
+    final public static String DB_LOG_NAME = "dblog.xml";
 
 
     final public static String webInfPath = "webInfPath";
@@ -125,7 +135,7 @@ public abstract class Environment {
 
     final public static String remote = "remote";
 
-    final public static String frameworkName = "jspx.net framework";
+    final public static String frameworkName = "jspx cloud framework";
 
     final public static String useEvasive = "useEvasive";
 
@@ -138,7 +148,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.53";
+    final static public String VERSION = "6.71";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -162,7 +172,6 @@ public abstract class Environment {
 
     final public static String logFatalFile = "logFatalFile";
 
-
     final public static String log_info_file = "sys_info.log";
 
     final public static String log_error_file = "sys_error.log";
@@ -170,6 +179,8 @@ public abstract class Environment {
     final public static String jspxProperties = "jspxProperties";
 
     final public static String jspx_properties_file = "jspx.properties";
+
+    final public static String jspx_properties_template = "jspx-${active}.properties";
 
     final public static String logInfo = "info";
 
@@ -188,8 +199,6 @@ public abstract class Environment {
     //static public final String uploadFileDAO = "uploadFileDAO";
 
     static public final String UserBundleDAO = "userBundleDAO";
-
-
 
     //文件上传对象Ueditor里边使用
     //static public final String uploadFileAction = "uploadFileAction";
@@ -376,6 +385,9 @@ public abstract class Environment {
 
     static public final String CACHE = "cache";
 
+    static public final String DEFAULT_STORE = "defaultStore";
+
+
 
     static public final String useCache = "useCache";
     static public final String useTxWeb = "useTxWeb";
@@ -492,7 +504,7 @@ public abstract class Environment {
     final public static String jspxNetRocVersion = "3.0";
     final public static String Protocol = "protocol";
     final public static String rocFormat = "format";
-    final public static String rocMethodCall = "methodCall";
+    //final public static String rocMethodCall = "methodCall";
 
     //方法调用方式的 actinName
     final public static String rocId = "id";
@@ -587,16 +599,20 @@ public abstract class Environment {
     static public final String APOLLO_APP_ID = "app.id";
     static public final String APOLLO_BOOTSTRAP_ENABLED = "apollo.bootstrap.enabled";
     static public final String APOLLO_BOOTSTRAP_NAMESPACES = "apollo.bootstrap.namespaces";
+    static public final String APOLLO_BOOTSTRAP_EAGERLOAD_ENABLED = "apollo.bootstrap.eagerLoad.enabled";
     static public final String APOLLO_META = "apollo.meta";
+    //static public final String APOLLO_IP = "apollo.ip";
+
 
     static public final String HTTP_RPC_DOMAIN = "http.rpc.domain";
     static public final String HTTP_RPC_ROUTES = "http.rpc.routes.";
 
     //网络RPC调用服务发现模式
-    static public final String serviceDiscoverMode = "serviceDiscoverMode";
+    static public final String SERVICE_DISCOVER_MODE = "serviceDiscoverMode";
     static public final String consul = "consul";
 
-
+    //是否为嵌入tomcat方式运行
+    static public final String SERVER_EMBED = "server.embed";
     static public final String SERVER_PORT = "server.port";
 
     static public final String SERVER_WEB_PATH = "server.web.path";
@@ -615,11 +631,31 @@ public abstract class Environment {
 
     static public final String SERVER_REDISSON_SESSION_CONFIG = "server.redissonSessionConfig";
 
+    static public final String SERVER_FILTER_MODE = "server.filter.mode";
+
     public final static String SPRING_PATH_SIGN = ".jar!/BOOT-INF/classes!";
 
 
     final public static String forceExit = "forceExit";
 
     final public static String USER_SESSION = "userSession";
+
+    //开发这中心用户
+    public final static String KEY_DCV_ENTER_USER_LIST = "dev_center_user_list";
+
+    //表结构模型缓存
+    public static final String KEY_SOBER_TABLE_CACHE = "sober_table_cache";
+
+
+    //配置文件方式的启动环境
+    public static final String JSPX_ENV_ACTIVE = "jspx.env.active";
+
+    //任务注册中心begin
+    public static final String USE_SCHEDULER_REGISTER = "useSchedulerRegister";
+    public static final String SCHEDULER_REGISTER_URL = "schedulerRegisterUrl";
+    public static final String SCHEDULER_REGISTER_API = "schedulerRegisterApi";
+    public static final String SCHEDULER_REGISTER_NAME = "schedulerRegisterName";
+    public static final String SCHEDULER_REGISTER_TOKEN = "schedulerRegisterToken";
+    //任务注册中心end
 
 }

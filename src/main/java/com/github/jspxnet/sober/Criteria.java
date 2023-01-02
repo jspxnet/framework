@@ -24,13 +24,36 @@ import java.util.Map;
  * Time: 10:10:51
  */
 public interface Criteria extends Serializable {
+    /**
+     *
+     * @return 得到页数
+     */
+    Integer getCurrentPage();
+    /**
+     *
+     * @param criterion 查询条件
+     * @return 查询器
+     */
     Criteria add(Criterion criterion);
-
+    /**
+     *
+     * @param order 排序字段
+     * @return 查询器
+     */
     Criteria addOrder(Order order);
-
+    /**
+     *
+     * @param group 分组字段
+     * @return  查询器
+     */
     Criteria addGroup(String group);
 
     Criteria setProjection(Projection projection);
+    /**
+     *
+     * @return 得到行数
+     */
+    int getTotalCount();
 
     Criteria setTotalCount(Integer totalCount);
 
@@ -42,6 +65,14 @@ public interface Criteria extends Serializable {
 
     Object uniqueResult();
 
+    /**
+     *
+     * @param loadChild 是否载入映射
+     * @param <T> 对象类型
+     * @return 载入单个对象
+     */
+    <T> T objectUniqueResult(boolean loadChild);
+
     boolean booleanUniqueResult();
 
     int intUniqueResult();
@@ -52,12 +83,19 @@ public interface Criteria extends Serializable {
 
     double doubleUniqueResult();
 
-    <T> T objectUniqueResult(boolean loadChild);
-
+    /**
+     * 删除对象
+     *
+     * @param delChild 是否删除映射对象
+     * @return boolean 是否成功
+     */
     int delete(boolean delChild);
-
+    /**
+     * 更新
+     * @param updateMap 参数
+     * @return 是否成功
+     */
     int update(Map<String, Object> updateMap);
-
 
     /**
      *
@@ -78,7 +116,12 @@ public interface Criteria extends Serializable {
      * @return 类实体对象
      */
     <T> T autoSum();
-
+    /**
+     * 对一个类对象求合计并返回
+     * @param fields 需要求和的字段
+     * @param <T> 类型
+     * @return 类实体对象
+     */
     <T> T autoSum(String[] fields);
 
     /**
@@ -87,6 +130,11 @@ public interface Criteria extends Serializable {
      * @return 类实体对象
      */
     <T> T autoAvg();
-
+    /**
+     * 对一个类对象里边的数字求平均数,在保存到对象返回
+     * @param fields 字段
+     * @param <T> 类型
+     * @return 类实体对象
+     */
     <T> T autoAvg(String[] fields);
 }

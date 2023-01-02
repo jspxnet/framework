@@ -9,9 +9,7 @@
  */
 package com.github.jspxnet.scriptmark.load;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.UnicodeReader;
-
 import java.io.*;
 
 /**
@@ -22,7 +20,7 @@ import java.io.*;
  */
 public abstract class AbstractSource extends Source implements java.io.Serializable {
 
-    static final String UNICODE_START1 = "utf";
+
     static final String UNICODE_START2 = "unicode";
 
     private final String name;
@@ -44,17 +42,15 @@ public abstract class AbstractSource extends Source implements java.io.Serializa
 
     @Override
     public Reader getReader() throws IOException {
-        if (encoding != null) {
-            if (encoding.toLowerCase().startsWith(UNICODE_START1) || encoding.toLowerCase().startsWith(UNICODE_START2)) {
-                return new UnicodeReader(getInputStream(), encoding);
-            } else {
-                return new InputStreamReader(getInputStream(), encoding);
-            }
+        if (UNICODE_START2.equalsIgnoreCase(encoding))
+        {
+            return new UnicodeReader(getInputStream(), UNICODE_START2);
         } else {
-            return new InputStreamReader(getInputStream(), Environment.defaultEncode);
+            return new InputStreamReader(getInputStream(), encoding);
         }
     }
 
     protected abstract InputStream getInputStream() throws IOException;
 
+    public abstract boolean isFile();
 }

@@ -20,6 +20,7 @@ import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.model.param.RoleParam;
 import com.github.jspxnet.txweb.support.DefaultTemplateAction;
@@ -27,7 +28,6 @@ import com.github.jspxnet.txweb.table.Member;
 import com.github.jspxnet.txweb.table.MemberRole;
 import com.github.jspxnet.txweb.model.vo.OperateVo;
 import com.github.jspxnet.txweb.table.Role;
-import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.txweb.view.PermissionView;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -410,7 +410,7 @@ public class PermissionManageAction extends PermissionView {
             }
             if (!op.getNamespace().contains("/")) {
                 userOperates = ArrayUtil.add(userOperates, op.getActionMethodId());
-                if (TXWebUtil.defaultExecute.equals(op.getClassMethod()) || "login".equalsIgnoreCase(op.getClassMethod())
+                if (ActionEnv.DEFAULT_EXECUTE.equalsIgnoreCase(op.getClassMethod()) || "login".equalsIgnoreCase(op.getClassMethod())
                         || "exit".equalsIgnoreCase(op.getClassMethod())
                         || DefaultTemplateAction.class.getName().equalsIgnoreCase(op.getClassName())
                         || op.getNamespace().endsWith("validator") ||

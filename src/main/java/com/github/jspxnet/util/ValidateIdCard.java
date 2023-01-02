@@ -1,7 +1,8 @@
 package com.github.jspxnet.util;
 
+import com.github.jspxnet.enums.YesNoEnumType;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -494,13 +495,17 @@ public class ValidateIdCard {
      * @return 生日(yyyyMMdd)
      */
     public static String getBirthByIdCard(String idCard) {
-        Integer len = idCard.length();
+        int len = idCard.length();
         if (len < CHINA_ID_MIN_LENGTH) {
             return null;
         } else if (len == CHINA_ID_MIN_LENGTH) {
             idCard = conver15CardTo18(idCard);
         }
-        return idCard.substring(6, 14);
+        if (idCard!=null)
+        {
+            return idCard.substring(6, 14);
+        }
+        return "00000000";
     }
 
     /**
@@ -788,8 +793,12 @@ public class ValidateIdCard {
     }
 
     public static void main(String[] args) {
-        boolean b = ValidateIdCard.validateCard("P673423(9)");
+
+        System.out.println(ObjectUtil.toString(YesNoEnumType.class.getEnumConstants()));
+
+
+        /*boolean b = ValidateIdCard.validateCard("P673423(9)");
         System.out.println("Hello World1="+ b);
-        System.out.println("Hello World2="+ checkIdCard("P673423(9)"));
+        System.out.println("Hello World2="+ checkIdCard("P673423(9)"));*/
     }
 }

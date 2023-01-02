@@ -10,6 +10,8 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.caucho.quercus.lib.db.ColumnType;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.utils.ObjectUtil;
@@ -82,6 +84,74 @@ public class PostgreSQLDialect extends Dialect {
     }
 
     @Override
+    public String getFieldType(SoberColumn soberColumn) {
+
+        if (ClassUtil.isNumberType(soberColumn.getClassType()))
+        {
+            if (soberColumn.getClassType()==int.class || soberColumn.getClassType()==Integer.class)
+            {
+                if (soberColumn.getLength()<3)
+                {
+                    return "tinyint("+soberColumn.getLength()+")";
+                }
+                return "integer";
+            }
+
+            if (soberColumn.getClassType()==long.class || soberColumn.getClassType()==Long.class)
+            {
+                if (soberColumn.getLength()>8)
+                {
+                    return "bigint("+soberColumn.getLength()+")";
+                }
+                return "bigint(16)";
+            }
+
+            if (soberColumn.getClassType()==float.class || soberColumn.getClassType()==Float.class)
+            {
+                return "real";
+            }
+
+            if (soberColumn.getClassType()==double.class || soberColumn.getClassType()==Double.class)
+            {
+                return "double precision";
+            }
+        }
+        if (soberColumn.getClassType()==boolean.class || soberColumn.getClassType()==Boolean.class)
+        {
+            return "boolean";
+        }
+        if (soberColumn.getClassType()==String.class)
+        {
+            if (soberColumn.getLength()<512)
+            {
+                return "varchar("+soberColumn.getLength()+")";
+            }
+            return "text";
+        }
+
+        if (soberColumn.getClassType()==Date.class)
+        {
+            return "timestamp";
+        }
+
+        if (soberColumn.getClassType()==Time.class)
+        {
+            return "time";
+        }
+
+        if (soberColumn.getClassType()==InputStream.class)
+        {
+            return "bytea";
+        }
+
+        if (soberColumn.getClassType()==char.class)
+        {
+            return "char("+soberColumn.getLength()+")";
+        }
+        return "varchar(512)";
+    }
+
+    @Override
     public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
         int start = end - begin;
         if (start < 0) {
@@ -112,7 +182,6 @@ public class PostgreSQLDialect extends Dialect {
         if ("integer".equals(typeName) || "serial".equals(typeName) || (typeName.contains("int4") || "int".equals(typeName) || (typeName.contains("number")) && colSize < 12) || ("fixed".equalsIgnoreCase(typeName) && colSize < 12)) {
             return rs.getInt(index);
         }
-
         ///////长整型
         if ("bigserial".equals(typeName) || "bigint".equals(typeName) || "fixed".equals(typeName)) {
             return rs.getLong(index);
@@ -215,7 +284,6 @@ public class PostgreSQLDialect extends Dialect {
         }
         return rs.getObject(index);
     }
-
 
 
     @Override

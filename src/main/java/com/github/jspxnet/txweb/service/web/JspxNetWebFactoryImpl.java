@@ -6,6 +6,9 @@ import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.action.AuthenticationAction;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.DefultContextHolderStrategy;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.dispatcher.service.RocService;
 import com.github.jspxnet.txweb.dispatcher.service.RsaRocService;
@@ -30,6 +33,7 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 import java.util.Map;
@@ -114,8 +118,10 @@ public class JspxNetWebFactoryImpl extends AuthenticationAction implements WebBe
     @WebMethod
     public void exit() {
         MessageContext messageContext = wsContext.getMessageContext();
-        setRequest((HttpServletRequest) messageContext.get(MessageContext.SERVLET_REQUEST));
-        setResponse((HttpServletResponse) messageContext.get(MessageContext.SERVLET_RESPONSE));
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.setRequest((HttpServletRequest) messageContext.get(MessageContext.SERVLET_REQUEST));
+        actionContext.setResponse((HttpServletResponse) messageContext.get(MessageContext.SERVLET_RESPONSE));
+        HttpSession session = actionContext.getRequest().getSession();
         try {
             if (session != null && session.getAttribute(TXWeb.token) == null) {
                 session.setAttribute(TXWeb.token, token);
@@ -129,8 +135,10 @@ public class JspxNetWebFactoryImpl extends AuthenticationAction implements WebBe
     @WebMethod
     public String getNetPublicKey() {
         MessageContext messageContext = wsContext.getMessageContext();
-        setRequest((HttpServletRequest) messageContext.get(MessageContext.SERVLET_REQUEST));
-        setResponse((HttpServletResponse) messageContext.get(MessageContext.SERVLET_RESPONSE));
+        HttpServletRequest request = (HttpServletRequest) messageContext.get(MessageContext.SERVLET_REQUEST);
+        HttpServletResponse response =  (HttpServletResponse) messageContext.get(MessageContext.SERVLET_RESPONSE);
+
+        DefultContextHolderStrategy.createContext(request,response, TXWebUtil.createEnvironment());
         String publicKeyHost = StringUtil.trim(config.getString(Environment.publicKeyHost));
         if (!IpUtil.interiorly(publicKeyHost, getRemoteAddr())) {
             return language.getLang(LanguageRes.notAllowedIpLimits);
@@ -172,16 +180,20 @@ public class JspxNetWebFactoryImpl extends AuthenticationAction implements WebBe
     @Override
     public String process(String call) {
         MessageContext messageContext = wsContext.getMessageContext();
-        setRequest((HttpServletRequest) messageContext.get(MessageContext.SERVLET_REQUEST));
-        setResponse((HttpServletResponse) messageContext.get(MessageContext.SERVLET_RESPONSE));
+
+
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.setRequest((HttpServletRequest) messageContext.get(MessageContext.SERVLET_REQUEST));
+        actionContext.setResponse((HttpServletResponse) messageContext.get(MessageContext.SERVLET_RESPONSE));
 
         ///////////////////////////////////环境参数 begin
         Map<String, Object> envParams = TXWebUtil.createEnvironment();
         envParams.put(ActionEnv.Key_RealPath, Dispatcher.getRealPath());
-        envParams.put(ActionEnv.Key_Request, request);
-        envParams.put(ActionEnv.Key_Response, response);
+        envParams.put(ActionEnv.Key_Request, actionContext.getRequest());
+        envParams.put(ActionEnv.Key_Response, actionContext.getResponse());
         envParams.put(TXWeb.token, token);
         //setSessionId(sessionId);
+        HttpSession session = actionContext.getRequest().getSession();
         session.setAttribute(TXWeb.token, token);
         ///////////////////////////////////环境参数 end
         ///////////////////读取ajax请求 end
@@ -224,7 +236,7 @@ public class JspxNetWebFactoryImpl extends AuthenticationAction implements WebBe
             //这种方式主要是返回Rsa的结果
             RsaRocService rsaRocService = new RsaRocService();
             try {
-                return rsaRocService.doing(request, response, jsonData.toString());
+                return rsaRocService.doing(actionContext.getRequest(), actionContext.getResponse(), jsonData.toString());
             } catch (Exception e) {
                 e.printStackTrace();
                 return new JSONObject(RocResponse.error(-32700, "Parse error.调用发生异常")).toString(4);
@@ -232,7 +244,7 @@ public class JspxNetWebFactoryImpl extends AuthenticationAction implements WebBe
         } else {
             RocService rocService = new RocService();
             try {
-                return rocService.doing(request, response, jsonData.toString());
+                return rocService.doing(actionContext.getRequest(),actionContext.getResponse(), jsonData.toString());
             } catch (Exception e) {
                 e.printStackTrace();
                 return new JSONObject(RocResponse.error(-32700, "Parse error.调用发生异常")).toString(4);

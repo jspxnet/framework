@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -37,11 +37,11 @@ public class JFTPSClient extends FTPSClient implements IFTPClient {
     public JFTPSClient(int buffer, String encoding, boolean implicit) {
 
         /*
-FTPS协议分两种,
-Explicit和Implicit, 即显示传输和隐式传输。
-显示传输默认使用端口21.
-隐式传输默认使用端口990. 更加安全,jspx.net ftp 服务器只支持这种方式
-隐式传输更安全.
+        FTPS协议分两种,
+        Explicit和Implicit, 即显示传输和隐式传输。
+        显示传输默认使用端口21.
+        隐式传输默认使用端口990. 更加安全,jspx.net ftp 服务器只支持这种方式
+        隐式传输更安全.
          */
         super(implicit);
         super.setControlEncoding(encoding);

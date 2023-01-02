@@ -20,6 +20,8 @@ import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.IRole;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.PermissionDAO;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
@@ -70,10 +72,11 @@ public class UserInterceptor extends InterceptorSupport {
 
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {
-//这里是不需要验证的action
+        //这里是不需要验证的action
+        ActionContext actionContext = ThreadContextHolder.getContext();
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         Action action = actionProxy.getAction();
-        UserSession userSession = onlineManager.getUserSession(action);
+        UserSession userSession = onlineManager.getUserSession(actionContext);
 
 
         String organizeId = action.getString("organizeId", true);
@@ -123,9 +126,9 @@ public class UserInterceptor extends InterceptorSupport {
             return ActionSupport.UNTITLED;
         }
 
-        String method = actionProxy.getMethod().getName();
+        String method = actionContext.getMethod().getName();
         String pathNamespace = action.getEnv(ActionEnv.Key_Namespace);
-        String actionName = actionInvocation.getActionName();
+        String actionName = actionContext.getActionName();
 
         if (permission) {
             if (role.getUserType() < UserEnumType.INTENDANT.getValue()) {

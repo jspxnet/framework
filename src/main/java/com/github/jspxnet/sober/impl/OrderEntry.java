@@ -4,6 +4,9 @@ import com.github.jspxnet.sober.Criteria;
 import com.github.jspxnet.sober.criteria.Order;
 import java.io.Serializable;
 
+/**
+ * @author chenyuan
+ */
 public class OrderEntry implements Serializable {
     private final Order order;
     private final Criteria criteria;

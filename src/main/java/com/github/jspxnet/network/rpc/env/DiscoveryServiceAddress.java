@@ -42,7 +42,7 @@ public  class DiscoveryServiceAddress {
     {
         if (serviceDiscoverMode==null)
         {
-            serviceDiscoverMode =EnvFactory.getEnvironmentTemplate().getString(Environment.serviceDiscoverMode);
+            serviceDiscoverMode =EnvFactory.getEnvironmentTemplate().getString(Environment.SERVICE_DISCOVER_MODE);
             if (StringUtil.isNull(serviceDiscoverMode))
             {
                 serviceDiscoverMode = Environment.defaultValue;

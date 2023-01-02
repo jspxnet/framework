@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.utils;
 
+import com.github.jspxnet.json.JSONArray;
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.scriptmark.parse.html.ATag;
@@ -592,7 +594,7 @@ public final class HtmlUtil {
      * @param html html
      * @return 返回 href 的地址列表,空或者#，或者void 开始的不返回
      */
-    public static String[] getHrefUrl(String html) {
+    public static JSONArray getHrefUrl(String html) {
         HtmlCleaner cleaner = new HtmlCleaner();
         CleanerProperties props = cleaner.getProperties();
         props.setAdvancedXmlEscape(false);
@@ -612,21 +614,67 @@ public final class HtmlUtil {
 
         TagNode node = cleaner.clean(html);
 
-        String[] result = new String[0];
+        JSONArray result = new JSONArray();
 
         TagNode[] tagNodes = node.getAllElements(true); //true 表示所有节点,false 表示第一级
         for (TagNode n : tagNodes) {
             if ("a".equalsIgnoreCase(n.getName())) {
-                String hraf = n.getAttributeByName("href");
-                if (StringUtil.isNull(hraf) || hraf.startsWith("#") || hraf.startsWith("javascript") || hraf.startsWith("mailto")) {
+                String href = n.getAttributeByName("href");
+                if (StringUtil.isNull(href) || href.startsWith("#") || href.startsWith("javascript") || href.startsWith("mailto")) {
                     continue;
                 }
-                result = ArrayUtil.add(result, hraf);
+                JSONObject json = new JSONObject();
+                json.put("href",href);
+                json.put("title",deleteHtml(n.getText().toString(),20,""));
+                result.add(json);
+
             }
         }
         return result;
     }
 
+    /**
+     *
+     * @param html html
+     * @return 返回img src列表
+     */
+    public static JSONArray getImgSrc(String html) {
+        HtmlCleaner cleaner = new HtmlCleaner();
+        CleanerProperties props = cleaner.getProperties();
+        props.setAdvancedXmlEscape(false);
+        props.setRecognizeUnicodeChars(false);
+        props.setTranslateSpecialEntities(false);
+        props.setUseCdataForScriptAndStyle(false); //是否使用 <![CDATA[
+
+        props.setOmitDeprecatedTags(true);
+        props.setOmitXmlDeclaration(true);
+        props.setOmitHtmlEnvelope(true);
+        props.setOmitUnknownTags(true);
+
+        props.setIgnoreQuestAndExclam(true);
+        props.setNamespacesAware(false);
+        props.setTransResCharsToNCR(false);
+        props.setUseEmptyElementTags(false);
+
+        TagNode node = cleaner.clean(html);
+
+        JSONArray result = new JSONArray();
+
+        TagNode[] tagNodes = node.getAllElements(true); //true 表示所有节点,false 表示第一级
+        for (TagNode n : tagNodes) {
+            if ("img".equalsIgnoreCase(n.getName())) {
+                String src = n.getAttributeByName("src");
+                if (StringUtil.isNull(src) || src.startsWith("#")) {
+                    continue;
+                }
+                JSONObject json = new JSONObject();
+                json.put("src",src);
+                json.put("title",deleteHtml(n.getText().toString(),20,""));
+                result.add(json);
+            }
+        }
+        return result;
+    }
     /**
      * html 十进制解码， 就是 html 里边{@code  &#8220; &#8221; &#2699;} 的编码
      *

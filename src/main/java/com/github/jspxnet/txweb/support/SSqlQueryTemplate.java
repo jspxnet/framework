@@ -18,7 +18,6 @@ import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.impl.GenericDAOImpl;
 import com.github.jspxnet.utils.*;
 import com.github.jspxnet.txweb.annotation.TurnPage;
-
 import java.sql.SQLException;
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class SSqlQueryTemplate extends ActionSupport {
 
     private TableModels soberTable = null;
 
-    private SoberSupport genericDAO = new GenericDAOImpl();
+    private final SoberSupport genericDAO = new GenericDAOImpl();
 
     private String linkPage = null;
     //查询字段

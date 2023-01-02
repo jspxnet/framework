@@ -15,7 +15,10 @@ import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.load.Source;
 import com.github.jspxnet.scriptmark.load.StringSource;
 import com.github.jspxnet.txweb.Action;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
+import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.boot.environment.Environment;
@@ -27,7 +30,6 @@ import com.github.jspxnet.scriptmark.util.ScriptMarkUtil;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.utils.StringUtil;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Map;
@@ -49,16 +51,19 @@ public class MarkdownResult extends ResultSupport {
 
     @Override
     public void execute(ActionInvocation actionInvocation) throws Exception {
+
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.setActionResult(ActionSupport.Markdown);
+        HttpServletResponse response = actionContext.getResponse();
         Action action = actionInvocation.getActionProxy().getAction();
-        HttpServletResponse response = action.getResponse();
 
         //浏览器缓存控制begin
-        checkCache(action, response);
+        checkCache(actionContext);
         //浏览器缓存控制end
 
 
         //处理下载情况 begin
-        String disposition = action.getEnv(ActionEnv.CONTENT_DISPOSITION);
+        String disposition = actionContext.getString(ActionEnv.CONTENT_DISPOSITION);
         if (!StringUtil.isNull(disposition)) {
             response.setHeader(ActionEnv.CONTENT_DISPOSITION, disposition);
         }
@@ -126,14 +131,7 @@ public class MarkdownResult extends ResultSupport {
                 response.setCharacterEncoding(tempEncode);
             }
         } else {
-            String encode = Dispatcher.getEncode();
-            if (encode==null)
-            {
-                encode = Environment.defaultEncode;
-            }
-            response.setContentType("text/html; charset=" + encode);
-            response.setCharacterEncoding(encode);
-            action.getRequest().setCharacterEncoding(encode);
+            response.setContentType("text/html; charset=" + Dispatcher.getEncode());
         }
         //请求编码end
 

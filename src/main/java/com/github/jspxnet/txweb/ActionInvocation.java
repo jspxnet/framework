@@ -22,19 +22,9 @@ import java.io.Serializable;
  */
 public interface ActionInvocation extends Serializable {
 
-    boolean isExecuted();
-
     ActionProxy getActionProxy();
 
-    String getResultCode();
-
-    void setResultCode(String resultCode);
-
     String invoke() throws Exception;
-
-    String getActionName();
-
-    String getNamespace();
 
     void executeResult(Result result) throws Exception;
 
@@ -42,4 +32,8 @@ public interface ActionInvocation extends Serializable {
 
     void initAction() throws Exception;
 
+    boolean isExecuted();
+/*
+    @Deprecated
+    String getActionName();*/
 }

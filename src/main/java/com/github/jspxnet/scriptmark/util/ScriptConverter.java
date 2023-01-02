@@ -49,17 +49,17 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ScriptConverter {
 
 
-    final static char[] nameIncertitudeChars = {
+    final static char[] NAME_INCERTITUDE_CHARS = {
             '\\', '/', '\r', '\n', '$', '&', '\'', '(', ')', '&', '#', '!', '=', '\"', '<', '>', '.'
     };
 
 
     final static public String var_converter = "converter";
-    static private ScriptConverter instance = new ScriptConverter();
+    static private final ScriptConverter INSTANCE = new ScriptConverter();
     private static final String[] imgTypes = new String[]{"jpg", "png", "gif", "bmp"};
 
     public static ScriptConverter getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
 
@@ -171,10 +171,12 @@ public class ScriptConverter {
      * @return UBB 代码 转换
      */
     public static String toUbb(String str) {
+
+
         try {
-            return (String) ClassUtil.callStaticMethod(ClassUtil.loadClass("com.github.jspxnet.components.java.jubb.UBBFilter"), "decode", str);
+            return (String) ClassUtil.callStaticMethod(ClassUtil.loadClass("com.github.jspxnet.component.jubb.UBBFilter"), "decode", str);
         } catch (ClassNotFoundException e) {
-            log.error("no fount com.github.jspxnet.components.java.jubb.UBBFilter", e);
+            log.error("no com.github.jspxnet.component.jubb.UBBFilter", e);
         }
         return StringUtil.empty;
     }
@@ -376,7 +378,7 @@ public class ScriptConverter {
 
             }
 
-            StringMap<String, String> stringMap = new StringMap();
+            StringMap<String, String> stringMap = new StringMap<>();
             stringMap.setString(str);
             StringBuilder sb = new StringBuilder();
             for (String key : stringMap.keySet()) {
@@ -432,16 +434,18 @@ public class ScriptConverter {
     }
 
 
-    public static String show(Object obj, String sel, String keyF) {
-        if (keyF == null || "undefined".equalsIgnoreCase(keyF)) {
-            keyF = StringUtil.COLON;
+    public static String show(Object obj, Object selObj, Object key) {
+        if (key == null || "undefined".equalsIgnoreCase(key.toString())) {
+            key = StringUtil.COLON;
         }
-        if (sel == null || "undefined".equalsIgnoreCase(sel)) {
-            sel = StringUtil.SEMICOLON;
-        }
+        String keyF = key.toString();
 
+        if (selObj == null || "undefined".equalsIgnoreCase(selObj.toString())) {
+            selObj = StringUtil.SEMICOLON;
+        }
+        String sel = selObj.toString();
         if (obj instanceof String || obj.getClass().getName().contains("NativeString")) {
-            String str = (String) obj;
+            String str = obj.toString();
             if (isJsonArray(str)) {
                 try {
                     JSONArray jsonArray = JSONArray.parse(str);
@@ -468,11 +472,11 @@ public class ScriptConverter {
                 }
                 return StringUtil.empty;
             }
-            StringMap<String, String> stringMap = new StringMap();
+            StringMap<String, String> stringMap = new StringMap<>();
             stringMap.setString(str);
-            for (String key : stringMap.keySet()) {
-                if (key.equals(sel)) {
-                    return stringMap.get(key);
+            for (String k : stringMap.keySet()) {
+                if (k.equals(sel)) {
+                    return stringMap.getString(k);
                 }
             }
             return StringUtil.empty;
@@ -488,9 +492,9 @@ public class ScriptConverter {
         }
         if (obj instanceof Map) {
             Map stringMap = (Map) obj;
-            for (Object key : stringMap.keySet()) {
-                if (key.equals(sel)) {
-                    return (String) stringMap.get(key);
+            for (Object keyx : stringMap.keySet()) {
+                if (keyx.equals(sel)) {
+                    return (String) stringMap.get(keyx);
                 }
             }
             return StringUtil.empty;
@@ -849,7 +853,7 @@ public class ScriptConverter {
         }
         Action action = (Action) arg[0];
         String className = arg[1].toString();
-        List<Object> list = new ArrayList();
+        List<Object> list = new ArrayList<>();
         if (arg.length > 2) {
             list.addAll(Arrays.asList(arg).subList(2, arg.length));
         }
@@ -919,7 +923,7 @@ public class ScriptConverter {
      * @param field 字段
      * @return 选项
      */
-    public static String getOptions(Class cla, String field) {
+    public static String getOptions(Class<?>cla, String field) {
         List<SoberColumn> soberColumns = AnnotationUtil.getColumnList(cla);
         for (SoberColumn column : soberColumns) {
             if (column.getName().equalsIgnoreCase(field)) {
@@ -936,7 +940,7 @@ public class ScriptConverter {
      * @param clear 清空括号
      * @return 选项
      */
-    public static String getOptions(Class cla, String field, boolean clear) {
+    public static String getOptions(Class<?> cla, String field, boolean clear) {
         String option = getOptions(cla, field);
         if (option.startsWith("(") && option.endsWith(")") && clear) {
             return StringUtil.substringBetween(option, "(", ")");
@@ -970,7 +974,7 @@ public class ScriptConverter {
      * @return 创建一个拼音的ID号，不能保证不重复
      */
     public static String makePinYinName(String txt) {
-        String text = StringUtil.getPolicyName(StringUtil.fullToHalf(txt), 100, nameIncertitudeChars);
+        String text = StringUtil.getPolicyName(StringUtil.fullToHalf(txt), 100, NAME_INCERTITUDE_CHARS);
         text = StringUtil.replace(text, " ", "");
         return getPinYin(text);
     }

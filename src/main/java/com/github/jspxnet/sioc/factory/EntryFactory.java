@@ -22,6 +22,7 @@ import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.sioc.util.Empty;
+import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,6 @@ import java.util.Map;
  */
 @Slf4j
 public final class EntryFactory implements BeanFactory {
-
     private final static Lifecycle LIFE_CYCLE = new LifecycleManager();
     private final static Map<String, BeanElement> INJECT_OBJECTS = new HashMap<>();
     private static IocContext iocContext;
@@ -306,7 +306,6 @@ public final class EntryFactory implements BeanFactory {
                     }
                 } else if (!ref.test()) {
                     method.invoke(o, getBean(beanId, mNamespace));
-
                     setRefField = ArrayUtil.add(setRefField, method.toString());
                 }
             }
@@ -547,7 +546,6 @@ public final class EntryFactory implements BeanFactory {
             if (!beanElement.getNamespace().equalsIgnoreCase(namespace) && Sioc.global.equalsIgnoreCase(beanElement.getNamespace())) {
                 lifecycleObject.setRefNamespace(nameK);
             }
-
             LIFE_CYCLE.put(beanName, lifecycleObject);
             //如果没有就创建
         } catch (Exception e) {
@@ -696,6 +694,10 @@ public final class EntryFactory implements BeanFactory {
         //扫描得到的 begin
         Map<String, String> map = iocContext.getSchedulerMap();
         for (String name : map.keySet()) {
+            if (StringUtil.isNull(name))
+            {
+                continue;
+            }
             Object o = getBean(name, map.get(name));
             if (o != null) {
                 log.info("init Scheduler " + o.getClass());
@@ -708,8 +710,13 @@ public final class EntryFactory implements BeanFactory {
         //扫描注册的bean里边是否存在 begin
         List<BeanElement> elementList = iocContext.getElementList();
         for (BeanElement beanElement : elementList) {
+            if (StringUtil.isNull(beanElement.getClassName()))
+            {
+                continue;
+            }
             try {
                 Class<?> cls = ClassUtil.loadClass(beanElement.getClassName());
+
                 if (AnnotationUtil.hasScheduled(cls)) {
                     Object o = getBean(beanElement.getId(), beanElement.getNamespace());
                     schedulerManager.add(o);

@@ -6,6 +6,7 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -14,15 +15,9 @@ import java.util.function.Predicate;
 @Slf4j
 public class FileScanner implements ScanJar {
 
-    private String defaultClassPath;
+
     private static final String CLASS_SUFFIX = ".class";
-    private static final String[] JUMP_CLASS_LIST = {"Big5", "GB2Big5"};
-
-
-    public String getDefaultClassPath() {
-        return defaultClassPath;
-    }
-
+    private static final String[] JUMP_CLASS_LIST = {"Big5", "GB2Big5","com\\sun\\syndication","com\\github\\jspxnet\\component\\jxls\\MergeCell"};
 
     public FileScanner() {
 
@@ -44,7 +39,7 @@ public class FileScanner implements ScanJar {
     private static class ClassSearcher {
         final private Set<Class<?>> classPaths = new HashSet<>();
 
-        private Set<Class<?>> doPath(File file, String packageName, Predicate<Class<?>> predicate, boolean flag) {
+        private Set<Class<?>> doPath(File file, String packageName, Predicate<Class<?>> predicate, boolean flag,Class<?> annotationClass) {
 
             if (file.isDirectory()) {
                 //文件夹我们就递归
@@ -55,18 +50,29 @@ public class FileScanner implements ScanJar {
 
                 assert files != null;
                 for (File f1 : files) {
-                    doPath(f1, packageName, predicate, false);
+                    doPath(f1, packageName, predicate, false,annotationClass);
                 }
             } else {//标准文件
                 //标准文件我们就判断是否是class文件
-                if (file.getName().endsWith(CLASS_SUFFIX) && !isJumpClass(file.getName())) {
+
+                if (file.getName().endsWith(CLASS_SUFFIX) && !isJumpClass(file.getPath())) {
                     //如果是class文件我们就放入我们的集合中。
                     String className = null;
                     try {
                         className = packageName + StringUtil.DOT + file.getName().substring(0, file.getName().lastIndexOf(StringUtil.DOT));
                         Class<?> clazz = Class.forName(className);
                         if (predicate == null || predicate.test(clazz)) {
-                            classPaths.add(clazz);
+                            if (annotationClass==null)
+                            {
+                                classPaths.add(clazz);
+                            } else
+                            {
+                                Class<Annotation> annotation = ( Class<Annotation>)annotationClass;
+                                if (clazz.getAnnotation(annotation)!=null)
+                                {
+                                    classPaths.add(clazz);
+                                }
+                            }
                         }
                     } catch (Throwable e) {
                         log.info("not class :{}",className,e);
@@ -78,13 +84,19 @@ public class FileScanner implements ScanJar {
         }
     }
 
-
     @Override
     public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath) {
         //先把包名转换为路径,首先得到项目的classpath
         //然后把我们的包名basPack转换为路径名
+        return search( packageName,  predicate,  defaultPath,null);
+    }
+
+    @Override
+    public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath,Class<?> annotationClass) {
+        //先把包名转换为路径,首先得到项目的classpath
+        //然后把我们的包名basPack转换为路径名
         String basePackPath = packageName.replace(StringUtil.DOT, File.separator);
-        return new ClassSearcher().doPath(new File(defaultPath,basePackPath), packageName, predicate, true);
+        return new ClassSearcher().doPath(new File(defaultPath,basePackPath), packageName, predicate, true,annotationClass);
     }
 
 }

@@ -10,15 +10,15 @@ package com.github.jspxnet.txweb.action;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.component.zhex.ChineseAnalyzer;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.io.AbstractRead;
 import com.github.jspxnet.io.ReadPdfTextFile;
 import com.github.jspxnet.io.ReadWordTextFile;
 import com.github.jspxnet.json.JSONArray;
-import com.github.jspxnet.component.zhex.ChineseAnalyzer;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.network.oss.CloudServiceFactory;
 import com.github.jspxnet.network.oss.CloudFileClient;
+import com.github.jspxnet.network.oss.CloudServiceFactory;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.AssertException;
@@ -28,6 +28,7 @@ import com.github.jspxnet.txweb.annotation.MulRequest;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.bundle.Bundle;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
 import com.github.jspxnet.txweb.enums.FileCoveringPolicyEnumType;
 import com.github.jspxnet.txweb.enums.ImageSysEnumType;
@@ -39,15 +40,16 @@ import com.github.jspxnet.txweb.table.CloudFileConfig;
 import com.github.jspxnet.txweb.table.IUploadFile;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.upload.CosMultipartRequest;
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -310,7 +312,7 @@ public class UploadFileAction extends MultipartSupport {
     @Param(request = false)
     @MulRequest(covering = FileCoveringPolicyEnumType.JSPX, saveDirectory = "@saveDirectory", fileTypes = "@fileTypes", maxPostSize = "@maxPostSize")
     public void setMultipartRequest(MultipartRequest multipartRequest) {
-        request = this.multipartRequest = multipartRequest;
+        ThreadContextHolder.getContext().setRequest(multipartRequest);
     }
 
     /**
@@ -371,8 +373,8 @@ public class UploadFileAction extends MultipartSupport {
             json.put("OK", 1);
         }
 
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
-        TXWebUtil.print(json.toString(), contentType, response);
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(getRequest()) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
+        TXWebUtil.print(json.toString(), contentType, getResponse());
     }
 
     @Operate(caption = "秒传")
@@ -412,7 +414,7 @@ public class UploadFileAction extends MultipartSupport {
         }
 
         IUserSession userSession = getUserSession();
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(getRequest()) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
         Object alreadyUploadFile = uploadFileDAO.getForHash(hash);
         IUploadFile checkUploadFile = (IUploadFile) alreadyUploadFile;
         if (useFastUpload && checkUploadFile != null && !StringUtil.isNull(hash) && fileEquals(checkUploadFile.getHash(), hash)) {
@@ -424,7 +426,7 @@ public class UploadFileAction extends MultipartSupport {
             json = getUploadFileInfo(copyUploadFile, chunkJson, getBoolean(THUMBNAIL_VAR_NAME), uploadFileDAO.getNamespace(),
                     language.getLang(LanguageRes.success));
         }
-        TXWebUtil.print(json.toString(), contentType, response);
+        TXWebUtil.print(json.toString(), contentType, getResponse());
 
     }
 
@@ -477,8 +479,8 @@ public class UploadFileAction extends MultipartSupport {
             json.put(Environment.message, "chunk upload " + language.getLang(LanguageRes.success));
         }
         //兼容 plupload  end
-        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
-        TXWebUtil.print(json.toString(), contentType, response);
+        int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(getRequest()) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
+        TXWebUtil.print(json.toString(), contentType, getResponse());
     }
 
 
@@ -500,12 +502,14 @@ public class UploadFileAction extends MultipartSupport {
             printErrorInfo("DAO配置错误");
             return NONE;
         }
+        HttpServletRequest request = getRequest();
         //验证环境
-        if (multipartRequest == null && !RequestUtil.isMultipart(request) && !response.isCommitted()) {
+        if (request != null && !RequestUtil.isMultipart(request)) {
             printErrorInfo(language.getLang(LanguageRes.uploadRequestError));
             return NONE;
         }
 
+        MultipartRequest multipartRequest = (MultipartRequest)request;
         if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
         {
             printErrorInfo("没有登陆");
@@ -540,7 +544,7 @@ public class UploadFileAction extends MultipartSupport {
         boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
         Object[] objects = localUploadFile(userSession, thumbnail);
         if (ObjectUtil.isEmpty(objects)) {
-            printErrorInfo("上传失败");
+            printErrorInfo("上传失败",getFieldInfo());
             return NONE;
         }
 
@@ -566,7 +570,7 @@ public class UploadFileAction extends MultipartSupport {
                 setResult(json);
             }
         } else {
-            TXWebUtil.print(json.toString(4), contentType, response);
+            TXWebUtil.print(json.toString(4), contentType, getResponse());
             //其他方式不能释放,否则不会返回
             json.clear();
         }
@@ -574,7 +578,7 @@ public class UploadFileAction extends MultipartSupport {
         if (multipartRequest != null) {
             multipartRequest.destroy();
         }
-        multipartRequest = null;
+
         return NONE;
     }
 
@@ -589,7 +593,7 @@ public class UploadFileAction extends MultipartSupport {
      */
     public Object[] localUploadFile(IUserSession userSession, boolean thumbnail) throws Exception {
         String setupPath = getSetupPath();
-
+        MultipartRequest multipartRequest = (MultipartRequest)getRequest();
         String[] titleArray = multipartRequest.getParameterValues(TITLE_VAR_NAME);
         String[] contentArray = multipartRequest.getParameterValues(CONTENT_VAR_NAME);
 
@@ -598,12 +602,12 @@ public class UploadFileAction extends MultipartSupport {
             index++;
             if (ArrayUtil.inArray(STOP_EXS, uf.getFileType(), true)) {
                 FileUtil.delete(uf.getFile());
-                printErrorInfo(language.getLang(LanguageRes.notAllowedFileType) + StringUtil.COLON + uf.getFileType(), null);
+                addFieldInfo(Environment.warningInfo,language.getLang(LanguageRes.notAllowedFileType) + StringUtil.COLON + uf.getFileType());
                 return null;
             }
             if (!uf.isUpload()) {
                 FileUtil.delete(uf.getFile());
-                printErrorInfo(language.getLang(LanguageRes.notAllowedFileTypeOrUploadError), null);
+                addFieldInfo(Environment.warningInfo,language.getLang(LanguageRes.notAllowedFileTypeOrUploadError));
                 return null;
             }
             //分片上传
@@ -620,7 +624,7 @@ public class UploadFileAction extends MultipartSupport {
 
             if (!uf.moveToTypeDir()) {
                 //没有移动成功的文件
-                printErrorInfo(language.getLang(LanguageRes.folderWriteError), null);
+                addFieldInfo(Environment.warningInfo,language.getLang(LanguageRes.folderWriteError));
                 return null;
             }
 
@@ -1015,10 +1019,8 @@ public class UploadFileAction extends MultipartSupport {
      * @param info     打印错误信息
      * @param valueMap 其他数据
      */
-    protected void printErrorInfo(String info, Map<String, Object> valueMap) {
-        if (response.isCommitted()) {
-            return;
-        }
+    protected void printErrorInfo(String info, Map<String, ?> valueMap) {
+
         JSONObject json = new JSONObject();
         json.put("OK", YesNoEnumType.NO.getValue());
         json.put("repair", false);
@@ -1035,8 +1037,8 @@ public class UploadFileAction extends MultipartSupport {
         }
         json.put(Environment.message, info);
         if (!editorUpload) {
-            int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(request) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
-            TXWebUtil.print(json.toString(), contentType, response);
+            int contentType = getInt(CONTENT_TYPE_VAR_NAME, RequestUtil.isLowIe(getRequest()) ? WebOutEnumType.HTML.getValue() : WebOutEnumType.JSON.getValue());
+            TXWebUtil.print(json.toString(), contentType, getResponse());
         }
     }
 

@@ -10,9 +10,12 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.Date;
 
@@ -76,6 +79,19 @@ public class MySQLDialect extends Dialect {
         put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX `${"+KEY_INDEX_NAME+"}`(${"+KEY_INDEX_FIELD+"})");
 
 
+        //<#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'
+        //添加字段
+        put(SQL_ADD_COLUMN, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` ADD COLUMN `${" + COLUMN_NAME + "}` ${"+COLUMN_TYPE+"} <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}' <#if where=" + OLD_COLUMN + ">AFTER '${" + OLD_COLUMN + "}'</#if>");
+
+        put(SQL_MODIFY_COLUMN, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` MODIFY COLUMN `${" + COLUMN_NAME + "}` ${"+COLUMN_TYPE+"} <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+
+        put(SQL_DROP_COLUMN, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` DROP COLUMN `${" + COLUMN_NAME + "}`");
+
+
+        //ALTER TABLE table_name ADD COLUMN column_name VARCHAR(100) DEFAULT NULL COMMENT '新加字段' AFTER old_column;
+
+        //ALTER TABLE TABLE_NAME DROP COLUMN COLUMN_NAME
+
         /*
         判断没有才插入
         INSERT INTO table(field1, field2, fieldn) SELECT 'field1',
@@ -83,8 +99,80 @@ public class MySQLDialect extends Dialect {
                 table WHERE field = ?)
 
          */
-
     }
+
+    @Override
+    public String getFieldType(SoberColumn soberColumn) {
+
+        if (ClassUtil.isNumberType(soberColumn.getClassType()))
+        {
+            if (soberColumn.getClassType()==int.class || soberColumn.getClassType()==Integer.class)
+            {
+                if (soberColumn.getLength()<3)
+                {
+                    return "tinyint("+soberColumn.getLength()+")";
+                }
+                return "integer";
+            }
+
+            if (soberColumn.getClassType()==long.class || soberColumn.getClassType()==Long.class)
+            {
+                if (soberColumn.getLength()>8)
+                {
+                    return "bigint("+soberColumn.getLength()+")";
+                }
+                return "bigint(16)";
+            }
+
+            if (soberColumn.getClassType()==float.class || soberColumn.getClassType()==Float.class||soberColumn.getClassType()==double.class || soberColumn.getClassType()==Double.class)
+            {
+                if (soberColumn.getLength()>8)
+                {
+                    return "decimal("+soberColumn.getLength()+",2)";
+                }
+                return "decimal";
+            }
+        }
+        if (soberColumn.getClassType()==boolean.class || soberColumn.getClassType()==Boolean.class)
+        {
+            return "int(1)";
+        }
+        if (soberColumn.getClassType()==String.class)
+        {
+            if (soberColumn.getLength()<512)
+            {
+                return "varchar("+soberColumn.getLength()+")";
+            }
+            if (soberColumn.getLength()<3000)
+            {
+                return "mediumtext";
+            }
+            return "text";
+        }
+
+        if (soberColumn.getClassType()==Date.class)
+        {
+            return "datetime";
+        }
+
+        if (soberColumn.getClassType()==Time.class)
+        {
+            return "time";
+        }
+
+        if (soberColumn.getClassType()==InputStream.class)
+        {
+            return "LONGBLOB";
+        }
+
+        if (soberColumn.getClassType()==char.class)
+        {
+            return "char("+soberColumn.getLength()+")";
+        }
+        return "varchar(512)";
+    }
+
+
 
     @Override
     public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
@@ -94,13 +182,6 @@ public class MySQLDialect extends Dialect {
         }
         return sql + " limit " + begin + "," + length;
     }
-
-/*
-    @Override
-    public void setPreparedStatementValue(PreparedStatement pstmt, int parameterIndex, Object obj) throws Exception {
-        super.setPreparedStatementValue(pstmt, parameterIndex, obj);
-    }
-*/
 
     @Override
     public boolean supportsSequenceName() {
@@ -147,6 +228,7 @@ public class MySQLDialect extends Dialect {
         try {
             typeName = rs.getMetaData().getColumnTypeName(index).toLowerCase();
             colSize = rs.getMetaData().getColumnDisplaySize(index);
+            //String columnName = rs.getMetaData().getColumnName(index).toLowerCase();
 
             //短断整型
             if (("int".equals(typeName) && colSize < 4) || "tinyint".equalsIgnoreCase(typeName) || "short".equals(typeName) || "smallint".equals(typeName) || "int2".equals(typeName) || ("fixed".equalsIgnoreCase(typeName) && colSize < 4)) {
@@ -197,11 +279,7 @@ public class MySQLDialect extends Dialect {
 
             ////////////时间
             if ("time".equalsIgnoreCase(typeName)) {
-                Time t = rs.getTime(index);
-                if (t == null) {
-                    return null;
-                }
-                return t;
+                return rs.getTime(index);
             }
 
             ///////短字符串

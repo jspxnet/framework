@@ -11,6 +11,8 @@ package com.github.jspxnet.sober.util;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
+import com.github.jspxnet.json.JSONArray;
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.*;
 import com.github.jspxnet.sober.config.SoberCalcUnique;
@@ -20,9 +22,10 @@ import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
+import com.github.jspxnet.sober.model.container.PropertyContainer;
+import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -35,11 +38,12 @@ import java.util.*;
  * Time: 23:49:08
  */
 @Slf4j
-public class AnnotationUtil {
+public final class AnnotationUtil {
 
     private AnnotationUtil() {
 
     }
+
 
     /**
      * postgre 数据库seq修复
@@ -188,12 +192,18 @@ public class AnnotationUtil {
                 soberColumn.setName(field.getName());
                 soberColumn.setClassType(field.getType());
                 soberColumn.setCaption(column.caption());
-                soberColumn.setOption(column.option());
                 soberColumn.setLength(column.length());
                 soberColumn.setDefaultValue(column.defaultValue());
                 soberColumn.setNotNull(column.notNull());
                 soberColumn.setDataType(column.dataType());
                 soberColumn.setHidden(column.hidden());
+                soberColumn.setInput(column.input());
+                if (!NullClass.class.equals(column.enumType()))
+                {
+                    soberColumn.setOption(new JSONArray(column.enumType().getEnumConstants()).toString());
+                } else {
+                    soberColumn.setOption(column.option());
+                }
                 soberColumns.add(soberColumn);
                 Table table = cls.getAnnotation(Table.class);
                 if (field.getType() == String.class && column.length() < 1 && table != null && table.create()) {
@@ -228,6 +238,7 @@ public class AnnotationUtil {
                 soberNexus.setSave(nexus.save());
                 soberNexus.setChain(nexus.chain());
                 soberNexus.setWhere(nexus.where());
+                soberNexus.setTerm(nexus.term());
                 soberNexus.setLength(nexus.length());
                 soberColumns.put(field.getName(), soberNexus);
             }
@@ -279,7 +290,6 @@ public class AnnotationUtil {
         }
         return null;
     }
-
     /**
      * @param cls 类
      * @return 得到的显示名称
@@ -320,13 +330,14 @@ public class AnnotationUtil {
         return StringUtil.empty;
     }
 
+
     /**
-     * 生成 SoberTable
      *
      * @param cls 实体对象
-     * @return SoberTable
+     * @param extend  0:所有;1:可扩展;2:不可扩展
+     * @return 生成 SoberTable
      */
-    public static SoberTable getSoberTable(Class<?> cls) {
+    public static SoberTable getSoberTable(Class<?> cls,int extend) {
         if (cls == null) {
             return null;
         }
@@ -353,7 +364,20 @@ public class AnnotationUtil {
                 soberTable.setIdType(id.type());
             }
         }
-        return soberTable;
+        soberTable.setCanExtend(PropertyContainer.class.isAssignableFrom(cls));
+        if (extend==0)
+        {
+            return soberTable;
+        }
+        if (extend==1 && soberTable.isCanExtend())
+        {
+            return soberTable;
+        }
+        if (extend==2 && !soberTable.isCanExtend())
+        {
+            return soberTable;
+        }
+        return null;
     }
 
     static public String getNexusOrderBy(Object obj, String orderBy) {
@@ -415,7 +439,7 @@ public class AnnotationUtil {
         for (String name : classList) {
             Class<?> cls = ClassUtil.loadClass(name);
             Table table = cls.getAnnotation(Table.class);
-            if (table != null) {
+            if (table != null && table.create()) {
                 result.add(cls);
             }
         }
@@ -427,11 +451,73 @@ public class AnnotationUtil {
                 continue;
             }
             Table table = cls.getAnnotation(Table.class);
-            if (table != null && !result.contains(cls)) {
+            if (table != null && table.create() && !result.contains(cls)) {
                 result.add(cls);
             }
         }
         return result;
     }
+
+    /**
+     *
+     * @param cla 查询过滤出枚举类型列表
+     * @return 得到枚举列表,包括选项
+     */
+    public static Map<String,JSONArray> getEnumType(Class<?> cla)
+    {
+        Map<String,JSONArray> result = new HashMap<>();
+        Field[] fields = ClassUtil.getDeclaredFields(cla);
+        for (Field field:fields)
+        {
+            Column column = field.getAnnotation(Column.class);
+            if (column==null)
+            {
+                continue;
+            }
+            if (StringUtil.isNull(column.option()) && column.enumType()==NullClass.class)
+            {
+                continue;
+            }
+            //1:小;2:中;3:大
+            if (!NullClass.class.getName().equals(column.enumType().getName()))
+            {
+                Object[] enumObj = column.enumType().getEnumConstants();
+                if (!result.containsKey(column.enumType().getSimpleName()))
+                {
+                    result.put(StringUtil.uncapitalize(column.enumType().getSimpleName()),new JSONArray(enumObj));
+                }
+            }
+            else if (!StringUtil.isNull(column.option()))
+            {
+                List<JSONObject> temp = new ArrayList<>();
+                String option = column.option();
+                if (StringUtil.isJsonArray(option))
+                {
+                    JSONArray array = new JSONArray(option);
+                    for (int i=0;i<array.length();i++)
+                    {
+                        JSONObject obj = array.getJSONObject(i);
+                        temp.add(obj);
+                    }
+                } else
+                {
+                    StringMap<String,String> stringMap = new StringMap<>();
+                    stringMap.setKeySplit(StringUtil.COLON);
+                    stringMap.setLineSplit(StringUtil.EQUAL);
+                    stringMap.setString(column.option());
+                    for (String key:stringMap.keySet())
+                    {
+                        JSONObject json = new JSONObject();
+                        json.put("value",key);
+                        json.put("name",stringMap.getString(key));
+                        temp.add(json);
+                    }
+                }
+                result.put(StringUtil.uncapitalize(field.getName())+"EnumType",new JSONArray(temp));
+            }
+        }
+        return result;
+    }
+
 
 }

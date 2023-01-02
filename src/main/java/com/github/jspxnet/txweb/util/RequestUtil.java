@@ -14,16 +14,12 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
-import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.sioc.annotation.RpcClient;
-import com.github.jspxnet.sioc.rpc.RpcClientProxy;
-import com.github.jspxnet.txweb.enums.SafetyEnumType;
+import com.github.jspxnet.sober.model.container.PropertyContainer;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
-import com.github.jspxnet.txweb.support.ActionSupport;
+import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.RequestFacade;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +27,9 @@ import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -156,8 +154,8 @@ public class RequestUtil {
         {
             return false;
         }
-        String requestedWith = request.getHeader("X-Requested-With");
-        return requestedWith != null && requestedWith.toLowerCase().contains("-roc");
+        String requestedWith = request.getHeader("Content-Type");
+        return requestedWith != null && requestedWith.toLowerCase().contains("application/json");
     }
 
     /**
@@ -399,9 +397,6 @@ public class RequestUtil {
             {
                 return def;
             }
-            if (REPAIR_ENCODE && (StringUtil.ASTERISK.equals(REPAIR_REQUEST_METHOD) || StringUtil.indexIgnoreCaseOf(REPAIR_REQUEST_METHOD, request.getMethod()) != -1)) {
-                s = new String(s.getBytes(StandardCharsets.ISO_8859_1), Dispatcher.getEncode());
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -428,7 +423,7 @@ public class RequestUtil {
      * @return 变量数组
      */
     public static String[] getArray(HttpServletRequest request, String name, boolean checkSql) {
-        if (request == null || isRocRequest(request)) {
+        if (request == null) {
             return null;
         }
         String[] s = null;
@@ -753,9 +748,13 @@ public class RequestUtil {
             if (names == null) {
                 return result;
             }
+
+            List<String> propertyList = new ArrayList<>();
+            Collections.addAll(propertyList, names);
             Method[] methods = ClassUtil.getDeclaredSetMethods(cla);
             for (Method method : methods) {
                 String propertyName = method.getName();
+                propertyList.remove(propertyName);
                 if (StringUtil.isNull(propertyName) || propertyName.startsWith("get") || propertyName.startsWith("is")) {
                     continue;
                 }
@@ -777,7 +776,23 @@ public class RequestUtil {
                         BeanUtil.setSimpleProperty(result, method.getName(),BeanUtil.getTypeValue( getString(request, propertyName, safe),type[0]));
                     }
                 }
+
             }
+
+            //扩展方式支持 begin
+            if (result!=null&&!ObjectUtil.isEmpty(propertyList)&& PropertyContainer.class.isAssignableFrom(cla))
+            {
+                PropertyContainer p = (PropertyContainer)result;
+                for (String key:propertyList)
+                {
+                    //判断名称是正常的,又是上边没有放入的,统一在这里放入
+                    if (ValidUtil.isGoodName(key))
+                    {
+                        p.put(key,getString(request, key, safe));
+                    }
+                }
+            }
+            //扩展方式支持 end
         }
         return result;
     }
@@ -1005,20 +1020,22 @@ public class RequestUtil {
      * @return 得到ajax请求的字符串
      * @throws IOException 异常
      */
-    static public String getReader(HttpServletRequest request) throws IOException {
+    static public String getReader(HttpServletRequest request) throws Exception {
         ///////////////////读取ajax请求 begin
         if (isMultipart(request))
         {
             return null;
         }
-        BufferedReader buffer = request.getReader();
-        StringBuilder call = new StringBuilder();
-        String str;
-        while ((str = buffer.readLine()) != null) {
-            call.append(str);
+
+       try (BufferedReader buffer = request.getReader()){
+            StringBuilder call = new StringBuilder();
+            String str;
+            while ((str = buffer.readLine()) != null) {
+                call.append(str);
+            }
+            return call.toString();
         }
-        buffer.close();
-        return call.toString();
+
     }
 
     /**
@@ -1148,7 +1165,6 @@ public class RequestUtil {
         Map<String, Object> resultMap = new HashMap<>();
         if (request==null)
         {
-            log.error("getTransferMap 方法出现 空 request");
             return resultMap;
         }
         Enumeration<String> requestParams = request.getParameterNames();
@@ -1183,26 +1199,40 @@ public class RequestUtil {
         resultMap.put(HEADER+".querystring",request.getQueryString());
         resultMap.put(HEADER+".remoteuser",request.getRemoteUser());
         resultMap.put(HEADER+".requestedsessionid",request.getRequestedSessionId());
+        resultMap.put(HEADER+".requesturi",StringUtil.empty);
+        resultMap.put(HEADER+".requesturl",StringUtil.empty);
+        /*
         if (request instanceof RequestFacade)
+        {
+
+        } else
         {
             resultMap.put(HEADER+".requesturi",StringUtil.empty);
             resultMap.put(HEADER+".requesturl",StringUtil.empty);
-        } else
-        {
-            resultMap.put(HEADER+".requesturi",request.getRequestURI());
-            resultMap.put(HEADER+".requesturl",request.getRequestURL()==null?StringUtil.empty:request.getRequestURL().toString());
-        }
+
+            try {
+                resultMap.put(HEADER+".requesturi",request.getRequestURI());
+                resultMap.put(HEADER+".requesturl",request.getRequestURL()==null?StringUtil.empty:request.getRequestURL().toString());
+            } catch (Exception e) {
+                resultMap.put(HEADER+".requesturi",StringUtil.empty);
+                resultMap.put(HEADER+".requesturl",StringUtil.empty);
+            }
+        }*/
         resultMap.put(HEADER+".pathinfo",request.getPathInfo());
         resultMap.put(HEADER+".pathtranslated",request.getPathTranslated());
-        resultMap.put(HEADER+".servletpath",request.getServletPath());
-        resultMap.put(HEADER+".contextpath",request.getContextPath());
-        resultMap.put(HEADER+".scheme",request.getScheme());
+        resultMap.put(HEADER+".servletpath",Dispatcher.getRealPath());
+        resultMap.put(HEADER+".contextpath",Dispatcher.getRealPath());
         resultMap.put(HEADER+".servername",request.getServerName());
         resultMap.put(HEADER+".serverport",request.getServerPort());
         resultMap.put(HEADER+".localport",request.getLocalPort());
         resultMap.put(HEADER+".remoteport",request.getRemotePort());
         resultMap.put(HEADER+".characterencoding",request.getCharacterEncoding());
-
+        try {
+            resultMap.put(HEADER+".scheme",request.getScheme());
+        } catch (Exception e)
+        {
+            resultMap.put(HEADER+".scheme","http");
+        }
         HttpSession httpSession = request.getSession();
         if (httpSession==null)
         {
@@ -1213,45 +1243,6 @@ public class RequestUtil {
             resultMap.put(SESSION+".id",httpSession.getId());
         }
         return resultMap;
-    }
-
-    /**
-     *
-     * @param o rpc 调用放入token信息
-     * @throws Exception 异常
-     */
-    public static void initRpcRequest(Object o) throws Exception {
-        if (o == null) {
-            return;
-        }
-        // Ref 支持字段方式，和设置方法两种
-        Field[] fields = ClassUtil.getDeclaredFields(o.getClass());
-        if (fields != null) {
-            for (Field field : fields) {
-                if (Modifier.isFinal(field.getModifiers()))
-                {
-                    continue;
-                }
-                Ref ref = field.getAnnotation(Ref.class);
-                if (ref == null) {
-                    continue;
-                }
-                if (field.getType().getAnnotation(RpcClient.class)==null)
-                {
-                    continue;
-                }
-                field.setAccessible(true);
-                Object obj = field.get(o);
-                if (obj instanceof RpcClientProxy && o instanceof ActionSupport)
-                {
-                    RpcClientProxy rpcClientProxy = (RpcClientProxy)obj;
-                    ActionSupport action = (ActionSupport)o;
-                    rpcClientProxy.setRequest(action.getRequest());
-                    rpcClientProxy.setResponse(action.getResponse());
-                }
-            }
-        }
-
     }
 
 }

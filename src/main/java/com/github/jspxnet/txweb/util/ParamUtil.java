@@ -3,6 +3,9 @@ package com.github.jspxnet.txweb.util;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sober.enums.ParamModeType;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
+import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.enums.TalkEnumType;
 import com.github.jspxnet.json.JSONArray;
@@ -16,6 +19,7 @@ import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.annotation.PathVar;
 import com.github.jspxnet.txweb.annotation.Validate;
+import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.model.param.SignParam;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -177,7 +181,7 @@ public final class ParamUtil {
      * @param max    最大
      * @return 是否满足, 在这个范围类返回 true
      */
-    public static boolean isSafe(Number number, int min, long max) {
+    public static boolean isSafe(Number number, long min, long max) {
         if (number == null) {
             return true;
         }
@@ -366,6 +370,8 @@ public final class ParamUtil {
         if (ObjectUtil.isEmpty(pTypes)) {
             return null;
         }
+
+        ActionContext actionContext = ThreadContextHolder.getContext();
         Object[] paramObj = new Object[pTypes.length];
         //i 表示第几个参数，下边完成参数组装
         Parameter[] parameters = exeMethod.getParameters();
@@ -378,7 +384,8 @@ public final class ParamUtil {
                 if (annotation instanceof Param) {
                     isParam = true;
                     Param param = (Param) annotation;
-                    if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType)) {
+                    if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType))
+                    {
                         if (paramsJson != null && paramsJson.containsKey(paramName)) {
                             if (ParamModeType.RocMode.getValue() == param.modeType().getValue()) {
                                 // paramsJson.containsKey(Environment.rocParams)
@@ -425,11 +432,28 @@ public final class ParamUtil {
                         //没有值的保留为空
                         paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
                     }
-                    //-------------
-                    isRequired(action, param, paramName, paramObj[i]);
-                    if (action.hasFieldInfo()) {
-                        return paramObj;
+                    else
+                    {
+                        Operate operate = exeMethod.getAnnotation(Operate.class);
+                        if (operate!=null)
+                        {
+                            //这里主要为了安全,避免参数乱进入
+                            HttpServletRequest request = actionContext.getRequest();
+                            if (RequestUtil.isParameter(request,paramName))
+                            {
+                                boolean checkSql = !SafetyEnumType.NONE.equals(param.level());
+                                if (ClassUtil.isArrayType(pType) || ClassUtil.isCollection(pType))
+                                {
+                                    paramObj[i] = BeanUtil.getTypeValue(RequestUtil.getArray(action.getRequest(),paramName,checkSql), pType);
+                                } else
+                                {
+                                    paramObj[i] = BeanUtil.getTypeValue(RequestUtil.getString(action.getRequest(),paramName,null,checkSql), pType);
+                                }
+                            }
+                        }
                     }
+                    //-------------
+                    //判断是否需要放入默认参数
                     if (paramObj[i] == null && !StringUtil.empty.equals(param.value())) {
                         //放入默认参数
                         paramObj[i] = getDefaultParam(param, pType);
@@ -437,6 +461,15 @@ public final class ParamUtil {
                         paramObj[i] = 0;
                     }
 
+                    if (isPutDefaultValue(paramObj[i] , param,pType))
+                    {
+                        paramObj[i] = getDefaultParam(param, pType);
+                    }
+
+                    isRequired(action, param, paramName, paramObj[i]);
+                    if (action.hasFieldInfo()) {
+                        return paramObj;
+                    }
                 }
 
                 if (annotation instanceof PathVar) {
@@ -448,7 +481,7 @@ public final class ParamUtil {
                     Operate operate = exeMethod.getAnnotation(Operate.class);
                     PathVar pathVar = (PathVar) annotation;
                     if (operate != null && operate.method().contains(pathVar.name())) {
-                        String urlPath = URLUtil.getUrlPath(request.getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
+                        String urlPath = actionContext.getNamespace() + StringUtil.BACKSLASH + actionContext.getActionName();
                         String tempMethodUrl = StringUtil.substringBefore(operate.method(), StringUtil.BACKSLASH);
                         String checkPath = StringUtil.substringAfter(urlPath, tempMethodUrl);
                         String operatePath = StringUtil.substringAfter(operate.method(), tempMethodUrl);
@@ -500,6 +533,8 @@ public final class ParamUtil {
         if (ObjectUtil.isEmpty(pTypes)) {
             return null;
         }
+
+        ActionContext actionContext = ThreadContextHolder.getContext();
         Object[] paramObj = new Object[pTypes.length];
         //i 表示第几个参数，下边完成参数组装
         Parameter[] parameters = exeMethod.getParameters();
@@ -512,6 +547,7 @@ public final class ParamUtil {
                 if (annotation instanceof Param) {
                     isParam = true;
                     Param param = (Param) annotation;
+
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
                         if (ParamModeType.RocMode.getValue() == param.modeType().getValue())
                         {
@@ -555,13 +591,22 @@ public final class ParamUtil {
                             paramObj[i] = BeanUtil.getTypeValue(action.getString(paramName, false), pType);
                         }
                         //放入默认参数
+
+                        if (paramObj[i] == null && !StringUtil.empty.equals(param.value())) {
+                            //放入默认参数
+                            paramObj[i] = getDefaultParam(param, pType);
+                        } else if (paramObj[i] == null && ClassUtil.isBaseNumberType(pType)) {
+                            paramObj[i] = 0;
+                        }
+
+                        if (isPutDefaultValue(paramObj[i] , param,pType))
+                        {
+                            paramObj[i] = getDefaultParam(param, pType);
+                        }
+
                         isRequired(action, param, paramName, paramObj[i]);
                         if (action.hasFieldInfo()) {
                             return paramObj;
-                        }
-                        if (paramObj[i] == null) {
-                            //放入默认参数
-                            paramObj[i] = getDefaultParam(param, pType);
                         }
                     }
                 }
@@ -581,7 +626,7 @@ public final class ParamUtil {
                     }
 
                     if (operate != null && operate.method().contains(pathVarName)) {
-                        String urlPath = URLUtil.getUrlPath(request.getRequestURI()) + action.getEnv(ActionEnv.Key_ActionName);
+                        String urlPath = actionContext.getNamespace() + StringUtil.BACKSLASH + actionContext.getActionName();
                         String tempMethodUrl = StringUtil.substringBefore(operate.method(), VARIABLE_BEGIN);
                         String checkPath = StringUtil.substringAfter(urlPath, tempMethodUrl);
 
@@ -715,7 +760,6 @@ public final class ParamUtil {
         if (!param.required()) {
             return;
         }
-        param.required();
         if (StringUtil.isEmpty(param.value()) && (theParam == null || ((theParam instanceof String) && StringUtil.isEmpty((String)theParam))))
         {
             if (StringUtil.isNull(param.message())) {
@@ -723,6 +767,7 @@ public final class ParamUtil {
             } else {
                 action.addFieldInfo(Environment.warningInfo, param.message());
             }
+            action.setActionResult(ActionSupport.ERROR);
         }
     }
 
@@ -817,17 +862,21 @@ public final class ParamUtil {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                action.addFieldInfo(Environment.warningInfo, "参数类型异常");
+                action.setActionResult(ActionSupport.ERROR);
             }
         }
         if (!ArrayUtil.isEmpty(strEnum) && !ArrayUtil.contains(strEnum, theParam.intValue())) {
             String message = StringUtil.isEmpty(param.message()) ? (paramName + " ,参数不在允许范围") : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
+            action.setActionResult(ActionSupport.ERROR);
             return;
         }
 
         if (theParam.compareTo(new BigDecimal(param.min())) < 0 || theParam.compareTo(new BigDecimal(param.max())) > 0) {
             String message = StringUtil.isEmpty(param.message()) ? (paramName + " ,参数不在允许范围") : param.message();
             action.addFieldInfo(Environment.warningInfo, message);
+            action.setActionResult(ActionSupport.ERROR);
         }
     }
 
@@ -879,9 +928,9 @@ public final class ParamUtil {
             action.addFieldInfo(Environment.errorInfo, msg);
             return false;
         }
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        validatorAction.initEnv(actionContext.getEnvironment(),actionContext.getExeType());
 
-        validatorAction.setRequest(action.getRequest());
-        validatorAction.setResponse(action.getResponse());
         Validator dataTypeValidator = validatorAction.getProcessor();
         dataTypeValidator.setCheckObject(obj);
 
@@ -976,8 +1025,6 @@ public final class ParamUtil {
         SIGN_TYPE_MAP.put("Sm3", "Sm3");
         SIGN_TYPE_MAP.put("sha256", "sha256");
     }
-
-
     /**
      * 创建带参签名的参数字符串
      *
@@ -1040,7 +1087,6 @@ public final class ParamUtil {
             String varsion = json.getString(Environment.rocVersion);
             return varsion != null && varsion.equals(Environment.jspxNetRocVersion);
         }
-
         return false;
     }
 
@@ -1053,10 +1099,7 @@ public final class ParamUtil {
      */
     public static Object getDefaultParam(Param param, Type pType) {
         String value = param.value();
-        if (value == null) {
-            return null;
-        }
-        if (value.contains("${") && value.contains("}")) {
+        if (value != null && value.contains("${") && value.contains("}")) {
             Map<String, Object> valueMap = new HashMap<>();
             valueMap.put("date", new Date());
             valueMap.put("max", param.max());
@@ -1066,4 +1109,51 @@ public final class ParamUtil {
         return BeanUtil.getTypeValue(value, pType);
     }
 
+
+
+    /**
+     *
+     * @param json 请求josn转换为 标准 调用格式
+     * @return 得到标准json
+     */
+    public static JSONObject getRequestStdJson(JSONObject json)
+    {
+        if (json==null)
+        {
+            return new JSONObject();
+        }
+
+        JSONObject dataField = json.getJSONObject(RocHandle.DATA_FIELD);
+        if (!isRocRequest(json))
+        {
+            //spring  转换成老的格式
+            JSONObject jsonData = new JSONObject();
+            JSONObject methodJson = new JSONObject();
+            methodJson.put(Environment.rocParams,json);
+            jsonData.put(Environment.rocMethod, methodJson);
+            jsonData.put(Environment.rocFormat, WebOutEnumType.JSON.getName());
+            jsonData.put(Environment.Protocol,Environment.jspxNetRoc);
+            jsonData.put(RocHandle.DATA_FIELD,dataField);
+            return jsonData;
+        }
+        json.put(RocHandle.DATA_FIELD,dataField);
+        return json;
+    }
+
+    /**
+     * 判断是否放入默认值,判断 param.value() 不为空,就需要放入默认值
+     * 先放入默认值,在设置请求参数
+     * @param obj 对象
+     * @param param  参数注释
+     * @param type  变量类型
+     * @return   判断是否放入默认值
+     */
+    public static boolean isPutDefaultValue(Object obj,Param param,Type type)
+    {
+        if (param==null||StringUtil.empty.equals(param.value()))
+        {
+            return false;
+        }
+        return param.required()&&ClassUtil.isNumberType(type) && obj instanceof Number && !isSafe((Number) obj, param.min(), param.max());
+    }
 }

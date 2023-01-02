@@ -39,5 +39,4 @@ public @interface Ref {
      */
     boolean test() default false; //载入的时候如果为true,并且没有这个对象的时候不报错，否则会报错误
 
-
 }

@@ -30,14 +30,10 @@ public final class ZipUtil {
         if (aData == null) {
             return null;
         }
-        try {
-            ByteArrayOutputStream byteout = new ByteArrayOutputStream();
-            GZIPOutputStream zipout = new GZIPOutputStream(byteout);
+        try (ByteArrayOutputStream byteout = new ByteArrayOutputStream();GZIPOutputStream zipout = new GZIPOutputStream(byteout)){
             zipout.write(aData);
             zipout.finish();
-            byte[] result = byteout.toByteArray();
-            zipout.close();
-            return result;
+            return byteout.toByteArray();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -54,46 +50,17 @@ public final class ZipUtil {
         if (compressed == null) {
             return null;
         }
-        ByteArrayOutputStream out = null;
-        ByteArrayInputStream in = null;
-        GZIPInputStream zin = null;
-        try {
-            out = new ByteArrayOutputStream();
-            in = new ByteArrayInputStream(compressed);
-            zin = new GZIPInputStream(in);
-
-            byte[] buffer = new byte[1024];
-            int offset = -1;
-            while ((offset = zin.read(buffer)) != -1) {
-                out.write(buffer, 0, offset);
-            }
-
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+             ByteArrayInputStream in = new ByteArrayInputStream(compressed);
+             GZIPInputStream zin = new GZIPInputStream(in)
+        )
+        {
+            StreamUtil.copy(zin,out);
+            return out.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (zin != null) {
-                try {
-                    zin.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            return null;
         }
-        return out.toByteArray();
     }
 
 
@@ -149,6 +116,7 @@ public final class ZipUtil {
         if (txt == null) {
             return null;
         }
+
         try {
             return new String(unZip(EncryptUtil.getBase64Decode(txt, EncryptUtil.URL_SAFE + EncryptUtil.NO_WRAP)), Environment.defaultEncode);
         } catch (UnsupportedEncodingException e) {

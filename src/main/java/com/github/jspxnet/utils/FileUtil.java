@@ -49,9 +49,8 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public final class FileUtil {
-    static final private String[] zipFiles = new String[]{".zip!", ".jar!", ".apk!", ".war!", ".jzb!"};
+    static final private String[] ZIP_FILES = new String[]{".zip!", ".jar!", ".apk!", ".war!", ".jzb!"};
 
-    static final private String[] zipEx = new String[]{"zip", "jar", "apk", "war", "jzb"};
     //路径通配符
     static final private String[] pathMarks = {"#", StringUtil.ASTERISK, "?"};
     //缩图文件名称
@@ -93,7 +92,7 @@ public final class FileUtil {
             return false;
         }
         String temp = file.toLowerCase();
-        for (String fileType : zipFiles) {
+        for (String fileType : ZIP_FILES) {
             if (temp.contains(fileType)) {
                 return true;
             }
@@ -403,41 +402,6 @@ public final class FileUtil {
             e.printStackTrace();
         }
         return EncryptUtil.getMd5(value + head + FileUtil.getTypePart(fileName) + fileName.length());
-    }
-
-
-    /**
-     * @param name 文件名称
-     * @return 得到流
-     * @throws IOException 读取异常
-     */
-    static public FileInputStream openInputStream(String name) throws IOException {
-        File file = new File(name);
-        if (!file.isFile()) {
-            throw new IOException(name + " is not a file.");
-        }
-        if (!file.canRead()) {
-            throw new IOException(name + " is not readable.");
-        }
-        return (new FileInputStream(file));
-    }
-
-    /**
-     * @param name 文件名称
-     * @return 输出流
-     * @throws IOException 读取异常
-     */
-    static public FileOutputStream openOutputStream(String name) throws IOException {
-        File file = new File(name);
-        if (file.isDirectory()) {
-            throw new IOException(name + " is a directory.");
-        }
-        if (file.exists()) {
-            if (!file.delete()) {
-                throw new IOException(name + " is not delete file.");
-            }
-        }
-        return (new FileOutputStream(file));
     }
 
     /**
@@ -844,12 +808,10 @@ public final class FileUtil {
      * @return 空目录
      */
     static public boolean isEmptyDirectory(File fileName) {
-
         if (isFileExist(fileName)) {
             return true;
         }
         return Objects.requireNonNull(fileName.listFiles()).length<1;
-
     }
 
     /**
@@ -913,25 +875,6 @@ public final class FileUtil {
                 e.printStackTrace();
             }
         }
-
-       /*
-        try {
-
-            Path apkFile = Paths.get(jarFileName);
-            log.info("1---------Paths.get(jarFileName),jarFileName:{}",jarFileName);
-            ZipFileSystemProvider jarFileSystemProvider = new ZipFileSystemProvider();
-            FileSystem fs = jarFileSystemProvider.newFileSystem(apkFile,null);
-
-            //FileSystem fs = FileSystems.newFileSystem(apkFile, jarFileSystemProvider);
-            log.info("2---------Paths.get(jarFileName),fs:{}",fs);
-            Path dexFile = fs.getPath(entryName);
-            log.info("3---------Paths.get(jarFileName),dexFile:{}",dexFile);
-            return Files.exists(dexFile);
-        } catch (Throwable e) {
-            log.error("Paths.get(jarFileName),jarFileName:{}",jarFileName);
-            e.printStackTrace();
-        }*/
-
     }
 
     /**
@@ -1712,6 +1655,33 @@ public final class FileUtil {
         return false;
     }
 
+    /**
+     * 通配符判断是否相同
+     * @param dir 目录
+     * @param patternName 通配符火文件名
+     * @return 是否下昂痛
+     */
+    public static boolean isPatternEquals(String dir,String patternName)
+    {
+        if (dir==null&&patternName==null)
+        {
+            return true;
+        }
+        if (dir==null)
+        {
+            return false;
+        }
+        String s = patternName.replace(StringUtil.DOT, "#");
+        s = s.replaceAll("#", "\\\\.");
+        s = s.replace('*', '#');
+        s = s.replaceAll("#", ".*");
+        s = s.replace("?", "#");
+        s = s.replaceAll("#", ".?");
+        s = "^" + s + "$";
+        Pattern p = Pattern.compile(s);
+        Matcher fMatcher = p.matcher(dir);
+        return fMatcher.matches();
+    }
 
     /**
      * 模糊（通配符）文件查找程序
@@ -1725,7 +1695,6 @@ public final class FileUtil {
         {
             return new ArrayList<>(0);
         }
-
         if (dir != null && dir.startsWith("file:/")) {
             dir = dir.substring(6);
         }
@@ -1811,22 +1780,30 @@ public final class FileUtil {
             {
                 path = StringUtil.substringBefore(file.getPath(),".jar!") + ".jar";
             }
-            try (JarInputStream zis = new JarInputStream(new FileInputStream(path))) {
-                List<File> list = new ArrayList<>();
-                JarEntry e;
-                while ((e = zis.getNextJarEntry()) != null) {
-                    if (e.isDirectory() || "..\\".equals(e.getName()) || "../".equals(e.getName())) {
-                        continue;
+            if (path.contains("file:"))
+            {
+                path = path.substring(path.indexOf("file:"));
+            }
+
+            if (FileUtil.isFileExist(path))
+            {
+                try (JarInputStream zis = new JarInputStream(new FileInputStream(path))) {
+                    List<File> list = new ArrayList<>();
+                    JarEntry e;
+                    while ((e = zis.getNextJarEntry()) != null) {
+                        if (e.isDirectory() || "..\\".equals(e.getName()) || "../".equals(e.getName())) {
+                            continue;
+                        }
+                        Matcher fMatcher = p.matcher(FileUtil.getFileName(e.getName()));
+                        if (fMatcher.matches()) {
+                            list.add(new File(path + "!/" + e.getName()));
+                        }
                     }
-                    Matcher fMatcher = p.matcher(FileUtil.getFileName(e.getName()));
-                    if (fMatcher.matches()) {
-                        list.add(new File(path + "!/" + e.getName()));
-                    }
+                    zis.closeEntry();
+                    return list;
+                } catch (Exception e) {
+                    log.error("path=" + path + " file=" + file, e);
                 }
-                zis.closeEntry();
-                return list;
-            } catch (Exception e) {
-                log.error("path=" + path + " file=" + file, e);
             }
         } else {
             if (file.isFile()) {
@@ -2499,4 +2476,88 @@ public final class FileUtil {
         }
     }
 
+
+    /**
+     * @param path 目录
+     * @param limit 限制个数
+     * @return 读取特定目录下最新的文件名称
+     */
+    public static List<File> getLatestFileList(File path,int limit) {
+        // 获取最新改动的文件名
+        if (!path.exists())
+        {
+            return new ArrayList<>(0);
+        }
+
+        // 列出该目录下所有文件和文件夹
+        File[] files = path.listFiles();
+        // 按照文件最后修改日期倒序排序
+        if (files==null)
+        {
+            return new ArrayList<>(0);
+        }
+        Arrays.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File file1, File file2) {
+                long result = file2.lastModified() - file1.lastModified();
+                //先将Long的差值算出，然后视该值是否会超越int的最大值，然后返回不同结果
+                return result>=Integer.MAX_VALUE?Integer.MAX_VALUE:(int)result;
+            }
+        });
+        List<File> result = new ArrayList<>();
+        for (int i=0;i<files.length&&result.size()<limit;i++)
+        {
+            result.add(files[i]);
+        }
+        return result;
+    }
+    final private static float JAVA_VERSION = StringUtil.toFloat(System.getProperty("java.vm.specification.version"));
+    public static String getContentType(File file)
+    {
+        if (file==null)
+        {
+            return "text/html";
+        }
+        String fileType = FileUtil.getTypePart(file.getName());
+        String contentType = null;
+        //为了兼容 jdk 1.6
+        if ("mp4".equalsIgnoreCase(fileType)) {
+            contentType = "video/mpeg4";
+        } else if ("bt".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-bittorrent";
+        } else if ("swftools".equalsIgnoreCase(fileType)) {
+            contentType = "application/swftools";
+        } else if ("xls".equalsIgnoreCase(fileType)) {
+            contentType = "application/vnd.ms-excel";
+        } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
+            contentType = "application/msword";
+        } else if ("mdb".equalsIgnoreCase(fileType)) {
+            contentType = "application/msaccess";
+        } else if ("ppt".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-ppt";
+        } else if ("xml".equalsIgnoreCase(fileType)) {
+            contentType = "application/xml";
+        } else if ("txt".equalsIgnoreCase(fileType) || "htm".equalsIgnoreCase(fileType) || "html".equalsIgnoreCase(fileType)) {
+            contentType = "text/html";
+        } else if ("zip".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-zip-compressed";
+        } else if ("rar".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-rar-compressed";
+        } else if (FileSuffixUtil.isImageSuffix(fileType)) {
+            contentType = "image/" + fileType;
+        } else if ("js".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-javascript";
+        } else if (JAVA_VERSION >= 1.7)
+        {
+            try {
+                return Files.probeContentType(Paths.get(file.getPath()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (StringUtil.isNull(contentType)) {
+            contentType = "application/octet-stream";
+        }
+        return contentType;
+    }
 }

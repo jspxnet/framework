@@ -12,6 +12,10 @@ package com.github.jspxnet.txweb.support;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.txweb.*;
+
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
+
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.json.JSONObject;
@@ -48,12 +52,7 @@ import java.util.*;
  */
 public abstract class ActionSupport implements Action {
 
-    final private Map<String, Object> environment = new HashMap<>(20);
-    //fusionCharts 图形文字换行
-    //protected static final String ChartTextWrap = "&#xD;";
-    protected transient HttpSession session = null;
-    protected transient HttpServletRequest request;
-    protected transient HttpServletResponse response;
+
 
     public ActionSupport() {
 
@@ -62,23 +61,25 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public void initialize() {
-        try {
-            RequestUtil.initRpcRequest(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
     }
 
     @Override
     public void destroy() {
-        Iterator<Map.Entry<String, Object>> iterator = this.environment.entrySet().iterator();
-        while(iterator.hasNext()) {
-            Map.Entry<String, Object> entry = iterator.next();
-            String name = entry.getKey();
-            if (!ArrayUtil.inArray(ActionEnv.NO_CLEAN, name, true)) {
-                iterator.remove();
-                ObjectUtil.free(entry.getValue());
+        try {
+            ActionContext actionContext = ThreadContextHolder.getContext();
+            if (actionContext==null)
+            {
+                return;
             }
+            actionContext.clean();
+            actionContext.setResult(null);
+            actionContext.setActionResult(null);
+            actionContext.setRequest(null);
+            actionContext.setResponse(null);
+            actionContext.setExecuted(false);
+        } finally {
+            ThreadContextHolder.clearContext();
         }
     }
 
@@ -109,6 +110,7 @@ public abstract class ActionSupport implements Action {
 
     //这里要放置ajax方式调用出去
 
+    //兼容页面模式用的
     /**
      *
      * @return 配置
@@ -141,7 +143,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String getLocaleName() {
-        return RequestUtil.getLocale(request);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return RequestUtil.getLocale(actionContext.getRequest());
     }
 
     /**
@@ -157,20 +160,32 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String getRootNamespace() {
-        return TXWebUtil.getRootNamespace(getEnv(ActionEnv.Key_Namespace));
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return URLUtil.getRootNamespace(actionContext.getNamespace());
+    }
+
+    @Override
+    public boolean isComponent()
+    {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        Map<String, Object> actionEnv = actionContext.getComponentEnvironment(this.getClass(),this.hashCode());
+        return ActionEnv.COMPONENT_MODEL.equalsIgnoreCase((String)actionEnv.get(ActionEnv.ACTION_RUN_MODEL));
     }
 
     /**
      * @return 得到环境空间
      */
+    @Deprecated
     @Override
     public Map<String, Object> getEnv() {
-        return new HashMap<>(environment);
+        return ThreadContextHolder.getContext().getEnvironment();
     }
 
     @Override
-    public void initEnv(Map<String, Object> paraMap) {
-         environment.putAll(paraMap);
+    public void initEnv(Map<String, Object> paramMap, String exeType) {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.setExeType(exeType);
+        actionContext.getEnvironment().putAll(paramMap);
     }
     /**
      * @param key 放入环境变量
@@ -178,7 +193,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void put(String key, Object obj) {
-        environment.put(key, obj);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.put(key, obj);
     }
 
     /**
@@ -188,7 +204,8 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public boolean containsKey(String key) {
-        return environment.containsKey(key);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return actionContext.containsKey(key);
     }
 
 
@@ -197,18 +214,20 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void setEnv(Map<String, Object> environment) {
-        this.environment.clear();
-        this.environment.putAll(environment);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.getEnvironment().clear();
+        actionContext.getEnvironment().putAll(environment);
     }
 
 
     @Override
     public String getEnv(String keys) {
-        Object o = environment.get(keys);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        String o = actionContext.getString(keys);
         if (o == null) {
             return StringUtil.empty;
         }
-        return o.toString();
+        return o;
     }
 
     /**
@@ -241,12 +260,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public Map<String, String> getFieldInfo() {
-        Map<String, String> fieldErrors = (Map<String, String>) environment.get(ActionEnv.Key_FieldInfo);
-        if (fieldErrors == null) {
-            fieldErrors = new HashMap<>();
-            environment.put(ActionEnv.Key_FieldInfo, fieldErrors);
-        }
-        return fieldErrors;
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return actionContext.getFieldInfo();
     }
 
     /**
@@ -257,12 +272,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void addFieldInfo(String keys, String msg) {
-        Map<String, String> fieldError = (Map<String, String>) environment.get(ActionEnv.Key_FieldInfo);
-        if (fieldError == null) {
-            fieldError = new HashMap<>();
-            environment.put(ActionEnv.Key_FieldInfo, fieldError);
-        }
-        fieldError.put(keys, msg);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.addFieldInfo(keys,msg);
     }
 
     /**
@@ -270,12 +281,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void addFieldInfo(Map<String, String> errors) {
-        Map fieldError = (Map) environment.get(ActionEnv.Key_FieldInfo);
-        if (fieldError == null) {
-            fieldError = new HashMap<String, String>();
-            environment.put(ActionEnv.Key_FieldInfo, errors);
-        }
-        fieldError.putAll(errors);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.addFieldInfo(errors);
     }
 
     /**
@@ -283,8 +290,12 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public boolean hasFieldInfo() {
-        Map<String, String> fieldError = (Map<String, String>) environment.get(ActionEnv.Key_FieldInfo);
-        return fieldError != null && !fieldError.isEmpty();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return false;
+        }
+        return actionContext.hasFieldInfo();
     }
 
 
@@ -295,12 +306,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String getFailureMessage() {
-        Map<String, String> fieldError = (Map<String, String>) environment.get(ActionEnv.Key_FieldInfo);
-        if (fieldError != null && !fieldError.isEmpty()) {
-            Iterator<String> iterator = fieldError.values().iterator();
-            return iterator.next();
-        }
-        return null;
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return actionContext.getFailureMessage();
     }
     ////////////提交错误的时候显示的错误字段信息 end
 
@@ -311,12 +318,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void addActionMessage(String msg) {
-        List<String> actionMsg = (List<String>) environment.get(ActionEnv.Key_ActionMessages);
-        if (actionMsg == null) {
-            actionMsg = new ArrayList<>();
-        }
-        actionMsg.add(msg);
-        environment.put(ActionEnv.Key_ActionMessages, actionMsg);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.addActionMessage(msg);
     }
 
     /**
@@ -324,21 +327,22 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public List<String> getActionMessage() {
-        List<String> list = (List<String>) environment.get(ActionEnv.Key_ActionMessages);
-        if (list == null) {
-            list = new ArrayList<>();
-            environment.put(ActionEnv.Key_ActionMessages, list);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return new ArrayList<>(0);
         }
-        return list;
+        return actionContext.getActionMessage();
     }
 
     @Override
     public String getSuccessMessage() {
-        List<String> list = (List<String>) environment.get(ActionEnv.Key_ActionMessages);
-        if (list != null && !list.isEmpty()) {
-            return list.get(0);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return StringUtil.empty;
         }
-        return null;
+        return actionContext.getSuccessMessage();
     }
 
     /**
@@ -346,8 +350,12 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public boolean hasActionMessage() {
-        List<String> actionMsg = (List<String>) environment.get(ActionEnv.Key_ActionMessages);
-        return actionMsg != null && !actionMsg.isEmpty();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return false;
+        }
+        return actionContext.hasActionMessage();
     }
 
     /**
@@ -355,7 +363,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void setActionLogTitle(String value) {
-        environment.put(ActionEnv.Key_ActionLogTitle, value);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.getEnvironment().put(ActionEnv.Key_ActionLogTitle, value);
     }
 
     /**
@@ -363,7 +372,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String getActionLogTitle() {
-        return (String) environment.get(ActionEnv.Key_ActionLogTitle);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return (String) actionContext.getEnvironment().get(ActionEnv.Key_ActionLogTitle);
     }
 
     /**
@@ -371,7 +381,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void setActionLogContent(Serializable value) {
-        environment.put(ActionEnv.Key_ActionLogContent, value);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.getEnvironment().put(ActionEnv.Key_ActionLogContent, value);
     }
 
     /**
@@ -380,7 +391,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void setOrganizeId(Serializable value) {
-        environment.put(ActionEnv.KEY_organizeId, value);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        actionContext.getEnvironment().put(ActionEnv.KEY_organizeId, value);
     }
 
     /**
@@ -388,7 +400,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public Object getActionLogContent() {
-        return environment.get(ActionEnv.Key_ActionLogContent);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return actionContext.getEnvironment().get(ActionEnv.Key_ActionLogContent);
     }
 
     /**
@@ -396,7 +409,11 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void setResult(Object value) {
-         environment.put(ActionEnv.KEY_ACTION_RESULT_OBJECT,value);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext!=null&&!actionContext.hasFieldInfo() && ActionSupport.ERROR.equalsIgnoreCase(actionContext.getActionResult()))
+        {
+            actionContext.setResult(value);
+        }
     }
 
     /**
@@ -406,62 +423,42 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public Object getResult() {
-        return environment.get(ActionEnv.KEY_ACTION_RESULT_OBJECT);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return actionContext.getResult();
     }
 
     @Override
     public HttpSession getSession() {
-        return session;
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext.getRequest()==null)
+        {
+            return null;
+        }
+        return actionContext.getRequest().getSession();
     }
 
     @Override
     public HttpServletRequest getRequest() {
-        return request;
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return actionContext.getRequest();
     }
 
-    @Override
-    public void setRequest(final HttpServletRequest request) {
-        this.request = request;
-        if (this.request != null && !(this.request instanceof Map) ) {
-            session = this.request.getSession();
-        }
-    }
 
     @Override
     public HttpServletResponse getResponse() {
-        return response;
-    }
-
-    @Override
-    public void setResponse(final HttpServletResponse response) {
-        this.response = response;
-    }
-
-    private JSONObject getJsonParams() {
-        JSONObject json = (JSONObject) environment.get(ActionEnv.Key_CallRocJsonData);
-        if (json==null)
-        {
-            return null;
-        }
-        boolean isRoc = ParamUtil.isRocRequest(json);
-        if (!isRoc)
-        {
-            return json;
-        }
-        JSONObject methodJson = json.getJSONObject(Environment.rocMethod);
-        if (methodJson!=null&&methodJson.containsKey(Environment.rocParams))
-        {
-            return methodJson.getJSONObject(Environment.rocParams);
-        }
-        return json.getJSONObject(Environment.rocParams);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return actionContext.getResponse();
     }
 
     @Override
     public <T> T getBean(Class<T> cla) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData))
+        {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
-                return params.parseObject(cla);
+                return params.parseObject(cla,true);
             }
         }
         return RequestUtil.getBean(request, cla, false);
@@ -481,8 +478,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public String getString(String name, String def, boolean checkSql) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null && params.containsKey(name)) {
                 if (checkSql) {
                     return ParamUtil.getSafeFilter(params.getString(name,def), RequestUtil.paramMaxLength, SafetyEnumType.LOW);
@@ -495,8 +494,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public int getInt(String name) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return params.getInt(name);
             }
@@ -506,8 +507,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public int getInt(String name, int def) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return params.getInt(name);
             }
@@ -517,8 +520,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public String[] getArray(String name, boolean checkSql) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), String[].class);
             }
@@ -528,8 +533,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public int[] getIntArray(String name) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), int[].class);
             }
@@ -548,8 +555,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public Integer[] getIntegerArray(String name) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), Integer[].class);
             }
@@ -584,8 +593,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public Long[] getLongArray(String name) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), Long[].class);
             }
@@ -595,8 +606,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public float[] getFloatArray(String name) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), float[].class);
             }
@@ -606,8 +619,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public double[] getDoubleArray(String name) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), double[].class);
             }
@@ -617,8 +632,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public Float[] getFloatObjectArray(String name) {
-        if (environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), Float[].class);
             }
@@ -628,8 +645,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public Double[] getDoubleObjectArray(String name) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), Double[].class);
             }
@@ -639,8 +658,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public double getDouble(String name, double def) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), double.class);
             }
@@ -650,8 +671,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public BigDecimal[] getBigDecimalArray(String name) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return BeanUtil.getTypeValue(params.get(name), BigDecimal[].class);
             }
@@ -666,8 +689,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public long getLong(String name, long def) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return params.getLong(name);
             }
@@ -677,8 +702,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public float getFloat(String name, float def) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return params.getFloat(name);
             }
@@ -688,8 +715,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public boolean getBoolean(String name) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 return params.getBoolean(name);
             }
@@ -704,8 +733,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public Date getDate(String name, String format) {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 try {
                     return StringUtil.getDate(params.getString(name), format);
@@ -719,8 +750,10 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public String[] getParameterNames() {
-        if (!RequestUtil.isMultipart(request)&&environment.containsKey(ActionEnv.Key_CallRocJsonData)) {
-            JSONObject params = getJsonParams();
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
+        if (!RequestUtil.isMultipart(request)&&actionContext.containsKey(ActionEnv.Key_CallRocJsonData)) {
+            JSONObject params = actionContext.getJsonParams();
             if (params != null) {
                 try {
                     return params.keySet().toArray(new String[0]);
@@ -734,16 +767,20 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public String[] getAttributeNames() {
-        return RequestUtil.getAttributeNames(request);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return RequestUtil.getAttributeNames(actionContext.getRequest());
     }
 
     @Override
     public boolean isMobileBrowser() {
-        return RequestUtil.isMobileBrowser(request);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return RequestUtil.isMobileBrowser(actionContext.getRequest());
     }
 
     @Override
     public boolean containsUserAgent(String str) {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
         if (request == null || str == null) {
             return false;
         }
@@ -774,6 +811,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String toQueryString(Map<String, String> param) {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
         return RequestUtil.toQueryString(request, param);
     }
 
@@ -782,6 +821,8 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String getRemoteAddr() {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
         return RequestUtil.getRemoteAddr(request);
     }
 
@@ -814,6 +855,8 @@ public abstract class ActionSupport implements Action {
         if (level < 0) {
             level = SafetyEnumType.NONE.getValue();
         }
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletRequest request = actionContext.getRequest();
         String url = request.getRequestURI();
         String[] paths = StringUtil.split(url, StringUtil.BACKSLASH);
         if (paths.length >= level) {
@@ -836,7 +879,16 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public boolean isMethodInvoked() {
-        return environment.containsKey(ActionEnv.Key_CallMethodName);
+        if (isComponent())
+        {
+            return false;
+        }
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null || actionContext.getMethod()==null)
+        {
+            return false;
+        }
+        return actionContext.isExecuted() && actionContext.getMethod().toString().contains("Action." + actionContext.getMethod().getName());
     }
 
     private String templatePath = null;
@@ -851,11 +903,12 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String getTemplatePath() {
+        ActionContext actionContext = ThreadContextHolder.getContext();
         if (StringUtil.isNull(templatePath)) {
             StringBuilder sb = new StringBuilder();
             sb.append(Dispatcher.getRealPath());
-            if (!TXWeb.global.equals(environment.get(ActionEnv.Key_Namespace))) {
-                sb.append("/").append((String) environment.get(ActionEnv.Key_Namespace)).append("/");
+            if (!TXWeb.global.equals(actionContext.getNamespace())) {
+                sb.append("/").append(actionContext.getNamespace()).append("/");
             }
             return FileUtil.mendPath(sb.toString());
         }
@@ -867,14 +920,15 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String getTemplateFile() {
-        String actionName = getEnv(ActionEnv.Key_ActionName);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        String actionName = actionContext.getActionName();
         if (StringUtil.isNull(actionName)) {
             return null;
         }
-        if (ObjectUtil.toBoolean(environment.get(ActionEnv.KEY_MobileTemplate)) && isMobileBrowser()) {
-            return actionName + StringUtil.DOT + ActionEnv.mobileTemplateSuffix + StringUtil.DOT + getEnv(Environment.templateSuffix);
+        if (ObjectUtil.toBoolean(actionContext.get(ActionEnv.KEY_MobileTemplate)) && isMobileBrowser()) {
+            return actionName + StringUtil.DOT + ActionEnv.mobileTemplateSuffix + StringUtil.DOT + actionContext.getString(Environment.templateSuffix);
         }
-        return actionName + StringUtil.DOT + getEnv(Environment.templateSuffix);
+        return actionName + StringUtil.DOT + actionContext.getString(Environment.templateSuffix);
     }
 
     /**
@@ -883,12 +937,14 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public String getCookie(String name) {
-        return CookieUtil.getCookieString(request, name, StringUtil.empty);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return CookieUtil.getCookieString(actionContext.getRequest(), name, StringUtil.empty);
     }
 
     @Override
     public String getActionResult() {
-        return (String)environment.get(ActionEnv.KEY_ACTION_RESULT);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        return actionContext.getActionResult();
     }
 
     /**
@@ -896,7 +952,12 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public void setActionResult(String actionResult) {
-        environment.put(ActionEnv.KEY_ACTION_RESULT,actionResult);
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext!=null)
+        {
+            //&&ObjectUtil.isEmpty(actionContext.getActionResult())
+            actionContext.setActionResult(actionResult);
+        }
     }
 
     @Override
@@ -906,6 +967,8 @@ public abstract class ActionSupport implements Action {
 
     @Override
     public void printError(Object out, int status) {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        HttpServletResponse response = actionContext.getResponse();
         if (response == null) {
             System.err.println(out);
             return;
@@ -924,7 +987,6 @@ public abstract class ActionSupport implements Action {
         }
     }
 
-
     public IRole getRole() {
         UserSession userSession = getUserSession();
         if (userSession == null) {
@@ -935,7 +997,8 @@ public abstract class ActionSupport implements Action {
             guestRole.setNamespace(getRootNamespace());
             return guestRole;
         }
-        IRole role = userSession.getRole(getRootNamespace(),getString(ActionEnv.KEY_organizeId, (String)environment.getOrDefault(ActionEnv.KEY_organizeId,StringUtil.empty),true));
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        IRole role = userSession.getRole(getRootNamespace(),getString(ActionEnv.KEY_organizeId, (String)actionContext.getOrDefault(ActionEnv.KEY_organizeId,StringUtil.empty),true));
         if (role==null||role.getId()==null)
         {
             Role guestRole = new Role();

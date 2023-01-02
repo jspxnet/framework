@@ -13,7 +13,7 @@ import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.utils.StringUtil;
-
+import lombok.Data;
 import java.io.Serializable;
 
 
@@ -25,7 +25,8 @@ import java.io.Serializable;
  * 陈原
  */
 
-@Table(name = "jspx_ip_location", caption = "IP表", cache = true)
+@Data
+@Table(name = "jspx_ip_location", caption = "IP表")
 public class IpLocation implements Serializable {
     @Id
     @Column(caption = "ID", notNull = true)
@@ -43,60 +44,7 @@ public class IpLocation implements Serializable {
     @Column(caption = "地区", length = 100, notNull = true)
     private String country = StringUtil.empty;
 
-    @Column(caption = "城市", length = 100, notNull = false)
+    @Column(caption = "城市", length = 100)
     private String city = StringUtil.empty;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public int getLineNumber() {
-        return lineNumber;
-    }
-
-    public void setLineNumber(int lineNumber) {
-        this.lineNumber = lineNumber;
-    }
-
-    public long getBeginIp() {
-        return beginIp;
-    }
-
-    public void setBeginIp(long beginIp) {
-        this.beginIp = beginIp;
-    }
-
-    public long getEndIp() {
-        return endIp;
-    }
-
-    public void setEndIp(long endIp) {
-        this.endIp = endIp;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    @Override
-    public String toString() {
-        return country;
-    }
 
 }

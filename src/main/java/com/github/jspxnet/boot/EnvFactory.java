@@ -103,8 +103,6 @@ public class EnvFactory {
         return ENV_TEMPLATE.getString(Environment.secretKey, "chenYuan");
     }
 
-
-
     //对称加密实例
     static private Encrypt symmetryEncrypt = null;
 

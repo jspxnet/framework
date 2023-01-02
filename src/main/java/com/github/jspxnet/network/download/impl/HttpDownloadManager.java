@@ -26,37 +26,37 @@ import com.github.jspxnet.utils.DateUtil;
  * com.github.jspxnet.network.download.impl.HttpDownloadManager
  */
 public class HttpDownloadManager implements HttpDownloadWork {
-    final private static HttpDownloadWork instance = new HttpDownloadManager();
+    final private static HttpDownloadWork INSTANCE = new HttpDownloadManager();
 
-    final private static Map<String, HttpDownloadThread> downMap = new Hashtable<String, HttpDownloadThread>();
+    final private static Map<String, HttpDownloadThread> DOWN_MAP = new Hashtable<>();
 
     static public HttpDownloadWork getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override
     public void put(String keyId, HttpDownloadThread td) {
-        downMap.put(keyId, td);
+        DOWN_MAP.put(keyId, td);
     }
 
     @Override
     public HttpDownloadThread get(String keyId) {
-        return downMap.get(keyId);
+        return DOWN_MAP.get(keyId);
     }
 
     @Override
     public Map<String, HttpDownloadThread> getGroup() {
-        return downMap;
+        return DOWN_MAP;
     }
 
     @Override
     public HttpDownloadThread remove(String keyId) {
-        return downMap.remove(keyId);
+        return DOWN_MAP.remove(keyId);
     }
 
     @Override
     public boolean containsKey(String key) {
-        return downMap.containsKey(key);
+        return DOWN_MAP.containsKey(key);
     }
 
     /**
@@ -82,14 +82,14 @@ public class HttpDownloadManager implements HttpDownloadWork {
     @Override
     public void clearFailAndFinish(long hour, String namespace) {
         synchronized (this) {
-            for (HttpDownloadThread httpDownload : downMap.values()) {
+            for (HttpDownloadThread httpDownload : DOWN_MAP.values()) {
                 if (!httpDownload.getNamespace().equalsIgnoreCase(namespace)) {
                     continue;
                 }
                 if (DownStateType.ERROR == httpDownload.getStateType() || DownStateType.FINISH == httpDownload.getStateType()
                         || DownStateType.DOWNLOADING != httpDownload.getStateType()) {
                     if (DateUtil.compareHour(new Date(), httpDownload.getCreateDate()) > hour) {
-                        downMap.remove(httpDownload.getDownStateId());
+                        DOWN_MAP.remove(httpDownload.getDownStateId());
                     }
                 }
             }
@@ -97,11 +97,11 @@ public class HttpDownloadManager implements HttpDownloadWork {
     }
 
     @Override
-    public void CloseAll() {
-        synchronized (downMap) {
-            for (HttpDownloadThread httpDownload : downMap.values()) {
+    public void closeAll() {
+        synchronized (DOWN_MAP) {
+            for (HttpDownloadThread httpDownload : DOWN_MAP.values()) {
                 httpDownload.setQuit(true);
-                downMap.remove(httpDownload.getDownStateId());
+                DOWN_MAP.remove(httpDownload.getDownStateId());
             }
         }
     }

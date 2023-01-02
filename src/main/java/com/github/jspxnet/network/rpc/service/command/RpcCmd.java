@@ -9,19 +9,21 @@ import com.github.jspxnet.network.rpc.model.transfer.IocResponse;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
+import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
+import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
 import com.github.jspxnet.txweb.result.RpcResult;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.util.HessianSerializableUtil;
 import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
 import io.netty.channel.Channel;
@@ -100,17 +102,77 @@ public class RpcCmd extends INetCommand {
         return reply;
     }
 
+    static public Map<String, Object> createEnvironment(IocRequest iocRequest)  {
+        String namePart = URLUtil.getFileNamePart(iocRequest.getUrl());
+        String namespace = URLUtil.getNamespace(iocRequest.getUrl());
+        if (!StringUtil.hasLength(namespace)) {
+            namespace = TXWeb.global;
+        }
+
+        if (!StringUtil.hasLength(namePart) || StringUtil.BACKSLASH.equals(namePart)) {
+            namePart = "index";
+        }
+        ////////////////////action begin
+
+        //////////////////////////////////环境参数 begin
+        Map<String, Object> envParams = TXWebUtil.createEnvironment();
+        envParams.put(ActionEnv.Key_ActionName, namePart);
+        envParams.put(ActionEnv.Key_Namespace, namespace);
+        envParams.put(ActionEnv.Key_RealPath, Dispatcher.getRealPath());
+        ///////////////////////////////////环境参数 end
+        return envParams;
+    }
+    static public Map<String, Object> createRocEnvironment(ActionConfig actionConfig, IocRequest iocRequest)  {
+        Map<String, Object> envParams = createEnvironment(iocRequest);
+        //命名空间初始化begin
+        String namespace = actionConfig.getNamespace();
+        if (!Sioc.global.equals(namespace) && !StringUtil.isEmpty(namespace))
+        {
+            envParams.put(ActionEnv.Key_Namespace, namespace);
+        }
+        String  namePart =  StringUtil.substringAfter(StringUtil.toLowerCase(iocRequest.getUrl()),namespace);
+
+        if (namePart!=null&& namePart.contains(StringUtil.DOT))
+        {
+            namePart = namePart.substring(0, namePart.lastIndexOf(StringUtil.DOT));
+        }
+        if (namePart!=null&&namePart.startsWith(StringUtil.BACKSLASH))
+        {
+            namePart = namePart.substring(1);
+        }
+        if (StringUtil.isEmpty(namePart))
+        {
+            namePart = "index";
+        }
+        if (!StringUtil.isEmpty(namePart))
+        {
+            envParams.put(ActionEnv.Key_ActionName, namePart);
+        }
+        //命名空间初始化end
+        return envParams;
+    }
 
 
-    public static void exeAction(IocRequest iocRequest,final SendCmd reply) {
+    static protected ActionConfig getActionConfig(IocRequest iocRequest) throws Exception {
+        String namePart = URLUtil.getFileNamePart(iocRequest.getUrl());
+        String namespace = URLUtil.getNamespace(iocRequest.getUrl());
+        if (!StringUtil.hasLength(namespace)) {
+            namespace = TXWeb.global;
+        }
+        if (!StringUtil.hasLength(namePart) || StringUtil.BACKSLASH.equals(namePart)) {
+            namePart = "index";
+        }
+        WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
+        return webConfigManager.getActionConfig(namePart, namespace, true);
+    }
+
+
+    public static void exeAction(IocRequest iocRequest,SendCmd reply) {
 
         //得到请求对象
-        WebConfigManager webConfigManager = TxWebConfigManager.getInstance();
         ActionConfig actionConfig = null;
-        String namespace = TXWebUtil.getNamespace(iocRequest.getUrl());
-        String urlName = URLUtil.getFileName(iocRequest.getUrl());
         try {
-            actionConfig = webConfigManager.getActionConfig(urlName, namespace, true);
+            actionConfig = getActionConfig(iocRequest);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -134,32 +196,39 @@ public class RpcCmd extends INetCommand {
         methodJson.put(Environment.rocName, iocRequest.getMethodName());
         methodJson.put(Environment.rocParams, new JSONObject(iocRequest.getParameters()));
         json.put(Environment.rocMethod, methodJson);
-        Map<String, Object>  envParam = TXWebUtil.createEnvironment();
-        envParam.put(ActionEnv.Key_Namespace,namespace);
-        envParam.put(ActionEnv.Key_ActionName,urlName);
-        RequestTo requestTo = new RequestTo((Map) iocRequest.getRequest());
+
+        Map<String, Object>   envParam = createRocEnvironment(actionConfig,  iocRequest);
+        RequestTo requestTo = new RequestTo((Map<String,Object>)iocRequest.getRequest());
+        ResponseTo responseTo = new ResponseTo((Map<String,Object>)iocRequest.getResponse());
+
         requestTo.setAttribute(ActionEnv.Key_REMOTE_TYPE,INetCommand.RPC);
         IocResponse response = new IocResponse();
+        ActionInvocation actionInvocation = null;
         try {
-
-            ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig,envParam , RocHandle.NAME,
-                    json,requestTo, new ResponseTo((Map) iocRequest.getResponse()));
+            actionInvocation = new DefaultActionInvocation(actionConfig,envParam , RocHandle.NAME,json,requestTo,responseTo);
             actionInvocation.initAction();
             actionInvocation.invoke();
-            RpcResult rpcResult = new RpcResult();
-            actionInvocation.executeResult(rpcResult);
-            Object result = rpcResult.getResult();
-            response.setResult(result);
         } catch (Throwable t) {
             response.setError(t);
             t.printStackTrace();
+        } finally {
+            if (actionInvocation!=null)
+            {
+                RpcResult rpcResult = new RpcResult();
+                try {
+                    actionInvocation.executeResult(rpcResult);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    response.setError(e);
+                }
+                response.setResult(rpcResult.getResult());
+            }
         }
         try {
             reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(response)));
         } catch (IOException e) {
             response.setError(e);
             e.printStackTrace();
-
         }
     }
 

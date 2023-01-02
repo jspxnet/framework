@@ -15,22 +15,6 @@ package com.github.jspxnet.sober.annotation;
  * date: 2007-2-5
  * Time: 21:24:46
  *
- */
-
-import com.github.jspxnet.utils.DateUtil;
-
-import java.lang.annotation.Target;
-import java.lang.annotation.Retention;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.RetentionPolicy;
-
-@Target({ElementType.METHOD, ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Id {
-    //是否sober生成ID
-    boolean auto() default false;
-    /*
-
     表示让数据库自动生成ID
     @Id
 
@@ -52,7 +36,21 @@ public @interface Id {
 
     果 auto=false 就会 type＝serial 更具数据库得到
     auto=true 如果里边已经有值，将不创建id,否则更具type生成
-    */
+*
+*/
+
+import com.github.jspxnet.utils.DateUtil;
+
+import java.lang.annotation.Target;
+import java.lang.annotation.Retention;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
+
+@Target({ElementType.METHOD, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Id {
+    //是否sober生成ID
+    boolean auto() default false;
 
     String type() default IDType.serial;
 

@@ -248,7 +248,7 @@ public class MultiThreadImpl extends Thread implements HttpDownloadThread {
                         nStartPos[i], nEndPos[i], i, bufferSize);
 
                 fileSplitterFetch[i].setCompleted(nCompleted[i]);
-                log.debug("Thread " + i + " , nStartPos = " + nStartPos[i] + ", nEndPos = " + nEndPos[i]);
+                //log.debug("Thread " + i + " , nStartPos = " + nStartPos[i] + ", nEndPos = " + nEndPos[i]);
                 fileSplitterFetch[i].start();
             }
             //等待子线程结束
@@ -259,13 +259,13 @@ public class MultiThreadImpl extends Thread implements HttpDownloadThread {
             stateType = DownStateType.DOWNLOADING;
             while (!flagQuit && !interrupted()) {
                 writePos();
-                sleep(500);
+                sleep(300);
                 boolean breakWhile = true;
                 for (int i = 0; i < nStartPos.length; i++) {
                     FileSplitterFetch fetch = fileSplitterFetch[i];
 
                     //统计已经传动数据begin
-                    System.out.println("Thread " + i + " , nStartPos = " + nStartPos[i] + ", nEndPos = " + nEndPos[i] + "  " + completedSize);
+                    //System.out.println("Thread " + i + " , nStartPos = " + nStartPos[i] + ", nEndPos = " + nEndPos[i] + "  " + completedSize);
                     completedSize = completedSize + fetch.getCompleted();
                     if (!listeners.isEmpty()) {
                         for (TransmitListener listener : listeners) {

@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -31,6 +31,8 @@ public interface SoberFactory extends Serializable {
 
     String getDatabaseType();
 
+    String getDatabaseName();
+
     Dialect getDialect();
 
     DataSource getDataSource();
@@ -53,18 +55,41 @@ public interface SoberFactory extends Serializable {
      */
     Connection getConnection(int type, String tid) throws SQLException;
 
+    /**
+     *
+     * @param conn 关闭连接
+     * @param release 是否彻底关闭
+     */
     void closeConnection(Connection conn, boolean release);
-
+    /**
+     * 得到表结构,如果数据库中不存在表，就创建表
+     *
+     * @param cla          类
+     * @param soberSupport 支持对象
+     * @return 得到表结构
+     */
     TableModels getTableModels(Class<?> cla, final SoberSupport soberSupport);
 
+    /**
+     *
+     * @return 调试开启显示sql
+     */
     boolean isShowsql();
 
+    /**
+     *
+     * @return 是否自动提交
+     */
     boolean isAutoCommit();
 
     int getTransactionIsolation();
 
     void setTransactionIsolation(int transactionIsolation);
-
+    /**
+     * 同时这里将初始化并创建索引
+     * @param namespace 得到命名空间的SQL
+     * @return sql空间
+     */
     SQLRoom getSqlRoom(String namespace);
 
     void setMappingResources(String[] strings) throws Exception;
@@ -72,6 +97,10 @@ public interface SoberFactory extends Serializable {
     boolean isValid();
 
     void setValid(boolean valid);
+
+    TableModels getTableModels(String tableName, SoberSupport soberSupport);
+
+    void evictTableModels(Class<?> cla);
 
     void clear();
 

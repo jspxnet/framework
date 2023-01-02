@@ -26,6 +26,17 @@ import java.util.List;
  * author: chenYuan
  * date: 2021/1/5 12:37
  * description: Ecwid Consul 客户端,支持ssl证书
+ *
+ *
+ *<p>{@code
+ *     <bean class="com.github.jspxnet.network.consul.ConsulConfig" singleton="true" caption="consul配置">
+ *         <string name="ip">${consulAddress}</string>
+ *         <int name="port">${consulPort}</int>
+ *         <bool name="ssl">false</bool>
+ *     </bean>
+ *     <bean class="com.github.jspxnet.network.consul.impl.EcwidConsulServiceImpl" singleton="true" caption="consul服务器控制" />
+ *}
+ *</p>
  **/
 @Slf4j
 public class EcwidConsulServiceImpl implements ConsulService {
@@ -58,7 +69,6 @@ public class EcwidConsulServiceImpl implements ConsulService {
             client = new ConsulClient(consulConfig.getIp(),consulConfig.getPort(), tlsConfig);
         }
     }
-
 
     /**
      *
