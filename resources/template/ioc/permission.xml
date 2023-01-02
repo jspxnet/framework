@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sioc>
+        <!--权限 begin-->
+        <bean caption="权限DAO" class="com.github.jspxnet.txweb.dao.impl.PermissionDAOImpl" singleton="false">
+            <string name="namespace">@rootNamespace</string>
+        </bean>
+        <bean caption="权限VIEW" class="com.github.jspxnet.txweb.view.PermissionView" singleton="false"/>
+        <bean caption="权限ACTION" class="com.github.jspxnet.txweb.action.PermissionManageAction" singleton="false"/>
+        <!--权限 end-->
+</sioc>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sioc namespace="global">
+    <scan package="com.github.jspxnet.txweb.interceptor" />
+    <scan package="com.github.jspxnet.txweb.action" />
+    <scan package="com.github.jspxnet.component" caption="组件"/>
+    <scan package="com.github.jspxnet.txweb.devcenter" caption="开发中心" />
+
+    <load file="ioc/default.xml" />
+    <!--默认载入语言和配置begin-->
+     <bean id="config" class="com.github.jspxnet.txweb.bundle.provider.DBBundleProvider" singleton="true">
+            <ref name="soberFactory">${soberFactory}</ref>
+            <string name="dataType">config</string>
+            <string name="namespace">global</string>
+     </bean>
+
+     <bean id="language" class="com.github.jspxnet.txweb.bundle.provider.DBBundleProvider" singleton="true" caption="中文语言">
+            <ref name="soberFactory">${soberFactory}</ref>
+            <string name="namespace">global</string>
+            <string name="dataType">zh</string>
+            <string name="model">language</string>
+     </bean>
+    <bean id="loadLanguageAction" class="com.github.jspxnet.txweb.bundle.action.LoadLanguageAction" singleton="true" />
+    <!--默认载入语言和配置end-->
+    <!--include file="包含其他文件.xml" -->
+    <include file="*.sioc.xml" />
+</sioc>

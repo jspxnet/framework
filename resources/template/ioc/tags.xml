@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sioc>
+        <!--Tag处理 begin-->
+        <bean class="com.github.jspxnet.txweb.dao.impl.TagsDAOImpl" singleton="false">
+            <!--<ref name="soberFactory">${soberFactory}</ref>-->
+        </bean>
+        <bean class="com.github.jspxnet.txweb.view.TagsView" singleton="false">
+        </bean>
+        <!--Tag处理 end-->
+</sioc>

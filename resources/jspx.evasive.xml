@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<evasives >
+
+    <!--白名单-->
+    <whiteList>127.0.0.1;192.168.0.*</whiteList>
+    <!--黑名单 默认返回名为 black -->
+    <blackList>124.67.207.35;120.193.236.90;1.27.231.100;</blackList>
+    <result name="black" type="html" status="503"><![CDATA[<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>提示说明</title>
+            <style type="text/css">.question_wrapper { background-color: #fff; border: 2px solid #f8bb5b; margin: 10px; padding:10px; z-index: 10;}
+            div, ul, li, h1, h2, h3, h4, form, input, p, button, dl, dt, dd, fieldset, textarea, label, del {margin: 0; padding: 0;}.question_text {color: #666;font-size: 14px; font-weight: normal; line-height: 21px;}
+            .user_wrap a {color: #828282;}pre { font-family: "Microsoft YaHei","SimHei","SimSun",Arial,sans-serif;    overflow-wrap: break-word;    white-space: pre-wrap;    word-break: break-all;}
+            a { color: #666; text-decoration: none;}.clearfix::after, .cf::after { clear: both;display: table;}.ask_autho {    color: #828282;    line-height: 30px;    position: relative;}
+            .pj_btn a { color: #4083a9; display: block; float:right;margin-left:50px; padding: 0 6px; white-space: nowrap;}</style></head><body><div class="question_wrapper">
+             <h2>错误信息:<span style="color: #E0E0E0;">ERROR</span></h2><hr /><div class="question_text"><pre>你的ip存在异常行为,已被列入可疑名单</pre></div><div class="pj_btn cf"></div></div></body></html>
+            ]]>
+    </result>
+
+    <!--不安全的URL关键字,配置里边空格有效-->
+    <insecureUrlKeys><![CDATA[<;>; or ; and ;temp.;web-inf;windows;@;!;|;{;};~;^;*;:;\;%5c;%255c;#cmd]]></insecureUrlKeys>
+
+    <!--不安全的参数字符串,配置里边空格有效;发现后直接提示错误-->
+   <insecureQueryStringKeys><![CDATA[<;>; or ; and ;insert ;select ; where ; from ;delete ;drop ;exec ;execute ;xp_cmdshell ; create ;information_schema;group_concat; use ;window.location;";';!;#cmd]]></insecureQueryStringKeys>
+    <!--IP 查询表黑名单 ipField:ip 字段名称 timesField:次数字段,出现次数;  minTimes:最小次数,这个次数以上的才会放入黑名单; blackSize:一次最多放入黑名单个数,imprisonSecond:囚禁时间如为-1将永久屏蔽,,执行周期为有 imprisonSecond*1.5
+    例子: SELECT  COUNT(ip) AS times,ip FROM  `jbbs_vote_member` WHERE createDate>'${date.addMinutes(-30).string('yyyy-MM-dd HH:mm')}' GROUP BY ip HAVING times>100 ORDER BY times DESC LIMIT 0,10
+
+    <queryBlack name="weixinvote" ipField="ip" timesField="times" minTimes="200" blackSize="2" imprisonSecond="2000" result="voteBusy"><![CDATA[
+    SELECT  COUNT(ip) AS times,ip FROM  `jspx_vote_member` WHERE createDate>'${date.addMinutes(-30).string('yyyy-MM-dd HH:mm')}' GROUP BY ip HAVING times>200 ORDER BY times DESC LIMIT 0,10]]></queryBlack>
+    <result name="voteBusy" type="html" status="503"><![CDATA[<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>提示说明</title>
+            <style type="text/css">.question_wrapper { background-color: #fff; border: 2px solid #f8bb5b; margin: 10px; padding:10px; z-index: 10;}
+            div, ul, li, h1, h2, h3, h4, form, input, p, button, dl, dt, dd, fieldset, textarea, label, del {margin: 0; padding: 0;}.question_text {color: #666;font-size: 14px; font-weight: normal; line-height: 21px;}
+            .user_wrap a {color: #828282;}pre { font-family: "Microsoft YaHei","SimHei","SimSun",Arial,sans-serif;    overflow-wrap: break-word;    white-space: pre-wrap;    word-break: break-all;}
+            a { color: #666; text-decoration: none;}.clearfix::after, .cf::after { clear: both;display: table;}.ask_autho {    color: #828282;    line-height: 30px;    position: relative;}
+            .pj_btn a { color: #4083a9; display: block; float:right;margin-left:50px; padding: 0 6px; white-space: nowrap;}</style></head><body><div class="question_wrapper">
+             <h2>错误信息:<span style="color: #E0E0E0;">ERROR</span></h2><hr /><div class="question_text"><pre> Please try again later,不允许频繁刷票,访问存在异常行为,请${waitTime}后在试</pre></div><div class="pj_btn cf"></div></div></body></html>
+            ]]>
+    </result>
+    -->
+        <!--
+        如果要直接屏蔽,调整频率和囚禁时间就可以
+         imprisonSecond 囚禁时间 600为 10分钟
+         result 中黑名单的时候默认是black优先
+         -->
+    <!--
+   <evasive name="起个名字方便记" interval="50" maxTimes="10" method="POST" url="votePost" cacheName="validVotePostIp" imprisonSecond="600" logic="or">
+       <condition type="cookie" caption="只是判断是否存在这个参数">cookieVarName</condition>
+       <condition type="session" caption="只是判断是否存在这个参数">sessionVarName</condition>
+       <condition type="referer" caption="判断是否外链,防止CSRF攻击">允许外链的域名,多少使用|分割</condition>
+       <condition type="sql" caption="使用默认DAO执行sql返回,sql 返回来判断是否成立">select id from table </condition>
+       <condition type="ip" caption="这里是一个ip表达式例如:211.92.137.1-211.92.137.55;211.92.137.*">192.168.0.1</condition>
+       <condition type="parameter" caption="只是判断是否存在这个参数">sign</condition>
+       <result name="*" type="redirect">/error/busy.html</result>
+   </evasive>
+    <result name="black" type="redirect">/error/busy.html</result>
+   -->
+    <!--interval 检测周期 maxTimes  最大访问次数  imprisonSecond 囚禁时间,如果为-1将永久屏蔽-->
+    <evasive name="allPage" interval="20" maxTimes="20" method="*" url="\S+[^.].${suffix}" cacheName="evasiveCache" imprisonSecond="20" logic="or" result="busy" />
+
+    <result name="busy" type="html" status="503"><![CDATA[<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>提示说明</title>
+            <style type="text/css">.question_wrapper { background-color: #fff; border: 2px solid #f8bb5b; margin: 10px; padding:10px; z-index: 10;}
+            div, ul, li, h1, h2, h3, h4, form, input, p, button, dl, dt, dd, fieldset, textarea, label, del {margin: 0; padding: 0;}.question_text {color: #666;font-size: 14px; font-weight: normal; line-height: 21px;}
+            .user_wrap a {color: #828282;}pre { font-family: "Microsoft YaHei","SimHei","SimSun",Arial,sans-serif;    overflow-wrap: break-word;    white-space: pre-wrap;    word-break: break-all;}
+            a { color: #666; text-decoration: none;}.clearfix::after, .cf::after { clear: both;display: table;}.ask_autho {    color: #828282;    line-height: 30px;    position: relative;}
+            .pj_btn a { color: #4083a9; display: block; float:right;margin-left:50px; padding: 0 6px; white-space: nowrap;}</style></head><body><div class="question_wrapper">
+             <h2>错误信息:<span style="color: #E0E0E0;">ERROR</span></h2><hr /><div class="question_text">	<pre>The server is busy. Please try again later,服务器忙,请${waitTime}后在试</pre></div><div class="pj_btn cf"></div></div></body></html>
+            ]]>
+    </result>
+
+    <include file="*.evasive.xml" />
+</evasives>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<txweb>
+        <!--Upload begin-->
+        <action name="upload" class="com.github.jspxnet.txweb.action.MulUploadFileAction" caption="附件上传"/>
+        <action name="ueditorcontroller.js" class="com.github.jspxnet.txweb.ueditor.adaptor.UEditorAdaptor" caption="ueditor控制器"/>
+        <action name="photoedit" class="com.github.jspxnet.txweb.view.UploadFileView">
+            <param name="pageEnable">false</param>
+        </action>
+        <action name="postphotoedit" class="com.github.jspxnet.txweb.action.PhotoEditAction" method="@method"/>
+        <action name="selectfile|selectlink" class="com.github.jspxnet.txweb.view.UploadFileView">
+            <param name="pageEnable">true</param>
+        </action>
+        <action name="acuploadfile|aeuploadfile|file1list|uploadfilemanage|uploadfilemanage1" caption="附件管理"
+                class="com.github.jspxnet.txweb.action.UploadFileManageAction" method="@method">
+            <param name="pid">-1</param>
+        </action>
+        <action name="file2list" caption="附件浏览" class="com.github.jspxnet.txweb.action.UploadFileManageAction" method="@method">
+            <param name="pid">-1</param>
+            <param name="pageEnable">true</param>
+            <param name="turnPageFile">turnpage.ftl</param>
+        </action>
+        <!--Upload end-->
+</txweb>

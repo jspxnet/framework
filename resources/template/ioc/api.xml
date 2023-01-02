@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sioc>
+    <sioc namespace="${softName}/api" extends="${softName}">
+        <bean class="com.github.jspxnet.txweb.view.ApiDocView" caption="API文档"  />
+    </sioc>
+</sioc>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sioc>
+    <!--上传 begin-->
+    <bean class="com.github.jspxnet.txweb.dao.impl.UploadFileDAOImpl" singleton="false">
+        <!--<ref name="soberFactory">${soberFactory}</ref>-->
+        <string name="className">jspx.${softName}.table.UploadFile</string>
+        <string name="namespace">@rootNamespace</string>
+    </bean>
+    <bean class="com.github.jspxnet.txweb.view.UploadFileView" singleton="false" />
+    <bean class="com.github.jspxnet.txweb.action.UploadFileManageAction" singleton="false" />
+    <bean class="com.github.jspxnet.txweb.action.UploadFileAction" singleton="false" >
+        <boolean name="useCloudFile">true</boolean>
+    </bean>
+    <bean class="com.github.jspxnet.txweb.ueditor.adaptor.UEditorAdaptor" singleton="false" />
+    <bean class="com.github.jspxnet.txweb.view.DownloadFileNameProxy" singleton="false" />
+    <!--上传 end-->
+</sioc>

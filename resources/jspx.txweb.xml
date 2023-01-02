@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<txweb>
+    <package namespace="global">
+        <default>
+            <result name="untitled" type="chain">${untitledUrl}</result>
+            <result name="login" type="redirect">${userLoginUrl}</result>
+        </default>
+        <action name="validate" caption="验证图片" class="validate" />
+        <action name="transphoto" caption="图片转换,对称加密方式" class="com.github.jspxnet.txweb.view.TransPhotoView" />
+        <action name="qrcode" caption="二维码生成,对称加密方式" class="com.github.jspxnet.txweb.view.QRCodeView"  />
+        <action name="weather" caption="天气预报" class="com.github.jspxnet.txweb.view.WeatherView" />
+<!--        <action name="counters" caption="计数器" class="countersView" />-->
+        <action name="countryView" caption="国家表" class="countryModule" >
+            <result name="*" type="roc"/>
+        </action>
+        <action name="provinceView" caption="省份表" class="provinceModule" >
+            <result name="*" type="roc"/>
+        </action>
+        <action name="regionView" caption="片区表" class="regionModule" >
+            <result name="*" type="roc"/>
+        </action>
+        <action name="cityView" caption="城市表" class="cityModule" >
+            <result name="*" type="roc"/>
+        </action>
+        <action name="descriptionPortal" caption="描述自动生成" class="com.github.jspxnet.txweb.view.DescriptionView">
+            <result name="*" type="roc"/>
+        </action>
+        <action name="loadlanguage" caption="载入语言" class="loadLanguageAction" method="save"/>
+        <!--
+         分布式session同步接口
+        <action name="clusterSession" class="clusterSessionModule" />
+         -->
+        <!--要得到一个空的项目，你只要删除demo.txweb.xml 和 其他的项目配置就可以得到-->
+        <action name="index" mobile="true" class="com.github.jspxnet.txweb.support.DefaultTemplateAction"/>
+    </package>
+
+    <package namespace="md" extends="global">
+         <action name="*" mobile="false" class="com.github.jspxnet.txweb.support.DefaultTemplateAction"/>
+    </package>
+
+    <package extends="global" namespace="script">
+         <action name="*" mobile="false" class="com.github.jspxnet.txweb.support.DefaultTemplateAction"/>
+    </package>
+    <include file="*.txweb.xml" />
+</txweb>

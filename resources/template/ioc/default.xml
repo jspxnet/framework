@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sioc>
+    <!--以上为基本配置,例子从这里开始-->
+    <!--database begin com.github.jspxnet.datasource.JspxDataSource | LimitDataSource | com.mchange.v2.c3p0.ComboPooledDataSource -->
+    <bean id="jspxDataSource" class="com.github.jspxnet.datasource.JspxDataSource" destroy="close" singleton="true">
+        <string name="driverClass">${driverClassName}</string>
+        <string name="jdbcUrl"><![CDATA[${jdbcUrl}]]></string>
+        <string name="user">${username}</string>
+        <string name="password"><![CDATA[${password}]]></string>
+        <int name="maxPoolSize">${maxPoolSize}</int>
+    </bean>
+    <!--  读写分离方式配置
+    <bean id="writeDataSource" class="com.github.jspxnet.datasource.JspxDataSource" destroy="close" singleton="true">
+         <string name="driverClass">${driverClassName}</string>
+         <string name="jdbcUrl"><![CDATA[jdbc:postgresql://192.168.0.201:5432/jspxnet]]></string>
+         <string name="user">${username}</string>
+         <string name="password"><![CDATA[${password}]]></string>
+         <int name="maxPoolSize">${maxPoolSize}</int>
+         <int name="readWrite">0</int>
+     </bean>
+
+    <bean id="jspxDataSource" class="com.github.jspxnet.datasource.JRWPoolDataSource" singleton="true">
+        <list name="dataSources" class="ref">
+            <value>readDataSource</value>
+            <value>writeDataSource</value>
+        </list>
+     </bean>
+     -->
+    <!--database end -->
+
+    <!--Sober  begin  injection 配置后,其他的bean会自动注入这个对象,数据库配置后,后边就可以自动载入数据库配置了 -->
+    <bean id="${soberFactory}" class="com.github.jspxnet.sober.config.SoberMappingBean" singleton="true" inject="soberFactory">
+        <!--数据库适配器,更具数据库生成不同的SQL-->
+        <string name="databaseType">${dialect}</string>
+        <!--注意先后顺序如果是auto必须在setDataSource前-->
+        <!--
+        <ref name="dataSource">jspxDataSource</ref>
+        <string name="dataSource">java:comp/jdbc/XADataSource</string>
+        <ref name="dataSource">jspxDataSource</ref>
+        -->
+        <!--weblogic:javax.transaction.UserTransaction
+            resin:java:comp/UserTransaction
+        <string name="userTransaction">java:comp/UserTransaction</string>
+        -->
+        <!--是否自动提交
+        <boolean name="autoCommit">true</boolean>
+        <string name="dataSource">java:comp/env/jdbc/XADataSource</string>
+          <boolean name="valid">true</boolean>
+        -->
+        <boolean name="useCache">${useCache}</boolean>
+        <ref name="dataSource">jspxDataSource</ref>
+        <!--是否显示SQL  ${show_sql}-->
+        <string name="showsql">${show_sql}</string>
+        <!--载入sql map-->
+        <array name="mappingResources" class="string">
+            <value>*.sqlmap.xml</value>
+        </array>
+    </bean>
+    <!--Sober end -->
+
+    <!--底层分布式支持  begin-->
+    <!--jspx.net 默认提供 begin-->
+    <bean class="com.github.jspxnet.txweb.dao.impl.GenericDAOImpl" singleton="false" />
+    <bean class="com.github.jspxnet.cache.redis.ValidateCodeCacheService" singleton="true" caption="分布式验证码" />
+    <bean class="com.github.jspxnet.cache.redis.RedissonClientConfig" create="getRedissonClient" singleton="true" caption="Redis配置">
+        <string name="config">${redissonConfig}</string>
+    </bean>
+    <bean class="com.github.jspxnet.sober.util.SequenceFactory" singleton="true" caption="redis序列生成器" />
+    <bean class="com.github.jspxnet.sober.transaction.TransactionController" singleton="false" caption="事务标签控制器" />
+    <bean class="com.github.jspxnet.sober.dao.impl.SqlMapConfDAOImpl" caption="sqlMap控制器" singleton="true" />
+
+<!--    <bean class="com.github.jspxnet.sober.queue.RedisStoreQueueServer" singleton="true" caption="存储消息服务" />-->
+<!--    <bean class="com.github.jspxnet.sober.queue.RedisStoreQueueClient" singleton="true" caption="存储消息客户端" />-->
+<!--    <bean class="com.github.jspxnet.sober.queue.StoreQueueServerMain" singleton="true" caption="存储消息队列启动服务" />-->
+    <!--底层分布式支持  end-->
+
+    <!--xweb 模板支持 begin-->
+    <bean class="com.github.jspxnet.txweb.support.DefaultTemplateAction" singleton="false" />
+    <!-- <bean class="jspx.jcommon.view.RRSReadView" />-->
+    <!--xweb 返回类型,模板支持 end-->
+
+    <!--png 附加码 ValidateExpImgView,ValidateImgView -->
+    <bean id="validate" class="com.github.jspxnet.txweb.view.ValidateExpImgView" singleton="false" />
+    <!--gif 附加码-->
+    <!-- 传统方式
+      <bean id="validate" class="com.github.jspxnet.txweb.view.ValidateImgView" singleton="false">
+          <int name="length">3</int>
+      </bean>
+      -->
+    <!--png 字符串加密转图片 begin-->
+    <bean class="com.github.jspxnet.txweb.view.TransPhotoView" singleton="false"/>
+    <!--png 字符串加密转图片 end-->
+
+    <!--png 二维码图片生成 begin-->
+    <bean class="com.github.jspxnet.txweb.view.QRCodeView" singleton="false"/>
+
+    <!--中国省市列表 begin-->
+    <bean id="countryModule" class="com.github.jspxnet.txweb.view.StringTreeView" singleton="true">
+        <string name="fileName">
+            ${resPath}table/city.jzb!/country.table
+        </string>
+    </bean>
+
+    <bean id="provinceModule" class="com.github.jspxnet.txweb.view.StringTreeView" singleton="true">
+        <string name="fileName">${resPath}table/city.jzb!/province.table</string>
+    </bean>
+
+    <bean id="cityModule" class="com.github.jspxnet.txweb.view.StringTreeView" singleton="true">
+        <string name="fileName">${resPath}table/city.jzb!/province.table</string>
+    </bean>
+
+    <bean id="regionModule" class="com.github.jspxnet.txweb.view.StringTreeView" singleton="true">
+        <string name="fileName">${resPath}table/city.jzb!/region.table</string>
+    </bean>
+    <!--中国省市列表 end-->
+
+    <bean caption="天气预报" class="com.github.jspxnet.txweb.view.WeatherView" singleton="true" />
+
+    <!--tags 或描述 生成接口-->
+    <bean class="com.github.jspxnet.txweb.view.DescriptionView" singleton="true">
+    </bean>
+
+    <!--分词接口-->
+    <bean class="com.github.jspxnet.component.zhex.analyzer.ChineseAnalyzerImpl" singleton="false" />
+    <!-- 老的配置失效 -->
+<!--    <bean class="com.github.jspxnet.lucene.impl.ChineseAnalyzerImpl" singleton="true" />-->
+    <!--component end-->
+
+    <bean caption="盗链拦截器" class="com.github.jspxnet.txweb.interceptor.PiratedInterceptor" singleton="false" />
+
+    <!--在线和用户-->
+    <bean class="com.github.jspxnet.txweb.action.AuthenticationAction" singleton="false" />
+    <bean class="com.github.jspxnet.txweb.online.impl.OnlineManagerImpl" singleton="true">
+        <boolean name="sso" caption="单点登录">${sso}</boolean>
+    </bean>
+
+    <!--基本字典库   参考国家民政数据标准.  begin-->
+    <bean class="com.github.jspxnet.txweb.dao.impl.OptionDAOImpl" singleton="true" >
+        <!--<ref name="soberFactory">${soberFactory}</ref>-->
+        <string name="folder">${resPath}option/</string>
+    </bean>
+    <bean id="option" class="com.github.jspxnet.txweb.view.OptionProvider" singleton="true" />
+    <bean class="com.github.jspxnet.txweb.action.OptionAction" singleton="true" />
+    <!--基本字典库 end-->
+    <bean class="com.github.jspxnet.txweb.dao.impl.MemberDAOImpl" singleton="true">
+    </bean>
+
+    <bean id="globalAction" class="com.github.jspxnet.txweb.support.DefaultTemplateAction" singleton="false" />
+
+</sioc>

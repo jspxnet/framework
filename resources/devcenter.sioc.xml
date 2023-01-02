@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<multi-siocs>
+    <sioc namespace="devcenter" extends="global" application="开发者中心">
+        <load file="ioc/definterceptor.xml" />
+        <load file="ioc/permission.xml" softName="devcenter" />
+        <load file="ioc/config.xml" softName="devcenter" />
+        <scan package="com.github.jspxnet.txweb.devcenter"/>
+    </sioc>
+
+    <sioc namespace="dynout" extends="global" application="开发者中心动态输出">
+        <load file="ioc/config.xml" softName="dynout" />
+        <scan package="com.github.jspxnet.txweb.devcenter"/>
+    </sioc>
+</multi-siocs>
