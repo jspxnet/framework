@@ -432,8 +432,6 @@ public final class ParamUtil {
                         //没有值的保留为空
                         paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
                     }
-<<<<<<< HEAD
-=======
                     else
                     {
                         Operate operate = exeMethod.getAnnotation(Operate.class);
@@ -454,7 +452,6 @@ public final class ParamUtil {
                             }
                         }
                     }
->>>>>>> dev
                     //-------------
                     //判断是否需要放入默认参数
                     if (paramObj[i] == null && !StringUtil.empty.equals(param.value())) {
@@ -463,19 +460,12 @@ public final class ParamUtil {
                     } else if (paramObj[i] == null && ClassUtil.isBaseNumberType(pType)) {
                         paramObj[i] = 0;
                     }
+
                     if (isPutDefaultValue(paramObj[i] , param,pType))
                     {
                         paramObj[i] = getDefaultParam(param, pType);
                     }
 
-<<<<<<< HEAD
-=======
-                    if (isPutDefaultValue(paramObj[i] , param,pType))
-                    {
-                        paramObj[i] = getDefaultParam(param, pType);
-                    }
-
->>>>>>> dev
                     isRequired(action, param, paramName, paramObj[i]);
                     if (action.hasFieldInfo()) {
                         return paramObj;

@@ -50,12 +50,8 @@ public final class BeanUtil {
             return;
         }
         //map 的
-<<<<<<< HEAD
-        if (object instanceof Map) {
-=======
 
         if (object instanceof Map && !(object instanceof PropertyContainer)) {
->>>>>>> dev
             Map<String,Object> map = (Map<String,Object>) object;
             map.put(methodName, obj);
             return;
@@ -434,11 +430,7 @@ public final class BeanUtil {
      * @param jump      跳过不满足条件的方法,并且不会报错
      * @return 返回对象
      */
-<<<<<<< HEAD
-    @SuppressWarnings("unchecked")
-=======
     //@SuppressWarnings("unchecked")
->>>>>>> dev
     public static Object getProperty(Object object, String name, Object[] parameter, boolean jump) {
         if (!StringUtil.hasLength(name)) {
             return null;
@@ -713,11 +705,7 @@ public final class BeanUtil {
      * @param newData 得到属性的bean
      */
     @SuppressWarnings("unchecked")
-<<<<<<< HEAD
-    public static void copyFiledValue(Object getData,Object oldData) {
-=======
     public static void copyFiledValue(Object getData,Object newData) {
->>>>>>> dev
 
         if (getData instanceof JSONObject) {
             getData = ((JSONObject) getData).toMap();
@@ -768,10 +756,6 @@ public final class BeanUtil {
                     continue;
                 }
                 if (field.getName().equals(setField.getName())) {
-                    if (field.getName().contains("good"))
-                    {
-                        System.out.println(field);
-                    }
                     try {
                         field.setAccessible(true);
                         setField.setAccessible(true);
@@ -782,35 +766,22 @@ public final class BeanUtil {
                         }
                         else if (setField.getGenericType().equals(field.getGenericType()) || ClassUtil.isNumberType(setField.getType()) && ClassUtil.isNumberType(field.getType())) {
                             //todo字符串 和数字类型需要避开
-<<<<<<< HEAD
-                            Object col =field.get(oldData);
-=======
                             Object col =field.get(newData);
->>>>>>> dev
                             if ((col instanceof Collection)&& !ObjectUtil.isEmpty(col))
                             {
                                 Collection coll = (Collection)col;
                                 Object obj = coll.iterator().next();
                                 if (obj!=null)
                                 {
-<<<<<<< HEAD
-                                    Class<?> type = obj.getClass();
-                                    field.set(oldData, copyList((Collection)o,type));
-=======
 
                                     Class<?> type = obj.getClass();
                                     field.set(newData, copyList((Collection)o,type));
->>>>>>> dev
                                 }
                             }
                             else
                             {
-<<<<<<< HEAD
-                                field.set(oldData, o);
-=======
 
                                 field.set(newData, o);
->>>>>>> dev
                             }
                         }
                         else

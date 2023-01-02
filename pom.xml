@@ -5,11 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-<<<<<<< HEAD
-    <version>6.70</version>
-=======
     <version>6.71</version>
->>>>>>> dev
     <description>jspx framework</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,16 +15,6 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.test.skip>true</maven.test.skip>
         <github.global.server>github</github.global.server>
-<<<<<<< HEAD
-        <tomcat.version>9.0.65</tomcat.version>
-        <jackson.version>2.13.3</jackson.version>
-        <redisson.version>3.17.3</redisson.version>
-        <log4j2.version>2.18.0</log4j2.version>
-        <poi.version>5.2.2</poi.version>
-        <jxls.version>2.11.0</jxls.version>
-        <spring.version>5.3.20</spring.version>
-        <logback.version>1.3.0</logback.version>
-=======
         <tomcat.version>9.0.70</tomcat.version>
         <jackson.version>2.14.1</jackson.version>
         <redisson.version>3.19.0</redisson.version>
@@ -39,7 +25,6 @@
         <logback.version>1.3.5</logback.version>
         <slf4j.version>2.0.6</slf4j.version>
         <imageio.version>3.9.4</imageio.version>
->>>>>>> dev
         <!--
         查看依赖树：mvn dependency:tree
         分析依赖树：mvn dependency:analyze
@@ -140,11 +125,7 @@
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
             <version>4.9.4</version>
-<<<<<<< HEAD
-            <scope>provided</scope>
-=======
             <scope>compile</scope>
->>>>>>> dev
         </dependency>
         <dependency>
             <groupId>com.belerweb</groupId>
@@ -169,11 +150,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-<<<<<<< HEAD
-            <version>1.31</version>
-=======
             <version>1.33</version>
->>>>>>> dev
         </dependency>
 
 
@@ -302,11 +279,7 @@
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-core</artifactId>
-<<<<<<< HEAD
-            <version>4.6.1</version>
-=======
             <version>4.6.3</version>
->>>>>>> dev
         </dependency>
         <dependency>
             <groupId>com.aliyun</groupId>
@@ -316,20 +289,12 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-<<<<<<< HEAD
-            <version>1.2.83</version>
-=======
             <version>2.0.22</version>
->>>>>>> dev
         </dependency>
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
-<<<<<<< HEAD
-            <version>3.15.1</version>
-=======
             <version>3.16.0</version>
->>>>>>> dev
         </dependency>
         <dependency>
             <groupId>com.atomikos</groupId>
@@ -391,20 +356,12 @@
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-core</artifactId>
-<<<<<<< HEAD
-            <version>3.8.3</version>
-=======
             <version>${imageio.version}</version>
->>>>>>> dev
         </dependency>
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-jpeg</artifactId>
-<<<<<<< HEAD
-            <version>3.8.3</version>
-=======
             <version>${imageio.version}</version>
->>>>>>> dev
         </dependency>
         <dependency>
             <groupId>com.drewnoakes</groupId>
@@ -465,15 +422,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-<<<<<<< HEAD
-            <version>42.5.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.30</version>
-=======
             <version>42.5.1</version>
             <scope>provided</scope>
         </dependency>
@@ -481,7 +429,6 @@
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>8.0.31</version>
->>>>>>> dev
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
@@ -498,20 +445,12 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-<<<<<<< HEAD
-            <version>3.21.5</version>
-=======
             <version>3.21.12</version>
->>>>>>> dev
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-<<<<<<< HEAD
-            <version>2.9.1</version>
-=======
             <version>2.10</version>
->>>>>>> dev
         </dependency>
         <!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
         <dependency>
@@ -523,23 +462,13 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-<<<<<<< HEAD
-            <version>4.1.80.Final</version>
-=======
             <version>4.1.86.Final</version>
->>>>>>> dev
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
-<<<<<<< HEAD
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
-=======
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
->>>>>>> dev
         </dependency>
         <!--测试基础支持end -->
         <!-- https://mvnrepository.com/artifact/com.thetransactioncompany/cors-filter -->
@@ -596,21 +525,13 @@
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-project-info-reports-plugin</artifactId>
-<<<<<<< HEAD
-            <version>3.3.0</version>
-=======
             <version>3.4.1</version>
->>>>>>> dev
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-<<<<<<< HEAD
-            <version>3.1.2</version>
-=======
             <version>3.2.0</version>
->>>>>>> dev
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -643,23 +564,9 @@
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
- <!--       <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.2.7</version>
-        </dependency>-->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
-<<<<<<< HEAD
-            <exclusions>
-=======
               <exclusions>
->>>>>>> dev
                 <exclusion>
                     <groupId>*</groupId>
                     <artifactId>*</artifactId>
@@ -671,14 +578,6 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>7.2</version>
-<<<<<<< HEAD
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j2.version}</version>
-=======
->>>>>>> dev
         </dependency>
 
         <dependency>
@@ -751,13 +650,6 @@
             <artifactId>spotbugs-annotations</artifactId>
             <version>4.7.1</version>
         </dependency>
-
-        <!--        <dependency>
-                    <groupId>com.google.code.findbugs</groupId>
-                    <artifactId>annotations</artifactId>
-                    <version>4.7.0</version>
-                    <scope>compile</scope>
-                </dependency>-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
@@ -1063,20 +955,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-<<<<<<< HEAD
-                <version>3.1.2</version>
-=======
                 <version>3.2.0</version>
->>>>>>> dev
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jxr-plugin</artifactId>
-<<<<<<< HEAD
-                <version>3.2.0</version>
-=======
                 <version>[3.2.0.)</version>
->>>>>>> dev
             </plugin>
         </plugins>
     </reporting>

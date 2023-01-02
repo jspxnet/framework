@@ -7,13 +7,8 @@ import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.tag.BeanElement;
-<<<<<<< HEAD
-import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.sober.annotation.Table;
-=======
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.config.SoberTable;
->>>>>>> dev
 import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.txweb.WebConfigManager;
@@ -264,11 +259,8 @@ public class ApiDocView extends ActionSupport {
         SoberTable soberTable = AnnotationUtil.getSoberTable(builderClass,0);
         return BeanUtil.copy(soberTable,SoberTableDto.class);
     }
-<<<<<<< HEAD
-=======
 
 
->>>>>>> dev
 /*
     public static void main(String[] arg) throws Exception {
 

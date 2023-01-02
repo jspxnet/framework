@@ -41,10 +41,7 @@ import com.github.jspxnet.txweb.Interceptor;
 import com.github.jspxnet.txweb.annotation.*;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
-<<<<<<< HEAD
-=======
 import com.github.jspxnet.txweb.dao.GenericDAO;
->>>>>>> dev
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.dispatcher.handle.CommandHandle;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
@@ -145,7 +142,6 @@ public final class TXWebUtil {
 
             if (action.getRequest() instanceof MultipartRequest) {
                 continue;
-<<<<<<< HEAD
             }
             FileCoveringPolicyEnumType fileCoveringPolicy = mulRequest.covering();
             if (FileCoveringPolicyEnumType.Method.equals(mulRequest.covering()) && ClassUtil.isDeclaredMethod(action.getClass(), "covering")) {
@@ -153,15 +149,6 @@ public final class TXWebUtil {
                 int covering = ObjectUtil.toInt(BeanUtil.getProperty(action, "covering"));
                 fileCoveringPolicy = FileCoveringPolicyEnumType.find(covering);
             }
-=======
-            }
-            FileCoveringPolicyEnumType fileCoveringPolicy = mulRequest.covering();
-            if (FileCoveringPolicyEnumType.Method.equals(mulRequest.covering()) && ClassUtil.isDeclaredMethod(action.getClass(), "covering")) {
-
-                int covering = ObjectUtil.toInt(BeanUtil.getProperty(action, "covering"));
-                fileCoveringPolicy = FileCoveringPolicyEnumType.find(covering);
-            }
->>>>>>> dev
 
             MultipartRequest multipartRequest;
             if ("cos".equalsIgnoreCase(mulRequest.component())) {
@@ -849,13 +836,8 @@ public final class TXWebUtil {
         }
         return exeMethod;
     }
-<<<<<<< HEAD
 
 
-=======
-
-
->>>>>>> dev
     /**
      * @param url         url 路径
      * @param actionClass action类型
@@ -1276,80 +1258,9 @@ public final class TXWebUtil {
             } catch (Exception e) {
                 log.debug("打印错误信息发生错误", e);
             }
-<<<<<<< HEAD
         }
     }
 
-    /**
-     * @return 创建默认环境
-     */
-    public static Map<String, Object> createEnvironment() {
-        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        Map<String, Object> venParams = new HashMap<>(50);
-        venParams.put(Environment.filterSuffix, envTemplate.getString(Environment.filterSuffix));
-        venParams.put(Environment.ApiFilterSuffix, envTemplate.getString(Environment.ApiFilterSuffix));
-        venParams.put(Environment.templateSuffix, envTemplate.getString(Environment.templateSuffix));
-        venParams.put(Environment.encode, Dispatcher.getEncode());
-        venParams.put(Environment.remoteHostUrl, envTemplate.getString(Environment.remoteHostUrl, StringUtil.empty));
-        venParams.put(Environment.scriptPath, envTemplate.getString(Environment.scriptPath, "/script"));
-        venParams.put(Environment.sitePath, envTemplate.getString(Environment.sitePath, "/"));
-        venParams.put(Environment.userLoginUrl, envTemplate.getString(Environment.userLoginUrl, "/user/login." + envTemplate.getString(Environment.filterSuffix)));
-        venParams.put(Environment.DEBUG, envTemplate.getBoolean(Environment.DEBUG));
-        venParams.put("date", new Date());
-        return venParams;
-    }
-
-    /**
-     * action在组建模式下运行 保存的key
-     * @param clas 类书籍
-     * @param hashCode hash
-     * @return key
-     */
-    public static String getComponentEnvKey(Class<?> clas,int hashCode) {
-        return clas.getName() + "_" + hashCode;
-    }
-
-
-
-    /**
-     * 创建方法拦截器
-     * @param array 拦截器配置
-     * @param namespace 命名空间
-     * @return 返回拦截器列表
-     */
-    public static LinkedList<Interceptor> builderMethodInterceptor(String[] array,String namespace)
-    {
-        LinkedList<Interceptor> list = new LinkedList<>();
-        if (!ObjectUtil.isEmpty(array))
-        {
-            BeanFactory beanFactory = EnvFactory.getBeanFactory();
-            for (String className:array)
-            {
-                if (StringUtil.isNull(className))
-                {
-                    continue;
-                }
-                Interceptor interceptor;
-                if (className.contains(StringUtil.AT))
-                {
-                    interceptor = (Interceptor)beanFactory.getBean(className);
-                } else
-                {
-                    interceptor = (Interceptor)beanFactory.getBean(className,namespace);
-                }
-                if (interceptor!=null)
-                {
-                    list.addLast(interceptor);
-                }
-            }
-=======
->>>>>>> dev
-        }
-        return list;
-    }
-
-<<<<<<< HEAD
-=======
     /**
      * @return 创建默认环境
      */
@@ -1416,5 +1327,4 @@ public final class TXWebUtil {
         return list;
     }
 
->>>>>>> dev
 }

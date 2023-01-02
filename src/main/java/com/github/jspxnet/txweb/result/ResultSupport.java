@@ -189,22 +189,16 @@ public abstract class ResultSupport implements Result {
         } else {
             //什么都没有的情况返回提示信息
             Method method = actionContext.getMethod();
-<<<<<<< HEAD
-=======
 
->>>>>>> dev
             if (actionContext.hasFieldInfo())
             {
                 //有错误信息
                 return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), actionContext.getFieldInfo());
             } else
-<<<<<<< HEAD
-=======
             if (actionContext.getResult()==null&&method.getGenericReturnType().equals(Void.TYPE) && action.hasActionMessage()) {
                 //如果是void 无返回类型,将就用消息返回
                 return RocResponse.success(null,action.getSuccessMessage());
             } else
->>>>>>> dev
             if (method==null||ActionEnv.DEFAULT_EXECUTE.equals(method.getName())&&actionContext.getResult()==null)
             {
                 //没有找到执行的方法

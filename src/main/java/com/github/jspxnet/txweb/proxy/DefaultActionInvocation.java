@@ -553,10 +553,6 @@ public class DefaultActionInvocation implements ActionInvocation {
      *  只为了兼容老版本
      * @return 返回是否已经执行
      */
-<<<<<<< HEAD
-    @Deprecated
-=======
->>>>>>> dev
     @Override
     public boolean isExecuted() {
         ActionContext actionContext = ThreadContextHolder.getContext();
@@ -568,19 +564,13 @@ public class DefaultActionInvocation implements ActionInvocation {
      * 只为了兼容
      * @return 返回action name
      */
-<<<<<<< HEAD
-=======
 /*
->>>>>>> dev
     @Deprecated
     @Override
     public String getActionName() {
         ActionContext actionContext = ThreadContextHolder.getContext();
         return actionContext.getActionName();
     }
-<<<<<<< HEAD
-=======
 */
->>>>>>> dev
 
 }

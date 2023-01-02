@@ -3298,8 +3298,6 @@ public class StringUtil {
         return newName;
     }
 
-<<<<<<< HEAD
-=======
 
     public static Map<String, String> queryStringToMap(String str)
     {
@@ -3324,7 +3322,6 @@ public class StringUtil {
         }
         return result;
     }
->>>>>>> dev
 
 
 }

@@ -14,10 +14,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
-<<<<<<< HEAD
-=======
 import com.github.jspxnet.sober.model.container.PropertyContainer;
->>>>>>> dev
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.util.StringMap;
