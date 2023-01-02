@@ -9,28 +9,12 @@
  */
 package com.github.jspxnet.sober.jdbc;
 
-<<<<<<< HEAD
-import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.boot.environment.Placeholder;
-import com.github.jspxnet.cache.*;
-import com.github.jspxnet.cache.core.JSCache;
-import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.scriptmark.ScriptRunner;
-import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
-=======
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.*;
->>>>>>> dev
 import com.github.jspxnet.sober.*;
 import com.github.jspxnet.txweb.table.meta.OperatePlug;
 import com.github.jspxnet.sober.config.SoberColumn;
-<<<<<<< HEAD
-import com.github.jspxnet.sober.config.SoberNexus;
-import com.github.jspxnet.sober.config.SoberTable;
-=======
->>>>>>> dev
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.dialect.Dialect;
@@ -58,10 +42,6 @@ import java.util.*;
  */
 @Slf4j
 public abstract class JdbcOperations implements SoberSupport {
-<<<<<<< HEAD
-    private Dialect dialect = null;
-=======
->>>>>>> dev
     private SqlMapClient sqlMapClient = null;
     private SqlMapBase sqlMapBase = null;
     private SoberFactory soberFactory;
@@ -125,50 +105,6 @@ public abstract class JdbcOperations implements SoberSupport {
         return soberFactory.getTableModels(cla, this);
     }
 
-
-    /**
-     * 并且根据数据模型自动创建缓存,
-     * @param dto 是否包含DTO
-     * @return 得到所有表结构的模型
-     */
-    @Override
-    public Map<String,TableModels> getAllTableModels(boolean dto) {
-
-        String cacheKey = Environment.KEY_SOBER_TABLE_CACHE + "_" + ObjectUtil.toInt(dto);
-        Map<String, TableModels> result = null;
-        if (soberFactory.isUseCache())
-        {
-            result = (Map<String,TableModels>)JSCacheManager.get(DefaultCache.class,cacheKey);
-            if (!ObjectUtil.isEmpty(result))
-            {
-                return result;
-            }
-        }
-        result = new HashMap<>();
-        List<SoberTable> list = SoberUtil.getScanTableAnnotationList(dto);
-        for (SoberTable table:list)
-        {
-            result.put(table.getId(),table);
-            CacheManager cacheManager = JSCacheManager.getCacheManager();
-            if (table.isUseCache() && cacheManager.containsKey(table.getClassName()))
-            {
-                Cache cache = cacheManager.getCache(DefaultCache.class);
-                Map<String,String> configMap = new HashMap<>();
-                configMap.put("name",table.getClassName());
-                configMap.put("keepTime",ObjectUtil.toString(cache.getSecond()));
-                configMap.put("maxElements",ObjectUtil.toString(cache.getMaxElements()));
-                configMap.put("eternal",ObjectUtil.toString(cache.isEternal()));
-                configMap.put("diskStorePath",null);
-                IStore store = (IStore)EnvFactory.getBeanFactory().getBean(Environment.DEFAULT_STORE,Environment.CACHE);
-                JSCacheManager.getCacheManager().createCache(store,configMap);
-            }
-        }
-        if (soberFactory.isUseCache())
-        {
-            JSCacheManager.put(DefaultCache.class,cacheKey,result);
-        }
-        return result;
-    }
     /**
      *
      * @param tableName  类
@@ -259,43 +195,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public <T> T loadColumnsValue(Class<T> tClass, ResultSet resultSet) throws Exception {
-<<<<<<< HEAD
-        T result;
-        if (Map.class.isAssignableFrom(tClass)||HashMap.class.isAssignableFrom(tClass)||List.class.isAssignableFrom(tClass))
-        {
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            Map<String, Object> beanMap = new HashMap<>();
-            for (int n = 1; n <= metaData.getColumnCount(); n++) {
-                String field = StringUtil.underlineToCamel(metaData.getColumnLabel(n));
-                Object value = dialect.getResultSetValue(resultSet, n);
-                beanMap.put(field, value);
-            }
-            result = (T)beanMap;
-        } else
-        {
-            TableModels soberTable = getSoberTable(tClass);
-            result = tClass.newInstance();
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int count = metaData.getColumnCount();
-            for (int i = 1; i <= count; i++) {
-                String dbFiled = metaData.getColumnLabel(i);
-                SoberColumn soberColumn = soberTable.getColumn(dbFiled);
-                if (soberColumn != null) {
-                    Object obj = dialect.getResultSetValue(resultSet, i);
-                    BeanUtil.setFieldValue(result, soberColumn.getName(), obj);
-                } else if (ClassUtil.getDeclaredField(result.getClass(), dbFiled) != null) {
-                    BeanUtil.setFieldValue(result, dbFiled, dialect.getResultSetValue(resultSet, i));
-                }
-            }
-        }
-        if (String.class.isAssignableFrom(tClass))
-        {
-            return (T)ObjectUtil.getJson(result);
-        }
-        return result;
-=======
         return JdbcUtil.loadColumnsValue(this, getDialect(),tClass,resultSet);
->>>>>>> dev
     }
 
     /**
@@ -305,69 +205,8 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 计算结果
      */
     @Override
-<<<<<<< HEAD
-    @SuppressWarnings("unchecked")
-    public Object calcUnique(TableModels soberTable, Object inObj)  {
-        if (inObj == null || soberTable == null) {
-            return inObj;
-        }
-        Map<String, SoberCalcUnique> calcUniqueMap = soberTable.getCalcUniqueMap();
-        if (ObjectUtil.isEmpty(calcUniqueMap))
-        {
-            return inObj;
-        }
-        Object obj= inObj;
-        if (inObj instanceof String)
-        {
-            obj = new JSONObject((String)inObj).parseObject(soberTable.getEntity());
-        }
-        ////////////////////////////CalcUnique
-
-        for (String colName : calcUniqueMap.keySet()) {
-            SoberCalcUnique soberCalcUnique = calcUniqueMap.get(colName);
-            Map<String, Object> valueMap = new HashMap<>();
-            Class<?>[] classArray = soberCalcUnique.getEntity();
-            if (classArray != null) {
-                for (Class<?> aClassArray : classArray) {
-
-                    String tableName = StringUtil.uncapitalize(aClassArray.getSimpleName());
-                    if (!StringUtil.hasLength(tableName)) {
-                        tableName = aClassArray.getName();
-                    }
-                    valueMap.put(tableName, getTableName(aClassArray));
-                }
-            }
-            String sqlText = dialect.processSql(soberCalcUnique.getSql(), valueMap);
-            try {
-                Object[] param = null;
-                if (!ArrayUtil.isEmpty(soberCalcUnique.getValue())) {
-                    for (String key : soberCalcUnique.getValue()) {
-                        param = ArrayUtil.add(param, BeanUtil.getProperty(obj, key));
-                    }
-                }
-                if (obj instanceof Map)
-                {
-                    Map<String,Object> temp = (Map<String,Object>)obj;
-                    temp.put(colName,getUniqueResult(sqlText, param));
-                } else
-                {
-                    BeanUtil.setSimpleProperty(obj, colName, getUniqueResult(sqlText, param));
-                }
-            } catch (Exception e) {
-                log.error(soberTable.getName() + ":" + sqlText, e);
-                e.printStackTrace();
-            }
-        }
-        ////////////////////////////
-        if (inObj instanceof String)
-        {
-            return new JSONObject(obj).toString();
-        }
-        return obj;
-=======
     public Object calcUnique(TableModels soberTable, Object inObj)  {
         return JdbcUtil.calcUnique(this, getDialect(),soberTable,inObj);
->>>>>>> dev
     }
 
     /**
@@ -389,90 +228,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public void loadNexusList(TableModels soberTable, List<?> list) {
-<<<<<<< HEAD
-        if (ObjectUtil.isEmpty(list))
-        {
-            return;
-        }
-        Map<String, SoberNexus> nexus = soberTable.getNexusMap();
-        Placeholder placeholder = EnvFactory.getPlaceholder();
-        for (String colName : nexus.keySet()) {
-            SoberNexus soberNexus = nexus.get(colName);
-            if ((MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping()) || MappingType.ManyToOne.equalsIgnoreCase(soberNexus.getMapping()))
-                    && (StringUtil.isNull(soberNexus.getWhere())|| !StringUtil.isNull(soberNexus.getWhere())
-                    && ObjectUtil.toBoolean(placeholder.processTemplate(ObjectUtil.getMap(list.get(0)), soberNexus.getWhere()))))
-            {
-                List<Object> idList = BeanUtil.copyFieldList(list,soberNexus.getField());
-                Criteria criteria = createCriteria(soberNexus.getTargetEntity());
-                criteria = criteria.add(Expression.in(soberNexus.getTargetField(), idList));
-                if (!StringUtil.isNull(soberNexus.getTerm())) {
-                    String term = soberNexus.getTerm();
-                    term = AnnotationUtil.getNexusTerm(list.get(0),term);
-                    criteria = SSqlExpression.getTermExpression(criteria, term);
-                }
-                criteria = criteria.setCurrentPage(1).setTotalCount(idList.size());
-                List<Object> loadObjectList = criteria.list(soberNexus.isChain());
-                if (ObjectUtil.isEmpty(loadObjectList))
-                {
-                    continue;
-                }
-                for (Object obj:list)
-                {
-                    Object objField = BeanUtil.getProperty(obj,soberNexus.getField());
-                    if (objField==null)
-                    {
-                        continue;
-                    }
-                    for (Object loadObj:loadObjectList)
-                    {
-                        if (objField.equals(BeanUtil.getProperty(loadObj,soberNexus.getTargetField())))
-                        {
-                            BeanUtil.setFieldValue(obj,colName,loadObj);
-                        }
-                    }
-                }
-            }
-            else if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
-                List<Object> idList = BeanUtil.copyFieldList(list,soberNexus.getField());
-                for (Object obj:list)
-                {
-                    Criteria criteria = createCriteria(soberNexus.getTargetEntity());
-                    criteria = criteria.add(Expression.in(soberNexus.getTargetField(), idList));
-                    if (!StringUtil.isNull(soberNexus.getTerm())) {
-                        String term = soberNexus.getTerm();
-                        term = AnnotationUtil.getNexusTerm(obj,term);
-                        criteria = SSqlExpression.getTermExpression(criteria, term);
-                    }
-                    criteria = criteria.setCurrentPage(1).setTotalCount(getMaxRows());
-                    List<Object> loadObjectList = criteria.list(soberNexus.isChain());
-                    List<Object> valueLstCache = new ArrayList<>();
-                    for (Object loadObj:loadObjectList)
-                    {
-                        if (loadObj==null)
-                        {
-                            continue;
-                        }
-
-                        //对应id对象
-                        Object objField = BeanUtil.getFieldValue(obj, soberNexus.getField(),false);
-                        if (objField==null)
-                        {
-                            continue;
-                        }
-                        Object keyField = BeanUtil.getFieldValue(loadObj,soberNexus.getTargetField(),false);
-                        if (objField.equals(keyField))
-                        {
-                            valueLstCache.add(loadObj);
-                        }
-                        BeanUtil.setSimpleProperty(obj, colName, valueLstCache);
-                    }
-                }
-            }
-        }
-
-=======
         JdbcUtil.loadNexusList(this, soberTable, list);
->>>>>>> dev
     }
     /**
      * @param soberTable 结构
@@ -480,60 +236,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public void loadNexusValue(TableModels soberTable, Object result) {
-<<<<<<< HEAD
-        if (result == null) {
-            return;
-        }
-        try {
-            Map<String, SoberNexus> nexus = soberTable.getNexusMap();
-            for (String colName : nexus.keySet()) {
-                SoberNexus soberNexus = nexus.get(colName);
-                Placeholder placeholder = EnvFactory.getPlaceholder();
-                if ((MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping()) || MappingType.ManyToOne.equalsIgnoreCase(soberNexus.getMapping()))
-                        && (StringUtil.isNull(soberNexus.getWhere())|| !StringUtil.isNull(soberNexus.getWhere()) && ObjectUtil.toBoolean(placeholder.processTemplate(ObjectUtil.getMap(result), soberNexus.getWhere())))) {
-
-                    Object findValue = BeanUtil.getProperty(result, soberNexus.getField());
-                    String term = AnnotationUtil.getNexusTerm(result, soberNexus.getTerm());
-
-                    TableModels targetModels = getSoberTable(soberNexus.getTargetEntity());
-                    SoberColumn soberColumn = targetModels.getColumn(soberNexus.getTargetField());
-                    if (soberColumn == null) {
-                        continue;
-                    }
-                    Class<?> classType = soberColumn.getClassType();
-                    //id 为 0 的时候不查询
-                    if ((classType == Long.class || classType == long.class || classType == Integer.class || classType == int.class) && ObjectUtil.toInt(findValue) == 0) {
-                        continue;
-                    }
-                    List<?> childList =  getFindFieldList(soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) findValue, term, AnnotationUtil.getNexusOrderBy(result, soberNexus.getOrderBy()), false, 1);
-                    if (!childList.isEmpty()) {
-                        Object chainObj = childList.get(0);
-                        if (soberNexus.isChain() && chainObj != null) {
-                            TableModels cSoberTable = getSoberTable(chainObj.getClass());
-                            loadNexusValue(cSoberTable, chainObj);
-                        }
-                        BeanUtil.setSimpleProperty(result, colName, chainObj);
-                    }
-                } else if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
-                    //对应id对象
-                    Object findValue = BeanUtil.getProperty(result, soberNexus.getField());
-                    //条件
-                    String term = AnnotationUtil.getNexusTerm(result, soberNexus.getTerm());
-                    //数据个数
-                    int length = AnnotationUtil.getNexusLength(result, soberNexus.getLength(), getMaxRows());
-                    //查询得到列表
-                    List<?> childList = getFindFieldList(soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) findValue, term, AnnotationUtil.getNexusOrderBy(result, soberNexus.getOrderBy()), soberNexus.isChain(), length);
-                    BeanUtil.setSimpleProperty(result, colName, childList);
-                }
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("载入关系表错误" + soberTable.toString() + "对象" + result, e);
-        }
-=======
         JdbcUtil.loadNexusValue(this,soberTable,result);
->>>>>>> dev
     }
 
 
@@ -573,64 +276,6 @@ public abstract class JdbcOperations implements SoberSupport {
     public <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild) {
         return JdbcUtil.load(this,aClass,field,serializable,loadChild);
     }
-<<<<<<< HEAD
-    /**
-     * 查询字段返回一个对象,从缓存中起，查询后放入缓存
-     * 如果为空，如果为空就创建对象,返回永远不为空
-     *
-     * @param aClass       类
-     * @param <T> 类型
-     * @param field        字段
-     * @param serializable 字段值
-     * @return Object 得到对象
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild, boolean loadUseCache)
-    {
-        if (aClass==null)
-        {
-            return null;
-        }
-        if ((serializable == null || field == null && (ClassUtil.isNumberType(serializable.getClass())
-                && ObjectUtil.toLong(serializable) == 0)) || ObjectUtil.isEmpty(serializable)) {
-            try {
-                return aClass.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-        //安全防范，如果有  or and where 这种关键字的，直接返回 空
-        TableModels soberTable = getSoberTable(aClass);
-        if (field == null) {
-            field = soberTable.getPrimary();
-        }
-
-        if (!StringUtil.hasLength((String) field)) {
-            log.error(aClass + " SQL Primary is NULL,配置表没设置ID");
-            return null;
-        }
-
-        T result;
-        //取出cache
-        String cacheKey = null;
-        boolean useCache = loadUseCache && soberFactory.isUseCache() && soberTable.isUseCache();
-        if (useCache) {
-            cacheKey = SoberUtil.getLoadKey(aClass, field, serializable, loadChild);
-            result = (T) JSCacheManager.get(aClass, cacheKey);
-            if (!ObjectUtil.isEmpty(result) && aClass.equals(result.getClass())) {
-                return result;
-            }
-        }
-
-        result = get(aClass,  field,  serializable,  loadChild);
-        //放入cache
-        if (useCache&&result!=null) {
-            JSCacheManager.put(aClass, cacheKey, result);
-        }
-=======
->>>>>>> dev
 
 
     /**
@@ -671,70 +316,8 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return Object 得到对象
      */
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T get(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild)
     {
-<<<<<<< HEAD
-        TableModels soberTable = getSoberTable(aClass);
-        if (field == null) {
-            field = soberTable.getPrimary();
-        }
-
-        if (!StringUtil.hasLength((String) field)) {
-            log.error(aClass + " SQL Primary is NULL,配置表没设置ID");
-            return null;
-        }
-
-        T result = null;
-        Connection conn = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_FIELD_NAME, field);
-
-        String sqlText = StringUtil.empty;
-        try {
-            conn = getConnection(SoberEnv.READ_ONLY);
-            if (conn == null) {
-                String info = "得到链接为空，数据库连接池不能正常连接,Connection is null";
-                SQLException e = new SQLException(info);
-                log.error(info, e);
-                throw e;
-            }
-            sqlText = dialect.processTemplate(Dialect.SQL_QUERY_ONE_FIELD, valueMap);
-            debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                preparedStatement = conn.prepareStatement(sqlText);
-            } else {
-                preparedStatement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            }
-            preparedStatement.setMaxRows(1);
-            debugPrint("prepared[1]=" + serializable);
-            dialect.setPreparedStatementValue(preparedStatement, 1, serializable);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                result = loadColumnsValue(aClass, resultSet);
-                //载入映射对象
-                if (loadChild) {
-                    loadNexusValue(soberTable, result);
-                }
-                //载入计算数据
-                result = (T)calcUnique(soberTable, result);
-            }
-        } catch (Exception e) {
-            log.error("sql:" + sqlText, e);
-            throw new IllegalArgumentException("sql:" + sqlText);
-        } finally {
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(preparedStatement);
-            JdbcUtil.closeConnection(conn);
-            valueMap.clear();
-        }
-        return result;
-=======
         return JdbcUtil.get(this, getDialect(),aClass,field,serializable,loadChild);
     }
 
@@ -752,44 +335,6 @@ public abstract class JdbcOperations implements SoberSupport {
         TableModels soberTable = getSoberTable(aClass);
         String field = soberTable.getPrimary();
         return load(aClass,  field, serializables, true);
->>>>>>> dev
-    }
-
-    /**
-     *
-     * @param aClass 返回实体
-     * @param values 字段值
-     * @param loadChild 是否载入映射
-     * @param <T> 类型
-     * @return 返回列表
-     */
-    @Override
-    public <T> List<T> load(Class<T> aClass, Collection<?> values, boolean loadChild) {
-        //载入一个ID列表
-        TableModels soberTable = getSoberTable(aClass);
-        String field = soberTable.getPrimary();
-        Criteria criteria = createCriteria(aClass);
-        criteria = criteria.add(Expression.in(field, values));
-        criteria = criteria.setCurrentPage(1).setTotalCount(getMaxRows());
-        return criteria.list(loadChild);
-    }
-
-    /**
-     *
-     * @param aClass 返回实体
-     * @param field 查询字段
-     * @param values 字段值
-     * @param loadChild 是否载入映射
-     * @param <T> 类型
-     * @return 返回列表
-     */
-    @Override
-    public <T> List<T> load(Class<T> aClass, String field, Collection<?> values, boolean loadChild) {
-        //载入一个ID列表
-        Criteria criteria = createCriteria(aClass);
-        criteria = criteria.add(Expression.in(field, values));
-        criteria = criteria.setCurrentPage(1).setTotalCount(getMaxRows());
-        return criteria.list(loadChild);
     }
 
     /**
@@ -867,155 +412,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int save(Object object, final boolean child) throws Exception {
-<<<<<<< HEAD
-        if (object == null) {
-            return -2;
-        }
-        if (object instanceof Collection) {
-            return save((Collection<?>) object);
-        }
-        //////////配置验证才能够保存 begin
-        if (soberFactory.isValid()) {
-            validator(object);
-        }
-        //////////配置验证才能够保存 end
-        TableModels soberTable = getSoberTable(object.getClass());
-        if (soberTable==null)
-        {
-            log.error("@Table 标签没有配置:{}",object.getClass());
-            throw  new Exception("@Table 标签没有配置");
-        }
-
-        Object idValue = BeanUtil.getFieldValue(object, soberTable.getPrimary(),false);
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-
-        String sqlText = StringUtil.empty;
-        Connection conn = null;
-        PreparedStatement statement = null;
-        try {
-            //判断是否支持自动生成ID，如果支持，字段中就不包含id字段，否则包含id字段,先自动生成ID
-            String[] fieldArray;
-            if (!soberTable.isAutoId() && dialect.isSupportsSavePoints() && (idValue == null || 0 == ObjectUtil.toLong(idValue))) {
-                fieldArray = soberTable.getFieldArray();
-            } else {
-                //不用支持ID字段，就自动生成ID字段
-                AnnotationUtil.autoSetId(object, soberTable.getPrimary(), this);
-                fieldArray = soberTable.getFullFieldArray();
-            }
-            if (fieldArray == null || fieldArray.length < 1) {
-                return -2;
-            }
-
-            valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
-            valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
-            conn = getConnection(SoberEnv.READ_WRITE);
-            sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
-            if (StringUtil.isNull(sqlText)) {
-                //不破坏连接属性
-                return -2;
-            }
-            if (!soberTable.isAutoId() && dialect.isSupportsSavePoints() && soberTable.isSerial()) {
-                statement = conn.prepareStatement(sqlText, Statement.RETURN_GENERATED_KEYS);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            }
-            debugPrint(sqlText);
-            for (int i = 0; i < fieldArray.length; i++) {
-                debugPrint("prepared[" + (i + 1) + "]=" + BeanUtil.getProperty(object, fieldArray[i]));
-                dialect.setPreparedStatementValue(statement, i + 1, BeanUtil.getProperty(object, fieldArray[i]));
-            }
-            int result = statement.executeUpdate();
-            if (result < 1) {
-                return result;
-            }
-            if (!soberTable.isAutoId() && dialect.isSupportsGetGeneratedKeys() && soberTable.isSerial()) {
-                ResultSet rs = statement.getGeneratedKeys();
-                if (rs.next()) {
-                    BeanUtil.setSimpleProperty(object, soberTable.getPrimary(), dialect.getResultSetValue(rs, 1));
-                }
-                JdbcUtil.closeResultSet(rs);
-            }
-            if (child) {
-                Map<String, SoberNexus>  nexusMap = soberTable.getNexusMap();
-                if (!ObjectUtil.isEmpty(nexusMap))
-                {
-                    // Object keyObj = BeanUtil.getProperty(object, soberTable.getPrimary());
-                    /////////////////////////////保存关联对象begin
-                    Map<String, SoberNexus> nexus = soberTable.getNexusMap();
-                    for (String colName : nexus.keySet()) {
-                        SoberNexus soberNexus = nexus.get(colName);
-                        if (!soberNexus.isSave()) {
-                            continue;
-                        }
-                        if (MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping())) {
-                            Object oneToOneObject = BeanUtil.getProperty(object, colName);
-                            if (oneToOneObject == null) {
-                                continue;
-                            }
-                            Object oneToOneValue = BeanUtil.getProperty(object, soberNexus.getField());
-                            Object v = BeanUtil.getFieldValue(oneToOneObject,soberNexus.getTargetField(),false);
-                            if (ObjectUtil.isEmpty(v) || ((v instanceof Number)&& ObjectUtil.toLong(v)==0))
-                            {
-                                BeanUtil.setSimpleProperty(oneToOneObject, soberNexus.getTargetField(), oneToOneValue);
-                            }
-                            result = result + save(oneToOneObject,soberNexus.isChain());
-                        }
-                        if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
-                            Collection<?> oneToMayObjects = (Collection<?>) BeanUtil.getProperty(object, colName);
-                            if (oneToMayObjects == null || oneToMayObjects.isEmpty()) {
-                                continue;
-                            }
-                            Object oneToManyValue = BeanUtil.getProperty(object, soberNexus.getField());
-                            for (Object o : oneToMayObjects) {
-                                Object v = BeanUtil.getFieldValue(o,soberNexus.getTargetField(),false);
-                                if (ObjectUtil.isEmpty(v) || ((v instanceof Number)&& ObjectUtil.toLong(v)==0))
-                                {
-                                    BeanUtil.setSimpleProperty(o, soberNexus.getTargetField(), oneToManyValue);
-                                }
-                            }
-                            int s = save(oneToMayObjects,soberNexus.isChain());
-                            if (s != oneToMayObjects.size()) {
-                                return -2;
-                            }
-                            result = result + oneToMayObjects.size();
-                            oneToMayObjects.clear();
-                        }
-                    }
-                }
-                //save
-                /////////////////////////////保存关联对象end
-            }
-
-            return result;
-        } catch (Exception e) {
-            SoberColumn soberColumn = soberTable.getColumn(soberTable.getPrimary());
-            if (soberTable.isAutoId()&&soberColumn!=null&&ClassUtil.isNumberType(soberColumn.getClassType()))
-            {
-                String msg = e.getMessage();
-                if (msg!=null&&msg.contains("Duplicate")&&msg.contains("PRIMARY"))
-                {
-                    //关键字重复了,这些去修复一下
-                    AnnotationUtil.fixIdCacheMax(soberTable,object,this);
-                    if (DatabaseEnumType.find(soberFactory.getDatabaseType()).equals(DatabaseEnumType.POSTGRESQL)&&msg.contains("duplicate key value"))
-                    {
-                        //手工修改了数据库的seq,这里尝试修复
-                        AnnotationUtil.postgreSqlFixSeqId(soberTable,this);
-                    }
-                }
-            }
-            log.error(sqlText, e);
-            //在事务中不能关闭连接,关闭了会滚会失败
-            throw e;
-        } finally {
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-            valueMap.clear();
-        }
-=======
       return JdbcUtil.save(this,getDialect(),object,child);
->>>>>>> dev
     }
 
     /**
@@ -1067,89 +464,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int batchSave(Collection<?> collection) throws Exception {
-<<<<<<< HEAD
-        if (collection == null || collection.size() < 1) {
-            return -2;
-        }
-        Object checkObj = collection.iterator().next();
-        TableModels soberTable = getSoberTable(checkObj.getClass());
-        PreparedStatement statement = null;
-
-        Object idValue = BeanUtil.getProperty(checkObj, soberTable.getPrimary());
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-
-        String[] fieldArray;
-        if (!soberTable.isAutoId() && dialect.isSupportsGetGeneratedKeys() && (idValue == null || 0 == ObjectUtil.toLong(idValue))) {
-            fieldArray = soberTable.getFieldArray();
-        } else {
-            //不用支持ID字段，就自动生成ID字段
-            for (Object object : collection) {
-                AnnotationUtil.autoSetId(object, soberTable.getPrimary(), this);
-            }
-            fieldArray = soberTable.getFullFieldArray();
-        }
-        if (fieldArray == null || fieldArray.length < 1) {
-            return -2;
-        }
-
-        valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
-        valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
-
-        int result = 0;
-        String sqlText = StringUtil.empty;
-        Connection conn = getConnection(SoberEnv.WRITE_ONLY);
-        boolean oldAutoCommit = conn.getAutoCommit();
-        try {
-            //先自动生成ID
-            conn.setAutoCommit(false);
-            sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
-            debugPrint(sqlText);
-            if (!soberTable.isAutoId() && dialect.isSupportsGetGeneratedKeys() && soberTable.isSerial()) {
-                statement = conn.prepareStatement(sqlText, Statement.RETURN_GENERATED_KEYS);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            }
-
-            int cm = 0;
-            for (Object object : collection) {
-                cm++;
-                //////////配置验证才能够保存 begin
-                if (soberFactory.isValid()) {
-                    validator(object);
-                }
-                //////////配置验证才能够保存 end
-
-                for (int i = 0; i < fieldArray.length; i++) {
-                    debugPrint("prepared[" + (i + 1) + "]=" + BeanUtil.getProperty(object, fieldArray[i]));
-                    dialect.setPreparedStatementValue(statement, i + 1, BeanUtil.getProperty(object, fieldArray[i]));
-                }
-
-                statement.addBatch();
-                if (cm % 500 == 0) {
-                    result = result + ArrayUtil.sum(statement.executeBatch());
-                    conn.commit();
-                }
-            }
-            if (cm % 500 != 0) {
-                result = result + ArrayUtil.sum(statement.executeBatch());
-                conn.commit();
-            }
-        } catch (Exception e) {
-            log.error("ERROR SQL:" + sqlText, e);
-            e.printStackTrace();
-            throw e;
-        } finally {
-            conn.setAutoCommit(oldAutoCommit);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-            valueMap.clear();
-        }
-        return result;
-=======
         return JdbcUtil.batchSave(this,getDialect(),collection);
->>>>>>> dev
     }
 
     /**
@@ -1261,33 +576,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int deleteNexus(Object o) {
-<<<<<<< HEAD
-        int result = 0;
-        TableModels soberTable = getSoberTable(o.getClass());
-        for (SoberNexus soberNexus : soberTable.getNexusMap().values()) {
-            if (!soberNexus.isDelete()) {
-                continue;
-            }
-            if (!MappingType.ManyToOne.equalsIgnoreCase(soberNexus.getMapping())) {
-                Object selfValue;
-                try {
-                    selfValue = BeanUtil.getProperty(o, soberNexus.getField());
-                    if (selfValue == null) {
-                        continue;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    log.error("映射关系错误:" + o.getClass().getName() + "  方法:" + soberNexus.getField() + "不存在", e);
-                    return -2;
-                }
-                String term = AnnotationUtil.getNexusTerm(o,soberNexus.getTerm());
-                result = result + delete(soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) selfValue,term,soberNexus.isChain());
-            }
-        }
-        return result;
-=======
        return JdbcUtil.deleteNexus(this,o);
->>>>>>> dev
     }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -1312,163 +601,6 @@ public abstract class JdbcOperations implements SoberSupport {
        return JdbcUtil.update(this,getDialect(),object);
     }
 
-<<<<<<< HEAD
-        //////////配置验证才能够保存 end                ;
-        TableModels soberTable = getSoberTable(object.getClass());
-        if (soberTable == null) {
-            return -2;
-        }
-        Connection conn = null;
-        PreparedStatement statement = null;
-        String[] fieldArray = soberTable.getFieldArray();
-        if (ArrayUtil.isEmpty(fieldArray)) {
-            return -2;
-        }
-        fieldArray = ArrayUtil.delete(fieldArray, soberTable.getPrimary(), true);
-
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
-        valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
-        valueMap.put(Dialect.KEY_FIELD_NAME, soberTable.getPrimary());
-        valueMap.put(Dialect.KEY_FIELD_NAME + Dialect.FIELD_QUOTE, JdbcUtil.isQuote(soberTable, soberTable.getPrimary()));
-        Object value = BeanUtil.getProperty(object, soberTable.getPrimary());
-        valueMap.put(Dialect.KEY_FIELD_VALUE, value);
-        if (value == null)
-        {
-            SQLException e = new SQLException("ERROR:SQL,update primary is null,更新的关键字不能为空!");
-            log.error(ObjectUtil.toString(object), e);
-            e.printStackTrace();
-            throw e;
-        }
-
-        int result;
-        String sqlText = StringUtil.empty;
-        try {
-            conn = getConnection(SoberEnv.READ_WRITE);
-            sqlText = dialect.processTemplate(Dialect.SQL_UPDATE, valueMap);
-            debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            }
-
-            setPreparedStatementValueList(statement, fieldArray, object);
-            result = statement.executeUpdate();
-
-            ///////////////////处理关联对象begin
-            Map<String, SoberNexus> nexus = soberTable.getNexusMap();
-            for (String colName : nexus.keySet()) {
-                SoberNexus soberNexus = nexus.get(colName);
-                if (!soberNexus.isUpdate()) {
-                    continue;
-                }
-                if (MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping())) {
-                    Object findValue = BeanUtil.getProperty(object, soberNexus.getField());
-                    if (findValue == null) {
-                        continue;
-                    }
-                    delete(soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) findValue);
-                    Object saveObj = BeanUtil.getProperty(object, colName);
-                    if (saveObj != null) {
-                        result = result + save(saveObj);
-                    }
-                }
-                if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
-                    Object findValue = BeanUtil.getProperty(object, soberNexus.getField());
-                    if (findValue == null) {
-                        continue;
-                    }
-                    Criteria criteria = createCriteria(soberNexus.getTargetEntity()).add(Expression.eq(soberNexus.getTargetField(), findValue));
-                    SSqlExpression.getTermExpression(criteria, soberNexus.getTerm()).delete(false);
-                    Collection<?> saveObjList = (Collection<?>) BeanUtil.getProperty(object, colName);
-                    if (saveObjList != null && !saveObjList.isEmpty()) {
-                        for (Object child : saveObjList) {
-                            BeanUtil.setSimpleProperty(child, soberNexus.getTargetField(), findValue);
-                        }
-                        result = result + save(saveObjList);
-                        evict(soberNexus.getTargetEntity());
-                    }
-                }
-            }
-            ///////////////////处理关联对象end
-        } catch (Exception e) {
-            log.error(sqlText, e);
-            e.printStackTrace();
-            throw e;
-        } finally {
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-            valueMap.clear();
-        }
-        return result;
-    }
-
-    /**
-     * @param object      查询对象
-     * @param updateFiled 更新一个字段
-     * @return 指定更新字段, 特殊不验证了
-     * @throws Exception 异常
-     */
-    @Override
-    public int update(Object object, String[] updateFiled) throws Exception {
-        if (object == null) {
-            return -2;
-        }
-        if (ArrayUtil.isEmpty(updateFiled))
-        {
-            return update(object);
-        }
-        TableModels soberTable = getSoberTable(object.getClass());
-        Connection conn = null;
-        PreparedStatement statement = null;
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_FIELD_LIST, updateFiled);
-        valueMap.put(Dialect.KEY_FIELD_COUNT, updateFiled.length);
-        valueMap.put(Dialect.KEY_FIELD_NAME, soberTable.getPrimary());
-        valueMap.put(Dialect.KEY_FIELD_NAME + Dialect.FIELD_QUOTE, JdbcUtil.isQuote(soberTable, soberTable.getPrimary()));
-        Object value;
-        String sqlText = StringUtil.empty;
-
-        try {
-            value = BeanUtil.getProperty(object, soberTable.getPrimary());
-            valueMap.put(Dialect.KEY_FIELD_VALUE, value);
-            if (valueMap.get(Dialect.KEY_FIELD_VALUE) == null) {
-                throw new SQLException("SQL Primary Key is NULL");
-            }
-            conn = getConnection(SoberEnv.READ_WRITE);
-            sqlText = dialect.processTemplate(Dialect.SQL_UPDATE, valueMap);
-            debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            }
-            //TYPE_FORWARD_ONLY
-            setPreparedStatementValueList(statement, updateFiled, object);
-            return statement.executeUpdate();
-        } catch (Exception e) {
-            log.error(sqlText, e);
-            throw e;
-        } finally {
-            valueMap.clear();
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-            if (soberFactory.isUseCache() && soberTable.isUseCache()) {
-                //同时更新缓存
-                String cacheKey = SoberUtil.getLoadKey(soberTable.getEntity(), soberTable.getPrimary(), BeanUtil.getProperty(object, soberTable.getPrimary()));
-                JSCacheManager.remove(soberTable.getEntity(), cacheKey);
-            }
-        }
-
-    }
-
-    /**
-=======
     /**
      * @param object      查询对象
      * @param updateFiled 更新一个字段
@@ -1481,7 +613,6 @@ public abstract class JdbcOperations implements SoberSupport {
     }
 
     /**
->>>>>>> dev
      *
      * @param sql 简单sql
      * @return sql执行更新
@@ -1554,177 +685,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int saveOrUpdate(Object object) throws Exception {
-<<<<<<< HEAD
-        if (object == null) {
-            return -2;
-        }
-        if (object instanceof Collection) {
-            return saveOrUpdateAll((Collection<?>) object);
-        }
-        //////////配置验证才能够保存 begin
-        if (soberFactory.isValid()) {
-            validator(object);
-        }
-        //////////配置验证才能够保存 end
-
-        TableModels soberTable = getSoberTable(object.getClass());
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-
-        String[] fieldArray = soberTable.getFieldArray();
-        if (fieldArray == null || fieldArray.length < 1) {
-            return -2;
-        }
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
-        valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
-        valueMap.put(Dialect.KEY_FIELD_NAME, soberTable.getPrimary());
-        valueMap.put(Dialect.KEY_FIELD_NAME + Dialect.FIELD_QUOTE, JdbcUtil.isQuote(soberTable, soberTable.getPrimary()));
-        valueMap.put(Dialect.KEY_FIELD_VALUE, BeanUtil.getProperty(object, soberTable.getPrimary()));
-        if (valueMap.get(Dialect.KEY_FIELD_VALUE) == null) {
-            if (dialect.isSupportsGetGeneratedKeys() && soberTable.isAutoId() && soberTable.isSerial()) {
-                return save(object);
-            } else {
-                throw new SQLException("SQL Primary is NULL");
-            }
-        }
-        String sqlText = StringUtil.empty;
-        Connection conn = null;
-        try {
-            conn = getConnection(SoberEnv.READ_WRITE);
-            sqlText = dialect.processTemplate(Dialect.SQL_HAVE, valueMap);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            }
-            debugPrint(sqlText);
-            resultSet = statement.executeQuery();
-            if (resultSet.next() && resultSet.getInt(1) > 0) {
-                fieldArray = ArrayUtil.delete(fieldArray, soberTable.getPrimary(), true);
-                valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
-                valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
-                sqlText = dialect.processTemplate(Dialect.SQL_UPDATE, valueMap);
-                debugPrint(sqlText);
-                statement = conn.prepareStatement(sqlText);
-                setPreparedStatementValueList(statement, fieldArray, object);
-            } else {
-                sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
-                debugPrint(sqlText);
-                if (!dialect.supportsConcurReadOnly()) {
-                    statement = conn.prepareStatement(sqlText);
-                } else {
-                    statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                }
-                setPreparedStatementValueList(statement, fieldArray, object);
-            }
-            return statement.executeUpdate();
-        } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
-            throw e;
-        } finally {
-            valueMap.clear();
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-        }
-    }
-
-    /**
-     * 先判断是否存在,存在就使用更新,否则增加 ,处理一个队
-     *
-     * @param collection 更新对象列表
-     * @return boolean 返回是否成功
-     * @throws Exception 异常
-     */
-    private int saveOrUpdateAll(Collection<?> collection) throws Exception {
-        if (collection == null || collection.isEmpty()) {
-            return -2;
-        }
-        Connection conn = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        TableModels soberTable = null;
-        List<Object> deleteId = new ArrayList<>();
-        //得到类型
-        int i = 0;
-        for (Object object : collection) {
-            if (i == 0) {
-                soberTable = getSoberTable(object.getClass());
-                if (soberTable == null) {
-                    return -2;
-                }
-            }
-            deleteId.add(BeanUtil.getProperty(object, soberTable.getPrimary()));
-            i++;
-            //////////配置验证才能够保存 begin
-
-            if (soberFactory.isValid()) {
-                validator(object);
-            }
-            ////////////配置验证才能够保存 end
-
-        }
-        String[] fieldArray = soberTable.getFieldArray();
-        if (ArrayUtil.isEmpty(fieldArray)) {
-            return -2;
-        }
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
-        valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
-        valueMap.put(Dialect.KEY_FIELD_NAME, soberTable.getPrimary());
-        valueMap.put(Dialect.KEY_FIELD_NAME + Dialect.FIELD_QUOTE, JdbcUtil.isQuote(soberTable, soberTable.getPrimary()));
-        int result = 0;
-        String sqlText = StringUtil.empty;
-        try {
-            conn = getConnection(SoberEnv.READ_WRITE);
-
-            //////////////删除 begin
-            valueMap.put(Dialect.KEY_FIELD_VALUE, deleteId);
-            sqlText = dialect.processTemplate(Dialect.SQL_DELETE_IN, valueMap);
-            debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                conn.prepareStatement(sqlText).execute();
-            } else {
-                conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE).execute();
-            }
-            //////////////删除 end
-
-            sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
-            debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            }
-            for (Object object : collection) {
-                setPreparedStatementValueList(statement, fieldArray, object);
-                int temp = statement.executeUpdate();
-                if (temp < 1) {
-                    throw new SQLException(sqlText + " object:" + MapUtil.toString(ObjectUtil.getMap(object)));
-                } else {
-                    result = result + temp;
-                }
-                statement.clearParameters();
-            }
-            return result;
-        } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
-            throw e;
-        } finally {
-            valueMap.clear();
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-
-        }
-=======
         return JdbcUtil.saveOrUpdate(this,getDialect(),object);
->>>>>>> dev
     }
     //------------------------------------------------------------------------------------------------------------------
     /**
@@ -1740,106 +701,8 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return List object list
      */
     @Override
-    @SuppressWarnings("unchecked")
     public <T> List<T> query(Class<T> cla, String sql, Object[] param, int currentPage, int totalCount, boolean loadChild) {
-<<<<<<< HEAD
-        if (totalCount > getMaxRows()) {
-            totalCount = getMaxRows();
-        }
-        if (currentPage <= 0) {
-            currentPage = 1;
-        }
-        int iEnd = currentPage * totalCount;
-        if (iEnd < 0) {
-            iEnd = 0;
-        }
-        int iBegin = iEnd - totalCount;
-        if (iBegin < 0) {
-            iBegin = 0;
-        }
-
-        TableModels soberTable = getSoberTable(cla);
-
-        List<T> result;
-
-        //取出cache  begin
-        String cacheKey = null;
-        if (soberFactory.isUseCache() && soberTable.isUseCache()) {
-            StringBuilder termKey = new StringBuilder();
-            termKey.append(sql);
-            termKey.append("_").append("_p_").append(soberFactory.getDatabaseType()).append("_");
-            if (param != null) {
-                for (Object po : param) {
-                    termKey.append(ObjectUtil.toString(po));
-                }
-            }
-            cacheKey = SoberUtil.getListKey(cla, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),StringUtil.empty,iBegin,iEnd, loadChild);
-            result = (List<T>)JSCacheManager.get(cla, cacheKey);
-            if (!ObjectUtil.isEmpty(result)) {
-                return result;
-            }
-        }
-        //取出cache  end
-        result = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-
-        Map<String, Object> valueMap = new HashMap<>(5);
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
-        try {
-            conn = getConnection(SoberEnv.READ_ONLY);
-            sql = dialect.processSql(sql, valueMap);
-            debugPrint(sql);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sql);
-            } else {
-                statement = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            }
-            JdbcUtil.setFetchSize(statement,iEnd);
-            statement.setMaxRows(iEnd);
-            if (param != null) {
-                for (int i = 0; i < param.length; i++) {
-                    debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
-                    dialect.setPreparedStatementValue(statement, i + 1, param[i]);
-                }
-            }
-            resultSet = statement.executeQuery();
-            if (iBegin > 0) {
-                resultSet.absolute(iBegin);
-            }
-            while (resultSet.next()) {
-                T tempObj = loadColumnsValue(cla, resultSet);
-                //载入计算数据
-                calcUnique(soberTable, tempObj);
-                result.add(tempObj);
-                if (result.size() > totalCount) {
-                    break;
-                }
-            }
-            if (loadChild) {
-                loadNexusList(soberTable, result);
-            }
-        } catch (Exception e) {
-            log.error(soberTable + ",SQL:" + sql, e);
-            e.printStackTrace();
-            throw new IllegalArgumentException(soberTable + ",SQL:" + sql);
-        } finally {
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-            valueMap.clear();
-            if (soberFactory.isUseCache() && soberTable.isUseCache()) {
-                JSCacheManager.put(cla, cacheKey,result);
-            }
-
-        }
-        return result;
-=======
         return JdbcUtil.query(this,getDialect(),cla,sql,param,currentPage,totalCount,loadChild);
->>>>>>> dev
     }
 
     /**
@@ -1851,77 +714,8 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 封装好的查询对象
      */
     @Override
-<<<<<<< HEAD
-    @SuppressWarnings("unchecked")
-    public <T> List<T> query(Class<T> cla, String sql, Object[] param) {
-        Connection conn = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-
-        List<T> result = null;
-        //取出cache  begin
-        TableModels soberTable = soberFactory.getTableModels(cla, this);
-        String cacheKey = null;
-        if (soberTable!=null&&soberFactory.isUseCache() && soberTable.isUseCache()) {
-            StringBuilder termKey = new StringBuilder();
-            termKey.append(sql);
-            termKey.append("_").append("_p_").append(soberFactory.getDatabaseType()).append("_");
-            if (param != null) {
-                for (Object po : param) {
-                    termKey.append(ObjectUtil.toString(po));
-                }
-            }
-            cacheKey = SoberUtil.getListKey(cla, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"),StringUtil.empty,1,getMaxRows(), false);
-            result = (List<T>)JSCacheManager.get(cla, cacheKey);
-            if (!ObjectUtil.isEmpty(result)) {
-                return result;
-            }
-
-        }
-        result = new ArrayList<>();
-        //取出cache  end
-        try {
-            conn = getConnection(SoberEnv.READ_ONLY);
-            debugPrint(sql);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sql);
-            } else {
-                statement = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            }
-
-            if (param != null) {
-                for (int i = 0; i < param.length; i++) {
-                    debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
-                    dialect.setPreparedStatementValue(statement, i + 1, param[i]);
-                }
-            }
-            JdbcUtil.setFetchSize(statement,500);
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                T resultObject;
-                if (soberTable != null) {
-                    resultObject = loadColumnsValue(cla, resultSet);
-                } else {
-                    resultObject = JdbcUtil.getBean(resultSet, cla, dialect);
-                }
-                result.add(resultObject);
-            }
-        } catch (Exception e) {
-            log.error("SQL:" + sql, e);
-            e.printStackTrace();
-        } finally {
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-            if (soberTable!=null&&soberFactory.isUseCache() && soberTable.isUseCache()) {
-                JSCacheManager.put(cla, cacheKey,result);
-            }
-        }
-        return result;
-=======
     public <T> List<T> query(Class<T> cla, String sql, Object[] param) {
         return JdbcUtil.query(this,getDialect(),cla,sql,param);
->>>>>>> dev
     }
 
     /**
@@ -1933,69 +727,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public List<?> query(String sqlText, Object[] param, int currentPage, int totalCount) {
-<<<<<<< HEAD
-        if (totalCount > getMaxRows()) {
-            totalCount = getMaxRows();
-        }
-        if (currentPage <= 0) {
-            currentPage = 1;
-        }
-        int iEnd = currentPage * totalCount;
-        if (iEnd < 0) {
-            iEnd = 0;
-        }
-        int iBegin = iEnd - totalCount;
-        Connection conn = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        List<Object> result = new ArrayList<>();
-        try {
-            conn = getConnection(SoberEnv.READ_ONLY);
-            debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            }
-
-            JdbcUtil.setFetchSize(statement,iEnd);
-            statement.setMaxRows(iEnd);
-
-            if (param != null) {
-                for (int i = 0; i < param.length; i++) {
-                    debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
-                    dialect.setPreparedStatementValue(statement, i + 1, param[i]);
-                }
-            }
-
-            resultSet = statement.executeQuery();
-            if (iBegin == 0 || resultSet.absolute(iBegin)) {
-                ResultSetMetaData metaData = resultSet.getMetaData();
-                while (resultSet.next()) {
-                    Map<String, Object> beanMap = new HashMap<>();
-                    for (int n = 1; n <= metaData.getColumnCount(); n++) {
-                        String field = StringUtil.underlineToCamel(metaData.getColumnLabel(n));
-                        Object value = dialect.getResultSetValue(resultSet, n);
-                        beanMap.put(field, value);
-                    }
-                    result.add(ReflectUtil.createDynamicBean(beanMap));
-                    if (result.size() > totalCount) {
-                        break;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
-            e.printStackTrace();
-        } finally {
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-        }
-        return result;
-=======
         return JdbcUtil.query(this,getDialect(),sqlText,param,currentPage,totalCount);
->>>>>>> dev
     }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -2049,43 +781,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public Object getUniqueResult(String sqlText, Object[] param) {
-<<<<<<< HEAD
-        Object result = null;
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement statement = null;
-        try {
-            conn = getConnection(SoberEnv.READ_ONLY);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            }
-
-            debugPrint(sqlText);
-            if (!ArrayUtil.isEmpty(param)) {
-                for (int i = 0; i < param.length; i++) {
-                    debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
-                    dialect.setPreparedStatementValue(statement, i + 1, param[i]);
-                }
-            }
-            resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                result = resultSet.getObject(1);
-            }
-        } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
-            e.printStackTrace();
-        } finally {
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-        }
-
-        return result;
-=======
         return JdbcUtil.getUniqueResult(this,getDialect(),sqlText,param);
->>>>>>> dev
     }
 
     /**
@@ -2097,36 +793,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public Object getUniqueResult(String sql, Map<String, Object> valueMap) {
-<<<<<<< HEAD
-        Connection conn = null;
-        Statement statement = null;
-        ResultSet resultSet = null;
-        String sqlText = StringUtil.empty;
-        try {
-            sqlText = dialect.processSql(sql, valueMap);
-            debugPrint(sqlText);
-            conn = getConnection(SoberEnv.READ_ONLY);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.createStatement();
-            } else {
-                statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            }
-            resultSet = statement.executeQuery(sqlText);
-            if (resultSet.next()) {
-                return dialect.getResultSetValue(resultSet, 1);
-            }
-        } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
-            e.printStackTrace();
-        } finally {
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-        }
-        return null;
-=======
        return JdbcUtil.getUniqueResult(this,getDialect(),sql,valueMap);
->>>>>>> dev
     }
 
     /**
@@ -2136,148 +803,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public boolean deleteAll(Collection<?> collection) throws Exception {
-<<<<<<< HEAD
-        if (ObjectUtil.isEmpty(collection)) {
-            return true;
-        }
-        PreparedStatement statement = null;
-        Connection conn = null;
-        ResultSet resultSet = null;
-        TableModels soberTable = null;
-        List<Object> deleteId = new ArrayList<>();
-        int i = 0;
-        for (Object object : collection) {
-            if (i == 0) {
-                soberTable = getSoberTable(object.getClass());
-                if (soberTable == null) {
-                    return false;
-                }
-            }
-            deleteId.add(BeanUtil.getProperty(object, soberTable.getPrimary()));
-            i++;
-        }
-
-        if (soberTable == null) {
-            return false;
-        }
-        String[] fieldArray = soberTable.getFieldArray();
-        if (fieldArray == null || fieldArray.length < 1) {
-            return false;
-        }
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
-        valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
-        valueMap.put(Dialect.KEY_FIELD_NAME, soberTable.getPrimary());
-        valueMap.put(Dialect.KEY_FIELD_NAME + Dialect.FIELD_QUOTE, JdbcUtil.isQuote(soberTable, soberTable.getPrimary()));
-        String sqlText = StringUtil.empty;
-        try {
-            valueMap.put(Dialect.KEY_FIELD_VALUE, deleteId);
-            conn = getConnection(SoberEnv.WRITE_ONLY);
-            sqlText = dialect.processTemplate(Dialect.SQL_DELETE_IN, valueMap);
-            debugPrint(sqlText);
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.prepareStatement(sqlText);
-            } else {
-                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            }
-            return statement.execute();
-        } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
-            throw  e;
-        } finally {
-            valueMap.clear();
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-        }
-    }
-
-    /**
-     * 得到创建表的SQL
-     *
-     * @param createClass 生成表创建sql
-     */
-    @Override
-    public String getCreateTableSql(Class<?> createClass, TableModels soberTable) {
-
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(),"'",""));
-
-        /////////先创建每一个字段
-        String[] columns = null;
-        for (SoberColumn soberColumn : soberTable.getColumns()) {
-            valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-            if (soberColumn.getName().equalsIgnoreCase(soberTable.getPrimary())) {
-                valueMap.put(Dialect.KEY_FIELD_SERIAL, soberTable.isSerial());
-            } else {
-                valueMap.put(Dialect.KEY_FIELD_SERIAL, false);
-            }
-            valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
-            valueMap.put(Dialect.COLUMN_NAME, soberColumn.getName());
-
-            valueMap.put(Dialect.COLUMN_LENGTH, soberColumn.getLength());
-
-            valueMap.put(Dialect.COLUMN_NOT_NULL, soberColumn.isNotNull());
-            if (StringUtil.isEmpty(soberColumn.getDefaultValue()) && ClassUtil.isNumberType(soberColumn.getClassType())) {
-                valueMap.put(Dialect.COLUMN_DEFAULT, 0);
-            } else {
-                valueMap.put(Dialect.COLUMN_DEFAULT, soberColumn.getDefaultValue());
-            }
-            if (soberColumn.getLength()==0&&soberColumn.getClassType().equals(String.class))
-            {
-                valueMap.put(Dialect.COLUMN_LENGTH, 32);
-                log.error("类对象{}创建表结构字段{},没有设置长度,系统默认设置32",createClass,soberColumn.getName());
-            }
-            valueMap.put(Dialect.COLUMN_CAPTION, soberColumn.getCaption());
-            String columnData = dialect.processTemplate(soberColumn.getClassType().getName(), valueMap);
-            if (StringUtil.isEmpty(columnData) || columnData.length() < 4) {
-                log.error(soberTable.getName() + StringUtil.DOT + soberColumn.getName() + "表结构定义有异常");
-            }
-            columns = ArrayUtil.add(columns, columnData);
-            valueMap.clear();
-        }
-        ///修补建表注释主要是pgsql   begin
-        StringBuilder commentPatchSql = new StringBuilder();
-        if (dialect.commentPatch()) {
-
-            for (SoberColumn soberColumn : soberTable.getColumns()) {
-                valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-                valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-                valueMap.put(Dialect.COLUMN_NAME, soberColumn.getName());
-                valueMap.put(Dialect.COLUMN_CAPTION, StringUtil.replace(soberColumn.getCaption(),StringUtil.SEMICOLON,"_"));
-                commentPatchSql.append(dialect.processTemplate(Dialect.SQL_COMMENT, valueMap)).append(StringUtil.SEMICOLON).append(StringUtil.CRLF);
-                valueMap.clear();
-            }
-            valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-            valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-            valueMap.put(Dialect.SQL_TABLE_COMMENT, StringUtil.replace(soberTable.getCaption(),StringUtil.SEMICOLON,"_"));
-            valueMap.put(Dialect.KEY_TABLE_CAPTION, soberTable.getCaption());
-
-            commentPatchSql.append(dialect.processTemplate(Dialect.SQL_TABLE_COMMENT, valueMap)).append(StringUtil.SEMICOLON).append(StringUtil.CRLF);
-        }
-        ///修补建表注释主要是pgsql   end
-
-        /////////在总体的生成SQL begin
-        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
-        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(),"'",""));
-        valueMap.put(Dialect.KEY_COLUMN_LIST, columns);
-        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
-        valueMap.put(Dialect.KEY_FIELD_SERIAL, soberTable.isSerial());
-        /////////在总体的生成SQL end
-
-        if (dialect.commentPatch() && !StringUtil.isNull(commentPatchSql.toString())) {
-            return dialect.processTemplate(Dialect.SQL_CREATE_TABLE, valueMap) + StringUtil.SEMICOLON + StringUtil.CRLF + commentPatchSql;
-        }
-
-        return dialect.processTemplate(Dialect.SQL_CREATE_TABLE, valueMap);
-=======
          return JdbcUtil.deleteAll(this,getDialect(),collection);
->>>>>>> dev
     }
 
     /**
@@ -2351,39 +877,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public String[] getTableNames() {
-<<<<<<< HEAD
-        Connection conn = null;
-        Statement statement = null;
-        ResultSet resultSet = null;
-        String[] result = null;
-        //取出cache  begin
-        String sqlText = StringUtil.empty;
-        try {
-            sqlText = dialect.processTemplate(Dialect.SQL_TABLE_NAMES, new HashMap<>());
-            debugPrint(sqlText);
-            conn = getConnection(SoberEnv.READ_ONLY);
-
-            if (!dialect.supportsConcurReadOnly()) {
-                statement = conn.createStatement();
-            } else {
-                statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            }
-            resultSet = statement.executeQuery(sqlText);
-            while (resultSet.next()) {
-                result = ArrayUtil.add(result, (String) dialect.getResultSetValue(resultSet, 1));
-            }
-        } catch (Exception e) {
-            log.error("SQL:" + sqlText, e);
-            e.printStackTrace();
-        } finally {
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-        }
-        return result;
-=======
         return SoberUtil.getTableNames(this,getDialect());
->>>>>>> dev
     }
 
     /**
@@ -2478,45 +972,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public List<?> prepareQuery(String sqlText, Object[] param) {
-<<<<<<< HEAD
-        List<Object> result = new ArrayList<>();
-        Connection conn = null;
-        CallableStatement statement = null;
-        ResultSet resultSet = null;
-        try {
-            conn = getConnection(SoberEnv.READ_ONLY);
-            debugPrint(sqlText);
-            statement = conn.prepareCall(sqlText);
-            if (!ArrayUtil.isEmpty(param)) {
-                for (int i = 0; i < param.length; i++) {
-                    debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
-                    dialect.setPreparedStatementValue(statement, i + 1, param[i]);
-                }
-            }
-            JdbcUtil.setFetchSize(statement,500);
-            resultSet = statement.executeQuery();
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            while (resultSet.next()) {
-                //名称位_转换位驼峰命名方式
-                Map<String, Object> beanMap = new HashMap<>();
-                for (int n = 1; n <= metaData.getColumnCount(); n++) {
-                    String field = StringUtil.underlineToCamel(metaData.getColumnLabel(n));
-                    beanMap.put(field, dialect.getResultSetValue(resultSet, n));
-                }
-                result.add(ReflectUtil.createDynamicBean(beanMap));
-            }
-        } catch (Exception e) {
-            log.error("检查 SQL:" + sqlText, e);
-            e.printStackTrace();
-        } finally {
-            JdbcUtil.closeResultSet(resultSet);
-            JdbcUtil.closeStatement(statement);
-            JdbcUtil.closeConnection(conn);
-        }
-        return result;
-=======
         return JdbcUtil.prepareQuery(this,getDialect(),sqlText, param);
->>>>>>> dev
     }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -2772,8 +1228,6 @@ public abstract class JdbcOperations implements SoberSupport {
             JSCacheManager.put(cla,cacheKey,data);
         }
     }
-<<<<<<< HEAD
-=======
 
     /**
      *
@@ -2799,5 +1253,4 @@ public abstract class JdbcOperations implements SoberSupport {
     public boolean unLock(Object obj) {
         return LockUtil.unLock(this,obj);
     }
->>>>>>> dev
 }

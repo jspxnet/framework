@@ -8,10 +8,6 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
-<<<<<<< HEAD
-import org.xml.sax.SAXException;
-=======
->>>>>>> dev
 import java.io.IOException;
 import java.util.List;
 

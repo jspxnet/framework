@@ -18,10 +18,6 @@ import java.util.jar.JarFile;
 
 public class JarScanner implements ScanJar {
     public static final String[] NO_SEARCH_CLASS = new String[]{"com.seeyon.ctp.common.po.BasePO","org.junit","com.github.jspxnet.component.jxls","org.apache","org.jxls","net.sf.cglib","com.aliyuncs"};
-<<<<<<< HEAD
-
-=======
->>>>>>> dev
 
     @Override
     public Set<Class<?>> search(String packageName, Predicate<Class<?>> predicate, String defaultPath) {

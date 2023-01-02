@@ -22,10 +22,7 @@ import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.DialectFactory;
-<<<<<<< HEAD
-=======
 import com.github.jspxnet.sober.model.container.PropertyContainer;
->>>>>>> dev
 import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
 import com.github.jspxnet.sober.transaction.JDBCTransaction;
@@ -36,7 +33,6 @@ import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.txweb.table.meta.TableMeta;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;

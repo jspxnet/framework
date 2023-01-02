@@ -68,13 +68,10 @@ public interface TableModels extends Serializable {
     boolean containsField(String keys);
 
     boolean equals(TableModels models);
-<<<<<<< HEAD
-=======
 
     boolean isCanExtend();
 
     void setCanExtend(boolean canExtend);
->>>>>>> dev
 
     String getId();
 }

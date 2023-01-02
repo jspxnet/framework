@@ -12,7 +12,6 @@ package com.github.jspxnet.txweb.interceptor;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.DefaultCache;
@@ -57,16 +56,7 @@ import java.util.Date;
  */
 @Slf4j
 @Bean(bind = PermissionInterceptor.class)
-<<<<<<< HEAD
-public class PermissionInterceptor extends InterceptorSupport {
-    private final static String GUEST_STOP_URL_TXT = "guest_stop_url_txt";
-    private final static String ADMIN_RULE_URL_TXT = "admin_rule_url_txt";
-
-=======
 public class PermissionInterceptor extends BasePermissionInterceptor {
->>>>>>> dev
-
-    private boolean useAppolloConfig = false;
 
     private boolean useAppolloConfig = false;
 
@@ -88,23 +78,8 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         return useAppolloConfig;
     }
 
-<<<<<<< HEAD
-
-    public boolean isUseAppolloConfig() {
-        return useAppolloConfig;
-    }
-
     public void setUseAppolloConfig(boolean useAppolloConfig) {
         this.useAppolloConfig = useAppolloConfig;
-    }
-
-    @Override
-    public void destroy() {
-
-=======
-    public void setUseAppolloConfig(boolean useAppolloConfig) {
-        this.useAppolloConfig = useAppolloConfig;
->>>>>>> dev
     }
 
     @Override
@@ -113,99 +88,6 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         if (useAppolloConfig)
         {
             //配置中心读取begin
-<<<<<<< HEAD
-            EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-            if (envTemplate.containsName(GUEST_STOP_URL_TXT))
-            {
-                String txt = envTemplate.getString(GUEST_STOP_URL_TXT);
-                decodeGuestUrl(txt);
-            }
-            if (envTemplate.containsName(ADMIN_RULE_URL_TXT))
-            {
-                String txt = envTemplate.getString(ADMIN_RULE_URL_TXT);
-                decodeAdminUrl(txt);
-            }
-            //配置中心读取end
-
-        } else
-        {
-            //换成中读取begin
-            String txt = (String) JSCacheManager.get(DefaultCache.class,GUEST_STOP_URL_TXT);
-            decodeGuestUrl(txt);
-            txt = (String) JSCacheManager.get(DefaultCache.class,ADMIN_RULE_URL_TXT);
-            decodeAdminUrl(txt);
-            //换成中读取end
-
-            if (!ArrayUtil.isEmpty(guestStopUrl) || !ArrayUtil.isEmpty(ruleOutUrl)) {
-                return;
-            }
-            File file = null;
-            try {
-                if (guestUrlFile != null && !guestUrlFile.startsWith("http")) {
-                    file = EnvFactory.getFile(guestUrlFile);
-                }
-                log.info("载入guestUrlFile:{}", file);
-
-                if (file != null) {
-                    txt = IoUtil.autoReadText(file);
-                    JSCacheManager.put(DefaultCache.class,GUEST_STOP_URL_TXT,txt);
-                    decodeGuestUrl(txt);
-                } else
-                {
-                    log.error(guestUrlFile + "没有找到");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            //---------------------------
-            if (!ArrayUtil.isEmpty(adminRuleUrl)||!ArrayUtil.isEmpty(adminRuleOutUrl)) {
-                return;
-            }
-            try {
-                if (adminUrlFile != null && !adminUrlFile.startsWith("http")) {
-                    file = EnvFactory.getFile(adminUrlFile);
-                }
-                log.info("adminUrlFile:{}", file);
-                if (file != null) {
-                    txt = IoUtil.autoReadText(file);
-                    decodeAdminUrl(txt);
-                    JSCacheManager.put(DefaultCache.class,ADMIN_RULE_URL_TXT,txt);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void decodeGuestUrl(String txt)
-    {
-
-        String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
-        for (String str : array) {
-            if (str == null) {
-                continue;
-            }
-            if (str.startsWith("!")) {
-                guestStopUrl = ArrayUtil.add(guestStopUrl, StringUtil.substringAfter(str, "!"));
-            } else {
-                ruleOutUrl = ArrayUtil.add(ruleOutUrl, str);
-            }
-        }
-    }
-
-    private static void decodeAdminUrl(String txt)
-    {
-
-        String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
-        for (String str : array) {
-            if (str == null) {
-                continue;
-            }
-            if (str.startsWith("!")) {
-                adminRuleOutUrl = ArrayUtil.add(adminRuleOutUrl, StringUtil.substringAfter(str, "!"));
-            } else {
-                adminRuleUrl = ArrayUtil.add(adminRuleUrl, str);
-=======
             if (ENV_TEMPLATE.containsName(GUEST_STOP_URL_TXT))
             {
                 String txt = ENV_TEMPLATE.getString(GUEST_STOP_URL_TXT);
@@ -264,7 +146,6 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
->>>>>>> dev
             }
         }
     }

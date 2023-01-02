@@ -147,10 +147,7 @@ public class GenericDAOImpl extends JdbcOperations implements GenericDAO {
     }
 
 
-<<<<<<< HEAD
-=======
 
 
 
->>>>>>> dev
 }

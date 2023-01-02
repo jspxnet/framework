@@ -2,14 +2,10 @@ package com.github.jspxnet.txweb.devcenter.interceptor;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
-<<<<<<< HEAD
-import com.github.jspxnet.boot.environment.EnvironmentTemplate;
-=======
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.io.IoUtil;
 import com.github.jspxnet.sioc.annotation.Bean;
->>>>>>> dev
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
@@ -17,42 +13,14 @@ import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.PermissionDAO;
-<<<<<<< HEAD
-import com.github.jspxnet.txweb.interceptor.InterceptorSupport;
-import com.github.jspxnet.txweb.online.OnlineManager;
-import com.github.jspxnet.txweb.support.ActionSupport;
-import com.github.jspxnet.txweb.table.UserSession;
-import com.github.jspxnet.txweb.util.RequestUtil;
-=======
 import com.github.jspxnet.txweb.interceptor.BasePermissionInterceptor;
 import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.UserSession;
->>>>>>> dev
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-<<<<<<< HEAD
-
-
-@Slf4j
-public class DevCenterInterceptor extends InterceptorSupport {
-
-    private final static EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
-
-
-    @Override
-    public void init() {
-
-    }
-
-    @Override
-    public void destroy() {
-
-    }
-
-=======
 import java.io.File;
 
 
@@ -92,7 +60,6 @@ public class DevCenterInterceptor extends BasePermissionInterceptor {
         }
 
     }
->>>>>>> dev
     /**
      * 载入在线管理
      */
@@ -121,8 +88,6 @@ public class DevCenterInterceptor extends BasePermissionInterceptor {
             }
         }
 
-<<<<<<< HEAD
-=======
         String pathNamespace = actionContext.getNamespace();
         if (StringUtil.isNull(pathNamespace)) {
             pathNamespace = actionContext.getNamespace();
@@ -138,7 +103,6 @@ public class DevCenterInterceptor extends BasePermissionInterceptor {
             }
         }
 
->>>>>>> dev
         UserSession userSession = onlineManager.getUserSession(actionContext);
         String userListStr = ENV_TEMPLATE.getString(Environment.KEY_DCV_ENTER_USER_LIST);
         if (StringUtil.isNull(userListStr)) {

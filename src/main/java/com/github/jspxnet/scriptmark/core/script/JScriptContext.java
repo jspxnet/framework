@@ -69,11 +69,7 @@ public class JScriptContext implements SingletonContext {
             }
             context.setOptimizationLevel(-1);
             WrapFactory wrapFactory = ScriptWrapFactory.getInstance();
-<<<<<<< HEAD
-            wrapFactory.setJavaPrimitiveWrap(true);
-=======
             //wrapFactory.setJavaPrimitiveWrap(true);
->>>>>>> dev
             context.setWrapFactory(wrapFactory);
 
             globalScope = context.initStandardObjects();

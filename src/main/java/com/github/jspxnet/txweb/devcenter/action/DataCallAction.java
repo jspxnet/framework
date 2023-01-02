@@ -27,11 +27,7 @@ public class DataCallAction extends DataCallView {
     {
 
         String modelId = getString("modelId",true);
-<<<<<<< HEAD
-        TableModels tableModels = genericDAO.getAllTableModels(true).get(modelId);
-=======
         TableModels tableModels = genericDAO.getAllTableModels(true,0).get(modelId);
->>>>>>> dev
         AssertException.isNull(tableModels,"不存在的模型对象");
         Object object = getBean(tableModels.getEntity());
         IUserSession userSession = getUserSession();
@@ -95,11 +91,7 @@ public class DataCallAction extends DataCallView {
     @Operate(caption = "删除")
     public RocResponse<Long[]> delete(@Param(caption = "modelId",required = true,min = 10,max = 64) String modelId,
                                       @Param(caption = "ID",required = true) Long[] ids)  {
-<<<<<<< HEAD
-        TableModels tableModels = genericDAO.getAllTableModels(true).get(modelId);
-=======
         TableModels tableModels = genericDAO.getAllTableModels(true,0).get(modelId);
->>>>>>> dev
         AssertException.isNull(tableModels,"不存在的模型对象");
         ActionContext actionContext = ThreadContextHolder.getContext();
         actionContext.put(TABLE_MODELS,tableModels);

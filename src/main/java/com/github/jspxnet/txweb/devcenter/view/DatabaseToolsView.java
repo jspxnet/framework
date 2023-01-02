@@ -12,11 +12,8 @@ import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
-<<<<<<< HEAD:src/main/java/com/github/jspxnet/txweb/devcenter/view/DatabaseToolsView.java
-=======
 import com.github.jspxnet.utils.BeanUtil;
 
->>>>>>> dev:src/main/java/com/github/jspxnet/txweb/view/DatabaseToolsView.java
 import java.util.List;
 
 @HttpMethod(caption = "数据库工具",namespace = Environment.DEV_CENTER+"/db",actionName = "*")

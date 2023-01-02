@@ -4,10 +4,7 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sober.Interceptor;
 import com.github.jspxnet.sober.SoberSupport;
-<<<<<<< HEAD
-=======
 import com.github.jspxnet.sober.dialect.Dialect;
->>>>>>> dev
 import com.github.jspxnet.sober.enums.ExecuteEnumType;
 import com.github.jspxnet.sober.enums.QueryModelEnumType;
 import com.github.jspxnet.sober.table.SqlMapConf;
@@ -19,30 +16,19 @@ import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-<<<<<<< HEAD
-=======
 
 import java.io.Serializable;
->>>>>>> dev
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
 
 @Slf4j
-<<<<<<< HEAD
-public class InterceptorProxy {
-=======
 public class InterceptorProxy implements Serializable {
->>>>>>> dev
     public static final String KEY_NAMESPACE = "namespace";
     public static final String KEY_EXE_ID = "exeId";
     public static final String KEY_CURRENT_PAGE = "currentPage";
     public static final String KEY_COUNT = "count";
-<<<<<<< HEAD
-    public static final String KEY_NEXUS = "nexus";
-=======
     //public static final String KEY_NEXUS = "nexus";
->>>>>>> dev
     public static final String KEY_RETURN_CLASS = "returnClass";
     public static final String KEY_QUERY_MODEL_ENUM_TYPE = "QueryModelEnumType";
     public static final String KEY_LOAD_CHILD = "loadChild";
@@ -66,12 +52,8 @@ public class InterceptorProxy implements Serializable {
         this.valueMap.put(KEY_QUERY_MODEL_ENUM_TYPE, sqlMapConf.getQueryModel());
         this.valueMap.put(KEY_NAMESPACE, sqlMapConf.getNamespace());
         this.valueMap.put(KEY_EXE_ID, sqlMapConf.getName());
-<<<<<<< HEAD
-        this.valueMap.put(KEY_NEXUS, ObjectUtil.toBoolean(sqlMapConf.getNexus()));
-=======
         this.valueMap.put(KEY_LOAD_CHILD, ObjectUtil.toBoolean(sqlMapConf.getNexus()));
         this.valueMap.put(Dialect.KEY_DATABASE_NAME, soberSupport.getSoberFactory().getDatabaseName());
->>>>>>> dev
     }
 
     public LinkedList<Interceptor> builderInterceptor(LinkedList<SqlMapInterceptorConf> confList)
@@ -103,8 +85,6 @@ public class InterceptorProxy implements Serializable {
         return list;
     }
 
-<<<<<<< HEAD
-=======
     /**
      *
      * @param soberSupport 数据库对象
@@ -112,7 +92,6 @@ public class InterceptorProxy implements Serializable {
      * @param sqlMapConf sql配置
      * @param exeMethod  执行方法
      */
->>>>>>> dev
     public InterceptorProxy(SoberSupport soberSupport, Object[] arg, SqlMapConf sqlMapConf, Method exeMethod)
     {
         this.soberSupport = soberSupport;
@@ -122,11 +101,7 @@ public class InterceptorProxy implements Serializable {
         valueMap.put(KEY_QUERY_MODEL_ENUM_TYPE, sqlMapConf.getQueryModel());
         valueMap.put(KEY_NAMESPACE, sqlMapConf.getNamespace());
         valueMap.put(KEY_EXE_ID, sqlMapConf.getName());
-<<<<<<< HEAD
-        valueMap.put(KEY_NEXUS, ObjectUtil.toBoolean(sqlMapConf.getNexus()));
-=======
         valueMap.put(KEY_LOAD_CHILD, ObjectUtil.toBoolean(sqlMapConf.getNexus()));
->>>>>>> dev
 
         if (ExecuteEnumType.QUERY.getValue()==sqlMapConf.getExecuteType())
         {
@@ -251,11 +226,7 @@ public class InterceptorProxy implements Serializable {
                 Object result = soberSupport.getBaseSqlMap().getUniqueResult(sqlMapConf, valueMap);
                 return BeanUtil.getTypeValue(result, cls);
             }
-<<<<<<< HEAD
-            List<?> list = soberSupport.getBaseSqlMap().query(sqlMapConf, valueMap, 1, 1, ObjectUtil.toBoolean(sqlMapConf.getNexus()), false, cls);
-=======
             List<?> list = soberSupport.getBaseSqlMap().query(sqlMapConf, valueMap, 1, 1,  false, cls);
->>>>>>> dev
             if (list == null || list.isEmpty()) {
                 return null;
             }
@@ -270,26 +241,11 @@ public class InterceptorProxy implements Serializable {
             return result;
         }
 
-<<<<<<< HEAD
-
-
-
-        int currentPage = ObjectUtil.toInt(valueMap.get(InterceptorProxy.KEY_CURRENT_PAGE)==null?1:valueMap.get(InterceptorProxy.KEY_CURRENT_PAGE));
-        int count = ObjectUtil.toInt(valueMap.get(InterceptorProxy.KEY_COUNT)==null?soberSupport.getMaxRows():valueMap.get(InterceptorProxy.KEY_COUNT));
-        boolean loadChild = ObjectUtil.toBoolean(valueMap.get(InterceptorProxy.KEY_LOAD_CHILD));
-        boolean rollRows =  ObjectUtil.toBoolean(valueMap.get(InterceptorProxy.KEY_ROLL_ROWS));
-        if (loadChild||rollRows)
-        {
-            return soberSupport.getBaseSqlMap().query(sqlMapConf, valueMap, currentPage, count, loadChild,rollRows,cls);
-        }
-        return soberSupport.getBaseSqlMap().query(sqlMapConf, valueMap, currentPage, count, ObjectUtil.toBoolean(sqlMapConf.getNexus()), cls);
-=======
         //valueMap 是根据 sqlMapConf 来的
         int currentPage = ObjectUtil.toInt(valueMap.get(InterceptorProxy.KEY_CURRENT_PAGE)==null?1:valueMap.get(InterceptorProxy.KEY_CURRENT_PAGE));
         int count = ObjectUtil.toInt(valueMap.get(InterceptorProxy.KEY_COUNT)==null?soberSupport.getMaxRows():valueMap.get(InterceptorProxy.KEY_COUNT));
         boolean rollRows =  ObjectUtil.toBoolean(valueMap.get(InterceptorProxy.KEY_ROLL_ROWS));
         return soberSupport.getBaseSqlMap().query(sqlMapConf, valueMap, currentPage, count, rollRows, cls);
->>>>>>> dev
     }
 
     /**

@@ -27,10 +27,6 @@ import java.io.IOException;
 
 @HttpMethod(caption = "数据页面呈现", actionName = "*", namespace = Environment.DYN_OUT+"/render")
 @Bean(namespace = Environment.DYN_OUT, singleton = true)
-<<<<<<< HEAD
-
-=======
->>>>>>> dev
 public class DataRenderView extends ActionSupport {
     @Ref
     protected GenericDAO genericDAO;

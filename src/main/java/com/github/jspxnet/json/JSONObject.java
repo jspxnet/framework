@@ -5,19 +5,12 @@ import com.github.jspxnet.enums.EnumType;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.config.SoberTable;
-<<<<<<< HEAD
-import com.github.jspxnet.sober.util.AnnotationUtil;
-import com.github.jspxnet.util.TypeReference;
-import com.github.jspxnet.utils.*;
-import com.google.gson.Gson;
-=======
 import com.github.jspxnet.sober.model.container.PropertyContainer;
 import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
->>>>>>> dev
 import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.lang.reflect.Field;
@@ -338,21 +331,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 if (v==null)
                 {
                     super.put(key, null);
-<<<<<<< HEAD
-                } /*else if (v instanceof JSONArray)
-                {
-                    super.put(key, v);
-                } else
-                if (ClassUtil.isArrayType(v)|| ClassUtil.isCollection(v))
-                {
-                    super.put(key, new JSONArray(v,includeSuperClass));
-                } else
-                if (!ClassUtil.isStandardProperty(v.getClass())&&!(v instanceof JSONObject)) {
-                    super.put(key, new JSONObject(v, includeSuperClass,dataField));
-                }*/ else {
-=======
                 } else {
->>>>>>> dev
                     super.put(key, v);
                 }
             }
@@ -362,22 +341,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
             }
         }
 
-<<<<<<< HEAD
-        if (bean.getClass().isArray() || bean instanceof Collection) {
-            //正常使用不应该使用JSONObject，应该直接使用JSONArray
-            super.put(KEY_DATA, new JSONArray(bean,includeSuperClass,KEY_DATA, dataField));
-            return;
-        }
-
-
-        if (bean.getClass().isEnum() && EnumType.class.isAssignableFrom(bean.getClass())) {
-            EnumType en = (EnumType)bean;
-            super.put("value",en.getValue());
-            super.put("name",en.getName());
-            return;
-        }
-=======
->>>>>>> dev
 
         lass = bean.getClass();
         if (!isNull(bean)) {
@@ -425,11 +388,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                         continue;
                     }
                     if (ClassUtil.isStandardProperty(result.getClass())) {
-<<<<<<< HEAD
-                        super.put(key, result);
-=======
                         super.put(displayKey, result);
->>>>>>> dev
                         continue;
                     }
 
@@ -1657,10 +1616,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         if (value instanceof JSONString) {
             return ((JSONString) value).toJSONString();
         }
-<<<<<<< HEAD
-=======
 
->>>>>>> dev
         if (value instanceof Serializable && !ClassUtil.isStandardProperty(value.getClass()) &&
                 !(ClassUtil.isCollection(value)|| ClassUtil.isArrayType(value))
         ) {
@@ -1804,11 +1760,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         T t = parseObject(this, clazz);
         if (tableValue)
         {
-<<<<<<< HEAD
-            SoberTable soberTable = AnnotationUtil.getSoberTable(clazz);
-=======
             SoberTable soberTable = AnnotationUtil.getSoberTable(clazz,0);
->>>>>>> dev
             if (soberTable==null)
             {
                 return t;
@@ -1828,8 +1780,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                     BeanUtil.setFieldValue(t,soberColumn.getName(),value);
                 }
             }
-<<<<<<< HEAD
-=======
 
             //扩展方式支持 begin
             if (t!=null&&PropertyContainer.class.isAssignableFrom(clazz))
@@ -1845,7 +1795,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
                 }
             }
             //扩展方式支持 end
->>>>>>> dev
         }
         return t;
     }

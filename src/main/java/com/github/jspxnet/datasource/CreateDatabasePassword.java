@@ -1,5 +1,7 @@
 package com.github.jspxnet.datasource;
 
+import com.github.jspxnet.boot.JspxNetApplication;
+import com.github.jspxnet.utils.ArrayUtil;
 
 /**
  * Created by ChenYuan on 2017/5/12.
@@ -15,11 +17,7 @@ public class CreateDatabasePassword extends JspxDataSource {
             args[0] = "";
         }
         CreateDatabasePassword createDatabasePassword = new CreateDatabasePassword();
-<<<<<<< HEAD
-        String ps = createDatabasePassword.makePassword("xxxx");
-=======
         String ps = createDatabasePassword.makePassword(args[0]);
->>>>>>> dev
         System.out.println(ps);
     }
 /*

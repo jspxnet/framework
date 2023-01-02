@@ -55,21 +55,13 @@ public interface SqlMapBase {
      * @param o           查询对象条件
      * @param currentPage 当前页数
      * @param totalCount  最大行数
-<<<<<<< HEAD
-     * @param loadChild   是否载入
-=======
->>>>>>> dev
      * @param rollRows    是否滚动
      * @param <T>         返回类型
      * @return 返回列表
      * @throws Exception 异常
      */
-<<<<<<< HEAD
-    <T> List<T> query(SqlMapConf sqlMapConf, Object o, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception;
-=======
     <T> List<T> query(SqlMapConf sqlMapConf, Object o, int currentPage, int totalCount, boolean rollRows) throws Exception;
 
->>>>>>> dev
     /**
      * @param sqlMapConf sql配置
      * @param valueMap   参数对象
@@ -87,42 +79,19 @@ public interface SqlMapBase {
      * @throws Exception 异常
      */
     <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, Class<T> cls) throws Exception;
-<<<<<<< HEAD
-    /**
-     * @param sqlMapConf  sql配置
-     * @param valueMap    参数对象
-     * @param currentPage 页数
-     * @param totalCount  返回行数
-     * @param loadChild   载入子对象
-     * @param cls         返回类型
-     * @param <T>         类
-     * @return 返回查询列表
-     * @throws Exception 异常
-     */
-    <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, Class<T> cls) throws Exception;
-=======
 
->>>>>>> dev
     /**
      * @param sqlMapConf  sql配置
      * @param valueMap    参数对象
      * @param currentPage 页数
      * @param totalCount  页数
-<<<<<<< HEAD
-     * @param loadChild   返回行数
-=======
->>>>>>> dev
      * @param rollRows    是否行滚
      * @param <T>         类
      * @return 返回查询列表
      * @throws Exception 异常
      */
-<<<<<<< HEAD
-    <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows) throws Exception;
-=======
     <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean rollRows) throws Exception;
 
->>>>>>> dev
     /**
      * @param sqlMapConf  sql配置
      * @param valueMap    参数对象
@@ -141,21 +110,13 @@ public interface SqlMapBase {
      * @param valueMap    参数MAP
      * @param currentPage 第几页
      * @param totalCount  一页的行数
-<<<<<<< HEAD
-     * @param loadChild   是否载入映射对象
-=======
->>>>>>> dev
      * @param rollRows    是否让程序执行滚动,如果不让程序执行滚动，那么在程序里边要自己判断滚动
      * @param cls         类型
      * @param <T>         类型
      * @return 返回查询列表
      * @throws Exception 异常
      */
-<<<<<<< HEAD
-    <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean loadChild, boolean rollRows, Class<T> cls) throws Exception;
-=======
     <T> List<T> query(SqlMapConf sqlMapConf, Map<String, Object> valueMap, int currentPage, int totalCount, boolean rollRows, Class<T> cls) throws Exception;
->>>>>>> dev
     /**
      * 用来避免写两次SQL 来得到翻页的总数,这里映入查询,就自动封装得到行数
      *

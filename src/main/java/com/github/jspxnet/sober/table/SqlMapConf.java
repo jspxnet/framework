@@ -1,10 +1,6 @@
 package com.github.jspxnet.sober.table;
 
 import com.github.jspxnet.enums.YesNoEnumType;
-<<<<<<< HEAD
-import com.github.jspxnet.json.JsonField;
-=======
->>>>>>> dev
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;

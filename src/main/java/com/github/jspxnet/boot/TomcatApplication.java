@@ -87,17 +87,6 @@ public class TomcatApplication {
         System.setProperty("log4j.ignoreTCL", "true");
         String defaultPath = jspxConfiguration.getDefaultPath();
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
-<<<<<<< HEAD
-        Properties properties = environmentTemplate.readDefaultProperties(FileUtil.mendFile((defaultPath == null ? "" : defaultPath) + "/" + Environment.jspx_properties_file));
-
-        if (properties.size() > 3 && properties.containsKey(Environment.SERVER_PORT) && properties.containsKey(Environment.SERVER_WEB_PATH)) {
-            port = StringUtil.toInt(properties.getProperty(Environment.SERVER_PORT, "8080"));
-            webPath = properties.getProperty(Environment.SERVER_WEB_PATH, System.getProperty("user.dir"));
-            ip = properties.getProperty(Environment.SERVER_IP, "127.0.0.1");
-            cors = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CORS, "true"));
-            threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS, "3"));
-            maxPostSize = StringUtil.toInt(properties.getProperty(Environment.SERVER_MAX_POST_SIZE, "10000000"));
-=======
         Map<String,String>  properties = environmentTemplate.readDefaultProperties(FileUtil.mendFile((defaultPath == null ? "" : defaultPath) + "/" + Environment.jspx_properties_file));
 
         if (properties.size() > 3 && properties.containsKey(Environment.SERVER_PORT) && properties.containsKey(Environment.SERVER_WEB_PATH)) {
@@ -107,7 +96,6 @@ public class TomcatApplication {
             cors = StringUtil.toBoolean(properties.getOrDefault(Environment.SERVER_CORS, "true"));
             threads = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_THREADS, "3"));
             maxPostSize = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_MAX_POST_SIZE, "10000000"));
->>>>>>> dev
 
 
         } else if (TomcatApplication.jspxNetBootApplication != null && properties.size() < 2) {
@@ -119,21 +107,12 @@ public class TomcatApplication {
             maxPostSize = TomcatApplication.jspxNetBootApplication.maxPostSize();
 
         } else {
-<<<<<<< HEAD
-            port = StringUtil.toInt(properties.getProperty(Environment.SERVER_PORT, "8080"));
-            webPath = properties.getProperty(Environment.SERVER_WEB_PATH, System.getProperty("user.dir"));
-            ip = properties.getProperty(Environment.SERVER_IP, "127.0.0.1");
-            cors = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CORS, "true"));
-            threads = StringUtil.toInt(properties.getProperty(Environment.SERVER_THREADS, "3"));
-            maxPostSize = StringUtil.toInt(properties.getProperty(Environment.SERVER_MAX_POST_SIZE, "10000000"));
-=======
             port = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_PORT, "8080"));
             webPath = properties.getOrDefault(Environment.SERVER_WEB_PATH, System.getProperty("user.dir"));
             ip = properties.getOrDefault(Environment.SERVER_IP, "127.0.0.1");
             cors = StringUtil.toBoolean(properties.getOrDefault(Environment.SERVER_CORS, "true"));
             threads = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_THREADS, "3"));
             maxPostSize = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_MAX_POST_SIZE, "10000000"));
->>>>>>> dev
         }
 
 
@@ -147,17 +126,6 @@ public class TomcatApplication {
 
         boolean cachingAllowed = true;
         if (properties.containsKey(Environment.SERVER_CACHING_ALLOWED)) {
-<<<<<<< HEAD
-            cachingAllowed = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_CACHING_ALLOWED));
-        }
-
-        boolean openRedis = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_SESSION_REDIS));
-        String redisConfig = properties.getProperty(Environment.SERVER_REDISSON_SESSION_CONFIG);
-        if (!StringUtil.isEmpty(webPath)) {
-            FileUtil.makeDirectory(webPath);
-        }
-        boolean filterMode = StringUtil.toBoolean(properties.getProperty(Environment.SERVER_FILTER_MODE));
-=======
             cachingAllowed = StringUtil.toBoolean(properties.get(Environment.SERVER_CACHING_ALLOWED));
         }
 
@@ -167,17 +135,12 @@ public class TomcatApplication {
             FileUtil.makeDirectory(webPath);
         }
         boolean filterMode = StringUtil.toBoolean(properties.get(Environment.SERVER_FILTER_MODE));
->>>>>>> dev
         System.setProperty("catalina.home", webPath);
         System.setProperty("catalina.base", webPath);
         System.setProperty("user.dir", new File(webPath, "WEB-INF").getPath());
 
 
-<<<<<<< HEAD
-        String encode = properties.getProperty(Environment.encode, Environment.defaultEncode);
-=======
         String encode = properties.getOrDefault(Environment.encode, Environment.defaultEncode);
->>>>>>> dev
 
         Tomcat tomcat = new Tomcat();
         Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
@@ -248,25 +211,6 @@ public class TomcatApplication {
             tomcat.addServlet("", "jspxServlet", new ServletDispatcher());
             standardContext.addServletMappingDecoded("/*", "jspxServlet");
         }
-<<<<<<< HEAD
-
-        //放入环境变量begin
-        for (Object key : properties.keySet()) {
-            String keyName = (String) key;
-            if (!environmentTemplate.containsName(keyName)) {
-                environmentTemplate.put(keyName, properties.getProperty(keyName));
-            }
-        }
-        environmentTemplate.put(Environment.SERVER_PORT, port);
-        environmentTemplate.put(Environment.SERVER_WEB_PATH, webPath);
-        environmentTemplate.put(Environment.SERVER_IP, ip);
-        environmentTemplate.put(Environment.SERVER_CORS, cors);
-        environmentTemplate.put(Environment.SERVER_THREADS, threads);
-        environmentTemplate.put(Environment.SERVER_MAX_POST_SIZE, maxPostSize);
-        environmentTemplate.put(Environment.SERVER_FILTER_MODE, filterMode);
-        environmentTemplate.put(Environment.SERVER_SESSION_REDIS, openRedis);
-        environmentTemplate.put(Environment.SERVER_EMBED, true);
-=======
 
         //放入环境变量begin
         for (Object key : properties.keySet()) {
@@ -285,7 +229,6 @@ public class TomcatApplication {
         environmentTemplate.put(Environment.SERVER_SESSION_REDIS, openRedis);
         environmentTemplate.put(Environment.SERVER_EMBED, true);
 
->>>>>>> dev
         //放入环境变量end
 
 
@@ -435,10 +378,7 @@ public class TomcatApplication {
         Dispatcher.setRealPath(webPath);
 
         System.out.println("defaultPath=" + defaultPath);
-<<<<<<< HEAD
-=======
         System.out.println("webPath=" + webPath);
->>>>>>> dev
         System.out.println("config server=" + ip + ":" + port);
         tomcat.start();
 

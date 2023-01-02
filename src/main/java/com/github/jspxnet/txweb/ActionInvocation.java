@@ -33,13 +33,7 @@ public interface ActionInvocation extends Serializable {
     void initAction() throws Exception;
 
     boolean isExecuted();
-<<<<<<< HEAD
-
-    @Deprecated
-    String getActionName();
-=======
 /*
     @Deprecated
     String getActionName();*/
->>>>>>> dev
 }

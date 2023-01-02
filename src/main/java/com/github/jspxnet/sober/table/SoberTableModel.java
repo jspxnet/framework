@@ -30,17 +30,6 @@ public class SoberTableModel extends OperateTable{
     @Column(caption = "实体对象", length = 200)
     private String entityClass;
 
-<<<<<<< HEAD:src/main/java/com/github/jspxnet/sober/table/MasterTableMeta.java
-    //一般默认为id
-    @Column(caption = "关键字名", length = 200)
-    private String primary = StringUtil.empty;
-
-    @Nexus(mapping = MappingType.OneToMany, field = "tableName", targetField = "tableName", targetEntity = SoberColumn.class)
-    private List<SoberColumn> columns = new LinkedList<>();
-
-
-=======
     @Column(caption = "缓存")
     private boolean useCache = true;
->>>>>>> dev:src/main/java/com/github/jspxnet/sober/table/SoberTableModel.java
 }

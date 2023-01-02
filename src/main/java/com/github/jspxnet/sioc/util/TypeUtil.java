@@ -17,13 +17,9 @@ import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.scriptmark.core.TagNode;
-<<<<<<< HEAD
-import com.github.jspxnet.utils.ClassUtil;
-=======
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ReflectUtil;
->>>>>>> dev
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Array;
@@ -46,9 +42,6 @@ public final class TypeUtil {
     }
 
     final private static Map<String, TypeSerializer> TYPE_MAP = new HashMap<>();
-<<<<<<< HEAD
-    private static final String[] BASE_TYPE = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
-=======
 
     public static final String[] BASE_TYPE = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
 
@@ -69,7 +62,6 @@ public final class TypeUtil {
         CODE_TYPE_MAP.put("map","Map");
     }
 
->>>>>>> dev
 
     static {
 
@@ -77,10 +69,7 @@ public final class TypeUtil {
         TYPE_MAP.put(boolean.class.getName(), typeSerializer);
         TYPE_MAP.put(Boolean.class.getName(), typeSerializer);
         TYPE_MAP.put("bool", typeSerializer);
-<<<<<<< HEAD
-=======
         TYPE_MAP.put("boolean", typeSerializer);
->>>>>>> dev
 
         typeSerializer = new IntXmlType();
         TYPE_MAP.put(int.class.getName(), typeSerializer);
@@ -207,13 +196,10 @@ public final class TypeUtil {
      */
     public static Type getJavaType(String typeString) {
         TypeSerializer typeSerializer = TYPE_MAP.get(typeString);
-<<<<<<< HEAD
-=======
         if (typeSerializer==null && CODE_TYPE_MAP.containsKey(typeString))
         {
             typeSerializer = TYPE_MAP.get(CODE_TYPE_MAP.get(typeString));
         }
->>>>>>> dev
         if (typeSerializer!=null)
         {
             return typeSerializer.getJavaType();

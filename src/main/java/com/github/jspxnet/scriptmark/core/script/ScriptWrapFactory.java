@@ -31,12 +31,7 @@ public class ScriptWrapFactory extends WrapFactory {
     }
 
     private ScriptWrapFactory() {
-<<<<<<< HEAD
-        super.setJavaPrimitiveWrap(false);
-
-=======
         super.setJavaPrimitiveWrap(true);
->>>>>>> dev
     }
 
     /**
@@ -56,7 +51,6 @@ public class ScriptWrapFactory extends WrapFactory {
             char[] a = {(Character) obj};
             return new String(a);
         }
-
         return super.wrap(cx, scope, obj, staticType);
     }
 

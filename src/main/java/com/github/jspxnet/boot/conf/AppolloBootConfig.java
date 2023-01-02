@@ -28,17 +28,6 @@ public class AppolloBootConfig {
     public void bind(Map<String,String> properties)
     {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-<<<<<<< HEAD
-        String namespace = properties.getProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES,"application");
-        System.setProperty(Environment.APOLLO_ENV,properties.getProperty(Environment.APOLLO_ENV));
-        System.setProperty(Environment.APOLLO_APP_ID,properties.getProperty(Environment.APOLLO_APP_ID));
-        System.setProperty(Environment.APOLLO_BOOTSTRAP_ENABLED,properties.getProperty(Environment.APOLLO_BOOTSTRAP_ENABLED));
-        System.setProperty(Environment.APOLLO_BOOTSTRAP_NAMESPACES,namespace);
-        System.setProperty(Environment.APOLLO_BOOTSTRAP_EAGERLOAD_ENABLED,properties.getProperty(Environment.APOLLO_BOOTSTRAP_EAGERLOAD_ENABLED));
-        System.setProperty(Environment.APOLLO_META,properties.getProperty(Environment.APOLLO_META));
-        envTemplate.put(Environment.BOOT_CONF_MODE, BootConfigEnumType.APPOLLO.getName());
-        log.debug("Apollo bootstrap namespaces: {},env: {}", namespace,properties.getProperty(Environment.APOLLO_ENV));
-=======
         String namespace = properties.getOrDefault(Environment.APOLLO_BOOTSTRAP_NAMESPACES,"application");
         System.setProperty(Environment.APOLLO_ENV,properties.get(Environment.APOLLO_ENV));
         System.setProperty(Environment.APOLLO_APP_ID,properties.get(Environment.APOLLO_APP_ID));
@@ -48,7 +37,6 @@ public class AppolloBootConfig {
         System.setProperty(Environment.APOLLO_META,properties.get(Environment.APOLLO_META));
         envTemplate.put(Environment.BOOT_CONF_MODE, BootConfigEnumType.APPOLLO.getName());
         log.debug("Apollo bootstrap namespaces: {},env: {}", namespace,properties.get(Environment.APOLLO_ENV));
->>>>>>> dev
         //"application" apollo.ip
 
         Config config = ConfigService.getConfig(namespace);

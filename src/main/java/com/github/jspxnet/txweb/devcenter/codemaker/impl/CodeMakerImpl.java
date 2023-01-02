@@ -36,15 +36,9 @@ import java.util.*;
 public class CodeMakerImpl implements CodeMaker {
     public static final String varClassName = "className";
     //public static final String varPackageName = "packageName";
-<<<<<<< HEAD
-    public static final String varDate = "date";
-    public static final String varEncode = "encode";
-    public static final String varNamespace = "namespace";
-=======
 /*    public static final String varDate = "date";
     public static final String varEncode = "encode";
     public static final String varNamespace = "namespace";*/
->>>>>>> dev
     //public static final String varFilePath = "filePath";
     public static final String varName = "varName";
 
@@ -96,11 +90,7 @@ public class CodeMakerImpl implements CodeMaker {
     @Override
     public RocResponse<String> builderPage(String templateName, String modelId, List<String> jumpFields)
     {
-<<<<<<< HEAD
-        TableModels tableModels = genericDAO.getAllTableModels(true).get(modelId);
-=======
         TableModels tableModels = genericDAO.getAllTableModels(true,0).get(modelId);
->>>>>>> dev
         UiTemplate template = getUiTemplateLastVersion(templateName);
         if (template==null||template.getId()<=0)
         {
@@ -235,13 +225,6 @@ public class CodeMakerImpl implements CodeMaker {
     }
     /**
      *
-<<<<<<< HEAD
-     * @return 的大命名空间列表
-     */
-    @Override
-    public  Map<String, TableModels>  getSoberTableList(boolean dto) {
-        return genericDAO.getAllTableModels(dto);
-=======
      * @param dto 是否包含DTO 是否保护dto
      * @param extend  0:所有;1:可扩展;2:不可扩展
      * @return 的大命名空间列表
@@ -249,7 +232,6 @@ public class CodeMakerImpl implements CodeMaker {
     @Override
     public  Map<String, TableModels>  getSoberTableList(boolean dto,int extend) {
         return genericDAO.getAllTableModels(dto,extend);
->>>>>>> dev
     }
 
 

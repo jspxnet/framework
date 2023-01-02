@@ -56,14 +56,6 @@ public interface SoberSupport extends Serializable {
      */
     TableModels getSoberTable(Class<?> cla);
 
-<<<<<<< HEAD
-    /**
-     *
-     * @param dto 是否包含DTO
-     * @return 得到所有表结构的模型
-     */
-    Map<String,TableModels> getAllTableModels(boolean dto);
-=======
     TableModels getTableModels(String tableName);
 
     /**
@@ -73,7 +65,6 @@ public interface SoberSupport extends Serializable {
      * @return  得到所有表结构的模型
      */
     Map<String,TableModels> getAllTableModels(boolean dto,int extend);
->>>>>>> dev
 
     /**
      *

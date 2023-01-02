@@ -192,30 +192,6 @@ public final class JdbcUtil {
     }
 
     /**
-<<<<<<< HEAD
-     * @param resultSet 返回结果
-     * @return 得到字段信息
-     */
-    public static Map<String, SoberColumn> getFieldType(final ResultSet resultSet) {
-        Map<String, SoberColumn> result = new HashMap<>();
-        try {
-            ResultSetMetaData rsm = resultSet.getMetaData();
-            for (int i = 1; i <= rsm.getColumnCount(); i++) {
-                SoberColumn soberColumn = new SoberColumn();
-                soberColumn.setName(rsm.getColumnName(i));
-                result.put(soberColumn.getName(), soberColumn);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new HashMap<>(0);
-        }
-        return result;
-    }
-
-
-    /**
-=======
->>>>>>> dev
      *
      * @param con 连接
      * @return String 得到数据库类型,枚举和适配器对应
@@ -344,13 +320,8 @@ public final class JdbcUtil {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-<<<<<<< HEAD
-            JdbcUtil.closeResultSet(rs);
-            JdbcUtil.closeConnection(conn);
-=======
             closeResultSet(rs);
             closeConnection(conn);
->>>>>>> dev
         }
         return columnList;
     }
@@ -398,8 +369,6 @@ public final class JdbcUtil {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-<<<<<<< HEAD
-=======
     }
 
     //-----------------
@@ -2305,7 +2274,5 @@ public final class JdbcUtil {
             closeStatement(statement);
             closeConnection(conn);
         }
->>>>>>> dev
     }
-
 }

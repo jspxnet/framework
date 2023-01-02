@@ -232,12 +232,9 @@ public class JspxCoreListener implements ServletContextListener {
         }
         //rpc服务器,提供外部rpctcp调用 end
 
-<<<<<<< HEAD
-=======
         //载入定时任务
         beanFactory.initScheduler();
 
->>>>>>> dev
         boolean dbLog = envTemplate.getBoolean(Environment.DB_LOG);
         if (dbLog)
         {

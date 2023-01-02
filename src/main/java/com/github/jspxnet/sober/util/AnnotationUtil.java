@@ -10,7 +10,6 @@
 package com.github.jspxnet.sober.util;
 
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.enums.DocumentFormatType;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
@@ -201,11 +200,7 @@ public final class AnnotationUtil {
                 soberColumn.setInput(column.input());
                 if (!NullClass.class.equals(column.enumType()))
                 {
-<<<<<<< HEAD
-                    soberColumn.setOption(ObjectUtil.toString(column.enumType().getEnumConstants()));
-=======
                     soberColumn.setOption(new JSONArray(column.enumType().getEnumConstants()).toString());
->>>>>>> dev
                 } else {
                     soberColumn.setOption(column.option());
                 }

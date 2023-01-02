@@ -130,12 +130,6 @@ public class LogBackConfigUtil {
 
     public static void changeDbLogBackConfig()
     {
-<<<<<<< HEAD
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        loggerContext.reset();
-
-
-=======
         Object logContext = LoggerFactory.getILoggerFactory();
         if (logContext==null || logContext.getClass().getName().contains("Log4jLoggerFactory"))
         {
@@ -146,7 +140,6 @@ public class LogBackConfigUtil {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         loggerContext.reset();
 
->>>>>>> dev
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         boolean isDefaultConfig = false;
         String defaultConfigTxt = null;
@@ -166,12 +159,6 @@ public class LogBackConfigUtil {
             }
         }
 
-<<<<<<< HEAD
-       // lc.reset();
-        //LoggerContext loggerContext = new LoggerContext();
-
-=======
->>>>>>> dev
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(loggerContext);
 

@@ -57,13 +57,10 @@ public class SoberTable implements TableModels {
     private List<SoberColumn> columns = new LinkedList<>();
     //字段
     private Map<String, SoberCalcUnique> calcUniqueMap = new LinkedHashMap<>();
-<<<<<<< HEAD
-=======
 
     //可扩展
     private boolean canExtend = false;
 
->>>>>>> dev
     //最后访问时间
     private long lastDate = System.currentTimeMillis();
 
@@ -279,7 +276,6 @@ public class SoberTable implements TableModels {
     @Override
     public int hashCode() {
         return toString().hashCode();
-<<<<<<< HEAD
     }
 
     @Override
@@ -289,17 +285,6 @@ public class SoberTable implements TableModels {
     }
 
     @Override
-=======
-    }
-
-    @Override
-    public String toString()
-    {
-        return new JSONObject(this,false).toString();
-    }
-
-    @Override
->>>>>>> dev
     public boolean equals(TableModels models)
     {
         return (this.toString()).equals(models.toString());
@@ -311,8 +296,6 @@ public class SoberTable implements TableModels {
         return entity.getName();
     }
 
-<<<<<<< HEAD
-=======
     @JsonField(name="isCanExtend")
     @Override
     public boolean isCanExtend() {
@@ -323,7 +306,6 @@ public class SoberTable implements TableModels {
         this.canExtend = canExtend;
     }
 
->>>>>>> dev
     @Override
     @JsonField(caption = "id")
     public String getId()
@@ -331,10 +313,7 @@ public class SoberTable implements TableModels {
         JSONObject json = new JSONObject();
         json.put("d",databaseName);
         json.put("n",name);
-<<<<<<< HEAD
-=======
         json.put("p",primary);
->>>>>>> dev
         json.put("c",columns.size());
         return EncryptUtil.getMd5(json.toString());
     }

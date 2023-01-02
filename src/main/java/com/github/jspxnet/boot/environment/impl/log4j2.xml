@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-<?xml version="1.0" encoding="GBK" ?>
-<Configuration>
-    <logger name="org.apache" level="ERROR" />
-    <logger name="httpclient" level="ERROR" />
-
-    <!-- Êä³öÈÕÖ¾µ½¿ØÖÆÌ¨  ConsoleAppender -->
-=======
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     status : è¿™ä¸ªç”¨äºŽè®¾ç½®log4j2è‡ªèº«å†…éƒ¨çš„ä¿¡æ¯è¾“å‡º,å¯ä»¥ä¸è®¾ç½®,å½“è®¾ç½®æˆtraceæ—¶,ä¼šçœ‹åˆ°log4j2å†…éƒ¨å„ç§è¯¦ç»†è¾“å‡º
@@ -14,7 +6,6 @@
     æ–‡ä»¶æ•°æ®è¾¾åˆ°æœ€å¤§å€¼æ—¶ï¼Œæ—§æ•°æ®ä¼šè¢«åŽ‹ç¼©å¹¶æ”¾è¿›æŒ‡å®šæ–‡ä»¶å¤¹
 -->
 <Configuration status="INFO" monitorInterval="600">
->>>>>>> dev
     <Properties>
         <!-- é…ç½®æ—¥å¿—æ–‡ä»¶è¾“å‡ºç›®å½•ï¼Œæ­¤é…ç½®å°†æ—¥å¿—è¾“å‡ºåˆ°tomcatæ ¹ç›®å½•ä¸‹çš„æŒ‡å®šæ–‡ä»¶å¤¹ -->
         <Property name="logPath">${logPath}</Property>
@@ -90,13 +81,6 @@
             <Policies>
                 <SizeBasedTriggeringPolicy size="2MB"/>
             </Policies>
-<<<<<<< HEAD
-        </RollingFile>
-        <RollingFile name="FILE_ERROR" fileName="${logPath}/error.log"
-                     filePattern="${logPath}/error-%d{yyyy-MM-dd}-%i.log">
-            <!-- µ±Ê¹ÓÃ×éºÏ¹ýÂËÆ÷µÄÊ±ºò£¬onMatch/onMismatch=NEUTRALµÄÊ±ºò ÈÕÖ¾ÏûÏ¢»á¼ÌÐøÍùºóÃæÁ÷×ª-->
-            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
-=======
             <Filters>
                 <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL"/>
                 <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -106,20 +90,12 @@
         <RollingRandomAccessFile name="warn_appender"
                                  immediateFlush="true" fileName="${logPath}/warn.log"
                                  filePattern="${logPath}/warn-%d{yyyy-MM-dd}.log.gz">
->>>>>>> dev
             <PatternLayout>
                 <pattern>%5p [%t] %d{yyyy-MM-dd HH:mm:ss} (%F:%L) %m%n</pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="2MB"/>
             </Policies>
-<<<<<<< HEAD
-        </RollingFile>
-        <RollingFile name="FILE_WARN" fileName="${logPath}/warn.log"
-                     filePattern="${logPath}/warn-%d{yyyy-MM-dd}-%i.log">
-            <!-- µ±Ê¹ÓÃ×éºÏ¹ýÂËÆ÷µÄÊ±ºò£¬onMatch/onMismatch=NEUTRALµÄÊ±ºò ÈÕÖ¾ÏûÏ¢»á¼ÌÐøÍùºóÃæÁ÷×ª-->
-=======
->>>>>>> dev
             <Filters>
                 <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>
                 <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
