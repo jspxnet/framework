@@ -24,6 +24,10 @@ public interface Option {
      * @return 得到字典表列表
      */
     List<OptionBundle> getList(String namespace);
+
+    List<OptionBundle> getList(@Param(caption = "分组号") String groupCode,
+                               @Param(caption = "命名空间") String namespace);
+
     /**
      * 字典表中得到key数据
      * @param key code

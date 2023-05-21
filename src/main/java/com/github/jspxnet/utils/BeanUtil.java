@@ -588,6 +588,10 @@ public final class BeanUtil {
         if (null == cls) {
             return null;
         }
+        if (ClassUtil.isStandardProperty(cls))
+        {
+            return (T)object;
+        }
         if (cls.equals(JSONObject.class)) {
             return (T) new JSONObject(object);
         }
@@ -636,6 +640,7 @@ public final class BeanUtil {
         } else {
             List<T> result = new ArrayList<>();
             for (V obj : list) {
+
                 result.add(copy(obj, cls));
             }
             return result;
@@ -748,70 +753,153 @@ public final class BeanUtil {
             }
         }
 
+        //保存已经处理过的字段
+        List<String> doFields = new ArrayList<>();
         Field[] fieldGet = ClassUtil.getDeclaredFields(newData.getClass());
         Field[] fieldSet = ClassUtil.getDeclaredFields(getData.getClass());
+        PropertyContainer propertyContainer = null;
+        if (getData instanceof PropertyContainer)
+        {
+            propertyContainer = (PropertyContainer)getData;
+        }
+
         for (Field setField : fieldSet) {
             for (Field field : fieldGet) {
                 if (ArrayUtil.indexOf(STOP_MODIFIERS, field.getModifiers()) != -1) {
                     continue;
                 }
                 if (field.getName().equals(setField.getName())) {
-                    try {
-                        field.setAccessible(true);
-                        setField.setAccessible(true);
-                        Object o = setField.get(getData);
-                        if (o==null && ClassUtil.isBaseNumberType(field.getType()))
-                        {
-                            field.set(newData, 0);
-                        }
-                        else if (setField.getGenericType().equals(field.getGenericType()) || ClassUtil.isNumberType(setField.getType()) && ClassUtil.isNumberType(field.getType())) {
-                            //todo字符串 和数字类型需要避开
-                            Object col =field.get(newData);
-                            if ((col instanceof Collection)&& !ObjectUtil.isEmpty(col))
-                            {
-                                Collection coll = (Collection)col;
-                                Object obj = coll.iterator().next();
-                                if (obj!=null)
-                                {
-
-                                    Class<?> type = obj.getClass();
-                                    field.set(newData, copyList((Collection)o,type));
-                                }
-                            }
-                            else
-                            {
-
-                                field.set(newData, o);
-                            }
-                        }
-                        else
-                        {
-                            //对象二次拷贝
-                            String typeModel = field.getGenericType().getTypeName();
-                            typeModel = StringUtil.substringOutBetween(typeModel,"<",">");
-                            if (ClassUtil.isCollection(field.getType()) && !StringUtil.isEmpty(typeModel))
-                            {
-                                field.set(newData,copyList((Collection<?>)o,ClassUtil.loadClass(typeModel)));
-                            }
-                            else if (field.getType().equals(Map.class))
-                            {
-                                JSONObject json = new JSONObject(newData);
-                                field.set(newData,json);
-                            }
-                            else
-                            {
-                                field.set(newData,copy(o, (Class<?>)field.getType()));
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
-                    }
+                    doFields.add(field.getName());
+                    putFieldValue( field, setField, getData, newData);
                 }
             }
         }
+        for (Field field : fieldGet) {
+            if (doFields.contains(field.getName()))
+            {
+                continue;
+            }
+            if (propertyContainer!=null && propertyContainer.containsKey(field.getName()))
+            {
+                putFieldValue( field, propertyContainer.get(field.getName()), newData);
+
+            }
+        }
+        doFields.clear();
+
     }
 
+    private static void putFieldValue(Field field,Object o,Object newData)
+    {
+        try {
+            field.setAccessible(true);
+            if (o==null && ClassUtil.isBaseNumberType(field.getType()))
+            {
+                field.set(newData, 0);
+            } else
+            if (o==null && !ClassUtil.isBaseNumberType(field.getType()))
+            {
+                field.set(newData,null);
+            }
+            else if (o!=null&&ClassUtil.isNumberType(o.getClass()) && ClassUtil.isNumberType(field.getType())) {
+                //todo字符串 和数字类型需要避开
+                Object col =field.get(newData);
+                if ((col instanceof Collection)&& !ObjectUtil.isEmpty(col))
+                {
+                    Collection coll = (Collection)col;
+                    Object obj = coll.iterator().next();
+                    if (obj!=null)
+                    {
+
+                        Class<?> type = obj.getClass();
+                        field.set(newData, copyList((Collection)o,type));
+                    }
+                }
+                else
+                {
+
+                    field.set(newData, o);
+                }
+            }
+            else
+            {
+                //对象二次拷贝
+                String typeModel = field.getGenericType().getTypeName();
+                typeModel = StringUtil.substringOutBetween(typeModel,"<",">");
+                if (ClassUtil.isCollection(field.getType()) && !StringUtil.isEmpty(typeModel))
+                {
+                    field.set(newData,copyList((Collection<?>)o,ClassUtil.loadClass(typeModel)));
+                }
+                else if (field.getType().equals(Map.class))
+                {
+                    JSONObject json = new JSONObject(newData);
+                    field.set(newData,json);
+                }
+                else
+                {
+                    field.set(newData,copy(o, (Class<?>)field.getType()));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
+        }
+    }
+
+    private static void putFieldValue(Field field,Field setField,Object getData,Object newData)
+    {
+        try {
+            field.setAccessible(true);
+            setField.setAccessible(true);
+            Object o = setField.get(getData);
+            if (o==null && ClassUtil.isBaseNumberType(field.getType()))
+            {
+                field.set(newData, 0);
+            }
+            else if (setField.getGenericType().equals(field.getGenericType()) || ClassUtil.isNumberType(setField.getType()) && ClassUtil.isNumberType(field.getType())) {
+                //todo字符串 和数字类型需要避开
+                Object col =field.get(newData);
+                if ((col instanceof Collection)&& !ObjectUtil.isEmpty(col))
+                {
+                    Collection coll = (Collection)col;
+                    Object obj = coll.iterator().next();
+                    if (obj!=null)
+                    {
+
+                        Class<?> type = obj.getClass();
+                        field.set(newData, copyList((Collection)o,type));
+                    }
+                }
+                else
+                {
+
+                    field.set(newData, o);
+                }
+            }
+            else
+            {
+                //对象二次拷贝
+                String typeModel = field.getGenericType().getTypeName();
+                typeModel = StringUtil.substringOutBetween(typeModel,"<",">");
+                if (ClassUtil.isCollection(field.getType()) && !StringUtil.isEmpty(typeModel))
+                {
+                    field.set(newData,copyList((Collection<?>)o,ClassUtil.loadClass(typeModel)));
+                }
+                else if (field.getType().equals(Map.class))
+                {
+                    JSONObject json = new JSONObject(newData);
+                    field.set(newData,json);
+                }
+                else
+                {
+                    field.set(newData,copy(o, (Class<?>)field.getType()));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
+        }
+    }
     /**
      *
      * @param list 列表

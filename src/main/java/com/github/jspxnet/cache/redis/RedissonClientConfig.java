@@ -81,11 +81,15 @@ public class RedissonClientConfig implements Serializable {
                 }
                 return;
             }
-            try {
-                redisConfig = getRedisConfig( config);
-                redisson = Redisson.create(redisConfig);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (redisConfig!=null)
+            {
+                try {
+                    redisConfig = getRedisConfig( config);
+                    assert redisConfig != null;
+                    redisson = Redisson.create(redisConfig);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

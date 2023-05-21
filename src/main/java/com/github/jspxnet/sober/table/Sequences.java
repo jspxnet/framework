@@ -54,6 +54,10 @@ public class Sequences implements Serializable {
     @Column(caption = "添加日期", option = "0:否;1:是", notNull = true, defaultValue = "1")
     private int dateStart = 0;
 
+    @Column(caption = "单号头", length = 20)
+    private String headChars = StringUtil.empty;
+
+    //加前缀配置 'BXD'yyyyMMdd
     @Column(caption = "日期格式", length = 20, notNull = true, defaultValue = "yyMMdd")
     private String dateFormat = "yyMMddhh";
 
@@ -62,13 +66,14 @@ public class Sequences implements Serializable {
     private int mac = 0;
 
     public String getNextKey(long value) {
+        keyValue = value;
         if (keyValue <= keyMin) {
             keyValue = keyMin;
         }
         if (keyValue > keyMax) {
             keyValue = keyMin;
         }
-        keyValue = value;
+
         if (StringUtil.isNull(dateFormat)) {
             dateFormat = "yyMMddhh";
         }

@@ -22,6 +22,7 @@ import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.DialectFactory;
+import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.model.container.PropertyContainer;
 import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
@@ -42,6 +43,7 @@ import javax.transaction.UserTransaction;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +64,8 @@ import java.util.Map;
 
 @Slf4j
 public class SoberMappingBean implements SoberFactory {
+
+
     //事务管理器
     private static final TransactionManager TRANSACTION_MANAGER = TransactionManager.getInstance();
     //初始化表 用于比较是否重复
@@ -356,14 +360,31 @@ public class SoberMappingBean implements SoberFactory {
                 log.error("database dataSource not get JDBC Connection，数据库配置错误");
                 throw new SQLException("database dataSource not get JDBC Connection,数据库配置错误");
             }
+
             if (StringUtil.isNull(databaseType) || Environment.auto.equalsIgnoreCase(databaseType)) {
                 this.databaseType = JdbcUtil.getDatabaseType(conn).getName();
-                this.dialect = DialectFactory.createDialect(databaseType);
-            } else {
+                if (DatabaseEnumType.MSSQL.equals(DatabaseEnumType.find(this.databaseType)))
+                {
+                    if (JdbcUtil.isMsSqlHeightVersion(conn))
+                    {
+                        this.dialect = DialectFactory.createDialect("MsSqlHeight");
+                    }
+                } else
+                {
+                    this.dialect = DialectFactory.createDialect(databaseType);
+                }
+            }
+            //修复一下
+            if (this.dialect==null)
+            {
                 this.dialect = DialectFactory.createDialect(databaseType);
             }
+
+            if (StringUtil.isNull(databaseName))
+            {
+                databaseName = JdbcUtil.getCurrentDatabaseName(conn,dialect,DatabaseEnumType.find(this.databaseType));
+            }
             DatabaseMetaData databaseMetaData = conn.getMetaData();
-            databaseName = conn.getCatalog();
             this.dialect.setSupportsSavePoints(databaseMetaData.supportsSavepoints());
             this.dialect.setSupportsGetGeneratedKeys(databaseMetaData.supportsGetGeneratedKeys());
         } finally {
@@ -526,7 +547,7 @@ public class SoberMappingBean implements SoberFactory {
                 }
             }
 
-            final List<String> checkList = new ArrayList<>();
+            List<String> checkList = new ArrayList<>();
             for (File file : fileList) {
                 if (file==null) {
                     continue;
@@ -559,8 +580,8 @@ public class SoberMappingBean implements SoberFactory {
 
     /**
      * 得到表结构,如果数据库中不存在表，就创建表
-     *
-     * @param cla          类
+     * 这里只放入基本的模型结构，不放入枚举字段数据
+     * @param cla   类
      * @param soberSupport 支持对象
      * @return 得到表结构
      */
@@ -604,9 +625,20 @@ public class SoberMappingBean implements SoberFactory {
                     }
                 }
                 soberTable.setCanExtend(PropertyContainer.class.isAssignableFrom(cla));
-
-
                 //放入扩展字段end
+
+
+                //这里跳过系统中默认的表
+                if (!SoberUtil.isJumpEnuTypeCheck(cla))
+                {
+                    //判断是否有配置好的枚举begin
+                    for (SoberColumn soberColumn:columnList)
+                    {
+                        boolean isConfFieldEnum = JdbcUtil.isConfFieldEnum(soberSupport,soberColumn.getTableName(),soberColumn.getName());
+                        soberColumn.setConfEnum(isConfFieldEnum);
+                    }
+                    //判断是否有配置好的枚举end
+                }
                 TABLE_MAP.put(cla, soberTable);
             }
         }

@@ -16,10 +16,8 @@ import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -243,6 +241,7 @@ public class SqlMapBaseImpl implements SqlMapBase {
         ScriptMarkUtil.fixVarNull(valueMap, sqlMapConf.getContext());
         //修复变量,避免空异常 end
 
+        System.out.println("valueMap=" + ObjectUtil.toString(valueMap));
         String sqlText = dialect.processSql(sqlMapConf.getContext(), valueMap);
         if (StringUtil.isNull(sqlText)) {
             throw new Exception("ERROR SQL IS NULL");
@@ -395,7 +394,6 @@ public class SqlMapBaseImpl implements SqlMapBase {
     public boolean execute(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws Exception {
         Dialect dialect = soberFactory.getDialect();
         return jdbcOperations.execute(dialect.processSql(sqlMapConf.getContext(), valueMap));
-
     }
 
     /**
@@ -412,7 +410,7 @@ public class SqlMapBaseImpl implements SqlMapBase {
 
     /**
      * @param sqlMapConf sql配置
-     * @param valueMap   参数msp
+     * @param valueMap   参数map
      * @return 更新是否成功
      * @throws Exception 异常
      */
@@ -421,4 +419,18 @@ public class SqlMapBaseImpl implements SqlMapBase {
         Dialect dialect = soberFactory.getDialect();
         return jdbcOperations.update(dialect.processSql(sqlMapConf.getContext(), valueMap));
     }
+
+    /**
+     *
+     * @param sqlMapConf sql配置
+     * @param valueMap 参数map
+     * @return 更新是否成功
+     * @throws SQLException 异常
+     */
+    @Override
+    public int[] batchUpdate(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws SQLException {
+        return jdbcOperations.batchUpdate(sqlMapConf,valueMap);
+    }
+
+
 }

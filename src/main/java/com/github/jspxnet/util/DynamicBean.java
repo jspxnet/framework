@@ -24,7 +24,6 @@ public class DynamicBean implements Serializable {
     public DynamicBean(Map<String, Class<?>> propertyMap) {
 
         this.target = ReflectUtil.generateBean(propertyMap);
-
         this.propertyMap = BeanMap.create(this.target);
     }
     /*
@@ -37,8 +36,20 @@ public class DynamicBean implements Serializable {
      * @param value    值
      */
     public void setValue(String property, Object value) {
-        if (!"empty".equals(property)) {
-            propertyMap.put(property, value);
+        if (null!=property&&!"empty".equals(property)) {
+            //propertyMap 中key 的大小写会变，的不区分大小写
+            for (Object key:propertyMap.keySet())
+            {
+                if (property.equalsIgnoreCase((String)key))
+                {
+                    propertyMap.put(key, value);
+                    return;
+                }
+
+            }
+
+
+
         }
     }
 

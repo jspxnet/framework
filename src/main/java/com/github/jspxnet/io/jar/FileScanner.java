@@ -2,6 +2,7 @@ package com.github.jspxnet.io.jar;
 
 
 import com.github.jspxnet.io.ScanJar;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,19 +18,26 @@ public class FileScanner implements ScanJar {
 
 
     private static final String CLASS_SUFFIX = ".class";
-    private static final String[] JUMP_CLASS_LIST = {"Big5", "GB2Big5","com\\sun\\syndication","com\\github\\jspxnet\\component\\jxls\\MergeCell"};
+    private static final String[] JUMP_CLASS_LIST = {"Big5", "GB2Big5","com\\sun\\syndication","com\\github\\jspxnet\\component\\jxls\\MergeCell","org\\apache\\rocketmq"};
 
     public FileScanner() {
 
-
     }
+
+    public static boolean useRocketMq = ClassUtil.hasClass("org.apache.rocketmq.client.producer.SendCallback");
+
 
     private static boolean isJumpClass(String name) {
         if (StringUtil.isNull(name)) {
             return true;
         }
         for (String className : JUMP_CLASS_LIST) {
+
             if (name.toLowerCase().contains(className.toLowerCase())) {
+                return true;
+            }
+            if (!useRocketMq&&name.toLowerCase().contains("com\\github\\jspxnet\\txweb\\interceptor\\ActionLogRocketInterceptor".toLowerCase()))
+            {
                 return true;
             }
         }

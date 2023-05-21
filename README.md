@@ -27,7 +27,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.70</version>
+    <version>6.72</version>
 </dependency>
 ```
     
@@ -143,3 +143,4 @@
 * 2022年07月：Jspx.net Framework 6.67-69 添加了开发者中心功能,能够快速的配置开发页面,sqlmap配置支持在开发中心配置,不用在写xml.修复bug
 * 2022年09月：Jspx cloud Framework 6.70 添加开发中心,支持sql在线配置,内存结构自动化,定时任务分布式管理,满足不重启的情况最大范围调整逻辑
 * 2022年12月：Jspx cloud Framework 6.71 动态对象,动态表单支持,满足开发的系统能够方便的动态扩展字段,后台 任务管理等功能
+* 2022年12月：Jspx cloud Framework 6.72 优化oracle，mssql支持，添加搜索扩展结构支持

@@ -10,5 +10,4 @@ package com.github.jspxnet.mq.env;
 public class MqIoc {
     final public static String actionLogMqProducer = "actionLogMqProducer";
 
-    final public static String talkMqProducer = "talkMqProducer";
 }

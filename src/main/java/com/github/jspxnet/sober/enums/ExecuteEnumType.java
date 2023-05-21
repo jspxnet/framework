@@ -16,9 +16,9 @@ public enum ExecuteEnumType implements EnumType {
     //更新
     UPDATE(1, "UPDATE"),
     //执行
-    EXECUTE(2, "EXECUTE");
-
-
+    EXECUTE(2, "EXECUTE"),
+    //批量更新
+    BATCH_UPDATE(3, "BATCH_UPDATE");
     final private int value;
     final private String name;
 

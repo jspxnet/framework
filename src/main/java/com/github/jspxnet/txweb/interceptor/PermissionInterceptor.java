@@ -187,7 +187,7 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         permissionDAO.setOrganizeId(organizeId);
 
         UserSession userSession = onlineManager.getUserSession();
-        //todo 待检查确认
+        //待检查确认
         IRole role = userSession.getRole(permissionDAO.getNamespace(), organizeId);
         //自动分配调试权限 begin
         //role == null &&

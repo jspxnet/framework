@@ -230,7 +230,6 @@ public class BlockedDAOImpl extends DFAFilterImpl implements BlockedDAO {
             int maxWord = getCount();
             super.getSoberFactory().setMaxRows(maxWord);
             Set<String> keyWordSet = new HashSet<String>();
-            log.info("载入屏蔽域名结束,共载入" + keyWordSet.size() + "个");
 
             log.info("开始载入屏蔽关键字");
             List<BlockedWord> blockedWordList = getList(null, null, null, null, 1, maxWord);
@@ -238,9 +237,9 @@ public class BlockedDAOImpl extends DFAFilterImpl implements BlockedDAO {
                 keyWordSet.add(blockedWord.getWord());
             }
             addWordToHashMap(keyWordSet);
+            log.info("载入屏蔽关键字,共载入" + keyWordSet.size() + "个");
             blockedWordList.clear();
             keyWordSet.clear();
-            log.info("载入屏蔽关键字,共载入" + keyWordSet.size() + "个");
         } finally {
             super.getSoberFactory().setMaxRows(maxRows);
         }

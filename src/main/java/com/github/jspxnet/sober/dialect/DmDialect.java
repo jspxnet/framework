@@ -78,7 +78,7 @@ public class DmDialect extends Dialect {
         put(InputStream.class.getName(), "\"${" + COLUMN_NAME + "}\" blob");
         put(char.class.getName(), "\"${" + COLUMN_NAME + "}\" char(2) NOT NULL default ''");
         put(SQL_DROP_TABLE, "DROP TABLE  \"${"+ KEY_DATABASE_NAME +"}\".\"${" + KEY_TABLE_NAME + "}\"");
-        put(FUN_TABLE_EXISTS, " SELECT COUNT(1)  FROM all_tables WHERE OWNER='${"+KEY_DATABASE_NAME+"}' AND TABLE_NAME='${" + KEY_TABLE_NAME + "}'");
+        put(FUN_TABLE_EXISTS, "SELECT COUNT(1)  FROM all_tables WHERE OWNER='${"+KEY_DATABASE_NAME+"}' AND TABLE_NAME='${" + KEY_TABLE_NAME + "}'");
     }
 
     @Override

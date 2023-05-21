@@ -29,7 +29,7 @@ public class InformixDialect extends Dialect {
     public InformixDialect() {
 
 
-        //todo 这个不确定 begin
+        //这个不确定 begin
         put(SQL_COMMENT, "COMMENT ON COLUMN ${" + KEY_TABLE_NAME + "}.${" + COLUMN_NAME + "} IS '${" + COLUMN_CAPTION + "}'");
         put(SQL_TABLE_COMMENT, "COMMENT ON TABLE ${" + KEY_TABLE_NAME + "} IS '${" + SQL_TABLE_COMMENT + "}'");
         //这个不确定 end

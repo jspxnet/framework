@@ -9,7 +9,6 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 @Data
 public class SoberColumnDto implements Serializable {
@@ -93,11 +92,6 @@ public class SoberColumnDto implements Serializable {
             sb.append("private ").append(typeString).append(" ").append(name).append(" = StringUtil.empty;");
         }
         return sb.toString();
-    }
-
-    public List<Object> getOptionList()
-    {
-        return TypeUtil.getOptionList(option);
     }
 
 }

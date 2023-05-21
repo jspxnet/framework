@@ -10,6 +10,7 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.util.SqlParser;
 import com.github.jspxnet.utils.ObjectUtil;
 
 import java.sql.PreparedStatement;
@@ -23,6 +24,7 @@ import java.sql.PreparedStatement;
  */
 public class MsSqlHeightDialect extends MsSqlDialect {
     public MsSqlHeightDialect() {
+        put(SQL_CRITERIA_QUERY, "SELECT * FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
 
     }
 
@@ -42,6 +44,7 @@ public class MsSqlHeightDialect extends MsSqlDialect {
         if (length < 0) {
             length = 0;
         }
+        //begin 从0开始
         if (sql.toLowerCase().contains(" order "))
         {
             return sql + " offset " + begin + " rows fetch next " + length + " rows only";
@@ -61,7 +64,7 @@ public class MsSqlHeightDialect extends MsSqlDialect {
 
     @Override
     public boolean supportsLimit() {
-        return false;
+        return true;
     }
 
     @Override

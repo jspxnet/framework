@@ -1,13 +1,11 @@
 package com.github.jspxnet.sober.model.container;
 
+import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.IPropertyChange;
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.utils.ObjectUtil;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -16,12 +14,14 @@ import java.util.Map;
 
 public abstract class AbstractObjectValue extends PropertyContainer implements IPropertyChange {
     private transient TableModels tableModels;
+
+    @JsonIgnore
     protected transient DataMap<String, Object> oldValues = null;
 
-    //这里是为了多语言实现
-
+    @JsonIgnore
     private boolean available = true;
 
+    @JsonIgnore
     private boolean isLoaded;
 
     public boolean isLoaded() {

@@ -27,7 +27,7 @@ import java.sql.Connection;
 @Slf4j
 public class ConnectionInvocationHandler implements InvocationHandler {
 
-    private String checkSql = "SELECT 1";
+    private String checkSql = null;
     private boolean isClosed = false;
     private Connection target;
     private long lastAccessTime = System.currentTimeMillis();

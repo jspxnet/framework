@@ -69,7 +69,7 @@ public class LogBackConfigUtil {
 
     public static void createLogBackConfig(LoggerContext lc)
     {
-        lc.reset();
+
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
         boolean isDefaultConfig = false;
@@ -118,6 +118,7 @@ public class LogBackConfigUtil {
         {
             org.xml.sax.InputSource inputSource = new InputSource(new StringReader(confTxt));
             try {
+                lc.reset();
                 configurator.doConfigure(inputSource);
             } catch (JoranException e) {
                 System.err.println("1.默认路径是否配置错误;2.检查defaultlog.xml文件是否存在");
@@ -161,7 +162,6 @@ public class LogBackConfigUtil {
 
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(loggerContext);
-
         if (StringUtil.isNull(defaultConfigTxt))
         {
             System.err.println("LogBack defaultConfig:" + defaultConfigTxt);

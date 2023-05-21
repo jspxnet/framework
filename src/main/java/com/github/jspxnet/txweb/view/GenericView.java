@@ -36,10 +36,6 @@ public class GenericView extends ActionSupport {
 
     @Ref
     protected GenericDAO genericDAO;
-    public void setGenericDAO(GenericDAO genericDAO) {
-        this.genericDAO = genericDAO;
-    }
-
 
     public List<?> getList(@Param(caption = "通用参数")PageParam  params) throws Exception {
         return genericDAO.getList(ClassUtil.loadClass(className),params.getField() , params.getFind(), params.getTerm(),params.getUid(),params.getSort(),params.getCurrentPage(),params.getCount(),false);

@@ -9,11 +9,15 @@
  */
 package com.github.jspxnet.sober;
 
+import com.github.jspxnet.json.JSONArray;
+import com.github.jspxnet.sober.table.SqlMapConf;
+import com.github.jspxnet.txweb.table.meta.BaseBillType;
 import com.github.jspxnet.txweb.table.meta.OperatePlug;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.exception.ValidException;
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.List;
@@ -38,7 +42,6 @@ public interface SoberSupport extends Serializable {
      * @return sql 适配器
      */
     Dialect getDialect();
-
     /**
      *
      * @param soberFactory 数据工厂
@@ -55,8 +58,26 @@ public interface SoberSupport extends Serializable {
      * @return 表结构模型
      */
     TableModels getSoberTable(Class<?> cla);
-
+    /**
+     *
+     * @param tableName  类
+     * @return 表结构模型
+     */
     TableModels getTableModels(String tableName);
+    /**
+     *
+     * @param cla  类对象
+     * @param fieldName  字段名称
+     * @return  返回枚举
+     */
+    JSONArray getFieldEnumType(Class<?> cla, String fieldName);
+    /**
+     *
+     * @param tableName 表明
+     * @param fieldName  字段名称
+     * @return 返回枚举
+     */
+    JSONArray getFieldEnumType(String tableName, String fieldName);
 
     /**
      *
@@ -78,7 +99,14 @@ public interface SoberSupport extends Serializable {
      */
     int getMaxRows();
 
-
+    /**
+     * @param aClass       类
+     * @param <T> 类型
+     * @param field        字段名称
+     * @param serializable 字段值
+     * @param loadChild    是否载入关联
+     * @return 返回对象，如果为空就创建对象，不会有null 返回
+     */
     <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild);
 
     /**
@@ -112,28 +140,6 @@ public interface SoberSupport extends Serializable {
      * @return Object 得到对象
      */
     <T> T get(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild);
-    /**
-     * 查询字段返回一个对象,从缓存中起，查询后放入缓存
-     * 如果为空，如果为空就创建对象,返回永远不为空
-     *
-     * @param aClass 类
-     * @param field 字段
-     * @param serializable 字段值
-     * @param loadChild 载入子对象
-     * @param loadUseCache 是否是用缓存
-     * @param <T> 类型
-     * @return 得到对象
-     */
-   // <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild, boolean loadUseCache);
-    /**
-     * @param aClass       类
-     * @param <T> 类型
-     * @param field        字段名称
-     * @param serializable 字段值
-     * @param loadChild    是否载入关联
-     * @return 返回对象，如果为空就创建对象，不会有null 返回
-     */
-   // <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild);
     /**
      * @param aClass       类
      * @param serializable 字段值
@@ -189,6 +195,20 @@ public interface SoberSupport extends Serializable {
      * @return 查询返回
      */
     <T> List<T> load(Class<T> aClass, String field, Serializable[] serializables, boolean loadChild);
+
+    /**
+     *
+     * @param tableName 表名称
+     * @return 单据类型列表
+     */
+    BaseBillType getDefaultBaseBillType(String tableName);
+    /**
+     * 判断是否存在单号
+     * @param tableName 表名
+     * @param billNo  单号
+     * @return 是否存在,int类型,为数量
+     */
+    int existBillNo(String tableName, String billNo);
 
     /**
      *
@@ -365,6 +385,10 @@ public interface SoberSupport extends Serializable {
      * @throws Exception 异常
      */
     boolean execute(String sqlText, Object[] params) throws Exception;
+
+
+    int[] batchUpdate(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws SQLException;
+
     /**
      * 执行一个sql
      *

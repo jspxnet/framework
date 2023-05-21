@@ -609,6 +609,12 @@ public class OnlineManagerImpl implements OnlineManager {
     @Override
     public UserSession getUserSession(ActionContext actionContext)
     {
+        if (actionContext==null)
+        {
+            UserSession userSession = createGuestUserSession();
+            userSession.setName("非法用户");
+            return userSession;
+        }
         HttpServletRequest request = actionContext.getRequest();
 
         //有可能多个拦截器，之前已经读取过一次了

@@ -30,10 +30,8 @@ public @interface SqlMap
     String namespace() default StringUtil.empty;
     //执行方式
     ExecuteEnumType execute() default ExecuteEnumType.QUERY;
-
     //当前页变量名称
     String currentPage() default "currentPage";
-
     //每月返回条数 变量名称
     String count() default "count";
 

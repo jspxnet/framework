@@ -28,6 +28,8 @@ public class TableMeta extends OperateTable {
     @Column(caption = "表名称", length = 100, notNull = true)
     private String tableName;
 
+
+
     //0:作废,1:表示只有1级主表;2:表示主子表;3:足子孙表 , 一般就不要超过3级了
     //利用这个标识优化查询
     @Column(caption = "表类型")
@@ -54,6 +56,10 @@ public class TableMeta extends OperateTable {
 
     @Nexus(mapping = MappingType.OneToMany, field = "tableName", targetField = "tableName", targetEntity = OperatePlug.class)
     private List<OperatePlug> operatePlugList = new LinkedList<>();
+
+    @Nexus(mapping = MappingType.OneToOne, field = "tableName", targetField = "tableName", targetEntity = BaseBillType.class)
+    private BaseBillType billType = new BaseBillType();
+
 
     //所有的界面功能脚本
     @Column(caption = "功能脚本", length = 20000)

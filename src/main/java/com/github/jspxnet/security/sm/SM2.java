@@ -304,7 +304,7 @@ public class SM2 {
         try {
             res = SM3Util.hash(join(params));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            //  Auto-generated catch block
             e.printStackTrace();
         }
         return res;

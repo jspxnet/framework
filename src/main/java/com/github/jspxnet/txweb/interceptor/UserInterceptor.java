@@ -78,7 +78,6 @@ public class UserInterceptor extends InterceptorSupport {
         Action action = actionProxy.getAction();
         UserSession userSession = onlineManager.getUserSession(actionContext);
 
-
         String organizeId = action.getString("organizeId", true);
         if (!StringUtil.isEmpty(organizeId)) {
             permissionDAO.setOrganizeId(organizeId);
@@ -97,7 +96,6 @@ public class UserInterceptor extends InterceptorSupport {
             role = debugRole;
             onlineManager.updateUserSessionCache(userSession);
         }
-
 
         if (action.isGuest() && role == null) {
             userSession.setRole(permissionDAO.getRole(config.getString(Environment.guestRole)));

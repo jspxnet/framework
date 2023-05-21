@@ -53,7 +53,6 @@ public class WordFilterAction extends WordFilterView {
             }
             addActionMessage(language.getLang(LanguageRes.operationSuccess));
         }
-
     }
 
     //不清空数据，累加方式

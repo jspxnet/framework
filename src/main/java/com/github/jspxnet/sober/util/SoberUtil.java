@@ -19,6 +19,7 @@
 package com.github.jspxnet.sober.util;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.dblog.JspxLoggingEvent;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
@@ -31,9 +32,9 @@ import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import com.github.jspxnet.sober.*;
-import com.github.jspxnet.sober.annotation.IDType;
-import com.github.jspxnet.sober.annotation.SqlMap;
-import com.github.jspxnet.sober.annotation.Table;
+import com.github.jspxnet.sober.annotation.*;
+import com.github.jspxnet.sober.table.*;
+import com.github.jspxnet.txweb.table.*;
 import com.github.jspxnet.txweb.table.meta.OperatePlug;
 import com.github.jspxnet.sober.config.*;
 import com.github.jspxnet.sober.config.xml.*;
@@ -48,12 +49,8 @@ import com.github.jspxnet.sober.enums.QueryModelEnumType;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.proxy.DefaultSqlMapInvocation;
 import com.github.jspxnet.sober.proxy.InterceptorProxy;
-import com.github.jspxnet.sober.table.SoberTableModel;
-import com.github.jspxnet.sober.table.SqlMapConf;
-import com.github.jspxnet.sober.table.SqlMapInterceptorConf;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.sql.*;
@@ -75,6 +72,10 @@ public final class SoberUtil {
     final public static String CACHE_TREM_LOAD = ":load:";
     final public static String CACHE_TREM_CHILD = ":c:";
     final public static String CACHE_TREM_EQUALS = ":e:";
+    private final static List<Class<?>> JUMP_ENU_TYPE_CHECK = Arrays.asList(SensitiveWord.class, SearchScheme.class,
+            LockTable.class,Sequences.class,SoberTableModel.class,SqlMapConf.class,SoberFieldEnum.class,
+            OptionBundle.class,CityItem.class,BlockedWord.class,SyncIndex.class,StoreQueueStatus.class,
+            JspxLoggingEvent.class);
 
     private SoberUtil() {
 
@@ -451,6 +452,11 @@ public final class SoberUtil {
      * @return 表模型对象
      */
     public static TableModels createTableAndIndex(Class<?> cla, SqlMapConf sqlMapConf, SoberSupport soberSupport) {
+        if (cla==null)
+        {
+            log.error("没有找到实体类:检查当前传入的类对象:" + cla);
+            return null;
+        }
         //&& !soberSupport.tableExists(cla)
         SoberTable soberTable = AnnotationUtil.getSoberTable(cla, 0);
         //DTO 对象
@@ -465,6 +471,7 @@ public final class SoberUtil {
                 dynSoberTable.setTableCaption(soberTableModel.getCaption());
                 dynSoberTable.setName(soberTableModel.getTableName());
                 dynSoberTable.setEntity(cla);
+                dynSoberTable.setDatabaseName(soberSupport.getSoberFactory().getDatabaseName());
                 soberTable = dynSoberTable;
             }
             //扩展的实体结构end
@@ -598,8 +605,13 @@ public final class SoberUtil {
         SQLRoom sqlRoom = soberFactory.getSqlRoom(namespace);
         if (ExecuteEnumType.UPDATE.equals(executeEnumType)) {
             sqlMapConf = sqlRoom.getUpdateMapSql(exeName, soberFactory.getDatabaseType());
-        } else if (ExecuteEnumType.EXECUTE.equals(executeEnumType)) {
+        } else
+        if (ExecuteEnumType.BATCH_UPDATE.equals(executeEnumType)) {
             sqlMapConf = sqlRoom.getUpdateMapSql(exeName, soberFactory.getDatabaseType());
+            sqlMapConf.setExecuteType(ExecuteEnumType.BATCH_UPDATE.getValue());
+        }
+        else if (ExecuteEnumType.EXECUTE.equals(executeEnumType)) {
+            sqlMapConf = sqlRoom.getExecuteMapSql(exeName, soberFactory.getDatabaseType());
         } else {
             sqlMapConf = sqlRoom.getQueryMapSql(exeName, soberFactory.getDatabaseType());
         }
@@ -1027,4 +1039,11 @@ public final class SoberUtil {
         valueMap.put(Dialect.KEY_SEQUENCE_RESTART, start);
         return jdbcOperations.execute(dialect.processTemplate(Dialect.ALTER_SEQUENCE_RESTART, valueMap), null);
     }
+
+    public static boolean isJumpEnuTypeCheck(Class<?> cla)
+    {
+        return JUMP_ENU_TYPE_CHECK.contains(cla);
+    }
+
+
 }

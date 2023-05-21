@@ -35,6 +35,16 @@ public abstract class Dialect extends HashMap<String,String> {
     final protected static Placeholder PLACEHOLDER = EnvFactory.getPlaceholder();
     final protected static Placeholder SQL_PLACEHOLDER = EnvFactory.getSqlPlaceholder();
 
+    final public static String POSTGRESQL_CURRENT_DATABASE = "select current_database()";
+
+    final public static String MYSQL_CURRENT_DATABASE = "select database()";
+
+    final public static String MSSQL_CURRENT_DATABASE = " select db_name()";
+
+    final public static String MSSQL_CURRENT_VESION = " SELECT @@VERSION";
+
+
+    //生产部,王建
 
     public static final String ORACLE_CREATE_SEQUENCE = "oracle_create_sequence";
     public static final String ORACLE_CREATE_SEQ_TIGGER = "oracle_create_seq_tigger";
@@ -125,7 +135,9 @@ public abstract class Dialect extends HashMap<String,String> {
 
     public static final String SQL_CRITERIA_GROUP_QUERY = "sql_criteria_group_query";
 
-//    public final Map<String, String> standard_SQL = new HashMap<>(100);
+
+    public static final String CHECK_SQL = "check_sql";
+
 
     public Dialect() {
         put(SQL_QUERY_ONE_FIELD, "SELECT * FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=?");
@@ -166,6 +178,10 @@ public abstract class Dialect extends HashMap<String,String> {
         put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX ${"+KEY_INDEX_NAME+"}(${"+KEY_INDEX_FIELD+"})");
 
         //
+        put(CHECK_SQL, "SELECT 1");
+
+
+
         //SQL_MODIFY_COLUMN
     }
 

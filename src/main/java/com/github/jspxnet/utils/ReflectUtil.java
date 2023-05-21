@@ -90,13 +90,15 @@ public final  class ReflectUtil {
         Map<String, Class<?>> propertyMap = getMapPropertiesType(addProperties);
         DynamicBean dynamicBean = new DynamicBean(propertyMap);
         // 添加新属性值
-        addProperties.forEach((k, v) -> {
+        for (String k:addProperties.keySet())
+        {
             try {
-                dynamicBean.setValue(k, v);
+                Object o = addProperties.get(k);
+                dynamicBean.setValue(k,o);
             } catch (Exception e) {
                 throw new RuntimeException("对象添加新属性失败，" + e.getMessage());
             }
-        });
+        }
         return dynamicBean.getTarget();
     }
 

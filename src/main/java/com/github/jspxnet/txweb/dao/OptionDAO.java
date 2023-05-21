@@ -10,11 +10,11 @@ package com.github.jspxnet.txweb.dao;
 
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.txweb.table.OptionBundle;
-
 import java.util.List;
 
 /**
- * Created by yuan on 14-2-16.
+ *
+ * @author chenYuan
  */
 public interface OptionDAO extends SoberSupport {
 
@@ -78,6 +78,8 @@ public interface OptionDAO extends SoberSupport {
      * @return 得到字典数据
      */
     OptionBundle getOptionValue(String code, String namespace);
+
+
     /**
      * 得到子列表
      * @param field 字段

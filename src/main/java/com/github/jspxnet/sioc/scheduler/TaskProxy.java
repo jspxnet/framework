@@ -89,10 +89,7 @@ public class TaskProxy implements Runnable {
                 try {
                     runTimes++;
                     BeanUtil.invoke(bean, methodName);
-                    if (bean.getClass().getName().contains("SchedulerRegisterTask"))
-                    {
-                        System.out.println(once);
-                    }
+
                     //关闭一次性任务 begin
                     if (once== YesNoEnumType.YES.getValue()&&runTimes>=1)
                     {

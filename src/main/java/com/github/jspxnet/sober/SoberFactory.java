@@ -97,7 +97,12 @@ public interface SoberFactory extends Serializable {
     boolean isValid();
 
     void setValid(boolean valid);
-
+    /**
+     *
+     * @param tableName  表明
+     * @param soberSupport 数据库操作对象
+     * @return 返回模型
+     */
     TableModels getTableModels(String tableName, SoberSupport soberSupport);
 
     void evictTableModels(Class<?> cla);

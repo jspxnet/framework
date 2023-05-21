@@ -10,7 +10,6 @@
 package com.github.jspxnet.txweb.support;
 
 import com.github.jspxnet.sober.*;
-import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
@@ -215,7 +214,7 @@ public class SSqlQueryTemplate extends ActionSupport {
     }
 
 
-    public List getList() throws Exception {
+    public List<?> getList() throws Exception {
         Criteria criteria = genericDAO.createCriteria(soberTable.getEntity());
         criteria = SSqlExpression.getTermExpression(criteria, term);
         criteria = SSqlExpression.getSortOrder(criteria, orderBy);
@@ -249,7 +248,7 @@ public class SSqlQueryTemplate extends ActionSupport {
         return turnPage;
     }
 
-    public String getOption(String column, Object value) {
+    /*public String getOption(String column, Object value) {
         if (value == null) {
             return StringUtil.empty;
         }
@@ -279,7 +278,7 @@ public class SSqlQueryTemplate extends ActionSupport {
             }
         }
         return values;
-    }
+    }*/
 
     @Override
     public String execute()  {

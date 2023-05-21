@@ -127,7 +127,6 @@ public class UploadFileManageAction extends UploadFileView {
                 FileUtil.delete(phoneImgFile);
                 //todo另外还要删除子图片
             }
-
         }
     }
 

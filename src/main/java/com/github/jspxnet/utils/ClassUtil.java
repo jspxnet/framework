@@ -162,6 +162,16 @@ public class ClassUtil {
         return result;
     }
 
+    public static boolean hasClass(String className)
+    {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            //
+            return false;
+        }
+    }
     /**
      * 得到所有方法命
      *

@@ -12,7 +12,16 @@ package com.github.jspxnet.sober.jdbc;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.*;
+import com.github.jspxnet.enums.BoolEnumType;
+import com.github.jspxnet.json.JSONArray;
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.*;
+import com.github.jspxnet.sober.annotation.Column;
+import com.github.jspxnet.sober.annotation.NullClass;
+import com.github.jspxnet.sober.table.SoberFieldEnum;
+import com.github.jspxnet.sober.table.SqlMapConf;
+import com.github.jspxnet.txweb.table.OptionBundle;
+import com.github.jspxnet.txweb.table.meta.BaseBillType;
 import com.github.jspxnet.txweb.table.meta.OperatePlug;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.criteria.expression.Expression;
@@ -26,9 +35,11 @@ import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.LockUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
+import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
@@ -42,6 +53,7 @@ import java.util.*;
  */
 @Slf4j
 public abstract class JdbcOperations implements SoberSupport {
+
     private SqlMapClient sqlMapClient = null;
     private SqlMapBase sqlMapBase = null;
     private SoberFactory soberFactory;
@@ -115,6 +127,139 @@ public abstract class JdbcOperations implements SoberSupport {
         return soberFactory.getTableModels(tableName, this);
     }
 
+    /**
+     *
+     * @param cla  类对象
+     * @param fieldName  字段名称
+     * @return  返回枚举
+     */
+    @Override
+    public JSONArray getFieldEnumType(Class<?> cla, String fieldName)
+    {
+        TableModels tableModels = soberFactory.getTableModels(cla, this);
+        if (tableModels==null)
+        {
+            return null;
+        }
+        return getFieldEnumType(tableModels.getName(), fieldName);
+    }
+    /**
+     *
+     * @param tableName 表明
+     * @param fieldName  字段名称
+     * @return 返回枚举
+     */
+    @Override
+    public JSONArray getFieldEnumType(String tableName, String fieldName)
+    {
+        TableModels tableModels = soberFactory.getTableModels(tableName, this);
+        if (tableModels==null)
+        {
+            return null;
+        }
+        Class<?> cla = tableModels.getEntity();
+        if (cla==null)
+        {
+            return null;
+        }
+
+        Field field = ClassUtil.getDeclaredField(cla,fieldName);
+        if (field==null)
+        {
+            return null;
+        }
+        Column column = field.getAnnotation(Column.class);
+        if (column==null)
+        {
+            return null;
+        }
+        //1:小;2:中;3:大
+        if (!NullClass.class.getName().equals(column.enumType().getName()))
+        {
+            Object[] enumObj = column.enumType().getEnumConstants();
+            return new JSONArray(enumObj);
+        }
+        //文本方式
+        else if (!StringUtil.isNull(column.option()))
+        {
+            List<JSONObject> temp = new ArrayList<>();
+            String option = column.option();
+            if (StringUtil.isJsonArray(option))
+            {
+                JSONArray array = new JSONArray(option);
+                for (int i=0;i<array.length();i++)
+                {
+                    JSONObject obj = array.getJSONObject(i);
+                    temp.add(obj);
+                }
+            } else
+            {
+                //这里有两种格式,先判断是不是简写的
+                if (column.option()!=null && !column.option().contains(StringUtil.COLON))
+                {
+                    //简写方式  男;女
+                    String[] dataArray = StringUtil.split(column.option(),StringUtil.SEMICOLON);
+                    if (!ObjectUtil.isEmpty(dataArray))
+                    {
+                        for (String value:dataArray)
+                        {
+                            JSONObject json = new JSONObject();
+                            json.put("value",value);
+                            json.put("name",value);
+                            temp.add(json);
+                        }
+                    }
+                }
+                else {
+                    //标准格式
+                    StringMap<String,String> stringMap = new StringMap<>();
+                    stringMap.setKeySplit(StringUtil.COLON);
+                    stringMap.setLineSplit(StringUtil.SEMICOLON);
+                    stringMap.setString(column.option());
+                    for (String key:stringMap.keySet())
+                    {
+                        JSONObject json = new JSONObject();
+                        json.put("value",key);
+                        json.put("name",stringMap.getString(key));
+                        temp.add(json);
+                    }
+                }
+            }
+            return new JSONArray(temp);
+        }
+
+        SoberColumn soberColumn = tableModels.getColumn(fieldName);
+        if (soberColumn!=null&&soberColumn.isConfEnum())
+        {
+            //数据库绑定方式
+            //未了实现低耦合，这里还是,在去查询数据库
+            SoberFieldEnum soberFieldEnum = JdbcUtil.getSoberFieldEnum(this,tableName,fieldName);
+            if (soberFieldEnum==null)
+            {
+                return null;
+            }
+
+            List<OptionBundle> optionBundles = JdbcUtil.getOptionBundleList(this,soberFieldEnum.getGroupCode(),soberFieldEnum.getNamespace());
+            if (ObjectUtil.isEmpty(optionBundles))
+            {
+                return null;
+            }
+            List<JSONObject> temp = new ArrayList<>();
+            for (OptionBundle bundle:optionBundles)
+            {
+                JSONObject json = new JSONObject();
+                json.put("value",bundle.getCode());
+                json.put("name",bundle.getName());
+                json.put("selected",bundle.getSelected());
+                json.put("parentCode",bundle.getParentCode());
+                json.put("groupCode",bundle.getGroupCode());
+                json.put("namespace",bundle.getNamespace());
+                temp.add(json);
+            }
+            return new JSONArray(temp);
+        }
+        return null;
+    }
     /**
      * 并且根据数据模型自动创建缓存
      * @param dto 是否包含DTO
@@ -325,16 +470,16 @@ public abstract class JdbcOperations implements SoberSupport {
     /**
      *
      * @param aClass 返回实体
-     * @param serializables 字段值
+     * @param serializable 字段值
      * @param <T> 类型
      * @return 查询返回
      */
     @Override
-    public <T> List<T> load(Class<T> aClass, Serializable[] serializables)
+    public <T> List<T> load(Class<T> aClass, Serializable[] serializable)
     {
         TableModels soberTable = getSoberTable(aClass);
         String field = soberTable.getPrimary();
-        return load(aClass,  field, serializables, true);
+        return load(aClass,  field, serializable, true);
     }
 
     /**
@@ -377,22 +522,55 @@ public abstract class JdbcOperations implements SoberSupport {
      *
      * @param aClass 返回实体
      * @param field 查询字段
-     * @param serializables 字段值
+     * @param serializable 字段值
      * @param loadChild 是否载入映射
      * @param <T> 类型
      * @return 查询返回
      */
     @Deprecated
     @Override
-    public <T> List<T> load(Class<T> aClass, String field, Serializable[] serializables, boolean loadChild)
+    public <T> List<T> load(Class<T> aClass, String field, Serializable[] serializable, boolean loadChild)
     {
         //载入一个ID列表
         Criteria criteria = createCriteria(aClass);
-        criteria = criteria.add(Expression.in(field, serializables));
+        criteria = criteria.add(Expression.in(field, serializable));
         criteria = criteria.setCurrentPage(1).setTotalCount(getMaxRows());
         return criteria.list(loadChild);
     }
+    /**
+     *
+     * @param tableName 表名称
+     * @return 单据类型列表
+     */
+    @Override
+    public BaseBillType getDefaultBaseBillType(String tableName)
+    {
+        //载入一个ID列表
+        Criteria criteria = createCriteria(BaseBillType.class);
+        criteria = criteria.add(Expression.eq("tableName", tableName));
+        criteria = criteria.add(Expression.eq("defType", BoolEnumType.YES.getValue()));
+        criteria = criteria.setCurrentPage(1).setTotalCount(1);
+        List<BaseBillType> list = criteria.list(false);
+        if (ObjectUtil.isEmpty(list))
+        {
+            return null;
+        }
+        return list.get(0);
+    }
 
+    /**
+     * 判断是否存在单号
+     * @param tableName 表名
+     * @param billNo  单号
+     * @return 是否存在,int类型,为数量
+     */
+    @Override
+    public int existBillNo(String tableName, String billNo)
+    {
+        //载入一个ID列表
+        String SQL = "SELECT count(1) as num FROM "+tableName+" where billNo=" + StringUtil.quoteSql(billNo);
+        return ObjectUtil.toInt(getUniqueResult(SQL));
+    }
     /**
      *
      * @param object 实体对象
@@ -464,7 +642,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int batchSave(Collection<?> collection) throws Exception {
-        return JdbcUtil.batchSave(this,getDialect(),collection);
+        return JdbcUtil.batchSave(this,collection);
     }
 
     /**
@@ -635,6 +813,18 @@ public abstract class JdbcOperations implements SoberSupport {
         return JdbcUtil.update(this,getDialect(),sqlText,params);
     }
 
+
+    /**
+     * 批量更新，这个方法主要为了提高速度
+     * @param sqlMapConf  sql 配置
+     * @param valueMap  变量
+     * @return 执行结果
+     */
+    @Override
+    public int[] batchUpdate(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws SQLException
+    {
+        return JdbcUtil.batchUpdate(this,sqlMapConf,valueMap) ;
+    }
 
     /**
      * 执行一个sql

@@ -13,6 +13,7 @@ import com.github.jspxnet.txweb.table.meta.TableMeta;
 import com.github.jspxnet.utils.BeanUtil;
 import java.util.List;
 
+
 public class TableMetaView extends ActionSupport {
     @Ref
     protected GenericDAO genericDAO;

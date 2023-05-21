@@ -1090,9 +1090,7 @@ public class StringUtil {
      * @return 包含时返回true，否则返回false
      * @since 0.4
      */
-    public static boolean contains
-    (String[] strings, String
-            string) {
+    public static boolean contains(String[] strings, String string) {
         return contains(strings, string, true);
     }
 

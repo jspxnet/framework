@@ -379,7 +379,7 @@ public final class TypeUtil {
         }
         return namespace;
     }
-
+/*
     public static List<Object> getOptionList(String option)
     {
         if (StringUtil.isNull(option))
@@ -416,5 +416,5 @@ public final class TypeUtil {
             }
         }
         return result;
-    }
+    }*/
 }

@@ -117,13 +117,18 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
-    <logger name="io.netty.buffer.PooledByteBufAllocator" level="WARN" />
-    <logger name="org.redisson.connection.DNSMonitor" level="WARN" />
-    <logger name="org.redisson.connection" level="WARN" />
-    <logger name="org.redisson.command.RedisExecutor" level="WARN" />
-    <logger name="org.redisson.connection.ClientConnectionsEntry" level="WARN" />
-    <logger name="org.hibernate" level="WARN" />
-    <logger name="org.hibernate.type.descriptor.sql" level="TRACE" />
+    <logger name="io.netty.buffer.PooledByteBufAllocator" level="ERROR" />
+    <logger name="org.redisson.connection.DNSMonitor" level="ERROR" />
+    <logger name="org.redisson.connection" level="ERROR" />
+    <logger name="org.redisson.command.RedisExecutor" level="ERROR" />
+    <logger name="org.redisson.connection.ClientConnectionsEntry" level="ERROR" />
+    <logger name="org.hibernate" level="ERROR" />
+    <logger name="org.hibernate.type.descriptor.sql" level="ERROR" />
+    <logger name="org.apache.rocketmq" level="ERROR" />
+    <logger name="RocketmqClient" additivity="false">
+        <level value="ERROR" />
+        <appender-ref ref="RocketmqClientAppender"/>
+    </logger>
     <!-- root级别   DEBUG -->
     <root level="${debug=='true'?'DEBUG':'INFO'}">
         <!-- 控制台输出 -->

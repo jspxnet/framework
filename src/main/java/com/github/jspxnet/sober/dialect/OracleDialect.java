@@ -69,8 +69,13 @@ public class OracleDialect extends Dialect {
         put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
         put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
         put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
-        put(SQL_DROP_TABLE, "DROP TABLE \"${" + KEY_TABLE_NAME + "}\"");
-        put(FUN_TABLE_EXISTS, "SELECT count(1) FROM tab WHERE tname=upper('${" + KEY_TABLE_NAME + "}')");
+        put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + ")");
+        //CREATE INDEX 索引名 ON 表名 (列名)TABLESPACE 表空间名; INDEX  ${" + KEY_TABLE_NAME + "} ADD
+        put(SQL_CREATE_TABLE_INDEX, "CREATE <#if where=" + KEY_IS_UNIQUE + ">UNIQUE</#if> INDEX ${"+KEY_INDEX_NAME+"} ON ${" + KEY_TABLE_NAME + "} (${"+KEY_INDEX_FIELD+"})");
+        //put(FUN_TABLE_EXISTS, "SELECT COUNT(1) FROM ALL_TABLES WHERE OWNER=UPPER('${"+KEY_DATABASE_NAME+"}') AND TABLE_NAME=UPPER('${" + KEY_TABLE_NAME + "}')");
+
+        put(FUN_TABLE_EXISTS, "SELECT COUNT(1) FROM ALL_TABLES WHERE TABLE_NAME=UPPER('${" + KEY_TABLE_NAME + "}')");
+        put(CHECK_SQL, "SELECT 1 FROM DUAL");
     }
 
     @Override
@@ -247,7 +252,7 @@ public class OracleDialect extends Dialect {
         String typeName = rs.getMetaData().getColumnTypeName(index).toLowerCase();
         int colSize = rs.getMetaData().getColumnDisplaySize(index);
         ///////大数值
-        if ("ROWID".equals(typeName)) {
+        if ("ROWID".equalsIgnoreCase(typeName)) {
             return rs.getString(index);
         }
 
@@ -308,7 +313,7 @@ public class OracleDialect extends Dialect {
         }
 
         ////////////大文本类型
-        if ("CLOB".equals(typeName) || "mediumtext".equals(typeName) || " long varchar".equals(typeName)
+        if ("CLOB".equalsIgnoreCase(typeName) || "mediumtext".equals(typeName) || " long varchar".equals(typeName)
                 || "ntext".equals(typeName) || "text".equals(typeName) || "long raw".equals(typeName)) {
             //oracle.sql.CLOB clob = (oracle.sql.CLOB) rs.getClob(index);
             Clob clob = rs.getClob(index);

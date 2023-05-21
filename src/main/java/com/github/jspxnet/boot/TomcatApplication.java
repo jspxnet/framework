@@ -79,12 +79,16 @@ public class TomcatApplication {
 
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
+        System.setProperty("log4j.ignoreTCL", "true");
+        System.setProperty("rocketmq.client.logLevel","ERROR");
+        //System.setProperty("rocketmq.client.logUseSlf4j","true");
+
+
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!ArrayUtil.isEmpty(args)) {
             log.debug("tomcat param:{}", args[0]);
             jspxConfiguration.setDefaultPath(args[0]);
         }
-        System.setProperty("log4j.ignoreTCL", "true");
         String defaultPath = jspxConfiguration.getDefaultPath();
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
         Map<String,String>  properties = environmentTemplate.readDefaultProperties(FileUtil.mendFile((defaultPath == null ? "" : defaultPath) + "/" + Environment.jspx_properties_file));
@@ -358,10 +362,8 @@ public class TomcatApplication {
             webappLoader.setDelegate(true);
             webappLoader.setLoaderClass(ParallelWebappClassLoader.class.getName());
             webappLoader.setLoaderInstance(new ParallelWebappClassLoader());
-
             standardContext.setLoader(webappLoader);
         }
-
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = tomcat.getServer();

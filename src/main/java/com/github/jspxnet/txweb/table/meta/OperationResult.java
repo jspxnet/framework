@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 事件返回统一标准
+ * 事件返回统一标准,操作事件链,后返回
  */
 @Data
 public class OperationResult implements Serializable {

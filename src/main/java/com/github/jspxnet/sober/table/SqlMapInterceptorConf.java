@@ -9,6 +9,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 
+/**
+ * @author chenYuan
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Table(name = "jspx_sql_interceptor", caption = "sqlmap拦截器")

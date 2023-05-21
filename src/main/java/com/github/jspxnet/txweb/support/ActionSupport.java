@@ -53,7 +53,6 @@ import java.util.*;
 public abstract class ActionSupport implements Action {
 
 
-
     public ActionSupport() {
 
     }
@@ -822,6 +821,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public String getRemoteAddr() {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return "127.0.0.1";
+        }
         HttpServletRequest request = actionContext.getRequest();
         return RequestUtil.getRemoteAddr(request);
     }

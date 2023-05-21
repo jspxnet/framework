@@ -128,8 +128,6 @@ public class SqlMapConfDAOImpl extends JdbcOperations implements SqlMapConfDAO {
         criteria = SSqlExpression.getTermExpression(criteria, param.getTerm());
         return criteria.setProjection(Projections.rowCount()).longUniqueResult();
     }
-
-    //---------------------------------------
     /**
      *
      * @param param 翻页参数
@@ -177,4 +175,6 @@ public class SqlMapConfDAOImpl extends JdbcOperations implements SqlMapConfDAO {
         criteria = SSqlExpression.getTermExpression(criteria, param.getTerm());
         return criteria.setProjection(Projections.rowCount()).longUniqueResult();
     }
+
+
 }

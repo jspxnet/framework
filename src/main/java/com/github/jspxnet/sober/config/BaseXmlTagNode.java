@@ -47,6 +47,7 @@ public abstract class BaseXmlTagNode extends TagNode {
 
     public String getIndex()
     {
+        //索引信息
         String result = XMLUtil.deleteQuote(getStringAttribute("index"));
         if (!StringUtil.isNull(result))
         {
