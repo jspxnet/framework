@@ -74,22 +74,23 @@ public class RedissonClientConfig implements Serializable {
     @Init
      public void init() {
         if (redisson == null) {
-            if (StringUtil.isNull(config) && StringUtil.isNull(config)) {
+            if (StringUtil.isNull(config)) {
                 if (EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useCache))
                 {
                     log.error("not config Redis cache link, 没有正确配置Redis 链接");
                 }
                 return;
             }
-            if (redisConfig!=null)
-            {
-                try {
-                    redisConfig = getRedisConfig( config);
-                    assert redisConfig != null;
-                    redisson = Redisson.create(redisConfig);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        }
+
+        if (redisConfig==null)
+        {
+            try {
+                redisConfig = getRedisConfig( config);
+                assert redisConfig != null;
+                redisson = Redisson.create(redisConfig);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

@@ -507,6 +507,7 @@ public final class SoberUtil {
                         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
                         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
 
+                        //除非
                         String haveSeqSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_HAVE_SEQ, valueMap);
                         Object obj = soberSupport.getUniqueResult(haveSeqSql);
                         if (ObjectUtil.toInt(obj) <= 0) {

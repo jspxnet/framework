@@ -24,7 +24,6 @@ import com.github.jspxnet.sober.config.SoberNexus;
 import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.sober.criteria.expression.Expression;
-import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.GeneralDialect;
 import com.github.jspxnet.sober.dialect.OracleDialect;
@@ -2489,22 +2488,34 @@ public final class JdbcUtil {
         return SSqlExpression.getSortOrder(criteria, sortString).objectUniqueResult(false);
     }
 
+
     /**
      * 判断是否有配置的枚举
      * @param soberSupport jdbc操作类
-     * @param tableName 表名称
-     * @param fieldName  字段
-     * @return 判断是否有配置
+     * @param columnList 配置列表
      */
-    public static boolean isConfFieldEnum(SoberSupport soberSupport, String tableName, String fieldName) {
-        if (StringUtil.isNull(tableName) || StringUtil.isNull(fieldName))
+    public static void isConfFieldEnum(SoberSupport soberSupport,List<SoberColumn> columnList) {
+        if (ObjectUtil.isEmpty(columnList))
         {
-            return false;
+            return;
         }
-        Criteria criteria = soberSupport.createCriteria(SoberFieldEnum.class)
-                .add(Expression.eq("tableName", tableName))
-                .add(Expression.eq("fieldName", fieldName));
-        return criteria.setProjection(Projections.rowCount()).booleanUniqueResult();
+        List<SoberFieldEnum> list = soberSupport.createCriteria(SoberFieldEnum.class).setCurrentPage(1).setTotalCount(soberSupport.getMaxRows()).list(false);
+        if (!ObjectUtil.isEmpty(list))
+        {
+            for (SoberColumn column:columnList)
+            {
+                for (SoberFieldEnum soberFieldEnum:list)
+                {
+                    if (column.getTableName().equalsIgnoreCase(soberFieldEnum.getTableName())&&column.getName().equalsIgnoreCase(soberFieldEnum.getFieldName()))
+                    {
+                        column.setConfEnum(true);
+                        break;
+                    }
+                }
+            }
+
+        }
+
     }
 
 

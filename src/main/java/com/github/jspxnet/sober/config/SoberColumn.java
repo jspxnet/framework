@@ -18,7 +18,6 @@ import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import lombok.Data;
 import java.io.Serializable;
-import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -100,10 +99,5 @@ public class SoberColumn implements Serializable {
         return  "String";
     }
 
- /*   public List<Object> getOptionList()
-    {
-        return TypeUtil.getOptionList(option);
-    }
-*/
 
 }

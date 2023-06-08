@@ -585,7 +585,7 @@ public final class BeanUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T, D> T copy(D object, Class<T> cls) {
-        if (null == cls) {
+        if (null == cls || null == object) {
             return null;
         }
         if (ClassUtil.isStandardProperty(cls))
@@ -598,12 +598,12 @@ public final class BeanUtil {
         if (cls.equals(JSONArray.class)) {
             return (T) new JSONArray(object);
         }
+        if (cls.equals(String.class)) {
+            return (T) ObjectUtil.toString(object);
+        }
         T result = null;
         try {
             result = (T)ClassUtil.newInstance(cls.getName());
-            if (null == object) {
-                return result;
-            }
             if (cls.equals(object.getClass()))
             {
                 //相同类型,快速拷贝
@@ -835,6 +835,10 @@ public final class BeanUtil {
                     JSONObject json = new JSONObject(newData);
                     field.set(newData,json);
                 }
+                else if (o!=null&&field.getType().equals(String.class) && ClassUtil.isNumberType(o.getClass()))
+                {
+                    field.set(newData,ObjectUtil.toString(o));
+                }
                 else
                 {
                     field.set(newData,copy(o, (Class<?>)field.getType()));
@@ -889,6 +893,10 @@ public final class BeanUtil {
                 {
                     JSONObject json = new JSONObject(newData);
                     field.set(newData,json);
+                }
+                else if (o!=null&&field.getType().equals(String.class) && ClassUtil.isNumberType(o.getClass()))
+                {
+                    field.set(newData,ObjectUtil.toString(o));
                 }
                 else
                 {

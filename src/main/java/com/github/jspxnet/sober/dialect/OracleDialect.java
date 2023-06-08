@@ -43,7 +43,7 @@ public class OracleDialect extends Dialect {
 
         //oracle
         put(ORACLE_CREATE_SEQUENCE,"create sequence ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ minvalue 1 maxvalue 99999999 increment by 1  start with 1");
-        put(ORACLE_CREATE_SEQ_TIGGER,"create or replace trigger ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ_TIGGER\n" +
+        put(ORACLE_CREATE_SEQ_TIGGER,"create or replace trigger ${" + KEY_TABLE_NAME + ".toUpperCase()}_TIG\n" +
                 "before insert on ${" + KEY_TABLE_NAME + ".toUpperCase()}\n" +
                 "for each row\r\n" +
                 "begin if (:new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} is null or :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()}=0) then select ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ.nextval into :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} from dual; end if; end;");
@@ -53,10 +53,17 @@ public class OracleDialect extends Dialect {
         put(Boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         put(boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+
         put(Integer.class.getName(), "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
-        put("int", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>NUMBER(10)</#else></#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+
+        put(int.class.getName(), "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+
+        put("int", "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
 
         put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
+        put(long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
         put("long", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
         put(Double.class.getName(), "${" + COLUMN_NAME + "} BINARY_DOUBLE default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");

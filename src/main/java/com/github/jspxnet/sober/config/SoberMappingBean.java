@@ -627,16 +627,11 @@ public class SoberMappingBean implements SoberFactory {
                 soberTable.setCanExtend(PropertyContainer.class.isAssignableFrom(cla));
                 //放入扩展字段end
 
-
                 //这里跳过系统中默认的表
                 if (!SoberUtil.isJumpEnuTypeCheck(cla))
                 {
                     //判断是否有配置好的枚举begin
-                    for (SoberColumn soberColumn:columnList)
-                    {
-                        boolean isConfFieldEnum = JdbcUtil.isConfFieldEnum(soberSupport,soberColumn.getTableName(),soberColumn.getName());
-                        soberColumn.setConfEnum(isConfFieldEnum);
-                    }
+                    JdbcUtil.isConfFieldEnum(soberSupport,columnList);
                     //判断是否有配置好的枚举end
                 }
                 TABLE_MAP.put(cla, soberTable);

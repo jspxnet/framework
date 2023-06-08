@@ -117,8 +117,6 @@ public abstract class Environment {
 
     final public static String realPath = "realPath";
 
-    final public static String log4jPath = "log4jPath";
-
     final public static String logPath = "logPath";
 
     final public static String startRunDate = "startRunDate";
@@ -130,8 +128,6 @@ public abstract class Environment {
     final public static String filterSuffix = "suffix";
 
     final public static String ApiFilterSuffix = "apiSuffix";
-
-    final public static String domainName = "domainName";
 
     final public static String remote = "remote";
 
@@ -148,7 +144,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.72";
+    final static public String VERSION = "6.73";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -166,11 +162,7 @@ public abstract class Environment {
 
     final public static String logInfoFile = "logInfoFile";
 
-    final public static String logDebugFile = "logDebugFile";
-
     final public static String logErrorFile = "logErrorFile";
-
-    final public static String logFatalFile = "logFatalFile";
 
     final public static String log_info_file = "sys_info.log";
 
@@ -182,9 +174,6 @@ public abstract class Environment {
 
     final public static String jspx_properties_template = "jspx-${active}.properties";
 
-    final public static String logInfo = "info";
-
-    final public static String logError = "error";
 
     final public static String DEBUG = "debug";
 
@@ -200,8 +189,6 @@ public abstract class Environment {
 
     static public final String UserBundleDAO = "userBundleDAO";
 
-    //文件上传对象Ueditor里边使用
-    //static public final String uploadFileAction = "uploadFileAction";
     //验证
     static public final String validate = "validate";
 
@@ -245,9 +232,6 @@ public abstract class Environment {
 
     final static public String sitePath = "sitePath";
 
-    //拦截器里边使用
-    final static public String interceptorRole = "interceptorRole";
-
     //FTP权限
     final static public String permission = "permission";
 
@@ -258,9 +242,6 @@ public abstract class Environment {
     final static public String setupPath = "setupPath";
     //上传路径
 
-    //上传是否覆盖
-    final static public String uploadCovering = "uploadCovering";
-
     //上传提起txt保存
     final static public String useUploadConverterTxt = "useUploadConverterTxt";
 
@@ -269,9 +250,6 @@ public abstract class Environment {
     final static public String maxImageHeight = "maxImageHeight";
     //上传路径
     final static public String uploadPath = "uploadPath";
-
-    //备份路径
-    final static public String BackupPath = "backupPath";
 
     //允许上传的文件类型
     final static public String allowedTypes = "allowedTypes";
@@ -284,9 +262,6 @@ public abstract class Environment {
 
     //上传类型
     final static public String uploadPathType = "uploadPathType";
-
-    //用户上传次数
-    static public final String userUploadTimes = "userUploadTimes";
 
     //最大下载数
     final static public String maxDownloader = "maxDownloader";
@@ -361,23 +336,13 @@ public abstract class Environment {
 
     static public final String manageMail = "manageMail";
 
-    static public final String languageDAO = "languageDAO";
-
     static public final String rowCount = "rowCount";
-
-
-    static public final String mobileRowCount = "mobileRowCount";
-
-
-    static public final String notRefurbish = "notRefurbish";
 
     static public final String registerRole = "registerRole";
 
     static public final String guestRole = "guestRole";
 
     static public final String SUCCESS = "success";
-
-    public static final String FAIL = "fail";
 
     static public final String ERROR = "error";
 
