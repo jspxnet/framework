@@ -559,6 +559,8 @@ public interface SoberSupport extends Serializable {
      */
     List<SoberColumn>  getTableColumns(String tableName);
 
+    List<SoberColumn>  getSqlColumns(String sql);
+
     /**
      * sql map 查询器
      *

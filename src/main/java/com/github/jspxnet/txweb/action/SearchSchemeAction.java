@@ -1,20 +1,24 @@
 package com.github.jspxnet.txweb.action;
 
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
+import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.model.param.SearchSchemeParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.SearchScheme;
+import com.github.jspxnet.txweb.table.UserSession;
 import com.github.jspxnet.txweb.view.SearchSchemeView;
 import com.github.jspxnet.utils.BeanUtil;
 
 @HttpMethod(caption = "搜索条件")
 public class SearchSchemeAction extends SearchSchemeView {
 
-    public RocResponse<?> save(@Param(caption = "保存",required = true) SearchSchemeParam param)
+    @Operate(caption = "保存")
+    public RocResponse<?> save(@Param(caption = "搜索条件",required = true) SearchSchemeParam param)
     {
         if (isGuest())
         {
@@ -35,7 +39,8 @@ public class SearchSchemeAction extends SearchSchemeView {
         return RocResponse.success(x).setMessage(language.getLang(LanguageRes.saveSuccess));
     }
 
-    public RocResponse<?> update(@Param(caption = "编辑",required = true) SearchSchemeParam param)
+    @Operate(caption = "编辑")
+    public RocResponse<?> update(@Param(caption = "搜索条件",required = true) SearchSchemeParam param)
     {
         if (isGuest())
         {
@@ -56,17 +61,28 @@ public class SearchSchemeAction extends SearchSchemeView {
         }
         return RocResponse.success(x).setMessage(language.getLang(LanguageRes.updateSuccess));
     }
-
-    public RocResponse<?> delete(@Param(caption = "删除",required = true) SearchSchemeParam param)
+    @Operate(caption = "删除")
+    public RocResponse<?> delete(@Param(caption = "条件ID",required = true) int id)
     {
         if (isGuest())
         {
             return RocResponse.error(ErrorEnumType.NEED_LOGIN);
         }
-        SearchScheme searchScheme = BeanUtil.copy(param, SearchScheme.class);
+        UserSession userSession = getUserSession();
+
         int x;
         try {
-            x = genericDAO.delete(searchScheme);
+            SearchScheme searchScheme = genericDAO.get(SearchScheme.class,id);
+            if (searchScheme==null)
+            {
+                return RocResponse.error(ErrorEnumType.NO_DATA);
+            }
+            if (searchScheme.getPutUid()!= Environment.SYSTEM_ID&&
+                    searchScheme.getPutUid()!=userSession.getUid())
+            {
+                return RocResponse.error(ErrorEnumType.POWER);
+            }
+            x = genericDAO.delete(SearchScheme.class);
         } catch (Exception e) {
             e.printStackTrace();
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),language.getLang(LanguageRes.deleteFailure));

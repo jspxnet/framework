@@ -1295,6 +1295,11 @@ public abstract class JdbcOperations implements SoberSupport {
     public  List<SoberColumn>  getTableColumns(String tableName) {
         return JdbcUtil.getTableColumns(this,tableName);
     }
+
+    @Override
+    public  List<SoberColumn>  getSqlColumns(String sql) {
+        return JdbcUtil.getSqlColumns(this,sql);
+    }
     //-----------------------------------------------------------------
     /**
      * sql map 查询器,带拦截器等功能

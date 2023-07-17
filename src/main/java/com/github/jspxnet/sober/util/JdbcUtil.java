@@ -381,10 +381,10 @@ public final class JdbcUtil {
      */
     @SuppressWarnings("unchecked")
     public static List<SoberColumn> getTableColumns(JdbcOperations jdbcOperations, String table) {
-        List<SoberColumn> columnList = new ArrayList<>();
         if (StringUtil.isNull(table)) {
-            return columnList;
+            return new ArrayList<>(0);
         }
+        List<SoberColumn> columnList = new ArrayList<>();
         Dialect dialect = jdbcOperations.getDialect();
         Connection conn = null;
         ResultSet rs = null;
@@ -401,11 +401,62 @@ public final class JdbcUtil {
                 rs = conn.getMetaData().getColumns(conn.getCatalog(), "%", table, "%");
             }
             //查询出表结构 end
-
             while (rs.next()) {
-                //SoberColumn soberColumn = dialect.getJavaType(jdbcOperations.loadColumnsValue(Map.class, rs));
                 columnList.add(dialect.getJavaType(jdbcOperations.loadColumnsValue(Map.class, rs)));
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeResultSet(rs);
+            closeConnection(conn);
+        }
+        return columnList;
+    }
+
+
+    /**
+     *
+     * @param jdbcOperations jdbc 操作对象
+     * @param sql sql查询
+     * @return 通过sql得到数据结构
+     */
+    public static List<SoberColumn> getSqlColumns(JdbcOperations jdbcOperations, String sql) {
+        if (StringUtil.isNull(sql)) {
+            return new ArrayList<>(0);
+        }
+        List<SoberColumn> columnList = new ArrayList<>();
+        Connection conn = null;
+        ResultSet rs = null;
+        try {
+            conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
+            //查询出表结构 begin
+            rs = conn.createStatement().executeQuery(sql);
+            ResultSetMetaData resultSetMetaData = rs.getMetaData();
+
+            for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                SoberColumn soberColumn = new SoberColumn();
+
+                String className = resultSetMetaData.getColumnClassName(i);
+                if (!StringUtil.isNull(className) && className.contains("."))
+                {
+                    soberColumn.setClassType(ClassUtil.loadClass(className));
+                }
+                //是数据库类型
+                //String typeName = resultSetMetaData.getColumnTypeName(i);
+                String name = resultSetMetaData.getColumnName(i);
+                soberColumn.setName(name);
+
+                String label = resultSetMetaData.getColumnLabel(i);
+                soberColumn.setCaption(label);
+                int displaySize = resultSetMetaData.getColumnDisplaySize(i);
+                soberColumn.setLength(displaySize);
+                soberColumn.setNotNull(ObjectUtil.toBoolean(resultSetMetaData.isNullable(i)));
+                soberColumn.setAutoincrement(resultSetMetaData.isAutoIncrement(i));
+                soberColumn.setTableName(resultSetMetaData.getTableName(i));
+                soberColumn.setDatabaseName(jdbcOperations.getSoberFactory().getDatabaseName());
+                columnList.add(soberColumn);
+            }
+            //查询出表结构 end
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -522,9 +573,10 @@ public final class JdbcUtil {
         return AnnotationUtil.getTableName(cla);
     }
 
-      public static  <T> T loadColumnsValue(JdbcOperations jdbcOperations,Dialect dialect,Class<T> tClass, ResultSet resultSet) throws Exception {
+      public static <T> T loadColumnsValue(JdbcOperations jdbcOperations,Dialect dialect,Class<T> tClass, ResultSet resultSet) throws Exception {
         T result;
-        if (!PropertyContainer.class.isAssignableFrom(tClass) && (Map.class.isAssignableFrom(tClass)||HashMap.class.isAssignableFrom(tClass)||List.class.isAssignableFrom(tClass)))
+        if (!PropertyContainer.class.isAssignableFrom(tClass)
+                && (Map.class.isAssignableFrom(tClass)||HashMap.class.isAssignableFrom(tClass)||List.class.isAssignableFrom(tClass)))
         {
             //载入表结构定义
             ResultSetMetaData metaData = resultSet.getMetaData();
@@ -1592,7 +1644,10 @@ public final class JdbcUtil {
         if (soberTable == null) {
             return -2;
         }
-
+        if (!soberTable.isCreate())
+        {
+            throw new Exception("注释标签配置为不可建表对象，不允许保存" + object.getClass());
+        }
         BusinessFilterUtil.updateFilter(jdbcOperations,object);
         Connection conn = null;
         PreparedStatement statement = null;
@@ -1705,6 +1760,10 @@ public final class JdbcUtil {
         //////////配置验证才能够保存 end
 
         TableModels soberTable = jdbcOperations.getSoberTable(object.getClass());
+        if (!soberTable.isCreate())
+        {
+            throw new Exception("注释标签配置为不可建表对象，不允许保存" + object.getClass());
+        }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
 
@@ -1799,6 +1858,10 @@ public final class JdbcUtil {
                 {
                     log.error("识别不到表结构模型:{}",collection.iterator().next());
                     return -2;
+                }
+                if (!soberTable.isCreate())
+                {
+                    throw new Exception("注释标签配置为不可建表对象，不允许保存" + object.getClass());
                 }
             }
             deleteId.add(BeanUtil.getProperty(object, soberTable.getPrimary()));
@@ -1898,6 +1961,10 @@ public final class JdbcUtil {
         {
             log.error("先确保数据库jdbc连接正常, @Table 标签没有配置:{}",object.getClass());
             throw  new Exception("先确保数据库jdbc连接正常, @Table 标签没有配置");
+        }
+        if (!soberTable.isCreate())
+        {
+            throw new Exception("注释标签配置为不可建表对象，不允许保存" + object.getClass());
         }
 
         //业务逻辑过滤处理begin
@@ -2062,8 +2129,11 @@ public final class JdbcUtil {
         Dialect dialect = jdbcOperations.getDialect();
         Object checkObj = collection.iterator().next();
         TableModels soberTable = jdbcOperations.getSoberTable(checkObj.getClass());
+        if (!soberTable.isCreate())
+        {
+            throw new Exception("注释标签配置为不可建表对象，不允许保存" + checkObj.getClass());
+        }
         PreparedStatement statement = null;
-
         Object idValue = BeanUtil.getProperty(checkObj, soberTable.getPrimary());
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());

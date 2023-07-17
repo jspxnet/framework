@@ -9,14 +9,13 @@
  */
 package com.github.jspxnet.sober.dialect;
 
-import com.caucho.quercus.lib.db.ColumnType;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.utils.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.sql.*;
 
@@ -58,6 +57,9 @@ public class PostgreSQLDialect extends Dialect {
 
         put(Float.class.getName(), "${" + COLUMN_NAME + "} real <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
         put("float", "${" + COLUMN_NAME + "} real <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
+        put(BigDecimal.class.getName(), "${" + COLUMN_NAME + "} double precision <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("BigDecimal", "${" + COLUMN_NAME + "} double precision <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
         put(Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
 

@@ -563,7 +563,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                     continue;
                 }
-                termKey.append(criterionEntry.getCriterion().termString());
+                termKey.append(criterionEntry.getCriterion().toString());
                 if (i != criterionEntries.size() - 1) {
                     termKey.append("_");
                 }
@@ -734,7 +734,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                     continue;
                 }
-                termKey.append(criterionEntry.getCriterion().termString());
+                termKey.append(criterionEntry.getCriterion().toString());
                 if (i != criterionEntries.size() - 1) {
                     termKey.append("_");
                 }
@@ -843,7 +843,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (!SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                 continue;
             }
-            termKey.append(criterionEntry.getCriterion().termString());
+            termKey.append(criterionEntry.getCriterion().toString());
             if (i != criterionEntries.size() - 1) {
                 termKey.append("_");
             }

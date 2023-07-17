@@ -37,10 +37,37 @@ public class DatabaseToolsView  extends ActionSupport {
         for (SoberColumn column:list)
         {
             SoberColumnDto dto = BeanUtil.copy(column, SoberColumnDto.class);
-            sb.append(dto.getBeanField()).append("\r\n");
+            sb.append(dto.getBeanField(false)).append("\r\n");
         }
         return RocResponse.success(sb.toString());
     }
+
+    @Operate(caption = "sql生成Bean字段", method = "sqlbeanfield",post = true)
+    public RocResponse<String> sqlBeanField(@Param(caption = "sql",min = 2,max = 100,required = true) String sql,
+                                            @Param(caption = "是否转驼峰命名",required = true,value = "true") boolean camel)
+    {
+        List<SoberColumn>  list = genericDAO.getSqlColumns(sql);
+        StringBuilder sb = new StringBuilder();
+        for (SoberColumn column:list)
+        {
+            SoberColumnDto dto = BeanUtil.copy(column, SoberColumnDto.class);
+            sb.append(dto.getBeanField(camel)).append("\r\n");
+        }
+        return RocResponse.success(sb.toString());
+    }
+
+    @Operate(caption = "得到sql字段", method = "getsqlfields",post = true)
+    public RocResponse<String> getsqlfields(@Param(caption = "sql",min = 2,max = 100,required = true) String sql)
+    {
+        List<SoberColumn>  list = genericDAO.getSqlColumns(sql);
+        StringBuilder sb = new StringBuilder();
+        for (SoberColumn column:list)
+        {
+            sb.append(column.getName()).append(",");
+        }
+        return RocResponse.success(sb.toString());
+    }
+
 
     @Operate(caption = "测试查询", method = "sql",post = false)
     public RocResponse<List<?>> sql(@Param(caption = "sql",min = 2,max = 500, required = true) String sql)

@@ -103,6 +103,11 @@ public final class TypeUtil {
         TYPE_MAP.put(java.sql.Date.class.getName(), typeSerializer);
         TYPE_MAP.put("Date", typeSerializer);
 
+        typeSerializer = new DateXmlType();
+        TYPE_MAP.put(java.sql.Timestamp.class.getName(), typeSerializer);
+        TYPE_MAP.put("Date", typeSerializer);
+
+
         TYPE_MAP.put(Object[].class.getName(), new ArrayXmlType());
 
         TYPE_MAP.put(int[].class.getName(), new IntArrayXmlType());

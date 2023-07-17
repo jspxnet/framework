@@ -809,6 +809,20 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return getJSONArray(key);
     }
 
+    public List<Object> getIgnoreList(String key) {
+        Object o = get(key);
+        if (o==null)
+        {
+            return null;
+        }
+        if (o instanceof JSONArray) {
+            return (List<Object>) o;
+        }
+
+        return (List<Object>) o;
+    }
+
+
     public Object get(String key) {
         Object o = super.get(key);
         if (o ==null|| NULL.equals(o))

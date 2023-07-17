@@ -1,8 +1,6 @@
 package com.github.jspxnet.txweb.devcenter.view;
 
 import com.github.jspxnet.boot.res.LanguageRes;
-import com.github.jspxnet.enums.ControlTypeEnumType;
-import com.github.jspxnet.enums.PlatformEnumType;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.annotation.PathVar;
 import com.github.jspxnet.txweb.dao.GenericDAO;

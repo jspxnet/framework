@@ -52,6 +52,7 @@ public class TreeManageAction extends TreeView {
 
     }
 
+/*
     private boolean checkCaption() {
         if (StringUtil.isNull(getString("caption", true))) {
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.nodeNameNeedInput));
@@ -59,6 +60,7 @@ public class TreeManageAction extends TreeView {
         }
         return true;
     }
+*/
 
     @Operate(caption = "清空缓存")
     public void clear() {

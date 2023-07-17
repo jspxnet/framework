@@ -273,9 +273,6 @@ public class OnlineManagerImpl implements OnlineManager {
         //信息检查完成
 
 
-
-
-
         String token = null;
         if (session != null) {
             token =  JWTUtil.createToken(ip,member.getId()+"",SessionUtil.getSessionId(session));

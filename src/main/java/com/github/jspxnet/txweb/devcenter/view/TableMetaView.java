@@ -11,6 +11,7 @@ import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.meta.TableMeta;
 import com.github.jspxnet.utils.BeanUtil;
+
 import java.util.List;
 
 
@@ -32,6 +33,11 @@ public class TableMetaView extends ActionSupport {
     }
 
 
+    /**
+     *
+     * @param tableName 表
+     * @return 默认构建一个空的
+     */
     public TableMeta create(String tableName)
     {
         //默认构建一个空的

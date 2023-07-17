@@ -16,6 +16,7 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.Date;
 
@@ -51,6 +52,9 @@ public class MySQLDialect extends Dialect {
         put("double", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;15>decimal(${" + COLUMN_LENGTH + "},3)<#else>decimal(15,3)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
         put(Float.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;9>decimal(${" + COLUMN_LENGTH + "},2)<#else>decimal(10,2)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
         put("float", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;9>decimal(${" + COLUMN_LENGTH + "},2)<#else>decimal(9,2)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+
+        put(BigDecimal.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;15>decimal(${" + COLUMN_LENGTH + "},8)<#else>decimal(15,8)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put("BigDecimal", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;15>decimal(${" + COLUMN_LENGTH + "},8)<#else>decimal(15,8)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
         put(Boolean.class.getName(), "`${" + COLUMN_NAME + "}` int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>  COMMENT '${" + COLUMN_CAPTION + "}'");
         put(boolean.class.getName(), "`${" + COLUMN_NAME + "}` int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>  COMMENT '${" + COLUMN_CAPTION + "}'");

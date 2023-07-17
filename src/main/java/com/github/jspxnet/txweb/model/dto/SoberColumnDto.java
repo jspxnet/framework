@@ -65,33 +65,41 @@ public class SoberColumnDto implements Serializable {
         return  "String";
     }
 
-
     @JsonField
-    public String getBeanField() {
+    public String getBeanField(boolean camel) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("@Column(caption = \"").append(caption).append("\", length = ").append(length).append(",notNull=").append(notNull).append(")").append("\r\n");
-        //StringUtil.empty
         String typeStr = getTypeString();
+        if ("date".equalsIgnoreCase(typeStr))
+        {
+            sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(")").append("\r\n");
 
+        } else {
+            sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(",notNull=").append(notNull).append(")").append("\r\n");
+        }
+
+        String fieldName = camel?StringUtil.underlineToCamel(name):name;
         String typeString = TypeUtil.CODE_TYPE_MAP.get(typeStr);
         if (StringUtil.isNull(typeString))
         {
             typeString = typeStr;
         }
-        if (ClassUtil.isNumberType(typeString))
+        if (ClassUtil.isNumberType(typeString)&&!"BigDecimal".equalsIgnoreCase(typeString))
         {
-            sb.append("private ").append(typeString).append(" ").append(name).append(" = 0;");
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = 0;");
+        } else
+        if ("BigDecimal".equalsIgnoreCase(typeString))
+        {
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = BigDecimal.valueOf(0);");
         } else
         if (typeString.equals(Date.class.getName()) || typeString.equals(Date.class.getSimpleName()) )
         {
-            sb.append("private ").append(typeString).append(" ").append(name).append(" = new Date();");
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = new Date();");
         }
         else
         {
-            sb.append("private ").append(typeString).append(" ").append(name).append(" = StringUtil.empty;");
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = StringUtil.empty;");
         }
         return sb.toString();
     }
-
 }

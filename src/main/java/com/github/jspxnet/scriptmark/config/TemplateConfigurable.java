@@ -9,6 +9,9 @@
  */
 package com.github.jspxnet.scriptmark.config;
 
+import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.Phrase;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
@@ -59,14 +62,32 @@ public class TemplateConfigurable implements Configurable, Cloneable {
     }
 
     public TemplateConfigurable() {
-        ///////////
-        hashMap.put(ScriptmarkEnv.NumberFormat, "####.##");
-        hashMap.put(ScriptmarkEnv.DateFormat, DateUtil.DAY_FORMAT);
-        hashMap.put(ScriptmarkEnv.DateTimeFormat, DateUtil.CURRENCY_ST_FORMAT);
-        hashMap.put(ScriptmarkEnv.TimeFormat, "HH:mm");
+        /////////// todo
 
-        hashMap.put(ScriptmarkEnv.Template_update_delay, 360);
-        hashMap.put(ScriptmarkEnv.Template_cache_size, 120);
+        /*final public static String DATE_FORMAT = "date_format";
+
+        final public static String TIME_FORMAT = "time_format";
+
+        final public static String NUMBER_FORMAT = "number_format";
+        */
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        String number_format = envTemplate.getString(Environment.NUMBER_FORMAT,"####.##");
+        hashMap.put(ScriptmarkEnv.NumberFormat, number_format);
+
+        String date_format = envTemplate.getString(Environment.DATE_FORMAT,DateUtil.DAY_FORMAT);
+        hashMap.put(ScriptmarkEnv.DateFormat, date_format);
+
+        String datetime_format = envTemplate.getString(Environment.DATETIME_FORMAT,DateUtil.CURRENCY_ST_FORMAT);
+        hashMap.put(ScriptmarkEnv.DateTimeFormat, datetime_format);
+
+        String time_format = envTemplate.getString(Environment.TIME_FORMAT,DateUtil.TIME_FORMAT);
+        hashMap.put(ScriptmarkEnv.TimeFormat, time_format);
+
+        int template_update_delay = envTemplate.getInt(ScriptmarkEnv.Template_update_delay,360);
+        hashMap.put(ScriptmarkEnv.Template_update_delay, template_update_delay);
+
+        int template_cache_size = envTemplate.getInt(ScriptmarkEnv.Template_cache_size,120);
+        hashMap.put(ScriptmarkEnv.Template_cache_size, template_cache_size);
 
         hashMap.put(ScriptmarkEnv.MacroCallTag, "@");
         hashMap.put(ScriptmarkEnv.Language, "JavaScript");

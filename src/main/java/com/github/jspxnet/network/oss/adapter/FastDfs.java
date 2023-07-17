@@ -1,4 +1,5 @@
 package com.github.jspxnet.network.oss.adapter;
+/*
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.network.oss.CloudFileClient;
@@ -12,6 +13,7 @@ import org.csource.fastdfs.StorageClient;
 import org.csource.fastdfs.TrackerClient;
 import java.io.*;
 
+*/
 /**
  * Created by jspx.net
  *
@@ -22,7 +24,8 @@ import java.io.*;
  * 然后配置 CloudFileConfig
  * 配置中注意  Endpoint 是主机域名部分,getBucket 是 FastDfs 的文件分组名称
  *
- **/
+ **//*
+
 @Slf4j
 public class FastDfs extends BaseCloudFile implements CloudFileClient {
     private static  boolean isInit  = false;
@@ -40,14 +43,16 @@ public class FastDfs extends BaseCloudFile implements CloudFileClient {
         }
     }
 
-    /**
+    */
+/**
      * 下载是用 ngx_fastdfs_module 映射
      * http://xxx.xxx.xxx.xxx:8888/group1/M00/00/00/wKh5blkcHpiAAEBkAAC7L7_PW5E715.jpg
      * @param cloudPath 保存路径
      * @param file 文件
      * @return url 地址 Endpoint 是主机域名部分
      * @throws Exception 异常
-     */
+     *//*
+
     @Override
     public String upload(String cloudPath, File file) throws Exception {
 
@@ -84,6 +89,7 @@ public class FastDfs extends BaseCloudFile implements CloudFileClient {
             return null;
         }
 
+        assert config != null;
         return config.getEndpoint() + StringUtil.BACKSLASH + strings[0]+ StringUtil.BACKSLASH + strings[1];
     }
 
@@ -101,6 +107,7 @@ public class FastDfs extends BaseCloudFile implements CloudFileClient {
             return false;
         } finally {
             try {
+                assert storageClient != null;
                 storageClient.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -115,3 +122,4 @@ public class FastDfs extends BaseCloudFile implements CloudFileClient {
         return null;
     }
 }
+*/

@@ -203,7 +203,7 @@ public final class SSqlExpression {
             for (int i = 0; i < valueArray.length; i++) {
                 arrayValue[i] = getTypeObject(classType, valueArray[i]);
             }
-            return Expression.not(Expression.in(field, arrayValue));
+            return Expression.notIn(field, arrayValue);
         }
         return null;
     }

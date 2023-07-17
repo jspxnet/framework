@@ -71,11 +71,15 @@ public abstract class Environment {
     final public static String repairRequestMethod = "repairRequestMethod";
 
 
-    //final public static String Date_format = "date_format";
+    final public static String DATE_FORMAT = "date_format";
 
-    //final public static String Time_format = "time_format";
+    final public static String DATETIME_FORMAT = "datetime_format";
 
-    //final public static String Number_format = "number_format";
+    final public static String TIME_FORMAT = "time_format";
+
+
+
+    final public static String NUMBER_FORMAT = "number_format";
 
     final public static String autoImports = "autoImports";
 

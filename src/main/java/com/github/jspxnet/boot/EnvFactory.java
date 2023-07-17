@@ -25,9 +25,12 @@ import com.github.jspxnet.security.symmetry.impl.SM4Encrypt;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.factory.EntryFactory;
 import com.github.jspxnet.sioc.BeanFactory;
+import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
+import org.eclipse.jdt.internal.compiler.apt.model.Factory;
+
 import java.io.File;
 
 /**
@@ -196,6 +199,11 @@ public class EnvFactory {
             return new File(loadFile);
         }
         String[]  findDirs = new String[]{ENV_TEMPLATE.getString(Environment.defaultPath), ENV_TEMPLATE.getString(Environment.templatePath), ENV_TEMPLATE.getString(Environment.resPath)};
+        File file = new File(jspxConfiguration.getDefaultPath(),"template");
+        if (file.isDirectory())
+        {
+            findDirs = ArrayUtil.add(findDirs,file.getPath());
+        }
         return FileUtil.scanFile(findDirs, loadFile);
     }
 }

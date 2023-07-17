@@ -1,12 +1,3 @@
-/*
- * Copyright © 2004-2014 chenYuan. All rights reserved.
- * @Website:wwww.jspx.net
- * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
- * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
- * @jvm:jdk1.6+  x86/amd64
- *
- */
 package com.github.jspxnet.sober.criteria.expression;
 
 import com.github.jspxnet.json.JSONObject;
@@ -18,53 +9,53 @@ import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
-/**
- * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
- * date: 2007-1-8
- * Time: 11:19:11
- */
-public class InExpression implements Criterion {
+public class NotInExpression  implements Criterion {
     private final String propertyName;
     private final List<Object> values = new LinkedList<>();
 
-    public InExpression(JSONObject json) {
+    public NotInExpression(JSONObject json) {
         propertyName = json.getString(JsonExpression.JSON_FIELD);
-        values.addAll(json.getIgnoreList(JsonExpression.JSON_VALUE));
+        List<Object> valuesList = json.getIgnoreList(JsonExpression.JSON_VALUE);
+        if (valuesList!=null)
+        {
+            values.addAll(valuesList);
+        }
     }
 
 
-    public InExpression(String propertyName, Object[] values) {
+    public NotInExpression(String propertyName, Object[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
             this.values.addAll(Arrays.asList(values));
         }
     }
 
-    public InExpression(String propertyName, int[] values) {
+    public NotInExpression(String propertyName, int[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
             this.values.addAll(Arrays.asList(values));
         }
     }
 
-    public InExpression(String propertyName, long[] values) {
+    public NotInExpression(String propertyName, long[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
             this.values.addAll(Arrays.asList(values));
         }
     }
 
-    public InExpression(String propertyName, float[] values) {
+    public NotInExpression(String propertyName, float[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
             this.values.addAll(Arrays.asList(values));
         }
     }
 
-    public InExpression(String propertyName, double[] values) {
+    public NotInExpression(String propertyName, double[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
             this.values.addAll(Arrays.asList(values));
@@ -89,15 +80,15 @@ public class InExpression implements Criterion {
             }
         }
         if (!StringUtil.hasLength(sb.toString())) {
-            return propertyName + " IN ('')";
+            return propertyName + " "+OperatorEnumType.NOT_IN.getSql()+" ('')";
         }
-        return propertyName + " IN (" + sb + ") ";
+        return propertyName + " "+OperatorEnumType.NOT_IN.getSql()+" (" + sb + ") ";
     }
 
     @Override
     public String toString() {
         if (ObjectUtil.isEmpty(values)) {
-            return propertyName + " IN ('')";
+            return propertyName + " "+OperatorEnumType.NOT_IN.getSql()+" ('')";
         }
         Object[] objects = values.toArray();
         StringBuilder sb = new StringBuilder();
@@ -108,9 +99,9 @@ public class InExpression implements Criterion {
             }
         }
         if (!StringUtil.hasLength(sb.toString())) {
-            return propertyName + " IN ('')";
+            return propertyName + " "+OperatorEnumType.NOT_IN.getSql()+" ('')";
         }
-        return propertyName + " IN (" + sb + ") ";
+        return propertyName + " "+OperatorEnumType.NOT_IN.getSql()+" (" + sb + ") ";
     }
 
     @Override
@@ -119,10 +110,9 @@ public class InExpression implements Criterion {
     }
 
 
-
     @Override
     public OperatorEnumType getOperatorEnumType() {
-        return OperatorEnumType.IN;
+        return OperatorEnumType.NOT_IN;
     }
 
 
@@ -131,8 +121,9 @@ public class InExpression implements Criterion {
     {
         JSONObject json = new JSONObject();
         json.put(JsonExpression.JSON_FIELD,propertyName);
-        json.put(JsonExpression.JSON_OPERATOR,OperatorEnumType.IN.getKey());
+        json.put(JsonExpression.JSON_OPERATOR,OperatorEnumType.NOT_IN.getKey());
         json.put(JsonExpression.JSON_VALUE,values);
         return json;
     }
+
 }

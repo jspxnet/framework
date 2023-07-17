@@ -27,7 +27,7 @@
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.72</version>
+    <version>6.73</version>
 </dependency>
 ```
     
@@ -144,4 +144,4 @@
 * 2022年09月：Jspx cloud Framework 6.70 添加开发中心,支持sql在线配置,内存结构自动化,定时任务分布式管理,满足不重启的情况最大范围调整逻辑
 * 2022年12月：Jspx cloud Framework 6.71 动态对象,动态表单支持,满足开发的系统能够方便的动态扩展字段,后台 任务管理等功能
 * 2022年12月：Jspx cloud Framework 6.72 修复动态对象查询bug,优化oracle，mssql支持，添加搜索结构支持
-* 2023年06月：Jspx cloud Framework 6.73 增强bean拷贝兼容性修复上一个版本redis配置bug
+* 2023年07月：Jspx cloud Framework 6.73 增强bean拷贝兼容性,修复bug,添加json查询过滤支持,过滤条件保存等功能

@@ -16,8 +16,8 @@ package com.github.jspxnet.sober.criteria.projection;
  * Time: 10:29:46
  */
 public class MulProjection implements Projection {
-    private Projection projection1;
-    private Projection projection2;
+    private final Projection projection1;
+    private final Projection projection2;
 
     protected MulProjection(Projection projection1, Projection projection2) {
         this.projection1 = projection1;

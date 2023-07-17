@@ -1,6 +1,8 @@
 package com.github.jspxnet.sober.criteria.expression;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.criteria.OperatorEnumType;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.utils.StringUtil;
@@ -17,6 +19,12 @@ public class FieldExpression implements Criterion {
         this.field1 = field1;
         this.compare = compare;
         this.field2 = field2;
+    }
+
+    public FieldExpression(JSONObject json) {
+        field1 = json.getString(JsonExpression.JSON_FIELD1);
+        field2 = json.getString(JsonExpression.JSON_FIELD2);
+        compare = json.getString(JsonExpression.JSON_OPERATOR);
     }
 
     @Override
@@ -40,9 +48,7 @@ public class FieldExpression implements Criterion {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(field1).append(compare).append(field2);
-        return sb.toString();
+        return field1 + compare + field2;
     }
 
     @Override
@@ -50,8 +56,24 @@ public class FieldExpression implements Criterion {
         return new String[]{field1};
     }
 
+    /**
+     *
+     * @return 扩展对
+     */
     @Override
-    public String termString() {
-        return toString();
+    public OperatorEnumType getOperatorEnumType() {
+        return OperatorEnumType.find(compare);
+    }
+
+
+    @Override
+    public JSONObject getJson()
+    {
+        OperatorEnumType operatorEnumType = getOperatorEnumType();
+        JSONObject json = new JSONObject();
+        json.put(JsonExpression.JSON_FIELD1,field1);
+        json.put(JsonExpression.JSON_OPERATOR,operatorEnumType.getKey());
+        json.put(JsonExpression.JSON_FIELD2,field2);
+        return json;
     }
 }

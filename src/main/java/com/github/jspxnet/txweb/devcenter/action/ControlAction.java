@@ -26,7 +26,6 @@ import java.util.List;
  */
 public class ControlAction extends ControlView {
 
-
     @Operate(caption = "删除控件", method = "delete")
     public RocResponse<Integer> delete(@Param(caption = "日志参数", required = true) long[] ids)  {
         if (isGuest()) {

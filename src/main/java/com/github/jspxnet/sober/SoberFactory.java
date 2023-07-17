@@ -49,7 +49,7 @@ public interface SoberFactory extends Serializable {
 
     /**
      * @param type 读写分离 0 ReadWrite 1 ReadOnly 2 WriteOnly
-     * @param tid  事务连接ID
+     * @param tid  事务连接ID   SoberEnv.NOT_TRANSACTION
      * @return 通过各种方式得到连接，包括XA连接
      * @throws SQLException sql异常
      */

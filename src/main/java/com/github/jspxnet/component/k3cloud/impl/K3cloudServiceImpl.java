@@ -57,6 +57,11 @@ public class K3cloudServiceImpl implements K3cloudService {
     private void loadConfig() throws Exception {
 
         File file = EnvFactory.getFile(configFile);
+        if (file==null)
+        {
+            log.error("K3cloudService 不能读取配置文件:{}",configFile);
+            throw new Exception("K3cloudService 不能读取配置文件"+configFile);
+        }
         String configString = IoUtil.autoReadText(file);
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag(KingdeeAccountElement.TAG_NAME, KingdeeAccountElement.class.getName());

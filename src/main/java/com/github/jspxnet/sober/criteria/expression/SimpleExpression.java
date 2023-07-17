@@ -9,11 +9,14 @@
  */
 package com.github.jspxnet.sober.criteria.expression;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.criteria.OperatorEnumType;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,20 +24,37 @@ import com.github.jspxnet.utils.StringUtil;
  * date: 2007-1-8
  * Time: 23:27:49
  */
+
+@Slf4j
 public class SimpleExpression implements Criterion {
 
     private final String propertyName;
     private final Object value;
-    private final String op;
+    private final OperatorEnumType op;
 
-    public SimpleExpression(String propertyName, Object value, String op) {
+    public SimpleExpression(JSONObject json)  {
+        propertyName = json.getString(JsonExpression.JSON_FIELD);
+        value = json.get(JsonExpression.JSON_VALUE);
+        String opStr = json.getIgnoreString(JsonExpression.JSON_OPERATOR);
+        op = OperatorEnumType.find(opStr);
+        if (op.equals(OperatorEnumType.UNKNOWN))
+        {
+            try {
+                throw  new Exception("表达式异常op不能识别:"+json.toString(4));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public SimpleExpression(String propertyName, Object value, OperatorEnumType op) {
         this.propertyName = propertyName;
         this.value = value;
         this.op = op;
-    }
-
-    public SimpleExpression ignoreCase() {
-        return this;
+        if (op.equals(OperatorEnumType.UNKNOWN))
+        {
+            log.debug("表达式异常op不能识别:{}",op);
+        }
     }
 
     @Override
@@ -42,11 +62,11 @@ public class SimpleExpression implements Criterion {
         StringBuilder sb = new StringBuilder();
         if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
         {
-            sb.append(StringUtil.quote(propertyName,true)).append(op).append("? ");
+            sb.append(StringUtil.quote(propertyName,true)).append(op.getSql()).append("? ");
         }
         else
         {
-            sb.append(propertyName).append(op).append("? ");
+            sb.append(propertyName).append(op.getSql()).append("? ");
         }
         return sb.toString();
     }
@@ -58,9 +78,7 @@ public class SimpleExpression implements Criterion {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(propertyName).append(getOp()).append(value);
-        return sb.toString();
+        return propertyName + op.getSql() + value;
     }
 
     @Override
@@ -68,12 +86,19 @@ public class SimpleExpression implements Criterion {
         return new String[]{propertyName};
     }
 
-    protected final String getOp() {
+    @Override
+    public OperatorEnumType getOperatorEnumType() {
         return op;
     }
 
     @Override
-    public String termString() {
-        return toString();
+    public JSONObject getJson()
+    {
+        OperatorEnumType  operatorEnumType = getOperatorEnumType();
+        JSONObject json = new JSONObject();
+        json.put(JsonExpression.JSON_OPERATOR,operatorEnumType.getKey());
+        json.put(JsonExpression.JSON_FIELD,propertyName);
+        json.put(JsonExpression.JSON_VALUE,value);
+        return json;
     }
 }

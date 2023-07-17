@@ -94,6 +94,8 @@ public class GlobalMethodInterceptor implements MethodInterceptor {
             }
             throw newException;
         }
+
+
         return result;
     }
 

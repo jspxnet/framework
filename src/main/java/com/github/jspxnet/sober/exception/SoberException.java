@@ -43,9 +43,9 @@ public class SoberException extends Exception {
         StackTraceElement[] newses = new StackTraceElement[ses.length + 2];
         System.arraycopy(ses, 0, newses, 0, ses.length);
         StackTraceElement st1 = new StackTraceElement("Sober", "msg", msg, 1);
-        newses[newses.length + 1] = st1;
+        newses[ses.length + 1] = st1;
         StackTraceElement st2 = new StackTraceElement("Sober", "sql", sql, 2);
-        newses[newses.length + 2] = st2;
+        newses[ses.length + 2] = st2;
         return newses;
     }
 

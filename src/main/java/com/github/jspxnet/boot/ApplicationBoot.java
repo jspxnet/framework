@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  * Time: 下午6:34
  * 这里是应用启动接口,可以使用exe4j 调用这个接口启动应用
  * 配置文件中加入:appBeanId  jspx.test.sioc
- * 这里是exe4j直接调用，不涉及其他aop方式
+ * 这里是exe4j直接调用，不 涉及其他aop方式
  *
  */
 @Slf4j

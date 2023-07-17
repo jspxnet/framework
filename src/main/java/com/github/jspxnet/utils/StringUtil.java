@@ -9,7 +9,6 @@
  */
 package com.github.jspxnet.utils;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.util.StringMap;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
@@ -23,7 +22,6 @@ import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static java.util.regex.Pattern.*;
 import static java.util.regex.Pattern.compile;
 
@@ -1940,11 +1938,16 @@ public class StringUtil {
             format = DateUtil.FULL_J_FORMAT;
         } else if (date.length() > 14 && date.length() <= 17 && countMatches(date, "/") == 2 && countMatches(date, ":") == 1) {
             format = DateUtil.CURRENCY_J_FORMAT;
-        } else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, ":") == 2) {
+        } else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, "时") == 1
+                && countMatches(date, "分") == 1 && countMatches(date, "秒") == 1) {
+            format = "yy年MM月dd日 HH时mm分ss秒";
+        }  else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, ":") == 2) {
             format = "yy年MM月dd日 HH:mm:ss";
         } else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, ":") == 1) {
             format = DateUtil.CN_FORMAT;
-        } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "-") == 2) {
+        }  else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, "时") == 1 && countMatches(date, "分") == 1) {
+            format = "yy年MM月dd日 HH时mm分";
+        }  else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "-") == 2) {
             format = DateUtil.DAY_FORMAT;
         } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "/") == 2) {
             if (date.indexOf("/")==2)

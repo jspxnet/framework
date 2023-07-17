@@ -1,5 +1,7 @@
 package com.github.jspxnet.sober.criteria.projection;
 
+import com.github.jspxnet.sober.criteria.expression.Expression;
+
 /**
  * Created by jspx.net
  * author: chenYuan
@@ -8,6 +10,6 @@ package com.github.jspxnet.sober.criteria.projection;
  **/
 public class SumProjection extends AggregateProjection {
     public SumProjection(String propertyName) {
-        super("SUM", propertyName);
+        super(Expression.KEY_SUM, propertyName);
     }
 }

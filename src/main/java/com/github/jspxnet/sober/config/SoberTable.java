@@ -170,7 +170,7 @@ public class SoberTable implements TableModels {
     @Override
     public SoberColumn getColumn(String keys) {
         for (SoberColumn column : columns) {
-            if (column.getName().equalsIgnoreCase(keys)) {
+            if (column.getName().equalsIgnoreCase(keys) || column.getCaption().equalsIgnoreCase(keys)) {
                 return column;
             }
         }

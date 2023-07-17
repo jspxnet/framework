@@ -62,7 +62,6 @@ public class TableColumnAction extends TableFieldView {
 
 
         Type type = TypeUtil.getJavaType(param.getTypeString());
-
         SoberColumn soberColumn = BeanUtil.copy(param, SoberColumn.class);
         soberColumn.setClassType((Class<?>)type);
         /*

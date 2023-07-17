@@ -22,26 +22,26 @@ import com.github.jspxnet.utils.StringUtil;
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2007-1-8
- * Time: 11:23:21
+ * Time: 11:22:06
  */
-public class NotNullExpression implements Criterion {
+public class IsNullExpression implements Criterion {
 
     private final DatabaseEnumType[] noNullDb = new DatabaseEnumType[]{
             DatabaseEnumType.POSTGRESQL,DatabaseEnumType.MYSQL,DatabaseEnumType.MSSQL,DatabaseEnumType.ORACLE
     };
-
     private final String propertyName;
 
-    public NotNullExpression(String propertyName) {
+    public IsNullExpression(String propertyName) {
         this.propertyName = propertyName;
     }
 
-    public NotNullExpression(JSONObject json) {
+    public IsNullExpression(JSONObject json) {
         propertyName = json.getString(JsonExpression.JSON_FIELD);
     }
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
+
         SoberColumn soberColumn = soberTable.getColumn(propertyName);
         if (soberColumn!=null&&"String".equalsIgnoreCase(soberColumn.getTypeString()))
         {
@@ -49,17 +49,15 @@ public class NotNullExpression implements Criterion {
             {
                 if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
                 {
-                    return "(" + StringUtil.quote(propertyName, true) +
-                            " " + OperatorEnumType.NOT_NULL.getSql() + " "+ FilterLogicEnumType.AND.getKey()+" " +
-                            StringUtil.quote(propertyName, true) + "<>'')";
+
+                    return "(" + StringUtil.quote(propertyName,true) + " "+OperatorEnumType.ISNULL.getSql()+" "+ FilterLogicEnumType.OR.getKey()+" " + StringUtil.quote(propertyName,true) + "='')";
                 } else
                 {
-                    return "(" + propertyName + " " + OperatorEnumType.NOT_NULL.getSql()+" "+FilterLogicEnumType.AND.getKey()
-                            +" " + propertyName + "<>'')";
+                    return "(" + propertyName + " " + OperatorEnumType.ISNULL.getSql() + " "+FilterLogicEnumType.OR.getKey()+" " + propertyName + "='')";
                 }
             }
         }
-        return propertyName + " " + OperatorEnumType.NOT_NULL.getSql();
+        return propertyName + " " + OperatorEnumType.ISNULL.getSql();
     }
 
     @Override
@@ -68,19 +66,18 @@ public class NotNullExpression implements Criterion {
     }
 
     @Override
+    public String toString() {
+        return propertyName + " " + OperatorEnumType.ISNULL.getKey();
+    }
+
+    @Override
     public String[] getFields() {
         return new String[]{propertyName};
     }
 
     @Override
-    public String toString() {
-        return propertyName + " " + OperatorEnumType.NOT_NULL.getSql();
-    }
-
-
-    @Override
     public OperatorEnumType getOperatorEnumType() {
-        return OperatorEnumType.NOT_NULL;
+        return OperatorEnumType.ISNULL;
     }
 
     @Override
@@ -88,7 +85,7 @@ public class NotNullExpression implements Criterion {
     {
         JSONObject json = new JSONObject();
         json.put(JsonExpression.JSON_FIELD,propertyName);
-        json.put(JsonExpression.JSON_OPERATOR,OperatorEnumType.NOT_NULL.getKey());
+        json.put(JsonExpression.JSON_OPERATOR,OperatorEnumType.ISNULL.getKey());
         return json;
     }
 }

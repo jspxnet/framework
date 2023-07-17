@@ -11,17 +11,15 @@ package com.github.jspxnet.txweb.support;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.HttpStatusType;
-import com.github.jspxnet.txweb.*;
-
-import com.github.jspxnet.txweb.context.ActionContext;
-import com.github.jspxnet.txweb.context.ThreadContextHolder;
-
-import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.txweb.*;
 import com.github.jspxnet.txweb.bundle.Bundle;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
+import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
@@ -35,12 +33,17 @@ import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -891,7 +894,12 @@ public abstract class ActionSupport implements Action {
         {
             return false;
         }
-        return actionContext.isExecuted() && actionContext.getMethod().toString().contains("Action." + actionContext.getMethod().getName());
+        Method method = actionContext.getMethod();
+        if (method.getDeclaringClass().isInterface())
+        {
+            return false;
+        }
+        return actionContext.isExecuted() && method.toString().contains("Action." + actionContext.getMethod().getName());
     }
 
     private String templatePath = null;

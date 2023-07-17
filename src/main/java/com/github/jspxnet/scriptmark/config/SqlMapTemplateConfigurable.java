@@ -40,10 +40,10 @@ public class SqlMapTemplateConfigurable implements Configurable, Cloneable {
 
     public SqlMapTemplateConfigurable() {
         ///////////
-        hashMap.put(ScriptmarkEnv.NumberFormat, "####.##");
+        hashMap.put(ScriptmarkEnv.NumberFormat, "####.####");
         hashMap.put(ScriptmarkEnv.DateFormat, DateUtil.DAY_FORMAT);
-        hashMap.put(ScriptmarkEnv.DateTimeFormat, DateUtil.CURRENCY_ST_FORMAT);
-        hashMap.put(ScriptmarkEnv.TimeFormat, "HH:mm");
+        hashMap.put(ScriptmarkEnv.DateTimeFormat, DateUtil.FULL_ST_FORMAT);
+        hashMap.put(ScriptmarkEnv.TimeFormat,DateUtil.TIME_FORMAT);
 
         hashMap.put(ScriptmarkEnv.Template_update_delay, 360);
         hashMap.put(ScriptmarkEnv.Template_cache_size, 120);
@@ -61,7 +61,6 @@ public class SqlMapTemplateConfigurable implements Configurable, Cloneable {
         hashMap.put(ScriptmarkEnv.htmlExtType, true);
         hashMap.put(ScriptmarkEnv.xmlEscapeClean, true);
         //////////
-
 
         ////////////Tag配置 begin
         tagMap.put("setting", SettingBlock.class.getName());

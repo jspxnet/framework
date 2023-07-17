@@ -35,7 +35,6 @@ public class SqlMapBaseImpl implements SqlMapBase {
     public SqlMapBaseImpl(JdbcOperations jdbcOperations) {
         this.jdbcOperations = jdbcOperations;
         this.soberFactory = jdbcOperations.getSoberFactory();
-
     }
 
     /**
@@ -241,7 +240,7 @@ public class SqlMapBaseImpl implements SqlMapBase {
         ScriptMarkUtil.fixVarNull(valueMap, sqlMapConf.getContext());
         //修复变量,避免空异常 end
 
-        System.out.println("valueMap=" + ObjectUtil.toString(valueMap));
+
         String sqlText = dialect.processSql(sqlMapConf.getContext(), valueMap);
         if (StringUtil.isNull(sqlText)) {
             throw new Exception("ERROR SQL IS NULL");
