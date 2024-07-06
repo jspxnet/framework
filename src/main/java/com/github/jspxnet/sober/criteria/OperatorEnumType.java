@@ -19,7 +19,7 @@ public enum OperatorEnumType implements EnumType {
     GE(4, "GE","大于等于","=>", SimpleExpression.class.getName()),
     LE(5, "LE","小于等于","<=", SimpleExpression.class.getName()),
 
-    NE(6, "NE","不等于","<=", SimpleExpression.class.getName()),
+    NE(6, "NE","不等于","<>", SimpleExpression.class.getName()),
 
     BETWEEN(7, "BETWEEN","至","BETWEEN", BetweenExpression.class.getName()),
 

@@ -94,7 +94,6 @@ public class EncryptUtil {
         if (origin == null) {
             return StringUtil.empty;
         }
-
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             return toHex(md.digest(origin.getBytes(Environment.defaultEncode))).toLowerCase();
@@ -103,7 +102,6 @@ public class EncryptUtil {
         }
         return StringUtil.empty;
     }
-
 
     /**
      * @param origin 来源数据

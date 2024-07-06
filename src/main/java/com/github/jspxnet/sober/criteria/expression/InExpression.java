@@ -46,28 +46,28 @@ public class InExpression implements Criterion {
     public InExpression(String propertyName, int[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
     public InExpression(String propertyName, long[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
     public InExpression(String propertyName, float[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
     public InExpression(String propertyName, double[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 

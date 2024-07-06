@@ -52,8 +52,8 @@ class TimerThread extends Thread {
 		this.scheduler = scheduler;
 		guid = SystemUtil.getPid() + "_" + scheduler.getGuid();
 		// Thread name.
-		final String name = "cron4j::[" + scheduler.getTaskConf().getName() + "]::timer[" + guid + "]";
-		setName(name);
+		//final String name = "cron4j::[" + scheduler.getTaskConf().getName() + "]::timer[" + guid + "]";
+		setName("cron4j::[" + scheduler.getTaskConf().getName() + "]::timer[" + guid + "]");
 	}
 
 	/**

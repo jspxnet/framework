@@ -143,7 +143,6 @@ public final  class FileSuffixUtil {
         return StringUtil.encodeHex(Objects.requireNonNull(getFileHead(filename, headLength)), " ").trim();
     }
 
-    final private static float version = StringUtil.toFloat(System.getProperty("java.vm.specification.version"));
 
     /**
      * 得到文件的http  ContentType 类型
@@ -158,12 +157,11 @@ public final  class FileSuffixUtil {
         }
         String fileType = FileUtil.getTypePart(fileName.getName());
         String contentType = null;
-        if (version >= 1.7) {
+        if (SystemUtil.jdkVersion >= 1.7) {
             try {
                 contentType = Files.probeContentType(Paths.get(fileName.getAbsolutePath()));
             } catch (IOException e) {
                 e.printStackTrace();
-                contentType = null;
             }
         }
 
@@ -174,8 +172,10 @@ public final  class FileSuffixUtil {
                 contentType = "video/mpeg4";
             } else if ("bt".equalsIgnoreCase(fileType)) {
                 contentType = "application/x-bittorrent";
-            } else if ("swftools".equalsIgnoreCase(fileType)) {
-                contentType = "application/swftools";
+            } else if ("m4v".equalsIgnoreCase(fileType)) {
+                contentType = "video/mp4";
+            } else if ("swf".equalsIgnoreCase(fileType)) {
+                contentType = "application/x-shockwave-flash";
             } else if ("xls".equalsIgnoreCase(fileType)) {
                 contentType = "application/vnd.ms-excel";
             } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {

@@ -47,13 +47,13 @@ public class RocHandle extends WebHandle {
 
     @Override
     public void doing(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String callStr = getRequestReader(request, response);
+        String callStr = StringUtil.trim(getRequestReader(request, response));
         callAction(request, response, callStr, false);
     }
 
     static void callAction(HttpServletRequest request, HttpServletResponse response, String call, boolean secret) throws Exception {
         //判断是XML还是JSON begin
-        String rpc = StringUtil.trim(call);
+        String rpc = call;
         JSONObject jsonData = null;
         if (StringUtil.isXml(rpc)) {
             //XML格式
@@ -75,52 +75,7 @@ public class RocHandle extends WebHandle {
                 TXWebUtil.print(new JSONObject(RocResponse.error(-32600, "json的ROC请求错误")).toString(4), WebOutEnumType.JSON.getValue(), response);
                 return;
             }
-        } /*else if (!StringUtil.isNull(rpc)&&rpc.contains("="))
-        {
-            //把www_form 格式转换为json
-            Map<String, String[]> queryParameters = HttpUtil.parseQueryString(rpc);
-
-            jsonData = new JSONObject();
-            for (String varName:queryParameters.keySet())
-            {
-                String[] values = queryParameters.get(varName);
-                if (ObjectUtil.isEmpty(values))
-                {
-                    jsonData.put(varName,StringUtil.empty);
-                } else if (values.length==1)
-                {
-                    jsonData.put(varName,values[0]);
-                } else
-                {
-                    jsonData.put(varName,values);
-                }
-            }
-        }*/
-
-        //为了兼用 api restFull 方式，这里允许为空,默认构造配置
-/*        if (jsonData == null) {
-            jsonData = new JSONObject();
-            JSONObject methodJson = new JSONObject();
-            jsonData.put(Environment.rocMethod, methodJson);
-            jsonData.put(Environment.rocFormat, WebOutEnumType.JSON.getName());
-        }*/
-        /*
-        {
-     "version": "3.0",  //版本,不是必须
-     "protocol": "jspx.net-roc",  //协议说明
-     "format": "json",  //返回的格式要求,可以是xml，默认位json
-      "method": {
-        "name": "调用的方法",    //调用的方法名称
-        "params": {'参数名称1':'参数值1','参数名称2':'参数值2',...}       //方法参数
-       }
-
-    },
-    "params": {                //类对象参数就是类的set方法,文档中叫全局参数
-        "参数1": 1,
-        "参数2": 2
-    }
-    }
-         */
+        }
 
         ///////////////////////////////////环境参数 begin
         ActionConfig actionConfig = getActionConfig(request);

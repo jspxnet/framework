@@ -9,9 +9,12 @@
  */
 package com.github.jspxnet.io.file;
 
+import com.github.jspxnet.upload.multipart.DefaultFileRenamePolicy;
+import com.github.jspxnet.upload.multipart.RenamePolicy;
+import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.FileUtil;
-
-import java.io.*;
+import com.github.jspxnet.utils.ObjectUtil;
+import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,76 +22,95 @@ import java.io.*;
  * date: 2006-9-22
  * Time: 16:54:25
  */
-public class MultiFile {
-    public MultiFile() {
+public final class MultiFile {
+    private MultiFile() {
 
     }
 
-    public static final int BUFFER_SIZE = 1024 * 2;
-
+    public static boolean deleteDirectory(String dirName, boolean delSelf)
+    {
+        return deleteDirectory(new File(dirName), null,delSelf);
+    }
     /**
      * 删除指定目录及其中的所有内容。
      *
      * @param dirName 要删除的目录的目录名
+     * @param fileTypes 是否删除自己 这个目录
      * @param delSelf 是否删除自己
      * @return 删除成功时返回true，否则返回false。
      */
-    public boolean deleteDirectory(String dirName, boolean delSelf) {
-        return deleteDirectory(new File(dirName), delSelf);
+    public static boolean deleteDirectory(String dirName, String[] fileTypes,boolean delSelf)
+    {
+        return deleteDirectory(new File(dirName), fileTypes,delSelf);
     }
 
+
     /**
-     * 删除指定目录及其中的所有内容
      *
-     * @param dir     要删除的目录
-     * @param delSelf 是否删除自己
-     * @return 删除成功时返回true，否则返回false。
+     * @param dir  要删除的目录
+     * @param fileTypes 是否删除自己 这个目录
+     * @param delSelf 删除成功时返回true，否则返回false。
+     * @return 删除指定目录及其中的所有内容
      */
-    public boolean deleteDirectory(File dir, boolean delSelf) {
+    public static boolean deleteDirectory(File dir,String[] fileTypes, boolean delSelf) {
         if ((dir == null) || !dir.isDirectory()) {
             throw new IllegalArgumentException("Argument " + dir +
                     " is not a directory. ");
         }
         File[] entries = dir.listFiles();
+        if (entries==null)
+        {
+            return true;
+        }
         for (File entry : entries) {
             if (entry.isDirectory()) {
-                deleteDirectory(entry, true);
+                deleteDirectory(entry,fileTypes, true);
             } else {
-                if (entry.canWrite()) {
-                    if (!entry.delete()) {
+                String fileType = FileUtil.getTypePart(entry);
+                if (ObjectUtil.isEmpty(fileTypes) || ArrayUtil.inArray(fileTypes,fileType,true))
+                {
+                    if (entry.canWrite()) {
+                        if (!entry.delete()) {
+                            entry.deleteOnExit();
+                        }
+                    } else {
                         entry.deleteOnExit();
                     }
-                } else {
-                    entry.deleteOnExit();
                 }
             }
         }
         return !delSelf || dir.delete();
     }
 
-
     /**
-     * 移动目录
      *
-     * @param inputDir    到 目录
-     * @param outputDir   移动到目录
-     * @param covering    覆盖
+     * @param inputDir  到 目录
+     * @param outputDir  移动到目录
+     * @param renamePolicy 重命名规则
+     * @param fileTypes 文件类型
+     * @param covering 覆盖
+     * @param jump 跳过
      * @param deleteInput 删除 原目录
      * @return 是否成功
      */
-    public boolean copyDirectoryMoveTo(String inputDir, String outputDir, boolean covering, boolean deleteInput) {
-        return copyDirectory(inputDir, outputDir, covering) && deleteDirectory(inputDir, deleteInput);
+    public static boolean copyDirectoryMoveTo(String inputDir, String outputDir, RenamePolicy renamePolicy,String[] fileTypes,boolean covering,boolean jump, boolean deleteInput) {
+        return copyDirectory(inputDir, outputDir,renamePolicy,fileTypes, covering,jump) && deleteDirectory(inputDir, deleteInput);
     }
 
 
+
+
     /**
-     * Copie un rpertoire dans un autre
      *
-     * @param inputDir  到 目录
+     * @param inputDir 原目录
      * @param outputDir 移动到目录
+     * @param renamePolicy  重命名规则
+     * @param fileTypes 文件类型
+     * @param covering 是否覆盖
+     * @param jump 相同是否跳过
      * @return 是否成功
      */
-    public boolean copyDirectoryToOneDir(File inputDir, File outputDir) {
+    public static boolean copyDirectoryToOneDir(File inputDir, File outputDir,RenamePolicy renamePolicy,String[] fileTypes,boolean covering,boolean jump) {
         if (!inputDir.isDirectory()) {
             return false;
         }
@@ -96,13 +118,21 @@ public class MultiFile {
             return false;
         }
         File[] files = inputDir.listFiles();
+        if (files==null)
+        {
+            return false;
+        }
         for (File file : files) {
             if (file.isFile()) {
-                if (!copy(file, new File(outputDir.getAbsolutePath() + File.separator + file.getName()), true)) {
-                    return false;
+                String fileType = FileUtil.getTypePart(file);
+                if (ObjectUtil.isEmpty(fileTypes) || ArrayUtil.inArray(fileTypes,fileType,true))
+                {
+                    if (!copy(file, new File(outputDir.getAbsolutePath() + File.separator + file.getName()), renamePolicy, fileTypes, covering, jump)) {
+                        return false;
+                    }
                 }
             } else if (file.isDirectory()) {
-                if (!copyDirectoryToOneDir(file, outputDir)) {
+                if (!copyDirectoryToOneDir(file, outputDir,renamePolicy,fileTypes,covering,jump)) {
                     return false;
                 }
             }
@@ -110,26 +140,39 @@ public class MultiFile {
         return true;
     }
 
-    public boolean copyDirectoryToOneDir(String inputDir, String outputDir) {
-        return copyDirectoryToOneDir(new File(inputDir), new File(outputDir));
+    /**
+     *
+     * @param inputDir 原目录
+     * @param outputDir 移动到
+     * @param renamePolicy 重命名贵州
+     * @param fileTypes 文件类型
+     * @param covering 是否转换
+     * @param jump  存在是否跳过
+     * @return 拷贝到一个目录
+     */
+    public static boolean copyDirectoryToOneDir(String inputDir, String outputDir,RenamePolicy renamePolicy,String[] fileTypes,boolean covering,boolean jump) {
+        return copyDirectoryToOneDir(new File(inputDir), new File(outputDir),renamePolicy,fileTypes,covering,jump);
     }
 
     /**
      * 移动到一个目录下
-     *
-     * @param inputDir  原目录
+     * @param inputDir 原目录
      * @param outputDir 移动到
+     * @param renamePolicy 重命名规则
+     * @param fileTypes 文件类型
+     * @param covering  是否覆盖
+     * @param jump 存在是否跳过
      * @return 移动多少个
      */
-    public int moveFolderToFolder(String inputDir, String outputDir) {
+    public static int moveFolderToFolder(String inputDir, String outputDir,RenamePolicy renamePolicy,String[] fileTypes,boolean covering,boolean jump) {
         int result = 0;
         File f = new File(inputDir);
         File[] files = f.listFiles();
         if (files != null) {
             for (File fromFile : files) {
                 if (fromFile.isDirectory()) {
-                    if (copyDirectoryToOneDir(fromFile.getPath(), outputDir)) {
-                        deleteDirectory(fromFile, true);
+                    if (copyDirectoryToOneDir(fromFile.getPath(), outputDir,renamePolicy,fileTypes,covering,jump)) {
+                        deleteDirectory(fromFile, fileTypes,true);
                         result++;
                     }
                 }
@@ -138,8 +181,30 @@ public class MultiFile {
         return result;
     }
 
-    public boolean copy(String inputFilename, String outputFilename, boolean covering) {
-        return copy(new File(inputFilename), new File(outputFilename), covering);
+    /**
+     *
+     * @param inputFilename 输入
+     * @param outputFilename 输出
+     * @param covering 是否覆盖
+     * @return 是否成功
+     */
+    public static boolean copy(String inputFilename, String outputFilename,boolean covering) {
+        return copy(new File(inputFilename), new File(outputFilename), new DefaultFileRenamePolicy(),null,covering,false);
+    }
+
+    /**
+     *
+     * @param inputFilename 输入
+     * @param outputFilename 输出
+     * @param renamePolicy 是否覆盖
+     * @param fileTypes 文件类型，递归使用
+     * @param covering 是否覆盖
+     * @param jump 是否成功
+     * @return 是否成功
+     */
+    public static boolean copy(String inputFilename, String outputFilename,RenamePolicy renamePolicy,String[] fileTypes,boolean covering,boolean jump)
+    {
+        return copy(new File(inputFilename), new File(outputFilename), renamePolicy,fileTypes,covering,jump);
     }
 
     /**
@@ -147,46 +212,99 @@ public class MultiFile {
      *
      * @param input    输入
      * @param output   输出
+     * @param renamePolicy 重命名规则
+     * @param fileTypes 文件类型
      * @param covering 是否覆盖
+     * @param jump 存在是否跳过
      * @return 是否成功
      */
-    public boolean copy(File input, File output, boolean covering) {
+    public static boolean copy(File input, File output, RenamePolicy renamePolicy,String[] fileTypes, boolean covering,boolean jump) {
         if (input.isDirectory()) {
             if (!FileUtil.makeDirectory(output)) {
                 return false;
             }
-            return copyDirectory(input, output, covering);
+            return copyDirectory(input, output, renamePolicy,fileTypes,covering,jump);
         } else {
-            return FileUtil.copyFile(input, output, covering);
+            return FileUtil.copyFile(input, output, renamePolicy,covering,jump);
         }
     }
 
-
     /**
-     * 拷贝目录
      *
-     * @param inputDir  输入
+     * @param inputDir 输入
      * @param outputDir 输出
-     * @param covering  是否覆盖
+     * @param covering 是否覆盖
      * @return 是否成功
      */
-    public boolean copyDirectory(String inputDir, String outputDir, boolean covering) {
-        return copyDirectory(new File(inputDir), new File(outputDir), covering);
+    public static boolean copyDirectory(String inputDir, String outputDir, boolean covering)
+    {
+        return copyDirectory(new File(inputDir), new File(outputDir), new DefaultFileRenamePolicy(),null,covering,false);
+    }
+    /**
+     *
+     * @param inputDir 输入
+     * @param outputDir 输出
+     * @param renamePolicy 重命名规则
+     * @param covering 是否覆盖
+     * @param jump 存在是否跳过
+     * @return 拷贝目录
+     */
+    public static boolean copyDirectory(String inputDir, String outputDir, RenamePolicy renamePolicy, boolean covering,boolean jump)
+    {
+        return copyDirectory(new File(inputDir), new File(outputDir), renamePolicy,null,covering,jump);
     }
 
     /**
-     * Copie un rpertoire dans un autre
      *
      * @param inputDir  输入
-     * @param outputDir 输出
+     * @param outputDir  输出
+     * @param renamePolicy  重命名规则
+     * @param covering 是否覆盖
+     * @param jump 存在是否跳过
+     * @return 拷贝目录
+     */
+    public static boolean copyDirectory(File inputDir, File outputDir, RenamePolicy renamePolicy,boolean covering, boolean jump) {
+       return copyDirectory( inputDir,  outputDir,  renamePolicy,null, covering, jump);
+    }
+
+
+    /**
+     *
+     * @param inputDir 输入
+     * @param outputDir  输出
+     * @param renamePolicy 重命名规则
+     * @param fileTypes 文件类型
      * @param covering  是否覆盖
+     * @param jump 存在是否跳过
+     * @return  拷贝目录
+     */
+    public static boolean copyDirectory(String inputDir, String outputDir, RenamePolicy renamePolicy, String[] fileTypes,boolean covering,boolean jump)
+    {
+        return copyDirectory(new File(inputDir), new File(outputDir), renamePolicy,fileTypes,covering,jump);
+    }
+
+
+
+    /**
+     *
+     * @param inputDir  输入
+     * @param outputDir  输出
+     * @param renamePolicy 重命名规则
+     * @param fileTypes 文件类型
+     * @param covering  是否覆盖
+     * @param jump 存在是否跳过
      * @return 是否成功
      */
-    public boolean copyDirectory(File inputDir, File outputDir, boolean covering) {
+    public static boolean copyDirectory(File inputDir, File outputDir, RenamePolicy renamePolicy,String[] fileTypes,boolean covering, boolean jump)
+    {
         if (!FileUtil.makeDirectory(outputDir.getAbsolutePath())) {
             return false;
         }
         File[] files = inputDir.listFiles();
+        if (files==null)
+        {
+            return true;
+        }
         for (File file : files) {
             File desFile = new File(outputDir.getAbsolutePath() + File.separator + file.getName());
             if (!desFile.exists()) {
@@ -198,8 +316,20 @@ public class MultiFile {
                     }
                 }
             }
-            if (!copy(file, desFile, covering)) {
-                return false;
+            if (file.isDirectory())
+            {
+                if (!copy(file, desFile, renamePolicy,fileTypes,covering,jump)) {
+                    return false;
+                }
+            }  else if (file.isFile())
+            {
+                String fileType = FileUtil.getTypePart(file);
+                if (ObjectUtil.isEmpty(fileTypes) || ArrayUtil.inArray(fileTypes,fileType,true))
+                {
+                    if (!copy(file, desFile, renamePolicy,fileTypes,covering,jump)) {
+                        return false;
+                    }
+                }
             }
         }
         return true;

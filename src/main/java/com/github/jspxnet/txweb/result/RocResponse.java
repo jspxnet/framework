@@ -20,11 +20,11 @@ import java.util.Map;
 public class RocResponse<T> implements Serializable {
 
     @Column(caption = "协议")
-    private final static String PROTOCOL = Environment.jspxNetRoc;
+    public final static String PROTOCOL = Environment.jspxNetRoc;
 
     //后边将增加多种格式的json支持
     @Column(caption = "版本")
-    private final static String VERSION = Environment.jspxNetRocVersion;
+    public final static String VERSION = Environment.jspxNetRocVersion;
 
     @Column(caption = "当前页数")
     @JsonIgnore(isNull = true)
@@ -74,39 +74,74 @@ public class RocResponse<T> implements Serializable {
 
     }
 
+    /**
+     *
+     * @return 当前页数
+     */
     public int getCurrentPage() {
         return currentPage;
     }
 
+    /**
+     *
+     * @param currentPage 当前页数
+     * @return 返回对象
+     */
     public RocResponse<T>  setCurrentPage(int currentPage) {
         this.currentPage = currentPage;
         return this;
     }
 
+    /**
+     *
+     * @return 最大行数
+     */
     public long getTotalCount() {
         return totalCount==null?0:totalCount;
     }
 
+    /**
+     *
+     * @param totalCount 最大行数
+     * @return 设置
+     */
     public RocResponse<T> setTotalCount(long totalCount) {
         this.totalCount = totalCount;
         calculatePage();
         return this;
     }
 
+    /**
+     *
+     * @return 返回最大页数
+     */
     public int getTotalPage() {
         return totalPage;
-
     }
 
+    /**
+     *
+     * @param totalPage 最大页数
+     * @return 返回对象
+     */
     public RocResponse<T> setTotalPage(int totalPage) {
         this.totalPage = totalPage;
         return this;
     }
 
+    /**
+     *
+     * @return 每月行数
+     */
     public int getCount() {
         return count;
     }
 
+    /**
+     *
+     * @param count  每月行数
+     * @return 返回对象
+     */
     public RocResponse<T> setCount(int count) {
         this.count = count;
         calculatePage();
@@ -176,6 +211,11 @@ public class RocResponse<T> implements Serializable {
         return property.get(key);
     }
 
+    /**
+     *
+     * @param error 错误信息
+     * @return 返回对象
+     */
     public RocResponse<T> setError(Map<String, ?> error) {
         this.error = error;
         return this;
@@ -192,11 +232,34 @@ public class RocResponse<T> implements Serializable {
         return new RocResponse<T>(data);
     }
 
+    /**
+     *
+     * @param data 数据
+     * @return 返回对象
+     * @param <T> 类型
+     */
+    public static <T> RocResponse<T> auto(T data) {
+
+        return ObjectUtil.toBoolean(data)?success(data):error(-32606, "失败");
+    }
+
+    /**
+     *
+     * @return 返回成功
+     * @param <T> 类型
+     */
     public static <T> RocResponse<T> success() {
         RocResponse<T> response = new RocResponse<>();
         return response.setSuccess(1);
     }
 
+    /**
+     *
+     * @param data 数据
+     * @param message 消息
+     * @return 返回对象
+     * @param <T> 类型
+     */
     public static <T> RocResponse<T> success(T data, String message) {
         return new RocResponse<>(data, message);
     }
@@ -279,18 +342,33 @@ public class RocResponse<T> implements Serializable {
         this.success = 1;
     }
 
+    /**
+     *
+     * @param data 数据
+     * @param message 消息
+     */
     private RocResponse(T data, String message) {
         this.data = data;
         this.message = message;
         this.success = 1;
     }
 
+    /**
+     *
+     * @param code 错误号
+     * @param msg 消息
+     */
     private RocResponse(int code, String msg) {
         this.code = code;
         this.message = msg;
         this.success = 0;
     }
 
+    /**
+     *
+     * @param code  错误号
+     * @param msg 消息
+     */
     private RocResponse(int code, Map<String, ?> msg) {
         this.code = code;
         this.success = 0;
@@ -323,7 +401,10 @@ public class RocResponse<T> implements Serializable {
         }
     }
 
-
+    /**
+     *
+     * @return http 状态
+     */
     public Integer getStatus() {
         return status;
     }

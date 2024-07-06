@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.utils;
 
-/**
+/*
  * Created by IntelliJ IDEA.
  * author chenYuan (mail:39793751@qq.com)
  * date: 2007-11-19
@@ -25,6 +25,9 @@ public final class SystemUtil {
     {
 
     }
+
+    final public static float jdkVersion = StringUtil.toFloat(System.getProperty("java.vm.specification.version"));
+
     /**
      * Operating system state flag for error.
      */
@@ -63,7 +66,7 @@ public final class SystemUtil {
 
     public static String encode = System.getProperty("file.encoding");
 
-    public static String lineSeparator = System.getProperty("line.separator");
+   // public static String lineSeparator = System.getProperty("line.separator");
 
     static {
 

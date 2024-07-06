@@ -17,12 +17,14 @@ import java.util.Map;
  #######################################################
  #  定时任务控制台
  #######################################################
+
  useSchedulerRegister = true
  schedulerRegisterUrl = http://127.0.0.1:8080/devcenter/taskserv/register.jwc
  schedulerRegisterApi =
  schedulerRegisterName = scheduler-local
  schedulerCheckCron = 0 0/7 * * * *
  schedulerRegisterToken = 3294u23uosudf98398432432
+
  */
 
 @Data
@@ -39,13 +41,14 @@ public class SchedulerRegisterDto implements Serializable {
 
     private String schedulerRegisterToken = StringUtil.empty;
 
-    public boolean equals(SchedulerRegisterDto dto)
+    @Override
+    public boolean equals(Object obj)
     {
-        if (dto==null)
+        if (obj==null || getId()==null)
         {
             return false;
         }
-       return this.getId().equals(dto.getId());
+       return getId().hashCode()==obj.hashCode();
     }
 
     @JsonField(name = "id")
@@ -59,8 +62,15 @@ public class SchedulerRegisterDto implements Serializable {
     }
 
     @Override
+    public int hashCode()
+    {
+        return getId().hashCode();
+    }
+
+    @Override
     public String toString()
     {
+
         Map<String,String> map = new HashMap<>();
         map.put(Environment.USE_SCHEDULER_REGISTER, BooleanUtil.toString(useSchedulerRegister));
         map.put(Environment.SCHEDULER_REGISTER_URL,schedulerRegisterUrl);

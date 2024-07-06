@@ -167,7 +167,6 @@ public class DefaultActionInvocation implements ActionInvocation {
         //放入action
         actionProxy.setAction(action);
 
-        String actionName = action.getEnv(ActionEnv.Key_ActionName);
 
         //设置执行方法 begin
         if ((exeType.equalsIgnoreCase(RocHandle.NAME) || exeType.equalsIgnoreCase(RsaRocHandle.NAME) || exeType.equalsIgnoreCase(CommandHandle.NAME)) && jsonData != null) {
@@ -178,6 +177,8 @@ public class DefaultActionInvocation implements ActionInvocation {
             //先放入参数 begin
             TXWebUtil.putJsonParams(action,jsonData);
             //先放入参数 end
+
+            String actionName = action.getEnv(ActionEnv.Key_ActionName);
             //这里只是做安全配置检查，屏蔽调用不允许的方法
             String requestMethodName;
             JSONObject methodJson = jsonData.getJSONObject(Environment.rocMethod);
@@ -190,6 +191,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         } else {
             //传统方式,如果发现是一个Roc配置的
             String methodName = actionConfig.getMethod();
+            String actionName = action.getEnv(ActionEnv.Key_ActionName);
             if (TXWebUtil.AT.equals(methodName) && !StringUtil.isEmpty(actionName)) {
                 actionProxy.setMethod(actionName);
             } else if(methodName!=null&&methodName.startsWith(TXWebUtil.AT)&&!StringUtil.isEmpty(StringUtil.substringAfter(methodName,TXWebUtil.AT)))

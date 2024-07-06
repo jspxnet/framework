@@ -35,7 +35,7 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
     @Ref
     private OnlineManager onlineManager;
 
-    @Ref(name = MqIoc.actionLogMqProducer,test = true)
+    @Ref(name = MqIoc.ACTION_LOG_MQ_PRODUCER,test = true)
     private RocketMqProducer rocketMqProducer;
 
     private String topic;

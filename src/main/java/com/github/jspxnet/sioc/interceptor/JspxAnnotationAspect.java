@@ -1,12 +1,14 @@
 package com.github.jspxnet.sioc.interceptor;
 
 
+/*
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
+*/
 
 /**
  * Created by jspx.net
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
  *  Import(JspxAnnotationAspect.class})
  * }</pre>
  **/
+/*
 @Aspect
 @Component
 @Slf4j
@@ -29,15 +32,18 @@ public class JspxAnnotationAspect {
 
     }
 
-    /**
+    */
+/**
      * 捕获请求和响应
      *
      * @param call spring JoinPoint
      * @return 拦截返回
      * @throws Throwable 异常
-     */
+     *//*
+
     @Around(value = "jspxAnnotMethod()")
     public Object doAround(ProceedingJoinPoint call) throws Throwable {
         return SpringMethodInterceptor.springInvoke(call);
     }
 }
+*/

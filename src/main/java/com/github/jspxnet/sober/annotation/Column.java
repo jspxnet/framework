@@ -49,6 +49,15 @@ public @interface Column {
      */
     Class<?> enumType() default NullClass.class;
 
+
+    /**
+     *
+     * @return 转json的时候是否显示枚举
+     */
+    boolean enumTypes() default true;
+
+
+
     /**
      * 验证更具js库 函数，和配置验证里边的条件一样
      * 在前后段不分离的时候使用的,如果在前后端分离的结构中不用使用此字段

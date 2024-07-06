@@ -72,4 +72,6 @@ public class MemberSpace extends OperateTable {
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;
 
+    @Column(caption = "职位id", length = 32)
+    private String positionNodeId;
 }

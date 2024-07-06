@@ -7,6 +7,7 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.table.IUploadFile;
 import com.github.jspxnet.txweb.view.UploadFileView;
+import com.github.jspxnet.upload.multipart.JspxNetFileRenamePolicy;
 import com.github.jspxnet.util.StringList;
 
 import com.github.jspxnet.utils.*;
@@ -120,7 +121,7 @@ public class PhotoEditAction extends UploadFileView {
             json.put(Environment.MESSAGE, "write " + language.getLang(LanguageRes.folderWriteError));
             return;
         }
-        if (!FileUtil.copy(file, history, true)) {
+        if (!FileUtil.copy(file, history, new JspxNetFileRenamePolicy(),true,false)) {
             json.put(Environment.MESSAGE, "copy " + language.getLang(LanguageRes.folderWriteError));
             return;
         }
@@ -152,7 +153,7 @@ public class PhotoEditAction extends UploadFileView {
             json.put(Environment.MESSAGE, language.getLang(LanguageRes.cutImageSuccess));
         } else {
             if (file.length() < 10) {
-                FileUtil.copy(history, file, true);
+                FileUtil.copy(history, file,  new JspxNetFileRenamePolicy(),true,false);
             }
             json.put(Environment.MESSAGE, language.getLang(LanguageRes.cutImageFailure));
         }
@@ -189,7 +190,7 @@ public class PhotoEditAction extends UploadFileView {
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
-        if (!FileUtil.copy(file, history, true)) {
+        if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
             json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
             return;
         }
@@ -262,7 +263,7 @@ public class PhotoEditAction extends UploadFileView {
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + DateUtil.toString("ddHHmmss") + ".tmp"));
-        if (!FileUtil.copy(file, history, true)) {
+        if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
             json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
             return;
         }
@@ -321,7 +322,7 @@ public class PhotoEditAction extends UploadFileView {
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
-        if (!FileUtil.copy(file, history, true)) {
+        if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
             json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
             return;
         }
@@ -380,7 +381,7 @@ public class PhotoEditAction extends UploadFileView {
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
-        if (!FileUtil.copy(file, history, true)) {
+        if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
             json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
             return;
         }
@@ -441,7 +442,7 @@ public class PhotoEditAction extends UploadFileView {
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
-        if (!FileUtil.copy(file, history, true)) {
+        if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
             json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
             return;
         }
@@ -515,7 +516,7 @@ public class PhotoEditAction extends UploadFileView {
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
-        if (!FileUtil.copy(file, history, true)) {
+        if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
             json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
             return;
         }
@@ -598,7 +599,7 @@ public class PhotoEditAction extends UploadFileView {
         }
         uploadFile.setHistory(list.toString());
         uploadFile.setLastDate(new Date());
-        if (FileUtil.copy(history, file, true) && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
+        if (FileUtil.copy(history, file,  new JspxNetFileRenamePolicy(),true,false) && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
             setActionLogContent(file.getPath());
             FileUtil.delete(history);
             json.put(Environment.SUCCESS, 1);

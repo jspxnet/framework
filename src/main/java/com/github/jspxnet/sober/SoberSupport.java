@@ -10,18 +10,19 @@
 package com.github.jspxnet.sober;
 
 import com.github.jspxnet.json.JSONArray;
-import com.github.jspxnet.sober.table.SqlMapConf;
-import com.github.jspxnet.txweb.table.meta.BaseBillType;
-import com.github.jspxnet.txweb.table.meta.OperatePlug;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.exception.ValidException;
+import com.github.jspxnet.sober.table.SqlMapConf;
+import com.github.jspxnet.txweb.table.meta.BaseBillType;
+import com.github.jspxnet.txweb.table.meta.OperatePlug;
+
 import java.io.Serializable;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Map;
 import java.util.List;
-import java.sql.ResultSet;
+import java.util.Map;
 
 
 /**
@@ -386,8 +387,22 @@ public interface SoberSupport extends Serializable {
      */
     boolean execute(String sqlText, Object[] params) throws Exception;
 
-
+    /**
+     * 批量更新，这个方法主要为了提高速度
+     * @param sqlMapConf  sql 配置
+     * @param valueMap  变量
+     * @return 执行结果
+     * @throws SQLException 异常
+     */
     int[] batchUpdate(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws SQLException;
+    /**
+     * 批量更新
+     * @param template sql模版
+     * @param paramList 参数对象
+     * @return 执行结果
+     * @throws SQLException 异常
+     */
+    int[] batchUpdate(String template, List<?> paramList) throws SQLException;
 
     /**
      * 执行一个sql
@@ -451,7 +466,7 @@ public interface SoberSupport extends Serializable {
      * @param totalCount 返回行数
      * @return 查询返回列表
      */
-    List<?> query(String sql, Object[] param, int currentPage, int totalCount);
+    List<?> query(String sql, Object[] param, int currentPage, long totalCount);
     /**
      * 查询返回列表
      * 使用jdbc完成,比较浪费资源
@@ -494,6 +509,9 @@ public interface SoberSupport extends Serializable {
      * @return 单一返回对象
      */
     Object getUniqueResult(String sql, Object o);
+
+    List<?> query(String sqlText, Object[] param, int currentPage, int totalCount);
+
     /**
      * @param cla 类
      * @param sql sql
@@ -558,7 +576,11 @@ public interface SoberSupport extends Serializable {
      * @return 字段列表
      */
     List<SoberColumn>  getTableColumns(String tableName);
-
+    /**
+     * 通过sql 得到字段信息
+     * @param sql sql
+     * @return 字段信息
+     */
     List<SoberColumn>  getSqlColumns(String sql);
 
     /**

@@ -20,15 +20,20 @@ import com.github.jspxnet.txweb.evasive.EvasiveManager;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.RequestWrapper;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.FileSuffixUtil;
 import com.github.jspxnet.utils.StreamUtil;
 import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
-import javax.servlet.*;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * Created by IntelliJ IDEA.
@@ -117,9 +122,9 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
                 log.debug("not find file:{}",file.getPath());
                 return;
             }
-            String contentType = FileUtil.getContentType(file);
+            String contentType = FileSuffixUtil.getContentType(file);
             response.setContentType(contentType);
-            try (InputStream in = new FileInputStream(file); OutputStream out = response.getOutputStream();) {
+            try (InputStream in = Files.newInputStream(file.toPath()); OutputStream out = response.getOutputStream();) {
                 StreamUtil.copy(in, out);
             } catch (IOException e) {
                 e.printStackTrace();

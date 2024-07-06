@@ -20,7 +20,7 @@ import com.github.jspxnet.utils.StringUtil;
  * Time: 16:45:27
  * 陈原
  */
-public abstract class Environment {
+public final class Environment {
     private Environment() {
 
     }
@@ -85,13 +85,9 @@ public abstract class Environment {
 
     final public static String autoIncludes = "autoIncludes";
 
-    final public static String dateTimeFormat = "dateTimeFormat";
-
     final public static String defaultPath = "defaultPath";
 
     final public static String sqlXmlPath = "sqlXmlPath";
-
-    final public static String lucenePath = "lucenePath";
 
     final public static String databasePath = "databasePath";
 
@@ -125,10 +121,6 @@ public abstract class Environment {
 
     final public static String startRunDate = "startRunDate";
 
-    final public static String upgradeXMLFile = "upgrade.cfg.xml";
-
-    final public static String versionId = "version";
-
     final public static String filterSuffix = "suffix";
 
     final public static String ApiFilterSuffix = "apiSuffix";
@@ -148,7 +140,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.73";
+    final static public String VERSION = "6.77";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -198,7 +190,7 @@ public abstract class Environment {
 
 
     //最高金额
-    static public final String MAX_AMOUNT = "maxAmount";
+  /*  static public final String MAX_AMOUNT = "maxAmount";
 
     static public final String MAX_POINTS = "maxPoints";
 
@@ -214,7 +206,7 @@ public abstract class Environment {
 
     //组织
     final static public String organise = "organise";
-
+*/
     //字符编码
     final static public String encode = "encode";
 
@@ -325,10 +317,7 @@ public abstract class Environment {
 
     static public final String closeGuestVisitInfo = "closeGuestVisitInfo";
 
-    static public final String useMail = "useMail";
-
     static public final String useSms = "useSms";
-
 
     static public final String mailSmtp = "mailSmtp";
 
@@ -453,10 +442,6 @@ public abstract class Environment {
 
     //私秘Key，2个地方在用，远程登陆，和非对称加密
     final static public String privateKey = "privateKey";
-
-
-    //支付标识，是用户自己定义的标识
-    final static public String paySign = "paySign";
 
     //加密签名
     final static public String sign = "sign";
@@ -626,5 +611,10 @@ public abstract class Environment {
     public static final String SCHEDULER_REGISTER_NAME = "schedulerRegisterName";
     public static final String SCHEDULER_REGISTER_TOKEN = "schedulerRegisterToken";
     //任务注册中心end
+
+    //超级API接口登陆begin
+    public static final String API_LOGIN_NAME = "API_LOGIN_NAME";
+    public static final String API_LOGIN_PASSWORD = "API_LOGIN_PASSWORD";
+    //超级API接口登陆end
 
 }

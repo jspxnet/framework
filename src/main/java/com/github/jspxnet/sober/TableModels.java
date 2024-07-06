@@ -73,5 +73,7 @@ public interface TableModels extends Serializable {
 
     void setCanExtend(boolean canExtend);
 
+    boolean isAutoCleanCache();
+
     String getId();
 }

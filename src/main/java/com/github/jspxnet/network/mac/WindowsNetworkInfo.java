@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.network.mac;
 
-/**
+/*
  * Created by IntelliJ IDEA.
  * User: chenYuan
  * date: 2004-8-31

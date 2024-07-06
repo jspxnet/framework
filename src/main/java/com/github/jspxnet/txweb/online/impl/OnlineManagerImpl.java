@@ -152,7 +152,7 @@ public class OnlineManagerImpl implements OnlineManager {
     @Override
     public void init()  {
         //如果redis缓存被关闭开始,开启onlineCache来保存数据
-        if (!memberDAO.getSoberFactory().isUseCache())
+        if (!EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useCache))
         {
             onlineCache = new LRUHashMap<>(50);
         }
@@ -377,8 +377,8 @@ public class OnlineManagerImpl implements OnlineManager {
         final HttpSession session = action.getSession();
         Member member = null;
         //短信方式登录
-        if (LoginField.Sms.equalsIgnoreCase(isId)) {
-            member = memberDAO.getMember(LoginField.Phone, loginId);
+        if (LoginField.SMS.equalsIgnoreCase(isId)) {
+            member = memberDAO.getMember(LoginField.PHONE, loginId);
             if (member == null) {
                 errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.noFoundUser));
                 memberDAO.evict(Member.class);
@@ -470,6 +470,115 @@ public class OnlineManagerImpl implements OnlineManager {
 
         session.setAttribute(TXWeb.token,userSession.getId());
         setCookieTicket(request, action.getResponse(), userSession.getId(), cookieSecond);
+        return errorInfo;
+    }
+
+
+    /**
+     * 判断是否可以登录
+     *
+     * @param loginName         登录用户名
+     * @param password        密码
+     * @return 判断是否可以登录
+     */
+    @Override
+    public Map<String, String> apiLogin(ActionSupport action, String loginName, String password, String userName) throws Exception
+    {
+        String lan = RequestUtil.getLanguage(action.getRequest());
+        Bundle language = action.getLanguage();
+        if (language==null)
+        {
+            PropertyProvider lang = new PropertyProvider();
+            lang.setNamespace(Environment.language);
+            lang.setDataType(lan);
+            lang.loadMap();
+            language = lang;
+        }
+
+        CookieUtil.cookieClear(action.getRequest(),action.getResponse());
+        Map<String, String> errorInfo = new HashMap<>();
+        if (StringUtil.getLength(loginName) < 3) {
+            errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorLoginName));
+            return errorInfo;
+        }
+        //tomcat6 bug 修复, 这里如果是中文，很可能接收到的为 编码后的字符串，需要判断解码
+        if (loginName!=null&&loginName.length() > 5 && loginName.startsWith("%") && StringUtil.countMatches(loginName, "%") > 6) {
+            loginName = URLUtil.getUrlDecoder(loginName, Environment.defaultEncode);
+        }
+        if (StringUtil.isNull(password) || password.length() < 4) {
+            errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorPassword));
+            return errorInfo;
+        }
+
+        EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
+        String userNameConf = environmentTemplate.getString(Environment.API_LOGIN_NAME);
+        String userNamePass = environmentTemplate.getString(Environment.API_LOGIN_PASSWORD);
+
+        if (loginName==null||!loginName.equals(userNameConf)||!password.equals(userNamePass))
+        {
+            errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorLoginName));
+            return errorInfo;
+        }
+
+        final HttpSession session = action.getSession();
+        Member member =  memberDAO.getMember(LoginField.NAME, userName);
+        if (member == null) {
+            errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.noFoundUser));
+            memberDAO.evict(Member.class);
+            return errorInfo;
+        }
+
+        //信息检查完成
+        HttpServletRequest request = action.getRequest();
+        String token = JWTUtil.createToken(action.getRemoteAddr(),member.getId()+"", SessionUtil.getSessionId(session));
+        //创建session信息更新 begin
+        UserSession userSession = BeanUtil.copy(member,UserSession.class);
+        userSession.setId(token);
+        userSession.setUid(member.getId());
+        userSession.setInvisible(0);
+        //创建session信息更新 end
+
+        session.setMaxInactiveInterval(Integer.MAX_VALUE-1000);
+
+        //单点登录，就删除其他的登录信息
+        if (sso) {
+            memberDAO.saveOrUpdate(userSession);
+        } else {
+            memberDAO.update(userSession);
+        }
+        //如果有必要，这里加入同步 end
+
+        //用户信息更新 begin
+        member.setLoginTimes(member.getLoginTimes() + 1);
+        member.setLoginDate(new Date());
+        member.setIp(RequestUtil.getRemoteAddr(request));
+        memberDAO.update(member, new String[]{"loginTimes", "loginDate", "ip"});
+        //更新用户信息 end
+        memberDAO.evictLoad(UserSession.class,"id",userSession.getId());
+
+        //保存登录日志 begin
+        LoginLog loginLog = createLoginLog(member);
+        loginLog.setToken(token);
+        loginLog.setClient("API");
+        loginLog.setLoginTimes(member.getLoginTimes());
+        loginLog.setSessionId(SessionUtil.getSessionId(session));
+        loginLog.setUrl(request.getRequestURL().toString());
+        loginLog.setSystem(RequestUtil.getSystem(request));
+        loginLog.setBrowser(RequestUtil.getBrowser(request));
+        loginLog.setIp(RequestUtil.getRemoteAddr(request));
+        //用户session信息更新 end
+        if (!StringUtil.isNull(token))
+        {
+            memberDAO.save(loginLog);
+        }
+        //保存登录日志 end
+
+        //在线信息保存到缓存中
+        updateUserSessionCache(userSession);
+        //登录的时候作为验证
+
+        session.setAttribute(TXWeb.token,userSession.getId());
+        setCookieTicket(request, action.getResponse(), userSession.getId(), Integer.MAX_VALUE-1000);
         return errorInfo;
     }
 

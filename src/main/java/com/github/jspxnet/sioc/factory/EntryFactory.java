@@ -13,8 +13,12 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.SpringBeanContext;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
+import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.sioc.BeanFactory;
+import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.SchedulerManager;
+import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.annotation.*;
 import com.github.jspxnet.sioc.interceptor.GlobalMethodInterceptor;
 import com.github.jspxnet.sioc.rpc.RpcClientProxyFactory;
@@ -22,15 +26,14 @@ import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.sioc.util.Empty;
-import com.github.jspxnet.txweb.dispatcher.Dispatcher;
-import com.github.jspxnet.util.StringMap;
-import com.github.jspxnet.utils.*;
-import lombok.extern.slf4j.Slf4j;
-import com.github.jspxnet.scriptmark.core.TagNode;
-import com.github.jspxnet.sioc.BeanFactory;
-import com.github.jspxnet.sioc.IocContext;
-import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.util.TypeUtil;
+import com.github.jspxnet.util.StringMap;
+import com.github.jspxnet.utils.ArrayUtil;
+import com.github.jspxnet.utils.BeanUtil;
+import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -119,6 +122,10 @@ public final class EntryFactory implements BeanFactory {
      */
     @Override
     public Object createEntry(LifecycleObject lifecycleObject) throws Exception {
+        if (lifecycleObject==null)
+        {
+            return null;
+        }
         if (lifecycleObject.isSingleton() && lifecycleObject.getObject() != null) {
             return lifecycleObject.getObject();
         }
@@ -197,6 +204,12 @@ public final class EntryFactory implements BeanFactory {
                         //已经设置过的变量
                         continue;
                     }
+                    if (method.getAnnotation(Ref.class)!=null)
+                    {
+                        //代码里边已经配置注入了的
+                        continue;
+                    }
+
                     if (INJECT_OBJECTS.containsKey(setFiledName)) {
                         BeanElement beanElement = INJECT_OBJECTS.get(setFiledName);
                         Object inObj = getBean(beanElement.getId(), beanElement.getNamespace());
@@ -304,7 +317,7 @@ public final class EntryFactory implements BeanFactory {
                         method.invoke(o, getBean(beanId, mNamespace));
                         setRefField = ArrayUtil.add(setRefField, method.getName());
                     }
-                } else if (!ref.test()) {
+                } else {
                     method.invoke(o, getBean(beanId, mNamespace));
                     setRefField = ArrayUtil.add(setRefField, method.toString());
                 }
@@ -406,8 +419,9 @@ public final class EntryFactory implements BeanFactory {
                     key = propPrefix.prefix() + StringUtil.DOT + field.getName();
                 }
                 String valueStr = (String) valueMap.get(key);
-                if (StringUtil.isEmpty(valueStr)) {
-                    continue;
+                if (StringUtil.isNull(valueStr)||StringUtil.AT.equalsIgnoreCase(valueStr))
+                {
+                    valueStr = "${"+field.getName() + "}";
                 }
                 String valueObj = EnvFactory.getPlaceholder().processTemplate(valueMap, valueStr);
                 BeanUtil.setFieldValue(o, field.getName(), valueObj);
@@ -433,6 +447,10 @@ public final class EntryFactory implements BeanFactory {
                     } else {
                         valueStr = (String) valueMap.get(val.value());
                     }
+                    if (StringUtil.isNull(valueStr)||StringUtil.AT.equalsIgnoreCase(valueStr))
+                    {
+                        valueStr =  "${"+field.getName() + "}";
+                    }
                     String valueObj = EnvFactory.getPlaceholder().processTemplate(valueMap, valueStr);
                     fieldNames = ArrayUtil.add(fieldNames, field.getName());
                     BeanUtil.setFieldValue(o, field.getName(), valueObj);
@@ -455,6 +473,10 @@ public final class EntryFactory implements BeanFactory {
                         valueStr = (String) valueMap.get(varNames[0]);
                     } else {
                         valueStr = (String) valueMap.get(val.value());
+                    }
+                    if (StringUtil.isNull(valueStr)||StringUtil.AT.equalsIgnoreCase(valueStr))
+                    {
+                        valueStr =  "${"+method.getName()+ "}";
                     }
                     String valueObj = EnvFactory.getPlaceholder().processTemplate(valueMap, valueStr);
                     if (valueObj == null) {
@@ -737,4 +759,6 @@ public final class EntryFactory implements BeanFactory {
     public void shutdown() {
         LIFE_CYCLE.shutdown();
     }
+
+
 }

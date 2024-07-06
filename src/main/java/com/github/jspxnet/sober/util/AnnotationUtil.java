@@ -353,6 +353,8 @@ public final class AnnotationUtil {
         soberTable.setName(table.name());  //得到数据库表名
         soberTable.setTableCaption(table.caption());//表的别名
         soberTable.setUseCache(table.cache()); //是否使用cache 默认使用
+        //是否自动清理缓存
+        soberTable.setAutoCleanCache(table.autoCleanCache());
         soberTable.setCreate(table.create());
         soberTable.setColumns(getColumnList(cls)); //数据库字段
         soberTable.setCalcUniqueMap(getSoberCalcUnique(cls)); //单个计算
@@ -474,6 +476,10 @@ public final class AnnotationUtil {
         {
             Column column = field.getAnnotation(Column.class);
             if (column==null)
+            {
+                continue;
+            }
+            if (!column.enumTypes())
             {
                 continue;
             }

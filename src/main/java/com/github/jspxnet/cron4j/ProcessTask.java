@@ -18,10 +18,6 @@
  */
 package com.github.jspxnet.cron4j;
 
-import com.github.jspxnet.security.utils.EncryptUtil;
-import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.SystemUtil;
-
 import java.io.*;
 
 /**
@@ -356,7 +352,7 @@ public class ProcessTask extends Task {
 		if (arr == null) {
 			return "null";
 		} else {
-			StringBuffer b = new StringBuffer();
+			StringBuilder b = new StringBuilder();
 			b.append('[');
 			for (int i = 0; i < arr.length; i++) {
 				if (i > 0) {
@@ -374,17 +370,15 @@ public class ProcessTask extends Task {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer b = new StringBuffer();
-		b.append("Task[");
-		b.append("cmd=");
-		b.append(ProcessTask.listStrings(command));
-		b.append(",env=");
-		b.append(ProcessTask.listStrings(envs));
-		b.append(",");
-		b.append("dir=");
-		b.append(directory);
-		b.append("]");
-		return b.toString();
+		return "Task[" +
+				"cmd=" +
+				ProcessTask.listStrings(command) +
+				",env=" +
+				ProcessTask.listStrings(envs) +
+				"," +
+				"dir=" +
+				directory +
+				"]";
 	}
 
 }

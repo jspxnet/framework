@@ -9,6 +9,7 @@ import com.github.jspxnet.txweb.annotation.Transaction;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+
 import java.lang.reflect.Method;
 
 public final class AnnotationUtil {
@@ -19,9 +20,8 @@ public final class AnnotationUtil {
      * 执行Init 标签
      *
      * @param bean bean对象
-     * @throws Exception 异常
      */
-    public static void invokeInit(Object bean) throws Exception {
+    public static void invokeInit(Object bean)  {
         if (bean == null) {
             return;
         }
@@ -29,10 +29,20 @@ public final class AnnotationUtil {
         //如果没有配置就检查是否有标签方式的
         Method[] methods = ClassUtil.getDeclaredMethods(bean.getClass());
         for (Method method : methods) {
+            if (method==null)
+            {
+                continue;
+            }
             Init init = method.getAnnotation(Init.class);
-            if (init != null && method.getParameterTypes().length==0) {
+            Class<?>[] paramTypes = method.getParameterTypes();
+            if (init != null &&  paramTypes.length==0) {
                 method.setAccessible(true);
-                method.invoke(bean);
+                try {
+                    method.invoke(bean);
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                }
             }
         }
     }

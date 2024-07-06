@@ -125,12 +125,17 @@
     <logger name="org.hibernate" level="ERROR" />
     <logger name="org.hibernate.type.descriptor.sql" level="ERROR" />
     <logger name="org.apache.rocketmq" level="ERROR" />
+    <logger name="org.apache" level="ERROR" />
+    <logger name="org.apache.http.wire" level="ERROR" />
+    <logger name="org.apache.http.headers" level="ERROR" />
+
     <logger name="RocketmqClient" additivity="false">
         <level value="ERROR" />
         <appender-ref ref="RocketmqClientAppender"/>
     </logger>
+
     <!-- root级别   DEBUG -->
-    <root level="${debug=='true'?'DEBUG':'INFO'}">
+    <root level="${debug=='true'?'DEBUG':'WARN'}">
         <!-- 控制台输出 -->
         <#if where="debug=='true'">
               <appender-ref ref="DEBUG"/>

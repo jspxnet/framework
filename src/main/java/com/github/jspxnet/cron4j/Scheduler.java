@@ -764,7 +764,7 @@ public class Scheduler {
                 thread.join(DateUtil.MINUTE);
                 dead = true;
             } catch (InterruptedException e) {
-                ;
+               //
             }
         } while (!dead);
     }
@@ -783,7 +783,7 @@ public class Scheduler {
                 executor.join();
                 dead = true;
             } catch (InterruptedException e) {
-                ;
+                ///
             }
         } while (!dead);
     }

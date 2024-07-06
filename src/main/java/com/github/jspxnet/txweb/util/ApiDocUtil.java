@@ -16,10 +16,6 @@ import com.github.jspxnet.txweb.apidoc.*;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
 import java.io.File;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -28,7 +24,6 @@ import java.util.*;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2021/1/11 11:44
  * description: API 文档工具
@@ -311,6 +306,7 @@ public final class ApiDocUtil {
             if (jsonIgnore != null&&!jsonIgnore.isNull()) {
                 continue;
             }
+
             if (checkList.contains(field.getType()))
             {
                 ApiField apiField = new ApiField();
@@ -377,7 +373,19 @@ public final class ApiDocUtil {
                 }
 
                 if (childObj != null) {
-
+                    if (field.getType().equals(List.class)||field.getType().equals(Collections.class))
+                    {
+                        String childTypeModel = field.getGenericType().getTypeName();
+                        if (childTypeModel.contains("<")&&childTypeModel.contains(">"))
+                        {
+                            String childClassName = StringUtil.substringOutBetween(childTypeModel,"<",">");
+                            try {
+                                childObj = ClassUtil.loadClass(childClassName);
+                            } catch (ClassNotFoundException e) {
+                               e.printStackTrace();
+                            }
+                        }
+                    }
                     List<ApiField> childFieldList = getApiFieldList(childObj,jsonIgnoreShow,checkList);
                     if (childFieldList != null && !childFieldList.isEmpty()) {
                         apiField.setChildren(childFieldList);
@@ -770,7 +778,7 @@ public final class ApiDocUtil {
             return null;
         }
         File file = new File(EnvFactory.getBaseConfiguration().getDefaultPath(),namespace + ".describe.xml");
-        if (!file.isFile())
+        if (!FileUtil.isFileExist(file))
         {
             file = EnvFactory.getFile(namespace + ".describe.xml");
         }
@@ -788,37 +796,14 @@ public final class ApiDocUtil {
         {
             return null;
         }
-
-        Document document;
         try {
-            document = DocumentHelper.parseText(xml);
-        } catch (DocumentException e) {
+            return XMLUtil.getDescribe(namespace,"id",name,flag,xml);
+        } catch (Exception e) {
             log.error("文档XML格式错误 file:{}",file);
             e.printStackTrace();
-            return null;
-        }
 
-        Element element = document.getRootElement();
-        if (element==null)
-        {
-            return null;
         }
-
-        Iterator<?> elementList = element.elementIterator("describe");
-        if (ObjectUtil.isEmpty(elementList))
-        {
-            return null;
-        }
-        while (elementList.hasNext())
-        {
-            Element el = (Element)elementList.next();
-            String id = StringUtil.trim(el.attributeValue("id"));
-            if (StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(id)||!StringUtil.isEmpty(flag)&&name.equalsIgnoreCase(id)&&flag.equalsIgnoreCase(StringUtil.trim(el.attributeValue("flag"))))
-            {
-                return el.getStringValue();
-            }
-        }
-        return null;
+        return StringUtil.empty;
     }
 
     /**

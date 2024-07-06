@@ -439,7 +439,7 @@ public final class BeanUtil {
             return object;
         }
         if (object instanceof Map && !(object instanceof  PropertyContainer) && parameter == null) {
-            Map map = (Map) object;
+            Map<String,Object> map = (Map<String,Object>) object;
             return map.get(name);
         }
 

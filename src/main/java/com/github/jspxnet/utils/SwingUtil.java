@@ -31,7 +31,7 @@ public final class SwingUtil {
     //得到JDK支持的基本字体,并且扩充常用字体
     static public String[] getSystemFontList() {
         //微软雅黑
-        String[] fontArray = Toolkit.getDefaultToolkit().getFontList();
+        String[] fontArray =  GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         if (hasFont("SimSun")) {
             fontArray = (String[]) ArrayUtil.add(fontArray, 0, "SimSun");
         }
@@ -134,9 +134,7 @@ public final class SwingUtil {
 
     static public void setOpaque(Container container, boolean isOpaque) {
         if (container instanceof JPanel) {
-            if (container instanceof JPanel) {
-                ((JPanel) container).setOpaque(isOpaque);
-            }
+            ((JPanel) container).setOpaque(isOpaque);
         }
         for (Component comm : container.getComponents()) {
             if (comm instanceof JPanel) {

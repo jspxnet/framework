@@ -9,14 +9,18 @@
  */
 package com.github.jspxnet.txweb.view;
 
+import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.txweb.model.param.PageParam;
+import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
+import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,4 +48,17 @@ public class GenericView extends ActionSupport {
     public int getTotalCount(PageParam  params) throws Exception {
         return genericDAO.getCount(ClassUtil.loadClass(className),params.getField() , params.getFind(), params.getTerm(),params.getUid());
     }
+
+
+    public RocResponse<List<?>> list(@Param(caption = "通用参数")PageParam  params) throws Exception {
+        int totalCount = getTotalCount(params);
+        if (totalCount <= 0) {
+            return RocResponse.success(new ArrayList<>(), language.getLang(LanguageRes.notDataFind));
+        }
+        List<?> list = getList(params);
+        RocResponse<List<?>> rocResponse = RocResponse.success(BeanUtil.copyList(list, ClassUtil.loadClass(className)));
+        return rocResponse.setCurrentPage(params.getCurrentPage()).setCount(params.getCount()).setTotalCount(totalCount);
+    }
+
+
 }

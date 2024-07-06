@@ -147,8 +147,8 @@ public class Predictor {
 	/**
 	 * Sets the time zone for predictions.
 	 * 
-	 * @param timeZone
-	 *            The time zone for predictions.
+	 * @param timeZone The time zone for predictions.
+	 *
 	 * @since 2.2.5
 	 */
 	public void setTimeZone(TimeZone timeZone) {

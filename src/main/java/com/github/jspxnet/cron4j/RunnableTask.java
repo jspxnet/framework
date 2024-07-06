@@ -70,11 +70,10 @@ class RunnableTask extends Task {
 	 */
 	@Override
 	public String toString() {
-		String b = "Task[" +
+		return "Task[" +
 				"runnable=" +
 				runnable +
 				"]";
-		return b;
 	}
 
 }

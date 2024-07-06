@@ -39,8 +39,11 @@ public class SoberTable implements TableModels {
     //是否动态创建表
     private boolean create = true;
 
-    //cache
+    //是否使用缓存
     private boolean useCache = true;
+
+    //是否自动清理缓存
+    private boolean autoCleanCache = false;
 
     //实体,具体的类
     @JsonIgnore
@@ -304,6 +307,15 @@ public class SoberTable implements TableModels {
     @Override
     public void setCanExtend(boolean canExtend) {
         this.canExtend = canExtend;
+    }
+
+    @Override
+    public boolean isAutoCleanCache() {
+        return autoCleanCache;
+    }
+
+    public void setAutoCleanCache(boolean autoCleanCache) {
+        this.autoCleanCache = autoCleanCache;
     }
 
     @Override

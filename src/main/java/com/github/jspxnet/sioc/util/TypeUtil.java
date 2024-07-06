@@ -9,17 +9,13 @@
  */
 package com.github.jspxnet.sioc.util;
 
-import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sioc.type.*;
 import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.scriptmark.core.TagNode;
-import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.ReflectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Array;
@@ -90,6 +86,11 @@ public final class TypeUtil {
         TYPE_MAP.put(Float.class.getName(), typeSerializer);
         TYPE_MAP.put("float", typeSerializer);
 
+        typeSerializer = new DoubleXmlType();
+        TYPE_MAP.put(Double.class.getName(), typeSerializer);
+        TYPE_MAP.put(Double.class.getName(), typeSerializer);
+        TYPE_MAP.put("double", typeSerializer);
+
         typeSerializer = new BigDecimalXmlType();
         TYPE_MAP.put(BigDecimal.class.getName(), typeSerializer);
         TYPE_MAP.put("BigDecimal", typeSerializer);
@@ -123,6 +124,11 @@ public final class TypeUtil {
         TYPE_MAP.put(float[].class.getName(), typeSerializer);
         TYPE_MAP.put(Float[].class.getName(), typeSerializer);
         TYPE_MAP.put("float[]", typeSerializer);
+
+        typeSerializer = new DoubleArrayXmlType();
+        TYPE_MAP.put(double[].class.getName(), typeSerializer);
+        TYPE_MAP.put(double[].class.getName(), typeSerializer);
+        TYPE_MAP.put("double[]", typeSerializer);
 
         typeSerializer = new BooleanArrayXmlType();
         TYPE_MAP.put(boolean[].class.getName(), typeSerializer);

@@ -180,10 +180,27 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         if (autoOrganizeId) {
             organizeId = action.getString(ActionEnv.KEY_organizeId);
         }
+
+        // 不同子站或获取cookie机构id
+        String noUserAdmin = checkUrl.substring(checkUrl.lastIndexOf("/"));
+        String oid = action.getString("oid");
+        String cookieOid = CookieUtil.getCookieString(request, "oid", "");
+        if (!noUserAdmin.contains("user") && !noUserAdmin.contains("admin") && !StringUtil.isEmpty(oid)) {
+            organizeId = oid;
+        } else if (!noUserAdmin.contains("user") && !noUserAdmin.contains("admin") && checkUrl.contains("jccms")) {
+            organizeId = action.getString("originId");
+            if (StringUtil.isEmpty(organizeId)) {
+                organizeId = action.getString("organizeId");
+            }
+        } else if (!noUserAdmin.contains("user") && !noUserAdmin.contains("admin") && StringUtil.isEmpty(organizeId) && !StringUtil.isEmpty(cookieOid)) {
+            organizeId = cookieOid;
+        }
+
         //is admin url
         if (isAdminRuleUrl(checkUrl)) {
             organizeId = null;
         }
+
         permissionDAO.setOrganizeId(organizeId);
 
         UserSession userSession = onlineManager.getUserSession();

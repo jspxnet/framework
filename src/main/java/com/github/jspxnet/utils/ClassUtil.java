@@ -212,7 +212,7 @@ public class ClassUtil {
         if (mName == null) {
             return null;
         }
-        Method[] methods = getDeclaredMethods(c);
+        Method[] methods = getDeclaredMethods(c,true);
         for (Method method : methods) {
 
             if (method.getName().equals(mName) && method.getName().startsWith(METHOD_NAME_SET)) {
@@ -481,9 +481,55 @@ public class ClassUtil {
         return null;
     }
 
+
     /**
-     * @param cls 类
-     * @return cls 类的所有方法
+     *
+     * @param cls  类
+     * @param only 是否方法唯一，如果为true 返回方法如果父类有的子类，被覆盖的将不会返回
+     * @return 返回方法
+     */
+    public static Method[] getDeclaredMethods(Class<?> cls,boolean only) {
+        if (!only) {
+            return getDeclaredMethods(cls);
+        } else {
+
+            List<String> checkList = new ArrayList<>();
+            Class<?> childClass = ClassUtil.getClass(cls);
+            Method[] result = null;
+            while (childClass != null) {
+                if (childClass.equals(Object.class) || childClass.equals(Serializable.class) || childClass.equals(DataMap.class)  || childClass.equals(Map.class)) {
+                    break;
+                }
+                Method[] childMethods = childClass.getDeclaredMethods();
+                for (Method childMethod:childMethods)
+                {
+                    String methodName = childMethod.toString();
+                    int pos = methodName.indexOf(childMethod.getName());
+                    if (pos==-1)
+                    {
+                        continue;
+                    }
+                    String checkName = methodName.substring(pos);
+                    if (checkList.contains(checkName))
+                    {
+                        continue;
+                    }
+                    checkList.add(checkName);
+                    result = BeanUtil.appendMethodArray(result, childMethod);
+                }
+                childClass = childClass.getSuperclass();
+            }
+            checkList.clear();
+            return result;
+
+        }
+    }
+
+
+    /**
+     *
+     * @param cls 类对象方法
+     * @return  返回类的所有方法，包括继承的方法，名称相同，类不同
      */
     public static Method[] getDeclaredMethods(Class<?> cls) {
         Class<?> childClass = ClassUtil.getClass(cls);
@@ -497,7 +543,6 @@ public class ClassUtil {
         }
         return result;
     }
-
     /**
      * @param cls  类
      * @param name 方法名称
@@ -507,7 +552,7 @@ public class ClassUtil {
         if (name == null) {
             return false;
         }
-        Method[] methods = getDeclaredMethods(cls);
+        Method[] methods = getDeclaredMethods(cls,true);
         for (Method method : methods) {
             if (method.getName().equals(name)) {
                 return true;
@@ -572,7 +617,7 @@ public class ClassUtil {
         if (name == null) {
             return null;
         }
-        Method[] methods = getDeclaredMethods(cls);
+        Method[] methods = getDeclaredMethods(cls,true);
         for (Method method : methods) {
             if (method.getName().equals(name) || method.getName().equals(METHOD_NAME_GET + StringUtil.capitalize(name))
                     || method.getName().equals(METHOD_NAME_SET + StringUtil.capitalize(name))
@@ -596,7 +641,7 @@ public class ClassUtil {
             return null;
         }
         Method[] result = null;
-        Method[] methods = getDeclaredMethods(cls);
+        Method[] methods = getDeclaredMethods(cls,true);
         for (Method method : methods) {
             if (!ignore&&method.getName().equals(name) || ignore&&method.getName().equalsIgnoreCase(name)) {
                 result = BeanUtil.appendMethodArray(result, method);
@@ -623,7 +668,7 @@ public class ClassUtil {
         if (name == null) {
             return null;
         }
-        Method[] methods = getDeclaredMethods(cls);
+        Method[] methods = getDeclaredMethods(cls,true);
         for (Method method : methods) {
             if ((method.getName().equals(name))
                     && method.getParameterCount() == pi) {
@@ -638,7 +683,7 @@ public class ClassUtil {
      * @return 得到得到所有set的方法
      */
     public static Method[] getDeclaredSetMethods(Class<?> cls) {
-        Method[] methods = getDeclaredMethods(cls);
+        Method[] methods = getDeclaredMethods(cls,true);
         Method[] result = null;
         for (Method method : methods) {
             if (method.getName().startsWith(METHOD_NAME_SET)) {
@@ -655,7 +700,7 @@ public class ClassUtil {
      * @return 得到所有get方法
      */
     public static Method[] getDeclaredReturnMethods(Class<?> cls, int pi) {
-        Method[] methods = getDeclaredMethods(cls);
+        Method[] methods = getDeclaredMethods(cls,true);
         if (methods==null)
         {
             return null;
@@ -1208,7 +1253,14 @@ public class ClassUtil {
      */
     public static List<File> getRunJarList()
     {
+
+        if (SystemUtil.jdkVersion>10)
+        {
+            return getRunJarListExt();
+        }
+
         List<File> result = new ArrayList<>();
+        //jdk 1.8 支持begin
         ClassLoader effectiveClassLoader = ClassUtil.class.getClassLoader();
         URL[] classPath = ((URLClassLoader) effectiveClassLoader).getURLs();
         for (URL url:classPath)
@@ -1219,11 +1271,42 @@ public class ClassUtil {
                 result.add(file);
             }
         }
+        //jdk 1.8 支持end
+        return result;
+    }
+
+    private static List<File> getRunJarListExt()
+    {
+        List<File> result = new ArrayList<>();
+        String cp = System.getProperty("java.class.path");
+        if (cp == null || cp.isEmpty()) {
+            String initialModuleName = System.getProperty("jdk.module.main");
+            cp = (initialModuleName == null) ? "" : null;
+        }
+        String[] classPath = null;
+        if (SystemUtil.OS==SystemUtil.WINDOWS)
+        {
+            classPath = StringUtil.split(cp,StringUtil.SEMICOLON);
+        } else {
+            classPath = StringUtil.split(cp,StringUtil.COLON);
+        }
+        for (String path:classPath)
+        {
+            if (path.endsWith("jar"))
+            {
+                result.add(new File(path));
+            }
+        }
         return result;
     }
 
     public static List<File> getRunJarDir()
     {
+        if (SystemUtil.jdkVersion>10)
+        {
+            return getRunJarDirExt();
+        }
+
         List<File> result = new ArrayList<>();
         ClassLoader effectiveClassLoader = ClassUtil.class.getClassLoader();
         URL[] classPath = ((URLClassLoader) effectiveClassLoader).getURLs();
@@ -1241,6 +1324,40 @@ public class ClassUtil {
             if (file.isDirectory()&&!result.contains(file))
             {
                 result.add(file);
+            }
+        }
+        File file = new File(System.getProperty("user.dir"));
+        if (!result.contains(file))
+        {
+            result.add(file);
+        }
+        return result;
+    }
+
+    private static List<File> getRunJarDirExt()
+    {
+        List<File> result = new ArrayList<>();
+        String cp = System.getProperty("java.class.path");
+        if (cp == null || cp.isEmpty()) {
+            String initialModuleName = System.getProperty("jdk.module.main");
+            cp = (initialModuleName == null) ? "" : null;
+        }
+        String[] classPath = null;
+        if (SystemUtil.OS==SystemUtil.WINDOWS)
+        {
+            classPath = StringUtil.split(cp,StringUtil.SEMICOLON);
+        } else {
+            classPath = StringUtil.split(cp,StringUtil.COLON);
+        }
+        for (String path:classPath)
+        {
+            if (path.endsWith("jar"))
+            {
+                File filePath = new File(FileUtil.getParentPath(path));
+                if (!result.contains(filePath))
+                {
+                    result.add(filePath);
+                }
             }
         }
         File file = new File(System.getProperty("user.dir"));

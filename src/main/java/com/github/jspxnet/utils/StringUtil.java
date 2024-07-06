@@ -36,10 +36,10 @@ import static java.util.regex.Pattern.compile;
  * Class stringUtil = ClassUtil.loadClass(class.getName());
  */
 @Slf4j
-public class StringUtil {
+public final class StringUtil {
     public static final char[] BR_TAG = "<BR>".toCharArray();
 
-
+    public static final String UTF8_BOM="\uFEFF";
     public static final char SINGLE_QUOTE_TAG = '\'';
     public static final char DOUBLE_QUOTE_TAG = '\"';
     public static final char UNDERLINE = '_';
@@ -80,9 +80,63 @@ public class StringUtil {
 
     public static final String CRLF = "\r\n";
 
+    //帆软的分隔方式
+    public static final String FINE_SPLIT = "','";
+
     //split 中需要转义的字符
     public static final String[] SPLIT_TRANSFERRED  = {"|",StringUtil.DOT,StringUtil.ASTERISK,"+"};
 
+
+    //字段名称标准化修复
+
+
+    //SQL名称特殊支付修复过滤
+    final private static List<String> captionFixChars = new ArrayList<>();
+    static {
+        captionFixChars.add("(");
+        captionFixChars.add(")");
+        captionFixChars.add("/");
+        captionFixChars.add("-");
+        captionFixChars.add("、");
+        captionFixChars.add("%");
+        captionFixChars.add("&");
+        captionFixChars.add("*");
+        captionFixChars.add("#");
+        captionFixChars.add("@");
+        captionFixChars.add(QUESTION);
+        captionFixChars.add("\"");
+        captionFixChars.add("'");
+    }
+
+    private StringUtil()
+    {
+
+    }
+    /**
+     *
+     * @param caption 字段名称
+     * @return 修复名称字段中的特殊支付，确保sql能正常执行
+     */
+    public static String filterFiledCaption(String caption) {
+        String fieldCaption = StringUtil.fullToHalf(caption);
+        for (String clean:captionFixChars)
+        {
+            fieldCaption = StringUtil.replace(fieldCaption,clean,"");
+        }
+        if (fieldCaption.contains("、"))
+        {
+            fieldCaption = StringUtil.substringAfter(fieldCaption,"、");
+        }
+        if (fieldCaption.length()>10)
+        {
+            fieldCaption = StringUtil.cut(fieldCaption,10,"");
+        }
+        if (!StringUtil.isChinese(fieldCaption))
+        {
+            fieldCaption = StringUtil.underlineToCamel(fieldCaption);
+        }
+        return StringUtil.replace(fieldCaption," ","");
+    }
 
     /**
      * 判断是否为空
@@ -122,6 +176,16 @@ public class StringUtil {
             }
         }
         return sqlText;
+    }
+    /**
+     * @param sqlText sql
+     * @return 返回SQL 删除排序
+     */
+    public static String getCountSql(String sqlText) {
+        if (sqlText == null) {
+            return empty;
+        }
+        return "SELECT count(1) AS NUM FROM (" + sqlText + ") C";
     }
 
     /**
@@ -1152,6 +1216,11 @@ public class StringUtil {
         if (StringUtil.isNull(value)) {
             return empty;
         } else {
+            if (value.startsWith(UTF8_BOM))
+            {
+                //去掉bom标识
+                value=value.substring(1);
+            }
             return value.trim();
         }
     }
@@ -1458,10 +1527,11 @@ public class StringUtil {
             return true;
         }
         String tmp = replace(value, "\t", empty);
-        tmp = replace(value, "\n", empty);
-        tmp = replace(value, "\f", empty);
-        tmp = replace(value, "\r", empty);
-        return hasLength(tmp.trim());
+        tmp = replace(tmp, "\n", empty);
+        tmp = replace(tmp, "\f", empty);
+        tmp = replace(tmp, "\r", empty);
+        tmp = replace(tmp, " ", empty);
+        return !hasLength(tmp.trim());
     }
 
 
@@ -1500,9 +1570,9 @@ public class StringUtil {
             return "http://";
         }
         if (http.toLowerCase().startsWith("http://")) {
-            return http;
+            return StringUtil.replace(http,"\\","/");
         } else {
-            return "http://" + http;
+            return "http://" + StringUtil.replace(http,"\\","/");
         }
     }
 
@@ -2363,7 +2433,7 @@ public class StringUtil {
         }
         //过滤重复
         Set<String> set = new LinkedHashSet<String>(Arrays.asList(nameArray));
-        return set.toArray(new String[set.size()]);
+        return set.toArray(new String[0]);
     }
 
 
@@ -3120,28 +3190,38 @@ public class StringUtil {
         if (isNull(value)) {
             return empty;
         }
+        String result;
         if (!value.contains(UNDERLINE+""))
         {
-            if (Character.isUpperCase(value.charAt(0)))
+            String param= value;
+            if (value.toUpperCase().equals(value))
             {
-                return uncapitalize(value);
+                //如果全部是大写的，就全部转换为小写
+                param= value.toLowerCase();
             }
-            return value;
-        }
-        String param= value.toLowerCase();
-        int len = param.length();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            char c = param.charAt(i);
-            if (c == UNDERLINE) {
-                if (++i < len) {
-                    sb.append(Character.toUpperCase(param.charAt(i)));
+            if (Character.isUpperCase(param.charAt(0)))
+            {
+                //其他情况转换为首字母小写
+                return uncapitalize(param);
+            }
+            result = param;
+        } else {
+            String param= value.toLowerCase();
+            int len = param.length();
+            StringBuilder sb = new StringBuilder(len);
+            for (int i = 0; i < len; i++) {
+                char c = param.charAt(i);
+                if (c == UNDERLINE) {
+                    if (++i < len) {
+                        sb.append(Character.toUpperCase(param.charAt(i)));
+                    }
+                } else {
+                    sb.append(c);
                 }
-            } else {
-                sb.append(c);
             }
+            result = sb.toString();
         }
-        return sb.toString();
+        return result;
     }
 
     //---------------------------------

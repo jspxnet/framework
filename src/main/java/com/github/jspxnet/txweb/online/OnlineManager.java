@@ -63,6 +63,8 @@ public interface OnlineManager extends Serializable {
 
     Map<String, String> login(ActionSupport action, String isId, String loginId, String password, int cookieSecond) throws Exception;
 
+    Map<String, String> apiLogin(ActionSupport action, String loginName, String password, String userName) throws Exception;
+
     void exit(ActionSupport action);
 
     void setCookieTicket(HttpServletRequest request, HttpServletResponse response, String sid, int cookieSecond);

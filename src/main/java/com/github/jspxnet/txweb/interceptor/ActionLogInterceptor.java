@@ -18,6 +18,7 @@ import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.ActionLogDAO;
 import com.github.jspxnet.txweb.env.ActionEnv;
+import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.*;
@@ -89,7 +90,20 @@ public class ActionLogInterceptor extends InterceptorSupport {
             actionLog.setCaption(actionProxy.getCaption());
             actionLog.setClassMethod(operation);
             actionLog.setMethodCaption(actionProxy.getMethodCaption());
-            actionLog.setActionResult(result);
+            if (StringUtil.isNull(result))
+            {
+                if (action.hasFieldInfo())
+                {
+                    actionLog.setActionResult(ActionSupport.ERROR);
+                } else if (action.hasActionMessage()){
+                    actionLog.setActionResult(ActionSupport.SUCCESS);
+                } else
+                {
+                    actionLog.setActionResult(actionContext.getExeType());
+                }
+            } else {
+                actionLog.setActionResult(result);
+            }
             if (actionLogDAO.save(actionLog) < 0) {
                 log.error("日志记录保存发生错误");
             }

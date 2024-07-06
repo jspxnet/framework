@@ -24,7 +24,6 @@ public final class ValidUtil {
      * This method accepts name with char, number or '_' or '.'
      * <p>
      * This method should be used transfer impl all LoginName input from user for sdk.security.
-     *
      * param str 用户名
      * return 判断是否为合法的用户名
      */
@@ -94,7 +93,8 @@ public final class ValidUtil {
      */
     public static boolean isPhone(String mobiles) {
         //if (!hasLength(str) || str.length() < 10) return false;
-        Pattern p = compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$|^([0-9]{3}-?[0-9]{8})|([0-9]{4}-?[0-9]{7})$");
+        String pattern = "^(\\+|00)?(86)?1[3-9]\\d{9}$";
+        Pattern p = compile(pattern);
         Matcher m = p.matcher(mobiles);
         return m.matches();
     }

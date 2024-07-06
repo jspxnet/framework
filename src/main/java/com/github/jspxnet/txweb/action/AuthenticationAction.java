@@ -76,7 +76,7 @@ public class AuthenticationAction extends AuthenticationView {
         }
         Map<String, String> loginInfo = null;
         try {
-            loginInfo = onlineManager.login(this, LoginField.Sms, mobile, onlineManager.getGuiPassword(),  cookieDate);
+            loginInfo = onlineManager.login(this, LoginField.SMS, mobile, onlineManager.getGuiPassword(),  cookieDate);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,7 +88,7 @@ public class AuthenticationAction extends AuthenticationView {
             return rocResponse;
         }
         try {
-            Thread.sleep(500);
+            Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -105,7 +105,7 @@ public class AuthenticationAction extends AuthenticationView {
 
     @Operate(caption = "传统方式Ajax登陆")
     public RocResponse<JSONObject> login(
-            @Param(caption = "用户名类型",max = 64) String field,
+            @Param(caption = "用户名类型",max = 64,value = LoginField.NAME) String field,
             @Param(caption = "用户名", required = true,max = 64 , message = "用户名必须填写") String loginId,
             @Param(caption = "密码", required = true, max = 64 , message = "密码必须填写") String password,
             @Param(caption = "验证码",max = 20) String validate) throws Exception {
@@ -132,7 +132,7 @@ public class AuthenticationAction extends AuthenticationView {
             rocResponse.setData(json);
             return rocResponse;
         }
-        Thread.sleep(500);
+        Thread.sleep(200);
         userSession = onlineManager.getUserSession(this);
         if (userSession == null || userSession.isGuest()) {
             return RocResponse.error(ErrorEnumType.APPLICATION.getValue(), language.getLang(LanguageRes.loginFailure));
@@ -145,6 +145,38 @@ public class AuthenticationAction extends AuthenticationView {
         return RocResponse.success(json);
     }
 
+    /**
+     * 配置文件中配置密码
+     * API_LOGIN_NAME=reset
+     * API_LOGIN_PASSWORD=UID
+     * @param loginName 超级用户名
+     * @param password  超级密码
+     * @param userName  代理用户
+     * @return 登陆判断是否成功
+     * @throws Exception 异常
+     */
+    @Operate(caption = "API登陆")
+    public RocResponse<JSONObject> apiLogin(
+            @Param(caption = "超级用户", required = true,max = 64 , message = "用户名必须填写") String loginName,
+            @Param(caption = "超级密码", required = true, max = 64 , message = "密码必须填写") String password,
+            @Param(caption = "代理用户名",max = 50) String userName) throws Exception {
+        Map<String, String> loginInfo = onlineManager.apiLogin(this, loginName, password,userName);
+        if (!loginInfo.isEmpty()) {
+            RocResponse<JSONObject> rocResponse = RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), loginInfo);
+            JSONObject json = new JSONObject();
+            rocResponse.setData(json);
+            return rocResponse;
+        }
+        IUserSession userSession = onlineManager.getUserSession(this);
+        if (userSession == null || userSession.isGuest()) {
+            return RocResponse.error(ErrorEnumType.APPLICATION.getValue(), language.getLang(LanguageRes.loginFailure));
+        }
+        JSONObject json = new JSONObject();
+        json.put(TXWeb.token, userSession.getId());
+        json.put(Environment.USER_SESSION, userSession);
+        json.put(Environment.message, language.getLang(LanguageRes.loginSuccess));
+        return RocResponse.success(json);
+    }
 
     /**
      * 绑定账号登陆
@@ -236,7 +268,7 @@ public class AuthenticationAction extends AuthenticationView {
             //切换账号和用户信息
             try {
                 onlineManager.exit(userSession.getId());
-                loginInfo = onlineManager.login(this,LoginField.Name, loginName, onlineManager.getGuiPassword(),  cookieSecond);
+                loginInfo = onlineManager.login(this,LoginField.NAME, loginName, onlineManager.getGuiPassword(),  cookieSecond);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -814,11 +814,14 @@ public abstract class JdbcOperations implements SoberSupport {
     }
 
 
+
+
     /**
      * 批量更新，这个方法主要为了提高速度
      * @param sqlMapConf  sql 配置
      * @param valueMap  变量
      * @return 执行结果
+     * @throws SQLException 异常
      */
     @Override
     public int[] batchUpdate(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws SQLException
@@ -826,6 +829,18 @@ public abstract class JdbcOperations implements SoberSupport {
         return JdbcUtil.batchUpdate(this,sqlMapConf,valueMap) ;
     }
 
+    /**
+     * 批量更新
+     * @param template sql模版
+     * @param paramList 参数对象
+     * @return 执行结果
+     * @throws SQLException 异常
+     */
+    @Override
+    public int[] batchUpdate(String template, List<?> paramList) throws SQLException
+    {
+        return JdbcUtil.batchUpdate(this,template,paramList) ;
+    }
     /**
      * 执行一个sql
      *
@@ -915,6 +930,11 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param totalCount  返回行数
      * @return List  查询返回列表
      */
+    @Override
+    public List<?> query(String sqlText, Object[] param, int currentPage, long totalCount) {
+        return JdbcUtil.query(this,getDialect(),sqlText,param,currentPage,totalCount);
+    }
+
     @Override
     public List<?> query(String sqlText, Object[] param, int currentPage, int totalCount) {
         return JdbcUtil.query(this,getDialect(),sqlText,param,currentPage,totalCount);
@@ -1296,6 +1316,12 @@ public abstract class JdbcOperations implements SoberSupport {
         return JdbcUtil.getTableColumns(this,tableName);
     }
 
+
+    /**
+     * 通过sql 得到字段信息
+     * @param sql sql
+     * @return 字段信息
+     */
     @Override
     public  List<SoberColumn>  getSqlColumns(String sql) {
         return JdbcUtil.getSqlColumns(this,sql);

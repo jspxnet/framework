@@ -9,24 +9,23 @@
  */
 package com.github.jspxnet.txweb;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.network.rpc.model.transfer.ResponseTo;
+import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.txweb.config.ActionConfig;
+import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.DefultContextHolderStrategy;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
-import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.sioc.BeanFactory;
-import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.sober.exception.ValidException;
+import com.github.jspxnet.utils.BeanUtil;
+import com.github.jspxnet.utils.ClassUtil;
+import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.StringUtil;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -84,8 +83,7 @@ public class ActionFactory {
      * @param action    主action
      * @param result    子action
      * @param arguments 参数列表
-     * @throws Exception      异常      异常
-     * @throws ValidException 验证错误
+     * @throws Exception     验证错误 异常      异常
      */
     static private void putArg(Action action, Action result, String className, List<?> arguments) throws Exception {
         ActionContext actionContext = ThreadContextHolder.getContext();

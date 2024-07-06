@@ -25,11 +25,10 @@ Information:java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
 ConcurrentHashMap
  */
 @Slf4j
-public class JSONObject extends LinkedHashMap<String, Object> {
+public class JSONObject extends LinkedHashMap<String,Object> {
     final static private String KEY_ENUM_TYPE = "enumTypes";
     final static private String KEY_DATA = "data";
 
-    //final static private String KEY_ROOT = "root";
     static public String[] NO_JSON_PACKAGE = new String[]{
             "java.lang.Package","com.seeyon.ctp.common.po.BasePO","org.apache.commons","org.apache.logging.log4j.message"
     };
@@ -60,7 +59,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
          * @return NULL.
          */
         @Override
-        protected final Object clone() {
+        protected Object clone() {
             return this;
         }
 
@@ -210,9 +209,9 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @param map               - A map with Key-Bean data.
      * @param includeSuperClass - Tell whether transfer include the super class properties.
      */
-    public JSONObject(Map<String, Object> map, boolean includeSuperClass) {
+    public JSONObject(Map<String,Object> map, boolean includeSuperClass) {
         if (map != null) {
-            for (Map.Entry<String, Object> e : map.entrySet()) {
+            for (Map.Entry<String,Object> e : map.entrySet()) {
                 if (ClassUtil.isStandardProperty(e.getValue().getClass())) {
                     super.put(e.getKey(), e.getValue());
                 } else {

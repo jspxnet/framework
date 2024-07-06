@@ -32,7 +32,7 @@ import java.util.Map;
  * Time: 11:43:55
  */
 
-public class TemplateConfigurable implements Configurable, Cloneable {
+public class TemplateConfigurable implements Configurable {
     private final static Map<String, MacroBlock> REG_MACRO = new HashMap<>();
     private final Map<String, String> tagMap = new HashMap<>();
     private final Map<String, Object> hashMap = new HashMap<>();
@@ -62,14 +62,7 @@ public class TemplateConfigurable implements Configurable, Cloneable {
     }
 
     public TemplateConfigurable() {
-        /////////// todo
 
-        /*final public static String DATE_FORMAT = "date_format";
-
-        final public static String TIME_FORMAT = "time_format";
-
-        final public static String NUMBER_FORMAT = "number_format";
-        */
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         String number_format = envTemplate.getString(Environment.NUMBER_FORMAT,"####.##");
         hashMap.put(ScriptmarkEnv.NumberFormat, number_format);

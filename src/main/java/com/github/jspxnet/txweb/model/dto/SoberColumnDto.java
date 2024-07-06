@@ -1,5 +1,6 @@
 package com.github.jspxnet.txweb.model.dto;
 
+import com.github.jspxnet.component.zhex.spell.ChineseUtil;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sioc.util.TypeUtil;
@@ -70,19 +71,75 @@ public class SoberColumnDto implements Serializable {
 
         StringBuilder sb = new StringBuilder();
         String typeStr = getTypeString();
-        if ("date".equalsIgnoreCase(typeStr))
+        if ("string".equalsIgnoreCase(typeStr))
         {
-            sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(")").append("\r\n");
+            if (length==0)
+            {
+                if (notNull)
+                {
+                    if (!StringUtil.isNull(option))
+                    {
+                        sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(",option=\"").append(option).append("\"").append(",enumTypes=false").append(")").append("\r\n");
+                    } else {
+                        sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(")").append("\r\n");
+                    }
+                } else
+                {
+                    if (!StringUtil.isNull(option))
+                    {
+                        sb.append("@Column(caption = \"").append(caption).append("\"").append(",option=\"").append(option).append("\"").append(")").append("\r\n");
+                    } else {
+                        sb.append("@Column(caption = \"").append(caption).append("\"").append(")").append("\r\n");
+                    }
+                }
+            }
+            else
+            {
+                if (notNull)
+                {
+                    if (!StringUtil.isNull(option))
+                    {
+                        sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(",notNull=").append(notNull).append(",option=\"").append(option).append("\"").append(")").append("\r\n");
+                    } else {
+                        sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(",notNull=").append(notNull).append(")").append("\r\n");
+                    }
+
+                } else {
+                    sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(")").append("\r\n");
+                }
+            }
 
         } else {
-            sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(",notNull=").append(notNull).append(")").append("\r\n");
+            if (notNull)
+            {
+                if (!StringUtil.isNull(option))
+                {
+                    sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(",option=\"").append(option).append("\"").append(",enumTypes=false").append(")").append("\r\n");
+                } else {
+                    sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(")").append("\r\n");
+                }
+            } else {
+                if (!StringUtil.isNull(option))
+                {
+                    sb.append("@Column(caption = \"").append(caption).append("\"").append(",option=\"").append(option).append("\"").append(")").append("\r\n");
+                } else {
+                    sb.append("@Column(caption = \"").append(caption).append("\"").append(")").append("\r\n");
+                }
+
+            }
         }
+
+
 
         String fieldName = camel?StringUtil.underlineToCamel(name):name;
         String typeString = TypeUtil.CODE_TYPE_MAP.get(typeStr);
         if (StringUtil.isNull(typeString))
         {
             typeString = typeStr;
+        }
+        if (camel&&StringUtil.isChinese(fieldName))
+        {
+            fieldName = StringUtil.uncapitalize(ChineseUtil.fullSpell(fieldName,StringUtil.empty));
         }
         if (ClassUtil.isNumberType(typeString)&&!"BigDecimal".equalsIgnoreCase(typeString))
         {
@@ -94,7 +151,12 @@ public class SoberColumnDto implements Serializable {
         } else
         if (typeString.equals(Date.class.getName()) || typeString.equals(Date.class.getSimpleName()) )
         {
-            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = new Date();");
+            if (notNull)
+            {
+                sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = new Date();");
+            } else {
+                sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = null;");
+            }
         }
         else
         {

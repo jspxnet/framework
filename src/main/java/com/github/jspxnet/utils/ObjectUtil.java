@@ -13,7 +13,6 @@ package com.github.jspxnet.utils;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.sober.model.container.AbstractObjectValue;
 import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.lang.reflect.Array;
@@ -104,6 +103,11 @@ public final  class ObjectUtil {
 
     }
 
+    /**
+     *
+     * @param obj 对象
+     * @return 序列化
+     */
     public static long getSerializedSize(Object obj) {
         if (obj == null) {
             return 0;

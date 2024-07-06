@@ -362,6 +362,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         try {
             sqlText = dialect.processTemplate(Dialect.SQL_CRITERIA_DELETE, valueMap);
             result = jdbcOperations.update(sqlText, objectArray);
+            if (soberTable.isAutoCleanCache()&&soberTable.getEntity()!=null)
+            {
+                jdbcOperations.evict(soberTable.getEntity());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalArgumentException("查询异常SQL:" + sqlText);
@@ -427,11 +431,16 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         int result = 0;
         try {
             result = jdbcOperations.update(dialect.processTemplate(Dialect.SQL_CRITERIA_UPDATE, valueMap), objectArray);
+            if (soberTable.isAutoCleanCache()&&soberTable.getEntity()!=null)
+            {
+                jdbcOperations.evict(soberTable.getEntity());
+            } else {
+                jdbcOperations.evict(criteriaClass);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalArgumentException(e.getMessage());
         }
-        jdbcOperations.evict(criteriaClass);
         return result;
     }
 
@@ -852,7 +861,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             termKey.setLength(termKey.length() - 1);
         }
         if (StringUtil.hasLength(groupText.toString())) {
-            termKey.append("_g_").append(groupText.toString());
+            termKey.append("_g_").append(groupText);
         }
         if (termKey.toString().endsWith("_")) {
             termKey.setLength(termKey.length() - 1);

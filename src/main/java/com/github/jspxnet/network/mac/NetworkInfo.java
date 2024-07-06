@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.network.mac;
 
-/**
+/*
  * Created by IntelliJ IDEA.
  * User: chenYuan
  * date: 2004-8-31
@@ -116,17 +116,17 @@ public abstract class NetworkInfo {
         }
     }
 
-    protected String parseDomain(String hostname) throws Exception {        // get the address of the host we are looking for - verification
+    protected String parseDomain(String hostName) throws Exception {        // get the address of the host we are looking for - verification
         java.net.InetAddress addy;
         try {
-            addy = java.net.InetAddress.getByName(hostname);
+            addy = java.net.InetAddress.getByName(hostName);
         } catch (UnknownHostException e) {
             e.printStackTrace();
             throw new ParseException(e.getMessage(), 0);
         }
         // back out transfer the hostname - just validating
-        hostname = addy.getCanonicalHostName();
-        String nslookupCommand = NSLOOKUP_CMD + " " + hostname;
+        hostName = addy.getCanonicalHostName();
+        String nslookupCommand = NSLOOKUP_CMD + " " + hostName;
         // run the lookup command
         String nslookupResponse;
         try {
@@ -141,8 +141,8 @@ public abstract class NetworkInfo {
             if (line.startsWith("Name:")) {
                 line = line.substring(line.indexOf(":") + 1);
                 line = line.trim();
-                if (isDomain(line, hostname)) {
-                    line = line.substring(hostname.length() + 1);
+                if (isDomain(line, hostName)) {
+                    line = line.substring(hostName.length() + 1);
                     return line;
                 }
             }

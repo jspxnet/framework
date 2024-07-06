@@ -1,9 +1,5 @@
 package com.github.jspxnet.txweb.dao.impl;
 
-/*
-  Created by ChenYuan on 2016/10/24.
- */
-
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.LoginField;
@@ -36,7 +32,7 @@ import java.util.*;
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2005-6-1
  * Time: 17:46:45
- * <p>
+ *
  * 将userSession 合并为一个dao处理
  *
  */
@@ -334,13 +330,13 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
             return StringUtil.empty;
         }
         if (ValidUtil.isMobile(loginId)) {
-            return LoginField.Phone;
+            return LoginField.PHONE;
         } else if (ValidUtil.isMail(loginId)) {
-            return LoginField.Mail;
+            return LoginField.MAIL;
         } else if (ValidUtil.isGoodName(loginId)) {
-            return LoginField.Name;
+            return LoginField.NAME;
         } else if (ValidUtil.isNumber(loginId) && loginId.length() == 16) {
-            return LoginField.Kid;
+            return LoginField.KID;
         } else if (ValidUtil.isNumber(loginId) && loginId.length() < 10) {
             return LoginField.UID;
         }
@@ -352,13 +348,13 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
         Member member;
         if ((LoginField.ID.equalsIgnoreCase(loginType) || LoginField.UID.equalsIgnoreCase(loginType)) && ValidUtil.isNumber(loginId)) {
             member = getForId(StringUtil.toLong(loginId));
-        } else if (LoginField.Phone.equalsIgnoreCase(loginType)) {
+        } else if (LoginField.PHONE.equalsIgnoreCase(loginType)) {
             member = getForPhone(loginId);
-        } else if (LoginField.Name.equalsIgnoreCase(loginType)) {
+        } else if (LoginField.NAME.equalsIgnoreCase(loginType)) {
             member = getForName(loginId);
-        } else if (LoginField.Mail.equalsIgnoreCase(loginType)) {
+        } else if (LoginField.MAIL.equalsIgnoreCase(loginType)) {
             member = getForMail(loginId);
-        } else if (LoginField.Kid.equalsIgnoreCase(loginType)) {
+        } else if (LoginField.KID.equalsIgnoreCase(loginType)) {
             member = getForKid(loginId);
         } else {
             member = getForName(loginId);

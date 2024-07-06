@@ -11,7 +11,8 @@ package com.github.jspxnet.util;
 
 import com.github.jspxnet.utils.StringUtil;
 
-import java.awt.Graphics2D;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
@@ -19,7 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import javax.imageio.ImageIO;
 
 /*
  * pHash-like image hash.
@@ -140,7 +140,7 @@ public class ImagePHash {
         return resizedImage;
     }
 
-    private ColorConvertOp colorConvert = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
+    private final ColorConvertOp colorConvert = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
 
     private BufferedImage grayscale(BufferedImage img) {
         colorConvert.filter(img, img);

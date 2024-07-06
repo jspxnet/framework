@@ -9,6 +9,9 @@
  */
 package com.github.jspxnet.utils;
 
+import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.scriptmark.XmlEngine;
@@ -16,18 +19,21 @@ import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
 import com.github.jspxnet.scriptmark.parse.html.ATag;
 import com.github.jspxnet.scriptmark.parse.html.BodyTag;
 import com.github.jspxnet.scriptmark.parse.html.ImgTag;
+import com.itextpdf.text.pdf.BaseFont;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import org.w3c.dom.Document;
+import org.xhtmlrenderer.pdf.ITextFontResolver;
+import org.xhtmlrenderer.pdf.ITextRenderer;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static java.util.regex.Pattern.compile;
 
 /**
@@ -56,8 +62,8 @@ public final class HtmlUtil {
     final private static String PATTERN_P_SCRIPT = "<script[^>]*?>[\\s\\S]*?<\\/script>";
 
 
-    private static HashMap<String, Character> unHtmlCharacter = new HashMap<String, Character>();
-    private static HashMap<Character, String> htmlCharacter = new HashMap<Character, String>();
+    private static final HashMap<String, Character> unHtmlCharacter = new HashMap<String, Character>();
+    private static final HashMap<Character, String> htmlCharacter = new HashMap<Character, String>();
 
     static {
         unHtmlCharacter.put("&lt;", '<');
@@ -512,7 +518,7 @@ public final class HtmlUtil {
         props.setUseEmptyElementTags(false);
 
         TagNode node = cleaner.clean(html);
-        List set = node.getAllElementsList(true);
+        List<?> set = node.getAllElementsList(true);
         for (Object tag : set) {
             if (tag == null) {
                 continue;
@@ -521,7 +527,7 @@ public final class HtmlUtil {
 
             ///////////////////////修复连接 A   link
             if ("a".equalsIgnoreCase(tagName) || "link".equalsIgnoreCase(tagName)) {
-                List tagList = node.getElementListByName(tagName, true);
+                List<?> tagList = node.getElementListByName(tagName, true);
                 for (Object tagObj : tagList) {
                     TagNode tagNode = (TagNode) tagObj;
                     String linkUrl = tagNode.getAttributeByName("href");
@@ -532,7 +538,7 @@ public final class HtmlUtil {
                 }
             } else /////////////////////////////修复图片 img
                 if ("img".equalsIgnoreCase(tagName) || "script".equalsIgnoreCase(tagName) || "javascript".equalsIgnoreCase(tagName)) {
-                    List tagList = node.getElementListByName(tagName, true);
+                    List<?> tagList = node.getElementListByName(tagName, true);
                     for (Object tagObj : tagList) {
                         TagNode tagNode = (TagNode) tagObj;
                         String linkUrl = tagNode.getAttributeByName("src");
@@ -543,7 +549,7 @@ public final class HtmlUtil {
                     }
                 } else /////////////////////////////修复图片 img
                     if ("apple".equalsIgnoreCase(tagName)) {
-                        List tagList = node.getElementListByName(tagName, true);
+                        List<?> tagList = node.getElementListByName(tagName, true);
                         for (Object tagObj : tagList) {
                             TagNode tagNode = (TagNode) tagObj;
                             String linkUrl = tagNode.getAttributeByName("codebase");
@@ -554,14 +560,14 @@ public final class HtmlUtil {
                         }
                     } else /////////////////////////////修复多媒体 msoa rm mp
                         if ("object".equalsIgnoreCase(tagName)) {
-                            List tagList = node.getElementListByName(tagName, true);
+                            List<?> tagList = node.getElementListByName(tagName, true);
                             for (Object tagObj : tagList) {
                                 TagNode tagNode = (TagNode) tagObj;
                                 String linkUrl = tagNode.getAttributeByName("data");
                                 if (linkUrl != null && linkUrl.startsWith(oldUrl)) {
                                     tagNode.addAttribute("data", StringUtil.replaceOnce(linkUrl, oldUrl, newUrl));
                                 }
-                                List paramList = tagNode.getElementListByName("param", true);
+                                List<?> paramList = tagNode.getElementListByName("param", true);
                                 for (Object childTagObj : paramList) {
                                     TagNode paramTag = (TagNode) childTagObj;
                                     String name = paramTag.getAttributeByName("name");
@@ -573,7 +579,7 @@ public final class HtmlUtil {
                                         }
                                     }
                                 }
-                                List embedList = tagNode.getElementListByName("embed ", true);
+                                List<?> embedList = tagNode.getElementListByName("embed ", true);
                                 for (Object childTagObj : embedList) {
                                     TagNode embedTag = (TagNode) childTagObj;
                                     linkUrl = embedTag.getAttributeByName("movie");
@@ -744,4 +750,47 @@ public final class HtmlUtil {
         }
         return content;
     }
+
+
+    /**
+     * 将HTML转成PD格式的文件。html文件的格式比较严格
+     * @param baseUrl 资源路径
+     * @param html  html正文
+     * @param os 输出流
+     * @throws Exception 异常
+     */
+    public static void toPdf(URL baseUrl, String html, OutputStream os) throws Exception {
+        EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
+        String FONTS_PATH =  ENV_TEMPLATE.getString(Environment.fontsPath,"").endsWith("/")?ENV_TEMPLATE.getString(Environment.fontsPath):(ENV_TEMPLATE.getString(Environment.fontsPath)+"/");
+
+        //"file:/E:/test/m/"
+        ITextRenderer renderer = new ITextRenderer();
+        renderer.getSharedContext().setPrint(true);
+        // 解决中文支持问题
+        ITextFontResolver fontResolver = renderer.getFontResolver();
+        //fontResolver.addFontDirectory(FONTS_PATH,SystemUtil.OS==SystemUtil.WINDOWS?BaseFont.NOT_EMBEDDED:BaseFont.EMBEDDED);
+        File f = new File(FONTS_PATH);
+        if (f.isDirectory()) {
+            File[] files = f.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    String lower = name.toLowerCase();
+                    return lower.endsWith(".otf") || lower.endsWith(".ttf") || lower.endsWith(".ttc");
+                }
+            });
+
+            for(int i = 0; i < Objects.requireNonNull(files).length; ++i) {
+                fontResolver.addFont(files[i].getAbsolutePath(), BaseFont.IDENTITY_H,SystemUtil.OS==SystemUtil.WINDOWS?BaseFont.NOT_EMBEDDED:BaseFont.EMBEDDED);
+            }
+        }
+        //解决图片的相对路径问题
+        renderer.getSharedContext().setBaseURL(baseUrl.getPath());
+        renderer.setDocumentFromString(html);
+        Document documents = renderer.getDocument();
+        documents.setStrictErrorChecking(false);
+        renderer.layout();
+        renderer.createPDF(os);
+        os.close();
+    }
+
+
 }

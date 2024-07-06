@@ -20,8 +20,11 @@ package com.github.jspxnet.utils;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.file.MultiFile;
 import com.github.jspxnet.security.utils.EncryptUtil;
+import com.github.jspxnet.upload.multipart.DefaultFileRenamePolicy;
+import com.github.jspxnet.upload.multipart.FileRenamePolicy;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,6 +33,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
@@ -171,16 +175,27 @@ public final class FileUtil {
 
     }
 
+    /**
+     *
+     * @param srcFile 原文件
+     * @param destFile 目标文件
+     * @return 移动文件
+     */
+    public static boolean moveFile(File srcFile, File destFile)
+    {
+        return moveFile( srcFile,  destFile,new DefaultFileRenamePolicy(), true,false);
+    }
 
     /**
-     * When the destination file is on another file system, do a "copy and delete".
      *
-     * @param srcFile  the file transfer be moved
-     * @param destFile the destination file
+     * @param srcFile the file transfer be moved
+     * @param destFile  the destination file
+     * @param renamePolicy 重命名规则
      * @param covering 是否覆盖
-     * @return 一对是否成功
+     * @param jump 跳过
+     * @return 是否成功
      */
-    public static boolean moveFile(File srcFile, File destFile, boolean covering) {
+    public static boolean moveFile(File srcFile, File destFile,RenamePolicy renamePolicy, boolean covering,boolean jump) {
         if (srcFile == null || destFile == null) {
             return false;
         }
@@ -193,7 +208,7 @@ public final class FileUtil {
 
         boolean rename = srcFile.renameTo(destFile);
         if (!rename) {
-            rename = copyFile(srcFile, destFile, covering);
+            rename = copyFile(srcFile, destFile, renamePolicy,covering,jump);
             if (!srcFile.delete()) {
                 srcFile.deleteOnExit();
             }
@@ -203,12 +218,14 @@ public final class FileUtil {
 
 
     /**
+     *
      * @param file         文件
      * @param renamePolicy 重命名方式
      * @param covering     是否覆盖
-     * @return 移动到类型目录
+     * @param jump 跳过
+     * @return  移动到类型目录
      */
-    public static File moveToTypeDir(File file, RenamePolicy renamePolicy, boolean covering) {
+    public static File moveToTypeDir(File file, RenamePolicy renamePolicy, boolean covering,boolean jump) {
         String type = getTypePart(file.getName());
         File newDir = new File(file.getParent(), type);
         if (!newDir.exists()) {
@@ -216,66 +233,129 @@ public final class FileUtil {
         }
         File newFile = new File(newDir, file.getName());
         newFile = renamePolicy.rename(newFile);
-        if (moveFile(file, newFile, covering)) {
+        if (moveFile(file, newFile, renamePolicy,covering,jump)) {
             return newFile;
         }
         return null;
     }
 
-    public static boolean copy(String inputFilename, String outputFilename, boolean covering) {
-        return copy(new File(inputFilename), new File(outputFilename), covering);
+    /**
+     *
+     * @param input 原目文件
+     * @param output 输出文件
+     * @return 拷贝文件
+     */
+    public static boolean copy(File input, File output)
+    {
+        return copy(input,  output,new DefaultFileRenamePolicy(), true, false);
     }
 
+    public static boolean copy(String inputFilename, String outputFilename,FileRenamePolicy fileRenamePolicy, boolean covering,boolean jump) {
+        return copy(new File(inputFilename), new File(outputFilename), fileRenamePolicy,covering,jump);
+    }
 
     /**
-     * 拷贝文件，是否使用覆盖方式
      *
-     * @param input    in file
-     * @param output   out file
+     * @param input 原目文件
+     * @param output 输出文件
      * @param covering 是否使用覆盖方式
      * @return 拷贝文件
      */
-    public static boolean copy(File input, File output, boolean covering) {
+    public static boolean copy(File input, File output,boolean covering)
+    {
+        return copy(input,  output,new DefaultFileRenamePolicy(), covering, false);
+    }
+    /**
+     *
+     * @param input 原目文件
+     * @param output 输出文件
+     * @param covering 是否使用覆盖方式
+     * @param jump 存在就跳过
+     * @return 拷贝文件
+     */
+    public static boolean copy(File input, File output,boolean covering,boolean jump)
+    {
+        return copy(input,  output,new DefaultFileRenamePolicy(), covering, jump);
+    }
+    /**
+     *
+     * @param input 原目文件
+     * @param output  输出文件
+     * @param renamePolicy  新文件重复使用规则
+     * @param covering  是否使用覆盖方式
+     * @param jump  存在就跳过
+     * @return 拷贝文件
+     */
+    public static boolean copy(File input, File output,RenamePolicy renamePolicy, boolean covering,boolean jump)
+    {
         if (input.isFile()) {
-            return copyFile(input, output, covering);
+
+            return copyFile(input, output,renamePolicy, covering,jump);
         } else {
-            MultiFile multiFile = new MultiFile();
             if (input.isDirectory()) {
                 if (!FileUtil.makeDirectory(output)) {
                     return false;
                 }
-                return multiFile.copyDirectory(input, output, covering);
+                return MultiFile.copyDirectory(input, output, renamePolicy,covering,jump);
             }
         }
         return true;
     }
 
-
     /**
-     * @param inputFile  进入文件
+     *
+     * @param inputFile 进入文件
      * @param outputFile 输出文件
-     * @param covering   覆盖否
+     * @param renamePolicy  不覆盖又好拷贝的时候，新文件名规则
+     * @param covering 覆盖否
+     * @param jump 输入新文件已经存在就直接跳过，用在文件同步上
      * @return 拷贝文件
      */
-    public static boolean copyFile(File inputFile, File outputFile, boolean covering) {
+    public static boolean copyFile(File inputFile, File outputFile, RenamePolicy renamePolicy,boolean covering, boolean jump)
+    {
         if (outputFile == null) {
             return false;
         }
         FileUtil.makeDirectory(outputFile.getParentFile());
-        //如果问卷存在
+        if (jump&&outputFile.isFile()&&outputFile.exists())
+        {
+            return true;
+        }
+        //如果文件存在
         if (!covering && outputFile.length() != 0 && outputFile.exists()) {
-            String fType = FileUtil.getTypePart(outputFile.getName());
-            String fileName = FileUtil.getNamePart(outputFile.getName());
-            outputFile = new File(outputFile.getParent(), fileName + "_duplicate." + fType);
+            if (renamePolicy!=null)
+            {
+                outputFile = renamePolicy.rename(outputFile);
+            }
         }
         try {
-            return StreamUtil.copy(new BufferedInputStream(new FileInputStream(inputFile)), new BufferedOutputStream(new FileOutputStream(outputFile)), BUFFER_SIZE) && outputFile.setLastModified(inputFile.lastModified());
+            return StreamUtil.copy(new BufferedInputStream(Files.newInputStream(inputFile.toPath())), new BufferedOutputStream(Files.newOutputStream(outputFile.toPath())), BUFFER_SIZE) && outputFile.setLastModified(inputFile.lastModified());
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
+    /**
+     *  例子
+     *
+     *   assertEquals(0, getPrefixLength("a\\b\\c.txt"));
+     *   assertEquals(1, getPrefixLength("\\a\\b\\c.txt"));
+     *   assertEquals(2, getPrefixLength("C:a\\b\\c.txt"));
+     *   assertEquals(3, getPrefixLength("C:\\a\\b\\c.txt"));
+     *   assertEquals(9, getPrefixLength("\\\\server\\a\\b\\c.txt"));
+     *   assertEquals(0, getPrefixLength("a/b/c.txt"));
+     *   assertEquals(1, getPrefixLength("/a/b/c.txt"));
+     *   assertEquals(2, getPrefixLength("~/a/b/c.txt"));
+     *   assertEquals(2, getPrefixLength("~"));
+     *   assertEquals(6, getPrefixLength("~user/a/b/c.txt"));
+     *   assertEquals(6, getPrefixLength("~user"));
+     *   assertEquals(9, getPrefixLength("//server/a/b/c.txt"));
+     *   assertEquals(9, getPrefixLength("//server//a/b/c.txt"));
+     *   assertEquals(9, getPrefixLength("//server//./bar"));
+     * @param filename 文件名
+     * @return 获取文件路径的前缀
+     */
     public static int getPrefixLength(String filename) {
         if (filename == null) {
             return -1;
@@ -341,7 +421,7 @@ public final class FileUtil {
              hashType ="MD5";
         }
         if (fileName.isFile() && fileName.exists() && fileName.canRead()) {
-            InputStream fis = new FileInputStream(fileName);
+            InputStream fis = Files.newInputStream(fileName.toPath());
             MessageDigest md5;
             try {
                 byte[] buffer = new byte[BUFFER_SIZE];
@@ -490,7 +570,7 @@ public final class FileUtil {
     static public String getNamePart(String fileName) {
         String result = getFileNamePart(fileName);
         int point = result.lastIndexOf(StringUtil.DOT);
-        if (point != -1 && result.length() >= point) {
+        if (point != -1) {
             return result.substring(0, point);
         }
         return result;
@@ -776,8 +856,55 @@ public final class FileUtil {
      * @since 0.1
      */
     static public boolean isDirectory(String fileName) {
-        return !StringUtil.isNull(fileName) && new File(fileName).isDirectory();
+        if (StringUtil.isNull(fileName))
+        {
+            return false;
+        }
+        if (!fileName.contains("!/")&&!fileName.contains("!\\"))
+        {
+            return !StringUtil.isNull(fileName) && new File(fileName).isDirectory();
+        }
+
+        String jarFile;
+        String directory;
+        if (fileName.contains("!/"))
+        {
+            jarFile = StringUtil.substringBeforeLast(fileName,"!/");
+            directory = StringUtil.substringAfterLast(fileName,"!/");
+        } else {
+            jarFile = StringUtil.substringBeforeLast(fileName,"!\\");
+            directory = StringUtil.substringAfterLast(fileName,"!\\");
+        }
+        if (StringUtil.isNull(directory))
+        {
+            return false;
+        }
+        directory = StringUtil.replace(directory,"\\","/");
+
+        File file = new File(jarFile);
+        try (JarInputStream zis = new JarInputStream(Files.newInputStream(file.toPath()))) {
+
+            JarEntry e;
+            while ((e = zis.getNextJarEntry()) != null) {
+                String str = e.getName();
+                if (e.isDirectory()&&e.getName().contains(directory)) {
+                    return true;
+                }
+            }
+            zis.closeEntry();
+        } catch (Exception e) {
+            log.error(" file=" + fileName, e);
+        }
+        return false;
     }
+
+    public static void main(String[] args) {
+        File f = new File("D:\\hyinter\\hyinter-1.0.0.jar!/template");
+        System.out.println("--------f.getPath()=" + f.getPath());
+        System.out.println(isDirectory(f.getPath()));
+    }
+
+
 
 
     /**
@@ -863,7 +990,7 @@ public final class FileUtil {
             return true;
         } catch (Exception e)
         {
-            e.printStackTrace();
+            //log.debug("不存在的文件,jar:file:///" +jarFileName+ "!" + entryName);
             return false;
         } finally {
             try {
@@ -915,6 +1042,7 @@ public final class FileUtil {
      */
     static public boolean emptyDirectory(File directory) {
         File[] entries = directory.listFiles();
+        assert entries != null;
         for (File entry : entries) {
             if (!entry.delete()) {
                 return false;
@@ -1159,7 +1287,8 @@ public final class FileUtil {
      * @return 合并文件是否成功
      */
     public static boolean mergeFiles(File outFile, File[] files) {
-        try (FileChannel outChannel = new FileOutputStream(outFile).getChannel()) {
+
+        try (FileChannel outChannel =  new FileOutputStream(outFile).getChannel()) {
             for (File f : files) {
                 if (f == null || !f.exists() || !f.isFile()) {
                     return false;
@@ -1253,11 +1382,10 @@ public final class FileUtil {
                 continue;
             }
             FileInfo fileInfo = new FileInfo();
+            if (file.isFile()) {
+                fileInfo.setIsDir(0);
+            }
             if (StringUtil.isNull(type)) {
-
-                if (file.isFile()) {
-                    fileInfo.setIsDir(0);
-                }
                 if (file.isDirectory()) {
                     fileInfo.setIsDir(1);
                     fileInfo.setType("folder");
@@ -1270,9 +1398,6 @@ public final class FileUtil {
                 fileInfo.setIsDir(0);
             } else if (type.contains(FileUtil.getTypePart(file.getName()))) {
 
-                if (file.isFile()) {
-                    fileInfo.setIsDir(0);
-                }
                 if (file.isDirectory()) {
                     fileInfo.setIsDir(1);
                     fileInfo.setType("folder");
@@ -1427,31 +1552,6 @@ public final class FileUtil {
     }
 
     /**
-     * 修复相对路径
-     *
-     * @param fileName 文件名称
-     * @param basePath 根路径
-     * @return String 修复相对路径
-     */
-    static public String fixPath(String fileName, String basePath) {
-        String result;
-        if (StringUtil.isNull(fileName)) {
-            result = basePath;
-        } else if (hasPath(fileName)) {
-            result = fileName;
-        } else {
-            result = basePath + fileName;
-        }
-
-        if (SystemUtil.OS == SystemUtil.WINDOWS) {
-            if (result.startsWith("/")) {
-                result = result.substring(1);
-            }
-        }
-        return result;
-    }
-
-    /**
      * 添加文件到文件数组
      *
      * @param files 文件数组
@@ -1516,7 +1616,7 @@ public final class FileUtil {
             throws IllegalArgumentException {
 
         if (folder == null || !folder.isDirectory()) {
-            throw new IllegalArgumentException("Invalid   folder");
+            throw new IllegalArgumentException("Invalid folder");
         }
         File[] list = folder.listFiles();
         if (list == null || list.length < 1) {
@@ -1787,7 +1887,7 @@ public final class FileUtil {
 
             if (FileUtil.isFileExist(path))
             {
-                try (JarInputStream zis = new JarInputStream(new FileInputStream(path))) {
+                try (JarInputStream zis = new JarInputStream(Files.newInputStream(Paths.get(path)))) {
                     List<File> list = new ArrayList<>();
                     JarEntry e;
                     while ((e = zis.getNextJarEntry()) != null) {
@@ -2003,6 +2103,10 @@ public final class FileUtil {
             return StringUtil.empty;
         }
         File[] fileList = folder.listFiles();
+        if (fileList==null)
+        {
+            return StringUtil.empty;
+        }
         sort(fileList, sortDate, false);
         String[] fileType = StringUtil.split(types, StringUtil.SEMICOLON);
         StringBuilder sb = new StringBuilder();
@@ -2323,12 +2427,12 @@ public final class FileUtil {
                     continue;
                 }
                 File file = new File(loadFile);
-                if (file.isFile()) {
+                if (FileUtil.isFileExist(file)) {
                     return file;
                 }
 
                 file = new File(path, loadFile);
-                if (file.isFile()) {
+                if (FileUtil.isFileExist(file)) {
                     return file;
                 }
 
@@ -2510,54 +2614,5 @@ public final class FileUtil {
             result.add(files[i]);
         }
         return result;
-    }
-    final private static float JAVA_VERSION = StringUtil.toFloat(System.getProperty("java.vm.specification.version"));
-    public static String getContentType(File file)
-    {
-        if (file==null)
-        {
-            return "text/html";
-        }
-        String fileType = FileUtil.getTypePart(file.getName());
-        String contentType = null;
-        //为了兼容 jdk 1.6
-        if ("mp4".equalsIgnoreCase(fileType)) {
-            contentType = "video/mpeg4";
-        } else if ("bt".equalsIgnoreCase(fileType)) {
-            contentType = "application/x-bittorrent";
-        } else if ("swftools".equalsIgnoreCase(fileType)) {
-            contentType = "application/swftools";
-        } else if ("xls".equalsIgnoreCase(fileType)) {
-            contentType = "application/vnd.ms-excel";
-        } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
-            contentType = "application/msword";
-        } else if ("mdb".equalsIgnoreCase(fileType)) {
-            contentType = "application/msaccess";
-        } else if ("ppt".equalsIgnoreCase(fileType)) {
-            contentType = "application/x-ppt";
-        } else if ("xml".equalsIgnoreCase(fileType)) {
-            contentType = "application/xml";
-        } else if ("txt".equalsIgnoreCase(fileType) || "htm".equalsIgnoreCase(fileType) || "html".equalsIgnoreCase(fileType)) {
-            contentType = "text/html";
-        } else if ("zip".equalsIgnoreCase(fileType)) {
-            contentType = "application/x-zip-compressed";
-        } else if ("rar".equalsIgnoreCase(fileType)) {
-            contentType = "application/x-rar-compressed";
-        } else if (FileSuffixUtil.isImageSuffix(fileType)) {
-            contentType = "image/" + fileType;
-        } else if ("js".equalsIgnoreCase(fileType)) {
-            contentType = "application/x-javascript";
-        } else if (JAVA_VERSION >= 1.7)
-        {
-            try {
-                return Files.probeContentType(Paths.get(file.getPath()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        if (StringUtil.isNull(contentType)) {
-            contentType = "application/octet-stream";
-        }
-        return contentType;
     }
 }

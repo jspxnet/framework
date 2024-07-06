@@ -25,6 +25,7 @@ import com.github.jspxnet.utils.SystemUtil;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -190,19 +191,10 @@ public class CronParser {
 	 *             I/O error.
 	 */
 	public static TaskTable parse(File file) throws IOException {
-		InputStream stream = null;
-		try {
-			stream = new FileInputStream(file);
+		try (InputStream stream = Files.newInputStream(file.toPath())) {
 			return parse(stream);
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (Throwable t) {
-					;
-				}
-			}
 		}
+		//...
 	}
 
 	/**
@@ -230,19 +222,10 @@ public class CronParser {
 	 *             I/O error.
 	 */
 	public static TaskTable parse(URL url) throws IOException {
-		InputStream stream = null;
-		try {
-			stream = url.openStream();
+		try (InputStream stream = url.openStream()) {
 			return parse(stream);
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (Throwable t) {
-					;
-				}
-			}
 		}
+
 	}
 
 	/**
@@ -269,7 +252,7 @@ public class CronParser {
 	 *             I/O error.
 	 */
 	public static TaskTable parse(InputStream stream) throws IOException {
-		return parse(new InputStreamReader(stream, StandardCharsets.UTF_8.name()));
+		return parse(new InputStreamReader(stream, StandardCharsets.UTF_8));
 	}
 
 	/**
@@ -340,17 +323,17 @@ public class CronParser {
 		line = line.substring(pattern.length());
 		size = line.length();
 		// Splitting the line
-		List splitted = new ArrayList<>();
-		StringBuffer current = null;
+		List<String> splitted = new ArrayList<>();
+		StringBuilder current = null;
 		boolean quotes = false;
 		for (int i = 0; i < size; i++) {
 			char c = line.charAt(i);
 			if (current == null) {
 				if (c == '"') {
-					current = new StringBuffer();
+					current = new StringBuilder();
 					quotes = true;
 				} else if (c > ' ') {
-					current = new StringBuffer();
+					current = new StringBuilder();
 					current.append(c);
 					quotes = false;
 				}
@@ -362,7 +345,7 @@ public class CronParser {
 					closeCurrent = (c <= ' ');
 				}
 				if (closeCurrent) {
-					if (current != null && current.length() > 0) {
+					if (current.length() > 0) {
 						String str = current.toString();
 						if (quotes) {
 							str = escape(str);
@@ -393,11 +376,11 @@ public class CronParser {
 		File stdinFile = null;
 		File stdoutFile = null;
 		File stderrFile = null;
-		ArrayList envsList = new ArrayList();
+		List<String> envsList = new ArrayList<>();
 		String command = null;
-		ArrayList argsList = new ArrayList();
+		List<String> argsList = new ArrayList();
 		for (int i = 0; i < size; i++) {
-			String tk = (String) splitted.get(i);
+			String tk =  splitted.get(i);
 			// Check the local status.
 			if (status == 0) {
 				// Environment variables, working directory and channels
@@ -455,7 +438,7 @@ public class CronParser {
 			}
 			String[] args = new String[argsList.size()];
 			for (int i = 0; i < argsList.size(); i++) {
-				args[i] = (String) argsList.get(i);
+				args[i] = argsList.get(i);
 			}
 
 			String id = SystemUtil.getPid() + "_" + EncryptUtil.getMd5( className + methodName + ObjectUtil.toString(args));
@@ -465,7 +448,7 @@ public class CronParser {
 			String[] cmdarray = new String[1 + argsList.size()];
 			cmdarray[0] = command;
 			for (int i = 0; i < argsList.size(); i++) {
-				cmdarray[i + 1] = (String) argsList.get(i);
+				cmdarray[i + 1] = argsList.get(i);
 			}
 			// Environments.
 			String[] envs = null;
@@ -473,7 +456,7 @@ public class CronParser {
 			if (size > 0) {
 				envs = new String[size];
 				for (int i = 0; i < size; i++) {
-					envs[i] = (String) envsList.get(i);
+					envs[i] = envsList.get(i);
 				}
 			}
 			// Working directory.
@@ -489,7 +472,7 @@ public class CronParser {
 				}
 			}
 			// Builds the task.
-			String id = SystemUtil.getPid() + "_" + EncryptUtil.getMd5( ObjectUtil.toString(cmdarray) + ObjectUtil.toString(envs)+ dir==null?"":dir.getPath());
+			String id = SystemUtil.getPid() + "_" + EncryptUtil.getMd5(ObjectUtil.toString(cmdarray) + ObjectUtil.toString(envs)+ dir==null?"":dir.getPath());
 			ProcessTask process = new ProcessTask(cmdarray, envs, dir,id);
 			// Channels.
 			if (stdinFile != null) {

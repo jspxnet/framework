@@ -50,6 +50,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -775,7 +776,7 @@ public class UploadFileAction extends MultipartSupport {
             int maxImageHeight = getMaxImageHeight();
             if (image.getHeight()>maxImageHeight||image.getWidth() > maxImageWidth)
             {
-                boolean repair = ImageUtil.thumbnail(image, new FileOutputStream(file), uf.getFileType(), Math.min(maxImageWidth,image.getWidth()) ,Math.min( image.getHeight(),maxImageHeight));
+                boolean repair = ImageUtil.thumbnail(image, Files.newOutputStream(file.toPath()), uf.getFileType(), Math.min(maxImageWidth,image.getWidth()) ,Math.min( image.getHeight(),maxImageHeight));
                 image = ImageIO.read(file);
                 if (image!=null)
                 {
@@ -801,7 +802,7 @@ public class UploadFileAction extends MultipartSupport {
                 int height = getInt(THUMBNAIL_HEIGHT_VAR_NAME, config.getInt(THUMBNAIL_HEIGHT_VAR_NAME, 400));
                 //创建缩图
                 File thumbnailFile = new File(file.getParent(), thumbnailImg);
-                if (ImageUtil.thumbnail(image, new FileOutputStream(thumbnailFile), uf.getFileType(), width, height))
+                if (ImageUtil.thumbnail(image, Files.newOutputStream(thumbnailFile.toPath()), uf.getFileType(), width, height))
                 {
                     String thumbnailPath = FileUtil.mendPath(FileUtil.getDecrease(setupPath, uf.getDir())) + thumbnailImg;
                     IUploadFile thumbnailUploadFile = (IUploadFile) uploadFileDAO.getClassType().newInstance();

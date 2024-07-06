@@ -232,8 +232,8 @@ public class SqlMapBaseImpl implements SqlMapBase {
         valueMap.put("totalCount", totalCount);
         valueMap.put("loadChild", loadChild);
         valueMap.put("rollRows", rollRows);
-        valueMap.put("beginRow", beginRow);
-        valueMap.put("endRow", endRow);
+        valueMap.put(Dialect.SQL_RESULT_BEGIN_ROW, beginRow);
+        valueMap.put(Dialect.SQL_RESULT_END_ROW, endRow);
         valueMap.put("namespace", sqlMapConf.getNamespace());
 
         //修复变量,避免空异常 begin
@@ -431,5 +431,5 @@ public class SqlMapBaseImpl implements SqlMapBase {
         return jdbcOperations.batchUpdate(sqlMapConf,valueMap);
     }
 
-
 }
+

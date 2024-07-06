@@ -44,7 +44,7 @@ public class SendEmailAdapter {
 
 
     private MimeMessage mimeMsg; //MIME邮件对象
-    private Properties props = new Properties(); //系统属性
+    private final Properties props = new Properties(); //系统属性
     private String user = StringUtil.empty; //smtp认证用户名和密码
     private String password = StringUtil.empty;
     private String from = StringUtil.empty;
@@ -55,7 +55,7 @@ public class SendEmailAdapter {
     private String subject = StringUtil.empty;
     private String body = StringUtil.empty;
 
-    private List<BodyPart> bodyParts = new LinkedList<BodyPart>();
+    private final List<BodyPart> bodyParts = new LinkedList<BodyPart>();
 
 
 //Multipart对象,邮件内容,标题,附件等内容均添加到其中后再生成MimeMessage对象

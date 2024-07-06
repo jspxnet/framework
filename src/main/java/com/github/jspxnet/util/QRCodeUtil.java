@@ -1,10 +1,16 @@
 package com.github.jspxnet.util;
 
-import java.awt.BasicStroke;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Shape;
+import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.NumberUtil;
+import com.github.jspxnet.utils.StringUtil;
+import com.google.zxing.*;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -13,23 +19,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
 import java.util.Map;
-import javax.imageio.ImageIO;
-
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.NumberUtil;
-import com.github.jspxnet.utils.StringUtil;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatReader;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.Result;
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 /**
  * user: Rex  chenyuan
@@ -64,7 +53,7 @@ public final class QRCodeUtil {
      * @throws IOException     异常
      */
 
-    private static BufferedImage createImage(String content, String logoImgPath, boolean needCompress) throws WriterException, IOException {
+    public static BufferedImage createImage(String content, String logoImgPath, boolean needCompress) throws Exception {
         Map<EncodeHintType, Object> hints = new Hashtable<EncodeHintType, Object>();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         hints.put(EncodeHintType.CHARACTER_SET, CHARSET);

@@ -2898,6 +2898,45 @@ public final class ArrayUtil {
     }
 
     /**
+     *
+     * @param array 数字串数组
+     * @return 将字符串数组使用指定的变为 SQL in (1,2,3) 格式
+     */
+    public static String toSqlString(Number[] array) {
+        if (array == null) {
+            return StringUtil.empty;
+        }
+        StringBuilder result = new StringBuilder();
+        for (Number anArray : array) {
+            result.append(anArray).append(",");
+        }
+        if (result.length() <= 1) {
+            return StringUtil.empty;
+        }
+        result.setLength(result.length() - 1);
+        return result.toString();
+    }
+
+    /**
+     *
+     * @param array 数字串数组
+     * @return 将字符串数组使用指定的变为 SQL in (1,2,3) 格式
+     */
+    public static String toSqlString(long[] array) {
+        if (array == null) {
+            return StringUtil.empty;
+        }
+        StringBuilder result = new StringBuilder();
+        for (long anArray : array) {
+            result.append(anArray).append(",");
+        }
+        if (result.length() <= 1) {
+            return StringUtil.empty;
+        }
+        result.setLength(result.length() - 1);
+        return result.toString();
+    }
+    /**
      * @param array1     数组1
      * @param array2     数组2
      * @param ignoreCase 是否区分大小写

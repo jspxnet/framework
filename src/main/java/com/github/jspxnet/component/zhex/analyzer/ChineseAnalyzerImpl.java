@@ -18,6 +18,7 @@ import org.wltea.analyzer.core.IKSegmenter;
 import org.wltea.analyzer.core.Lexeme;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Set;
 
 /**
@@ -128,8 +129,8 @@ public class ChineseAnalyzerImpl implements ChineseAnalyzer {
         InputStream in = null;
         InputStreamReader inReader = null;
         try {
-            in = new FileInputStream(file);
-            inReader = new InputStreamReader(in, StandardCharsets.UTF_8.name());
+            in = Files.newInputStream(file.toPath());
+            inReader = new InputStreamReader(in, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inReader);
             StringBuilder buffer = new StringBuilder();
             String line;

@@ -8,6 +8,8 @@ import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
@@ -259,7 +261,7 @@ public class ActionContext implements Serializable {
     public void setMethod(Method method) {
         this.method = method;
         //如果是void 方法，自动设置 NONE begin
-        if (void.class.equals(method.getGenericReturnType())) {
+        if (void.class.equals(method.getGenericReturnType())&& StringUtil.isNull(actionResult) && !ActionSupport.ROC.equalsIgnoreCase(exeType)) {
             actionResult = ActionSupport.NONE;
         }
         //如果是void 方法，自动设置 NONE end

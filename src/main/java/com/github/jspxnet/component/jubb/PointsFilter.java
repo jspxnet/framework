@@ -36,8 +36,8 @@ public class PointsFilter extends HTMLFilter {
     private int points = 0;
     private String pointsTip = "【此部分为隐藏内容,支付${points}积分后可看,<button class=\"paymentButton\" data=\"${data}\" points=\"${points}\" sign=\"${sign}\" signType=\"${signType}\">支付</button>】";
 
-    private Map<Integer, Integer> payMap = new HashMap();
-    private Map<String, Object> valueMap = new HashMap();
+    final private Map<Integer, Integer> payMap = new HashMap<>();
+    final private Map<String, Object> valueMap = new HashMap<>();
 
     public PointsFilter(String s) {
         super(s);
@@ -52,11 +52,13 @@ public class PointsFilter extends HTMLFilter {
     }
 
     public void setPayMap(Map<Integer, Integer> payMap) {
-        this.payMap = payMap;
+        this.payMap.clear();
+        this.payMap.putAll(payMap);
     }
 
     public void setValueMap(Map<String, Object> valueMap) {
-        this.valueMap = valueMap;
+        this.valueMap.clear();
+        this.valueMap.putAll(valueMap);
     }
 
     public int getPoints() {

@@ -1,11 +1,7 @@
 package com.github.jspxnet.txweb.devcenter.action;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.enums.ErrorEnumType;
-import com.github.jspxnet.sioc.annotation.Bean;
-import com.github.jspxnet.txweb.annotation.HttpMethod;
-import com.github.jspxnet.txweb.model.dto.ControlDto;
 import com.github.jspxnet.txweb.table.meta.ControlEvent;
 import com.github.jspxnet.txweb.table.meta.ControlBase;
 import com.github.jspxnet.txweb.annotation.Operate;
@@ -15,7 +11,6 @@ import com.github.jspxnet.txweb.table.meta.ControlProperty;
 import com.github.jspxnet.txweb.devcenter.view.ControlView;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.txweb.model.param.component.ControlParam;
-import com.github.jspxnet.utils.ObjectUtil;
 import java.util.List;
 
 //@HttpMethod(caption = "基础控件(目前不是用)", actionName = "*", namespace = Environment.DEV_CENTER+"/control")
@@ -84,14 +79,14 @@ public class ControlAction extends ControlView {
         }
         return super.execute();
     }
-
+/*
     public static void main(String[] args) {
 
         ControlDto dto = new ControlDto();
         RocResponse rocResponse = RocResponse.success(dto);
         System.out.println(ObjectUtil.getJson(rocResponse));
 
-                /*
+
         String jsonStr = "{\"id\":1,\"name\":\"浏览帮助提示\",\"caption\":\"111\",\"desc\":\"222\",\"demo\":\"222\",\"propertyList\":[{\"name\":\"\",\"groupName\":\"a1\",\"propertyName\":\"11\",\"propertyValue\":\"22\",\"propertyDef\":\"33\",\"desc\":\"44\"}],\"eventList\":[{\"name\":\"\",\"eventName\":\"b1\",\"eventCaption\":\"22\",\"template\":\"\",\"desc\":\"444\"}],\"sortType\":0,\"sortDate\":\"2022-12-05 21:26:58\",\"createDate\":\"2022-12-05 21:40:26\"}";
         JSONObject json = new JSONObject(jsonStr);
         ControlParam param = json.parseObject(ControlParam.class);
@@ -109,8 +104,7 @@ public class ControlAction extends ControlView {
             controlEvent.setName(control.getName());
         }
 
-        System.out.println(ObjectUtil.toString(control));*/
+        System.out.println(ObjectUtil.toString(control));
 
-
-    }
+    }*/
 }

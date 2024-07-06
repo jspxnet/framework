@@ -33,7 +33,6 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         }
     }
 
-
     private void initParameters()
     {
         String queryString = getQueryString();
@@ -164,7 +163,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
 
             }
             @Override
-            public int read() throws IOException {
+            public int read() {
                 return bais.read();
             }
         };

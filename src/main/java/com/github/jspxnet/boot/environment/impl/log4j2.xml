@@ -139,5 +139,6 @@
         <logger name="httpclient" level="ERROR" />
         <logger name="org.apache.rocketmq" level="ERROR" />
         <logger name="RocketmqClient" value="ERROR" />
+        <logger name="org.apache.http.wire" level="WARN" />
     </Loggers>
 </Configuration>

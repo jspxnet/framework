@@ -41,7 +41,7 @@ class StreamBridge {
 	/**
 	 * Used to trace alive instances.
 	 */
-	private static final List<StreamBridge> traced = new ArrayList<>();
+	private static final List<StreamBridge> TRACED = new ArrayList<>();
 
 	/**
 	 * A self-referece, for inner classes.
@@ -75,8 +75,8 @@ class StreamBridge {
 		this.in = in;
 		this.out = out;
 		this.thread = new DaemonThreadFactory("cron4j_streambridge").newThread(new Runner());
-		synchronized (traced) {
-			traced.add(this);
+		synchronized (TRACED) {
+			TRACED.add(this);
 		}
 	}
 
@@ -202,8 +202,8 @@ class StreamBridge {
 			} catch (Throwable t) {
 				;
 			}
-			synchronized (traced) {
-				traced.remove(myself);
+			synchronized (TRACED) {
+				TRACED.remove(myself);
 			}
 		}
 

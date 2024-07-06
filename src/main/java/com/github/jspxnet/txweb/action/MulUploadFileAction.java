@@ -448,8 +448,11 @@ public abstract class MulUploadFileAction extends MultipartSupport {
         }
 
         if (UploadVerifyEnumType.API_KEY_2.getValue() == verifyType) {
-            String signature = EncryptUtil.getMd5(apiKey + getRequestTimestamp());
-            if (!signature.equalsIgnoreCase(getRequestSignature())) {
+            String timestamp =  getRequestTimestamp();
+            String signature = EncryptUtil.getMd5(apiKey + timestamp);
+            String sendSignature = getRequestSignature();
+            if (!signature.equalsIgnoreCase(sendSignature)) {
+                assert multipartRequest != null;
                 for (UploadedFile uf : multipartRequest.getFiles()) {
                     FileUtil.delete(uf.getFile());
                 }

@@ -239,7 +239,6 @@ public class TaskExecutor {
 
 	/**
 	 * Starts executing the task (spawns a secondary thread).
-	 * 
 	 * daemon true to spawn a daemon thread; false otherwise.
 	 */
 	void start() {
@@ -447,8 +446,7 @@ public class TaskExecutor {
 	 */
 	private void notifyExecutionTerminated(Throwable exception) {
 		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				TaskExecutorListener l = (TaskExecutorListener) i.next();
+			for (TaskExecutorListener l : listeners) {
 				l.executionTerminated(this, exception);
 			}
 		}
@@ -462,8 +460,7 @@ public class TaskExecutor {
 	 */
 	private void notifyStatusMessageChanged(String statusMessage) {
 		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				TaskExecutorListener l = (TaskExecutorListener) i.next();
+			for (TaskExecutorListener l : listeners) {
 				l.statusMessageChanged(this, statusMessage);
 			}
 		}
@@ -477,8 +474,7 @@ public class TaskExecutor {
 	 */
 	private void notifyCompletenessValueChanged(double completenessValue) {
 		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				TaskExecutorListener l = (TaskExecutorListener) i.next();
+			for (TaskExecutorListener l : listeners) {
 				l.completenessValueChanged(this, completenessValue);
 			}
 		}

@@ -24,7 +24,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "jspx_action_log", caption = "动作日志")
+@Table(name = "jspx_action_log", caption = "动作日志",autoCleanCache = true)
 public class ActionLog extends OperateTable {
 
     @Id(auto = true, length = 32, type = IDType.uuid, dateStart = true)
@@ -43,7 +43,7 @@ public class ActionLog extends OperateTable {
     @Column(caption = "类名", length = 200, dataType = "isLengthBetween(2,200)", notNull = true)
     private String classMethod = StringUtil.empty;
 
-    @Column(caption = "返回", length = 200)
+    @Column(caption = "返回", length = 100)
     private String actionResult = StringUtil.empty;
 
     @Column(caption = "说明", length = 250, dataType = "isLengthBetween(2,250)")

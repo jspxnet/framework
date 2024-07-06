@@ -10,6 +10,7 @@ import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,28 +38,28 @@ public class NotInExpression  implements Criterion {
     public NotInExpression(String propertyName, int[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
     public NotInExpression(String propertyName, long[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
     public NotInExpression(String propertyName, float[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
     public NotInExpression(String propertyName, double[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 

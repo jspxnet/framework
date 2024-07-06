@@ -89,8 +89,8 @@ public abstract class Dialect extends HashMap<String,String> {
 
 
 
-    public static final String SQL_RESULT_BEGIN_ROW = "sql_result_begin_row";
-    public static final String SQL_RESULT_END_ROW = "sql_result_end_row";
+    public static final String SQL_RESULT_BEGIN_ROW = "beginRow";
+    public static final String SQL_RESULT_END_ROW = "endRow";
 
     public static final String SQL_HAVE = "sql_have";
     public static final String SQL_DELETE_IN = "sql_delete_in";

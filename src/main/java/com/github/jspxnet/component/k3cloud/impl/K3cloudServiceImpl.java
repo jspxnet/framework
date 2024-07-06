@@ -19,7 +19,6 @@ import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -190,6 +189,11 @@ public class K3cloudServiceImpl implements K3cloudService {
         return KingdeeUtil.createBeanFields(k3TableConf.getContent());
     }
 
+    /**
+     *
+     * @param cls 表类
+     * @return 得到key
+     */
     @Override
     public String getKey(Class<?> cls)
     {

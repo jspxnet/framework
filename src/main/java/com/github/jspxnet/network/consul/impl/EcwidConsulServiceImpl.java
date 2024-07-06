@@ -22,12 +22,9 @@ import java.util.List;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2021/1/5 12:37
  * description: Ecwid Consul 客户端,支持ssl证书
- *
- *
  *<p>{@code
  *     <bean class="com.github.jspxnet.network.consul.ConsulConfig" singleton="true" caption="consul配置">
  *         <string name="ip">${consulAddress}</string>
@@ -56,7 +53,6 @@ public class EcwidConsulServiceImpl implements ConsulService {
     protected void createClient()
     {
         log.info("consulConfig={}", ObjectUtil.toString(consulConfig));
-
         if (!consulConfig.isSsl())
         {
             client = new ConsulClient(consulConfig.getIp(),consulConfig.getPort());

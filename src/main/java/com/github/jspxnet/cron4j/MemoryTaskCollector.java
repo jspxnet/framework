@@ -19,7 +19,6 @@
 package com.github.jspxnet.cron4j;
 
 
-import com.github.jspxnet.utils.SystemUtil;
 import java.util.ArrayList;
 import java.util.List;
 

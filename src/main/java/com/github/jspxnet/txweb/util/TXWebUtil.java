@@ -917,7 +917,6 @@ public final class TXWebUtil {
         }
 
 
-
         //判断是否满足执行条件
         Object result = null;
         LinkedList<AbstractBillPlug> billPlugLinkedList = new LinkedList<>();
@@ -1056,8 +1055,9 @@ public final class TXWebUtil {
         //没有Operate标记的不允许对外访问
         //注意，档位GET的时候 submit 为 false
         //Template 方式跳过这个判断
+        ActionContext actionContext = ThreadContextHolder.getContext();
         if (operate.post() && TXWeb.httpGET.equalsIgnoreCase(action.getRequest().getMethod())) {
-            ActionContext actionContext = ThreadContextHolder.getContext();
+
             if (actionContext!=null && (RocHandle.NAME.equalsIgnoreCase (actionContext.getExeType())|| RsaRocHandle.NAME.equalsIgnoreCase (actionContext.getExeType())))
             {
                 action.setActionResult(ActionSupport.ERROR);
@@ -1068,7 +1068,12 @@ public final class TXWebUtil {
 
         //验证防止重复提交 begin
         if (operate.repeat() > 0) {
-            String keyValue = EncryptUtil.getMd5(ClassUtil.getClass(action.getClass()).getName() + StringUtil.DOT + exeMethod.getName() + StringUtil.DOT + action.getUserSession().getId());
+            String referer = StringUtil.empty;
+            if (actionContext!=null)
+            {
+                referer = RequestUtil.getHeaderReferer(actionContext.getRequest());
+            }
+            String keyValue = EncryptUtil.getMd5(referer + "-" + ClassUtil.getClass(action.getClass()).getName() + StringUtil.DOT + exeMethod.getName() + StringUtil.DOT + action.getUserSession().getId());
             String key = String.format(REPEAT_VERIFY_KEY, keyValue);
             Object check = JSCacheManager.get(DefaultCache.class, key);
             if (ObjectUtil.isEmpty(check)) {

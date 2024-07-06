@@ -10,30 +10,31 @@
 package com.github.jspxnet.txweb.view;
 
 import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.enums.YesNoEnumType;
+import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.enums.YesNoEnumType;
+import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.AssertException;
 import com.github.jspxnet.txweb.IUserSession;
-import com.github.jspxnet.txweb.annotation.Param;
-import com.github.jspxnet.txweb.dao.IpLocationDAO;
-import com.github.jspxnet.txweb.enums.WebOutEnumType;
-import com.github.jspxnet.txweb.env.ActionEnv;
-import com.github.jspxnet.txweb.table.DownloadFileClient;
-import com.github.jspxnet.txweb.table.IpLocation;
-
-import lombok.extern.slf4j.Slf4j;
-
-import com.github.jspxnet.boot.environment.Environment;
-
-import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.action.UploadFileAction;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
+import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.dao.IpLocationDAO;
 import com.github.jspxnet.txweb.dao.UploadFileDAO;
+import com.github.jspxnet.txweb.enums.WebOutEnumType;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
+import com.github.jspxnet.txweb.table.DownloadFileClient;
 import com.github.jspxnet.txweb.table.IUploadFile;
+import com.github.jspxnet.txweb.table.IpLocation;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.*;
+import com.github.jspxnet.utils.FileSuffixUtil;
+import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.ValidUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,8 +43,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * Created with IntelliJ IDEA.
@@ -201,7 +200,7 @@ public class DownloadFileView extends ActionSupport {
 
         HttpServletResponse response = getResponse();
         String fileType = FileUtil.getTypePart(fileName.getName());
-        String contentType = FileUtil.getContentType(fileName);
+        String contentType = FileSuffixUtil.getContentType(fileName);
         response.reset();
         response.setHeader("framework", Environment.frameworkName + " " + Environment.VERSION);
         response.setContentType(contentType);

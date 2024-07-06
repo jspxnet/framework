@@ -1,11 +1,13 @@
 package com.github.jspxnet.json;
 
 
+/*
 import org.springframework.http.converter.json.AbstractJsonHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
+*/
 
 /**
  * Created by chenYuan
@@ -24,6 +26,7 @@ import java.lang.reflect.Type;
  *    }
  * }</pre>
  **/
+/*
 public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 
     @Override
@@ -37,3 +40,4 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
         writer.write(json.toString(4));
     }
 }
+*/

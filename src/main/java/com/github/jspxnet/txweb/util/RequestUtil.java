@@ -100,26 +100,16 @@ public class RequestUtil {
         //--------------------------------------------------------------------------------------------------------------
         browserKeywords.put("micromessenger", "MicroMessenger"); //微信
         browserKeywords.put("miniprogram", "miniprogram"); //微信 小程序
-
         browserKeywords.put("netcaptor", "NetCaptor");
-        browserKeywords.put("mozilla", "Mozilla");
-        browserKeywords.put("myie", "MyIe");
-        browserKeywords.put("myie2", "MyIE2");
         browserKeywords.put("maxthon", "Maxthon");
         browserKeywords.put("firefox", "Firefox");
-        browserKeywords.put("msie 5.5", "Internet Explorer 5.5");
-        browserKeywords.put("msie 6.0", "Internet Explorer 6.0");
-        browserKeywords.put("msie 7.0", "Internet Explorer 7.0");
-        browserKeywords.put("msie 8.0", "Internet Explorer 8.0");
-        browserKeywords.put("msie 9.0", "Internet Explorer 9.0");
-        browserKeywords.put("msie 10.0", "Internet Explorer 10.0");
-        browserKeywords.put("msie 11.0", "Internet Explorer 11.0");
-        browserKeywords.put("msie 12.0", "Internet Explorer 12.0");
-        browserKeywords.put("msie 13.0", "Internet Explorer 13.0");
-        browserKeywords.put("msie 14.0", "Internet Explorer 14.0");
-        browserKeywords.put("msie 15.0", "Internet Explorer 15.0");
-        browserKeywords.put("msie 16.0", "Internet Explorer 16.0");
-        browserKeywords.put("msie", "Internet Explorer");
+        browserKeywords.put("msie 8.0", "IE8");
+        browserKeywords.put("msie 9.0", "IE9");
+        browserKeywords.put("msie 10.0", "IE10");
+        browserKeywords.put("msie 11.0", "IE11");
+        browserKeywords.put("edg", "IE11");
+        browserKeywords.put("msie", "IE");
+        browserKeywords.put("trident", "IE");
         browserKeywords.put("chrome", "Chrome");
         browserKeywords.put("safari", "Safari");
         browserKeywords.put("opera", "Opera");
@@ -178,6 +168,26 @@ public class RequestUtil {
         return !serverName.equalsIgnoreCase(URLUtil.getTopDomain(referer));
     }
 
+    /**
+     * 得到来源
+     * @param request 请求
+     * @return 返回来源
+     */
+    public static String getHeaderReferer(HttpServletRequest request) {
+        if (request == null) {
+            return StringUtil.empty;
+        }
+        String serverName = URLUtil.getTopDomain(request.getServerName());
+        if (serverName == null) {
+            return StringUtil.empty;
+        }
+        String referer = request.getHeader(requestReferer);
+        if (!StringUtil.hasLength(referer)) {
+            return StringUtil.empty;
+        }
+        //排除二级域名
+        return referer;
+    }
     public static boolean isMultipart(HttpServletRequest request) {
         if (request == null || !"POST".equalsIgnoreCase(request.getMethod())) {
             return false;

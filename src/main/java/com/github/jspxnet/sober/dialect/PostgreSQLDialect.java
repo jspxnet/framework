@@ -47,7 +47,7 @@ public class PostgreSQLDialect extends Dialect {
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=\"" + COLUMN_LENGTH + "&lt;255\">varchar(${" + COLUMN_LENGTH + "})<#else>text</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
         put(Integer.class.getName(), "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
-        put("int", "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+        put("int",                   "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
 
         put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">BIGSERIAL<#else>BIGINT</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
         put("long", "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">BIGSERIAL<#else>BIGINT</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
@@ -59,7 +59,8 @@ public class PostgreSQLDialect extends Dialect {
         put("float", "${" + COLUMN_NAME + "} real <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
         put(BigDecimal.class.getName(), "${" + COLUMN_NAME + "} double precision <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
-        put("BigDecimal", "${" + COLUMN_NAME + "} double precision <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("BigDecimal", "${" + COLUMN_NAME + "} double precision <#if where=\"" +
+                "" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
         put(Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
 
