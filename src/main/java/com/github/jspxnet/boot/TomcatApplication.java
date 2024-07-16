@@ -89,9 +89,21 @@ public class TomcatApplication {
             log.debug("tomcat param:{}", args[0]);
             jspxConfiguration.setDefaultPath(args[0]);
         }
+
+        String jspx_properties_file = Environment.jspx_properties_file;
+        String active_config =  System.getenv(Environment.JSPX_ENV_ACTIVE);
+        if (!StringUtil.isNull(active_config))
+        {
+            Map<String,Object> valueMap = new HashMap<>();
+            valueMap.put("active",active_config);
+            jspx_properties_file = EnvFactory.getPlaceholder().processTemplate(valueMap,Environment.jspx_properties_template);
+            jspxConfiguration.setDefaultConfigFile(jspx_properties_file);
+        }
+
+
         String defaultPath = jspxConfiguration.getDefaultPath();
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
-        Map<String,String>  properties = environmentTemplate.readDefaultProperties(FileUtil.mendFile((defaultPath == null ? "" : defaultPath) + "/" + Environment.jspx_properties_file));
+        Map<String,String>  properties = environmentTemplate.readDefaultProperties(FileUtil.mendFile((defaultPath == null ? "" : defaultPath) + "/" + jspx_properties_file));
 
         if (properties.size() > 3 && properties.containsKey(Environment.SERVER_PORT) && properties.containsKey(Environment.SERVER_WEB_PATH)) {
             port = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_PORT, "8080"));

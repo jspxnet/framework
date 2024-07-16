@@ -52,7 +52,6 @@ import java.util.*;
  * date: 2007-12-1
  * Time: 17:51:48
  * author chenyuan
- *
  * jspx.env.active=dev  配置启动环境
  */
 @Slf4j
@@ -109,9 +108,19 @@ public class JspxCoreListener implements ServletContextListener {
             jspxConfiguration.setDefaultPath(defaultPath);
         }
 
-
+        String jspx_properties_file = Environment.jspx_properties_file;
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        Map<String,String> properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file);
+
+        String active_config =  System.getenv(Environment.JSPX_ENV_ACTIVE);
+        if (!StringUtil.isNull(active_config))
+        {
+            Map<String,Object> valueMap = new HashMap<>();
+            valueMap.put("active",active_config);
+            jspx_properties_file = EnvFactory.getPlaceholder().processTemplate(valueMap,Environment.jspx_properties_template);
+            jspxConfiguration.setDefaultConfigFile(jspx_properties_file);
+        }
+
+        Map<String,String> properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + jspx_properties_file);
         String bootConfMode = properties.getOrDefault(Environment.BOOT_CONF_MODE,Environment.defaultValue);
         if (BootConfigEnumType.VCS.getName().equalsIgnoreCase(bootConfMode))
         {
@@ -128,29 +137,20 @@ public class JspxCoreListener implements ServletContextListener {
         }
         else
         {
-           String active_config =  System.getenv(Environment.JSPX_ENV_ACTIVE);
-           String jspx_properties_file = Environment.jspx_properties_file;
-           if (!StringUtil.isNull(active_config))
-           {
-              Map<String,Object> valueMap = new HashMap<>();
-              valueMap.put("active",active_config);
-              jspx_properties_file = EnvFactory.getPlaceholder().processTemplate(valueMap,Environment.jspx_properties_template);
-              jspxConfiguration.setDefaultConfigFile(jspx_properties_file);
-           }
            envTemplate.createJspxEnv(StringUtil.isNull(jspxConfiguration.getDefaultPath())?"":jspxConfiguration.getDefaultPath() + jspx_properties_file);
         }
 
         //默认方式
         envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
         //jdbc配置
-        if (!FileUtil.isFileExist(jspxConfiguration.getDefaultPath() + Environment.jspx_properties_file)) {
-            String info = "not found " + Environment.jspx_properties_file + ",不能找到基本的配置文件" + Environment.jspx_properties_file + ",构架将不能正常工作";
+        if (!FileUtil.isFileExist(jspxConfiguration.getDefaultPath() + jspx_properties_file)) {
+            String info = "not found " + jspx_properties_file + ",不能找到基本的配置文件" + jspx_properties_file + ",构架将不能正常工作";
             log.info(info);
-            log.info("你需要放入" + Environment.jspx_properties_file + "配置文件,然后重新启动java服务器");
+            log.info("你需要放入" + jspx_properties_file + "配置文件,然后重新启动java服务器");
             return;
         }
 
-        log.info("create jspx.net system Environment");
+        log.info("create jspx.net system Environment config file:{}",jspx_properties_file);
         //环境配置
         envTemplate.createSystemEnv();
 

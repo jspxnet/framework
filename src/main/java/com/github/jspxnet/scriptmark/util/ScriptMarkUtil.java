@@ -29,7 +29,7 @@ import java.util.Map;
  * date: 2008-11-27
  * Time: 15:28:52
  */
-public class ScriptMarkUtil {
+public final class ScriptMarkUtil {
     private static final char[] ESCAPES = createEscapes();
 
     private static char[] createEscapes() {

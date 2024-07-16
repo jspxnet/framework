@@ -67,7 +67,7 @@ public final  class FileSuffixUtil {
     public static final String[] IMAGE_TYPES = {"jpg", "jpeg", "gif", "png", "bmp"};
     public static final String[] ZIP_TYPES = {"rar", "zip", "7z", "gz", "bz2", "cab", "iso", "ace", "gzip", "jzb", "arj", "uue"};
     public static final String[] VIDEO_TYPES = {"flv", "swf", "mkv", "avi", "asf", "rm", "rmvb", "mpeg", "mpg", "ogg", "mp4", "wmv", "m4v", "mp3", "wav", "vob", "ram", "mid", "mod", "cpk", "3gp", "vob", "mov", "3g2", "asf", "xvid", "divx"};
-    public static final String[] OFFICE_TYPES = {"txt","doc", "docx", "xls", "xlsx", "ppt", "pptx", "mdb", "one", "pdf", "gd", "wps", "dps", "et", "ett", "rtf", "chm"};
+    public static final String[] OFFICE_TYPES = {"txt", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "mdb", "one", "pdf", "gd", "wps", "dps", "et", "ett", "rtf", "chm"};
 
     private FileSuffixUtil() {
 
@@ -146,14 +146,13 @@ public final  class FileSuffixUtil {
 
     /**
      * 得到文件的http  ContentType 类型
+     *
      * @param fileName 文件
-     * @return  ContentType
+     * @return ContentType
      */
-    public static String getContentType(File fileName)
-    {
-        if (fileName==null)
-        {
-            return  "application/octet-stream";
+    public static String getContentType(File fileName) {
+        if (fileName == null) {
+            return "application/octet-stream";
         }
         String fileType = FileUtil.getTypePart(fileName.getName());
         String contentType = null;
@@ -165,8 +164,7 @@ public final  class FileSuffixUtil {
             }
         }
 
-        if (contentType!=null)
-        {
+        if (StringUtil.isNull(contentType)) {
             //为了兼容 jdk 1.6
             if ("mp4".equalsIgnoreCase(fileType)) {
                 contentType = "video/mpeg4";
@@ -188,6 +186,8 @@ public final  class FileSuffixUtil {
                 contentType = "application/xml";
             } else if ("txt".equalsIgnoreCase(fileType) || "htm".equalsIgnoreCase(fileType) || "html".equalsIgnoreCase(fileType)) {
                 contentType = "text/html";
+            } else if ("css".equalsIgnoreCase(fileType) || "style".equalsIgnoreCase(fileType)) {
+                contentType = "text/css";
             } else if ("zip".equalsIgnoreCase(fileType)) {
                 contentType = "application/x-zip-compressed";
             } else if ("rar".equalsIgnoreCase(fileType)) {
@@ -196,14 +196,12 @@ public final  class FileSuffixUtil {
                 contentType = "image/" + fileType;
             } else if ("js".equalsIgnoreCase(fileType)) {
                 contentType = "application/x-javascript";
-            } else {
+            } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
                 contentType = "application/msword";
+            } else {
+                contentType = "application/octet-stream";
             }
-        }
-        if (contentType == null) {
-            contentType = "application/octet-stream";
         }
         return contentType;
     }
-
 }

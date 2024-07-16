@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.77</version>
-    <description>jspx framework</description>
+    <version>6.78</version>
+    <description>jspx cloud framework</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -14,6 +14,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+        <compilerVersion>1.8</compilerVersion>
         <maven.test.skip>true</maven.test.skip>
         <github.global.server>github</github.global.server>
         <tomcat.version>9.0.89</tomcat.version>
@@ -675,7 +676,7 @@
                         <locales>zh_CN</locales>
                     </configuration>
                 </plugin>
-                 <plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.5.0</version>
@@ -741,8 +742,9 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.12.1</version>
+                    <version>3.13.0</version>
                     <configuration>
+                        <compilerVersion>1.8</compilerVersion>
                         <encoding>UTF-8</encoding>
                         <source>1.8</source>
                         <target>1.8</target>

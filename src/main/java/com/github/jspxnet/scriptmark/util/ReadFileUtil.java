@@ -10,9 +10,6 @@
 package com.github.jspxnet.scriptmark.util;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,38 +24,6 @@ public final class ReadFileUtil {
 
     }
 
-    /**
-     * jdk 1.7 以上才支持，目前测试下来，性能io,nio基本差不多
-     *
-     * @param file 文件
-     * @return 文件类容
-     * @throws IOException 异常
-     */
-    public static String readToStringNio(File file) throws IOException {
-        // 获取源文件和目标文件的输入输出流
-        FileInputStream fin = new FileInputStream(file);
-        ByteArrayOutputStream fout = new ByteArrayOutputStream();
-        // 获取输入输出通道
-        FileChannel fcin = fin.getChannel();
-        // 创建缓冲区
-        ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-        while (true) {
-            // clear方法重设缓冲区，使它可以接受读入的数据
-            buffer.clear();
-            // 从输入通道中将数据读到缓冲区
-            int r = fcin.read(buffer);
-            // read方法返回读取的字节数，可能为零，如果该通道已到达流的末尾，则返回-1
-            if (r == -1) {
-                break;
-            }
-            // flip方法让缓冲区可以将新读入的数据写入另一个通道
-            buffer.flip();
-            // 从输出通道中将数据写入缓冲区
-            fout.write(buffer.array());
-        }
-        fin.close();
-        return fout.toString( StandardCharsets.UTF_8.name());
-    }
 
     public static String readToString(File file) throws IOException {
         return readToString(new FileReader(file));

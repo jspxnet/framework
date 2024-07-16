@@ -62,9 +62,8 @@ public class SourceLoaderChain implements SourceLoader {
 
     @Override
     public Source getSource(String name) throws IOException {
-        for (Object resourceLoader1 : resourceLoaders) {
+        for (SourceLoader resourceLoader : resourceLoaders) {
             try {
-                SourceLoader resourceLoader = (SourceLoader) resourceLoader1;
                 Source resource = resourceLoader.getSource(name);
                 if (resource != null) {
                     return resource;
@@ -83,10 +82,9 @@ public class SourceLoaderChain implements SourceLoader {
 
     @Override
     public Source getSource(String name, Locale locale) throws IOException {
-        for (Object resourceLoader1 : resourceLoaders) {
+        for (SourceLoader resourceLoader : resourceLoaders) {
             try {
-                SourceLoader resourceLoader = (SourceLoader) resourceLoader1;
-                Source resource = resourceLoader.getSource(name, locale);
+                   Source resource = resourceLoader.getSource(name, locale);
                 if (resource != null) {
                     return resource;
                 }

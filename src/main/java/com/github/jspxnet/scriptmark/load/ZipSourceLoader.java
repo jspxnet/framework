@@ -11,7 +11,7 @@ package com.github.jspxnet.scriptmark.load;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.FileNotFoundException;
+
 
 /**
  * Created by IntelliJ IDEA.

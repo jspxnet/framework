@@ -43,7 +43,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * Time: 17:45:19
  * com.github.jspxnet.jspx.test.scriptmark.util.ScriptConverter
  * extends ScriptableObject
- * extends ScriptableObject
  */
 @Slf4j
 public class ScriptConverter {
@@ -881,7 +880,7 @@ public class ScriptConverter {
      * @param cla 类
      * @return 得到字段选项, 用于查询
      */
-    public static String getFields(Class cla) {
+    public static String getFields(Class<?> cla) {
         List<SoberColumn> soberColumns = AnnotationUtil.getColumnList(cla);
         StringBuilder sb = new StringBuilder();
         for (SoberColumn column : soberColumns) {
