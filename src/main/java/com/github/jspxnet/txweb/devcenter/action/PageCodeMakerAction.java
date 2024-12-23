@@ -14,7 +14,9 @@ import com.github.jspxnet.txweb.table.PageCodeMaker;
 import com.github.jspxnet.txweb.table.PageCodeMakerVersion;
 import com.github.jspxnet.txweb.devcenter.view.PageCodeMakerView;
 import com.github.jspxnet.utils.BeanUtil;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @HttpMethod(caption = "页面数据", actionName = "*", namespace = Environment.DEV_CENTER+"/page/code")
 @Bean(namespace = Environment.DEV_CENTER, singleton = true)
 public class PageCodeMakerAction  extends PageCodeMakerView {
@@ -50,7 +52,7 @@ public class PageCodeMakerAction  extends PageCodeMakerView {
                 return RocResponse.success(pageCodeMaker.getId(),language.getLang(LanguageRes.saveSuccess));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("save",e);
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),e.getMessage());
         }
         return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.saveFailure));

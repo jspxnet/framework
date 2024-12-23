@@ -16,9 +16,6 @@ import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 /*
@@ -182,7 +179,7 @@ public class ImagePHash {
         }
         return F;
     }
-
+/*
     public static void main(String[] args) {
 
         ImagePHash p = new ImagePHash();
@@ -211,6 +208,5 @@ public class ImagePHash {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-    }
+    }*/
 }

@@ -4,22 +4,22 @@ import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.Phrase;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.core.HtmlEngineImpl;
+import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.core.block.*;
 import com.github.jspxnet.scriptmark.core.block.sqlmap.*;
 import com.github.jspxnet.scriptmark.core.dispose.*;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/10/14 0:17
  * description: jspbox
  **/
-public class SqlMapTemplateConfigurable implements Configurable, Cloneable {
+public class SqlMapTemplateConfigurable implements Configurable {
     private final static Map<String, MacroBlock> regMacro = new HashMap<>();
     private Map<String, String> tagMap = new HashMap<>();
     private Map<String, Object> hashMap = new HashMap<>();
@@ -29,12 +29,11 @@ public class SqlMapTemplateConfigurable implements Configurable, Cloneable {
     private String[] searchPath = null;
     private Map<String, Object> globalMap = new HashMap<>();
     private final Map<String, Phrase> phrases = new HashMap<>(20);
-
-
+    private final List<TagNode> autoImportTagNodeList = new ArrayList<>();
 
     final static private Configurable instance = new SqlMapTemplateConfigurable();
 
-    static public Configurable getInstance() {
+    static public synchronized Configurable getInstance() {
         return instance;
     }
 
@@ -60,6 +59,7 @@ public class SqlMapTemplateConfigurable implements Configurable, Cloneable {
         hashMap.put(ScriptmarkEnv.CompressBlockName, "compress");
         hashMap.put(ScriptmarkEnv.htmlExtType, true);
         hashMap.put(ScriptmarkEnv.xmlEscapeClean, true);
+        hashMap.put(ScriptmarkEnv.FixUndefined, true);
         //////////
 
         ////////////Tag配置 begin
@@ -258,6 +258,20 @@ public class SqlMapTemplateConfigurable implements Configurable, Cloneable {
         this.autoImports = autoImports;
     }
 
+
+    @Override
+    public List<TagNode> getAutoImportTagNodeList() {
+        return autoImportTagNodeList;
+    }
+
+    @Override
+    public void setAutoImportTagNodeList(List<TagNode> autoImportTagNodeList) {
+        this.autoImportTagNodeList.clear();
+        this.autoImportTagNodeList.addAll(autoImportTagNodeList);
+    }
+
+
+
     @Override
     public Configurable copy() {
         Configurable tc = new SqlMapTemplateConfigurable();
@@ -267,6 +281,7 @@ public class SqlMapTemplateConfigurable implements Configurable, Cloneable {
         tc.setAutoImports(autoImports);
         tc.setGlobalMap(new HashMap<>(globalMap));
         tc.setStaticModels(staticModels);
+        tc .setAutoImportTagNodeList(autoImportTagNodeList);
         return tc;
     }
 }

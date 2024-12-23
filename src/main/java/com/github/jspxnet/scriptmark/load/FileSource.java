@@ -10,6 +10,7 @@
 package com.github.jspxnet.scriptmark.load;
 
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,8 +33,8 @@ public class FileSource extends AbstractSource {
     }
 
     @Override
-    protected InputStream getInputStream() throws FileNotFoundException {
-        return new FileInputStream(file);
+    protected InputStream getInputStream() throws IOException {
+        return Files.newInputStream(file.toPath());
     }
 
     @Override

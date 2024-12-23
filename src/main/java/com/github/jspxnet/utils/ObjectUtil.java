@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -14,6 +14,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -26,12 +27,13 @@ import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
+ *
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2007-4-13
  * Time: 8:50:52
  */
 @Slf4j
-public final  class ObjectUtil {
+public final class ObjectUtil {
 
     private ObjectUtil() {
 
@@ -46,14 +48,16 @@ public final  class ObjectUtil {
             return StringUtil.isEmpty((String) value);
         }
         if (value instanceof Collection) {
-            return ((Collection)value).isEmpty();
+            return ((Collection<?>) value).isEmpty();
+        }
+        if (value instanceof String[]) {
+            return ((String[]) value).length == 0;
         }
         if (value.getClass().isArray()) {
             return Array.getLength(value) == 0;
         }
-        if (value instanceof Map)
-        {
-            return ((Map)value).isEmpty();
+        if (value instanceof Map) {
+            return ((Map<?, ?>) value).isEmpty();
         }
         return false;
     }
@@ -64,11 +68,10 @@ public final  class ObjectUtil {
         }
 
         if (value instanceof Collection) {
-             ((Collection)value).clear();
+            ((Collection<?>) value).clear();
         }
-        if (value instanceof Map)
-        {
-            ((Map)value).clear();
+        if (value instanceof Map) {
+            ((Map<?, ?>) value).clear();
         }
     }
 
@@ -77,11 +80,9 @@ public final  class ObjectUtil {
             return null;
         }
         Object newValue = null;
-        ObjectOutputStream oos = null;
         ObjectInputStream ois = null;
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        try {
-            oos = new ObjectOutputStream(bout);
+        try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(bout);) {
             oos.writeObject(oldValue);
             ois = new ObjectInputStream(new ByteArrayInputStream(bout.toByteArray()));
             newValue = ois.readObject();
@@ -89,9 +90,6 @@ public final  class ObjectUtil {
             log.error("Error deepCopy  during serialization and deserialization of value:" + oldValue.getClass(), e);
         } finally {
             try {
-                if (oos != null) {
-                    oos.close();
-                }
                 if (ois != null) {
                     ois.close();
                 }
@@ -104,7 +102,6 @@ public final  class ObjectUtil {
     }
 
     /**
-     *
      * @param obj 对象
      * @return 序列化
      */
@@ -115,22 +112,13 @@ public final  class ObjectUtil {
         if (!(obj instanceof Serializable)) {
             return 0;
         }
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(bout);
+
+        try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(bout)) {
             oos.writeObject(obj);
             return bout.size();
         } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (oos != null) {
-                    oos.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            //...
         }
         return 0;
     }
@@ -146,10 +134,13 @@ public final  class ObjectUtil {
         if (o instanceof Boolean) {
             return (Boolean) o;
         }
-          if (o instanceof Number) {
+        if (o instanceof Number) {
             return ((Number) o).intValue() > 0;
         }
-        if (o instanceof List||o instanceof Map) {
+        if (o instanceof String[]) {
+            return !ObjectUtil.isEmpty(o);
+        }
+        if (o instanceof List || o instanceof Map) {
             return !ObjectUtil.isEmpty(o);
         }
         if (o instanceof String) {
@@ -283,7 +274,7 @@ public final  class ObjectUtil {
         try {
             return StringUtil.getDate(obj.toString());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("toDate", e);
         }
         return null;
     }
@@ -305,7 +296,7 @@ public final  class ObjectUtil {
             Date date = StringUtil.getDate(obj.toString());
             return new java.sql.Date(date.getTime());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("toSqlDate", e);
         }
         return new java.sql.Date(DateUtil.empty.getTime());
     }
@@ -328,7 +319,7 @@ public final  class ObjectUtil {
             Date date = StringUtil.getDate(obj.toString());
             return new java.sql.Timestamp(date.getTime());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("toSqlTimestamp", e);
         }
         return new java.sql.Timestamp(DateUtil.empty.getTime());
     }
@@ -351,72 +342,66 @@ public final  class ObjectUtil {
             Date date = StringUtil.getDate(obj.toString());
             return new java.sql.Time(date.getTime());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("toSqlTime", e);
         }
         return new java.sql.Time(DateUtil.empty.getTime());
     }
 
     /**
      * 调试用,格式化后的字符串
+     *
      * @param obj 对象转字符串
      * @return 字符串
      */
-    public static String toFormatString(Object obj)
-    {
-        return toString( obj,4);
+    public static String toFormatString(Object obj) {
+        return toString(obj, 4);
     }
 
     /**
-     *
      * 调试用,一行方式
+     *
      * @param obj 对象转字符串
      * @return 字符串
      */
-    public static String toString(Object obj)
-    {
-        return toString( obj,0);
+    public static String toString(Object obj) {
+        return toString(obj, 0);
     }
 
     /**
-     *
      * @param obj 对象转字符串
      * @param tab 格式化间隔
      * @return 字符串
      */
-    public static String toString(Object obj,int tab)
-    {
+    public static String toString(Object obj, int tab) {
         if (obj == null) {
             return StringUtil.empty;
         }
-        if (obj instanceof String)
-        {
-            return (String)obj;
+        if (obj instanceof String) {
+            return (String) obj;
         }
-        if (obj instanceof Number)
-        {
+        if (obj instanceof Number) {
             return NumberUtil.toString(obj);
         }
         if (obj instanceof InetAddress) {
-            return IpUtil.getIp((InetAddress)obj);
+            return IpUtil.getIp((InetAddress) obj);
         }
         if (obj instanceof SocketAddress) {
-            return IpUtil.getIp((SocketAddress)obj);
+            return IpUtil.getIp((SocketAddress) obj);
         }
         if (obj instanceof Object[]) {
             return new JSONArray(obj).toString(tab);
         }
         if (ClassUtil.isStandardProperty(obj.getClass())) {
-            if (ClassUtil.isNumberProperty(obj.getClass()))
-            {
-                return NumberUtil.getNumberStdFormat(obj+"");
+            if (ClassUtil.isNumberProperty(obj.getClass())) {
+                return NumberUtil.getNumberStdFormat(obj + "");
             }
             return obj + "";
         }
         if (obj instanceof JSONArray) {
-            return ((JSONArray)obj).toString(tab);
+            return ((JSONArray) obj).toString(tab);
         }
         if (obj instanceof JSONObject) {
-            return ((JSONObject)obj).toString(tab);
+            return ((JSONObject) obj).toString(tab);
         }
         if (obj.getClass().isArray() || obj instanceof List) {
             return new JSONArray(obj).toString(tab);
@@ -429,31 +414,13 @@ public final  class ObjectUtil {
      * @return jdk内置序列化
      */
     public static byte[] getJkdSerialize(Object object) {
-        ObjectOutputStream objectOutputStream = null;
-        ByteArrayOutputStream byteArrayOutputStream = null;
-        try {
-            byteArrayOutputStream = new ByteArrayOutputStream();
-            objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        ) {
             objectOutputStream.writeObject(object);
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (objectOutputStream != null) {
-                try {
-                    objectOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (byteArrayOutputStream != null) {
-                try {
-                    byteArrayOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
+            log.error("getJkdSerialize", e);
         }
         return null;
     }
@@ -465,27 +432,12 @@ public final  class ObjectUtil {
      * @return jdk内置序列化 反
      */
     public static Object getJdkUnSerizlize(byte[] binaryByte) {
-        ObjectInputStream objectInputStream = null;
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(binaryByte);
-        try {
-            objectInputStream = new ObjectInputStream(byteArrayInputStream);
+        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(binaryByte);
+             ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+        ) {
             return objectInputStream.readObject();
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (objectInputStream != null) {
-                try {
-                    objectInputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    byteArrayInputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
+            log.error("getJdkUnSerizlize", e);
         }
         return null;
     }
@@ -499,10 +451,9 @@ public final  class ObjectUtil {
      * @throws UnsupportedEncodingException 异常
      */
     public static Object getForXml(String aXml) throws UnsupportedEncodingException {
-        java.beans.XMLDecoder decoder = new java.beans.XMLDecoder(new BufferedInputStream(new ByteArrayInputStream(aXml.getBytes(Environment.defaultEncode))));
-        Object obj = decoder.readObject();
-        decoder.close();
-        return obj;
+        try (java.beans.XMLDecoder decoder = new java.beans.XMLDecoder(new BufferedInputStream(new ByteArrayInputStream(aXml.getBytes(Environment.defaultEncode))))) {
+            return decoder.readObject();
+        }
     }
 
     /**
@@ -513,14 +464,11 @@ public final  class ObjectUtil {
      */
     public static String getXml(Object aObject) {
         ByteArrayOutputStream baStream = new ByteArrayOutputStream();
-        java.beans.XMLEncoder encoder = new java.beans.XMLEncoder(new BufferedOutputStream(baStream));
-        encoder.writeObject(aObject);
-        encoder.close();
-        try {
+        try (java.beans.XMLEncoder encoder = new java.beans.XMLEncoder(new BufferedOutputStream(new ByteArrayOutputStream()));) {
+            encoder.writeObject(aObject);
             return baStream.toString(Environment.defaultEncode);
         } catch (UnsupportedEncodingException e) {
-
-            e.printStackTrace();
+            log.error("getXml", e);
         }
         return null;
     }
@@ -530,7 +478,7 @@ public final  class ObjectUtil {
      * @return json 的对象转换
      */
     public static String getJson(Object o) {
-        if (ClassUtil.isArrayType(o)||ClassUtil.isCollection(o)) {
+        if (ClassUtil.isArrayType(o) || ClassUtil.isCollection(o)) {
             return new JSONArray(o).toString();
         }
         return new JSONObject(o).toString();
@@ -541,31 +489,14 @@ public final  class ObjectUtil {
      * @param t   结果对象类型
      * @return json 的对象转换
      */
-    public static Object getForJson(String str, Class t) {
+    public static Object getForJson(String str, Class<?> t) {
         if (StringUtil.isJsonArray(str)) {
             return new JSONArray(str).parseObject(t);
         }
         return new JSONObject(str).parseObject(t);
     }
 
-
     /**
-     * 12:30  2点飞机
-     * method.getModifiers()  返回说明
-     * <p>
-     * PUBLIC: 1
-     * PRIVATE: 2
-     * PROTECTED: 4
-     * STATIC: 8
-     * FINAL: 16
-     * SYNCHRONIZED: 32
-     * VOLATILE: 64
-     * TRANSIENT: 128
-     * NATIVE: 256
-     * INTERFACE: 512
-     * ABSTRACT: 1024
-     * STRICT: 2048
-     *
      * @param o 对象
      * @return Map 对象的值映射成Map
      */
@@ -576,7 +507,7 @@ public final  class ObjectUtil {
         if (o instanceof Class) {
             return new HashMap<>(0);
         }
-        if (o instanceof Map) {
+        if (o instanceof AbstractMap) {
             return (Map<String, Object>) o;
         }
         Map<String, Object> valueMap = new TreeMap<>();
@@ -584,13 +515,79 @@ public final  class ObjectUtil {
         if (fields != null) {
             for (Field field : fields) {
                 try {
-                    Object value = BeanUtil.getFieldValue(o, field.getName(),false);
-                    if (JSONObject.NULL.equals(value))
+                    Object value = BeanUtil.getFieldValue(o, field.getName(), false);
+                    valueMap.put(field.getName(), value);
+                } catch (Exception e) {
+                    log.error(o + "   method=" + field.getName(), e);
+                }
+            }
+        }
+        return valueMap;
+    }
+
+    /**
+     *
+     * 主要用于jxls 转换，jxls只支持map参数
+     * @param o 对象
+     * @return 完全的map对象
+     */
+    public static Map<String, Object> getFullMap(Object o) {
+        if (o == null) {
+            return new HashMap<>(0);
+        }
+        if (o instanceof Class) {
+            return new HashMap<>(0);
+        }
+        if (o instanceof Map) {
+            return (Map<String, Object>) o;
+        }
+        Map<String, Object> valueMap = new HashMap<>();
+        Field[] fields = ClassUtil.getDeclaredFields(o.getClass());
+        if (fields != null) {
+            for (Field field : fields) {
+                try {
+                    Object value = BeanUtil.getFieldValue(o, field.getName(), false);
+                    if (value==null)
                     {
                         valueMap.put(field.getName(), null);
                     } else
+                    if (ClassUtil.isArrayType(value)) {
+                        List<Object> list = new ArrayList<>();
+                        int len = Array.getLength(value);
+                        for (int i = 0; i < len; i++) {
+                            Object v = Array.get(value, i);
+                            if (!ClassUtil.isStandardType(v.getClass()) && !(v instanceof Map))
+                            {
+                               list.add(getFullMap(v));
+                            } else
+                            {
+                               list.add(v);
+                            }
+                        }
+                        valueMap.put(field.getName(), list);
+                    } else if (ClassUtil.isCollection(value)) {
+                        Collection<?> collection = (Collection<?>) value;
+                        List<Object> list = new ArrayList<>();
+                        for (Object v : collection) {
+                            if (!ClassUtil.isStandardType(v.getClass()) && !(v instanceof Map))
+                            {
+                               list.add(getFullMap(v));
+                            } else
+                            {
+                               list.add(v);
+                            }
+                        }
+                        valueMap.put(field.getName(), list);
+                    }
+                    else
                     {
-                        valueMap.put(field.getName(), value);
+                        if (!ClassUtil.isStandardType(value.getClass()) && !(value instanceof Map))
+                        {
+                            valueMap.put(field.getName(),getFullMap(value));
+                        } else
+                        {
+                            valueMap.put(field.getName(),value);
+                        }
                     }
                 } catch (Exception e) {
                     log.error(o + "   method=" + field.getName(), e);
@@ -602,29 +599,27 @@ public final  class ObjectUtil {
 
     /**
      * 比较两个对象相同
+     *
      * @param obj1 对象1
      * @param obj2 对象2
      * @return 是否相等
      */
     public static boolean compare(Object obj1, Object obj2) {
-        if (obj1 == null&&obj2 == null) {
+        if (obj1 == null && obj2 == null) {
             return true;
         }
         if (obj1 == obj2) {
             return true;
-        }
-        else if (obj1 instanceof Collection && obj2 instanceof Collection)
-        {
+        } else if (obj1 instanceof Collection && obj2 instanceof Collection) {
             JSONArray array1 = new JSONArray(obj1);
             JSONArray array2 = new JSONArray(obj2);
             return array1.toString().equals(array2.toString());
-        }
-        else if (obj1 instanceof Map && obj2 instanceof Map) {
+        } else if (obj1 instanceof Map && obj2 instanceof Map) {
             JSONObject json1 = new JSONObject(obj1);
             JSONObject json2 = new JSONObject(obj2);
             return json1.toString().equals(json2.toString());
         } else {
-            return compareValue(obj1, obj2) ;
+            return compareValue(obj1, obj2);
         }
     }
 
@@ -635,59 +630,82 @@ public final  class ObjectUtil {
                 return true;
             } else if (!isEmptyObject(value1) && !isEmptyObject(value2)) {
                 if (value1 instanceof Byte) {
-                    return ((Byte)value1).compareTo((Byte)value2) == 0;
+                    return ((Byte) value1).compareTo((Byte) value2) == 0;
                 } else if (value1 instanceof Short) {
-                    return ((Short)value1).compareTo((Short)value2) == 0;
+                    return ((Short) value1).compareTo((Short) value2) == 0;
                 } else if (value1 instanceof Integer) {
-                    return ((Integer)value1).compareTo((Integer)value2) == 0;
+                    return ((Integer) value1).compareTo((Integer) value2) == 0;
                 } else if (value1 instanceof Long) {
-                    return ((Long)value1).compareTo((Long)value2) == 0;
+                    return ((Long) value1).compareTo((Long) value2) == 0;
                 } else if (value1 instanceof Float) {
-                    return ((Float)value1).compareTo((Float)value2) == 0;
+                    return ((Float) value1).compareTo((Float) value2) == 0;
                 } else if (value1 instanceof Double) {
-                    return ((Double)value1).compareTo((Double)value2) == 0;
+                    return ((Double) value1).compareTo((Double) value2) == 0;
                 } else if (value1 instanceof BigDecimal) {
-                    return ((BigDecimal)value1).compareTo((BigDecimal)value2) == 0;
+                    return ((BigDecimal) value1).compareTo((BigDecimal) value2) == 0;
                 } else if (value1 instanceof String) {
                     return (value1).equals(value2);
                 } else if (value1 instanceof Date) {
-                    return  DateUtil.dayEquals((Date)value1, (Date)value2);
+                    return DateUtil.dayEquals((Date) value1, (Date) value2);
                 } else if (value1 instanceof Time) {
-                    return ((Time)value1).compareTo((Time)value2) == 0;
+                    return ((Time) value1).compareTo((Time) value2) == 0;
                 } else if (value1 instanceof Timestamp) {
-                    return DateUtil.dayEquals((Date)value1, (Date)value2);
-                } else if (value1.getClass().isArray()&&value2.getClass().isArray()) {
-                    Object[] arrValue1 = (Object[])value1;
-                    Object[] arrValue2 = (Object[])value2;
+                    return DateUtil.dayEquals((Date) value1, (Date) value2);
+                } else if (value1.getClass().isArray() && value2.getClass().isArray()) {
+                    Object[] arrValue1 = (Object[]) value1;
+                    Object[] arrValue2 = (Object[]) value2;
                     if (arrValue1.length != arrValue2.length) {
                         return false;
                     } else {
                         boolean retValue = true;
-                        for(int i = 0; i < arrValue1.length && retValue; ++i) {
+                        for (int i = 0; i < arrValue1.length && retValue; ++i) {
                             retValue = compareValue(arrValue1[i], arrValue2[i]);
                         }
 
                         return retValue;
                     }
-                } else
-                {
+                } else {
                     return value1.equals(value2);
                 }
             } else {
                 return false;
             }
         } else {
-            Boolean bool1 = value1 == null ? Boolean.FALSE : (Boolean)value1;
-            Boolean bool2 = value2 == null ? Boolean.FALSE : (Boolean)value2;
+            Boolean bool1 = value1 == null ? Boolean.FALSE : ObjectUtil.toBoolean(value1);
+            Boolean bool2 = value2 == null ? Boolean.FALSE : (Boolean) value2;
             return bool1.equals(bool2);
         }
     }
 
+    /**
+     *
+     * @param s 对象
+     * @return 盘点是否为空
+     */
     private static boolean isEmptyObject(Object s) {
         if (s instanceof String) {
-            return ((String)s).trim().length() == 0;
+            return ((String) s).trim().isEmpty();
         } else {
             return s == null || s == JSONObject.NULL;
         }
     }
+
+    /**
+     *
+     * @param o 对象
+     * @return 判断对象是字符串并且是空
+     */
+    public static boolean isNullOrWhiteSpace(Object o) {
+        if (o==null)
+        {
+            return true;
+        }
+        if (!(o instanceof String))
+        {
+            return false;
+        }
+        return StringUtil.isNullOrWhiteSpace((String)o);
+    }
+
+
 }

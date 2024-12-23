@@ -11,6 +11,7 @@ package com.github.jspxnet.sober;
 
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.exception.ValidException;
 import com.github.jspxnet.sober.table.SqlMapConf;
@@ -18,6 +19,7 @@ import com.github.jspxnet.txweb.table.meta.BaseBillType;
 import com.github.jspxnet.txweb.table.meta.OperatePlug;
 
 import java.io.Serializable;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -272,6 +274,14 @@ public interface SoberSupport extends Serializable {
      */
     int delete(Class<?> aClass, String field, Serializable serializable);
     /**
+     * @param savaList 保存数据
+     * @param soberTable  数据模型
+     * @return 执行结果
+     * @throws Exception 异常
+     */
+    int batchSave(List<Map> savaList, TableModels soberTable) throws Exception;
+
+    /**
      * 级联删除,不删除ManyToOne,只删除OneToOne 和 OneToMany
      *
      * @param o        对象
@@ -442,6 +452,9 @@ public interface SoberSupport extends Serializable {
      * @return 将表头数据返回给前端
      */
     List<SoberColumn> getColumnModels(Class<?> cla);
+
+    Connection getConnection(int type);
+
     /**
      * 设置字段数据(无映射关系)
      *
@@ -584,20 +597,25 @@ public interface SoberSupport extends Serializable {
     List<SoberColumn>  getSqlColumns(String sql);
 
     /**
+     * @param sql          sql
+     * @param fixFieldName 是否修复名称
+     * @return 通过sql 得到字段信息
+     */
+    List<SoberColumn>  getSqlColumns(String sql, boolean fixFieldName);
+    /**
+     *
+     * @param sql   sql
+     * @param fixFieldName 是否修复名称
+     * @return 通过sql得到表结构
+     */
+    SoberTable getSoberTable(String sql, boolean fixFieldName);
+
+    /**
      * sql map 查询器
      *
      * @return SqlMapClient
      */
     SqlMapClient buildSqlMap();
-
-
-    /**
-     *  有些数据库建表要带上库名
-     * @param createClass 生成表创建sql
-     * @param soberTable 库名等信息
-     * @return 得到创建表的SQL
-     */
-   // String getCreateTableSql(Class<?> createClass, TableModels soberTable);
 
     /**
      * 删除表

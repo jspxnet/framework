@@ -3,15 +3,19 @@ package com.github.jspxnet.sioc.util;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sioc.annotation.*;
+import com.github.jspxnet.sioc.interceptor.GlobalMethodInterceptor;
 import com.github.jspxnet.sober.annotation.SqlMap;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Transaction;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
+import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 
+@Slf4j
 public final class AnnotationUtil {
     private AnnotationUtil() {
     }
@@ -40,8 +44,7 @@ public final class AnnotationUtil {
                 try {
                     method.invoke(bean);
                 } catch (Exception e) {
-                    e.printStackTrace();
-
+                    log.error("invokeInit ",e);
                 }
             }
         }
@@ -138,10 +141,13 @@ public final class AnnotationUtil {
      * @return  判断是否有需要代理执行的方法
      */
     public static boolean hasProxyMethod(Class<?> cls) {
-        if (cls==null)
+
+        //避免出现嵌套循环
+        if (cls==null || GlobalMethodInterceptor.class.equals(cls) || MethodProxy.class.equals(cls))
         {
             return false;
         }
+
         for (Method method:cls.getDeclaredMethods())
         {
             if (method.getAnnotation(Transaction.class)!=null)

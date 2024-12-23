@@ -10,13 +10,16 @@
 package com.github.jspxnet.security.symmetry;
 
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.security.utils.Base64;
+import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.NumberUtil;
 import com.github.jspxnet.utils.StringUtil;
+import org.bouncycastle.util.encoders.Hex;
+
 import javax.crypto.spec.IvParameterSpec;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.security.spec.AlgorithmParameterSpec;
 
 /**
@@ -33,6 +36,20 @@ public abstract class AbstractEncrypt implements Encrypt {
     //加解密算法/模式/填充方式
     protected String cipherAlgorithm = StringUtil.empty;
     protected String cipherIv = StringUtil.empty;
+    protected KeyFormatEnumType keyFormatType = KeyFormatEnumType.STRING;
+
+    @Override
+    public KeyFormatEnumType getKeyFormatType() {
+        return keyFormatType;
+    }
+
+
+    @Override
+    public void setKeyFormatType(KeyFormatEnumType keyFormatType) {
+        this.keyFormatType = keyFormatType;
+    }
+
+
 
     @Override
     public void setSecretKey(String secretKey) {
@@ -91,20 +108,80 @@ public abstract class AbstractEncrypt implements Encrypt {
 
     //生成iv
     public AlgorithmParameterSpec getCipherIV() throws Exception {
-
-        if ("AES".equalsIgnoreCase(algorithm) && !StringUtil.hasLength(cipherIv)) {
+       /* if ("AES".equalsIgnoreCase(algorithm) && !StringUtil.hasLength(cipherIv)) {
             //iv 为一个 16 字节的数组，这里采用和 iOS 端一样的构造方法，数据全为0
             cipherIv = StringUtil.cut(NumberUtil.LING_STRING, 16, "");
         } else if ("DES".equalsIgnoreCase(algorithm) && !StringUtil.hasLength(cipherIv)) {
             //iv 为一个 16 字节的数组，这里采用和 iOS 端一样的构造方法，数据全为0
             cipherIv = StringUtil.cut(NumberUtil.LING_STRING, 8, "");
         }
+        return new IvParameterSpec(Hex.decodeStrict(cipherIv));*/
+
+        if ("AES".equalsIgnoreCase(algorithm) && StringUtil.hasLength(cipherIv)) {
+            //iv 为一个 16 字节的数组，这里采用和 iOS 端一样的构造方法，数据全为0
+            if (KeyFormatEnumType.HEX.equals(keyFormatType) && EncryptUtil.isHex(cipherIv))
+            {
+                return new IvParameterSpec(Hex.decodeStrict(cipherIv));
+            }
+            if (KeyFormatEnumType.BASE64.equals(keyFormatType) && EncryptUtil.isBase64(cipherIv))
+            {
+                return new IvParameterSpec(EncryptUtil.getBase64Decode(cipherIv));
+            }
+            String tmp = StringUtil.cut(cipherIv+NumberUtil.LING_STRING, 16, StringUtil.empty);
+            return new IvParameterSpec(tmp.getBytes(StandardCharsets.UTF_8));
+        }
+        if (("DESede".equalsIgnoreCase(algorithm) || "DES".equalsIgnoreCase(algorithm)) && StringUtil.hasLength(cipherIv)) {
+            //iv 为一个 16 字节的数组，这里采用和 iOS 端一样的构造方法，数据全为0
+            if (KeyFormatEnumType.HEX.equals(keyFormatType) && EncryptUtil.isHex(cipherIv))
+            {
+                return new IvParameterSpec(Hex.decodeStrict(cipherIv));
+            }
+            if (KeyFormatEnumType.BASE64.equals(keyFormatType) && EncryptUtil.isBase64(cipherIv))
+            {
+                return new IvParameterSpec(EncryptUtil.getBase64Decode(cipherIv));
+            }
+            String tmp = StringUtil.cut(cipherIv+NumberUtil.LING_STRING, 8, StringUtil.empty);
+            return new IvParameterSpec(tmp.getBytes(StandardCharsets.UTF_8));
+        }
+        if (KeyFormatEnumType.BASE64.equals(keyFormatType) && EncryptUtil.isBase64(cipherIv)&&cipherIv.length()!=32)
+        {
+              return new IvParameterSpec(EncryptUtil.getBase64Decode(cipherIv));
+        }
+        if (EncryptUtil.isHex(cipherIv)&&cipherIv.length()==32 || KeyFormatEnumType.HEX.equals(keyFormatType) )
+        {
+            return new IvParameterSpec(Hex.decodeStrict(cipherIv));
+        }
         return new IvParameterSpec(cipherIv.getBytes(Environment.defaultEncode));
+
     }
 
-    public byte[] getIvBytes() throws Exception {
-        return cipherIv.getBytes(Environment.defaultEncode);
+    public byte[] getSecretKeyBytes() throws Exception {
+        if (KeyFormatEnumType.STRING.equals(keyFormatType))
+        {
+            if ("AES".equalsIgnoreCase(algorithm) && StringUtil.hasLength(cipherIv)) {
+                //iv 为一个 16 字节的数组
+                return secretKey.length() > 16 ? secretKey.substring(0, 16).getBytes(Environment.defaultEncode) : secretKey.getBytes(Environment.defaultEncode);
+            }
+            if ( ("DESede".equalsIgnoreCase(algorithm) || "DES".equalsIgnoreCase(algorithm)) && StringUtil.hasLength(cipherIv)) {
+                return secretKey.length() > 8 ? secretKey.substring(0, 8).getBytes(Environment.defaultEncode) : secretKey.getBytes(Environment.defaultEncode);
+            }
+        }
+        if (KeyFormatEnumType.HEX.equals(keyFormatType) && EncryptUtil.isHex(secretKey)  && !EncryptUtil.isBase64(secretKey) && secretKey.length()==32)
+        {
+            return Hex.decodeStrict(secretKey);
+        }
+        if (KeyFormatEnumType.BASE64.equals(keyFormatType) && EncryptUtil.isBase64(secretKey)  && !EncryptUtil.isHex(secretKey) && secretKey.length()!=32)
+        {
+            return EncryptUtil.getBase64Decode(secretKey);
+        }
+        if ( EncryptUtil.isHex(secretKey) && secretKey.length()==32)
+        {
+            return Hex.decodeStrict(secretKey);
+        }
+
+        return secretKey.length() > 8 ? secretKey.substring(0, 8).getBytes(Environment.defaultEncode) : secretKey.getBytes(Environment.defaultEncode);
     }
+
 
     /**
      * @param data 数据

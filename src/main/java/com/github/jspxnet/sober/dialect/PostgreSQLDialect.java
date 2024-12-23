@@ -60,9 +60,10 @@ public class PostgreSQLDialect extends Dialect {
 
         put(BigDecimal.class.getName(), "${" + COLUMN_NAME + "} double precision <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
         put("BigDecimal", "${" + COLUMN_NAME + "} double precision <#if where=\"" +
-                "" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+                 COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
-        put(Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
+        put(java.util.Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
+        put(java.sql.Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
 
         put(Time.class.getName(), "${" + COLUMN_NAME + "} time <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '${" + COLUMN_DEFAULT + "}'</#if>");
 
@@ -77,7 +78,7 @@ public class PostgreSQLDialect extends Dialect {
         //修改系列开始
         put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE ${" + SERIAL_NAME + "} RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
 
-        put(SQL_TABLE_NAMES, "SELECT tablename FROM pg_tables WHERE tablename NOT LIKE 'pg%' AND tablename NOT LIKE 'sql_%' ORDER   BY tablename");
+        put(SQL_TABLE_NAMES, "SELECT tablename FROM pg_tables WHERE tablename NOT LIKE 'pg%' AND tablename NOT LIKE 'sql_%' ORDER BY tablename");
 
         put(DATABASE_SIZE, "SELECT pg_database_size('${" + KEY_TABLE_NAME + "}'");
 
@@ -307,6 +308,11 @@ public class PostgreSQLDialect extends Dialect {
     @Override
     public boolean commentPatch() {
         return true;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs limit 1";
     }
 
 }

@@ -26,10 +26,10 @@ public interface AsyEncrypt {
 
     byte[] decryptByPrivateKey(byte[] encryptedData, byte[] privateKey) throws Exception;
 
-    byte[] decryptByPublicKey(byte[] data, byte[] publicKey) throws Exception;
+   /* byte[] decryptByPublicKey(byte[] data, byte[] publicKey) throws Exception;
 
     byte[] encryptByPrivateKey(byte[] data, byte[] privateKey) throws Exception;
-
+*/
     // byte[] encryptByPrivateKey(byte[] data, byte[] privateKey)throws Exception;
 
     //byte[] decryptByPublicKey(byte[] encryptedData, byte[] publicKey) throws Exception;

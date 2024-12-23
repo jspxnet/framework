@@ -152,6 +152,7 @@ public class JSCache implements Runnable, Cache {
         if (store instanceof SingleRedissonStore)
         {
             //redis 就直接放了，不限制大小
+
             store.put(entry);
         } else
         {

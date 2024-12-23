@@ -13,6 +13,7 @@ import com.github.jspxnet.txweb.devcenter.view.SqlMapView;
 import com.github.jspxnet.txweb.model.param.SqlMapConfParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.BeanUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ import java.util.Map;
  * @author chenYuan
  *
  */
+@Slf4j
 @HttpMethod(caption = "SqlMap配置", actionName = "*", namespace = Environment.DEV_CENTER+"/sqlmap/conf")
 @Bean(namespace = Environment.DEV_CENTER, singleton = true)
 public class SqlMapAction extends SqlMapView {
@@ -54,7 +56,7 @@ public class SqlMapAction extends SqlMapView {
                 return RocResponse.success(sqlMapConf.getId(),language.getLang(LanguageRes.saveSuccess));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("save",e);
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),e.getMessage());
         }
         return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.saveFailure));

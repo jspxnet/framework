@@ -10,8 +10,8 @@
 package com.github.jspxnet.sioc.type;
 
 
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import java.lang.reflect.Type;
 
 /**
@@ -40,7 +40,7 @@ public class StringXmlType extends TypeSerializer {
         if (value == null) {
             return StringUtil.empty;
         }
-        return value.toString();
+        return ObjectUtil.toString(value);
     }
 
     @Override
@@ -48,11 +48,9 @@ public class StringXmlType extends TypeSerializer {
         if (value == null) {
             return StringUtil.empty;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("<string name=\"").append(name).append("\">");
-        sb.append(value);
-        sb.append("&gt;/string&lg;\r\n");
-        return sb.toString();
+        return "<string name=\"" + name + "\">" +
+                value +
+                "</string>\r\n";
     }
 
 }

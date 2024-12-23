@@ -5,16 +5,18 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/10/22 20:47
  * description: jspbox
  *
  **/
+@Slf4j
 public class ReadPdfTextFile extends AbstractRead {
     public final static String[] FILE_TYPE =  new String[]{"pdf"};
     public ReadPdfTextFile() {
@@ -43,7 +45,7 @@ public class ReadPdfTextFile extends AbstractRead {
                 result.append(strategy.getResultantText());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 

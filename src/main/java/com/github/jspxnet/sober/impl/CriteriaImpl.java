@@ -310,8 +310,6 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
         } catch (Exception e) {
             log.error("table:" + soberTable + " sql:" + sqlText, e);
-            e.printStackTrace();
-            throw new IllegalArgumentException("table:" + soberTable + " sql:" + sqlText);
         } finally {
             valueMap.clear();
             JdbcUtil.closeResultSet(resultSet);
@@ -362,19 +360,18 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         try {
             sqlText = dialect.processTemplate(Dialect.SQL_CRITERIA_DELETE, valueMap);
             result = jdbcOperations.update(sqlText, objectArray);
-            if (soberTable.isAutoCleanCache()&&soberTable.getEntity()!=null)
-            {
+            if (soberTable.isAutoCleanCache() && soberTable.getEntity() != null) {
                 jdbcOperations.evict(soberTable.getEntity());
             }
+            if (soberFactory.isUseCache()) {
+                //同时更新缓存
+                JSCacheManager.remove(criteriaClass, getDeleteListCacheKey());
+            }
+            return result;
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("查询异常SQL:" + sqlText);
+            log.error("table:" + soberTable + " sql:" + sqlText, e);
+            return -2;
         }
-        if (soberFactory.isUseCache()) {
-            //同时更新缓存
-            JSCacheManager.remove(criteriaClass, getDeleteListCacheKey());
-        }
-        return result;
     }
 
     /**
@@ -387,7 +384,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     public int update(Map<String, Object> updateMap) {
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
         if (soberTable == null) {
-            log.error("no fond sober Config :" + criteriaClass.getName());
+            log.error("no fond sober Config : {}", criteriaClass.getName());
             return -1;
         }
         Dialect dialect = soberFactory.getDialect();
@@ -431,14 +428,13 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         int result = 0;
         try {
             result = jdbcOperations.update(dialect.processTemplate(Dialect.SQL_CRITERIA_UPDATE, valueMap), objectArray);
-            if (soberTable.isAutoCleanCache()&&soberTable.getEntity()!=null)
-            {
+            if (soberTable.isAutoCleanCache() && soberTable.getEntity() != null) {
                 jdbcOperations.evict(soberTable.getEntity());
             } else {
                 jdbcOperations.evict(criteriaClass);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("update updateMap:{}", updateMap, e);
             throw new IllegalArgumentException(e.getMessage());
         }
         return result;
@@ -487,9 +483,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      */
     @Override
     public List<T> list(boolean loadChild) {
-        TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
+        final Class<T> cacheClass = criteriaClass;
+        TableModels soberTable = soberFactory.getTableModels(cacheClass, jdbcOperations);
         if (soberTable == null) {
-            log.error("no fond sober Config :" + criteriaClass.getName());
+            log.error("no fond sober Config :" + cacheClass.getName());
             return new ArrayList<T>(0);
         }
 
@@ -586,8 +583,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (termKey.toString().endsWith("_")) {
                 termKey.setLength(termKey.length() - 1);
             }
-            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, loadChild);
-            resultList = (List<T>) JSCacheManager.get(criteriaClass, cacheKey);
+            cacheKey = SoberUtil.getListKey(cacheClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, loadChild);
+            resultList = (List<T>) JSCacheManager.get(cacheClass, cacheKey);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
             }
@@ -627,7 +624,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
 
             while (resultSet.next()) {
-                T tempObj = jdbcOperations.loadColumnsValue(criteriaClass, resultSet);
+                T tempObj = jdbcOperations.loadColumnsValue(cacheClass, resultSet);
                 jdbcOperations.calcUnique(soberTable, tempObj);
                 resultList.add(tempObj);
                 if (resultList.size() >= totalCount) {
@@ -635,11 +632,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 }
             }
             if (loadChild) {
-                jdbcOperations.loadNexusList(criteriaClass, resultList);
+                jdbcOperations.loadNexusList(cacheClass, resultList);
             }
         } catch (Exception e) {
             log.info(sqlText, e);
-            e.printStackTrace();
             throw new IllegalArgumentException("查询异常SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
@@ -649,9 +645,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         }
         //放入cache
         if (soberFactory.isUseCache() && soberTable.isUseCache()) {
-            if (!JSCacheManager.put(criteriaClass, cacheKey, resultList)) {
-                log.error(criteriaClass + " put cache key " + cacheKey);
-            }
+            JSCacheManager.put(cacheClass, cacheKey, resultList);
         }
         return resultList;
     }
@@ -757,7 +751,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (termKey.toString().endsWith("_")) {
                 termKey.setLength(termKey.length() - 1);
             }
-            cacheKey = SoberUtil.getListKey(soberTable.getEntity(), StringUtil.replace(termText.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, false);
+            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termText.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, false);
             resultList = (List) JSCacheManager.get(criteriaClass, cacheKey);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
@@ -801,8 +795,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 }
             }
         } catch (Exception e) {
-            log.info(sqlText, e);
-            e.printStackTrace();
+            log.error(sqlText, e);
             throw new IllegalArgumentException("查询异常:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
@@ -813,9 +806,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
         //放入cache
         if (soberFactory.isUseCache() && soberTable.isUseCache() && !resultList.isEmpty()) {
-            if (!JSCacheManager.put(criteriaClass, cacheKey, resultList)) {
-                log.error(criteriaClass + " put cache key " + cacheKey);
-            }
+            JSCacheManager.put(criteriaClass, cacheKey, resultList);
         }
         return resultList;
     }
@@ -1171,7 +1162,6 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
         } catch (Exception e) {
             log.error("table:" + soberTable + " sql:" + sqlText, e);
-            e.printStackTrace();
             throw new IllegalArgumentException("table:" + soberTable + " sql:" + sqlText);
         } finally {
             valueMap.clear();

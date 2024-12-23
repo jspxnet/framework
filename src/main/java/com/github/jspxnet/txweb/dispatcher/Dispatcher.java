@@ -15,7 +15,6 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.json.JSONObject;
-
 import com.github.jspxnet.txweb.dispatcher.handle.*;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.result.RocResponse;
@@ -23,12 +22,14 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import com.thetransactioncompany.cors.CORSResponseWrapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ResponseFacade;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ import java.util.Map;
  * 转发器，转交action动作
  */
 @Slf4j
-public final class Dispatcher {
+public final class Dispatcher implements Serializable {
 
     private static final Map<String, WebHandle> ACTION_HANDLE_MAP = new HashMap<String, WebHandle>(7)
     {
@@ -57,6 +58,7 @@ public final class Dispatcher {
     };
 
     //根路径
+    @Getter
     private static String realPath;
 
     private static String encode;
@@ -92,10 +94,6 @@ public final class Dispatcher {
      */
     static public void shutdown() {
         ACTION_HANDLE_MAP.clear();
-    }
-
-    public static String getRealPath() {
-        return realPath;
     }
 
     public static void setRealPath(String realPath) {
@@ -172,7 +170,6 @@ public final class Dispatcher {
             WebHandle webHandle = ACTION_HANDLE_MAP.get(suffix);
             webHandle.doing(request, response);
         } catch (Exception e) {
-            e.printStackTrace();
             log.info(namespace + "/" + urlName, e);
             if (!response.isCommitted())
             {

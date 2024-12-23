@@ -13,6 +13,7 @@ import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.*;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -38,27 +39,17 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
     @Ref(name = MqIoc.ACTION_LOG_MQ_PRODUCER,test = true)
     private RocketMqProducer rocketMqProducer;
 
+    @Setter
     private String topic;
 
+    @Setter
     private String tags;
 
-
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
-
-    private boolean guestLog = false;
-
     /**
-     * @param guestLog 是否记录游客日志
+     * guestLog 是否记录游客日志
      */
-    public void setGuestLog(boolean guestLog) {
-        this.guestLog = guestLog;
-    }
+    @Setter
+    private boolean guestLog = false;
 
     @Override
     public void init() {

@@ -10,9 +10,7 @@
 package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.util.SqlParser;
 import com.github.jspxnet.utils.ObjectUtil;
-
 import java.sql.PreparedStatement;
 
 /**
@@ -39,7 +37,7 @@ public class MsSqlHeightDialect extends MsSqlDialect {
     }
 
     @Override
-    public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
+    public String getLimitString(String sql, int begin, int end,TableModels soberTable) {
         int length = end - begin;
         if (length < 0) {
             length = 0;
@@ -71,4 +69,5 @@ public class MsSqlHeightDialect extends MsSqlDialect {
     public boolean commentPatch() {
         return true;
     }
+
 }

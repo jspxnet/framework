@@ -6,6 +6,7 @@ import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ILicense;
 import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.utils.SystemUtil;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -30,6 +31,13 @@ public class LicenseInterceptor extends InterceptorSupport {
 
     }
 
+    public void setVerifyType(String verifyType) {
+        this.verifyType = verifyType;
+    }
+
+    //两种方式  GUID
+    private String verifyType = "MAC";
+
     private ILicense license;
 
     public void setLicense(ILicense license) {
@@ -43,7 +51,13 @@ public class LicenseInterceptor extends InterceptorSupport {
         String licenseVersion = Environment.versionFree;
 
         //许可值 0,没有注册,1：专业版:2:企业版
-        String mac = NetworkInfo.getMacAddress();
+        String mac = StringUtil.empty;
+        if ("MAC".equalsIgnoreCase(verifyType))
+        {
+           mac = NetworkInfo.getMacAddress();
+        } else {
+           mac = SystemUtil.SYSTEM_GUID;
+        }
         action.put(Environment.mac, mac);
         //许可计算 begin
         String licString = StringUtil.trim(config.getString(Environment.license));

@@ -28,8 +28,6 @@ public class TableMeta extends OperateTable {
     @Column(caption = "表名称", length = 100, notNull = true)
     private String tableName;
 
-
-
     //0:作废,1:表示只有1级主表;2:表示主子表;3:足子孙表 , 一般就不要超过3级了
     //利用这个标识优化查询
     @Column(caption = "表类型")

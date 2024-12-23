@@ -73,5 +73,6 @@ public class MemberSpace extends OperateTable {
     private String namespace = StringUtil.empty;
 
     @Column(caption = "职位id", length = 32)
-    private String positionNodeId;
+    private String positionNodeId = StringUtil.empty;
+
 }

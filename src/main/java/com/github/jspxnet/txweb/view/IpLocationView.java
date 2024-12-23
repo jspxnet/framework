@@ -17,6 +17,7 @@ import com.github.jspxnet.txweb.dao.IpLocationDAO;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,11 +34,8 @@ public class IpLocationView extends ActionSupport {
     @Ref
     protected IpLocationDAO ipLocationDAO;
 
+    @Getter
     private String ip = StringUtil.empty;
-
-    public String getIp() {
-        return ip;
-    }
 
     @Param(caption = "id")
     public void setIp(String ip) {

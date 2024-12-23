@@ -8,7 +8,6 @@ import com.github.jspxnet.utils.XMLUtil;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/10/15 23:34
  * description: jspbox
@@ -33,6 +32,11 @@ public abstract class BaseXmlTagNode extends TagNode {
     public String getCaption()
     {
         return XMLUtil.deleteQuote(getStringAttribute("caption"));
+    }
+
+    public String getCache()
+    {
+        return XMLUtil.deleteQuote(getStringAttribute("cache"));
     }
 
     public String getResultType()

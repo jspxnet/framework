@@ -81,11 +81,11 @@ public class HttpsClientAdapter extends HttpClientAdapter implements HttpClient 
         }
         return this;
     }
-/*
+
     public static void main(String[] args) throws Exception {
         String url = "https://www.wosign.com";
         HttpClient httpClient = new HttpsClientAdapter();
         String out = httpClient.build().getString(url);
         System.out.println(out);
-    }*/
+    }
 }

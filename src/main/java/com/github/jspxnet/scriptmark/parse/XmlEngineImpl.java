@@ -28,7 +28,7 @@ import java.util.List;
  * 用来解析XML
  */
 public class XmlEngineImpl implements XmlEngine {
-    private Configurable configurable = new TemplateConfigurable();
+    private final Configurable configurable = new TemplateConfigurable();
     private String tag;
 
     public XmlEngineImpl() {

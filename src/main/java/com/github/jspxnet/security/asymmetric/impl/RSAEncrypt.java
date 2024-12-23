@@ -110,17 +110,17 @@ public class RSAEncrypt extends AbstractEncrypt {
     /**
      * 公钥解密
      *
-     * @param data      已加密数据
-     * @param publicKey 公钥(BASE64编码)
-     * @return 原文
+     * param data      已加密数据
+     * param publicKey 公钥(BASE64编码)
+     * return 原文
      */
-    @Override
+    /*@Override
     public byte[] decryptByPublicKey(byte[] data, byte[] publicKey) throws Exception {
         if (ArrayUtil.isEmpty(data) || ArrayUtil.isEmpty(publicKey)) {
             return StringUtil.empty.getBytes();
         }
         return RSACoder.decryptByPublicKey(data, publicKey);
-    }
+    }*/
 
     /**
      * 公钥加密
@@ -140,17 +140,17 @@ public class RSAEncrypt extends AbstractEncrypt {
     /**
      * 私钥加密
      *
-     * @param data       源数据
-     * @param privateKey 私钥(BASE64编码)
-     * @return 原文
+     * param data       源数据
+     * param privateKey 私钥(BASE64编码)
+     * return 原文
      */
-    @Override
+  /*  @Override
     public byte[] encryptByPrivateKey(byte[] data, byte[] privateKey) throws Exception {
         if (ArrayUtil.isEmpty(data) || ArrayUtil.isEmpty(privateKey)) {
             return StringUtil.empty.getBytes();
         }
         return RSACoder.encryptByPrivateKey(data, privateKey);
-    }
+    }*/
 
 
 
@@ -169,7 +169,7 @@ public class RSAEncrypt extends AbstractEncrypt {
         byte[] jieMi  = encrypt.decryptByPrivateKey(jiaMi,keyPair.getPrivateKey());
         System.out.println("私密解密：" + new String(jieMi,Environment.defaultEncode));
         //--------------------------------------------------------------------------------------------------------------
-        byte[] pjiaMi  = encrypt.encryptByPrivateKey(source.getBytes(Environment.defaultEncode),keyPair.getPrivateKey());
+     /*   byte[] pjiaMi  = encrypt.encryptByPrivateKey(source.getBytes(Environment.defaultEncode),keyPair.getPrivateKey());
         System.out.println("私密加密的字符串为：" + new String(pjiaMi  ,Environment.defaultEncode) );
 
         //验证
@@ -180,7 +180,7 @@ public class RSAEncrypt extends AbstractEncrypt {
 
         byte[] pjieMi  = encrypt.decryptByPublicKey(pjiaMi,keyPair.getPublicKey());
 
-        System.out.println("私密解密：" + new String(pjieMi,Environment.defaultEncode));
+        System.out.println("私密解密：" + new String(pjieMi,Environment.defaultEncode));*/
     }
 
 }

@@ -5,7 +5,9 @@ import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
+import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.model.container.PropertyContainer;
+import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.beans.BeanCopier;
@@ -22,7 +24,6 @@ import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
- *
  * author chenYuan (mail:39793751@qq.com)
  * date: 2007-1-7
  * Time: 19:04:35
@@ -89,7 +90,6 @@ public final class BeanUtil {
                 (new java.beans.Expression(object, methodName, pObject)).execute();
             } catch (Exception e) {
                 log.error(object.getClass().getName() + StringUtil.DOT + methodName + " setProperty  type=" + aType + " value=" + obj, e);
-                e.printStackTrace();
             }
         } else
         {
@@ -149,7 +149,6 @@ public final class BeanUtil {
             }
         } catch (Exception e) {
             log.error(object.getClass().getName() + StringUtil.DOT + fieldName + " setValue  type=" + aType + " value=" + obj, e);
-            e.printStackTrace();
         }
     }
 
@@ -210,7 +209,7 @@ public final class BeanUtil {
         {
             ParameterizedType ptype = (ParameterizedType)aType;
             Type rawType = ptype.getRawType();
-            System.out.println("最外层<>前面那个类型 rawType："+rawType.getTypeName());
+            //System.out.println("最外层<>前面那个类型 rawType："+rawType.getTypeName());
             Type type = ptype.getActualTypeArguments()[0];
             if (rawType.getTypeName().contains("java.util.List")||rawType.getTypeName().contains(".Collection"))
             {
@@ -219,7 +218,7 @@ public final class BeanUtil {
                     JSONArray jsonArray = (JSONArray)obj;
                     return  GsonUtil.getList(jsonArray.toString(),cls);
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    log.error("最外层<>前面那个类型 rawType："+rawType.getTypeName(),e);
                 }
             }
             if (ClassUtil.isArrayType(aType)) {
@@ -228,7 +227,7 @@ public final class BeanUtil {
                     JSONArray jsonArray = (JSONArray) obj;
                     return GsonUtil.getList(jsonArray.toString(), cls).toArray();
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    log.error("aType：{}",aType,e);
                 }
             }
          }
@@ -244,7 +243,7 @@ public final class BeanUtil {
                 Class<?> cls = Class.forName(type.getTypeName());
                 return gson.fromJson(json.toString(),cls);
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                 log.error("obj：{}",obj,e);
             }
         }
 
@@ -488,7 +487,6 @@ public final class BeanUtil {
             }
         } catch (Throwable e) {
             log.error(object.getClass().getName() + " getProperty=" + testMethod.getName() + "  parameter=" + Arrays.toString(parameter) + ",检查类中方法是否正常执行", e);
-            e.printStackTrace();
         }
 
         return null;
@@ -701,7 +699,7 @@ public final class BeanUtil {
     }
 
 
-    private final static int[] STOP_MODIFIERS = {18, 25, 26, 28};
+    public final static int[] STOP_MODIFIERS = {18, 25, 26, 28,128};
 
     /**
      * 拷贝属性, 后边的数据拷贝到前边
@@ -722,16 +720,32 @@ public final class BeanUtil {
 
         if (getData instanceof Map) {
             Map<String,Object> map = (Map) getData;
+
             Class<?> getClass = newData.getClass();
+            Map<String,String> fieldMap = new HashMap<>();
+            List<SoberColumn> columns = AnnotationUtil.getColumnList(getClass);
+            for (SoberColumn column:columns)
+            {
+                fieldMap.put(column.getCaption(),column.getName());
+            }
             for (Object keyObj : map.keySet()) {
                 if (keyObj == null) {
                     continue;
                 }
+                //两个都是key begin
                 String key = ObjectUtil.toString(keyObj);
                 Field field = ClassUtil.getDeclaredField(getClass, key,true);
-                if (field == null && (newData instanceof PropertyContainer)) {
-                    PropertyContainer propertyContainer = (PropertyContainer)newData;
-                    propertyContainer.put(key,map.get(key));
+                //两个都是key end
+
+                if (field==null)
+                {
+                    key = fieldMap.get(key);
+                    field = ClassUtil.getDeclaredField(getClass, key,true);
+                }
+
+                if (field == null&&newData instanceof PropertyContainer) {
+                        PropertyContainer propertyContainer = (PropertyContainer)newData;
+                        propertyContainer.put(key,map.get(key));
                 }
                 if (field == null) {
                     continue;
@@ -741,10 +755,20 @@ public final class BeanUtil {
                 }
                 try {
                     field.setAccessible(true);
-                    field.set(newData, TypeUtil.getTypeValue(field.getType().getName(), map.get(key)));
+                    Object obj1 = null;
+                    if (map.containsKey(key))
+                    {
+                        obj1 = map.get(key);
+                    }
+                    if (obj1==null && map.containsKey(ObjectUtil.toString(keyObj)))
+                    {
+                        obj1 = map.get(ObjectUtil.toString(keyObj));
+                    }
+                    String fieldValue = ObjectUtil.toString(obj1);
+                    Object obj = TypeUtil.getTypeValue(field.getType().getName(),fieldValue);
+                    field.set(newData,obj);
                 } catch (Exception e) {
                     log.error("class={},field={},data={}",getClass,field.getName(),map.get(key), e);
-                    e.printStackTrace();
                 }
             }
             if (!(getData instanceof PropertyContainer))
@@ -845,7 +869,6 @@ public final class BeanUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
         }
     }
@@ -904,8 +927,7 @@ public final class BeanUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error(field.getName() + " Modifiers=" + field.getModifiers(), e);
+            log.error("{} Modifiers={}",field.getName(),field.getModifiers(), e);
         }
     }
     /**
@@ -1085,7 +1107,7 @@ public final class BeanUtil {
         {
             return ClassUtil.invokeStaticMethod(object.getClass().getName(),method.getName(),args);
         } else {
-            return method.invoke(object,string,args);
+            return method.invoke(object,args);
         }
     }
 
@@ -1105,19 +1127,39 @@ public final class BeanUtil {
         }
         if (ClassUtil.isArrayType(o.getClass()) && o.getClass().isArray())
         {
-            int length = ArrayUtil.getLength(o);
+            int length = Array.getLength(o);
             for (int i=0;i<length;i++)
             {
-                stringNullToEmpty(ArrayUtil.get((Object[])o,i));
+                Object tmp = Array.get(o,i);
+                if (tmp instanceof String && StringUtil.isNull((String)tmp))
+                {
+                    Array.set(o,i,StringUtil.empty);
+                }
             }
-        }
-
-        if (ClassUtil.isCollection(o)&& o instanceof Collection)
+        } else
+        if (ClassUtil.isCollection(o))
         {
-            Collection<Object> collection = (Collection<Object>)o;
-            for (Object obj:collection)
+            List<Object> tmpList = (List<Object>)o;
+            for (int i=0;i<tmpList.size();i++)
             {
-                stringNullToEmpty(obj);
+                Object tmp = tmpList.get(i);
+                if (tmp instanceof String && StringUtil.isNull((String)tmp))
+                {
+                    tmpList.set(i,StringUtil.empty);
+                }
+            }
+
+        } else
+        if (o instanceof Map)
+        {
+            Map<Object,Object> map = (Map<Object,Object>)o;
+            for (Object key:map.keySet())
+            {
+                Object obj = map.get(key);
+                if (obj instanceof String && StringUtil.isNull((String)obj))
+                {
+                    map.put(key,StringUtil.empty);
+                }
             }
         }
         Field[] fields = ClassUtil.getDeclaredFields(o.getClass());
@@ -1126,7 +1168,6 @@ public final class BeanUtil {
                 if (ArrayUtil.indexOf(STOP_MODIFIERS, field.getModifiers()) != -1) {
                     continue;
                 }
-
                 try {
                     Type aType = field.getGenericType();
                     if (aType.equals(String.class))
@@ -1137,20 +1178,45 @@ public final class BeanUtil {
                         {
                             field.set(o,StringUtil.empty);
                         }
-                    } else if (ClassUtil.isArrayType(aType) && ClassUtil.isArrayType(o))
+                    } else if (ClassUtil.isArrayType(aType))
                     {
-                        int length = ArrayUtil.getLength(o);
-                        for (int i=0;i<length;i++)
+                        field.setAccessible(true);
+                        Object v = field.get(o);
+                        if (v instanceof List)
                         {
-                            stringNullToEmpty(ArrayUtil.get((Object[])o,i));
+                            List<Object> tmpList = (List<Object>)v;
+                            for (int i=0;i<tmpList.size();i++)
+                            {
+                                Object tmp = tmpList.get(i);
+                                if (tmp instanceof String && StringUtil.isNull((String)tmp))
+                                {
+                                    tmpList.set(i,StringUtil.empty);
+                                }
+                            }
+                        } else {
+                            int length = Array.getLength(v);
+                            for (int i=0;i<length;i++)
+                            {
+                                Object tmp = Array.get(o,i);
+                                if (tmp instanceof String && StringUtil.isNull((String)tmp))
+                                {
+                                    Array.set(v,i,StringUtil.empty);
+                                }
+                            }
                         }
                     } else
-                    if (ClassUtil.isCollection(aType) && o instanceof Collection)
+                    if (ClassUtil.isCollection(aType))
                     {
-                        Collection<Object> collection = (Collection<Object>)o;
-                        for (Object obj:collection)
+                        field.setAccessible(true);
+                        Object v = field.get(o);
+                        List<Object> tmpList = (List<Object>)v;
+                        for (int i=0;i<tmpList.size();i++)
                         {
-                            stringNullToEmpty(obj);
+                            Object tmp = tmpList.get(i);
+                            if (tmp instanceof String && StringUtil.isNull((String)tmp))
+                            {
+                                tmpList.set(i,StringUtil.empty);
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -1159,5 +1225,272 @@ public final class BeanUtil {
             }
         }
     }
+
+    /**
+     *
+     * @param o  各种空转化为空白
+     */
+    public static void stringNullOrWhiteSpaceToEmpty(Object o) {
+        if (o==null)
+        {
+            return;
+        }
+        if (ClassUtil.isStandardProperty(o.getClass()))
+        {
+            return;
+        } else
+        if (ClassUtil.isArrayType(o.getClass()) && o.getClass().isArray())
+        {
+            int length = Array.getLength(o);
+            for (int i=0;i<length;i++)
+            {
+                Object tmp = Array.get(o,i);
+                if (ObjectUtil.isNullOrWhiteSpace(tmp))
+                {
+                    Array.set(o,i,StringUtil.empty);
+                }  else {
+                    stringNullOrWhiteSpaceToEmpty(tmp);
+                }
+            }
+        } else
+        if (ClassUtil.isCollection(o))
+        {
+            List<Object> tmpList = (List<Object>)o;
+            for (int i=0;i<tmpList.size();i++)
+            {
+                Object tmp = tmpList.get(i);
+                if (ObjectUtil.isNullOrWhiteSpace(tmp))
+                {
+                    tmpList.set(i,StringUtil.empty);
+                } else {
+                    stringNullOrWhiteSpaceToEmpty(tmp);
+                }
+            }
+        } else
+        if (o instanceof Map)
+        {
+            Map<Object,Object> map = (Map<Object,Object>)o;
+            for (Object key:map.keySet())
+            {
+                Object obj = map.get(key);
+                if (ObjectUtil.isNullOrWhiteSpace(obj) )
+                {
+                    map.put(key,StringUtil.empty);
+                } else {
+                    stringNullOrWhiteSpaceToEmpty(obj);
+                }
+            }
+        }
+        Field[] fields = ClassUtil.getDeclaredFields(o.getClass());
+        if (fields != null) {
+            for (Field field : fields) {
+                if (ArrayUtil.indexOf(BeanUtil.STOP_MODIFIERS, field.getModifiers()) != -1) {
+                    continue;
+                }
+                try {
+                    Type aType = field.getGenericType();
+                    if (aType.equals(String.class))
+                    {
+                        field.setAccessible(true);
+                        Object v = field.get(o);
+                        if (ObjectUtil.isNullOrWhiteSpace(v))
+                        {
+                            field.set(o,StringUtil.empty);
+                        }
+                    } else if (ClassUtil.isArrayType(aType))
+                    {
+                        field.setAccessible(true);
+                        Object v = field.get(o);
+                        if (v instanceof List)
+                        {
+                            List<Object> tmpList = (List<Object>)v;
+                            for (int i=0;i<tmpList.size();i++)
+                            {
+                                Object tmp = tmpList.get(i);
+                                if (ObjectUtil.isNullOrWhiteSpace(tmp))
+                                {
+                                    tmpList.set(i,StringUtil.empty);
+                                }  else {
+                                    stringNullOrWhiteSpaceToEmpty(tmp);
+                                }
+                            }
+                        } else {
+                            int length = Array.getLength(v);
+                            for (int i=0;i<length;i++)
+                            {
+                                Object tmp = Array.get(v,i);
+                                if (ObjectUtil.isNullOrWhiteSpace(tmp))
+                                {
+                                    Array.set(v,i,StringUtil.empty);
+                                }  else {
+                                    stringNullOrWhiteSpaceToEmpty(tmp);
+                                }
+                            }
+                        }
+                    } else
+                    if (ClassUtil.isCollection(aType))
+                    {
+                        field.setAccessible(true);
+                        Object v = field.get(o);
+                        List<Object> tmpList = (List<Object>)v;
+                        for (int i=0;i<tmpList.size();i++)
+                        {
+                            Object tmp = tmpList.get(i);
+                            if (ObjectUtil.isNullOrWhiteSpace(tmp))
+                            {
+                                tmpList.set(i,StringUtil.empty);
+                            }  else {
+                                stringNullOrWhiteSpaceToEmpty(tmp);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error(o + "   method=" + field.getName(), e);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 将数据中的字符串全角，转半角
+     * @param o bean 对象
+     */
+     public static void stringFullToHalf(Object o) {
+        if (o==null)
+        {
+            return;
+        }
+        if (ClassUtil.isStandardProperty(o.getClass()))
+        {
+            return;
+        }
+        if (ClassUtil.isArrayType(o.getClass()) && o.getClass().isArray())
+        {
+            int length = ArrayUtil.getLength(o);
+            for (int i=0;i<length;i++)
+            {
+
+                Object object = ArrayUtil.get((Object[])o,i);
+                if (object instanceof String)
+                {
+                    Array.set(o,i,StringUtil.fullToHalf((String) object));
+                }
+            }
+        } else
+        if (ClassUtil.isCollection(o))
+        {
+            List<Object> tmpList = (List<Object>)o;
+            for (int i=0;i<tmpList.size();i++)
+            {
+                Object tmp = tmpList.get(i);
+                if (tmp instanceof  String)
+                {
+                    tmpList.set(i,StringUtil.fullToHalf((String) tmp));
+                }
+            }
+        } else
+        if (o instanceof Map)
+         {
+             Map<Object,Object> map = (Map<Object,Object>)o;
+             for (Object key:map.keySet())
+             {
+                 Object tmp = map.get(key);
+                 if (tmp instanceof  String)
+                 {
+                     map.put(key,StringUtil.fullToHalf((String) tmp));
+                 }
+             }
+         }
+        Field[] fields = ClassUtil.getDeclaredFields(o.getClass());
+        if (fields != null) {
+            for (Field field : fields) {
+                if (ArrayUtil.indexOf(BeanUtil.STOP_MODIFIERS, field.getModifiers()) != -1) {
+                    continue;
+                }
+
+                try {
+                    Type aType = field.getGenericType();
+                    if (aType.equals(String.class))
+                    {
+                        field.setAccessible(true);
+                        Object v = field.get(o);
+                        if (v instanceof String && StringUtil.isNullOrWhiteSpace((String)v))
+                        {
+                            field.set(o,StringUtil.empty);
+                        } else {
+                            field.set(o,StringUtil.fullToHalf((String)v));
+                        }
+                    } else if (ClassUtil.isArrayType(aType))
+                    {
+                        field.setAccessible(true);
+                        Object v = field.get(o);
+                        if (v instanceof List)
+                        {
+                            List<Object> tmpList = (List<Object>)v;
+                            for (int i=0;i<tmpList.size();i++)
+                            {
+                                Object tmp = tmpList.get(i);
+                                if (tmp instanceof  String)
+                                {
+                                    tmpList.set(i,StringUtil.fullToHalf((String) tmp));
+                                }
+                            }
+                        } else {
+                            int length = ArrayUtil.getLength(v);
+                            for (int i=0;i<length;i++)
+                            {
+
+                                Object object = ArrayUtil.get((Object[])o,i);
+                                if (object instanceof String)
+                                {
+                                    Array.set(v,i,StringUtil.fullToHalf((String) object));
+                                }
+                            }
+                        }
+                    } else
+                    if (ClassUtil.isCollection(aType))
+                    {
+                        field.setAccessible(true);
+                        Object v = field.get(o);
+                        List<Object> tmpList = (List<Object>)v;
+                        for (int i=0;i<tmpList.size();i++)
+                        {
+                            Object tmp = tmpList.get(i);
+                            if (tmp instanceof  String)
+                            {
+                                tmpList.set(i,StringUtil.fullToHalf((String) tmp));
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error(o + "   method=" + field.getName(), e);
+                }
+            }
+        }
+    }
+
+/*
+    public static void main(String[] args) {
+
+        CityItem cityItem = new CityItem();
+        cityItem.setCaption(null);
+        cityItem.setRoleIds(" ");
+        cityItem.setDescription("sdfsd士大夫的,()（）【】，。");
+        List<Object> list = new ArrayList<>();
+        list.add(cityItem);
+
+        JSONObject json = new JSONObject(cityItem);
+        stringNullOrWhiteSpaceToEmpty(json);
+        System.out.println(ObjectUtil.toString(json));
+        stringFullToHalf(cityItem);
+        System.out.println(ObjectUtil.toString(cityItem));
+        System.out.println(ObjectUtil.toString(list));
+        cityItem.setDescription(null);
+        stringNullToEmpty(cityItem);
+        System.out.println(ObjectUtil.toString(cityItem));
+
+    }
+*/
 
 }

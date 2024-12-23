@@ -1,6 +1,8 @@
 package com.github.jspxnet.txweb.devcenter.action;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.cron4j.Scheduler;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.sioc.annotation.Bean;
@@ -15,14 +17,22 @@ import com.github.jspxnet.txweb.model.dto.SchedulerDto;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.SchedulerControl;
 import com.github.jspxnet.utils.BeanUtil;
+import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
+ * {@code
  * useSchedulerRegister=true
+ * 远程注册服务器地址
  * schedulerRegisterUrl=http://127.0.0.1:8080/devcenter/task/register.jwc
- * schedulerRegisterApi=http://127.0.0.1:8080/devcenter/task/list/register
+ * 本机地址
+ * schedulerRegisterApi = http://127.0.0.1/devcenter/tasklocal
  * schedulerRegisterToken=3294u23uosudf98398432432
+ * schedulerRegisterName = scheduler-local
+ * }
  */
+@Slf4j
 @HttpMethod(caption = "本地定时任务", actionName = "*", namespace = Environment.DEV_CENTER+"/tasklocal")
 @Bean(namespace = Environment.DEV_CENTER, singleton = true)
 public class SchedulerTaskAction extends SchedulerTaskView {
@@ -53,7 +63,7 @@ public class SchedulerTaskAction extends SchedulerTaskView {
             try {
                 scheduler.forceRun();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("loadUi",e);
                 return RocResponse.error(ErrorEnumType.CALL_API.getValue(),e.getMessage());
             }
         }
@@ -74,7 +84,7 @@ public class SchedulerTaskAction extends SchedulerTaskView {
             try {
                 scheduler.start();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("start",e);
                 return RocResponse.error(ErrorEnumType.CALL_API.getValue(),e.getMessage());
             }
         }
@@ -97,7 +107,7 @@ public class SchedulerTaskAction extends SchedulerTaskView {
                 scheduler.stop();
 
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("stop",e);
                 return RocResponse.error(ErrorEnumType.CALL_API.getValue(),e.getMessage());
             }
         }
@@ -115,6 +125,8 @@ public class SchedulerTaskAction extends SchedulerTaskView {
         {
             return RocResponse.success(0,"任务不在此服务");
         }
+
+        EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
         try {
             //原状态
             //scheduler.isStarted();
@@ -123,12 +135,16 @@ public class SchedulerTaskAction extends SchedulerTaskView {
             genericDAO.delete(SchedulerControl.class,guid);
             SchedulerDto dto = scheduler.getTaskConf();
             SchedulerControl schedulerControl =  BeanUtil.copy(dto,SchedulerControl.class);
+            if (StringUtil.isNull(schedulerControl.getRegisterName()))
+            {
+                schedulerControl.setRegisterName(environmentTemplate.getString(Environment.SCHEDULER_REGISTER_NAME));
+            }
             genericDAO.save(schedulerControl);
             //scheduler.start();
             schedulerRegisterTask.run();
             return RocResponse.success(1,"执行成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("updatePattern",e);
             return RocResponse.error(ErrorEnumType.CALL_API.getValue(),e.getMessage());
         }
     }

@@ -16,13 +16,17 @@ import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.Phrase;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.core.HtmlEngineImpl;
+import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.core.block.*;
 import com.github.jspxnet.scriptmark.core.block.template.*;
 import com.github.jspxnet.scriptmark.core.dispose.*;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,6 +41,10 @@ public class TemplateConfigurable implements Configurable {
     private final Map<String, String> tagMap = new HashMap<>();
     private final Map<String, Object> hashMap = new HashMap<>();
     private final Map<String, Phrase> phrases = new HashMap<>(20);
+
+
+    private final List<TagNode> autoImportTagNodeList = new ArrayList<>();
+
 
     private String[] autoImports = null;
     private String[] autoIncludes = null;
@@ -94,6 +102,7 @@ public class TemplateConfigurable implements Configurable {
         hashMap.put(ScriptmarkEnv.CompressBlockName, "#compress");
         hashMap.put(ScriptmarkEnv.htmlExtType, true);
         hashMap.put(ScriptmarkEnv.xmlEscapeClean, false);
+        hashMap.put(ScriptmarkEnv.FixUndefined, true);
         //////////
 
         ////////////Tag配置 begin
@@ -300,6 +309,19 @@ public class TemplateConfigurable implements Configurable {
     }
 
     @Override
+    public List<TagNode> getAutoImportTagNodeList() {
+        return autoImportTagNodeList;
+    }
+
+    @Override
+    public void setAutoImportTagNodeList(List<TagNode> autoImportTagNodeList) {
+        this.autoImportTagNodeList.clear();
+        this.autoImportTagNodeList.addAll(autoImportTagNodeList);
+    }
+
+
+
+    @Override
     public Configurable copy() {
         TemplateConfigurable tc = new TemplateConfigurable();
         tc.setTagMap(new HashMap<>(tagMap));
@@ -308,6 +330,8 @@ public class TemplateConfigurable implements Configurable {
         tc.setAutoImports(autoImports);
         tc.setGlobalMap(new HashMap<>(globalMap));
         tc.setStaticModels(staticModels);
+        tc .setAutoImportTagNodeList(autoImportTagNodeList);
         return tc;
     }
+
 }

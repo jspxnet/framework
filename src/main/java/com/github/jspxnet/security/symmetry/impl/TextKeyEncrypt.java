@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.security.symmetry.impl;
 
-/**
+/*
  * Created by IntelliJ IDEA.
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2004-4-16
@@ -21,14 +21,16 @@ package com.github.jspxnet.security.symmetry.impl;
  */
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.security.symmetry.AbstractEncrypt;
+import com.github.jspxnet.utils.StringUtil;
 
 import java.io.UnsupportedEncodingException;
 
 public class TextKeyEncrypt extends AbstractEncrypt {
 
     public TextKeyEncrypt() {
-
+        keyFormatType = KeyFormatEnumType.STRING;
     }
 
     @Override
@@ -45,23 +47,23 @@ public class TextKeyEncrypt extends AbstractEncrypt {
     @Override
     public byte[] getDecode(byte[] b) throws UnsupportedEncodingException {
         if (b == null || b.length == 0) {
-            return "".getBytes();
+            return StringUtil.empty.getBytes();
         }
         byte[] key = secretKey.getBytes(Environment.defaultEncode);
         byte[] ins;
         ins = b;
         int keyIndex = key.length;
         int insIndex = ins.length;
-        byte[] orgs = new byte[insIndex / 2];
+        byte[] org = new byte[insIndex / 2];
         for (int i = 0; i < insIndex; i += 2) {
             int index = (i / 2) % keyIndex;
             int k = ins[i] - key[index];
             if (k < 0) {
                 k = k + 256;
             }
-            orgs[i / 2] = (byte) k;
+            org[i / 2] = (byte) k;
         }
-        return orgs;
+        return org;
     }
 
     /**
@@ -83,9 +85,6 @@ public class TextKeyEncrypt extends AbstractEncrypt {
             int index = i % keyIndex;
             int k = b[i] + key[index];
             int d = (int) (255 * Math.random());
-            if (k > 255) {
-                k = k - 255;
-            }
             outs[2 * i] = (byte) k;
             outs[2 * i + 1] = (byte) d;
         }

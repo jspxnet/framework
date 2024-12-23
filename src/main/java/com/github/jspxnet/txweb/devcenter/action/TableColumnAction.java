@@ -12,13 +12,10 @@ import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.devcenter.view.TableFieldView;
 import com.github.jspxnet.txweb.model.param.component.SoberColumnParam;
-import com.github.jspxnet.txweb.model.param.component.TableColumnParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
-
 import java.lang.reflect.Type;
-import java.util.List;
 
 
 @HttpMethod(caption = "基础控件", actionName = "*", namespace = Environment.DEV_CENTER+"/column")

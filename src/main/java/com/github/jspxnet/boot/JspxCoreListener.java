@@ -30,6 +30,7 @@ import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
+import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.txweb.config.DefaultConfiguration;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
@@ -214,15 +215,21 @@ public class JspxCoreListener implements ServletContextListener {
             cache.setName(DefaultCache.class.getName());
             cache.setStore(new MemoryStore());
             JSCacheManager.getCacheManager().registeredCache(cache);
+        } else {
+            SoberUtil.clearSystemCache();
         }
+        //启动的时候清空缓存
+
+
 
         com.github.jspxnet.txweb.config.Configuration configuration = DefaultConfiguration.getInstance();
         try {
             configuration.loadConfigMap();
         } catch (Exception e) {
-            e.printStackTrace();
+
             log.error("载入Web配置错误", e);
         }
+
 
         TxWebConfigManager.getInstance().checkLoad();
         //rpc服务器,提供外部rpctcp调用 begin
@@ -257,10 +264,7 @@ public class JspxCoreListener implements ServletContextListener {
         log.info("Evasive config clean");
         //Evasive配置卸载begin
 
-        //定时任务
-        SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
-        schedulerManager.shutdown();
-        log.info("scheduler shutdown");
+
 
         if (RpcConfig.getInstance().isUseNettyRpc()) {
             log.info("关闭RPC服务器");
@@ -301,12 +305,17 @@ public class JspxCoreListener implements ServletContextListener {
             }
             //...
         }
+
+        //定时任务
+        SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
+        schedulerManager.shutdown();
+        log.info("scheduler shutdown");
         //关闭定时器和其他线程end
         try {
             DaemonThreadFactory.shutdown();
             log.info("Thread shutdown");
         } catch (Exception exception) {
-            exception.printStackTrace();
+            //...exception.printStackTrace();
             if (forceExit)
             {
                 System.exit(0);

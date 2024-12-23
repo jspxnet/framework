@@ -20,6 +20,8 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.NumberUtil;
 import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
@@ -40,29 +42,25 @@ public class ValidateExpImgView extends ActionSupport {
     private ValidateCodeCache validateCodeCache;
 
     // 图片的宽度。
+    @Getter
     private int width = 70;
     // 图片的高度。
+    @Getter
     private int height = 24;
     // 验证码干扰线数
 
+    @Getter
     private String bgColor = "#FFFFFF";
+    @Getter
     private String color = null;
 
     private String fileType = "png";
     private boolean safe = true;
 
 
-    public int getWidth() {
-        return width;
-    }
-
     @Param(caption = "宽", min = 0)
     public void setWidth(int width) {
         this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     @Param(caption = "高", min = 0)
@@ -70,17 +68,9 @@ public class ValidateExpImgView extends ActionSupport {
         this.height = height;
     }
 
-    public String getBgColor() {
-        return bgColor;
-    }
-
     @Param(caption = "背景色", min = 0)
     public void setBgColor(String bgColor) {
         this.bgColor = bgColor;
-    }
-
-    public String getColor() {
-        return color;
     }
 
     @Param(caption = "颜色", min = 0)

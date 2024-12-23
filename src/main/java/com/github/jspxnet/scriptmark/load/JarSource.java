@@ -40,12 +40,9 @@ public class JarSource extends AbstractSource {
 
     @Override
     public long getLastModified() {
-        try {
-            JarFile jarFile = new JarFile(file);
+        try (JarFile jarFile = new JarFile(file)){
             return jarFile.getEntry(getName()).getTime();
-        } catch (JarException e) {
-            return -1;
-        } catch (IOException e) {
+        } catch (Exception e) {
             return -1;
         }
     }

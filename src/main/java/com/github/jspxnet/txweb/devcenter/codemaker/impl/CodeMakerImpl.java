@@ -184,7 +184,6 @@ public class CodeMakerImpl implements CodeMaker {
      * @param tableModels 类模型
      * @param jumpFields  排除字段
      * @return 创建列表
-     * @throws Exception 异常
      */
     private static Map<String, Object> createValueMap(TableModels tableModels,List<String> jumpFields)  {
         if (tableModels==null)

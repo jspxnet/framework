@@ -7,10 +7,10 @@ import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.cache.redis.RedissonClientConfig;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.annotation.Bean;
+import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.IDType;
 import com.github.jspxnet.sober.annotation.Id;
-import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.table.Sequences;
 import com.github.jspxnet.utils.BooleanUtil;
 import com.github.jspxnet.utils.DateUtil;
@@ -71,7 +71,7 @@ public class SequenceFactory {
      * @return 返回key
      * @throws Exception 异常
      */
-     public String getNextKey(String keyName, Id idf, Class<?> type, JdbcOperations jdbcOperations) throws Exception {
+     public String getNextKey(String keyName, Id idf, Class<?> type, SoberSupport jdbcOperations) throws Exception {
         Sequences tableSequences = (Sequences)JSCacheManager.get(Sequences.class,keyName);
         if (tableSequences==null||tableSequences.getKeyValue()==idf.min())
         {
@@ -172,7 +172,7 @@ public class SequenceFactory {
      * @return 返回单号
      * @throws Exception 异常
      */
-    public String getNextBillNo(String keyName,  JdbcOperations jdbcOperations) throws Exception {
+    public String getNextBillNo(String keyName,  SoberSupport jdbcOperations) throws Exception {
         Sequences tableSequences = (Sequences)JSCacheManager.get(Sequences.class,keyName);
         if (tableSequences==null)
         {

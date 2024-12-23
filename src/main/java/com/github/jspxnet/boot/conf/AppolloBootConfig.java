@@ -3,23 +3,15 @@ package com.github.jspxnet.boot.conf;
 
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
-import com.ctrip.framework.apollo.core.dto.ApolloConfig;
-import com.ctrip.framework.apollo.core.dto.ApolloNotificationMessages;
-import com.ctrip.framework.apollo.core.dto.ServiceDTO;
 import com.ctrip.framework.apollo.enums.PropertyChangeType;
-import com.ctrip.framework.apollo.internals.ConfigRepository;
-import com.ctrip.framework.apollo.internals.RemoteConfigRepository;
 import com.ctrip.framework.apollo.model.ConfigChange;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.enums.BootConfigEnumType;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 @Slf4j
@@ -38,6 +30,7 @@ public class AppolloBootConfig {
         envTemplate.put(Environment.BOOT_CONF_MODE, BootConfigEnumType.APPOLLO.getName());
         log.debug("Apollo bootstrap namespaces: {},env: {}", namespace,properties.get(Environment.APOLLO_ENV));
         //"application" apollo.ip
+
 
         Config config = ConfigService.getConfig(namespace);
         Set<String> names = config.getPropertyNames();

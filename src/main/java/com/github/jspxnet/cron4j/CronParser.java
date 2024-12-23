@@ -21,6 +21,7 @@ package com.github.jspxnet.cron4j;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.SystemUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.URL;
@@ -159,6 +160,7 @@ import java.util.List;
  * @author Carlo Pelliccia
  * @since 2.0
  */
+@Slf4j
 public class CronParser {
 
 	/**
@@ -281,8 +283,7 @@ public class CronParser {
 				try {
 					parseLine(table, line);
 				} catch (Exception e) {
-					e.printStackTrace();
-					continue;
+					 log.error("parseLine line:{}",line,e);
 				}
 			}
 		} finally {
@@ -304,7 +305,7 @@ public class CronParser {
 	 */
 	public static void parseLine(TaskTable table, String line) throws Exception {
 		line = line.trim();
-		if (line.length() == 0 || line.charAt(0) == '#') {
+		if (line.isEmpty() || line.charAt(0) == '#') {
 			return;
 		}
 		// Detecting the pattern.
@@ -378,7 +379,7 @@ public class CronParser {
 		File stderrFile = null;
 		List<String> envsList = new ArrayList<>();
 		String command = null;
-		List<String> argsList = new ArrayList();
+		List<String> argsList = new ArrayList<>();
 		for (int i = 0; i < size; i++) {
 			String tk =  splitted.get(i);
 			// Check the local status.
@@ -403,15 +404,13 @@ public class CronParser {
 					status = 1;
 				}
 			}
-			if (status == 1) {
-				// Command or argument?
-				if (command == null) {
-					command = tk;
-				} else {
-					argsList.add(tk);
-				}
-			}
-		}
+            // Command or argument?
+            if (command == null) {
+                command = tk;
+            } else {
+                argsList.add(tk);
+            }
+        }
 		// Task preparing.
 		Task task;
 		// Command evaluation.
@@ -421,7 +420,7 @@ public class CronParser {
 		} else if (command.startsWith("java:")) {
 			// Java inner-process.
 			String className = command.substring(5);
-			if (className.length() == 0) {
+			if (className.isEmpty()) {
 				throw new Exception("Invalid Java class name on line: " + line);
 			}
 			String methodName;
@@ -431,7 +430,7 @@ public class CronParser {
 			} else {
 				methodName = className.substring(sep + 1);
 				className = className.substring(0, sep);
-				if (methodName.length() == 0) {
+				if (methodName.isEmpty()) {
 					throw new Exception("Invalid Java method name on line: "
 							+ line);
 				}
@@ -540,7 +539,7 @@ public class CronParser {
 									skip = 6;
 								}
 							} catch (NumberFormatException e) {
-								;
+								//...
 							}
 						}
 					}

@@ -17,10 +17,12 @@ import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.UiTemplate;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.BeanUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Map;
 
-
+@Slf4j
 @HttpMethod(caption = "UI模板", actionName = "*", namespace = Environment.DEV_CENTER+"/ui/template")
 @Bean(namespace = Environment.DEV_CENTER, singleton = true)
 public class UiTemplateAction extends UiTemplateView {
@@ -54,7 +56,7 @@ public class UiTemplateAction extends UiTemplateView {
                 return RocResponse.success(uiTemplate.getId(),language.getLang(LanguageRes.saveSuccess));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("save",e);
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),e.getMessage());
         }
         return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.saveFailure));
@@ -85,7 +87,7 @@ public class UiTemplateAction extends UiTemplateView {
                 result = ArrayUtil.add(result,template.getId());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("loadUi",e);
             return RocResponse.error(ErrorEnumType.WARN.getValue(),e.getMessage());
         }
         return RocResponse.success(result,language.getLang(LanguageRes.saveSuccess));

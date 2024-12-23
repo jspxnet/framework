@@ -29,12 +29,11 @@ public class ScopeNoteUtil {
      */
     public static JSONArray delete(String xml, long id) {
         JSONArray list = decode(xml);
-        for (int i = 0; i < list.length(); i++) {
+        for (int i = list.length()-1; i>=0; i--) {
             JSONObject jsonNote = list.getJSONObject(i);
             if (jsonNote != null && id == jsonNote.getLong("id")) {
                 list.remove(i);
             }
-
         }
         return list;
     }

@@ -1,12 +1,8 @@
 package com.github.jspxnet.network.http;
 
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.network.http.adapter.HttpClientAdapter;
 import com.github.jspxnet.network.http.adapter.HttpsClientAdapter;
-import com.github.jspxnet.security.utils.EncryptUtil;
-
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -96,20 +92,20 @@ public abstract class HttpClientFactory {
         }
     }
 
-
+/*
 
     public static void main(String[] args) throws Exception {
 
 
-/*
+
         File file1 = new File("d:\\logs\\logs1.zip");
         File file2 = new File("d:\\logs\\info-2024-06-08.zip");
         testUpload(new File[]{file1,file2});
-*/
 
-      /*  File file = new File("d:\\logs\\test.pdf");
-        testDownload(file);
-*/
+
+    //  File file = new File("d:\\logs\\test.pdf");
+        //testDownload(file);
+        testGet();
     }
 
     public static void testDownload(File file) throws Exception {
@@ -118,6 +114,14 @@ public abstract class HttpClientFactory {
         System.out.println("b=" + b);
         httpClient.close();
     }
+
+    public static void testGet() throws Exception {
+        HttpClient httpClient = createHttpClient("http://www.jspx.net/jcms/htdoc/refresh.jhtml");
+        String out = httpClient.getString();
+        System.out.println("b=" + out);
+        httpClient.close();
+    }
+
     public static void testUpload(File[] files) throws Exception {
 
         HttpClient httpClient = createHttpClient("http://127.0.0.1:8089/k3business/upload.jwc");
@@ -132,5 +136,5 @@ public abstract class HttpClientFactory {
         String out = httpClient.upload(files,"file",valueMap);
         System.out.println("out=" + out);
         httpClient.close();
-    }
+    }*/
 }

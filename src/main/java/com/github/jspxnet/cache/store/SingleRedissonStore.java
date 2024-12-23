@@ -12,10 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 但缓存下是用,分布式多缓存下是用 RedisStore
@@ -24,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SingleRedissonStore extends Store implements IStore {
     private static RedissonClient redisson = null;
-    private static  boolean useCache;
+    private static boolean useCache;
 
     public SingleRedissonStore() {
 
@@ -35,7 +33,7 @@ public class SingleRedissonStore extends Store implements IStore {
         if (redisson != null) {
             return;
         }
-        redisson =  (RedissonClient)EnvFactory.getBeanFactory().getBean(RedissonClientConfig.class);
+        redisson = (RedissonClient) EnvFactory.getBeanFactory().getBean(RedissonClientConfig.class);
         useCache = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useCache);
     }
 
@@ -50,14 +48,12 @@ public class SingleRedissonStore extends Store implements IStore {
     @Override
     public void put(CacheEntry entry) {
 
-        if (!useCache||entry.getKey()==null || cacheKey==null)
-        {
+        if (!useCache || entry.getKey() == null || cacheKey == null) {
             return;
         }
-        RMap<String,CacheEntry> rMap = redisson.getMap(cacheKey);
+        RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         rMap.put(entry.getKey(), entry);
-        if (getSecond()>1)
-        {
+        if (getSecond() > 1) {
             rMap.expire(Instant.now().plusSeconds(getSecond()));
         }
     }
@@ -65,8 +61,7 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public long size() {
-        if (!useCache||redisson==null||cacheKey==null)
-        {
+        if (!useCache || redisson == null || cacheKey == null) {
             return 0;
         }
         return redisson.getMap(cacheKey).size();
@@ -80,40 +75,33 @@ public class SingleRedissonStore extends Store implements IStore {
      */
     @Override
     public CacheEntry get(String key) {
-        if (!useCache || StringUtil.isNull(cacheKey))
-        {
+        if (!useCache || StringUtil.isNull(cacheKey)) {
             return null;
         }
 
         RMap<String, CacheEntry> rMap = null;
         try {
             rMap = redisson.getMap(cacheKey);
-            if (rMap==null)
-            {
+            if (rMap == null) {
                 return null;
             }
             CacheEntry cacheEntry = rMap.get(key);
             if (cacheEntry == null) {
                 return null;
             }
-            if (System.currentTimeMillis() > cacheEntry.getExpirationTime())
-            {
+            if (System.currentTimeMillis() > cacheEntry.getExpirationTime()) {
                 rMap.delete();
                 return null;
             }
-            if (cacheEntry.isKeep())
-            {
+            if (cacheEntry.isKeep()) {
                 cacheEntry.setAccessTime(System.currentTimeMillis());
-                rMap.replace(key,cacheEntry);
+                rMap.replace(key, cacheEntry);
             }
             return cacheEntry;
-        } catch (Exception e)
-        {
-            if (rMap!=null)
-            {
+        } catch (Exception e) {
+            if (rMap != null) {
                 rMap.remove(key);
-            } else
-            {
+            } else {
                 redisson.getMap(cacheKey).clear();
             }
             return null;
@@ -139,13 +127,11 @@ public class SingleRedissonStore extends Store implements IStore {
     @Override
     public CacheEntry remove(String key) {
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
-        if (!useCache||rMap==null)
-        {
+        if (!useCache || rMap == null) {
             return null;
         }
         Object obj = rMap.get(key);
-        if (obj==null)
-        {
+        if (obj == null) {
             return null;
         }
         return rMap.remove(key);
@@ -156,31 +142,29 @@ public class SingleRedissonStore extends Store implements IStore {
      */
     @Override
     public void removeAll() {
-        if (!useCache||redisson==null||redisson.isShutdown()) {
+        if (!useCache || redisson == null || redisson.isShutdown()) {
             return;
         }
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
-        if (rMap!=null)
-        {
+        if (rMap != null) {
             rMap.delete();
         }
     }
 
     @Override
     public Collection<CacheEntry> getAll() {
-        if (!useCache||redisson==null||redisson.isShutdown()) {
+        if (!useCache || redisson == null || redisson.isShutdown()) {
             return new ArrayList<>(0);
         }
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
-        if (rMap!=null)
-        {
-           return rMap.values();
+        if (rMap != null) {
+            return rMap.values();
 
         }
         return new ArrayList<>(0);
     }
+
     /**
-     *
      * @return redis默认一直保存
      * @throws CacheException 异常
      */
@@ -191,13 +175,11 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public Set<String> getKeys() {
-        if (!useCache)
-        {
+        if (!useCache) {
             return new HashSet<>(0);
         }
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
-        if (rMap==null)
-        {
+        if (rMap == null) {
             return new HashSet<>(0);
         }
         return rMap.keySet();
@@ -217,7 +199,7 @@ public class SingleRedissonStore extends Store implements IStore {
 
     @Override
     public void dispose() {
-       if (redisson!=null&&!redisson.isShutdown()) {
+        if (redisson != null && !redisson.isShutdown()) {
             redisson.shutdown();
         }
     }

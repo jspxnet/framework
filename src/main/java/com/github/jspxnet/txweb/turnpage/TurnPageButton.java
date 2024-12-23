@@ -32,6 +32,8 @@ public interface TurnPageButton {
 
     void setTotalCount(int totalCount);
 
+    void setTotalCount(long totalCount);
+
     long getTotalCount();
 
     void setQuerystring(String querystring);

@@ -11,6 +11,7 @@ package com.github.jspxnet.utils;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,7 +92,7 @@ final public class NumberUtil {
             //循环处理转换操作
             while (doubMoneyNumber > 0) {
                 //整的处理(无小数位)
-                if (ChineseUnitIndex == 2 && strChineseCurrency.length() == 0) {
+                if (ChineseUnitIndex == 2 && strChineseCurrency.isEmpty()) {
                     strChineseCurrency = strChineseCurrency + "整";
                 }
                 //非零数位的处理
@@ -104,10 +105,8 @@ final public class NumberUtil {
                     //元的处理(个位)
                     if (ChineseUnitIndex == 2) {
                         //段中有数字
-                        if (doubMoneyNumber > 0) {
-                            strChineseCurrency = STR_CHINESE_UNIT[ChineseUnitIndex] + strChineseCurrency;
-                            bZero = true;
-                        }
+                        strChineseCurrency = STR_CHINESE_UNIT[ChineseUnitIndex] + strChineseCurrency;
+                        bZero = true;
                     }
                     //万、亿数位的处理
                     else if (ChineseUnitIndex == 6 || ChineseUnitIndex == 10) {
@@ -207,7 +206,7 @@ final public class NumberUtil {
         }
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
-        return b1.divide(b2, scale, BigDecimal.ROUND_HALF_UP);
+        return b1.divide(b2, scale, RoundingMode.HALF_UP);
 
     }
 
@@ -228,7 +227,7 @@ final public class NumberUtil {
         }
         BigDecimal b = new BigDecimal(toString(v));
         BigDecimal one = new BigDecimal("1");
-        return b.divide(one, scale, BigDecimal.ROUND_HALF_UP);
+        return b.divide(one, scale, RoundingMode.HALF_UP);
     }
 
     /**
@@ -261,7 +260,7 @@ final public class NumberUtil {
             //循环处理转换操作
             while (doubMoneyNumber > 0) {
                 //整的处理(无小数位)
-                if (ChineseUnitIndex == 2 && strChineseCurrency.length() == 0) {
+                if (ChineseUnitIndex == 2 && strChineseCurrency.isEmpty()) {
                     strChineseCurrency = strChineseCurrency + StringUtil.empty;
                 }
                 //非零数位的处理
@@ -274,10 +273,8 @@ final public class NumberUtil {
                     //元的处理(个位)
                     if (ChineseUnitIndex == 2) {
                         //段中有数字
-                        if (doubMoneyNumber > 0) {
-                            strChineseCurrency = NUMBER_UNITS[ChineseUnitIndex] + strChineseCurrency;
-                            bZero = true;
-                        }
+                        strChineseCurrency = NUMBER_UNITS[ChineseUnitIndex] + strChineseCurrency;
+                        bZero = true;
                     }
                     //万、亿数位的处理
                     else if (ChineseUnitIndex == 6 || ChineseUnitIndex == 10) {
@@ -328,7 +325,7 @@ final public class NumberUtil {
 
     public static String toString(float value) {
         try {
-            return Float.toString(value);
+            return getNumberStdFormat(Float.toString(value));
         } catch (NumberFormatException e) {
             return "0";
         }
@@ -351,7 +348,7 @@ final public class NumberUtil {
      */
     public static String toString(double value) {
         try {
-            return Double.toString(value);
+            return getNumberStdFormat(value);
         } catch (NumberFormatException e) {
             return "0";
         }
@@ -364,6 +361,10 @@ final public class NumberUtil {
      */
     public static String toString(Object value) {
         try {
+            if (value instanceof String)
+            {
+                return (String)value;
+            }
             if (value instanceof  Double)
             {
                 return toString((double)value);
@@ -590,7 +591,7 @@ final public class NumberUtil {
             return "0";
         }
         String s = number.toString();
-        if (s.indexOf('.') > 0 && s.indexOf('e') < 0 && s.indexOf('E') < 0) {
+        if (s.indexOf(StringUtil.DOT) > 0 && s.toLowerCase().indexOf('e') < 0) {
             while (s.endsWith("0")) {
                 s = s.substring(0, s.length() - 1);
             }
@@ -607,7 +608,7 @@ final public class NumberUtil {
             return "0";
         }
         String s = number;
-        if (s.indexOf('.') > 0 && s.indexOf('e') < 0 && s.indexOf('E') < 0) {
+        if (s.indexOf(StringUtil.DOT) > 0 && s.indexOf('e') < 0 && s.indexOf('E') < 0) {
             while (s.endsWith("0")) {
                 s = s.substring(0, s.length() - 1);
             }
@@ -632,6 +633,5 @@ final public class NumberUtil {
         int index = string.indexOf(StringUtil.DOT);
         return index < 0 ? 0 : string.length() - index - 1;
     }
-
 
 }

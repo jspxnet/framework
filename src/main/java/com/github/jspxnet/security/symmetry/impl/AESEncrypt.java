@@ -1,6 +1,7 @@
 package com.github.jspxnet.security.symmetry.impl;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.security.symmetry.AbstractEncrypt;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,8 @@ public class AESEncrypt extends AbstractEncrypt {
 
         algorithm = "AES";
         cipherAlgorithm = "AES/CBC/PKCS7Padding";
+        keyFormatType = KeyFormatEnumType.STRING;
+        cipherIv = "0123456789ABCDEF";
         try {
             //判断log4j是否存在
             Security.addProvider((Provider) Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider").newInstance());
@@ -52,8 +55,8 @@ public class AESEncrypt extends AbstractEncrypt {
      */
     @Override
     public byte[] getEncode(byte[] classData) throws Exception {
-        String keyTxt = StringUtil.cut(secretKey, 16, "");
-        byte[] rawKey = keyTxt.getBytes(Environment.defaultEncode);
+
+        byte[] rawKey = getSecretKeyBytes();
         SecretKey key = new SecretKeySpec(rawKey, algorithm);
         Cipher cipher = Cipher.getInstance(cipherAlgorithm);
         //设置为加密模式
@@ -68,8 +71,7 @@ public class AESEncrypt extends AbstractEncrypt {
      */
     @Override
     public byte[] getDecode(byte[] data) throws Exception {
-        String keyTxt = StringUtil.cut(secretKey, 16, "");
-        byte[] rawKey = keyTxt.getBytes(Environment.defaultEncode);
+        byte[] rawKey = getSecretKeyBytes();
         SecretKeySpec key = new SecretKeySpec(rawKey, algorithm);
         Cipher cipher = Cipher.getInstance(cipherAlgorithm); //"算法/模式/补码方式"
         cipher.init(Cipher.DECRYPT_MODE, key, getCipherIV());

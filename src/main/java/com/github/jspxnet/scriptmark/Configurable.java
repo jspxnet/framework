@@ -9,6 +9,9 @@
  */
 package com.github.jspxnet.scriptmark;
 
+import com.github.jspxnet.scriptmark.core.TagNode;
+
+import java.util.List;
 import java.util.Map;
 import java.io.Serializable;
 
@@ -66,6 +69,10 @@ public interface Configurable extends Serializable, Cloneable {
     String[] getAutoImports();
 
     void setAutoImports(String[] autoImports);
+
+    List<TagNode> getAutoImportTagNodeList();
+
+    void setAutoImportTagNodeList(List<TagNode> autoImportTagNodeList);
 
     Configurable copy();
 

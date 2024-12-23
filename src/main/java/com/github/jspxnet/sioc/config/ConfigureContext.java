@@ -292,8 +292,7 @@ public class ConfigureContext implements IocContext {
                 schedulerMap.put(beanElement.getId(), beanElement.getNamespace());
             }
         } catch (ClassNotFoundException e) {
-            log.error("class not found {}",beanElement.getClassName());
-            e.printStackTrace();
+            log.error("class not found {}",beanElement.getClassName(),e);
         }
     }
 

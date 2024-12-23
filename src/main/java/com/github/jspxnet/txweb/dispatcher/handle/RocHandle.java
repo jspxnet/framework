@@ -53,25 +53,23 @@ public class RocHandle extends WebHandle {
 
     static void callAction(HttpServletRequest request, HttpServletResponse response, String call, boolean secret) throws Exception {
         //判断是XML还是JSON begin
-        String rpc = call;
         JSONObject jsonData = null;
-        if (StringUtil.isXml(rpc)) {
+        if (StringUtil.isXml(call)) {
             //XML格式
             try {
-                jsonData = XML.toJSONObject(rpc);
+                jsonData = XML.toJSONObject(call);
             } catch (JSONException e) {
                 log.error("xml的ROC请求数据错误", e);
                 JSONObject errorResultJson = new JSONObject(RocResponse.error(-32600, "xml的ROC请求数据错误"));
                 TXWebUtil.print("<?xml version=\"1.0\" encoding=\"" + Dispatcher.getEncode() + "\"?>\r\n" + XMLUtil.format(XML.toString(errorResultJson, Environment.rocResult)), WebOutEnumType.XML.getValue(), response);
             }
         }
-        if (!StringUtil.isNull(rpc)&&StringUtil.isJsonObject(rpc)) {
+        if (!StringUtil.isNull(call)&&StringUtil.isJsonObject(call)) {
             //JSON格式
             try {
-                jsonData = new JSONObject(rpc);
+                jsonData = new JSONObject(call);
             } catch (JSONException e) {
                 log.error("json的ROC请求错误", e);
-                e.printStackTrace();
                 TXWebUtil.print(new JSONObject(RocResponse.error(-32600, "json的ROC请求错误")).toString(4), WebOutEnumType.JSON.getValue(), response);
                 return;
             }

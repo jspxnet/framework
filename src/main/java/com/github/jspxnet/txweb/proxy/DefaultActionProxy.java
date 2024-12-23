@@ -24,6 +24,8 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ValidUtil;
+import lombok.Setter;
+
 import java.lang.reflect.Method;
 
 /**
@@ -86,6 +88,7 @@ public class DefaultActionProxy implements ActionProxy {
         }
     }
 
+    @Setter
     private String caption = "none";
 
 
@@ -96,10 +99,6 @@ public class DefaultActionProxy implements ActionProxy {
     public String getCaption() {
 
         return caption;
-    }
-
-    public void setCaption(String caption) {
-        this.caption = caption;
     }
 
     /**

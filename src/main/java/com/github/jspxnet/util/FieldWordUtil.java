@@ -1,3 +1,10 @@
+/*
+ * Copyright © 2004-2024 chenYuan. All rights reserved.
+ * @Website:wwww.jspx.net
+ * @Mail:39793751@qq.com
+ * author: chenYuan , 陈原
+ * @jvm:jdk1.8  x86/amd64/Android
+ */
 package com.github.jspxnet.util;
 
 import com.github.jspxnet.utils.StringUtil;
@@ -7,8 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class KingdeeXkUtil {
-    private KingdeeXkUtil()
+/**
+ * 自动生产bean的时候，得到一个好的字段名称。
+ * 参考金蝶字段名称
+ */
+public final class FieldWordUtil {
+    private FieldWordUtil()
     {}
 
     private static  final Map<String,String> fieldNameList = new HashMap<>();
@@ -47,7 +58,15 @@ public final class KingdeeXkUtil {
         fieldNameList.put("产品类型","productType");
         fieldNameList.put("预计产出数量","aiExpectoutputQty");
         fieldNameList.put("批号ID","lotId");
-
+        fieldNameList.put("批号","lotText");
+        fieldNameList.put("到期日","endDate");
+        fieldNameList.put("库存数量","stockQty");
+        fieldNameList.put("服务级别","serviceLevel");
+        fieldNameList.put("银行网点","bankDetail");
+        fieldNameList.put("项目类型","itemType");
+        fieldNameList.put("检测项","testItem");
+        fieldNameList.put("单据日期","billDate");
+        fieldNameList.put("审核日期","approverDate");
 
         wordList.add("Word");
         wordList.add("Type");
@@ -83,6 +102,26 @@ public final class KingdeeXkUtil {
         wordList.add("Out");
         wordList.add("Process");
         wordList.add("Shop");
+        wordList.add("Field");
+        wordList.add("Disk");
+        wordList.add("Space");
+        wordList.add("Html");
+        wordList.add("Map");
+        wordList.add("Long");
+        wordList.add("Office");
+        wordList.add("Off");
+        wordList.add("Code");
+        wordList.add("Length");
+        wordList.add("Select");
+        wordList.add("Method");
+        wordList.add("Type");
+        wordList.add("Remark");
+        wordList.add("Steam");
+        wordList.add("Business");
+        wordList.add("Purchase");
+        wordList.add("Settle");
+        wordList.add("Approve");
+        wordList.add("Node");
 
         fixWrodMap.put("fPale","pale");
         fixWrodMap.put("fentryid","entryId");
@@ -96,15 +135,28 @@ public final class KingdeeXkUtil {
         fixWrodMap.put("fAiStockQty","aiStockQty");
         fixWrodMap.put("fmoBillNo","moBillNo");
         fixWrodMap.put("fmoEntryseq","moEntryseq");
+        fixWrodMap.put("fLocaleid","localeId");
+        fixWrodMap.put("fforbidDate","forbidDate");
     }
 
-
-    public static String getFileName(String caption)
+    private static String getFixFileName(String caption)
     {
         return fieldNameList.get(caption);
     }
 
-    public static String fixWordName(String fieldName)
+
+
+    private static String replaceWordName(String fieldName)
+    {
+        for (String w:fixWrodMap.keySet())
+        {
+            String v = fixWrodMap.get(w);
+            fieldName = StringUtil.replace(fieldName,w,v);
+        }
+        return fieldName;
+    }
+
+    private static String fixWordName(String fieldName)
     {
         for (String w:wordList)
         {
@@ -126,14 +178,30 @@ public final class KingdeeXkUtil {
     }
 
 
-    private static String replaceWordName(String fieldName)
+    /**
+     *
+     * @param fieldName 字段名称
+     * @return 修复好的字段名称
+     */
+    public static String getFiledName(String fieldName)
     {
-        for (String w:fixWrodMap.keySet())
+        return fixWordName(fieldName);
+    }
+
+    /**
+     *
+     * @param caption 中文名称
+     * @param fieldName  字段名称
+     * @return 修复好的字段名称
+     */
+    public static String getFiledName(String caption,String fieldName)
+    {
+        String fileName = getFixFileName(caption);
+        if (StringUtil.isNull(fileName))
         {
-            String v = fixWrodMap.get(w);
-            fieldName = StringUtil.replace(fieldName,w,v);
+            fileName = fieldName;
         }
-        return fieldName;
+        return fixWordName(fileName);
     }
 
 }

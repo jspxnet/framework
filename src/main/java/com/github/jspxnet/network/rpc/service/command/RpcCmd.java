@@ -62,7 +62,6 @@ public class RpcCmd extends INetCommand {
             try {
                 iocRequest = HessianSerializableUtil.getUnSerializable(EncryptUtil.getBase64Decode(command.getData()));
             } catch (Throwable e) {
-                e.printStackTrace();
                 IocResponse rpcResponse = new IocResponse();
                 rpcResponse.setError(e);
                 try {
@@ -183,7 +182,6 @@ public class RpcCmd extends INetCommand {
             try {
                 reply.setData(EncryptUtil.getBase64Encode(HessianSerializableUtil.getSerializable(rpcResponse)));
             } catch (IOException e) {
-                e.printStackTrace();
                 rpcResponse.setError(e);
             }
             return;

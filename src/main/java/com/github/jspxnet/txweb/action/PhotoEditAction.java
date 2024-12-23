@@ -1,19 +1,21 @@
 package com.github.jspxnet.txweb.action;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
+import com.github.jspxnet.txweb.annotation.Param;
+import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.IUploadFile;
 import com.github.jspxnet.txweb.view.UploadFileView;
 import com.github.jspxnet.upload.multipart.JspxNetFileRenamePolicy;
 import com.github.jspxnet.util.StringList;
-
 import com.github.jspxnet.utils.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Date;
 
 /**
@@ -21,113 +23,51 @@ import java.util.Date;
  * 在线图片编辑器,绑定上传文件
  * 为了实现历史还原功能，以前操作的文件不删除，只有点击确定后才删除
  */
-@Deprecated
 @HttpMethod(caption = "图片编辑器")
 public class PhotoEditAction extends UploadFileView {
     //支持的文件类型
     private final String[] fileTypes = new String[]{"gif", "jpg", "jpeg", "png", "bmp"};
     private static final int MAX_HISTORY = 5;
-    final private JSONObject json = new JSONObject();
 
     public PhotoEditAction() {
-        json.put(SUCCESS, 0);
-        json.put(ERROR, 1);
-        json.put(Environment.infoType, Environment.warningInfo);
-    }
 
-    private int top = 0;
-    private int left = 0;
-    private int width = 0;
-    private int height = 0;
-    private int degree = 0;
-    private float scaleValue = 0;
-
-    public int getTop() {
-        return top;
-    }
-
-    public void setTop(int top) {
-        this.top = top;
-    }
-
-    public int getLeft() {
-        return left;
-    }
-
-    public void setLeft(int left) {
-        this.left = left;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public int getDegree() {
-        return degree;
-    }
-
-    public void setDegree(int degree) {
-        this.degree = degree;
-    }
-
-
-    public float getScaleValue() {
-        return scaleValue;
-    }
-
-    public void setScaleValue(float scaleValue) {
-        this.scaleValue = scaleValue;
     }
 
     @Operate(caption = "剪切")
-    public void cut() throws Exception {
+    public RocResponse<?> cut(@Param(caption = "文件id", required = true) long id,
+                           @Param(caption = "左", required = true) int left,
+                           @Param(caption = "上", required = true) int top,
+                           @Param(caption = "宽", required = true) int width,
+                           @Param(caption = "高", required = true) int height) throws Exception {
 
         //读取图片begin
-        Object uploadFileObject = uploadFileDAO.get(uploadFileDAO.getClassType(), getId());
+        Object uploadFileObject = uploadFileDAO.get(uploadFileDAO.getClassType(), id);
         if (uploadFileObject == null) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.invalidParameterNotFindFile));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.invalidParameterNotFindFile));
         }
 
         IUploadFile uploadFile = (IUploadFile) uploadFileObject;
         File file = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
         if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
 
         String fileType = FileUtil.getTypePart(file.getName());
         if (!ArrayUtil.inArray(fileTypes, fileType, true)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImageFormat));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImageFormat));
         }
         //读取图片end
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
         if (!history.createNewFile()) {
-            json.put(Environment.MESSAGE, "write " + language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(), "write " + language.getLang(LanguageRes.folderWriteError));
         }
         if (!FileUtil.copy(file, history, new JspxNetFileRenamePolicy(),true,false)) {
-            json.put(Environment.MESSAGE, "copy " + language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(), "copy " + language.getLang(LanguageRes.folderWriteError));
         }
         if (!history.isFile()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(), language.getLang(LanguageRes.folderWriteError));
         }
 
         StringList list = new StringList();
@@ -144,59 +84,54 @@ public class PhotoEditAction extends UploadFileView {
 
         uploadFile.setLastDate(new Date());
 
-        boolean cutYes = ImageUtil.cut(new FileInputStream(history), new FileOutputStream(file), fileType, left, top, width, height);
+        boolean cutYes = ImageUtil.cut(Files.newInputStream(history.toPath()), Files.newOutputStream(file.toPath()), fileType, left, top, width, height);
         if (cutYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
             setActionLogContent(file.getPath());
-            json.put(SUCCESS, 1);
-            json.put(ERROR, 0);
-            json.put(Environment.infoType, Environment.promptInfo);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.cutImageSuccess));
-        } else {
+            list.clear();
+            JSONObject json = new JSONObject();
+            json.put("name",file.getName());
+            json.put("namespace", uploadFileDAO.getNamespace());
+            return RocResponse.success(json).setMessage(language.getLang(LanguageRes.cutImageSuccess));
+       } else {
             if (file.length() < 10) {
                 FileUtil.copy(history, file,  new JspxNetFileRenamePolicy(),true,false);
             }
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.cutImageFailure));
+            list.clear();
+            return RocResponse.error(ErrorEnumType.WARN.getValue(), language.getLang(LanguageRes.cutImageFailure));
         }
-        list.clear();
-
     }
 
     @Operate(caption = "缩放")
-    public void thumbnail() throws Exception {
+    public RocResponse<?> thumbnail(@Param(caption = "文件id", required = true) long id,
+                          @Param(caption = "宽", required = true) int width,
+                          @Param(caption = "高", required = true) int height) throws Exception {
         if (width < 1 || height < 0) {
-
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.widthParameterError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.widthParameterError));
         }
 
         //读取图片begin
-        Object uploadFileObject = uploadFileDAO.get(uploadFileDAO.getClassType(), getId());
+        Object uploadFileObject = uploadFileDAO.get(uploadFileDAO.getClassType(),id);
         if (uploadFileObject == null) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
         IUploadFile uploadFile = (IUploadFile) uploadFileObject;
         File file = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
-        if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+        if (file == null || !file.exists() || !file.canRead()) {
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
         //读取图片end
         String fileType = FileUtil.getTypePart(file.getName());
         if (!ArrayUtil.inArray(fileTypes, fileType, true)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImageFormat));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImageFormat));
         }
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
         if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.folderWriteError));
         }
         if (!history.isFile()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.folderWriteError));
         }
 
         StringList list = new StringList();
@@ -211,65 +146,61 @@ public class PhotoEditAction extends UploadFileView {
         uploadFile.setHistory(list.toString());
         //先备份历史文件 end
 
-        boolean thumbnailYes = ImageUtil.thumbnail(new FileInputStream(history), new FileOutputStream(file), fileType, width, height);
+        boolean thumbnailYes = ImageUtil.thumbnail(Files.newInputStream(history.toPath()), Files.newOutputStream(file.toPath()), fileType, width, height);
         uploadFile.setLastDate(new Date());
         if (thumbnailYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
             setActionLogContent(file.getPath());
-            json.put(SUCCESS, 1);
-            json.put(ERROR, 0);
-            json.put(Environment.infoType, Environment.promptInfo);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.operationSuccess));
+            list.clear();
+            JSONObject json = new JSONObject();
+            json.put("name",file.getName());
+            json.put("namespace", uploadFileDAO.getNamespace());
+            return RocResponse.success(json).setMessage(language.getLang(LanguageRes.operationSuccess));
         } else {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.operationFailure));
+            list.clear();
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.operationFailure));
         }
-        list.clear();
     }
 
     @Operate(caption = "旋转")
-    public void rotate() throws Exception {
-
+    public RocResponse<?> rotate(@Param(caption = "文件id", required = true) long id,
+                                      @Param(caption = "角度", required = true) int degree) throws Exception {
         //读取图片begin
-        Object uploadFileObject = getUploadFile();
+        Object uploadFileObject = getUploadFile(id);
         if (uploadFileObject == null) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.widthParameterError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.widthParameterError));
         }
         IUploadFile uploadFile = (IUploadFile) uploadFileObject;
         File file = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
-        if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+        if (file == null || !file.exists()  || !file.canRead()) {
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
         //读取图片end
         String fileType = FileUtil.getTypePart(file.getName());
         if (!ArrayUtil.inArray(fileTypes, fileType, true)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImageFormat));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImageFormat));
         }
 
 
         if (degree == 0) {
-            return;
+            return RocResponse.error(ErrorEnumType.PARAMETERS);
         }
         if (degree > 360) {
-            return;
+            return RocResponse.error(ErrorEnumType.PARAMETERS);
         }
         if (degree < 0) {
             degree = 360 - degree;
         }
         if (degree < 0) {
-            return;
+            return RocResponse.error(ErrorEnumType.PARAMETERS);
         }
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + DateUtil.toString("ddHHmmss") + ".tmp"));
         if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.folderWriteError));
         }
         if (!history.isFile()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.operationFailure) + ",copy");
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.operationFailure) + ",copy");
         }
 
         StringList list = new StringList();
@@ -284,51 +215,48 @@ public class PhotoEditAction extends UploadFileView {
         uploadFile.setHistory(list.toString());
 
         //先备份历史文件 end
-        boolean rotateYes = ImageUtil.rotate(new FileInputStream(history), new FileOutputStream(file), fileType, degree);
+        boolean rotateYes = ImageUtil.rotate(Files.newInputStream(history.toPath()), Files.newOutputStream(file.toPath()), fileType, degree);
         uploadFile.setLastDate(new Date());
         if (rotateYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
             setActionLogContent(file.getPath());
-            json.put(SUCCESS, 1);
-            json.put(ERROR, 0);
-            json.put(Environment.infoType, Environment.promptInfo);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.rotateOperationSuccess));
+            list.clear();
+            JSONObject json = new JSONObject();
+            json.put("name",file.getName());
+            json.put("namespace", uploadFileDAO.getNamespace());
+            return RocResponse.success(json).setMessage(language.getLang(LanguageRes.rotateOperationSuccess) + ",copy");
         } else {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.rotateOperationFailure));
+            list.clear();
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.rotateOperationFailure));
         }
-        list.clear();
+
     }
 
 
     @Operate(caption = "黑白")
-    public void gray() throws Exception {
+    public RocResponse<?> gray(@Param(caption = "文件id", required = true) long id) throws Exception {
         //读取图片begin
-        Object uploadFileObject = getUploadFile();
+        Object uploadFileObject = getUploadFile(id);
         if (uploadFileObject == null) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.widthParameterError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.widthParameterError));
         }
         IUploadFile uploadFile = (IUploadFile) uploadFileObject;
         File file = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
         if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
         //读取图片end
         String fileType = FileUtil.getTypePart(file.getName());
         if (!ArrayUtil.inArray(fileTypes, fileType, true)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImageFormat));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImageFormat));
         }
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
         if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.folderWriteError));
         }
         if (!history.isFile()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.operationFailure) + ",copy");
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.operationFailure) + ",copy");
         }
 
         StringList list = new StringList();
@@ -343,51 +271,47 @@ public class PhotoEditAction extends UploadFileView {
         uploadFile.setHistory(list.toString());
 
         //先备份历史文件 end
-        boolean grayYes = ImageUtil.gray(new FileInputStream(history), new FileOutputStream(file), fileType);
+        boolean grayYes = ImageUtil.gray(Files.newInputStream(history.toPath()), Files.newOutputStream(file.toPath()), fileType);
         uploadFile.setLastDate(new Date());
         if (grayYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
             setActionLogContent(file.getPath());
-            json.put(SUCCESS, 1);
-            json.put(ERROR, 0);
-            json.put(Environment.infoType, Environment.promptInfo);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.grayOperationSuccess));
+            list.clear();
+            JSONObject json = new JSONObject();
+            json.put("name",file.getName());
+            json.put("namespace", uploadFileDAO.getNamespace());
+            return RocResponse.success(json).setMessage(language.getLang(LanguageRes.grayOperationSuccess));
         } else {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.grayOperationFailure));
+            list.clear();
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.grayOperationFailure) + ",copy");
         }
-        list.clear();
     }
 
     @Operate(caption = "加亮")
-    public void highlight() throws Exception {
+    public RocResponse<?> highlight(@Param(caption = "文件id", required = true) long id) throws Exception {
 
         //读取图片begin
-        Object uploadFileObject = getUploadFile();
+        Object uploadFileObject = getUploadFile(id);
         if (uploadFileObject == null) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.widthParameterError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.widthParameterError));
         }
         IUploadFile uploadFile = (IUploadFile) uploadFileObject;
         File file = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
-        if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+        if (file == null || !file.exists()  || !file.canRead()) {
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
         //读取图片end
         String fileType = FileUtil.getTypePart(file.getName());
         if (!ArrayUtil.inArray(fileTypes, fileType, true)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImageFormat));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImageFormat));
         }
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
         if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.folderWriteError));
         }
         if (!history.isFile()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.operationFailure) + ",copy");
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.operationFailure) + ",copy");
         }
 
 
@@ -402,53 +326,47 @@ public class PhotoEditAction extends UploadFileView {
         }
         uploadFile.setHistory(list.toString());
 
-
         //先备份历史文件 end
-        boolean grayYes = ImageUtil.filter(new FileInputStream(history), new FileOutputStream(file), fileType, 1.1f, 1.3f);
+        boolean grayYes = ImageUtil.filter(Files.newInputStream(history.toPath()), Files.newOutputStream(file.toPath()), fileType, 1.1f, 1.3f);
         uploadFile.setLastDate(new Date());
         if (grayYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
             setActionLogContent(file.getPath());
-            json.put(SUCCESS, 1);
-            json.put(ERROR, 0);
-            json.put(Environment.infoType, Environment.promptInfo);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.highlightOperationSuccess));
+            list.clear();
+            JSONObject json = new JSONObject();
+            json.put("name",file.getName());
+            json.put("namespace", uploadFileDAO.getNamespace());
+            return RocResponse.success(json).setMessage(language.getLang(LanguageRes.grayOperationSuccess));
         } else {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.highlightOperationFailure));
+            list.clear();
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.highlightOperationFailure));
         }
-
-        list.clear();
     }
 
     @Operate(caption = "变暗")
-    public void darkened() throws Exception {
+    public RocResponse<?> darkened(@Param(caption = "文件id", required = true) long id) throws Exception {
         //读取图片begin
-        Object uploadFileObject = getUploadFile();
+        Object uploadFileObject = getUploadFile(id);
         if (uploadFileObject == null) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.widthParameterError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.widthParameterError));
         }
         IUploadFile uploadFile = (IUploadFile) uploadFileObject;
         File file = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
         if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
         //读取图片end
         String fileType = FileUtil.getTypePart(file.getName());
         if (!ArrayUtil.inArray(fileTypes, fileType, true)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImageFormat));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImageFormat));
         }
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
         if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.folderWriteError));
         }
         if (!history.isFile()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.operationFailure) + ",copy");
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.operationFailure) + ",copy");
         }
 
 
@@ -464,65 +382,61 @@ public class PhotoEditAction extends UploadFileView {
         uploadFile.setHistory(list.toString());
         //先备份历史文件 end
 
-        boolean grayYes = ImageUtil.filter(new FileInputStream(history), new FileOutputStream(file), fileType, 0.9f, 0.9f);
+        boolean grayYes = ImageUtil.filter(Files.newInputStream(history.toPath()), Files.newOutputStream(file.toPath()), fileType, 0.9f, 0.9f);
         uploadFile.setLastDate(new Date());
         if (grayYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
             setActionLogContent(file.getPath());
-            json.put(SUCCESS, 1);
-            json.put(ERROR, 0);
-            json.put(Environment.infoType, Environment.promptInfo);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.darkenedOperationSuccess));
+            list.clear();
+            JSONObject json = new JSONObject();
+            json.put("name",file.getName());
+            json.put("namespace", uploadFileDAO.getNamespace());
+            return RocResponse.success(json).setMessage(language.getLang(LanguageRes.grayOperationSuccess));
         } else {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.darkenedOperationFailure));
+            list.clear();
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.darkenedOperationFailure));
         }
-        list.clear();
     }
 
 
     @Operate(caption = "比例")
-    public void scale() throws Exception {
+    public RocResponse<?> scale(@Param(caption = "文件id", required = true) long id,
+                                @Param(caption = "比例", required = true) float scaleValue) throws Exception
+    {
 
         if (scaleValue <= 0 || scaleValue == 1 || scaleValue == 100 || scaleValue > 300) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.scaleParameterError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.scaleParameterError));
         }
 
         if (scaleValue > 5) {
             scaleValue = scaleValue / 100;
         }
         if (scaleValue <= 0 || scaleValue == 1 || scaleValue == 100) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.scaleParameterError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.scaleParameterError));
         }
 
         //读取图片begin
-        Object uploadFileObject = getUploadFile();
+        Object uploadFileObject = getUploadFile(id);
         if (uploadFileObject == null) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.invalidParameter));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.invalidParameter));
         }
         IUploadFile uploadFile = (IUploadFile) uploadFileObject;
         File file = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
         if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
         //读取图片end
         String fileType = FileUtil.getTypePart(file.getName());
         if (!ArrayUtil.inArray(fileTypes, fileType, true)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImageFormat));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImageFormat));
         }
 
         //先备份历史文件 begin
         File history = FileUtil.createFile(new File(file.getParent(), FileUtil.getNamePart(file.getName()) + "_" + FileUtil.getTypePart(file.getName()) + "_" + DateUtil.toString("ddHHmmss") + ".tmp"));
         if (!FileUtil.copy(file, history,  new JspxNetFileRenamePolicy(),true,false)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.folderWriteError));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.folderWriteError));
         }
         if (!history.isFile()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.operationFailure) + ",copy");
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.operationFailure) + ",copy");
         }
 
         StringList list = new StringList();
@@ -538,101 +452,91 @@ public class PhotoEditAction extends UploadFileView {
         //先备份历史文件 end
 
 
-        boolean scaleYes = ImageUtil.scale(new FileInputStream(history), new FileOutputStream(file), fileType, scaleValue);
+        boolean scaleYes = ImageUtil.scale(Files.newInputStream(history.toPath()), Files.newOutputStream(file.toPath()), fileType, scaleValue);
         uploadFile.setLastDate(new Date());
         if (scaleYes && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
             setActionLogContent(file.getPath());
-            json.put(SUCCESS, 1);
-            json.put(ERROR, 0);
-            json.put(Environment.infoType, Environment.promptInfo);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.scaleOperationSuccess));
+            list.clear();
+            JSONObject json = new JSONObject();
+            json.put("name",file.getName());
+            json.put("namespace", uploadFileDAO.getNamespace());
+            return RocResponse.success(json).setMessage(language.getLang(LanguageRes.scaleOperationSuccess));
         } else {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.scaleOperationFailure));
+            list.clear();
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.scaleOperationFailure));
         }
-        list.clear();
+
     }
 
 
     @Operate(caption = "回退")
-    public void history() throws Exception {
+    public RocResponse<?> history(@Param(caption = "文件id", required = true) long id) throws Exception {
         //读取图片begin
-        Object uploadFileObject = getUploadFile();
+        Object uploadFileObject = getUploadFile(id);
         if (uploadFileObject == null) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.invalidParameter));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.invalidParameter));
         }
         IUploadFile uploadFile = (IUploadFile) uploadFileObject;
         File file = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
         if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
         //读取图片end
         String fileType = FileUtil.getTypePart(file.getName());
         if (!ArrayUtil.inArray(fileTypes, fileType, true)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImageFormat));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImageFormat));
         }
 
         //先备份历史文件 begin
         if (StringUtil.isNull(uploadFile.getHistory())) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notDataResult));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notDataResult));
         }
         StringList list = new StringList();
         list.setString(uploadFile.getHistory());
         if (list.isEmpty()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notDataResult));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notDataResult));
         }
         String fileName = list.removeLast();
         if (StringUtil.isNull(fileName)) {
-            json.put(Environment.SUCCESS, 1);
-            uploadFile.setHistory(StringUtil.empty);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notDataResult) + ":" + fileName);
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notDataResult) + ":" + fileName);
         }
         File history = new File(file.getParent(), fileName);
         if (!history.isFile()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.historyFileNotFind));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.historyFileNotFind));
         }
         uploadFile.setHistory(list.toString());
         uploadFile.setLastDate(new Date());
         if (FileUtil.copy(history, file,  new JspxNetFileRenamePolicy(),true,false) && uploadFileDAO.update(uploadFileObject, new String[]{"history", "lastDate"}) > 0) {
             setActionLogContent(file.getPath());
             FileUtil.delete(history);
-            json.put(Environment.SUCCESS, 1);
-            json.put(Environment.infoType, Environment.promptInfo);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.operationSuccess));
+            list.clear();
+            JSONObject json = new JSONObject();
+            json.put("name",file.getName());
+            json.put("namespace", uploadFileDAO.getNamespace());
+            return RocResponse.success(json).setMessage(language.getLang(LanguageRes.operationSuccess));
         } else {
-
-            json.put(Environment.SUCCESS, 0);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.operationFailure));
+            list.clear();
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.operationFailure));
         }
         //先备份历史文件 end
-        list.clear();
     }
 
     @Operate(caption = "确定")
-    public void quit() throws Exception {
+    public RocResponse<?> quit(@Param(caption = "文件id", required = true) long id) throws Exception {
         //读取图片begin
-        Object uploadFileObject = getUploadFile();
+        Object uploadFileObject = getUploadFile(id);
         if (uploadFileObject == null) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.invalidParameter));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.invalidParameter));
         }
         IUploadFile uploadFile = (IUploadFile) uploadFileObject;
         File file = UploadFileAction.getUploadFile(config, uploadFile.getFileName());
         if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImage));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImage));
         }
         //读取图片end
         String fileType = FileUtil.getTypePart(file.getName());
         if (!ArrayUtil.inArray(fileTypes, fileType, true)) {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.notFindImageFormat));
-            return;
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.notFindImageFormat));
         }
         //先备份历史文件 begin
 
@@ -648,6 +552,7 @@ public class PhotoEditAction extends UploadFileView {
             }
         }
 
+        JSONObject json = new JSONObject();
         BufferedImage image = ImageIO.read(file);
         uploadFile.setHistory(StringUtil.empty);
         uploadFile.setAttributes("width=" + image.getWidth() + "\r\nheight=" + image.getHeight());
@@ -663,7 +568,8 @@ public class PhotoEditAction extends UploadFileView {
                 //如果有缩图，重新创建覆盖
                 int tWidth = config.getInt("thumbnailWidth", 400);
                 int tHeight = config.getInt("thumbnailHeight", 400);
-                if (ImageUtil.thumbnail(new FileInputStream(file), new FileOutputStream(thumbnailFile), FileUtil.getTypePart(file), tWidth, tHeight)) {
+                if (ImageUtil.thumbnail(Files.newInputStream(file.toPath()), Files.newOutputStream(thumbnailFile.toPath()), FileUtil.getTypePart(file), tWidth, tHeight)) {
+
                     json.put("thumbnail", 1);
                 } else {
                     json.put("thumbnail", 0);
@@ -674,28 +580,28 @@ public class PhotoEditAction extends UploadFileView {
             if (mobileFile.isFile()) {
                 int mobileWidth = config.getInt("mobileWidth", 480);
                 int mobileHeight = config.getInt("mobileHeight", 480);
-                if (ImageUtil.thumbnail(new FileInputStream(file), new FileOutputStream(mobileFile), FileUtil.getTypePart(file), mobileWidth, mobileHeight)) {
+                if (ImageUtil.thumbnail(Files.newInputStream(file.toPath()), Files.newOutputStream(mobileFile.toPath()), FileUtil.getTypePart(file), mobileWidth, mobileHeight)) {
                     json.put("mobile", 1);
                 } else {
                     json.put("mobile", 0);
                 }
             }
-
-            json.put(Environment.SUCCESS, 1);
-            json.put(Environment.infoType, Environment.promptInfo);
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.editFinishClearTemp));
+            json.put("name",file.getName());
+            json.put("namespace", uploadFileDAO.getNamespace());
+            list.clear();
+            return RocResponse.success(json).setMessage(language.getLang(LanguageRes.editFinishClearTemp));
         } else {
-            json.put(Environment.MESSAGE, language.getLang(LanguageRes.clearTempFileFailure));
+            list.clear();
+            return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.clearTempFileFailure));
+
         }
         //先备份历史文件 end
-        list.clear();
+
     }
 
     @Override
     public String execute() throws Exception {
         if (isMethodInvoked()) {
-            setResult(json);
-            setActionResult(ROC);
             uploadFileDAO.evict(uploadFileDAO.getClassType());
         }
         put("namespace", uploadFileDAO.getNamespace());

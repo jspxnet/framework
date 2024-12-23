@@ -187,7 +187,7 @@ GO
     }
 
     @Override
-    public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
+    public String getLimitString(String sql, int begin, int end,TableModels soberTable) {
         return sql;
     }
 
@@ -239,9 +239,13 @@ GO
             //短断整型
             return super.getResultSetValue(rs,index);
         } catch (SQLException e) {
-            e.printStackTrace();
             log.error("typeName=" + typeName + " size=" + colSize + " columnName=" + rs.getMetaData().getColumnName(index), e);
         }
         return null;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT top 1 * FROM (" + sql + ") zs";
     }
 }

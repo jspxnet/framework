@@ -9,11 +9,12 @@ import com.github.jspxnet.txweb.model.dto.TipDto;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.TipUtil;
-import com.github.jspxnet.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
-
+/**
+ * com.github.jspxnet.txweb.view.TipView
+ */
 @Slf4j
 @HttpMethod(caption = "提示信息", actionName = "*", namespace = Environment.Global + "/tip")
 @Bean(singleton = true)

@@ -28,6 +28,8 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
 import com.github.jspxnet.utils.*;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +48,7 @@ import java.util.Map;
  * ,serverUrl: "${action.getString('namespace')}ueditorcontroller.js.${suffix}"
  *
  */
+@Slf4j
 @HttpMethod(caption = "UEditor上传适配器")
 public class UEditorAdaptor extends ActionSupport {
 
@@ -207,8 +210,10 @@ public class UEditorAdaptor extends ActionSupport {
                 break;
             }
         }
-        return state.toJsonString();
-
+        if (state != null) {
+            return state.toJsonString();
+        }
+        return StringUtil.empty;
     }
 
     private State binarySave() {
@@ -220,7 +225,7 @@ public class UEditorAdaptor extends ActionSupport {
             try {
                 request.setCharacterEncoding(Environment.defaultEncode);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         }
         if (!RequestUtil.isMultipart(request)) {
@@ -273,7 +278,7 @@ public class UEditorAdaptor extends ActionSupport {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         finally {
             uploadFileAction.destroy();
@@ -282,6 +287,7 @@ public class UEditorAdaptor extends ActionSupport {
     }
 
     private State base64Save(String content, String saveDirectory, String setupPath, long maxSize) throws Exception {
+
 
         byte[] data = com.github.jspxnet.security.utils.Base64.decode(content, com.github.jspxnet.security.utils.Base64.DEFAULT);
         if (!validSize(data, maxSize)) {

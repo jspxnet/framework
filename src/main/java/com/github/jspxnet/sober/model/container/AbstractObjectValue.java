@@ -5,6 +5,9 @@ import com.github.jspxnet.sober.IPropertyChange;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +16,8 @@ import java.util.Map;
  */
 
 public abstract class AbstractObjectValue extends PropertyContainer implements IPropertyChange {
+    @Setter
+    @Getter
     private transient TableModels tableModels;
 
     @JsonIgnore
@@ -21,15 +26,12 @@ public abstract class AbstractObjectValue extends PropertyContainer implements I
     @JsonIgnore
     private boolean available = true;
 
+    @Setter
     @JsonIgnore
     private boolean isLoaded;
 
     public boolean isLoaded() {
         return this.isLoaded;
-    }
-
-    public void setIsLoaded(boolean isLoaded) {
-        this.isLoaded = isLoaded;
     }
 
     @Override
@@ -95,11 +97,4 @@ public abstract class AbstractObjectValue extends PropertyContainer implements I
         return available;
     }
 
-    public TableModels getTableModels() {
-        return tableModels;
-    }
-
-    public void setTableModels(TableModels tableModels) {
-        this.tableModels = tableModels;
-    }
 }

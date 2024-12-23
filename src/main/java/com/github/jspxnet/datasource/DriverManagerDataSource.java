@@ -13,6 +13,9 @@ package com.github.jspxnet.datasource;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -29,10 +32,25 @@ import java.util.Properties;
  */
 public abstract class DriverManagerDataSource implements ReadWriteDataSource {
 
+    /**
+     * the JDBC driver class name, if any.
+     */
+    @Getter
     private String driverClass;
 
+    /**
+     * Return the JDBC URL transfer use for accessing the DriverManager.
+     */
+    @Getter
     private String jdbcUrl;
 
+    /**
+     * -- SETTER --
+     *  Set the JDBC username transfer use for accessing the DriverManager.
+     *  the JDBC username transfer use for accessing the DriverManager.
+     */
+    @Getter
+    @Setter
     private String user;
 
     /*
@@ -51,6 +69,12 @@ public abstract class DriverManagerDataSource implements ReadWriteDataSource {
         this.readWrite = readWrite;
     }
 
+    /**
+     * -- SETTER --
+     *  Set the JDBC password transfer use for accessing the DriverManager.
+     *  password 密码
+     */
+    @Setter
     private String password = null;
 
     /**
@@ -94,57 +118,15 @@ public abstract class DriverManagerDataSource implements ReadWriteDataSource {
 
 
     /**
-     * @return the JDBC driver class name, if any.
-     */
-    public String getDriverClass() {
-        return driverClass;
-    }
-
-
-    /**
      * Set the JDBC URL transfer use for accessing the DriverManager.
      *
      * @param url jdbcUrl
      */
     public void setJdbcUrl(String url) {
-        if (url == null || url.length() < 1) {
+        if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("url must not be empty");
         }
         this.jdbcUrl = url.trim();
-    }
-
-    /**
-     * @return Return the JDBC URL transfer use for accessing the DriverManager.
-     */
-    public String getJdbcUrl() {
-        return jdbcUrl;
-    }
-
-
-    /**
-     * Set the JDBC username transfer use for accessing the DriverManager.
-     *
-     * @param user 用户名
-     */
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    /**
-     * @return the JDBC username transfer use for accessing the DriverManager.
-     */
-    public String getUser() {
-        return user;
-    }
-
-
-    /**
-     * Set the JDBC password transfer use for accessing the DriverManager.
-     *
-     * @param password 密码
-     */
-    public void setPassword(String password) {
-        this.password = password;
     }
 
 
@@ -184,6 +166,7 @@ public abstract class DriverManagerDataSource implements ReadWriteDataSource {
         if (driverClass != null) {
             props.setProperty("url", getJdbcUrl());
         }
+
         return getConnectionFromDriverManager(getJdbcUrl(), props);
     }
 
@@ -208,6 +191,7 @@ public abstract class DriverManagerDataSource implements ReadWriteDataSource {
         if (driverClass != null) {
             props.setProperty("url", getJdbcUrl());
         }
+
         return getConnectionFromDriverManager(getJdbcUrl(), props);
     }
 
@@ -225,7 +209,7 @@ public abstract class DriverManagerDataSource implements ReadWriteDataSource {
             throws SQLException {
         //mysql
         props.put("useInformationSchema","true"); //表注释
-
+        props.setProperty("remarks","true");
         //oracle
         props.put("remarksReporting", "true");
         return DriverManager.getConnection(url, props);

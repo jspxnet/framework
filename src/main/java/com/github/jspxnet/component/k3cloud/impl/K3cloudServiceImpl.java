@@ -18,6 +18,7 @@ import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.lang.reflect.Field;
@@ -34,10 +35,8 @@ public class K3cloudServiceImpl implements K3cloudService {
 
     private final Map<String, K3TableConf> tableMap = new LinkedHashMap<>();
     private KingdeeAccount kingdeeAccount;
+    @Setter
     private String configFile = "kingdee.table.xml";
-    public void setConfigFile(String configFile) {
-        this.configFile = configFile;
-    }
 
     @Init
     public void init()

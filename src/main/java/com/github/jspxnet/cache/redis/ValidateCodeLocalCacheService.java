@@ -131,6 +131,8 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
         }
         return (String)entry.getValue();
     }
+
+
     /**
      * 正式的验证
      * @param mobile 手机号
@@ -368,5 +370,32 @@ public class ValidateCodeLocalCacheService implements ValidateCodeCache {
         entry.setLive(10*DateUtil.MINUTE);
         CACHE.put(entry);
     }
+
+
+    @Override
+    public long getTimeRemaining(String loginId) {
+        String key = String.format(ValidateCodeCacheService.VALIDATE_REMAINING_KEY, EncryptUtil.getMd5(loginId));
+        CacheEntry entry = CACHE.get(key);
+        if (entry==null)
+        {
+            entry = new CacheEntry();
+            try {
+                entry.setKey(key);
+                entry.setLive(1800);
+                entry.setValue(1);
+                CACHE.put(entry);
+            } catch (Exception e) {
+               //...
+            }
+        }
+        long expireTime = entry.getExpirationTime();
+        if (expireTime <= 0) {
+            CACHE.remove(key);
+        }
+        // 倒计时返回
+        return expireTime / 1000;
+
+    }
+
 
 }

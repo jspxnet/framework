@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.sioc.type;
 
+import com.github.jspxnet.utils.ObjectUtil;
+
 import java.lang.reflect.Type;
 
 /**
@@ -32,13 +34,11 @@ public class DoubleXmlType extends TypeSerializer {
 
     @Override
     public Object getTypeObject() {
-        return new Double(value.toString().trim());
+        return ObjectUtil.toDouble(value.toString().trim());
     }
 
     @Override
     public String getXmlString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<double name=\"").append(name).append("\">").append(value).append("</double>\r\n");
-        return sb.toString();
+        return "<double name=\"" + name + "\">" + value + "</double>\r\n";
     }
 }

@@ -42,6 +42,7 @@ public class MemoryStore extends Store implements IStore {
     @Override
     public void put(CacheEntry entry) {
         if (cacheList.size() > getMaxElements()) {
+            cacheList.replace(entry.getKey(),entry);
             return;
         }
         cacheList.put(entry.getKey(), entry);
@@ -125,6 +126,4 @@ public class MemoryStore extends Store implements IStore {
     public void dispose() {
         cacheList.clear();
     }
-
-
 }

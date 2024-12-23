@@ -41,6 +41,11 @@ public final class JxlsUtil {
             for (String key : model.keySet()) {
                 //这里转换一下支持dto对象
                 Object obj = model.get(key);
+                if (ClassUtil.isStandardProperty(obj.getClass()))
+                {
+                      context.putVar(key, obj);
+                      continue;
+                }
                 boolean isMap = false;
                 if (obj instanceof Collection)
                 {
@@ -59,11 +64,8 @@ public final class JxlsUtil {
                     //转换城Map对象
                     List<Map<String,Object>> list = new ArrayList<>();
                     Collection<Object> objCol = (Collection)obj;
-                    if (objCol!=null)
-                    {
-                        for (Object o : objCol) {
-                            list.add(ObjectUtil.getMap(o));
-                        }
+                    for (Object o : objCol) {
+                        list.add(ObjectUtil.getFullMap(o));
                     }
                     context.putVar(key, list);
                 } else
@@ -372,7 +374,6 @@ public final class JxlsUtil {
                         }
                     } catch (Exception e)
                     {
-                        e.printStackTrace();
                         log.error(headMap.get(j) +",取值错误,不要使用引用方式的值",e);
                     }
 

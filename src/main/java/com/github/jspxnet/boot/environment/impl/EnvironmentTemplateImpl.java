@@ -304,6 +304,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             System.setProperty("file.encoding", getEncode());
         }
 
+
         System.setProperty("javax.xml.soap.character-set-encoding", getEncode());
         //awtToolkit
         String awtToolkit = getAwtToolkit();

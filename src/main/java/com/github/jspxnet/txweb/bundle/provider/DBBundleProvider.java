@@ -20,6 +20,7 @@ import com.github.jspxnet.txweb.bundle.table.BundleTable;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.SoberFactory;
 import com.github.jspxnet.sober.SoberSupport;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
@@ -36,24 +37,16 @@ public class DBBundleProvider extends BundleProvider {
     final private static String BUNDLE_MODEL = "bundle";
     final private static String LANGUAGE_MODEL = "language";
 
-
-
-
     public void setSoberFactory(SoberFactory soberFactory) {
         soberTemplate.setSoberFactory(soberFactory);
     }
-
 
     public DBBundleProvider() {
 
     }
 
-
+    @Setter
     private String model = BUNDLE_MODEL;
-
-    public void setModel(String model) {
-        this.model = model;
-    }
 
     /**
      * 得到绑定值
@@ -78,7 +71,6 @@ public class DBBundleProvider extends BundleProvider {
         return super.save(key, value, 0);
     }
 
-
     /**
      * 保存
      *
@@ -102,7 +94,7 @@ public class DBBundleProvider extends BundleProvider {
             try {
                 return soberTemplate.update(editBundleTable, new String[]{"context", "encrypt"}) >= 0;
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("save",e);
             }
         }
         return soberTemplate.save(bundletable) > 0;
@@ -203,5 +195,9 @@ public class DBBundleProvider extends BundleProvider {
                 .add(Expression.eq("dataType", dataType)).getDeleteListCacheKey();
         JSCacheManager.queryRemove(BundleTable.class, key);
         cache.clear();
+    }
+
+    public String getModel() {
+        return model;
     }
 }

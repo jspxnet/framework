@@ -126,6 +126,7 @@ public class JWTUtil {
         return false;
     }
 
+/*
     public static void main(String[] arg)
     {
         String token = "e7e82de44bc77791410be46292049e07.OsmUInzzEoZJZeojgOwXJ1TE_FOwwMcg3I_Jjs32UxskhbDNmrvNODUL-mKflBKozO6RbWoCosubD-n84j5TshsY3FWc6jWjR54SoNQ7izy9-kEVDrjDq_ECsUTTrnNM58-Fugox6-NwgoXXeohMng==";
@@ -134,5 +135,6 @@ public class JWTUtil {
         System.out.println("---------------b="+ b);
 
     }
+*/
 
 }

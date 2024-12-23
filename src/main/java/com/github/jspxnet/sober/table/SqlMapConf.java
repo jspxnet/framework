@@ -74,6 +74,11 @@ public class SqlMapConf extends OperateTable {
     @Column(caption = "版本号",defaultValue = "1")
     private int version = 1;
 
+    //和对应的实体名称一直，这样sql 执行的结果才能正确的放入对应的redis 缓存中
+    @Column(caption = "缓存名称", length = 100)
+    private String cache;
+    //Class<T> criteriaClass
+
     //做初始化标识
     @JsonIgnore
     private boolean replenished = false;

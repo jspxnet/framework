@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -25,14 +25,22 @@ import java.util.Map;
  * Time: 10:47:26
  */
 public interface PermissionDAO extends SoberSupport {
-    MemberRole getMemberRole(long uid) throws SQLException;
 
+    /**
+     * 该账号是否是创建人
+     *
+     * @param oid  oid
+     * @param uid 用户id
+     * @return true = 创建人
+     */
+    boolean existsCreate(String oid, long uid);
+
+    MemberRole getMemberRole(long uid) throws SQLException;
 
     Role getRole(String roleId);
 
     List<MemberRole> getMemberRoles(long uid, boolean load);
 
-    //Role getComposeRole(long uid);
 
     Role getComposeRole(long uid, String organizeId);
 
@@ -50,7 +58,7 @@ public interface PermissionDAO extends SoberSupport {
 
     Map<String, ActionConfigBean> getActionList() throws Exception;
 
-    boolean deleteRoles(String[] ids) ;
+    boolean deleteRoles(String[] ids);
 
     String getNamespace();
 

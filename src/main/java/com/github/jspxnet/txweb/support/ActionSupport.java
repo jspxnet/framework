@@ -12,6 +12,7 @@ package com.github.jspxnet.txweb.support;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.enums.UserEnumType;
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.*;
@@ -217,6 +218,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public void setEnv(Map<String, Object> environment) {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return;
+        }
         actionContext.getEnvironment().clear();
         actionContext.getEnvironment().putAll(environment);
     }
@@ -225,6 +230,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public String getEnv(String keys) {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return null;
+        }
         String o = actionContext.getString(keys);
         if (o == null) {
             return StringUtil.empty;
@@ -885,18 +894,24 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public boolean isMethodInvoked() {
-        if (isComponent())
-        {
+        if (isComponent()) {
             return false;
         }
         ActionContext actionContext = ThreadContextHolder.getContext();
-        if (actionContext==null || actionContext.getMethod()==null)
-        {
+        // 响应结果为失败不清理缓存
+        Object result = actionContext.getResult();
+        if(!ObjectUtil.isEmpty(result)){
+            JSONObject resultStatus = new JSONObject(actionContext.getResult());
+            if (resultStatus.getInt("success") == YesNoEnumType.NO.getValue()) {
+                return false;
+            }
+        }
+
+        if (actionContext.getMethod() == null) {
             return false;
         }
         Method method = actionContext.getMethod();
-        if (method.getDeclaringClass().isInterface())
-        {
+        if (method.getDeclaringClass().isInterface()) {
             return false;
         }
         return actionContext.isExecuted() && method.toString().contains("Action." + actionContext.getMethod().getName());

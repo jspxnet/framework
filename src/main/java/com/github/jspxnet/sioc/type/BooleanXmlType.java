@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.sioc.type;
 
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.lang.reflect.Type;
@@ -35,7 +36,7 @@ public class BooleanXmlType extends TypeSerializer {
 
     @Override
     public Object getTypeObject() {
-        return StringUtil.toBoolean((String) value);
+        return ObjectUtil.toBoolean(value);
     }
 
     @Override

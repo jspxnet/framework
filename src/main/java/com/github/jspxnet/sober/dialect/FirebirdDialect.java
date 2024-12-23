@@ -13,10 +13,8 @@ import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
-
 import java.io.InputStream;
 import java.sql.PreparedStatement;
-import java.sql.Time;
 import java.util.Date;
 
 /**
@@ -114,7 +112,7 @@ public class FirebirdDialect extends Dialect {
     }
 
     @Override
-    public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
+    public String getLimitString(String sql, int begin, int end,TableModels soberTable) {
         return new StringBuilder(sql.length() + 20)
                 .append(sql)
                 .insert(6, begin > 0 ? " first " + (begin + 1) + " skip " + end : " first " + end)
@@ -150,5 +148,10 @@ public class FirebirdDialect extends Dialect {
     @Override
     public boolean commentPatch() {
         return true;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT first 1 * FROM (" + sql + ") zs";
     }
 }

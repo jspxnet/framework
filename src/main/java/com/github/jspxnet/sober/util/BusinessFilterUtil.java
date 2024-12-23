@@ -1,11 +1,9 @@
 package com.github.jspxnet.sober.util;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.sober.annotation.Column;
-import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.exception.RepeatBillNoException;
-import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.enums.DocumentStatusEnumType;
@@ -34,7 +32,7 @@ public final class BusinessFilterUtil {
      * @param jdbcOperations 数据处理
      * @return 得到用户在线信息
      */
-    public static UserSession getUserSession(ActionContext actionContext,JdbcOperations jdbcOperations)
+    public static UserSession getUserSession(ActionContext actionContext,SoberSupport jdbcOperations)
     {
         HttpServletRequest request = actionContext.getRequest();
         //才有头部传输sesionId的方式,这种方式比较标准一点
@@ -69,7 +67,7 @@ public final class BusinessFilterUtil {
      * @param object 处理对象
      * @throws Exception 异常
      */
-    public static void saveFilter(JdbcOperations jdbcOperations,  Object object) throws Exception {
+    public static void saveFilter(SoberSupport jdbcOperations,  Object object) throws Exception {
         if (object==null)
         {
             return;
@@ -162,7 +160,7 @@ public final class BusinessFilterUtil {
      * @param object 处理对象
      * @throws Exception 异常
      */
-    public static void updateFilter(JdbcOperations jdbcOperations, Object object) throws Exception {
+    public static void updateFilter(SoberSupport jdbcOperations, Object object) throws Exception {
         if (object==null)
         {
             return;

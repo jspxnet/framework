@@ -16,7 +16,10 @@ import com.github.jspxnet.txweb.devcenter.view.DataCallView;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
+
 //dynout/call
+@Slf4j
 @HttpMethod(caption = "数据接口", actionName = "*", namespace = Environment.DYN_OUT+"/call")
 @Bean(namespace = Environment.DYN_OUT, singleton = true)
 public class DataCallAction extends DataCallView {
@@ -67,7 +70,6 @@ public class DataCallAction extends DataCallView {
                 {
                     if (tableModels.containsField("version"))
                     {
-
                         int version = ObjectUtil.toInt(BeanUtil.getProperty(old,"version"));
                         BeanUtil.setSimpleProperty(object,"version",(version+1));
                     }
@@ -81,7 +83,7 @@ public class DataCallAction extends DataCallView {
                 return RocResponse.success(id,language.getLang(LanguageRes.saveSuccess));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+             log.error("save", e);
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),e.getMessage());
         }
         return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.saveFailure));

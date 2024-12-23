@@ -95,7 +95,7 @@ public class RandomGenerator {
     }
 
     private static final int BUFFER_SIZE = 101;
-    private static double[] buffer = new double[BUFFER_SIZE];
+    private static final double[] buffer = new double[BUFFER_SIZE];
 
     static {
         int i;
@@ -104,6 +104,7 @@ public class RandomGenerator {
         }
     }
 
+/*
     public static void main(String[] args) {
         //1270462611852 + 5
         System.out.println(UUID.randomUUID().getLeastSignificantBits());
@@ -123,5 +124,6 @@ public class RandomGenerator {
             System.out.println(randomGenerator.getKeepLength(4));
         }
     }
+*/
 
 }

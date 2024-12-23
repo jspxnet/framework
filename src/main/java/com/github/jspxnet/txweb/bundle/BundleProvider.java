@@ -12,8 +12,10 @@ package com.github.jspxnet.txweb.bundle;
 import com.github.jspxnet.io.StringOutputStream;
 import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.scriptmark.util.ScriptConverter;
+import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;
 import com.github.jspxnet.txweb.env.TXWeb;
+import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.SystemUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.beans.XMLEncoder;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -37,7 +40,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class BundleProvider implements Bundle, Serializable {
 
+    @Setter
     protected String namespace = TXWeb.global;
+    @Setter
     protected String dataType = StringUtil.empty;
     protected String encode = SystemUtil.encode;
     final protected Map<String, String> cache = new HashMap<>();
@@ -48,17 +53,9 @@ public abstract class BundleProvider implements Bundle, Serializable {
         return namespace;
     }
 
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
     @Override
     public String getDataType() {
         return dataType;
-    }
-
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
     }
 
     @Override
@@ -138,6 +135,26 @@ public abstract class BundleProvider implements Bundle, Serializable {
     public int getInt(String key, int defVar) {
         int result = getInt(key);
         return result == 0 ? defVar : result;
+    }
+
+
+    public SoberColumnDto getSoberColumn(final String keys)
+    {
+        BundleTable bundleTable = getBundleTable(keys);
+        if (bundleTable==null)
+        {
+            return null;
+        }
+        SoberColumnDto dto = new SoberColumnDto();
+        dto.setName(bundleTable.getIdx());
+        dto.setCaption(bundleTable.getCaption());
+        dto.setDefaultValue(bundleTable.getContext());
+        dto.setInput("text");
+        dto.setClassType(String.class);
+        dto.setTableName(AnnotationUtil.getTableName(BundleTable.class));
+        dto.setLength(bundleTable.getContext()==null?200:bundleTable.getContext().length());
+        dto.setDataType(bundleTable.getDataType());
+        return dto;
     }
 
     @Override

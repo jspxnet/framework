@@ -8,6 +8,7 @@ import com.github.jspxnet.security.symmetry.impl.DESEncrypt;
 import com.github.jspxnet.security.symmetry.impl.DESedeEncrypt;
 import com.github.jspxnet.security.symmetry.impl.SM4Encrypt;
 import com.github.jspxnet.utils.ClassUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,10 +20,10 @@ import java.util.Map;
  * 放入包
  * jce_policy-8.zip
  */
+@Slf4j
 public class SymmetryEncryptFactory {
     public static EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-    public static Character Encrypt_NONE;
-    static private String defaultCipherIv = envTemplate.getString(Environment.cipherIv);
+    static private final String defaultCipherIv = envTemplate.getString(Environment.cipherIv);
 
     //对称加密算法
     public static final Character NONE = '0'; //非加密
@@ -32,7 +33,7 @@ public class SymmetryEncryptFactory {
     public static final Character DESede = '4';
     public static final Character SM4 = '5';
 
-    public static final Map<Character, Class> symmetryMap = new HashMap<Character, Class>();
+    public static final Map<Character, Class<?>> symmetryMap = new HashMap<>();
 
     static {
         symmetryMap.put(AES, AESEncrypt.class);
@@ -68,7 +69,7 @@ public class SymmetryEncryptFactory {
      * @return 创建一个加密实体
      */
     public static Encrypt createEncrypt(Character type, String cipherAlgorithm, String cipherIv) {
-        Class className = symmetryMap.get(type);
+        Class<?> className = symmetryMap.get(type);
         if (className == null) {
             return null;
         }
@@ -80,8 +81,31 @@ public class SymmetryEncryptFactory {
             encrypt.setCipherIv(cipherIv);
             return encrypt;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
+
+    public static void main(String[] args) {
+
+        String password = "1719D1A8D93E6CFD7A175D1505598B11";
+        String srcStr = "大湾区重大工程又上新！黄茅海跨海通道11日15时正式通车，初期免费通行1234567我们使用生成的Key和IV对明文数据进行加密";
+        for (Class<?> cls:symmetryMap.values())
+        {
+            System.out.println(cls);
+            try {
+                AbstractEncrypt encrypt = (AbstractEncrypt) cls.newInstance();
+                encrypt.setSecretKey(password);
+                String enStr = encrypt.getEncode(srcStr);
+                String oldStr = encrypt.getDecode(enStr);
+                System.out.println(enStr);
+                System.out.println(oldStr);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+        }
+    }
+
 }

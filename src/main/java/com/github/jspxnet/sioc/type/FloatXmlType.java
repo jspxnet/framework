@@ -9,6 +9,9 @@
  */
 package com.github.jspxnet.sioc.type;
 
+import com.github.jspxnet.utils.ObjectUtil;
+import com.github.jspxnet.utils.StringUtil;
+
 import java.lang.reflect.Type;
 
 /**
@@ -32,13 +35,15 @@ public class FloatXmlType extends TypeSerializer {
 
     @Override
     public Object getTypeObject() {
-        return new Float(value.toString().trim());
+        if (StringUtil.isNullOrWhiteSpace(value.toString()))
+        {
+            return 0f;
+        }
+        return ObjectUtil.toFloat(value.toString().trim());
     }
 
     @Override
     public String getXmlString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<float name=\"").append(name).append("\">").append(value).append("</float>\r\n");
-        return sb.toString();
+        return "<float name=\"" + name + "\">" + value + "</float>\r\n";
     }
 }

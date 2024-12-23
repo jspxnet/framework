@@ -21,7 +21,6 @@ public class BigIntegerXmlType extends TypeSerializer {
 
     @Override
     public Object getTypeObject() {
-
         if (value == null || !StringUtil.isStandardNumber(value.toString())) {
             return BigInteger.ZERO;
         }

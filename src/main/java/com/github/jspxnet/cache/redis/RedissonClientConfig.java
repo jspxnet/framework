@@ -7,6 +7,7 @@ import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -31,6 +32,7 @@ import java.io.Serializable;
 @Bean(singleton = true)
 public class RedissonClientConfig implements Serializable {
     private static RedissonClient redisson = null;
+    @Setter
     private String config = StringUtil.empty;
     private Config redisConfig = null;
 
@@ -101,10 +103,6 @@ public class RedissonClientConfig implements Serializable {
         {
             redisson.shutdown();
         }
-    }
-
-    public void setConfig(String config) {
-        this.config = config;
     }
 
     public Config getConfig() {

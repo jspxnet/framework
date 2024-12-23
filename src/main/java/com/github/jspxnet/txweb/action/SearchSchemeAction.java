@@ -33,7 +33,6 @@ public class SearchSchemeAction extends SearchSchemeView {
         try {
             x = genericDAO.save(searchStore);
         } catch (Exception e) {
-            e.printStackTrace();
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),language.getLang(LanguageRes.saveFailure));
         }
         return RocResponse.success(x).setMessage(language.getLang(LanguageRes.saveSuccess));
@@ -56,7 +55,6 @@ public class SearchSchemeAction extends SearchSchemeView {
         try {
             x = genericDAO.update(searchScheme);
         } catch (Exception e) {
-            e.printStackTrace();
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),language.getLang(LanguageRes.updateFailure));
         }
         return RocResponse.success(x).setMessage(language.getLang(LanguageRes.updateSuccess));
@@ -84,7 +82,6 @@ public class SearchSchemeAction extends SearchSchemeView {
             }
             x = genericDAO.delete(SearchScheme.class);
         } catch (Exception e) {
-            e.printStackTrace();
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),language.getLang(LanguageRes.deleteFailure));
         }
         return RocResponse.success(x).setMessage(language.getLang(LanguageRes.deleteSuccess));

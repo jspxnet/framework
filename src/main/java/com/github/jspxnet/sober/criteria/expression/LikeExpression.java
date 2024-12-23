@@ -32,15 +32,21 @@ public class LikeExpression implements Criterion {
         this.propertyName = propertyName;
         this.value = value;
     }
+
     public LikeExpression(JSONObject json) {
         propertyName = json.getString(JsonExpression.JSON_FIELD);
         value = json.get(JsonExpression.JSON_VALUE);
     }
+
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
         if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
         {
-            return StringUtil.quote(propertyName,true)+ " " + OperatorEnumType.LIKE.getSql() + " ?";
+            return propertyName + " " + OperatorEnumType.LIKE.getSql() + " ?";
+        }
+        if (DatabaseEnumType.POSTGRESQL.equals(DatabaseEnumType.find(databaseName)))
+        {
+            return propertyName + " " + OperatorEnumType.ILIKE.getSql() + " ?";
         }
         return propertyName + " " + OperatorEnumType.LIKE.getSql() + " ?";
     }

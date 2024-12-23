@@ -89,7 +89,6 @@ public class SoberColumn implements Serializable {
     @Column(caption = "自动ID")
     private boolean autoincrement = false;
 
-
     @JsonField
     public String getTypeString() {
         if (classType!=null)

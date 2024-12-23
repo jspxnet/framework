@@ -57,7 +57,7 @@ public class JspxNetFilter implements Filter {
             servletRequest.setCharacterEncoding(Dispatcher.getEncode());
             servletResponse.setCharacterEncoding(Dispatcher.getEncode());
         } catch (UnsupportedEncodingException e) {
-            TXWebUtil.errorPrint("系统编码错误", null, (HttpServletResponse)servletResponse, HttpStatusType.HTTP_status_403);
+            TXWebUtil.errorPrint("系统编码错误", null, (HttpServletResponse)servletResponse, HttpStatusType.HTTP_status_OK);
             log.debug("系统编码错误", e);
             return;
         }

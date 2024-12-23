@@ -12,6 +12,8 @@ package com.github.jspxnet.util;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.NumberUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 import java.math.BigDecimal;
@@ -431,73 +433,42 @@ public class LunarCalendar extends GregorianCalendar {
             {28, 60, 92, 124, 160, 192, 200, 201, 250},
             {17, 53, 85, 124, 156, 188, 200, 201, 250}};
 
-    private int baseChineseDate = 11;
+    private final int baseChineseDate = 11;
 
-    private int baseChineseMonth = 11;
+    private final int baseChineseMonth = 11;
 
-    private int baseChineseYear = 4598 - 1;
+    private final int baseChineseYear = 4598 - 1;
 
-    private int baseDate = 1;
+    private final int baseDate = 1;
 
-    private int baseIndex = 0;
+    private final int baseIndex = 0;
 
-    private int baseMonth = 1;
+    private final int baseMonth = 1;
 
-    private int baseYear = 1901;
+    private final int baseYear = 1901;
 
+    @Setter
+    @Getter
     private int chineseDate; // 阴历  号
 
+    @Setter
+    @Getter
     private int chineseMonth; // 阴历  月
 
+    @Setter
+    @Getter
     private int chineseYear; // 阴历  年
 
+    @Setter
+    @Getter
     private int principleTerm;
 
+    @Setter
+    @Getter
     private int sectionalTerm;
 
 
-    //true为上班[班] ，false为放假[假]，如果本来就是周末的节假日则不需再设置
-    private Map<String, Boolean> dateMap = new HashMap<>();
 
-    public int getChineseDate() {
-        return chineseDate;
-    }
-
-    public void setChineseDate(int chineseDate) {
-        this.chineseDate = chineseDate;
-    }
-
-    public int getChineseMonth() {
-        return chineseMonth;
-    }
-
-    public void setChineseMonth(int chineseMonth) {
-        this.chineseMonth = chineseMonth;
-    }
-
-    public int getChineseYear() {
-        return chineseYear;
-    }
-
-    public void setChineseYear(int chineseYear) {
-        this.chineseYear = chineseYear;
-    }
-
-    public int getPrincipleTerm() {
-        return principleTerm;
-    }
-
-    public void setPrincipleTerm(int principleTerm) {
-        this.principleTerm = principleTerm;
-    }
-
-    public int getSectionalTerm() {
-        return sectionalTerm;
-    }
-
-    public void setSectionalTerm(int sectionalTerm) {
-        this.sectionalTerm = sectionalTerm;
-    }
 
     public int daysInChineseMonth(int y, int m) {
 
@@ -825,16 +796,14 @@ public class LunarCalendar extends GregorianCalendar {
     public String getChineseDateText() {
         //13 号星期5
         StringBuilder buf = new StringBuilder();
-        buf.append(DateUtil.toString(getTime(), "yyyy年MM月dd日") + "\r\n"); //日期
-        buf.append(dayNames[getWeek()] + "\r\n");  //星期
-        buf.append("今年第" + get(Calendar.DAY_OF_YEAR) + "天\r\n");  //一年的第几天
-        buf.append("农历 " + chineseMonth + "月" + chineseDate + "日\r\n"); //农历
-        buf.append(getCyclicalYear() + "年 " + getCyclicalMonth() + "月 " + getCyclicalDate() + "日\r\n"); //农 属象
+        buf.append(DateUtil.toString(getTime(), "yyyy年MM月dd日")).append("\r\n"); //日期
+        buf.append(dayNames[getWeek()]).append("\r\n");  //星期
+        buf.append("今年第").append(get(Calendar.DAY_OF_YEAR)).append("天\r\n");  //一年的第几天
+        buf.append("农历 ").append(chineseMonth).append("月").append(chineseDate).append("日\r\n"); //农历
+        buf.append(getCyclicalYear()).append("年 ").append(getCyclicalMonth()).append("月 ").append(getCyclicalDate()).append("日\r\n"); //农 属象
 
         for (String ftv : chineseFtv) {
-
             String mmdd = StringUtil.substringBefore(ftv, " ");
-
             int mm = StringUtil.toInt(mmdd.substring(0, 2));
             int dd = StringUtil.toInt(mmdd.substring(2, 4));
             if (chineseMonth == mm && chineseDate == dd) {
@@ -1042,11 +1011,13 @@ public class LunarCalendar extends GregorianCalendar {
      * 注意配置通过  dateMap
      * 计算向后多少个工作日
      * 碰到节假日向后推 周末如果有工作正算
+     * @param dateMap 工作日列表，true为上班[班] ，false为放假[假]，如果本来就是周末的节假日则不需再设置
      * @param date 默认开始日期
      * @param day  向后多少个工作日, 不能超过 365天
      * @return 日期
      */
-    public Date addWorkDay(Date date,int day) {
+    public Date addWorkDay(Map<String, Boolean> dateMap,Date date,int day) {
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int times = 0;
@@ -1074,7 +1045,7 @@ public class LunarCalendar extends GregorianCalendar {
         //有放假,后推
         times = 0;
         String dateStr = DateUtil.toString(calendar.getTime(), "yyyy-MM-dd");
-        while(this.dateMap.containsKey(dateStr) && Boolean.FALSE.equals(this.dateMap.get(dateStr)) || !this.dateMap.containsKey(dateStr) && getIsWeekEnd(calendar))
+        while(dateMap.containsKey(dateStr) && Boolean.FALSE.equals(dateMap.get(dateStr)) || !dateMap.containsKey(dateStr) && getIsWeekEnd(calendar))
         {
             ++times;
             calendar.add(Calendar.DATE, 1);//整数往后推日期,负数往前推日期
@@ -1130,7 +1101,6 @@ public class LunarCalendar extends GregorianCalendar {
         calendar.setTime(StringUtil.getDate("2020-11-1"));
         LunarCalendar lunarCalendar = new LunarCalendar();
         for (int i = 1; i < calendar.getMaximum(Calendar.DATE); i++) {
-
             lunarCalendar.setGregorian(calendar.getTime());
             lunarCalendar.computeChineseFields();
             lunarCalendar.computeSolarTerms();

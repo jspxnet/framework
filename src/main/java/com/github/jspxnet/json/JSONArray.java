@@ -215,7 +215,13 @@ public class JSONArray extends LinkedList<Object> {
                 } else if (ClassUtil.isStandardProperty(o.getClass())) {
                     super.add(o);
                 } else {
-                    super.add(new JSONObject(o, includeSuperClass));
+                    if (o instanceof JSONObject)
+                    {
+                        super.add(o);
+                    } else
+                    {
+                        super.add(new JSONObject(o, includeSuperClass));
+                    }
                 }
             }
         } else if (array instanceof Collection) {

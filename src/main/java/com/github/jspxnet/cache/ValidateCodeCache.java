@@ -20,5 +20,7 @@ public interface ValidateCodeCache {
 
     String querySms(String mobile);
 
+    long getTimeRemaining(String loginId);
+
     void updateTimes(String id);
 }

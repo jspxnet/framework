@@ -160,7 +160,8 @@ public class Predictor {
 	 * 
 	 * @return The next matching moment as a millis value.
 	 */
-	public synchronized long nextMatchingTime() {
+	public long nextMatchingTime() {
+		//synchronized
 		// Go a minute ahead.
 		time += 1000;
 		// Is it matching?

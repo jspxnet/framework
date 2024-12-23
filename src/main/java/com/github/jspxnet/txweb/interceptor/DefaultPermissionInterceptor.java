@@ -43,6 +43,8 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
@@ -61,6 +63,8 @@ import java.util.Date;
 @Bean(bind = DefaultPermissionInterceptor.class)
 public class DefaultPermissionInterceptor extends BasePermissionInterceptor {
 
+    @Setter
+    @Getter
     private boolean useAppolloConfig = false;
 
     public DefaultPermissionInterceptor() {
@@ -76,14 +80,6 @@ public class DefaultPermissionInterceptor extends BasePermissionInterceptor {
     @Ref
     private PermissionDAO permissionDAO;
 
-
-    public boolean isUseAppolloConfig() {
-        return useAppolloConfig;
-    }
-
-    public void setUseAppolloConfig(boolean useAppolloConfig) {
-        this.useAppolloConfig = useAppolloConfig;
-    }
 
     @Override
     public void init() {
@@ -131,7 +127,7 @@ public class DefaultPermissionInterceptor extends BasePermissionInterceptor {
                     log.error(guestUrlFile + "没有找到");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("DefaultPermissionInterceptor",e);
             }
             //---------------------------
             if (!ArrayUtil.isEmpty(adminRuleUrl)||!ArrayUtil.isEmpty(adminRuleOutUrl)) {
@@ -148,7 +144,7 @@ public class DefaultPermissionInterceptor extends BasePermissionInterceptor {
                     JSCacheManager.put(DefaultCache.class,ADMIN_RULE_URL_TXT,txt);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("DefaultPermissionInterceptor",e);
             }
         }
     }
@@ -187,27 +183,6 @@ public class DefaultPermissionInterceptor extends BasePermissionInterceptor {
         if (isAdminRuleUrl(checkUrl)) {
             organizeId = null;
         }
-
-        //肖佳添加 begin
-        String noUserAdmin = StringUtil.substringAfterLast(checkUrl,StringUtil.BACKSLASH);
-        String oid = action.getString("oid");
-        if (!noUserAdmin.contains("user") && !noUserAdmin.contains("admin") && !StringUtil.isEmpty(oid)) {
-            organizeId = oid;
-        }
-
-        if (!noUserAdmin.contains("user") && !noUserAdmin.contains("admin") && checkUrl.contains("controller") && checkUrl.contains("jccms")) {
-            organizeId = action.getString("originId");
-        }
-        //肖佳添加 end
-
-
-
-
-
-
-
-
-
 
         permissionDAO.setOrganizeId(organizeId);
 

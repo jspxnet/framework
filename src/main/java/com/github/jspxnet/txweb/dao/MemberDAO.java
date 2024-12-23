@@ -61,6 +61,8 @@ public interface MemberDAO extends SoberSupport {
 
     Member getMember(String loginType, String loginId);
 
+    Member getMemberV2(String loginType, String loginId);
+
     Member getForPhone(String name);
 
     Member getForId(long uid);

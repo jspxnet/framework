@@ -1,7 +1,5 @@
 package com.github.jspxnet.util;
 
-import com.github.jspxnet.enums.YesNoEnumType;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,7 +7,6 @@ import java.util.*;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/3/22 19:41
  * description: 身份证验证
@@ -790,15 +787,5 @@ public class ValidateIdCard {
         System.out.println(ValidateIdCard.getChineseEraById(idCard));
         System.out.println(ValidateIdCard.getProvinceByIdCard(idCard));
         return validateCard(idCard);
-    }
-
-    public static void main(String[] args) {
-
-        System.out.println(ObjectUtil.toString(YesNoEnumType.class.getEnumConstants()));
-
-
-        /*boolean b = ValidateIdCard.validateCard("P673423(9)");
-        System.out.println("Hello World1="+ b);
-        System.out.println("Hello World2="+ checkIdCard("P673423(9)"));*/
     }
 }

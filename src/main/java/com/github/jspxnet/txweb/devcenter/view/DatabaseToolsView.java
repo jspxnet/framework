@@ -13,15 +13,17 @@ import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
-import com.github.jspxnet.util.KingdeeXkUtil;
+import com.github.jspxnet.util.FieldWordUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @HttpMethod(caption = "数据库工具",namespace = Environment.DEV_CENTER+"/db",actionName = "*")
 @Bean(singleton = true)
 public class DatabaseToolsView  extends ActionSupport {
@@ -88,22 +90,49 @@ public class DatabaseToolsView  extends ActionSupport {
     public RocResponse<String> sqlBeanField(@Param(caption = "sql",min = 2,max = 100,required = true) String sql,
                                             @Param(caption = "Column列表") List<SoberColumnDto> listNew)
     {
-        List<SoberColumn>  list = genericDAO.getSqlColumns(sql);
-        Map<String,SoberColumnDto> columnMap = new HashMap<>();
+
+
+        //中文方式放入去对应begin
+        Map<String,SoberColumnDto> columnCaptionMap = new HashMap<>();
         for (SoberColumnDto dto:listNew)
         {
-            if (!columnMap.containsKey(dto.getCaption()))
+            if (!columnCaptionMap.containsKey(dto.getCaption()))
             {
-                columnMap.put(dto.getCaption(),dto);
+                columnCaptionMap.put(dto.getCaption(),dto);
             } else {
-                columnMap.put(dto.getCaption()+"D",dto);
+                columnCaptionMap.put(dto.getCaption()+"D",dto);
             }
         }
+        //中文方式放入去对应end
+
+        //中文方式放入去对应begin
+        Map<String,SoberColumnDto> columnFieldMap = new HashMap<>();
+        for (SoberColumnDto dto:listNew)
+        {
+            if (!columnFieldMap.containsKey(dto.getName().toUpperCase()))
+            {
+                columnFieldMap.put(dto.getName().toUpperCase(),dto);
+            } else {
+                columnFieldMap.put(dto.getName().toUpperCase()+"D",dto);
+            }
+        }
+        //中文方式放入去对应end
 
         StringBuilder sb = new StringBuilder();
+        List<SoberColumn> list = genericDAO.getSqlColumns(sql);
         for (SoberColumn column:list)
         {
-            SoberColumnDto dto = columnMap.get(column.getCaption());
+            SoberColumnDto dto = columnCaptionMap.get(column.getCaption());
+            if (dto==null)
+            {
+                dto = columnFieldMap.get(column.getName().toUpperCase());
+                if (dto==null)
+                {
+                    String fieldName = column.getName();
+                    fieldName = StringUtil.underlineToCamel(fieldName);
+                    dto = columnFieldMap.get(fieldName.toUpperCase());
+                }
+            }
             if (dto==null)
             {
                 dto = BeanUtil.copy(column, SoberColumnDto.class);
@@ -132,14 +161,11 @@ public class DatabaseToolsView  extends ActionSupport {
                 }
             }
             //中文字段名称修复为英文方式end
-            String fileName = KingdeeXkUtil.getFileName(dto.getCaption());
-            if (StringUtil.isNull(fileName))
-            {
-                fileName = dto.getName();
-            }
-            dto.setName(KingdeeXkUtil.fixWordName(fileName));
+            dto.setName(FieldWordUtil.getFiledName(dto.getCaption(),dto.getName()));
             sb.append(dto.getBeanField(true)).append("\r\n");
         }
+        columnCaptionMap.clear();
+        columnFieldMap.clear();
         return RocResponse.success(sb.toString());
     }
 
@@ -165,7 +191,7 @@ public class DatabaseToolsView  extends ActionSupport {
         try {
             cla = ClassUtil.loadClass(className);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+           log.error("getFieldAsSql", e);
             throw new RuntimeException(e);
         }
         TableModels tableModel = genericDAO.getSoberTable(cla);

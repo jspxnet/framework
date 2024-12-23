@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "jspx_table_model",caption = "实体映射关系",cache = false)
+@Table(name = "jspx_table_model",caption = "实体映射关系")
 public class SoberTableModel extends OperateTable{
     @Id
     @Column(caption = "id", notNull = true)

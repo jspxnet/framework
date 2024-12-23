@@ -82,7 +82,7 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
             servletRequest.setCharacterEncoding(Dispatcher.getEncode());
             servletResponse.setCharacterEncoding(Dispatcher.getEncode());
         } catch (UnsupportedEncodingException e) {
-            TXWebUtil.errorPrint("系统编码错误", null, (HttpServletResponse)servletResponse, HttpStatusType.HTTP_status_403);
+            TXWebUtil.errorPrint("系统编码错误", null, (HttpServletResponse)servletResponse, HttpStatusType.HTTP_status_OK);
             log.debug("系统编码错误", e);
             return;
         }
@@ -118,7 +118,7 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
             //不支持过滤功能,只能自己实现
             File file = new File(Dispatcher.getRealPath(), URLUtil.getNamespace(url) + "/" + URLUtil.getFileName(url));
             if (!file.isFile()) {
-                TXWebUtil.errorPrint("不存在的资源", null, response, HttpStatusType.HTTP_status_403);
+                TXWebUtil.errorPrint("不存在的资源", null, response, HttpStatusType.HTTP_status_OK);
                 log.debug("not find file:{}",file.getPath());
                 return;
             }
@@ -127,7 +127,7 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
             try (InputStream in = Files.newInputStream(file.toPath()); OutputStream out = response.getOutputStream();) {
                 StreamUtil.copy(in, out);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("not find file:{}",file.getPath());
             }
         }
     }

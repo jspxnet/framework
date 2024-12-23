@@ -13,7 +13,6 @@ import com.github.jspxnet.cache.CacheException;
 import com.github.jspxnet.cache.IStore;
 import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.util.LRUHashMap;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,11 +23,11 @@ import java.util.Set;
  * User: chenYuan
  * date: 2010-10-19
  * Time: 15:13:02
- * 标准的LRU本地内存缓存,默认限制长度250
+ * 使用apahce的LURMap
  * 数据一直保持，过期周期设置长一点比较合适
  */
 public class LRUStore extends Store implements IStore {
-    private final LRUHashMap<String, CacheEntry> cacheList = new LRUHashMap<>(4000);
+    private LRUHashMap<String, CacheEntry> cacheList = new LRUHashMap<>(500);
 
     public LRUStore() {
 
@@ -36,7 +35,9 @@ public class LRUStore extends Store implements IStore {
 
     @Override
     public void setMaxElements(int maxElements) {
-        cacheList.setMaxCapacity(maxElements);
+        cacheList.clear();
+        cacheList = null;
+        cacheList = new LRUHashMap<>(maxElements);
         super.setMaxElements(maxElements);
     }
 

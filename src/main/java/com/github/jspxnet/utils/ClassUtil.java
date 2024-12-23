@@ -43,7 +43,7 @@ public class ClassUtil {
     public static final String METHOD_NAME_IS = "is";
     public static final String[] BASE_NUMBER_TYPE = new String[]{"short","int","long","float","double"};
 
-    public static final String[] NO_CHECK_IS_PROXY = new String[]{"com.seeyon.ctp.common.po.BasePO","org.apache.logging.log4j","org.apache.commons"};
+    public static final String[] NO_CHECK_IS_PROXY = new String[]{"com.seeyon.ctp.common.po.BasePO","org.apache.logging.log4j","org.apache.commons","org.mozilla"};
 
 
 
@@ -468,7 +468,7 @@ public class ClassUtil {
             }
             Field[] fields = childClass.getDeclaredFields();
             for (Field f : fields) {
-                if (ignore && fieldName.equalsIgnoreCase(f.getName()))
+                if (ignore && (fieldName.equalsIgnoreCase(f.getName()) || ("$cglib_prop_"+fieldName).equals(f.getName())))
                 {
                     return f;
                 } else
@@ -786,13 +786,13 @@ public class ClassUtil {
             return false;
         }
 
-        return  type.equals(String[].class) || type.equals(int[].class) || type.equals(Integer[].class) ||
+        return  (type.equals(String[].class) || type.equals(int[].class) || type.equals(Integer[].class) ||
                 type.equals(long[].class) || type.equals(Long[].class) ||
                 type.equals(float[].class) || type.equals(Float[].class) ||
                 type.equals(double[].class) || type.equals(Double[].class) ||
                 type.equals(char[].class) || type.equals(Character[].class) ||
                 type.equals(byte[].class) || type.equals(BigInteger[].class) ||
-                type.equals(BigDecimal[].class) || type.equals(Object[].class);
+                type.equals(BigDecimal[].class) || type.equals(Object[].class) ) && !type.equals(List.class);
     }
 
     /**
@@ -1368,6 +1368,11 @@ public class ClassUtil {
         return result;
     }
 
+    /**
+     * 得到方法名称
+     * @param stackTraceElementArray 堆栈
+     * @return 得到方法名称
+     */
     public static String getClassMethodName(StackTraceElement[] stackTraceElementArray) {
         if (stackTraceElementArray==null)
         {
@@ -1393,7 +1398,6 @@ public class ClassUtil {
         try {
             cls = ClassUtil.loadClass(className);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
             log.error(className + " not found", e);
             return null;
         }
@@ -1403,6 +1407,7 @@ public class ClassUtil {
         }
         return iClass.getName() + StringUtil.DOT + stackTraceElement.getMethodName();
     }
+
 
 
 }

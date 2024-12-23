@@ -34,7 +34,6 @@ public class SqlMapConfDAOImpl extends JdbcOperations implements SqlMapConfDAO {
             criteria = criteria.add(Expression.eq("namespace", namespace));
         }
         criteria = criteria.add(Expression.eq("name", name));
-
         String databaseType = getSoberFactory().getDatabaseType();
         criteria = criteria.add(Expression.eq("databaseType", databaseType));
         SqlMapConf sqlMapConf = criteria.addOrder(Order.desc("version")).objectUniqueResult(false);

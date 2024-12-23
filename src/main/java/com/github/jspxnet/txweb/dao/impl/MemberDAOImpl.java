@@ -362,6 +362,14 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
         return member;
     }
 
+    @Override
+    public Member getMemberV2(String loginType, String loginId) {
+
+        return createCriteria(Member.class)
+                .add(Expression.eq(loginType,loginId))
+                .objectUniqueResult(false);
+    }
+
     /**
      * 第三方登陆信息查询
      *

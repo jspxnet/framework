@@ -4,7 +4,6 @@ import com.github.jspxnet.enums.BoolEnumType;
 import com.github.jspxnet.enums.TipStatusEnumType;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
-import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import java.io.Serializable;

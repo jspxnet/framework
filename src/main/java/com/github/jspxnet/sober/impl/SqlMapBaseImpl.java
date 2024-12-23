@@ -16,7 +16,6 @@ import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -247,11 +246,17 @@ public class SqlMapBaseImpl implements SqlMapBase {
         }
 
         //判断是否是用缓存
-        Table table = AnnotationUtil.getTable(cls);
         String cacheKey = null;
+        Class<?> cacheCls = cls;
+        String cacheClass = sqlMapConf.getCache();
+        if (!StringUtil.isNullOrWhiteSpace(cacheClass))
+        {
+            cacheCls = ClassUtil.loadClass(cacheClass);
+        }
+        Table table = AnnotationUtil.getTable(cacheCls);
         if (table != null && soberFactory.isUseCache() && table.cache()) {
-            cacheKey = SoberUtil.getListKey(cls, sqlText, StringUtil.empty, beginRow, endRow, loadChild);
-            List<T> resultList = (List<T>) JSCacheManager.get(cls, cacheKey);
+            cacheKey = SoberUtil.getListKey(cacheCls, sqlText, cls.getName(), beginRow, endRow, loadChild);
+            List<T> resultList = (List<T>) JSCacheManager.get(cacheCls, cacheKey);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
             }
@@ -317,9 +322,7 @@ public class SqlMapBaseImpl implements SqlMapBase {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("error SQL:{},info:{}", sqlText, e.getMessage());
-            throw new Exception("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(preparedStatement);
@@ -327,8 +330,8 @@ public class SqlMapBaseImpl implements SqlMapBase {
         }
         //放入cache
 
-        if (table != null && soberFactory.isUseCache() && table.cache()) {
-            JSCacheManager.put(cls, cacheKey, list);
+        if (cacheKey!=null&&table != null && soberFactory.isUseCache() && table.cache()) {
+            JSCacheManager.put(cacheCls, cacheKey, list);
         }
         return list;
     }

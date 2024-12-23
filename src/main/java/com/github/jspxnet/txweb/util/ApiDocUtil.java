@@ -382,7 +382,7 @@ public final class ApiDocUtil {
                             try {
                                 childObj = ClassUtil.loadClass(childClassName);
                             } catch (ClassNotFoundException e) {
-                               e.printStackTrace();
+                                log.error("childClassName:{},error:{}",childClassName);
                             }
                         }
                     }
@@ -501,7 +501,7 @@ public final class ApiDocUtil {
                     } else if (!param.type().equals(NullClass.class)) {
                         methodParam.setFiledType(param.type().getSimpleName());
                         addMethodParam(methodParam.getChildren(), param.type());
-                    } else if (param.type().equals(NullClass.class) && !ClassUtil.isStandardProperty(parameters[i].getType())) {
+                    } else if (!ClassUtil.isStandardProperty(parameters[i].getType())) {
                         methodParam.setFiledType(parameters[i].getType().getSimpleName());
                         methodParam.setClassParam(true);
                         addMethodParam(methodParam.getChildren(), parameters[i].getType());
@@ -790,7 +790,7 @@ public final class ApiDocUtil {
         try {
             xml = IoUtil.autoReadText(file);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("文档XML格式错误 file:{}",file);
         }
         if (StringUtil.isEmpty(xml))
         {
@@ -800,8 +800,6 @@ public final class ApiDocUtil {
             return XMLUtil.getDescribe(namespace,"id",name,flag,xml);
         } catch (Exception e) {
             log.error("文档XML格式错误 file:{}",file);
-            e.printStackTrace();
-
         }
         return StringUtil.empty;
     }

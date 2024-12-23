@@ -24,7 +24,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "jspx_action_log", caption = "动作日志",autoCleanCache = true)
+@Table(name = "jspx_action_log", caption = "动作日志")
 public class ActionLog extends OperateTable {
 
     @Id(auto = true, length = 32, type = IDType.uuid, dateStart = true)

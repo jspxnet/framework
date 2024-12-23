@@ -36,7 +36,7 @@ public class GUIDGenerator {
     /**
      * The machine descriptor, which is used transfer identified the underlying hardware machine.
      */
-    private static String MACHINE_DESCRIPTOR = getMachineDescriptor();
+    final private static String MACHINE_DESCRIPTOR = getMachineDescriptor();
 
     /**
      * Generates a GUID (48 chars).

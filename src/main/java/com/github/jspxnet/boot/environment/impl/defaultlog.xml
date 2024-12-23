@@ -40,6 +40,7 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
+
         <!-- 最常用的滚动策略，它根据时间来制定滚动策略.既负责滚动也负责出发滚动 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--日志输出位置  可相对、和绝对路径 -->
@@ -128,7 +129,12 @@
     <logger name="org.apache" level="ERROR" />
     <logger name="org.apache.http.wire" level="ERROR" />
     <logger name="org.apache.http.headers" level="ERROR" />
-
+    <logger name="io.netty.util.Recycler" level="ERROR" />
+    <logger name="io.netty.buffer.ByteBufUtil" level="ERROR" />
+    <logger name="org.redisson.client.RedisConnection" level="WARN" />
+    <Logger name="org.redisson.client.RedirectedLog" level="WARN"/>
+    <Logger name="org.redisson.client" level="WARN"/>
+    <Logger name="org.redisson" level="WARN"/>
     <logger name="RocketmqClient" additivity="false">
         <level value="ERROR" />
         <appender-ref ref="RocketmqClientAppender"/>

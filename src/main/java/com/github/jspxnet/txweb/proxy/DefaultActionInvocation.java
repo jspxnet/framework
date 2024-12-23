@@ -68,9 +68,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         MULTIPART_SUPPORT_ERROR_JSON.put("state", "error");
         MULTIPART_SUPPORT_ERROR_JSON.put("thumbnail", 0);
         MULTIPART_SUPPORT_ERROR_JSON.put(Environment.MESSAGE, "need login,no authority");
-    }
-
-    static {
+        //--------------------------------------------------
         RESULT_MAP.put(ActionSupport.NONE, NoneResult.class.getName());
         RESULT_MAP.put(ActionSupport.TEMPLATE, TemplateResult.class.getName());
         RESULT_MAP.put(ActionSupport.HtmlImg, HtmlImgResult.class.getName());
@@ -118,8 +116,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         try {
             action = (Action) obj;
         } catch (Exception e) {
-            log.debug("ioc class " + obj + " is not action");
-            e.printStackTrace();
+            log.error("ioc class {} is not action", obj);
         }
 
         if (action == null) {
@@ -522,14 +519,14 @@ public class DefaultActionInvocation implements ActionInvocation {
             if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode)) {
 
                 TXWebUtil.print(new JSONObject(RocResponse.error(ErrorEnumType.NEED_LOGIN.getValue(), action.getFailureMessage())),
-                        WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_401);
+                        WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_OK);
             } else
             if (ActionSupport.UNTITLED.equalsIgnoreCase(resultCode)) {
 
                 RocResponse<?> rocResponse = RocResponse.error(ErrorEnumType.POWER.getValue(), action.getFailureMessage());
                 rocResponse.setProperty("isGuest", NumberUtil.toString(ObjectUtil.toInt(action.isGuest())));
                 TXWebUtil.print(new JSONObject(rocResponse).toString(),
-                        WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_403);
+                        WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_OK);
             }
         } else {
             String loginUrl = EnvFactory.getEnvironmentTemplate().getString(Environment.userLoginUrl);
@@ -560,19 +557,5 @@ public class DefaultActionInvocation implements ActionInvocation {
         ActionContext actionContext = ThreadContextHolder.getContext();
         return actionContext.isExecuted();
     }
-
-
-    /**
-     * 只为了兼容
-     * @return 返回action name
-     */
-/*
-    @Deprecated
-    @Override
-    public String getActionName() {
-        ActionContext actionContext = ThreadContextHolder.getContext();
-        return actionContext.getActionName();
-    }
-*/
 
 }

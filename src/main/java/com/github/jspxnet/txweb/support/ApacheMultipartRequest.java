@@ -4,6 +4,7 @@ import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.upload.multipart.*;
 import com.github.jspxnet.util.HttpUtil;
 import com.github.jspxnet.utils.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+@Slf4j
 public class ApacheMultipartRequest extends MultipartRequest{
     //创建一个“硬盘文件条目工厂”对象
 
@@ -60,6 +62,7 @@ public class ApacheMultipartRequest extends MultipartRequest{
         factory.setDefaultCharset(encoding);
         //创建核心对象
 
+
         org.apache.commons.fileupload.servlet.ServletFileUpload fileUpload = new org.apache.commons.fileupload.servlet.ServletFileUpload(factory);
         //设置最大可支持的文件大小（10MB）
         fileUpload.setFileSizeMax(maxPostSize);
@@ -88,7 +91,8 @@ public class ApacheMultipartRequest extends MultipartRequest{
                 existingValues.add(fileItem.getString(encoding));
             }else{//判断该FileItem为一个文件
                 //获取文件名
-                String fileName = fileItem.getName();
+                String fileName = URLUtil.getUrlDecoder(fileItem.getName(),encoding);
+                //String fileName = fileItem.getName();
                 //获取文件大小
                 long fileSize = fileItem.getSize();
                 String type = FileUtil.getTypePart(fileName);
@@ -110,7 +114,7 @@ public class ApacheMultipartRequest extends MultipartRequest{
                             fileItem.write(file);
                             yesUploadedFile.setUpload(true);
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            log.error("file={}",file,ex);
                             yesUploadedFile.setUpload(false);
                             continue;
                         }

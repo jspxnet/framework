@@ -42,6 +42,8 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.JWTUtil;
 import com.github.jspxnet.util.LRUHashMap;
 import com.github.jspxnet.utils.*;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -62,16 +64,18 @@ import java.util.Map;
  * 最后检查cookie中的seesionId(要加密),满足跨域要求,从而实现单点登录
  */
 @Slf4j
-public class OnlineManagerImpl implements OnlineManager {
+public class  OnlineManagerImpl implements OnlineManager {
 
     final private static int DEFAULT_COOKIE_SECOND = DateUtil.SECOND*60*60;
     static private final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     final private static String GUI_PASSWORD_KEY = "gui:password";
     //上一次清空超时时间，清空超时是全局性的，放这里比较合适
     //domain 设置你的域名不要www开始为'.',不设置将自动
+    @Setter
     private String domain = StringUtil.empty;
     private Map<String,UserSession> onlineCache = null;
     //单点登录,一处登录，另外一处就下线
+    @Getter
     private boolean sso = false;
     //允许哪些服务器采用sessionId直接注入登陆
     //配置格式  "(.*).gzcom.gov.cn|(.*).testaio.com"   判断成立的才允许载入
@@ -105,10 +109,6 @@ public class OnlineManagerImpl implements OnlineManager {
         this.allowServerName = allowServerName;
     }
 
-    public boolean isSso() {
-        return sso;
-    }
-
     @Param(request = false, caption = "单点登录")
     public void setSso(boolean sso) {
         this.sso = sso;
@@ -127,22 +127,12 @@ public class OnlineManagerImpl implements OnlineManager {
     }
 
     //验证token的安全级别,0 默认只验证签名,1:验证ip,2:验证uid
+    @Setter
     private int verifyTokenLevel = 3;
-
-    public void setVerifyTokenLevel(int verifyTokenLevel) {
-        this.verifyTokenLevel = verifyTokenLevel;
-    }
 
     @Override
     public String getDomain() {
         return domain;
-    }
-
-    /**
-     * @param domain domain 设置你的域名不要www开始为'.',不设置将自动
-     */
-    public void setDomain(String domain) {
-        this.domain = domain;
     }
 
     @Ref
@@ -229,7 +219,7 @@ public class OnlineManagerImpl implements OnlineManager {
     public JSONObject login(HttpSession session, String loginId, String password,  String client, String ip) throws Exception {
         JSONObject resultInfo = new JSONObject();
         resultInfo.put(Environment.SUCCESS, YesNoEnumType.NO.getValue());
-        if ((StringUtil.isNull(loginId) || StringUtil.getLength(loginId) < 4)) {
+        if ((StringUtil.isNull(loginId) || StringUtil.getLength(loginId) < 1)) {
             resultInfo.put(Environment.message, "非法的用户名长度,error login name length");
             return resultInfo;
         }
@@ -361,7 +351,7 @@ public class OnlineManagerImpl implements OnlineManager {
 
         CookieUtil.cookieClear(action.getRequest(),action.getResponse());
         Map<String, String> errorInfo = new HashMap<>();
-        if (StringUtil.getLength(loginId) < 3) {
+        if (StringUtil.getLength(loginId) < 1) {
             errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorLoginName));
             return errorInfo;
         }
@@ -378,7 +368,7 @@ public class OnlineManagerImpl implements OnlineManager {
         Member member = null;
         //短信方式登录
         if (LoginField.SMS.equalsIgnoreCase(isId)) {
-            member = memberDAO.getMember(LoginField.PHONE, loginId);
+            member = memberDAO.getMemberV2(LoginField.PHONE, loginId);
             if (member == null) {
                 errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.noFoundUser));
                 memberDAO.evict(Member.class);
@@ -392,7 +382,7 @@ public class OnlineManagerImpl implements OnlineManager {
             if (StringUtil.isNull(isId)) {
                 isId = getLoginType(loginId);
             }
-            member = memberDAO.getMember(isId, loginId);
+            member = memberDAO.getMemberV2(isId, loginId);
             if (member == null) {
                 errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.noFoundUser));
                 memberDAO.evict(Member.class);
@@ -614,7 +604,7 @@ public class OnlineManagerImpl implements OnlineManager {
                 exit(userSession.getId());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
     /**

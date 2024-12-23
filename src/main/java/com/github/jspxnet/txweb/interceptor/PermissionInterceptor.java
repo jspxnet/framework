@@ -24,10 +24,12 @@ import com.github.jspxnet.network.rpc.model.cmd.INetCommand;
 import com.github.jspxnet.network.rpc.model.transfer.RequestTo;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.ActionProxy;
 import com.github.jspxnet.txweb.IRole;
+import com.github.jspxnet.txweb.bundle.table.BundleTable;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.PermissionDAO;
@@ -41,6 +43,8 @@ import com.github.jspxnet.txweb.table.UserSession;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,7 +53,7 @@ import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
- * User: chenYuan
+ * User: chenYuan 肖佳修改版本
  * date: 2010-11-11
  * Time: 13:50:12
  * 权限拦截 ,规则为,在admin目录下的action必须大于等于操作人员,并且放入用户的信息和角色信息,适用cms 类型软件
@@ -58,6 +62,8 @@ import java.util.Date;
 @Bean(bind = PermissionInterceptor.class)
 public class PermissionInterceptor extends BasePermissionInterceptor {
 
+    @Getter
+    @Setter
     private boolean useAppolloConfig = false;
 
     public PermissionInterceptor() {
@@ -74,44 +80,34 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
     private PermissionDAO permissionDAO;
 
 
-    public boolean isUseAppolloConfig() {
-        return useAppolloConfig;
-    }
-
-    public void setUseAppolloConfig(boolean useAppolloConfig) {
-        this.useAppolloConfig = useAppolloConfig;
-    }
-
     @Override
     public void init() {
 
-        if (useAppolloConfig)
-        {
+        if (useAppolloConfig) {
             //配置中心读取begin
-            if (ENV_TEMPLATE.containsName(GUEST_STOP_URL_TXT))
-            {
+            if (ENV_TEMPLATE.containsName(GUEST_STOP_URL_TXT)) {
                 String txt = ENV_TEMPLATE.getString(GUEST_STOP_URL_TXT);
                 decodeGuestUrl(txt);
             }
-            if (ENV_TEMPLATE.containsName(ADMIN_RULE_URL_TXT))
-            {
+            if (ENV_TEMPLATE.containsName(ADMIN_RULE_URL_TXT)) {
                 String txt = ENV_TEMPLATE.getString(ADMIN_RULE_URL_TXT);
                 decodeAdminUrl(txt);
             }
             //配置中心读取end
 
-        } else
-        {
-            //换成中读取begin
-            String txt = (String) JSCacheManager.get(DefaultCache.class,GUEST_STOP_URL_TXT);
-            decodeGuestUrl(txt);
-            txt = (String) JSCacheManager.get(DefaultCache.class,ADMIN_RULE_URL_TXT);
-            decodeAdminUrl(txt);
-            //换成中读取end
+        } else {
 
             if (!ArrayUtil.isEmpty(guestStopUrl) || !ArrayUtil.isEmpty(ruleOutUrl)) {
                 return;
             }
+
+            //换成中读取begin
+            String txt = (String) JSCacheManager.get(DefaultCache.class, GUEST_STOP_URL_TXT);
+            decodeGuestUrl(txt);
+            txt = (String) JSCacheManager.get(DefaultCache.class, ADMIN_RULE_URL_TXT);
+            decodeAdminUrl(txt);
+            //换成中读取end
+
             File file = null;
             try {
                 if (guestUrlFile != null) {
@@ -121,35 +117,33 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
 
                 if (file != null) {
                     txt = IoUtil.autoReadText(file);
-                    JSCacheManager.put(DefaultCache.class,GUEST_STOP_URL_TXT,txt);
+                    JSCacheManager.put(DefaultCache.class, GUEST_STOP_URL_TXT, txt);
                     decodeGuestUrl(txt);
-                } else
-                {
+                } else {
                     log.error(guestUrlFile + "没有找到");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("载入guestUrlFile:{}", file,e);
             }
             //---------------------------
-            if (!ArrayUtil.isEmpty(adminRuleUrl)||!ArrayUtil.isEmpty(adminRuleOutUrl)) {
+            if (!ArrayUtil.isEmpty(adminRuleUrl) || !ArrayUtil.isEmpty(adminRuleOutUrl)) {
                 return;
             }
             try {
                 if (adminUrlFile != null) {
                     file = EnvFactory.getFile(adminUrlFile);
                 }
-                log.info("adminUrlFile:{}", file);
+
                 if (file != null) {
                     txt = IoUtil.autoReadText(file);
                     decodeAdminUrl(txt);
-                    JSCacheManager.put(DefaultCache.class,ADMIN_RULE_URL_TXT,txt);
+                    JSCacheManager.put(DefaultCache.class, ADMIN_RULE_URL_TXT, txt);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.info("adminUrlFile:{}", file,e);
             }
         }
     }
-
 
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {
@@ -160,7 +154,6 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
             log.error("onlineManager 为空,检查ioc配置是否正确");
             return ActionSupport.ERROR;
         }
-
 
         HttpServletRequest request = actionContext.getRequest();
         HttpServletResponse response = actionContext.getResponse();
@@ -176,13 +169,22 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
 
         String checkUrl = StringUtil.replace(StringUtil.BACKSLASH + pathNamespace + StringUtil.BACKSLASH + actionContext.getActionName(), "//", StringUtil.BACKSLASH);
 
+        //登陆入口，直接放行
+        if (useGuestUrl) {
+            boolean isRule = isRuleOutUrl(checkUrl);
+            if (isRule) {
+                log.debug("ruleOutUrl checkUrl={},isRule={}", checkUrl, isRule);
+                return actionInvocation.invoke();
+            }
+        }
+
         String organizeId = null;
         if (autoOrganizeId) {
             organizeId = action.getString(ActionEnv.KEY_organizeId);
         }
 
-        // 不同子站或获取cookie机构id
-        String noUserAdmin = checkUrl.substring(checkUrl.lastIndexOf("/"));
+        // new 12-20 如果路径后缀不是/user或者/admin 获取oid参数
+        String noUserAdmin = checkUrl.substring(checkUrl.lastIndexOf(StringUtil.BACKSLASH));
         String oid = action.getString("oid");
         String cookieOid = CookieUtil.getCookieString(request, "oid", "");
         if (!noUserAdmin.contains("user") && !noUserAdmin.contains("admin") && !StringUtil.isEmpty(oid)) {
@@ -200,7 +202,6 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         if (isAdminRuleUrl(checkUrl)) {
             organizeId = null;
         }
-
         permissionDAO.setOrganizeId(organizeId);
 
         UserSession userSession = onlineManager.getUserSession();
@@ -218,6 +219,21 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
             userSession.setLastRequestTime(System.currentTimeMillis());
             role = debugRole;
             onlineManager.updateUserSessionCache(userSession);
+        }
+
+        // 7-13 初始机构创建人角色
+        if (!action.isGuest() &&
+                !StringUtil.isEmpty(organizeId)
+                && permissionDAO.existsCreate(organizeId, userSession.getUid())) {
+
+            BundleTable result = permissionDAO.createCriteria(BundleTable.class)
+                    .add(Expression.eq("namespace", permissionDAO.getNamespace()))
+                    .add(Expression.eq("idx", "organizeRegisterRole"))
+                    .objectUniqueResult(false);
+            if (!ObjectUtil.isEmpty(result)) {
+                // 查询机构默认角色
+                userSession.setRole(permissionDAO.load(Role.class, result.getContext()));
+            }
         }
 
         if (action.isGuest() && role == null) {
@@ -250,15 +266,6 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
             return ActionSupport.UNTITLED;
         }
 
-        //登陆入口，直接放行
-        if (useGuestUrl) {
-            boolean isRule = isRuleOutUrl(checkUrl);
-            if (isRule) {
-                log.debug("ruleOutUrl checkUrl={},isRule={}", checkUrl, isRule);
-                return actionInvocation.invoke();
-            }
-        }
-
         if (permission && userSession.getRole(permissionDAO.getNamespace(), organizeId) == null) {
             actionContext.addFieldInfo(Environment.warningInfo, permissionDAO.getNamespace() + " need config role,权限够不够");
             return ActionSupport.UNTITLED;
@@ -267,8 +274,7 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         role = userSession.getRole(permissionDAO.getNamespace(), organizeId);
         if (role == null) {
             if (RequestUtil.isRocRequest(request)) {
-                TXWebUtil.print(new JSONObject(RocResponse.error(ErrorEnumType.CONFIG.getValue(), "需要配置角色,初始化系统")),
-                        WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_500);
+                TXWebUtil.print(new JSONObject(RocResponse.error(ErrorEnumType.CONFIG.getValue(), "需要配置角色,初始化系统")), WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_500);
             } else {
                 actionContext.addFieldInfo(Environment.warningInfo, permissionDAO.getNamespace() + " need config role,需要配置角色,初始化系统");
             }
@@ -311,6 +317,13 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         //时段限制end
 
         if (permission) {
+            // 如果已经登入默认追加会员权限，所有登入都有
+            if (!userSession.isGuest()) {
+                Role regRole = permissionDAO.getRole(config.getString(Environment.registerRole));
+                // 拼接用户权限
+                role.setOperates(String.format("%s\n%s", role.getOperates(), regRole.getOperates()));
+            }
+
             if (role.getUserType() < UserEnumType.INTENDANT.getValue()) {
                 //配置的权限,判断是否可执行
                 if (!role.checkOperate(pathNamespace, action.getClass().getName(), method)) {
@@ -321,8 +334,7 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
             }
 
             //角色权限表判断
-            if (role.getUserType() >= UserEnumType.INTENDANT.getValue() && StringUtil.hasLength(method) && role.getUserType() < UserEnumType.ADMINISTRATOR.getValue()
-                    && !role.checkOperate(pathNamespace, action.getClass().getName(), method)) {
+            if (role.getUserType() >= UserEnumType.INTENDANT.getValue() && StringUtil.hasLength(method) && role.getUserType() < UserEnumType.ADMINISTRATOR.getValue() && !role.checkOperate(pathNamespace, action.getClass().getName(), method)) {
                 actionContext.addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.needPermission));
                 return ActionSupport.UNTITLED;
             }
@@ -331,7 +343,5 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         return actionInvocation.invoke();
         //也可以 return Action.ERROR; 终止action的运行
     }
-
-
 
 }

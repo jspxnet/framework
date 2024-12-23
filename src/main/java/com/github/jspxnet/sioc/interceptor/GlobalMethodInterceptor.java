@@ -101,8 +101,6 @@ public class GlobalMethodInterceptor implements MethodInterceptor {
             }
             throw newException;
         }
-
-
         return result;
     }
 
@@ -142,7 +140,6 @@ public class GlobalMethodInterceptor implements MethodInterceptor {
             invokeTransaction.begin();
         } catch (Exception e) {
             log.error("事务控制器，创建事物失败", e);
-            e.printStackTrace();
         }
         return invokeTransaction;
     }

@@ -123,7 +123,6 @@ public final class KingdeeUtil {
                 }
             } catch (Exception e){
                 System.err.println(ObjectUtil.toString(kingdeeField));
-                e.printStackTrace();
             }
 
         }

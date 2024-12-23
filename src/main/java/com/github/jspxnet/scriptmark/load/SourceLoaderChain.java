@@ -52,12 +52,7 @@ public class SourceLoaderChain implements SourceLoader {
                 // 忽略，继续取下一loader
             }
         }
-        try {
-            throw new Exception("文件没有找到");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        throw new IOException("文件没有找到");
     }
 
     @Override
@@ -72,12 +67,8 @@ public class SourceLoaderChain implements SourceLoader {
                 // 忽略，继续取下一loader
             }
         }
-        try {
-            throw new Exception("文件没有找到");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        throw new IOException("文件没有找到");
+
     }
 
     @Override
@@ -92,17 +83,11 @@ public class SourceLoaderChain implements SourceLoader {
                 // 忽略，继续取下一loader
             }
         }
-        try {
-            throw new Exception("文件没有找到");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        throw new IOException("文件没有找到");
     }
 
     @Override
-    public Source getSource(String name, Locale locale, String encoding)
-            throws IOException {
+    public Source getSource(String name, Locale locale, String encoding) throws IOException {
         for (SourceLoader resourceLoader : resourceLoaders) {
             try {
                 Source resource = resourceLoader.getSource(name, locale, encoding);
@@ -113,12 +98,7 @@ public class SourceLoaderChain implements SourceLoader {
                 // 忽略，继续取下一loader
             }
         }
-        try {
-            throw new Exception("文件没有找到");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        throw new IOException("文件没有找到");
     }
 
     @Override

@@ -446,6 +446,7 @@ public class JSONObject extends LinkedHashMap<String,Object> {
                             continue;
                         }
                         if (objectPackageName.startsWith("java.")
+                                || objectPackageName.startsWith("org.mozilla.javascript")
                                 || objectPackageName.startsWith("javax.")
                                 || result.getClass().getClassLoader() == null) {
                             super.put(displayKey, result);
@@ -461,13 +462,9 @@ public class JSONObject extends LinkedHashMap<String,Object> {
                                         childShowField =  fieldArray.toArray(new String[size]);
                                     }
                                 }
-                                if (!(result instanceof JSONObject) )
-                                {
-                                    super.put(displayKey, new JSONObject(result, childShowField,includeSuperClass,dataField));
-                                } else
-                                {
-                                    super.put(displayKey, result);
-                                }
+                                //有可能死循环，上边已经判断
+                                super.put(displayKey, new JSONObject(result, childShowField,includeSuperClass,dataField));
+
                             } else {
                                 super.put(displayKey, result);
                             }
@@ -862,7 +859,7 @@ public class JSONObject extends LinkedHashMap<String,Object> {
                 return new JSONObject(o);
             } catch (Exception e)
             {
-                e.printStackTrace();
+                //..
             }
         }
         if (o instanceof Map) {
@@ -920,7 +917,9 @@ public class JSONObject extends LinkedHashMap<String,Object> {
             return new Date(time);
         }
         try {
-            return StringUtil.getDate((String) o);
+            if (o instanceof String) {
+                return StringUtil.getDate((String) o);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -985,6 +984,25 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         }
         return null;
     }
+
+    /**
+     *
+     * @param value 值
+     * @return 得到值对应的key
+     */
+    public String getValueKey(String value) {
+        if (value==null)
+        {
+            return null;
+        }
+        for (String myKey:super.keySet()){
+            if (value.equals(ObjectUtil.toString(get(myKey))))
+            {
+                return myKey;
+            }
+        }
+        return null;
+    }
     /**
      * Determine if the JSONObject contains a specific key.
      *
@@ -1037,7 +1055,7 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         for (String key : keys) {
             ja.put(key);
         }
-        return ja.size() == 0 ? null : ja;
+        return ja.isEmpty() ? null : ja;
     }
 
     /**
@@ -1510,7 +1528,6 @@ public class JSONObject extends LinkedHashMap<String,Object> {
                 }
             }
         } catch (Exception f) {
-            f.printStackTrace();
             log.error("解析错误", f);
             return "{}";
         }
@@ -1613,8 +1630,7 @@ public class JSONObject extends LinkedHashMap<String,Object> {
 
 
         if (!(value instanceof JSONArray) && (ClassUtil.isCollection(value)|| ClassUtil.isArrayType(value))) {
-            JSONArray array = new JSONArray(value);
-            return array.toString(indentFactor, indent);
+            return new JSONArray(value).toString(indentFactor, indent);
         }
 
         if (value instanceof JSONObject) {
@@ -1747,8 +1763,7 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         Method method = ClassUtil.getDeclaredMethod(lass,key);
         if (method!=null)
         {
-            JsonField jsonField = method.getAnnotation(JsonField.class);
-            return jsonField;
+            return method.getAnnotation(JsonField.class);
         }
         return null;
     }
@@ -1848,13 +1863,11 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         try {
             cls = ClassUtil.loadClass(className);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("create newInstance className " + className, e);
         }
         if (cls == null) {
             return null;
         }
-
         Gson gson = GsonUtil.createGson();
         return (T) gson.fromJson(json.toString(), cls);
     }
@@ -1885,4 +1898,23 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         return parseObject(this, typeReference);
     }
 
+
+    public void stringNullOrWhiteSpaceToEmpty()
+    {
+        BeanUtil.stringNullOrWhiteSpaceToEmpty(this);
+    }
+
+    /*public static void main(String[] args) {
+
+        JSONObject json = new JSONObject();
+        json.put("name1"," ");
+        JSONObject json2 = new JSONObject();
+        json2.put("name2"," ");
+        json.put("json2",json2);
+
+        //BeanUtil.stringNullOrWhiteSpaceToEmpty(json);
+
+        json.stringNullOrWhiteSpaceToEmpty();
+        System.out.println(json);
+    }*/
 }

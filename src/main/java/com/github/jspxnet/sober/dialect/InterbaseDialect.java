@@ -120,7 +120,7 @@ public class InterbaseDialect extends Dialect {
 
 
     @Override
-    public String getLimitString(String sql, int ibegin, int iend, TableModels soberTable) {
+    public String getLimitString(String sql, int ibegin, int iend,TableModels soberTable) {
         return sql + " rows " + (ibegin + 1) + " transfer " + iend;
     }
 
@@ -153,5 +153,10 @@ public class InterbaseDialect extends Dialect {
     @Override
     public boolean commentPatch() {
         return true;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT TOP 1 * FROM (" + sql + ") zs";
     }
 }

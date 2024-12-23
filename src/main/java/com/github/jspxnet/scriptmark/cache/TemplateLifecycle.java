@@ -32,7 +32,6 @@ public class TemplateLifecycle implements TemplateLoader {
             cache.registeredEventListeners(new ScriptmarkEventListener());
             useCache = true;
         } catch (Exception e) {
-            e.printStackTrace();
             useCache = false;
         }
     }
@@ -47,7 +46,7 @@ public class TemplateLifecycle implements TemplateLoader {
         if (lifecycleObject == null) {
             return;
         }
-        JSCacheManager.put(TemplateLifecycle.class.getName(), beanName, lifecycleObject);
+        JSCacheManager.put(TemplateLifecycle.class, beanName, lifecycleObject);
     }
 
     @Override

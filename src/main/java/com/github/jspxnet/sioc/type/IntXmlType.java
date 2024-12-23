@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.sioc.type;
 
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.lang.reflect.Type;
@@ -36,13 +37,11 @@ public class IntXmlType extends TypeSerializer {
 
     @Override
     public Object getTypeObject() {
-        return StringUtil.toInt(value.toString());
+        return ObjectUtil.toInt(value);
     }
 
     @Override
     public String getXmlString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<int name=\"").append(name).append("\">").append(value).append("</int>\r\n");
-        return sb.toString();
+        return "<int name=\"" + name + "\">" + value + "</int>\r\n";
     }
 }

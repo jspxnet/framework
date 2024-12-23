@@ -365,11 +365,11 @@ public class Member extends OperateTable implements IMember {
     }
 
 
-    @Override
+/*    @Override
     public void setMemberRoles(List<MemberRole> memberRoles) {
         this.memberRoles.clear();
         this.memberRoles.addAll(memberRoles);
-    }
+    }*/
 
     @Override
     public void setRole(Role role) {
@@ -407,7 +407,7 @@ public class Member extends OperateTable implements IMember {
     @Override
     public String getProperty(String key)
     {
-        StringMap<String, String> hashMap = new StringMap();
+        StringMap<String, String> hashMap = new StringMap<>();
         hashMap.setKeySplit(StringUtil.EQUAL);
         hashMap.setLineSplit(StringUtil.CRLF);
         hashMap.setString(other);

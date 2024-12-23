@@ -59,6 +59,7 @@ public class MySQLDialect extends Dialect {
         put(boolean.class.getName(), "`${" + COLUMN_NAME + "}` int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>  COMMENT '${" + COLUMN_CAPTION + "}'");
 
         put(Date.class.getName(), "`${" + COLUMN_NAME + "}` datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT now()</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(java.sql.Date.class.getName(), "`${" + COLUMN_NAME + "}` datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT now()</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
         put(Time.class.getName(), "`${" + COLUMN_NAME + "}` time <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
         put(byte[].class.getName(), "`${" + COLUMN_NAME + "}` LONGBLOB COMMENT '${" + COLUMN_CAPTION + "}'");
@@ -258,7 +259,7 @@ public class MySQLDialect extends Dialect {
                 return rs.getBigDecimal(index);
             }
             ///////双精度
-            if ("double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
+            if ("number".equals(typeName) || "double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
                 return rs.getDouble(index);
             }
 
@@ -302,10 +303,14 @@ public class MySQLDialect extends Dialect {
             }
             return rs.getObject(index);
         } catch (SQLException e) {
-            e.printStackTrace();
             log.error("typeName=" + typeName + " size=" + colSize + " columnName=" + rs.getMetaData().getColumnName(index), e);
         }
         return null;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs limit 1";
     }
 
 }

@@ -84,6 +84,9 @@ public class UserSession implements IUserSession {
     @Column(caption = "IP",  length = 48)
     private String ip = StringUtil.empty;
 
+    // 主要同步redis使用
+    private boolean guest;
+
     @JsonIgnore
     private List<Role> roleList = new ArrayList<>();
 
@@ -155,7 +158,8 @@ public class UserSession implements IUserSession {
 
     @Override
     public boolean isGuest() {
-        return uid <= 0 || StringUtil.isEmpty(name) || Environment.guestName.equalsIgnoreCase(name);
+        guest = uid <= 0 || StringUtil.isEmpty(name) || Environment.guestName.equalsIgnoreCase(name);
+        return guest;
     }
 
 }

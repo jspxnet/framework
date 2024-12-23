@@ -8,6 +8,8 @@ import com.github.jspxnet.security.asymmetric.AsyEncrypt;
 import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.*;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
@@ -16,6 +18,7 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.*;
 import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
@@ -23,6 +26,7 @@ import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.io.CloseMode;
 import org.apache.hc.core5.net.URIBuilder;
 import java.io.*;
 import java.nio.charset.Charset;
@@ -32,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class HttpClientAdapter implements HttpClient {
     // OK: Success!
     public static final int SUCCESS = 200;
@@ -54,11 +59,8 @@ public class HttpClientAdapter implements HttpClient {
 
     protected final Map<String, String> defaultHeaders = new HashMap<>();
 
+    @Getter
     protected String url;
-
-    public String getUrl() {
-        return url;
-    }
 
 
     @Override
@@ -68,9 +70,10 @@ public class HttpClientAdapter implements HttpClient {
         {
             try {
                 cookieStore.clear();
-                httpClient.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+
+                httpClient.close(CloseMode.IMMEDIATE);
+            } catch (Exception e) {
+                log.error(e.getMessage(),e);
             }
         }
     }
@@ -215,6 +218,7 @@ public class HttpClientAdapter implements HttpClient {
         if (headers != null && !headers.isEmpty()) {
             addHeaders(httpGet, headers);
         }
+
         return httpClient.execute(httpGet);
     }
 
@@ -281,12 +285,12 @@ public class HttpClientAdapter implements HttpClient {
             StringEntity s = new StringEntity(json.toString(4),ContentType.APPLICATION_JSON.withCharset(Charset.forName(encode)));
             httpPost.setEntity(s);
         }
-        AbstractHttpClientResponseHandler<String> handler = new BasicHttpClientResponseHandler();
-        // String out = httpClient.execute(httpPost,handler);
+        /*AbstractHttpClientResponseHandler<String> handler = new BasicHttpClientResponseHandler();
+        String out = httpClient.execute(httpPost,handler);
+        */
         //HttpClientResponseHandler
         //ClassicHttpResponse response = httpClient.execute(httpPost);
         httpResponse = httpClient.execute(httpPost);
-
         return httpResponse.getEntity();
     }
 
@@ -630,7 +634,6 @@ public class HttpClientAdapter implements HttpClient {
 
         HttpPost postMethod = new HttpPost(url);
 
-
         for (String key:defaultHeaders.keySet())
         {
             if ("CONTENT-TYPE".contains(key.toUpperCase()))
@@ -639,14 +642,17 @@ public class HttpClientAdapter implements HttpClient {
             }
             postMethod.addHeader(key,defaultHeaders.get(key));
         }
+
+        Charset defCharset = Charset.forName(encode);
         MultipartEntityBuilder builder  = MultipartEntityBuilder.create();
-        builder.setCharset(Charset.forName(encode));
-        builder.setContentType(ContentType.MULTIPART_FORM_DATA.withCharset(Charset.forName(encode)));
+        builder.setCharset(defCharset);
+        builder.setMode(HttpMultipartMode.EXTENDED);
+        builder.setContentType(ContentType.MULTIPART_FORM_DATA.withCharset(defCharset));
         try {
             //----------------------------------------------
             // FilePart：用来上传文件的类,file即要上传的文件
             for (File file : files) {
-                builder.addBinaryBody("file", file,ContentType.APPLICATION_OCTET_STREAM.withCharset(Charset.forName(encode)),file.getName());
+                builder.addBinaryBody(name,file,ContentType.APPLICATION_OCTET_STREAM.withCharset(defCharset),file.getName());
             }
            if (params!=null)
             {
@@ -656,27 +662,30 @@ public class HttpClientAdapter implements HttpClient {
                     {
                         continue;
                     }
-                    builder.addTextBody(key,params.get(key),ContentType.TEXT_PLAIN.withCharset(Charset.forName(encode)));
+                    builder.addTextBody(key,params.get(key),ContentType.TEXT_PLAIN.withCharset(defCharset));
                 }
             }
             postMethod.setEntity(builder.build());
-            httpResponse = httpClient.execute(postMethod);
+            response = httpClient.execute(postMethod,new BasicHttpClientResponseHandler());
 
-            int status = httpResponse.getCode() ;
+            //httpResponse = httpClient.execute(postMethod,basicHttpClientResponseHandler);
+
+          /*  int status = httpResponse.getCode() ;
             if (status == HttpStatus.SC_OK) {
-                response =  EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8.displayName());
+                response =  EntityUtils.toString(httpResponse.getEntity(), defCharset);
             } else {
                 response = httpResponse.getReasonPhrase();
                 if (StringUtil.isEmpty(response))
                 {
                     response = "fail";
                 }
-            }
+            }*/
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(),e);
         } finally {
             // 释放连接
             postMethod.reset();
+            postMethod.clear();
         }
         return response;
     }

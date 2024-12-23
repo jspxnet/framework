@@ -44,7 +44,7 @@ public @interface Table {
      * 只有在对象结构的时候生效
      * @return 是否自动清理缓存
      */
-    boolean autoCleanCache() default false;
+    boolean autoCleanCache() default true;
 
     /**
      * 应为 PO，DO，DTO，VO 的的概念太多，实际使用中  PO 持久对象就是Table的映射，

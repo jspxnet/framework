@@ -10,6 +10,7 @@
 package com.github.jspxnet.scriptmark.core.type;
 
 import com.github.jspxnet.scriptmark.TypeConverter;
+import lombok.Setter;
 
 /**
  * Created by IntelliJ IDEA.
@@ -17,12 +18,7 @@ import com.github.jspxnet.scriptmark.TypeConverter;
  * date: 2008-11-30
  * Time: 5:30:53
  */
+@Setter
 public abstract class AbstractType implements TypeConverter {
     protected String format;
-
-    public void setFormat(String format) {
-        this.format = format;
-    }
-
-
 }

@@ -18,7 +18,7 @@ import java.io.*;
  * Time: 13:25:01
  */
 public final class ReadFileUtil {
-    final private static int BUFFER_SIZE = 2048;
+    final public static int BUFFER_SIZE = 2048;
 
     private ReadFileUtil() {
 

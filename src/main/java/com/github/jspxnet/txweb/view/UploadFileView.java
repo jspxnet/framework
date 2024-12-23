@@ -28,6 +28,8 @@ import com.github.jspxnet.txweb.table.IUploadFile;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,15 +44,26 @@ import java.util.List;
 @HttpMethod(caption = "浏览附件")
 public class UploadFileView extends ActionSupport {
     private int count = 0;
+    @Getter
     private long uid = 0;
+    @Setter
+    @Getter
     private long pid = 0;
+    @Getter
     private int currentPage = 0;
+    @Getter
     private String term = StringUtil.empty;
+    @Getter
     private String sort = "sortType:D;sortDate:D";
+    @Getter
     private String[] field = ArrayUtil.EMPTY_STRING_ARRAY;
+    @Getter
     private String[] find = ArrayUtil.EMPTY_STRING_ARRAY;
+    @Getter
     private String turnPageFile = "sturnpage.ftl";
-    private long id;
+/*    @Setter
+    @Getter
+    private long id;*/
 
     public UploadFileView() {
 
@@ -59,24 +72,13 @@ public class UploadFileView extends ActionSupport {
     @Ref
     protected UploadFileDAO uploadFileDAO;
 
+    @Getter
     @TurnPage(file = "@turnPageFile", params = "find;field;sort;uid")
     private String turnPage = StringUtil.empty;
-
-    public String getTurnPageFile() {
-        return turnPageFile;
-    }
 
     @Param(request = false)
     public void setTurnPageFile(String turnPageFile) {
         this.turnPageFile = turnPageFile;
-    }
-
-    public String getTurnPage() {
-        return turnPage;
-    }
-
-    public String[] getField() {
-        return field;
     }
 
     @Param(caption = "查询字段", max = 20)
@@ -84,17 +86,9 @@ public class UploadFileView extends ActionSupport {
         this.field = field;
     }
 
-    public String[] getFind() {
-        return find;
-    }
-
     @Param(caption = "查询数据", max = 20)
     public void setFind(String[] find) {
         this.find = find;
-    }
-
-    public String getTerm() {
-        return term;
     }
 
     @Param(caption = "条件", max = 50)
@@ -102,34 +96,14 @@ public class UploadFileView extends ActionSupport {
         this.term = term;
     }
 
-    public String getSort() {
-        return sort;
-    }
-
     @Param(caption = "排序", max = 20)
     public void setSort(String sort) {
         this.sort = sort;
     }
 
-    public long getUid() {
-        return uid;
-    }
-
     @Param(caption = "用户id", max = 20)
     public void setUid(long uid) {
         this.uid = uid;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public int getCurrentPage() {
-        return currentPage;
     }
 
     @Param(caption = "页数", min = 1)
@@ -149,13 +123,6 @@ public class UploadFileView extends ActionSupport {
         this.count = count;
     }
 
-    public long getPid() {
-        return pid;
-    }
-
-    public void setPid(long pid) {
-        this.pid = pid;
-    }
     @Deprecated
     public List<IUploadFile> getList() throws Exception {
         IRole role = getRole();
@@ -176,7 +143,8 @@ public class UploadFileView extends ActionSupport {
         return uploadFileDAO.getCount(field, find,null, term, getUid(), pid);
     }
 
-    public Object getUploadFile() throws Exception {
+    @Operate(caption = "得到上传文件", method = "file")
+    public Object getUploadFile(@Param(caption = "id", required = true) long id) throws Exception {
         return uploadFileDAO.load(id);
     }
 
@@ -209,7 +177,7 @@ public class UploadFileView extends ActionSupport {
             log.error("配置类对象uploadFileDAO不存在,请检查是否有重复的配置，或者配置不存在");
         }
         String classname = StringUtil.uncapitalize(StringUtil.substringAfterLast(uploadFileDAO.getClassType().getName(), StringUtil.DOT));
-        put(classname, getUploadFile());
+        put(classname, classname);
         put("namespace", uploadFileDAO.getNamespace());
         put("role", getRole());
         return getActionResult();

@@ -9,9 +9,6 @@
  */
 package com.github.jspxnet.sober;
 
-import com.github.jspxnet.sober.exception.TransactionException;
-
-
 import java.io.Serializable;
 import java.sql.Connection;
 

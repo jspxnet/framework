@@ -56,7 +56,7 @@ public class DevCenterInterceptor extends BasePermissionInterceptor {
                 log.error(guestUrlFile + "没有找到");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("init ",e);
         }
 
     }

@@ -77,6 +77,8 @@ public class OracleDialect extends Dialect {
         put("float", "${" + COLUMN_NAME + "} BINARY_FLOAT default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
         put(Date.class.getName(), "${" + COLUMN_NAME + "} TIMESTAMP default SYSDATE");
+        put(java.sql.Date.class.getName(),"${" + COLUMN_NAME + "} TIMESTAMP default SYSDATE");
+
         put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
         put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
         put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
@@ -277,7 +279,7 @@ public class OracleDialect extends Dialect {
         }
 
         ///////长整型
-        if ("number".equals(typeName) || "bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName))) {
+        if ("bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName))) {
             return rs.getLong(index);
         }
 
@@ -285,12 +287,14 @@ public class OracleDialect extends Dialect {
         if ("money".equals(typeName) || "float".equals(typeName) || "real".equals(typeName) || "binary_float".equals(typeName)) {
             return rs.getFloat(index);
         }
+
         ///////大数值
         if ("decimal".equals(typeName)) {
             return rs.getBigDecimal(index);
         }
+
         ///////双精度
-        if ("double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
+        if ("number".equals(typeName) || "double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
             return rs.getDouble(index);
         }
 
@@ -361,6 +365,8 @@ public class OracleDialect extends Dialect {
         return rs.getObject(index);
     }
 
+
+
     @Override
     public boolean supportsSequenceName() {
         return false;
@@ -375,6 +381,11 @@ public class OracleDialect extends Dialect {
     @Override
     public boolean commentPatch() {
         return true;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs WHERE ROWNUM=1";
     }
 
 }

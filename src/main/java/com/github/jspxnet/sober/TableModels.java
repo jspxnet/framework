@@ -23,11 +23,18 @@ import java.util.Map;
  * Time: 下午11:00
  */
 public interface TableModels extends Serializable {
+
+    boolean isEmpty();
+
+    String getIndexConf();
+
     String getName();
 
     String getCaption();
 
     String getDatabaseName();
+
+    void setDatabaseName(String databaseName);
 
     boolean isCreate();
 
@@ -76,4 +83,7 @@ public interface TableModels extends Serializable {
     boolean isAutoCleanCache();
 
     String getId();
+
+
+    String getDynamicTableName(String name);
 }

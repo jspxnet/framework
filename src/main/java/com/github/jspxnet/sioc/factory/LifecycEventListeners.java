@@ -81,7 +81,7 @@ public class LifecycEventListeners implements CacheEventListener {
                 Object bean = lifecycleObject.getObject();
                 AnnotationUtil.invokeDestroy(bean);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -100,7 +100,7 @@ public class LifecycEventListeners implements CacheEventListener {
                 try {
                     AnnotationUtil.invokeDestroy(bean);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
 
             }

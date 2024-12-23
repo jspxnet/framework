@@ -259,7 +259,7 @@ public class HessianSkeleton extends AbstractSkeleton {
         try {
             result = exeMethod.invoke(service, values);
         } catch (InvocationTargetException e) {
-            log.debug("hessian 调用异常:{}",exeMethod.getName());
+            log.error("hessian 调用异常:{}",exeMethod.getName(),e);
             Throwable throwable = e.getTargetException();
             out.writeFault(throwable.getClass().getName(),escapeMessage(throwable.getMessage()),throwable);
             out.close();

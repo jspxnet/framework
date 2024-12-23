@@ -81,7 +81,6 @@ public class LogicalExpression implements Criterion {
                         Criterion criterion = (Criterion)ClassUtil.newInstance(operatorEnumType.getClassName(),new Object[]{criterionJson});
                         filters.add(criterion);
                     } catch (Exception e) {
-                        e.printStackTrace();
                         log.error("转换异常:{}",criterionJson,e);
                     }
                 }
@@ -140,8 +139,6 @@ public class LogicalExpression implements Criterion {
         }
         return sb.toString();
     }
-
-
 
     @Override
     public Object[] getParameter(TableModels soberTable) {

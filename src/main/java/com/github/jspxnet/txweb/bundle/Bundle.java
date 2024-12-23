@@ -11,6 +11,7 @@ package com.github.jspxnet.txweb.bundle;
 
 import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;
+import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 
 import java.io.Serializable;
 import java.util.List;
@@ -53,13 +54,15 @@ public interface Bundle extends Serializable {
 
     BundleTable getBundleTable(final String keys);
 
+    SoberColumnDto getSoberColumn(final String keys);
+
     boolean save(BundleTable bundletable) throws Exception;
 
     boolean save(String key, String value) throws Exception;
 
     boolean save(String key, String value, int encrypt) throws Exception;
 
-    List getList();
+    List<BundleTable> getList();
 
     //载入数据
     void loadMap();

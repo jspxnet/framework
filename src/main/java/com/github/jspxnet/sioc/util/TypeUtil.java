@@ -193,8 +193,7 @@ public final class TypeUtil {
                 Class<?> classType = Class.forName(typeString);
                 result = (Object[]) Array.newInstance(classType, length);
             } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("XML配置错误,数组类型:" + typeString);
+                log.error("XML配置错误,数组类型:{}",typeString,e);
             }
         }
         return result;
@@ -220,7 +219,6 @@ public final class TypeUtil {
             try {
                 return ClassUtil.loadClass(typeString);
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
                 log.error("loadClass :{}",typeString,e);
             }
         }

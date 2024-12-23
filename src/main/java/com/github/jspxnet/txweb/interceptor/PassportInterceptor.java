@@ -19,6 +19,7 @@ import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.utils.CookieUtil;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import java.util.Map;
 @Slf4j
 public class PassportInterceptor extends InterceptorSupport {
 
+    @Setter
     private String[] urlList;
 
     @Override
@@ -44,11 +46,6 @@ public class PassportInterceptor extends InterceptorSupport {
 
     @Ref(namespace = Sioc.global)
     private OnlineManager onlineManager;
-
-    public void setUrlList(String[] url) {
-        this.urlList = url;
-
-    }
 
     @Override
     public String intercept(ActionInvocation actionInvocation) throws Exception {

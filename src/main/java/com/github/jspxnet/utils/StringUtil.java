@@ -97,6 +97,7 @@ public final class StringUtil {
         captionFixChars.add(")");
         captionFixChars.add("/");
         captionFixChars.add("-");
+        captionFixChars.add("+");
         captionFixChars.add("、");
         captionFixChars.add("%");
         captionFixChars.add("&");
@@ -138,13 +139,31 @@ public final class StringUtil {
         return StringUtil.replace(fieldCaption," ","");
     }
 
+
+    /**
+     *
+     * @param str 字符串
+     * @return 判断是否为一个变量名
+     */
+    public static boolean isVarName(String str)
+    {
+        for (String c:captionFixChars)
+        {
+            if (str.contains(c))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * 判断是否为空
      * @param value 字符串
      * @return 是否为空
      */
     public static boolean isNull(String value) {
-        return value == null || value.equals(StringUtil.empty) || "null".equals(value) || value.length() < 1;
+        return value == null || value.equals(StringUtil.empty) || "null".equals(value) || value.isEmpty();
     }
     /**
      * @param sqlText sql
@@ -301,10 +320,7 @@ public final class StringUtil {
      * @since 2.0
      */
     public static String substringBefore(String str, String separator) {
-        if (isNull(str) || separator == null) {
-            return empty;
-        }
-        if (separator.length() == 0) {
+        if (isNull(str) || separator == null || separator.isEmpty()) {
             return empty;
         }
         int pos = str.indexOf(separator);
@@ -1518,7 +1534,16 @@ public final class StringUtil {
     }
 
     public static boolean isEmpty(String value) {
-        return value == null || value.length() ==0;
+        return value == null || value.isEmpty();
+    }
+
+    /**
+     *
+     * @param value 字符串
+     * @return 判断空
+     */
+    public static boolean isNullOrWhiteSpace(String value) {
+        return isEmpty(value) || value.trim().isEmpty();
     }
 
 
@@ -1937,7 +1962,7 @@ public final class StringUtil {
      * @return float  转换为Float
      */
     public static float toFloat(String sdouble, long nint) {
-        if (sdouble == null) {
+        if (StringUtil.isNullOrWhiteSpace(sdouble)) {
             return nint;
         }
         try {
@@ -2397,13 +2422,34 @@ public final class StringUtil {
     }
 
     /**
+     *
+     * @param str 代码字符串
+     * @return 通用的
+     */
+    public static String[] getFreeMarkerVar(String str) {
+        String[] varArray1 = StringUtil.getFreeMarkerVar(str,'$','{','}');
+        String[] varArray2 = StringUtil.getFreeMarkerVar(str,'#','{','}');
+        Set<String> set = new LinkedHashSet<String>(Arrays.asList(ArrayUtil.join(varArray1, varArray2)));
+        return set.toArray(new String[0]);
+    }
+
+    /**
      * 得到Freemarker 的变量列表
      * 并且清除相同的变量
      *
      * @param str 字符串
      * @return 得到变量列表
      */
-    public static String[] getFreeMarkerVar(String str) {
+
+    /**
+     *
+     * @param str 字符串
+     * @param head 开头标识
+     * @param begin 变量前括号符号
+     * @param end 变量后括号符号
+     * @return 得到变量列表
+     */
+    public static String[] getFreeMarkerVar(String str,char head,char begin,char end) {
         if (str==null)
         {
             return new String[0];
@@ -2413,26 +2459,19 @@ public final class StringUtil {
         boolean isVar = false;
         for (int i = 0; i < length; i++) {
             char c = str.charAt(i);
-            if (c == '$' && i < length && str.charAt(i + 1) == '{') {
+            if (c == head && str.charAt(i + 1) == begin) {
                 isVar = true;
             }
-            if (isVar && c == '}') {
+            if (isVar && c == end) {
                 isVar = false;
                 sb.append(StringUtil.SEMICOLON);
             }
-            if (isVar && str.charAt(i) != '$' && str.charAt(i) != '{') {
+            if (isVar && str.charAt(i) != head && str.charAt(i) != begin) {
                 sb.append(c);
             }
         }
-
-        String[] nameArray = split(sb.toString(), StringUtil.SEMICOLON);
-        for (int i = 0; i < nameArray.length; i++) {
-            if (nameArray[i].contains("#(")) {
-                nameArray[i] = StringUtil.substringBeforeLast(nameArray[i], "#(");
-            }
-        }
         //过滤重复
-        Set<String> set = new LinkedHashSet<String>(Arrays.asList(nameArray));
+        Set<String> set = new LinkedHashSet<String>(Arrays.asList(StringUtil.split(sb.toString(),StringUtil.SEMICOLON)));
         return set.toArray(new String[0]);
     }
 
@@ -2498,6 +2537,10 @@ public final class StringUtil {
      * @return 全角
      */
     public static String halfToFull(String input) {
+        if (input==null)
+        {
+            return empty;
+        }
         char[] c = input.toCharArray();
         for (int i = 0; i < c.length; i++) {
             if (c[i] == 32) {
@@ -2517,6 +2560,10 @@ public final class StringUtil {
      * @return 半角
      */
     public static String fullToHalf(String input) {
+        if (input==null)
+        {
+            return empty;
+        }
         char[] c = input.toCharArray();
         for (int i = 0; i < c.length; i++) {
             if (c[i] == 12288) {
@@ -2567,7 +2614,7 @@ public final class StringUtil {
     public static String quote(String input, boolean dou)
     {
         if (input == null) {
-            return StringUtil.empty;
+            return empty;
         }
         StringBuilder filtered = new StringBuilder(input.length() * 50);
         if (dou) {
@@ -2630,7 +2677,7 @@ public final class StringUtil {
     public static String quoteSql(String input)
     {
         if (input == null) {
-            return StringUtil.empty;
+            return empty;
         }
         StringBuilder filtered = new StringBuilder(input.length() * 50);
         filtered.append("'");
@@ -2668,6 +2715,10 @@ public final class StringUtil {
     }
 
     public static String escape(String src) {
+        if (src==null)
+        {
+            return empty;
+        }
         int i;
         char j;
         StringBuilder tmp = new StringBuilder();
@@ -2691,6 +2742,10 @@ public final class StringUtil {
     }
 
     public static String unescape(String src) {
+        if (src==null)
+        {
+            return empty;
+        }
         StringBuilder tmp = new StringBuilder();
         tmp.ensureCapacity(src.length());
         int lastPos = 0, pos;
@@ -2729,6 +2784,10 @@ public final class StringUtil {
      * @return String 转换好的字符串
      */
     public static String mailTitleConverter(String str) {
+        if (str==null)
+        {
+            return empty;
+        }
         String temp = str;
         if (str != null) {
             String str2 = str.toUpperCase();
@@ -3146,7 +3205,8 @@ public final class StringUtil {
      * @return  驼峰格式字符串转换为下划线格式字符串
      */
     public static String camelToUnderline(String value,boolean lower) {
-        if (StringUtil.isNull(value)) {
+        if (value==null)
+        {
             return empty;
         }
         String param = value;
@@ -3249,6 +3309,21 @@ public final class StringUtil {
         s = s.replaceAll("#", ".?");
         s = "^" + s + "$";
         return matches(s, url);
+    }
+
+    /**
+     *
+     * @param str 字符串
+     * @return 去掉excel表导出的时候会出现Ensp空格
+     */
+    public static String replaceENSP(String str) {
+        char[] chars = str.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == 0x2002 || chars[i] == 0x2003 || chars[i] == 0x00a0) {
+                chars[i] = ' ';
+            }
+        }
+        return new String(chars);
     }
 
     public static String deleteAny(String inString, String charsToDelete) {
@@ -3359,6 +3434,11 @@ public final class StringUtil {
     }
 
 
+    /**
+     *
+     * @param name 修复变量名
+     * @return 好的变量名
+     */
     public static String fixedVarName(String name) {
         if (name == null) {
             return null;
@@ -3404,5 +3484,41 @@ public final class StringUtil {
         return result;
     }
 
-
+/*
+    public static void main(String[] args) {
+        String str = "SELECT count(RE.FID) as NUM   FROM T_ENG_ROUTE RE\n" +
+                "                    LEFT JOIN T_ENG_ROUTE_L REL ON RE.FID=REL.FID AND REL.FLOCALEID=2052\n" +
+                "                    LEFT JOIN T_BD_MATERIAL m ON m.FMATERIALID=RE.FMATERIALID\n" +
+                "                    LEFT JOIN T_BD_MATERIAL_L ml ON ml.FMATERIALID=m.FMATERIALID AND ml.FLOCALEID=2052\n" +
+                "                    LEFT JOIN T_ORG_ORGANIZATIONS org ON org.FORGID=RE.FUSEORGID\n" +
+                "                    LEFT JOIN (\n" +
+                "                        SELECT mei.FVALUE,mel.Fcaption FROM T_META_FORMENUM  me LEFT JOIN T_META_FORMENUMITEM mei ON me.FID=mei.FID\n" +
+                "                        LEFT JOIN T_META_FORMENUMITEM_L mel ON mel.FENUMID=mei.FENUMID AND mel.FLOCALEID=2052\n" +
+                "                        LEFT JOIN T_META_FORMENUM_L mul ON mul.FID=me.FID\n" +
+                "                        WHERE mul.FNAME='工艺类型'\n" +
+                "                    ) gylx ON gylx.FVALUE=RE.FPROCESSTYPE\n" +
+                "\n" +
+                "                    LEFT JOIN (\n" +
+                "                        SELECT mei.FVALUE,mel.Fcaption FROM T_META_FORMENUM  me LEFT JOIN T_META_FORMENUMITEM mei ON me.FID=mei.FID\n" +
+                "                        LEFT JOIN T_META_FORMENUMITEM_L mel ON mel.FENUMID=mei.FENUMID AND mel.FLOCALEID=2052\n" +
+                "                        LEFT JOIN T_META_FORMENUM_L mul ON mul.FID=me.FID\n" +
+                "                        WHERE mul.FNAME='工艺性质'\n" +
+                "                    ) gyxz ON gyxz.FVALUE=RE.F_PALE_GYXZ\n" +
+                "\n" +
+                "                    LEFT JOIN (\n" +
+                "                    SELECT mei.FVALUE,mel.Fcaption FROM T_META_FORMENUM  me LEFT JOIN T_META_FORMENUMITEM mei ON me.FID=mei.FID\n" +
+                "                    LEFT JOIN T_META_FORMENUMITEM_L mel ON mel.FENUMID=mei.FENUMID AND mel.FLOCALEID=2052\n" +
+                "                    LEFT JOIN T_META_FORMENUM_L mul ON mul.FID=me.FID\n" +
+                "                    WHERE mul.FNAME='工艺类别'\n" +
+                "                    ) gylb ON gylb.FVALUE=RE.F_PALE_GYLB\n" +
+                "            WHERE RE.FID>0\n" +
+                "            <if where=\"routeId\"> AND RE.FID=${routeId}</if>\n" +
+                "            <if where=\"numberList\">AND RE.FNumber IN <list v=\"numberList\" open=\"(\" close=\")\" separator=\",\">#{v}</list></if>\n" +
+                "            <if where=\"materialNumber\"> AND m.FNUMBER like '${materialNumber}%'</if>\n" +
+                "            <if where=\"gyxz\"> AND gyxz.Fcaption=#{gyxz}</if>\n" +
+                "            <if where=\"gylb\"> AND gylb .Fcaption=#{gylb}</if>\n" +
+                "            <if where=\"routeName\"> AND REL.FNAME=#{routeName}</if>";
+        String[] varArray = StringUtil.getFreeMarkerVar(str);
+        System.out.println(ObjectUtil.toString(varArray));
+    }*/
 }

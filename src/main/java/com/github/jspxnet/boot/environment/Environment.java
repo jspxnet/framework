@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -15,6 +15,7 @@ import com.github.jspxnet.utils.StringUtil;
 
 /**
  * Created by IntelliJ IDEA.
+ *
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2004-4-1
  * Time: 16:45:27
@@ -78,12 +79,13 @@ public final class Environment {
     final public static String TIME_FORMAT = "time_format";
 
 
-
     final public static String NUMBER_FORMAT = "number_format";
 
     final public static String autoImports = "autoImports";
 
     final public static String autoIncludes = "autoIncludes";
+
+    final public static String templateFixUndefined = "templateFixUndefined";
 
     final public static String defaultPath = "defaultPath";
 
@@ -140,7 +142,7 @@ public final class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.78";
+    final static public String VERSION = "6.79";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -345,9 +347,8 @@ public final class Environment {
 
     static public final String DEFAULT_STORE = "defaultStore";
 
-
-
     static public final String useCache = "useCache";
+
     static public final String useTxWeb = "useTxWeb";
 
     static public final String onlinePrivilege = "onlinePrivilege";
@@ -574,6 +575,8 @@ public final class Environment {
     static public final String SERVER_IP = "server.ip";
 
     static public final String SERVER_CORS = "server.cors";
+
+    static public final String tcpNoDelay = "tcpNoDelay";
 
     static public final String SERVER_THREADS = "server.threads";
 

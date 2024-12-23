@@ -32,6 +32,7 @@ public enum OperatorEnumType implements EnumType {
     NINSQL(11, "NOT_IN_SQL","NOT IN SQL","NOT IN",NotInSqlExpression.class.getName()),
 
     LIKE(12, "LIKE","包含","LIKE",LikeExpression.class.getName()),
+
     NOT_LIKE(13, "NOT LIKE","不包含","NOT LIKE",NotLikeExpression.class.getName()),
 
     NOT_NULL(14, "IS NOT NULL","非空","IS NOT NULL",NotNullExpression.class.getName()),
@@ -41,7 +42,11 @@ public enum OperatorEnumType implements EnumType {
     FIND(16, "FIND","搜索","LIKE",FindExpression.class.getName()),
 
     //这里主要未了兼容
-    NOT(17, "NOT","非","NOT",NotExpression.class.getName());
+    NOT(17, "NOT","非","NOT",NotExpression.class.getName()),
+
+    ILIKE(12, "ILIKE","包含","ILIKE",ILikeExpression.class.getName());
+
+
 
     private final int value;
     private final String key;

@@ -1,6 +1,5 @@
 package com.github.jspxnet.txweb.util;
 
-import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.TipStatusEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
@@ -66,7 +65,7 @@ public final class TipUtil {
             return;
         }
         String key = getKey(messageId);
-        JSCacheManager.put(DefaultCache.class,key,dto);
+        JSCacheManager.put(TipDto.class,key,dto);
     }
 
     /**
@@ -82,7 +81,7 @@ public final class TipUtil {
         }
         String key = getKey(messageId);
         List<TipDto> list = null;
-        Object obj = JSCacheManager.get(DefaultCache.class,key);
+        Object obj = JSCacheManager.get(TipDto.class,key);
         if (obj==null)
         {
             list = new ArrayList<>();
@@ -102,7 +101,7 @@ public final class TipUtil {
         }
         dto.setSort(list.size()+1);
         list.add(dto);
-        JSCacheManager.put(DefaultCache.class,key,list);
+        JSCacheManager.put(TipDto.class,key,list);
     }
 
     /**
@@ -112,7 +111,7 @@ public final class TipUtil {
      */
     public static Object getMessage(String messageId) {
         String key = getKey(messageId);
-        return JSCacheManager.get(DefaultCache.class,key);
+        return JSCacheManager.get(TipDto.class,key);
     }
 
     /**

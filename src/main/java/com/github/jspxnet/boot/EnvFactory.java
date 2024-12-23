@@ -147,7 +147,6 @@ public class EnvFactory {
         try {
             asymmetricEncrypt = (AsyEncrypt) ClassUtil.newInstance(encryptionAlgorithmClass);
         } catch (Exception e) {
-            e.printStackTrace();
             return new RSAEncrypt();
         }
         return asymmetricEncrypt;
@@ -206,7 +205,7 @@ public class EnvFactory {
                 templatePath = new File(defaultPath,ENV_TEMPLATE.getString(Environment.templatePath,"template")).getPath();
             }
         }
-        String[]  findDirs = new String[]{defaultPath,templatePath, ENV_TEMPLATE.getString(Environment.resPath)};
+        String[]  findDirs = new String[]{templatePath,defaultPath, ENV_TEMPLATE.getString(Environment.resPath)};
         return FileUtil.scanFile(findDirs, loadFile);
     }
 

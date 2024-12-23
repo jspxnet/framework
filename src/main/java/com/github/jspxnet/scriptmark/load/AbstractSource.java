@@ -10,6 +10,8 @@
 package com.github.jspxnet.scriptmark.load;
 
 import com.github.jspxnet.io.UnicodeReader;
+import lombok.Getter;
+
 import java.io.*;
 
 /**
@@ -23,16 +25,13 @@ public abstract class AbstractSource extends Source implements java.io.Serializa
 
     static final String UNICODE_START2 = "unicode";
 
+    @Getter
     private final String name;
     protected final String encoding;
 
     public AbstractSource(String name, String encoding) {
         this.name = name;
         this.encoding = encoding;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @Override

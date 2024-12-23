@@ -349,7 +349,7 @@ public class ScriptConverter {
                     }
                     return sb.get().toString();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("getHtmlOptions",e);
                 }
 
             }
@@ -372,7 +372,7 @@ public class ScriptConverter {
                     }
                     return sb.toString();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("getHtmlOptions",e);
                 }
 
             }
@@ -467,7 +467,7 @@ public class ScriptConverter {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("show",e);
                 }
                 return StringUtil.empty;
             }
@@ -604,7 +604,7 @@ public class ScriptConverter {
         try {
             return IoUtil.autoReadText(http,encode);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("getHighlight",e);
             return "ERROR";
         }
     }
@@ -909,10 +909,20 @@ public class ScriptConverter {
     }
 
 
+    /**
+     *
+     * @param name 文件名称
+     * @return 将文件名称转换为s_开头的，表示缩图名称
+     */
     public static String getThumbnailFileName(String name) {
         return FileUtil.getThumbnailFileName(name);
     }
 
+    /**
+     *
+     * @param name 文件名称
+     * @return 将文件名称转换为 m_开头的，表示手机图片
+     */
     public static String getMobileFileName(String name) {
         return FileUtil.getMobileFileName(name);
     }

@@ -851,8 +851,10 @@ public final class TXWebUtil {
         Method exeMethod = null;
         Map<Operate, Method> operateMap = getClassOperateList(actionClass);
         for (Operate operate : operateMap.keySet()) {
-            /*String txt = operate.caption();
-            String txtmethod = operate.method();*/
+            /*
+            String txt = operate.caption();
+            String txtmethod = operate.method();
+            */
             //处理通配符情况
             if (TXWebUtil.AT.equals(operate.method())) {
                 Method tmpMethod = operateMap.get(operate);
@@ -1194,13 +1196,13 @@ public final class TXWebUtil {
             try {
                 print(XML.toString(json), WebOutEnumType.XML.getValue(), response, status);
             } catch (JSONException e) {
-                e.printStackTrace();
+                //...
             }
         } else {
             try {
                 print(HtmlUtil.deleteHtml(XML.toString(json)), WebOutEnumType.XML.getValue(), response, status);
             } catch (JSONException e) {
-                e.printStackTrace();
+                //...
             }
         }
     }

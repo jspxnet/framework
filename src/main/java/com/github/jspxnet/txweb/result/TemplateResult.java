@@ -59,6 +59,7 @@ public class TemplateResult extends ResultSupport {
 
     static {
         CONFIGURABLE.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
+        CONFIGURABLE.put(ScriptmarkEnv.FixUndefined,ENV_TEMPLATE.getBoolean(Environment.templateFixUndefined));
     }
 
     public TemplateResult() {

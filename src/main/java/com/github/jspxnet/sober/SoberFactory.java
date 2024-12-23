@@ -29,6 +29,10 @@ public interface SoberFactory extends Serializable {
 
     void setMaxRows(int maxRows);
 
+    boolean isShowSql();
+
+    void setShowSql(boolean showsql);
+
     String getDatabaseType();
 
     String getDatabaseName();
@@ -72,10 +76,9 @@ public interface SoberFactory extends Serializable {
 
     /**
      *
-     * @return 调试开启显示sql
+     * @param autoCommit 自动提交
      */
-    boolean isShowsql();
-
+    void setAutoCommit(boolean autoCommit);
     /**
      *
      * @return 是否自动提交

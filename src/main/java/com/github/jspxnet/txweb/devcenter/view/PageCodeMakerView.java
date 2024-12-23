@@ -1,7 +1,10 @@
 package com.github.jspxnet.txweb.devcenter.view;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.sober.SoberFactory;
 import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.txweb.annotation.Operate;
@@ -18,8 +21,21 @@ import java.util.List;
 
 public class PageCodeMakerView extends ActionSupport {
 
-    @Ref
     protected GenericDAO genericDAO;
+
+    @Ref
+    public void setGenericDAO(GenericDAO genericDAO)
+    {
+        this.genericDAO = genericDAO;
+        //begin 载入默认数据源
+        if (genericDAO.getSoberFactory() == null) {
+            String soberFactoryName = EnvFactory.getEnvironmentTemplate().getString("soberFactory", "jspxSoberFactory");
+            BeanFactory beanFactory = EnvFactory.getBeanFactory();
+            SoberFactory soberFactory = (SoberFactory) beanFactory.getBean(soberFactoryName);
+            genericDAO.setSoberFactory(soberFactory);
+        }
+        //end 载入默认数据源
+    }
 
     @Operate(caption = "构建页面", method = "index", post = false)
     public String index()  {

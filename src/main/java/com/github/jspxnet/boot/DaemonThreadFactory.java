@@ -1,18 +1,20 @@
 package com.github.jspxnet.boot;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2021/1/23 17:15
  * description: 守护线程
  *
  * @author chenYuan
  * */
+@Slf4j
 public final class DaemonThreadFactory implements ThreadFactory {
     static final private List<Thread> THREAD_LIST = new ArrayList<>();
     private String name;
@@ -63,7 +65,7 @@ public final class DaemonThreadFactory implements ThreadFactory {
                             try {
                                 Thread.sleep(2000);
                             } catch (InterruptedException ex) {
-                                ex.printStackTrace();
+                                log.error(e.getMessage(),ex);
                             }
                             thread.interrupt();
                         }

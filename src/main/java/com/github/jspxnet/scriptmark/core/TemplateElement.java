@@ -43,7 +43,7 @@ public class TemplateElement implements TemplateModel {
         this.lastModified = lastModified;
         this.config = cfg;
         String syncopate = config.getString(ScriptmarkEnv.Syncopate);
-        if (syncopate == null || syncopate.length() < 1) {
+        if (syncopate == null || syncopate.isEmpty()) {
             syncopate = "<>";
         }
         beginTag = syncopate.charAt(0);
@@ -130,15 +130,6 @@ public class TemplateElement implements TemplateModel {
         }
 
 
-        //<![CDATA[${jdbcUrl}]]>
-/*        boolean h = false;
-        int iTemp = source.indexOf("<![CDATA[", bStart);
-        if (iTemp != -1) {
-            if ("".equals(source.substring(bStart, iTemp).trim())) {
-                bStart = iTemp;
-                h = true;
-            }
-        }*/
         for (int i = bStart; i < end; i++) {
             char c = source.charAt(i);
             if (i > begin) {
@@ -148,16 +139,6 @@ public class TemplateElement implements TemplateModel {
                 old = c;
             }
         }
-/*        if (h) {
-            iTemp = source.indexOf("]]>", bStart);
-            while (iTemp != -1 && iTemp < bend) {
-                iTemp = source.indexOf("]]>", bStart);
-                bend = iTemp;
-            }
-            if (iTemp != -1 && iTemp < bend) {
-                bend = iTemp;
-            }
-        }*/
         return source.substring(bStart, bend);
     }
 

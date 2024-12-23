@@ -18,6 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * This interface describes the ValueMatcher behavior. A ValueMatcher is an
@@ -26,7 +28,7 @@ package com.github.jspxnet.cron4j;
  * 
  * @author Carlo Pelliccia
  */
-interface ValueMatcher {
+public interface ValueMatcher extends Serializable {
 
 	/**
 	 * Validate the given integer value against a set of rules.
@@ -36,6 +38,6 @@ interface ValueMatcher {
 	 * @return true if the given value matches the rules of the ValueMatcher,
 	 *         false otherwise.
 	 */
-	public boolean match(int value);
+	boolean match(int value);
 
 }
