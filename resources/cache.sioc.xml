@@ -4,14 +4,6 @@
     <bean id="memoryStore" class="com.github.jspxnet.cache.store.MemoryStore" singleton="false"/>
     <bean id="lruStore" class="com.github.jspxnet.cache.store.LRUStore" singleton="false"/>
 
-    <!--
-    分布式缓存 推荐使用 Redis ,注意多个缓存 bean名称不要重复
-    分布式缓存数量在缓存里边控制 maxElements 将无效
-    Memcached windows下感觉不稳定,部分功能缺失，没有Redis 效率好
-    <bean id="clusterStore" class="com.github.jspxnetcache.store.SingleRedissonStore"  singleton="true">
-        <string name="configFile">c:/jwebs/tomcat/conf/redisson.conf</string>
-    </bean>
-    -->
 
     <!--本地模版缓存 begin-->
     <bean id="scriptMarkCache" class="com.github.jspxnet.cache.core.JSCache" singleton="true" caption="默认缓存">
@@ -20,22 +12,47 @@
         <int name="maxElements">1000</int>
         <ref name="store">memoryStore</ref>
     </bean>
-
     <!--system redis 配置不不需要多个 begin-->
     <!-- com.github.jspxnetcache.store.SingleRedissonStore -->
-    <!--<bean id="defaultStore" class="com.github.jspxnet.cache.store.SingleRedissonStore" singleton="false" />-->
-    <bean id="defaultStore" class="com.github.jspxnet.cache.store.SingleRedissonStore" singleton="false" caption="这里不能是用单例">
-    </bean>
-
-<!--
+   <bean id="defaultStore" class="com.github.jspxnet.cache.store.SingleRedissonStore" singleton="false" caption="多例模式，配置单例模式" />
+    <!--
     <bean id="defaultStore" class="com.github.jspxnet.cache.store.MemoryStore" singleton="false" />
--->
-
+    -->
     <bean id="com.github.jspxnet.cache.DefaultCache" class="com.github.jspxnet.cache.core.JSCache" singleton="true" caption="默认缓存">
         <string name="name">com.github.jspxnet.cache.DefaultCache</string>
         <int name="second">1800</int>
         <int name="maxElements">2000</int>
         <ref name="store">defaultStore</ref>
+    </bean>
+    <bean id="com.github.jspxnet.cache.LockCache" class="com.github.jspxnet.cache.core.JSCache" singleton="true" caption="默认缓存">
+        <string name="name">com.github.jspxnet.cache.LockCache</string>
+        <int name="second">1200</int>
+        <int name="maxElements">2000</int>
+        <ref name="store">defaultStore</ref>
+    </bean>
+
+    <bean id="com.github.jspxnet.sober.config.SoberTable" caption="tip提示信息" class="com.github.jspxnet.cache.core.JSCache" singleton="true" >
+        <ref name="store">defaultStore</ref>
+        <string name="name">com.github.jspxnet.sober.config.SoberTable</string>
+        <int name="second" caption="超时">86400</int>
+    </bean>
+
+    <bean id="com.github.jspxnet.txweb.model.dto.TipDto" caption="tip提示信息" class="com.github.jspxnet.cache.core.JSCache" singleton="true" >
+        <ref name="store">defaultStore</ref>
+        <string name="name">com.github.jspxnet.txweb.model.dto.TipDto</string>
+        <int name="second" caption="超时">86400</int>
+    </bean>
+
+    <bean id="com.github.jspxnet.txweb.bundle.table.BundleTable" class="com.github.jspxnet.cache.core.JSCache" singleton="true">
+        <ref name="store">defaultStore</ref>
+        <string name="name">com.github.jspxnet.txweb.bundle.table.BundleTable</string>
+        <int name="second" caption="超时">-1</int>
+    </bean>
+
+    <bean id="com.github.jspxnet.txweb.table.OptionBundle" class="com.github.jspxnet.cache.core.JSCache" singleton="true">
+        <ref name="store">defaultStore</ref>
+        <string name="name">com.github.jspxnet.txweb.table.OptionBundle</string>
+        <int name="second" caption="超时">-1</int>
     </bean>
     <!--system 配置 end-->
 
@@ -46,7 +63,6 @@
         <int name="second" caption="超时">86400</int>
     </bean>
 
-
     <bean id="com.github.jspxnet.txweb.table.MemberRole" class="com.github.jspxnet.cache.core.JSCache" singleton="true">
         <ref name="store">defaultStore</ref>
         <string name="name">com.github.jspxnet.txweb.table.MemberRole</string>
@@ -56,23 +72,6 @@
     <bean id="com.github.jspxnet.txweb.table.Role" class="com.github.jspxnet.cache.core.JSCache" singleton="true">
         <ref name="store">defaultStore</ref>
         <string name="name">com.github.jspxnet.txweb.table.Role</string>
-        <int name="second" caption="超时">-1</int>
-    </bean>
-
-    <bean id="jspx.jcommon.table.ConnectApp" class="com.github.jspxnet.cache.core.JSCache" singleton="true">
-        <ref name="store">defaultStore</ref>
-        <string name="name">jspx.jcommon.table.ConnectApp</string>
-        <int name="second" caption="超时">-1</int>
-    </bean>
-
-    <bean id="com.github.jspxnet.txweb.table.OptionBundle" class="com.github.jspxnet.cache.core.JSCache" singleton="true">
-        <ref name="store">defaultStore</ref>
-        <string name="name">com.github.jspxnet.txweb.table.OptionBundle</string>
-        <int name="second" caption="超时">-1</int>
-    </bean>
-    <bean id="com.github.jspxnet.txweb.bundle.table.BundleTable" class="com.github.jspxnet.cache.core.JSCache" singleton="true">
-        <ref name="store">defaultStore</ref>
-        <string name="name">com.github.jspxnet.txweb.bundle.table.BundleTable</string>
         <int name="second" caption="超时">-1</int>
     </bean>
 
