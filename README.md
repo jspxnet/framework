@@ -9,20 +9,20 @@ b/s,c/s ,分布式集群调用支持, 语言上只使用了标准的 java 和jav
 简化和实用性。这套框架不但提供了技术实现,同时也提供了一套开发规范,让系统的结构分层,代码规范,文档一体化的实现。
 可以理解为spring boot整合好的一套极小构架。是spring的替代框架。
 
-1.内部支持tcp,http方式分布式调用
+## 特点
+1.内部支持tcp,http方式分布式调用。
 
-2.内置网络服务注册中心,目前支持consul外联
+2.内置网络服务注册中心,目前支持consul外联。
 
-3.配置中心支持整合apollo.
+3.配置中心支持整合apollo。
 
-4.根据代码自动生成API接口文档,不用向swagger那样只是换个地方写注释.注释是根据提示等信息自动生成.
+4.根据代码自动生成API接口文档,不用向swagger那样只是换个地方写注释.注释是根据提示等信息自动生成。
 
-5.支持sql在线配置,类似mybatis的sql可以在线修改的功能.
+5.支持sql在线配置,类似mybatis的sql可以在线修改的功能。
 
-6.内存结构自动化,不用在做麻烦的内存保存结构管理,系统自动分类保存.
+6.内存结构自动化,不用在做麻烦的内存保存结构管理,系统自动分类保存。
 
-7.定时任务分布式管理,类似xxl-job 分布式管理任务调度.
-
+7.定时任务分布式管理,类似xxl-job 分布式管理任务调度。
 
 
 ##仓库地址
@@ -31,7 +31,7 @@ b/s,c/s ,分布式集群调用支持, 语言上只使用了标准的 java 和jav
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.77</version>
+    <version>6.79</version>
 </dependency>
 ```
     
@@ -43,7 +43,6 @@ b/s,c/s ,分布式集群调用支持, 语言上只使用了标准的 java 和jav
 
     https://gitee.com/jspx/jspx-framework
     
-
 ##名称说明
 	
 *	请大家不要以为是jspx，jspx是一个来自于埃及的java web快速开发框架。本构架和它没一点关系，而且本框架在它之前就已经开发了。
@@ -150,3 +149,5 @@ b/s,c/s ,分布式集群调用支持, 语言上只使用了标准的 java 和jav
 * 2022年12月：Jspx cloud Framework 6.72 修复动态对象查询bug,优化oracle，mssql支持，添加搜索结构支持
 * 2023年07月：Jspx cloud Framework 6.73 增强bean拷贝兼容性,修复bug,添加json查询过滤支持,过滤条件保存等功能
 * 2024年06-07月：Jspx cloud Framework 6.77 优化代码生成结构，httpclent升级到httpclent5支持.去掉spring嵌入支持,修复多数据源事物异常，修复jdk11下启动异常。优化代码自动生功能。精简依赖，修复上传bug。
+* 2024年07月：Jspx cloud Framework 6.78 修复多数据源事物异常，修复jdk11下启动异常。修复嵌入方式配置文件多环境bug。
+* 2024年12月：Jspx cloud Framework 6.79 修复国密加密不统一,优化缓存和部分bug，作为7x版本的最后版本，下一个版本计划配合整合周边功能，提供兼容性。
