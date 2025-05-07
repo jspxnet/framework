@@ -66,7 +66,7 @@ public class ChainResult extends RedirectResult {
         //设置新的action环境变量,避免死循环 end
         ActionInvocation chainActionInvocation = null;
         try {
-            chainActionInvocation = new DefaultActionInvocation(actionConfig, action.getEnv(), ActionHandle.NAME, null, action.getRequest(), action.getResponse());
+            chainActionInvocation = new DefaultActionInvocation(actionConfig, action.getEnv(), ActionHandle.NAME, null, action.getRequest(), action.getResponse(),false);
             chainActionInvocation.initAction();
             if (action.getClass().getName().equals(chainActionInvocation.getActionProxy().getAction().getClass().getName())) {
                 int times = ObjectUtil.toInt(chainActionInvocation.getActionProxy().getAction().getEnv(CHAIN_INVOKE_TIMES));

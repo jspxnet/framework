@@ -9,7 +9,7 @@ public enum PlatformEnumType implements EnumType {
     PC(1, "电脑"),
 
     //高级控件
-    mobile(2, "手持设备"),
+    MOBILE(2, "手持设备"),
 
     //高级控件
     PAD(3, "PAD"),

@@ -60,7 +60,7 @@ public abstract class TagNode implements Serializable {
             configurable = TemplateConfigurable.getInstance();
         }
         String syncopate = configurable.getString(ScriptmarkEnv.Syncopate);
-        if (syncopate == null || syncopate.length() < 1) {
+        if (syncopate == null || syncopate.isEmpty()) {
             syncopate = "<>";
         }
         beginTag = syncopate.charAt(0);

@@ -337,8 +337,6 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
             return LoginField.NAME;
         } else if (ValidUtil.isNumber(loginId) && loginId.length() == 16) {
             return LoginField.KID;
-        } else if (ValidUtil.isNumber(loginId) && loginId.length() < 10) {
-            return LoginField.UID;
         }
         return LoginField.UID;
     }
@@ -433,6 +431,28 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
     @Override
     public int getForPhoneCount(String phone) {
         return createCriteria(Member.class).add(Expression.eq("phone", phone)).setProjection(Projections.rowCount()).intUniqueResult();
+    }
+
+    /**
+     *
+     * @param phone 手机号
+     * @param uid 排除账号id
+     * @return 编辑的时候判断手机号是否重复
+     */
+    @Override
+    public boolean isRepeatPhone(String phone, long uid) {
+        return createCriteria(Member.class).add(Expression.eq("phone", phone)).add(Expression.ne("id", uid)).setProjection(Projections.rowCount()).intUniqueResult()>0;
+    }
+
+    /**
+     *
+     * @param name 用户名
+     * @param uid 排除账号id
+     * @return 编辑的时候判断手机号是否重复
+     */
+    @Override
+    public boolean isRepeatName(String name,long uid) {
+        return createCriteria(Member.class).add(Expression.eq("name", name)).add(Expression.ne("id", uid)).setProjection(Projections.rowCount()).intUniqueResult()>0;
     }
     /**
      * @param find       关键字
@@ -645,7 +665,6 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
     @Override
     public boolean deleteOvertimeSession(long overtime) {
         long delTime = System.currentTimeMillis() - overtime;
-
         try {
             if (tableExists(getSoberTable(UserSession.class))) {
                 return createCriteria(UserSession.class).add(Expression.lt("lastRequestTime", delTime)).delete(false) > 0;
@@ -663,18 +682,12 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
      */
     @Override
     public boolean deleteSession(String sessionId, long uid) {
-
-        if (uid == 0 && sessionId != null) {
+        if (!StringUtil.isNull(sessionId)) {
             evictLoad(UserSession.class, "id", sessionId);
             return createCriteria(UserSession.class).add(Expression.eq("id", sessionId)).delete(false) > 0;
-        } else if (uid > 0 && StringUtil.isNull(sessionId)) {
-            evictLoad(UserSession.class, "uid", uid);
-            return createCriteria(UserSession.class).add(Expression.eq("uid", uid)).delete(false) > 0;
-        } else {
-            evictLoad(UserSession.class, "id", sessionId);
-            evictLoad(UserSession.class, "uid", uid);
-            return createCriteria(UserSession.class).add(Expression.or(Expression.eq("id", sessionId), Expression.eq("uid", uid))).delete(false) > 0;
         }
+        evictLoad(UserSession.class, "uid", uid);
+        return createCriteria(UserSession.class).add(Expression.eq("uid", uid)).delete(false) > 0;
     }
 
     /**

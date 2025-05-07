@@ -732,7 +732,7 @@ public class JSONArray extends LinkedList<Object> {
      * @throws JSONException If any of the names are null.
      */
     public JSONObject toJSONObject(JSONArray names) throws JSONException {
-        if (names == null || names.size() == 0 || super.size() == 0) {
+        if (names == null || names.size() == 0 || super.isEmpty()) {
             return null;
         }
         JSONObject jo = new JSONObject();

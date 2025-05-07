@@ -46,6 +46,7 @@ import com.github.jspxnet.utils.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -123,7 +124,7 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
                     log.error(guestUrlFile + "没有找到");
                 }
             } catch (Exception e) {
-                log.error("载入guestUrlFile:{}", file,e);
+                log.error("载入guestUrlFile:{}", file, e);
             }
             //---------------------------
             if (!ArrayUtil.isEmpty(adminRuleUrl) || !ArrayUtil.isEmpty(adminRuleOutUrl)) {
@@ -140,7 +141,7 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
                     JSCacheManager.put(DefaultCache.class, ADMIN_RULE_URL_TXT, txt);
                 }
             } catch (Exception e) {
-                log.info("adminUrlFile:{}", file,e);
+                log.info("adminUrlFile:{}", file, e);
             }
         }
     }
@@ -154,8 +155,11 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
             log.error("onlineManager 为空,检查ioc配置是否正确");
             return ActionSupport.ERROR;
         }
-
         HttpServletRequest request = actionContext.getRequest();
+        //如果是RPC调用不拦截，RPC调用的安全使用通讯密钥方式来确保
+        if (request instanceof RequestTo || INetCommand.RPC.equals(request.getAttribute(ActionEnv.Key_REMOTE_TYPE))) {
+            return actionInvocation.invoke();
+        }
         HttpServletResponse response = actionContext.getResponse();
         //这里是不需要验证的action
         ActionProxy actionProxy = actionInvocation.getActionProxy();
@@ -166,17 +170,25 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         if (StringUtil.isNull(pathNamespace)) {
             pathNamespace = actionContext.getNamespace();
         }
-
         String checkUrl = StringUtil.replace(StringUtil.BACKSLASH + pathNamespace + StringUtil.BACKSLASH + actionContext.getActionName(), "//", StringUtil.BACKSLASH);
 
         //登陆入口，直接放行
-        if (useGuestUrl) {
-            boolean isRule = isRuleOutUrl(checkUrl);
-            if (isRule) {
-                log.debug("ruleOutUrl checkUrl={},isRule={}", checkUrl, isRule);
-                return actionInvocation.invoke();
-            }
+        if (useGuestUrl && isRuleOutUrl(checkUrl)) {
+            log.debug("ruleOutUrl checkUrl={},isRule=true", checkUrl);
+            return actionInvocation.invoke();
         }
+
+        //站点关闭 begin
+        if (permission && !config.getBoolean(Environment.openSite)) {
+            String closeInfo = config.getString(Environment.closeInfo);
+            if (StringUtil.isNull(closeInfo)) {
+                closeInfo = action.getRootNamespace() + "关闭状态，不允许访问";
+            }
+            actionContext.addFieldInfo(Environment.warningInfo, closeInfo);
+            config.flush();
+            return ActionSupport.UNTITLED;
+        }
+        //站点关闭 end
 
         String organizeId = null;
         if (autoOrganizeId) {
@@ -205,6 +217,27 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         permissionDAO.setOrganizeId(organizeId);
 
         UserSession userSession = onlineManager.getUserSession();
+
+        //游客访问控制 begin
+//        if (!config.getBoolean(Environment.useGuestVisit) && role.getUserType() <= UserEnumType.NONE.getValue()) {
+        if (!config.getBoolean(Environment.useGuestVisit) && userSession.isGuest()) {
+            //不输出信息就会到登录页面
+            String closeInfo = config.getString(Environment.closeGuestVisitInfo);
+            actionContext.addFieldInfo(Environment.warningInfo, closeInfo);
+            return ActionSupport.UNTITLED;
+        }
+        //游客访问控制 end
+
+        //屏蔽的URL游客
+        if (userSession.isGuest() && ArrayUtil.inArray(guestStopUrl, checkUrl, true)) {
+
+            //如果都载入为空，那么载入游客权限 begin
+            actionContext.addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notAllowedOperation));
+
+            //如果都载入为空，那么载入游客权限 end
+            return ActionSupport.UNTITLED;
+        }
+
         //待检查确认
         IRole role = userSession.getRole(permissionDAO.getNamespace(), organizeId);
         //自动分配调试权限 begin
@@ -222,9 +255,7 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         }
 
         // 7-13 初始机构创建人角色
-        if (!action.isGuest() &&
-                !StringUtil.isEmpty(organizeId)
-                && permissionDAO.existsCreate(organizeId, userSession.getUid())) {
+        if (!action.isGuest() && !StringUtil.isEmpty(organizeId) && permissionDAO.existsCreate(organizeId, userSession.getUid())) {
 
             BundleTable result = permissionDAO.createCriteria(BundleTable.class)
                     .add(Expression.eq("namespace", permissionDAO.getNamespace()))
@@ -251,21 +282,6 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
         }
         //没有角色权限自动载入 end
 
-        if (request instanceof RequestTo || INetCommand.RPC.equals(request.getAttribute(ActionEnv.Key_REMOTE_TYPE))) {
-            //如果是RPC调用不拦截，RPC调用的安全使用通讯密钥方式来确保
-            return actionInvocation.invoke();
-        }
-
-        //屏蔽的URL游客
-        if (userSession.isGuest() && ArrayUtil.inArray(guestStopUrl, checkUrl, true)) {
-
-            //如果都载入为空，那么载入游客权限 begin
-            actionContext.addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notAllowedOperation));
-
-            //如果都载入为空，那么载入游客权限 end
-            return ActionSupport.UNTITLED;
-        }
-
         if (permission && userSession.getRole(permissionDAO.getNamespace(), organizeId) == null) {
             actionContext.addFieldInfo(Environment.warningInfo, permissionDAO.getNamespace() + " need config role,权限够不够");
             return ActionSupport.UNTITLED;
@@ -281,28 +297,6 @@ public class PermissionInterceptor extends BasePermissionInterceptor {
             log.debug("角色没有初始化配置 namespace={},role={}", permissionDAO.getNamespace(), new JSONObject(role));
             return ActionSupport.UNTITLED;
         }
-
-        //访问控制,放开登录和管理目录
-        //站点关闭 begin
-        if (permission && !config.getBoolean(Environment.openSite)) {
-            String closeInfo = config.getString(Environment.closeInfo);
-            if (StringUtil.isNull(closeInfo)) {
-                closeInfo = action.getRootNamespace() + "关闭状态，不允许访问";
-            }
-            actionContext.addFieldInfo(Environment.warningInfo, closeInfo);
-            config.flush();
-            return ActionSupport.UNTITLED;
-        }
-        //站点关闭 end
-
-        //游客访问控制 begin
-        if (!config.getBoolean(Environment.useGuestVisit) && role.getUserType() <= UserEnumType.NONE.getValue()) {
-            //不输出信息就会到登录页面
-            String closeInfo = config.getString(Environment.closeGuestVisitInfo);
-            actionContext.addFieldInfo(Environment.warningInfo, closeInfo);
-            return ActionSupport.UNTITLED;
-        }
-        //游客访问控制 end
 
         //时段限制 begin
         String accessForbiddenRange = config.get(Environment.accessForbiddenRange);

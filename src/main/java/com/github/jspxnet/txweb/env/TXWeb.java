@@ -54,7 +54,7 @@ public final class TXWeb {
     final public static String CONFIG_TYPE = "type";
     final public static String CONFIG_ACTION = "action";
     final public static String CONFIG_SCAN = "scan";
-    final public static String CONFIG_SECRET = "secret";
+    //final public static String CONFIG_SECRET = "secret";
     final public static String CONFIG_MOBILE = "mobile";
     final public static String CONFIG_CACHE = "cache";
     final public static String CONFIG_CACHE_NAME = "cacheName";
@@ -99,16 +99,16 @@ public final class TXWeb {
     //OOS 方式 注意大小写
     //final static public String sessionId = "sessionId";
 
-    final static public String token = "token";
+
     //机构ID
     final static public String organizeId = "organizeId";
 
-    final static public String ticketName = "ticketName";
+    //final static public String ticketName = "ticketName";
 
     //浏览器默认会保存一个sessionID
-    final static public String CookieSessionId = "JSESSIONID";
+    //final static public String CookieSessionId = "JSESSIONID";
 
-    static public final String COOKIE_TICKET = "jspxCookieTicket"; //加密
+    //static public final String COOKIE_TICKET = "jspxCookieTicket"; //加密
 
     //全局高速唯一变量  放在config中,因为有缓存,正式改放到缓存中
 

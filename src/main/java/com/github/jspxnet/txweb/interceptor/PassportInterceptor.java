@@ -16,12 +16,11 @@ import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.IUserSession;
-import com.github.jspxnet.txweb.env.TXWeb;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.utils.CookieUtil;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +57,7 @@ public class PassportInterceptor extends InterceptorSupport {
             for (String url : urlList) {
                 HttpClient httpClient = HttpClientFactory.createHttpClient(url);
                 Map<String,Object> param = new HashMap<>();
-                param.put("ticket", CookieUtil.getCookieString(action.getRequest(), TXWeb.COOKIE_TICKET, null));
+                param.put("token", CookieUtil.getCookieString(action.getRequest(), ActionEnv.KEY_TOKEN, null));
                 param.put("tmc", tmc + "");
                 try {
                     httpClient.post(url, param);

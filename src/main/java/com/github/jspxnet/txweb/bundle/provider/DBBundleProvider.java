@@ -13,7 +13,9 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.security.symmetry.Encrypt;
+import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.txweb.dao.impl.GenericDAOImpl;
+import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.txweb.bundle.BundleProvider;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;
@@ -109,6 +111,7 @@ public class DBBundleProvider extends BundleProvider {
         List<BundleTable> bundleTableList = soberTemplate.createCriteria(BundleTable.class)
                 .add(Expression.eq("namespace", namespace))
                 .add(Expression.eq("dataType", dataType))
+                .addOrder(Order.asc("sort"))
                 .setCurrentPage(1)
                 .setTotalCount(10000)
                 .list(false);
@@ -127,6 +130,8 @@ public class DBBundleProvider extends BundleProvider {
 
         return bundleTableList;
     }
+
+
 
     /**
      * @return boolean 删除所有

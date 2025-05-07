@@ -811,9 +811,6 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         {
             return null;
         }
-        if (o instanceof JSONArray) {
-            return (List<Object>) o;
-        }
 
         return (List<Object>) o;
     }

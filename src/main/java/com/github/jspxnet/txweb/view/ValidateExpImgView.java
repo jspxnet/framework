@@ -43,10 +43,10 @@ public class ValidateExpImgView extends ActionSupport {
 
     // 图片的宽度。
     @Getter
-    private int width = 70;
+    private int width = 100;
     // 图片的高度。
     @Getter
-    private int height = 24;
+    private int height = 32;
     // 验证码干扰线数
 
     @Getter
@@ -115,10 +115,12 @@ public class ValidateExpImgView extends ActionSupport {
             viewCode = NumberUtil.toString(A) + "+" + NumberUtil.toString(B) + StringUtil.EQUAL;
         }
         PhotoString validateCode = new PhotoString(width, height, new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(bgColor, "#", "")), 16)), StringUtil.isNull(color) ? null : new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(color, "#", "")), 16)), viewCode);
-        ImageIO.write(validateCode.getBufferImage(), fileType, response.getOutputStream());
-
         if (userSession != null) {
             validateCodeCache.addImgCode(EncryptUtil.getMd5(userSession.getId()), NumberUtil.toString(C));
+        }
+        if (!response.isCommitted())
+        {
+            ImageIO.write(validateCode.getBufferImage(), fileType, response.getOutputStream());
         }
         return super.execute();
     }

@@ -7,7 +7,7 @@ import com.github.jspxnet.sober.exception.RepeatBillNoException;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.enums.DocumentStatusEnumType;
-import com.github.jspxnet.txweb.env.TXWeb;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.model.container.AbstractBillObject;
 import com.github.jspxnet.txweb.table.UserSession;
 import com.github.jspxnet.txweb.table.meta.BaseBillType;
@@ -43,7 +43,7 @@ public final class BusinessFilterUtil {
             token = RequestUtil.getToken(request);
             if (StringUtil.isEmpty(token))
             {
-                token = CookieUtil.getCookieString(request, TXWeb.COOKIE_TICKET, null);
+                token = CookieUtil.getCookieString(request, ActionEnv.KEY_TOKEN, null);
             }
             if (token!=null&&!token.contains(StringUtil.DOT))
             {
@@ -55,7 +55,7 @@ public final class BusinessFilterUtil {
         {
             session = request.getSession();
             if (session != null & StringUtil.isNull(token) ) {
-                token = (String) session.getAttribute(TXWeb.token);
+                token = (String) session.getAttribute(ActionEnv.KEY_TOKEN);
             }
         }
         return jdbcOperations.load(UserSession.class,token,false);

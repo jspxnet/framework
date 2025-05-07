@@ -18,6 +18,7 @@ import com.github.jspxnet.boot.environment.impl.BaseConfigurationImpl;
 import com.github.jspxnet.boot.environment.impl.EnvironmentTemplateImpl;
 import com.github.jspxnet.boot.environment.impl.PlaceholderImpl;
 import com.github.jspxnet.boot.environment.impl.SqlMapPlaceholderImpl;
+import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.security.asymmetric.AsyEncrypt;
 import com.github.jspxnet.security.asymmetric.impl.RSAEncrypt;
 import com.github.jspxnet.security.symmetry.Encrypt;
@@ -119,10 +120,10 @@ public class EnvFactory {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        int keyFormatType = ENV_TEMPLATE.getInt(Environment.keyFormatType,0);
+        symmetryEncrypt.setKeyFormatType(KeyFormatEnumType.find(keyFormatType));
         String secretKey = ENV_TEMPLATE.getString(Environment.secretKey, Environment.defaultDrug);
-        if (secretKey.length() > 16) {
-            secretKey = StringUtil.cut(secretKey, 16, StringUtil.empty);
-        }
         symmetryEncrypt.setSecretKey(secretKey);
         symmetryEncrypt.setCipherAlgorithm(ENV_TEMPLATE.getString(Environment.cipherAlgorithm));
         symmetryEncrypt.setCipherIv(ENV_TEMPLATE.getString(Environment.cipherIv));

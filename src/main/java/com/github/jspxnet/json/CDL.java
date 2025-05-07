@@ -121,7 +121,7 @@ public class CDL {
             String value = getValue(x);
             char c = x.next();
             if (value == null ||
-                    (ja.length() == 0 && value.length() == 0 && c != ',')) {
+                    (ja.length() == 0 && value.isEmpty() && c != ',')) {
                 return null;
             }
             ja.put(value);
@@ -175,7 +175,7 @@ public class CDL {
             Object object = ja.get(i);
             if (object != null) {
                 String string = object.toString();
-                if (string.length() > 0 && (string.indexOf(',') >= 0 ||
+                if (!string.isEmpty() && (string.indexOf(',') >= 0 ||
                         string.indexOf('\n') >= 0 || string.indexOf('\r') >= 0 ||
                         string.indexOf(0) >= 0 || string.charAt(0) == '"')) {
                     sb.append('"');
@@ -295,7 +295,7 @@ public class CDL {
      */
     public static String toString(JSONArray names, JSONArray ja)
             throws JSONException {
-        if (names == null || names.length() == 0) {
+        if (names == null || names.isEmpty()) {
             return null;
         }
         StringBuffer sb = new StringBuffer();

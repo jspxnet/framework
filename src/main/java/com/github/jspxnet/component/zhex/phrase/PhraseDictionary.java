@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class PhraseDictionary {
     static public List<Phrase> getPhraseList(String find) throws IOException {
-        if (StringUtil.isNull(find) || find.length() < 1) {
+        if (StringUtil.isNull(find) || find.isEmpty()) {
             return new ArrayList<>(0);
         }
         ReadPhrase readPhrase = new ReadPhrase(find);

@@ -9,12 +9,10 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
 import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
-
 import javax.net.ssl.*;
 import java.io.*;
 import java.security.*;
@@ -82,10 +80,10 @@ public class HttpsClientAdapter extends HttpClientAdapter implements HttpClient 
         return this;
     }
 
-    public static void main(String[] args) throws Exception {
+/*    public static void main(String[] args) throws Exception {
         String url = "https://www.wosign.com";
         HttpClient httpClient = new HttpsClientAdapter();
         String out = httpClient.build().getString(url);
         System.out.println(out);
-    }
+    }*/
 }

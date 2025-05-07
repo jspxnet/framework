@@ -4,7 +4,6 @@ import com.github.jspxnet.enums.EnumType;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/10/17 23:23
  * description: jdbc 的执行方法

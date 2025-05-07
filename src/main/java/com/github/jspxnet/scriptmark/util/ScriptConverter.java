@@ -370,6 +370,7 @@ public class ScriptConverter {
                         }
                         sb.append(">").append(vars).append("</option>");
                     }
+                    jsonObject.clear();
                     return sb.toString();
                 } catch (Exception e) {
                     log.error("getHtmlOptions",e);

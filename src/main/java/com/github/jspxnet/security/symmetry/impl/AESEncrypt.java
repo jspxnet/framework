@@ -1,15 +1,10 @@
 package com.github.jspxnet.security.symmetry.impl;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.security.symmetry.AbstractEncrypt;
-import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.Provider;
-import java.security.Security;
-
 /**
  * Created by ChenYuan on 2017/5/9.
  * <p>
@@ -37,12 +32,6 @@ public class AESEncrypt extends AbstractEncrypt {
         cipherAlgorithm = "AES/CBC/PKCS7Padding";
         keyFormatType = KeyFormatEnumType.STRING;
         cipherIv = "0123456789ABCDEF";
-        try {
-            //判断log4j是否存在
-            Security.addProvider((Provider) Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider").newInstance());
-        } catch (Exception e) {
-            log.error("bcprov-jdk15.jar or use jdk1.8 not find,can not transfer use PKCS7Padding");
-        }
     }
 
 

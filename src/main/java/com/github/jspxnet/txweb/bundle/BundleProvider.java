@@ -21,6 +21,7 @@ import com.github.jspxnet.utils.SystemUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +138,7 @@ public abstract class BundleProvider implements Bundle, Serializable {
         return result == 0 ? defVar : result;
     }
 
-
+    @Override
     public SoberColumnDto getSoberColumn(final String keys)
     {
         BundleTable bundleTable = getBundleTable(keys);
@@ -149,12 +150,29 @@ public abstract class BundleProvider implements Bundle, Serializable {
         dto.setName(bundleTable.getIdx());
         dto.setCaption(bundleTable.getCaption());
         dto.setDefaultValue(bundleTable.getContext());
-        dto.setInput("text");
+        dto.setInput(bundleTable.getInput());
         dto.setClassType(String.class);
         dto.setTableName(AnnotationUtil.getTableName(BundleTable.class));
         dto.setLength(bundleTable.getContext()==null?200:bundleTable.getContext().length());
         dto.setDataType(bundleTable.getDataType());
         return dto;
+    }
+
+    @Override
+    public List<SoberColumnDto> getColumnList()
+    {
+        List<BundleTable> bundleTableList = getList();
+        List<SoberColumnDto> result = new ArrayList<>();
+        for (BundleTable bundleTable : bundleTableList) {
+            SoberColumnDto countColumnDto = getSoberColumn(bundleTable.getIdx());
+            if (countColumnDto==null)
+            {
+                continue;
+            }
+            result.add(countColumnDto);
+        }
+
+        return result;
     }
 
     @Override

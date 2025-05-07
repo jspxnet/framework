@@ -17,7 +17,7 @@ public final class MemberUtil {
     }
 
     /**
-     *
+     * member.setPassword(MemberUtil.createPasswordSaveFormat(password, RandomUtil.getRandomGUID(8)));
      * @param password 密码
      * @param hashAlgorithmKey 密钥
      * @return 用户密码加密算法

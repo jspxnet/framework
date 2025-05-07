@@ -15,6 +15,9 @@ import com.github.jspxnet.txweb.bundle.Bundle;
 
 import com.github.jspxnet.utils.StringUtil;
 
+import javax.mail.PasswordAuthentication;
+import java.net.Authenticator;
+
 /**
  * Created with IntelliJ IDEA.
  * User: chenyuan
@@ -40,4 +43,5 @@ public class MailAdapterFactory {
         return mailAdapter;
     }
     // SendEmailAdapter
+
 }

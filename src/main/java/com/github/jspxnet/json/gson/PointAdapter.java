@@ -29,6 +29,7 @@ public class PointAdapter implements JsonSerializer<Point>, JsonDeserializer<Poi
                     JSONObject poJson = new JSONObject(v);
                     int x = poJson.getInt("x");
                     int y = poJson.getInt("y");
+                    poJson.clear();
                     return  new Point(x,y);
                 }
                 if (v.startsWith("[")&&v.endsWith("]"))

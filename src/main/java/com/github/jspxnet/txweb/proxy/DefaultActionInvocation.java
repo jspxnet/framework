@@ -105,7 +105,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         return actionConfig;
     }
 
-    public DefaultActionInvocation(ActionConfig actionConfig, Map<String, Object> params, String exeType, JSONObject jsonData, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public DefaultActionInvocation(ActionConfig actionConfig, Map<String, Object> params, String exeType, JSONObject jsonData, HttpServletRequest request, HttpServletResponse response,boolean secret) throws Exception {
         DefultContextHolderStrategy.createContext(request,response,params);
         this.actionProxy = new DefaultActionProxy();
         String namespace = (String)params.getOrDefault(ActionEnv.Key_Namespace,actionConfig.getNamespace());
@@ -132,6 +132,8 @@ public class DefaultActionInvocation implements ActionInvocation {
         if (actionConfig.isMobile()) {
             action.put(ActionEnv.KEY_MobileTemplate, true);
         }
+
+        action.put(ActionEnv.KEY_SECRET_DATA,secret);
 
         //////////////载入配置参数 begin
         Placeholder placeholder = EnvFactory.getPlaceholder();
@@ -224,7 +226,6 @@ public class DefaultActionInvocation implements ActionInvocation {
      * @return 拦截器列表
      */
     private Iterator<Interceptor> createInterceptorList(String namespace) {
-
         LinkedList<String> interceptNameList = new LinkedList<>();
         List<String> tmpList = WEB_CONFIG_MANAGER.getDefaultInterceptors(namespace);
         if (tmpList != null && !tmpList.isEmpty()) {
@@ -407,6 +408,8 @@ public class DefaultActionInvocation implements ActionInvocation {
      */
     @Override
     public String invoke()  {
+
+
         ActionContext actionContext = ThreadContextHolder.getContext();
         if (actionContext.isExecuted()) {
             return actionContext.getActionResult();
@@ -542,6 +545,7 @@ public class DefaultActionInvocation implements ActionInvocation {
                 redirectResult.execute(this);
             } else
             {
+                log.info("非ROC请求未知处理. action:{}, resultCode:{}, loginUrl:{}", action, resultCode, loginUrl);
                 Result result = new ErrorResult();
                 result.execute(this);
             }

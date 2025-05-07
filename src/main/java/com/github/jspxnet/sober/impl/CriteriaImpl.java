@@ -193,11 +193,12 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      */
     @Override
     public Object uniqueResult() {
+
         if (projection == null) {
             return null;
         }
         TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
-        String databaseName = soberFactory.getDatabaseName();
+        String databaseType = soberFactory.getDatabaseType();
         if (soberTable == null) {
             return null;
         }
@@ -211,7 +212,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 errorInfo = ObjectUtil.toString(criterionEntry.getCriterion().getFields());
                 continue;
             }
-            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseName);
+            String term = criterionEntry.getCriterion().toSqlString(soberTable, databaseType);
             termText.append(term);
             if (i != (criterionEntries.size() - 1) && !StringUtil.isNull(StringUtil.trim(term))) {
                 termText.append(" AND ");
@@ -240,7 +241,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 continue;
             }
 
-            orderText.append(orderEntry.getOrder().toSqlString(databaseName));
+            orderText.append(orderEntry.getOrder().toSqlString(databaseType));
             if (i != (orderEntries.size() - 1)) {
                 orderText.append(",");
             }
@@ -248,7 +249,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_FIELD_PROJECTION, projection.toSqlString(databaseName));
+        valueMap.put(Dialect.KEY_FIELD_PROJECTION, projection == null ? null : projection.toSqlString(databaseType));
         valueMap.put(Dialect.KEY_TERM, termText.toString());
         valueMap.put(Dialect.KEY_FIELD_GROUPBY, groupText.toString());
         valueMap.put(Dialect.KEY_FIELD_ORDERBY, orderText.toString());
@@ -451,7 +452,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     public int delete(boolean delChild) {
         int result = 0;
         if (delChild) {
-            List<T> list = list(delChild);
+            List<T> list = list(true);
             for (T o : list) {
                 if (o == null) {
                     continue;
@@ -742,16 +743,20 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                     termKey.append("_");
                 }
             }
+            if (StringUtil.hasLength(termText.toString())) {
+                termKey.append("_t_").append(termText);
+            }
             if (termKey.toString().endsWith("_")) {
                 termKey.setLength(termKey.length() - 1);
             }
             if (StringUtil.hasLength(groupText.toString())) {
-                termKey.append("_g_").append(groupText.toString());
+                termKey.append("_g_").append(groupText);
             }
             if (termKey.toString().endsWith("_")) {
                 termKey.setLength(termKey.length() - 1);
             }
-            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termText.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, false);
+
+            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, false);
             resultList = (List) JSCacheManager.get(criteriaClass, cacheKey);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;

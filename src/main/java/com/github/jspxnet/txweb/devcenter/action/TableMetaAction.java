@@ -75,6 +75,7 @@ public class TableMetaAction extends TableMetaView {
             tableMeta = create(tableName);
         }
         tableMeta.setViewScript(json.toString());
+        json.clear();
         if (tableMeta.getId()==0)
         {
             int x = genericDAO.save(tableMeta,true);
@@ -92,6 +93,7 @@ public class TableMetaAction extends TableMetaView {
             }
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(), language.getLang(LanguageRes.updateFailure));
         }
+
     }
 
     @Override

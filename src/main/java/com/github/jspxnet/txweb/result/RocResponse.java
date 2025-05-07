@@ -62,7 +62,7 @@ public class RocResponse<T> implements Serializable {
     private String message = null; // 请求状态描述，调试用
 
     @Column(caption = "请求数据")
-    @JsonIgnore(isNull = true)
+//    @JsonIgnore(isNull = true)
     private T data = null;// 请求数据，对象或数组均可
 
     @Column(caption = "扩展数据")

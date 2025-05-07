@@ -1,7 +1,9 @@
 package com.github.jspxnet.security.asymmetric.impl;
 
+//import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.security.KeyPairGen;
 import com.github.jspxnet.security.asymmetric.AbstractEncrypt;
+//import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.security.utils.RSACoder;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -104,20 +106,6 @@ public class RSAEncrypt extends AbstractEncrypt {
 
     }
 
-    /**
-     * 公钥解密
-     *
-     * param data      已加密数据
-     * param publicKey 公钥(BASE64编码)
-     * return 原文
-     */
-    /*@Override
-    public byte[] decryptByPublicKey(byte[] data, byte[] publicKey) throws Exception {
-        if (ArrayUtil.isEmpty(data) || ArrayUtil.isEmpty(publicKey)) {
-            return StringUtil.empty.getBytes();
-        }
-        return RSACoder.decryptByPublicKey(data, publicKey);
-    }*/
 
     /**
      * 公钥加密
@@ -135,20 +123,24 @@ public class RSAEncrypt extends AbstractEncrypt {
     }
 
 
-
-/*    public static void main(String[] args) throws Exception {
+/*
+    public static void main(String[] args) throws Exception {
         RSAEncrypt encrypt = new RSAEncrypt();
-
         KeyPairGen keyPair = encrypt.getKeyPair();
+        String publicKey = EncryptUtil.getBase64Encode(keyPair.getPublicKey());
+        String privateKey = EncryptUtil.getBase64Encode(keyPair.getPrivateKey());
+        System.out.println("publicKey：" + publicKey);
+        System.out.println("privateKey：" + privateKey);
+
         String source = "恭喜发财!当该用户发送文件时，用私钥签名";// 要加密的字符串
 
-        byte[] jiaMi  = encrypt.encryptByPublicKey(source.getBytes(Environment.defaultEncode),keyPair.getPublicKey());
+        byte[] jiaMi  = encrypt.encryptByPublicKey(source.getBytes(Environment.defaultEncode),EncryptUtil.getBase64Decode(publicKey));
         //验证
-        byte[] sign1 = encrypt.sign(jiaMi,keyPair.getPrivateKey());
+        byte[] sign1 = encrypt.sign(jiaMi,EncryptUtil.getBase64Decode(privateKey));
         System.out.println("sign1：" +  EncryptUtil.getBase64Encode(sign1));
-        System.out.println("verify1：" +  encrypt.verify(jiaMi,keyPair.getPublicKey(),sign1));
+        System.out.println("verify1：" +  encrypt.verify(jiaMi,EncryptUtil.getBase64Decode(publicKey),sign1));
         System.out.println("公钥加密的字符串为：" + new String(jiaMi,Environment.defaultEncode) );
-        byte[] jieMi  = encrypt.decryptByPrivateKey(jiaMi,keyPair.getPrivateKey());
+        byte[] jieMi  = encrypt.decryptByPrivateKey(jiaMi,EncryptUtil.getBase64Decode(privateKey));
         System.out.println("私密解密：" + new String(jieMi,Environment.defaultEncode));
 
     }*/

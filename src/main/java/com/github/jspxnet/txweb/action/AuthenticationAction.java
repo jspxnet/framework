@@ -25,6 +25,7 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.PermissionDAO;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.Role;
@@ -32,6 +33,7 @@ import com.github.jspxnet.txweb.table.UserSession;
 import com.github.jspxnet.txweb.view.AuthenticationView;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -79,7 +81,7 @@ public class AuthenticationAction extends AuthenticationView {
         try {
             loginInfo = onlineManager.login(this, LoginField.SMS, mobile, onlineManager.getGuiPassword(), cookieDate);
         } catch (Exception e) {
-            log.error("phoneLogin",e);
+            log.error("phoneLogin", e);
         }
         if (loginInfo == null || !loginInfo.isEmpty()) {
             RocResponse<JSONObject> rocResponse = RocResponse.error(ErrorEnumType.WARN.getValue(), loginInfo);
@@ -91,14 +93,14 @@ public class AuthenticationAction extends AuthenticationView {
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
-            log.error("phoneLogin",e);
+            log.error("phoneLogin", e);
         }
-        UserSession userSession = onlineManager.getUserSession(this);
+        UserSession userSession = onlineManager.getUserSession();
         if (userSession == null || userSession.isGuest()) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.validationFailure));
         }
         JSONObject json = new JSONObject();
-        json.put(TXWeb.token, userSession.getId());
+        json.put(ActionEnv.KEY_TOKEN, userSession.getId());
         json.put(Environment.USER_SESSION, userSession);
         json.put(Environment.message, language.getLang(LanguageRes.loginSuccess));
         return RocResponse.success(json);
@@ -111,12 +113,13 @@ public class AuthenticationAction extends AuthenticationView {
             @Param(caption = "密码", required = true, max = 64, message = "密码必须填写") String password,
             @Param(caption = "验证码", max = 20) String validate) throws Exception {
 
-        IUserSession userSession = getUserSession();
+
         int loginTimes = validateCodeCache.getTimes(EncryptUtil.getMd5(loginId));
         if (loginTimes > 6) {
             long expireTime = validateCodeCache.getTimeRemaining(loginId);
             return RocResponse.error(ErrorEnumType.CONGEAL.getValue(), String.format("冻结剩余时间：%d分%d秒", expireTime / 60, expireTime % 60));
         }
+        IUserSession userSession = getUserSession();
         if (loginTimes > 3 && !validateCodeCache.validateImg(EncryptUtil.getMd5(userSession.getId()), validate)) {
             RocResponse<JSONObject> rocResponse = RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.validationFailure));
             JSONObject json = new JSONObject();
@@ -135,14 +138,19 @@ public class AuthenticationAction extends AuthenticationView {
             rocResponse.setData(json);
             return rocResponse;
         }
-        Thread.sleep(500);
-        userSession = onlineManager.getUserSession(this);
-        if (userSession == null || userSession.isGuest()) {
-            return RocResponse.error(ErrorEnumType.APPLICATION.getValue(), language.getLang(LanguageRes.loginFailure));
-        }
 
+        String newToken = getEnv(ActionEnv.KEY_TOKEN);
+        if (newToken != null) {
+            userSession = onlineManager.getUserSession();
+            if (userSession != null) {
+                if (!userSession.getId().equalsIgnoreCase(newToken)) {
+                    Thread.sleep(500);
+                    userSession = onlineManager.getUserSession(newToken);
+                }
+            }
+        }
         JSONObject json = new JSONObject();
-        json.put(TXWeb.token, userSession.getId());
+        json.put(ActionEnv.KEY_TOKEN, newToken);
         json.put(Environment.USER_SESSION, userSession);
         json.put(Environment.message, language.getLang(LanguageRes.loginSuccess));
         return RocResponse.success(json);
@@ -206,7 +214,7 @@ public class AuthenticationAction extends AuthenticationView {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.notAllowedIpLimits));
         }
 
-        UserSession userSession = onlineManager.getUserSession(this);
+        UserSession userSession = onlineManager.getUserSession();
         int loginTimes = validateCodeCache.getTimes(EncryptUtil.getMd5(userSession.getId()));
         if (loginTimes > config.getInt(Environment.maxLoginTimes)) {
             return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), language.getLang(LanguageRes.validationFailureLimitTimes) + loginTimes);
@@ -216,7 +224,7 @@ public class AuthenticationAction extends AuthenticationView {
         try {
             loginInfo = onlineManager.login(this, field, loginId, password, cookieSecond);
         } catch (Exception e) {
-              return RocResponse.error(ErrorEnumType.UNKNOWN.getValue(), "登陆产生异常");
+            return RocResponse.error(ErrorEnumType.UNKNOWN.getValue(), "登陆产生异常");
         }
         if (!ObjectUtil.isEmpty(loginInfo)) {
             Iterator<String> iterator = loginInfo.keySet().iterator();
@@ -229,7 +237,7 @@ public class AuthenticationAction extends AuthenticationView {
         boolean isLogin = loginInfo != null && loginInfo.isEmpty();
         if (isLogin) {
             //已经登陆
-            userSession = onlineManager.getUserSession(this);
+            userSession = onlineManager.getUserSession();
             Role role = permissionDAO.getComposeRole(userSession.getUid(), permissionDAO.getOrganizeId());
             if (role == null || role.getUserType() != UserEnumType.RESET_ADMIN.getValue()) {
                 //只允许 reset_admin登陆
@@ -241,7 +249,7 @@ public class AuthenticationAction extends AuthenticationView {
                 onlineManager.exit(userSession.getId());
                 loginInfo = onlineManager.login(this, LoginField.NAME, loginName, onlineManager.getGuiPassword(), cookieSecond);
             } catch (Exception e) {
-               return RocResponse.error(ErrorEnumType.UNKNOWN.getValue(), "登陆产生异常");
+                return RocResponse.error(ErrorEnumType.UNKNOWN.getValue(), "登陆产生异常");
             }
             if (!loginInfo.isEmpty()) {
                 Iterator<String> iterator = loginInfo.keySet().iterator();
@@ -249,9 +257,9 @@ public class AuthenticationAction extends AuthenticationView {
                     return RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), loginInfo.get(iterator.next()));
                 }
             }
-            userSession = onlineManager.getUserSession(this);
+            userSession = onlineManager.getUserSession();
             JSONObject json = new JSONObject();
-            json.put(TXWeb.token, userSession.getId());
+            json.put(ActionEnv.KEY_TOKEN, userSession.getId());
 
             json.put(Environment.USER_SESSION, userSession);
             json.put(Environment.message, language.getLang(LanguageRes.loginSuccess));
@@ -285,7 +293,7 @@ public class AuthenticationAction extends AuthenticationView {
 
     @Operate(caption = "判断在线", post = false, method = "checksession")
     public RocResponse<Integer> checkSession() {
-        IUserSession userSession = onlineManager.getUserSession(this);
+        IUserSession userSession = onlineManager.getUserSession();
         if (userSession != null && !userSession.isGuest()) {
             return RocResponse.success(1);
         } else {

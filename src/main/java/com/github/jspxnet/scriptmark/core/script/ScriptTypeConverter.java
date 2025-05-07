@@ -183,7 +183,7 @@ public final class ScriptTypeConverter {
             return false;
         }
         s = s.trim();
-        if (s.length() < 1) {
+        if (s.isEmpty()) {
             return false;
         }
         char c = s.charAt(0);
@@ -195,7 +195,7 @@ public final class ScriptTypeConverter {
             return false;
         }
         s = s.trim();
-        if (s.length() < 1) {
+        if (s.isEmpty()) {
             return false;
         }
         char c = s.charAt(0);
@@ -207,7 +207,7 @@ public final class ScriptTypeConverter {
             return new Object[0];
         }
         s = s.trim();
-        if (s.length() < 1) {
+        if (s.isEmpty()) {
             return new Object[]{s};
         }
         s = s.substring(1, s.length() - 1);

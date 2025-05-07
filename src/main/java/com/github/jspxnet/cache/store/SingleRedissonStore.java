@@ -9,11 +9,13 @@ import com.github.jspxnet.cache.redis.RedissonClientConfig;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 但缓存下是用,分布式多缓存下是用 RedisStore
@@ -106,6 +108,60 @@ public class SingleRedissonStore extends Store implements IStore {
             }
             return null;
         }
+    }
+
+    /**
+     *
+     * @param key key
+     * @return 锁定 默认10秒
+     */
+    @Override
+    public boolean lock(String key) {
+        return lock( key, 10);
+    }
+
+    /**
+     *
+     * @param key key
+     * @param timeToLive 锁保持时间，单位为秒
+     * @return 锁定
+     */
+    @Override
+    public boolean lock(String key, int timeToLive) {
+        RLock lock = redisson.getLock(key);
+        lock.lock(timeToLive, TimeUnit.SECONDS);
+        return lock.isLocked();
+    }
+
+    /**
+     *
+     * @param key key
+     * @return 判断是否加锁
+     */
+    @Override
+    public boolean isLock(String key) {
+        RLock lock = redisson.getLock(key);
+        if (lock==null)
+        {
+            return false;
+        }
+        return lock.isLocked();
+    }
+
+    /**
+     *
+     * @param key key
+     * @return 解锁
+     */
+    @Override
+    public boolean unLock(String key) {
+        RLock lock = redisson.getLock(key);
+        if (lock==null)
+        {
+            return true;
+        }
+        lock.unlock();
+        return lock.isLocked();
     }
 
     /**

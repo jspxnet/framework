@@ -786,7 +786,7 @@ public final class HtmlUtil {
         renderer.getSharedContext().setBaseURL(baseUrl.getPath());
         renderer.setDocumentFromString(html);
         Document documents = renderer.getDocument();
-        documents.setStrictErrorChecking(false);
+        documents.setStrictErrorChecking(true);
         renderer.layout();
         renderer.createPDF(os);
         os.close();

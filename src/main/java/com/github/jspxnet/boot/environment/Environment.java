@@ -13,6 +13,8 @@ package com.github.jspxnet.boot.environment;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Created by IntelliJ IDEA.
  *
@@ -142,7 +144,7 @@ public final class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.79";
+    final static public String VERSION = "6.80";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -174,6 +176,9 @@ public final class Environment {
 
 
     final public static String DEBUG = "debug";
+
+    final public static String SHOW_API_RUN_TIME = "showApiRunTime";
+
 
     final public static String LOGIN_TIMES = "loginTimes";
 
@@ -219,7 +224,7 @@ public final class Environment {
 
     final static public String defaultLanguage = "zh";
 
-    final static public String defaultEncode = "UTF-8";
+    final static public String defaultEncode = StandardCharsets.UTF_8.name();
 
     final static public String timezone = "user.timezone";
 
@@ -351,6 +356,9 @@ public final class Environment {
 
     static public final String useTxWeb = "useTxWeb";
 
+    static public final String DEFAULT_ONLINE_HOUR = "defaultOnlineHour";
+
+
     static public final String onlinePrivilege = "onlinePrivilege";
 
     final static public String turnPageFile = "turnpage.ftl";
@@ -371,6 +379,8 @@ public final class Environment {
     static public final String photoModel = "photoModel";
 
     static public final int enterprise = 1;
+
+    static public final String LICENSE_VERIFY_VALUE = "licenseVerifyValue";
 
 
     static public final String mac = "mac";
@@ -411,6 +421,9 @@ public final class Environment {
 
     //系统默认密钥
     static public final String secretKey = "secretKey";
+
+    //系统默认密钥,配置的格式 是16进组，还是base64
+    static public final String keyFormatType = "keyFormatType";
 
     //密码算法模式
     static public final String cipherAlgorithm = "cipherAlgorithm";
@@ -591,7 +604,6 @@ public final class Environment {
     static public final String SERVER_FILTER_MODE = "server.filter.mode";
 
     public final static String SPRING_PATH_SIGN = ".jar!/BOOT-INF/classes!";
-
 
     final public static String forceExit = "forceExit";
 

@@ -175,6 +175,10 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
     @Override
     public Role getComposeRole(long uid,String organizeId)
     {
+        if (uid<=0)
+        {
+            return null;
+        }
         Criteria criteria = createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.eq("uid", uid));
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
@@ -239,14 +243,15 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         {
             criteria = criteria.add(Expression.isNull("organizeId"));
         }
-        return criteria.intUniqueResult();
+        return criteria.setProjection(Projections.rowCount()).intUniqueResult();
     }
 
     /**
      * 得到本软件的角色列表
-     *
+     * 规范不对 ，避免误解，去用
      * @return 返回角色列表
      */
+    @Deprecated
     @Override
     public List<Role> getRoleList(String find,int count,int page) {
         Criteria criteria = createCriteria(Role.class).add(Expression.eq("namespace", namespace));
@@ -259,11 +264,30 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         {
             criteria = criteria.add(Expression.isNull("organizeId"));
         }
-        return criteria.addOrder(Order.desc("sortDate")).addOrder(Order.desc("userType")).setTotalCount(count).setCurrentPage(page)
+        return criteria.addOrder(Order.desc("userType")).addOrder(Order.desc("sortDate")).setTotalCount(count).setCurrentPage(page)
                 .list(false);
     }
 
-
+    /**
+     * 得到本软件的角色列表
+     *
+     * @return 返回角色列表
+     */
+    @Override
+    public List<Role> getRoleList(String namespace,String organizeId,String find,int page,int count) {
+        Criteria criteria = createCriteria(Role.class).add(Expression.eq("namespace", namespace));
+        if (!StringUtil.isNull(find)) {
+            criteria = criteria.add(Expression.like("name", "%" + find + "%"));
+        }
+        if (!StringUtil.isEmpty(organizeId)) {
+            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
+        }  else
+        {
+            criteria = criteria.add(Expression.isNull("organizeId"));
+        }
+        return criteria.addOrder(Order.desc("userType")).addOrder(Order.desc("sortDate")).setTotalCount(count).setCurrentPage(page)
+                .list(false);
+    }
     /**
      * 得到本软件的所有动作事件
      *

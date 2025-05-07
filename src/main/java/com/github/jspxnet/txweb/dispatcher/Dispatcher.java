@@ -151,10 +151,8 @@ public final class Dispatcher implements Serializable {
             suffix = COMMAND_SUFFIX;
         }
         else {
-            String requestedWith = RequestUtil.getHeader(request, RequestUtil.REQUEST_X_REQUESTED_WITH);
-            String contentType = RequestUtil.getHeader(request, RequestUtil.requestContentType);
-            requestedWith = requestedWith.toLowerCase();
-            contentType = contentType.toLowerCase();
+            String requestedWith = RequestUtil.getHeader(request, RequestUtil.REQUEST_X_REQUESTED_WITH).toLowerCase();;
+            String contentType = RequestUtil.getHeader(request, RequestUtil.requestContentType).toLowerCase();;
             if (requestedWith.contains(Environment.rocSecret)) {
                 suffix = RsaRocHandle.NAME;
             } else if (contentType.contains(HessianHandle.HTTP_HEARD_NAME)) {

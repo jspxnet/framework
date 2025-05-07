@@ -38,6 +38,7 @@ public class RouteCmd extends INetCommand {
                 JSONArray jsonArray = json.getJSONArray(RouteChannelManage.KEY_ROUTE);
                 List<RouteSession> list = jsonArray.parseObject(RouteSession.class);
                 routeManage.joinCheckRoute(list);
+                json.clear();
             }
         }
 

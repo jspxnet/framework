@@ -241,6 +241,17 @@ public abstract class ActionSupport implements Action {
         return o;
     }
 
+
+    @Override
+    public <T> T getEnv(String keys, Class<T> t) {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return null;
+        }
+        return (T)actionContext.get(keys);
+    }
+
     /**
      * @return 得到用户在线信息
      */
@@ -248,7 +259,7 @@ public abstract class ActionSupport implements Action {
     public UserSession getUserSession() {
         //调整到cahce里边保存，不保存在session里边了，session里边只保存关联ID
         AssertException.isNull(onlineManager,"配置不完整,onlineManager在容器中没有找到");
-        return onlineManager.getUserSession(this);
+        return onlineManager.getUserSession();
     }
 
     /**
@@ -445,7 +456,7 @@ public abstract class ActionSupport implements Action {
         {
             return null;
         }
-        return actionContext.getRequest().getSession();
+        return actionContext.getRequest().getSession(false);
     }
 
     @Override
@@ -903,6 +914,7 @@ public abstract class ActionSupport implements Action {
         if(!ObjectUtil.isEmpty(result)){
             JSONObject resultStatus = new JSONObject(actionContext.getResult());
             if (resultStatus.getInt("success") == YesNoEnumType.NO.getValue()) {
+                resultStatus.clear();
                 return false;
             }
         }

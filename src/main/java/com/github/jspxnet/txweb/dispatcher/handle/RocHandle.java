@@ -35,6 +35,7 @@ public class RocHandle extends WebHandle {
     final public static String DATA_FIELD = "dataField";
 
 
+
     static String getRequestReader(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String callStr = RequestUtil.getReader(request);
         //////////////////初始begin
@@ -82,31 +83,32 @@ public class RocHandle extends WebHandle {
             return;
         }
 
-        if (actionConfig.isSecret() && !secret) {
+     /*   if (actionConfig.isSecret() && !secret) {
             TXWebUtil.print(new JSONObject(RocResponse.error(-32600, "forbidden not secret request roc.禁止非加密方式调用")).toString(4), WebOutEnumType.JSON.getValue(), response);
             return;
             //加密调用这里返回
-        }
+        }*/
 
         //在高并发下，ajax请求会出现异常，必须使用synchronized response 存在线程安全问题
         //执行action返回数据begin  多例模式下为必须
         jsonData = ParamUtil.getRequestStdJson(jsonData);
-        executeActionInvocation( actionConfig, jsonData, request, response);
+        executeActionInvocation( actionConfig, jsonData, request, response,secret);
     }
 
 
-    static public void executeActionInvocation(ActionConfig actionConfig, JSONObject jsonData,HttpServletRequest request,HttpServletResponse response) throws Exception
+    static public void executeActionInvocation(ActionConfig actionConfig, JSONObject jsonData,HttpServletRequest request,HttpServletResponse response,boolean secret) throws Exception
     {
-        JSONObject dataField = jsonData.getJSONObject(DATA_FIELD);
+
         Map<String, Object> envParams = createRocEnvironment(actionConfig,request, response);
         ActionInvocation actionInvocation = null;
         try {
-            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
+            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response,secret);
             actionInvocation.initAction();
             actionInvocation.invoke();
         } finally {
             if (actionInvocation!=null)
             {
+                JSONObject dataField = jsonData.getJSONObject(DATA_FIELD);
                 actionInvocation.executeResult(new RocResult(dataField));
             }
         }

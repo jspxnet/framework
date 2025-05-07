@@ -13,7 +13,6 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.sign.HttpStatusType;
-import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
@@ -75,6 +74,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -488,7 +488,6 @@ public final class TXWebUtil {
                                     return;
                                 }
                             }
-                            propertyValue = tempArray;
                         }
                         valueMap.put(propertyName, propertyValue);
                     } else {
@@ -1068,21 +1067,23 @@ public final class TXWebUtil {
             }
         }
 
+        if (actionContext != null && operate.secret() && !MapUtil.getBoolean(actionContext.getEnvironment(), ActionEnv.KEY_SECRET_DATA)) {
+            action.setActionResult(ActionSupport.ERROR);
+            action.addFieldInfo(exeMethod.getName(), "调用此方法强制必须使用加密方式");
+            return false;
+        }
+
         //验证防止重复提交 begin
         if (operate.repeat() > 0) {
-            String referer = StringUtil.empty;
-            if (actionContext!=null)
-            {
-                referer = RequestUtil.getHeaderReferer(actionContext.getRequest());
-            }
-            String keyValue = EncryptUtil.getMd5(referer + "-" + ClassUtil.getClass(action.getClass()).getName() + StringUtil.DOT + exeMethod.getName() + StringUtil.DOT + action.getUserSession().getId());
+            String keyValue = EncryptUtil.getMd5(ClassUtil.getClass(action.getClass()).getName() + StringUtil.DOT + exeMethod.getName() + StringUtil.DOT + action.getUserSession().getId());
             String key = String.format(REPEAT_VERIFY_KEY, keyValue);
-            Object check = JSCacheManager.get(DefaultCache.class, key);
-            if (ObjectUtil.isEmpty(check)) {
-                JSCacheManager.put(DefaultCache.class, key, operate.repeat(), operate.repeat());
-            } else {
+            if (JSCacheManager.isLock(key))
+            {
                 action.addFieldInfo(exeMethod.getName(), "不允许重复提交," + operate.repeat() + "秒后在来");
                 return false;
+            }
+            else {
+                JSCacheManager.lock(key,operate.repeat());
             }
         }
         //验证防止重复提交 end
@@ -1152,7 +1153,7 @@ public final class TXWebUtil {
         if (StringUtil.isEmpty(contentType)) {
             contentType = "application/json";
         }
-        response.setContentType(contentType + ";charset=" + (StringUtil.isNull(response.getCharacterEncoding()) ? "UTF-8" : response.getCharacterEncoding()));
+        response.setContentType(contentType + ";charset=" + (StringUtil.isNull(response.getCharacterEncoding()) ? StandardCharsets.UTF_8.name() : response.getCharacterEncoding()));
 
         if (status != null && status > 0 && status != 200) {
             response.setStatus(status);
@@ -1160,14 +1161,16 @@ public final class TXWebUtil {
         PrintWriter out;
         try {
             out = response.getWriter();
-            if (WebOutEnumType.JAVASCRIPT.getValue() == type) {
-                out.print("document.write(" + StringUtil.toJavaScriptQuote(string) + ");");
-            } else if (string != null) {
-                out.print(string);
-                out.flush();
+            if (out!=null)
+            {
+                if (WebOutEnumType.JAVASCRIPT.getValue() == type) {
+                    out.print("document.write(" + StringUtil.toJavaScriptQuote(string) + ");");
+                } else if (string != null) {
+                    out.print(string);
+                    out.flush();
+                }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("response writer is close,not out error", e);
         }
     }
@@ -1259,9 +1262,14 @@ public final class TXWebUtil {
         {
             log.info("异常信息:{},fieldInfo:{}", info,ObjectUtil.toString(fieldInfo));
         } else {
-            try (PrintWriter out = response.getWriter()) {
-                response.setStatus(status);
-                scriptMark.process(out, valueMap);
+            PrintWriter out = null;
+            try {
+                out = response.getWriter();
+                if (out!=null)
+                {
+                    response.setStatus(status);
+                    scriptMark.process(out, valueMap);
+                }
             } catch (Exception e) {
                 log.debug("打印错误信息发生错误", e);
             }

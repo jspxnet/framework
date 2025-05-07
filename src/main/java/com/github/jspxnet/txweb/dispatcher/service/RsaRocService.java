@@ -26,15 +26,11 @@ public class RsaRocService extends RocService {
     @Override
     public String doing(HttpServletRequest request, HttpServletResponse response, String call) throws Exception {
         ///////////////////读取ajax请求 end
-        if (StringUtil.isNull(call)) {
+        if (StringUtil.isNull(call)||call.length() > REQUEST_MAX_LENGTH) {
             JSONObject errorResultJson = new JSONObject(RocResponse.error(ErrorEnumType.FORMAT.getValue(), "Invalid params.参数无效,无效的请求"));
             return errorResultJson.toString(4);
         }
-        //////////////////初始begin
-        if (call.length() > REQUEST_MAX_LENGTH) {
-            JSONObject errorResultJson = new JSONObject(RocResponse.error(ErrorEnumType.FORMAT.getValue(), "Invalid params.参数无效,长度超出范围"));
-            return errorResultJson.toString(4);
-        }
+
 
         String rpc = StringUtil.trim(call);
         JSONObject jsonData = null;

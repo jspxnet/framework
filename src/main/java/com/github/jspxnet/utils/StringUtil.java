@@ -16,6 +16,8 @@ import org.dom4j.DocumentHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
@@ -764,7 +766,7 @@ public final class StringUtil {
      * StringUtils.hasLength("Hello") = true
      */
     public static boolean hasLength(String str) {
-        return (str != null && str.length() > 0);
+        return (str != null && !str.isEmpty());
     }
 
     /**
@@ -1022,7 +1024,7 @@ public final class StringUtil {
         }
         StringBuilder sb = new StringBuilder();
         try {
-            while (str.length() > 0) {
+            while (!str.isEmpty()) {
                 //4位长度
                 if (str.startsWith("\\u") && str.length() >= 6 && !str.substring(2, 6).contains("\\")) {
                     sb.append((char) Integer.parseInt(str.substring(2, 6), 16));
@@ -1215,11 +1217,11 @@ public final class StringUtil {
      * @since 0.6
      */
     public static String fillString(char c, int length) {
-        String ret = empty;
+        StringBuilder ret = new StringBuilder(empty);
         for (int i = 0; i < length; i++) {
-            ret += c;
+            ret.append(c);
         }
-        return ret;
+        return ret.toString();
     }
 
     /**
@@ -1991,7 +1993,14 @@ public final class StringUtil {
             return nint;
         }
         try {
-            return Long.parseLong(replace(sdouble, ",", ""));
+            String tmp = replace(sdouble, ",", "");
+            if (tmp!=null&&tmp.contains(DOT))
+            {
+                BigDecimal bigDecimal = new BigDecimal(tmp);
+                BigDecimal truncated = bigDecimal.setScale(0, RoundingMode.DOWN); // 截断，不进行四舍五入
+                return truncated.longValue();
+            }
+            return Long.parseLong(tmp);
         } catch (NumberFormatException e) {
             return nint;
         }
@@ -2206,17 +2215,17 @@ public final class StringUtil {
      * @return boolean 编码是否有效
      */
     static public boolean UTF8CodeCheck(String text) {
-        String sign = empty;
+        StringBuilder sign = new StringBuilder(empty);
         if (text.startsWith("%e")) {
             for (int p = 0; p != -1; ) {
                 p = text.indexOf("%", p);
                 if (p != -1) {
                     p++;
                 }
-                sign += p;
+                sign.append(p);
             }
         }
-        return "147-1".equals(sign);
+        return "147-1".equals(sign.toString());
     }
 
     /**
@@ -2955,11 +2964,11 @@ public final class StringUtil {
      * @return 获取替换字符串
      */
     public static String replaceChars(String replaceChar, int length) {
-        String resultReplace = replaceChar;
+        StringBuilder resultReplace = new StringBuilder(replaceChar);
         for (int i = 1; i < length; i++) {
-            resultReplace += replaceChar;
+            resultReplace.append(replaceChar);
         }
-        return resultReplace;
+        return resultReplace.toString();
     }
 
     /*
@@ -3484,41 +3493,4 @@ public final class StringUtil {
         return result;
     }
 
-/*
-    public static void main(String[] args) {
-        String str = "SELECT count(RE.FID) as NUM   FROM T_ENG_ROUTE RE\n" +
-                "                    LEFT JOIN T_ENG_ROUTE_L REL ON RE.FID=REL.FID AND REL.FLOCALEID=2052\n" +
-                "                    LEFT JOIN T_BD_MATERIAL m ON m.FMATERIALID=RE.FMATERIALID\n" +
-                "                    LEFT JOIN T_BD_MATERIAL_L ml ON ml.FMATERIALID=m.FMATERIALID AND ml.FLOCALEID=2052\n" +
-                "                    LEFT JOIN T_ORG_ORGANIZATIONS org ON org.FORGID=RE.FUSEORGID\n" +
-                "                    LEFT JOIN (\n" +
-                "                        SELECT mei.FVALUE,mel.Fcaption FROM T_META_FORMENUM  me LEFT JOIN T_META_FORMENUMITEM mei ON me.FID=mei.FID\n" +
-                "                        LEFT JOIN T_META_FORMENUMITEM_L mel ON mel.FENUMID=mei.FENUMID AND mel.FLOCALEID=2052\n" +
-                "                        LEFT JOIN T_META_FORMENUM_L mul ON mul.FID=me.FID\n" +
-                "                        WHERE mul.FNAME='工艺类型'\n" +
-                "                    ) gylx ON gylx.FVALUE=RE.FPROCESSTYPE\n" +
-                "\n" +
-                "                    LEFT JOIN (\n" +
-                "                        SELECT mei.FVALUE,mel.Fcaption FROM T_META_FORMENUM  me LEFT JOIN T_META_FORMENUMITEM mei ON me.FID=mei.FID\n" +
-                "                        LEFT JOIN T_META_FORMENUMITEM_L mel ON mel.FENUMID=mei.FENUMID AND mel.FLOCALEID=2052\n" +
-                "                        LEFT JOIN T_META_FORMENUM_L mul ON mul.FID=me.FID\n" +
-                "                        WHERE mul.FNAME='工艺性质'\n" +
-                "                    ) gyxz ON gyxz.FVALUE=RE.F_PALE_GYXZ\n" +
-                "\n" +
-                "                    LEFT JOIN (\n" +
-                "                    SELECT mei.FVALUE,mel.Fcaption FROM T_META_FORMENUM  me LEFT JOIN T_META_FORMENUMITEM mei ON me.FID=mei.FID\n" +
-                "                    LEFT JOIN T_META_FORMENUMITEM_L mel ON mel.FENUMID=mei.FENUMID AND mel.FLOCALEID=2052\n" +
-                "                    LEFT JOIN T_META_FORMENUM_L mul ON mul.FID=me.FID\n" +
-                "                    WHERE mul.FNAME='工艺类别'\n" +
-                "                    ) gylb ON gylb.FVALUE=RE.F_PALE_GYLB\n" +
-                "            WHERE RE.FID>0\n" +
-                "            <if where=\"routeId\"> AND RE.FID=${routeId}</if>\n" +
-                "            <if where=\"numberList\">AND RE.FNumber IN <list v=\"numberList\" open=\"(\" close=\")\" separator=\",\">#{v}</list></if>\n" +
-                "            <if where=\"materialNumber\"> AND m.FNUMBER like '${materialNumber}%'</if>\n" +
-                "            <if where=\"gyxz\"> AND gyxz.Fcaption=#{gyxz}</if>\n" +
-                "            <if where=\"gylb\"> AND gylb .Fcaption=#{gylb}</if>\n" +
-                "            <if where=\"routeName\"> AND REL.FNAME=#{routeName}</if>";
-        String[] varArray = StringUtil.getFreeMarkerVar(str);
-        System.out.println(ObjectUtil.toString(varArray));
-    }*/
 }

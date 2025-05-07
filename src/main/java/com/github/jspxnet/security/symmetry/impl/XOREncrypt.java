@@ -25,7 +25,7 @@ public class XOREncrypt extends AbstractEncrypt {
 
     //随机数，会使加密的key和数据不一样,
     public XOREncrypt() {
-        keyFormatType = KeyFormatEnumType.STRING;
+        keyFormatType = KeyFormatEnumType.HEX;
     }
 
     public boolean isEncrypt(String source) throws Exception {

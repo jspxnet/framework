@@ -13,10 +13,8 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.NumberUtil;
 import com.github.jspxnet.utils.StringUtil;
 import org.bouncycastle.util.encoders.Hex;
-
 import javax.crypto.spec.IvParameterSpec;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -102,8 +100,12 @@ public abstract class AbstractEncrypt implements Encrypt {
      */
     @Override
     public String getEncode(String classData) throws Exception {
-
-        return EncryptUtil.getBase64Encode(getEncode(classData.getBytes(Environment.defaultEncode)));
+        byte[] data = getEncode(classData.getBytes(Environment.defaultEncode));
+        if (KeyFormatEnumType.HEX.equals(keyFormatType))
+        {
+            return EncryptUtil.toHex(data);
+        }
+        return EncryptUtil.getBase64Encode(data);
     }
 
     //生成iv
@@ -117,69 +119,28 @@ public abstract class AbstractEncrypt implements Encrypt {
         }
         return new IvParameterSpec(Hex.decodeStrict(cipherIv));*/
 
-        if ("AES".equalsIgnoreCase(algorithm) && StringUtil.hasLength(cipherIv)) {
+        if ("AES".equalsIgnoreCase(algorithm) || "SM4".equalsIgnoreCase(algorithm)) {
             //iv 为一个 16 字节的数组，这里采用和 iOS 端一样的构造方法，数据全为0
-            if (KeyFormatEnumType.HEX.equals(keyFormatType) && EncryptUtil.isHex(cipherIv))
-            {
-                return new IvParameterSpec(Hex.decodeStrict(cipherIv));
-            }
-            if (KeyFormatEnumType.BASE64.equals(keyFormatType) && EncryptUtil.isBase64(cipherIv))
-            {
-                return new IvParameterSpec(EncryptUtil.getBase64Decode(cipherIv));
-            }
-            String tmp = StringUtil.cut(cipherIv+NumberUtil.LING_STRING, 16, StringUtil.empty);
-            return new IvParameterSpec(tmp.getBytes(StandardCharsets.UTF_8));
+            byte[] resultIv =getTypeKeyBytes(cipherIv,keyFormatType,16);
+            return new IvParameterSpec(resultIv);
         }
-        if (("DESede".equalsIgnoreCase(algorithm) || "DES".equalsIgnoreCase(algorithm)) && StringUtil.hasLength(cipherIv)) {
+        if (("DESede".equalsIgnoreCase(algorithm) || "DES".equalsIgnoreCase(algorithm))) {
             //iv 为一个 16 字节的数组，这里采用和 iOS 端一样的构造方法，数据全为0
-            if (KeyFormatEnumType.HEX.equals(keyFormatType) && EncryptUtil.isHex(cipherIv))
-            {
-                return new IvParameterSpec(Hex.decodeStrict(cipherIv));
-            }
-            if (KeyFormatEnumType.BASE64.equals(keyFormatType) && EncryptUtil.isBase64(cipherIv))
-            {
-                return new IvParameterSpec(EncryptUtil.getBase64Decode(cipherIv));
-            }
-            String tmp = StringUtil.cut(cipherIv+NumberUtil.LING_STRING, 8, StringUtil.empty);
-            return new IvParameterSpec(tmp.getBytes(StandardCharsets.UTF_8));
-        }
-        if (KeyFormatEnumType.BASE64.equals(keyFormatType) && EncryptUtil.isBase64(cipherIv)&&cipherIv.length()!=32)
-        {
-              return new IvParameterSpec(EncryptUtil.getBase64Decode(cipherIv));
-        }
-        if (EncryptUtil.isHex(cipherIv)&&cipherIv.length()==32 || KeyFormatEnumType.HEX.equals(keyFormatType) )
-        {
-            return new IvParameterSpec(Hex.decodeStrict(cipherIv));
+            byte[] resultIv =getTypeKeyBytes(cipherIv,keyFormatType,8);
+            return new IvParameterSpec(resultIv);
         }
         return new IvParameterSpec(cipherIv.getBytes(Environment.defaultEncode));
-
     }
 
     public byte[] getSecretKeyBytes() throws Exception {
-        if (KeyFormatEnumType.STRING.equals(keyFormatType))
-        {
-            if ("AES".equalsIgnoreCase(algorithm) && StringUtil.hasLength(cipherIv)) {
-                //iv 为一个 16 字节的数组
-                return secretKey.length() > 16 ? secretKey.substring(0, 16).getBytes(Environment.defaultEncode) : secretKey.getBytes(Environment.defaultEncode);
-            }
-            if ( ("DESede".equalsIgnoreCase(algorithm) || "DES".equalsIgnoreCase(algorithm)) && StringUtil.hasLength(cipherIv)) {
-                return secretKey.length() > 8 ? secretKey.substring(0, 8).getBytes(Environment.defaultEncode) : secretKey.getBytes(Environment.defaultEncode);
-            }
+        if ("AES".equalsIgnoreCase(algorithm)|| "SM4".equalsIgnoreCase(algorithm) ) {
+            //iv 为一个 16 字节的数组
+            return getTypeKeyBytes(secretKey,keyFormatType,16);
         }
-        if (KeyFormatEnumType.HEX.equals(keyFormatType) && EncryptUtil.isHex(secretKey)  && !EncryptUtil.isBase64(secretKey) && secretKey.length()==32)
-        {
-            return Hex.decodeStrict(secretKey);
+        if ( ("DESede".equalsIgnoreCase(algorithm) || "DES".equalsIgnoreCase(algorithm))) {
+            return getTypeKeyBytes(secretKey,keyFormatType,8);
         }
-        if (KeyFormatEnumType.BASE64.equals(keyFormatType) && EncryptUtil.isBase64(secretKey)  && !EncryptUtil.isHex(secretKey) && secretKey.length()!=32)
-        {
-            return EncryptUtil.getBase64Decode(secretKey);
-        }
-        if ( EncryptUtil.isHex(secretKey) && secretKey.length()==32)
-        {
-            return Hex.decodeStrict(secretKey);
-        }
-
-        return secretKey.length() > 8 ? secretKey.substring(0, 8).getBytes(Environment.defaultEncode) : secretKey.getBytes(Environment.defaultEncode);
+        return secretKey.getBytes(Environment.defaultEncode);
     }
 
 
@@ -191,7 +152,7 @@ public abstract class AbstractEncrypt implements Encrypt {
     @Override
     public String getDecode(String data) throws Exception
     {
-        if (EncryptUtil.isHex(data))
+        if (EncryptUtil.isHex(data) || KeyFormatEnumType.HEX.equals(keyFormatType))
         {
             return new String(getDecode(EncryptUtil.hexToByte(data)), Environment.defaultEncode);
         }
@@ -205,7 +166,6 @@ public abstract class AbstractEncrypt implements Encrypt {
         }
         return new String(getDecode(EncryptUtil.getBase64Decode(classData)), Environment.defaultEncode);
     }
-
 
     @Override
     public byte[] fileDecode(File fin) throws Exception {
@@ -238,18 +198,45 @@ public abstract class AbstractEncrypt implements Encrypt {
         return fin.canWrite() && FileUtil.writeFile(fOut, getDecode(FileUtil.readFileByte(fin)));
     }
 
-/*
-    public boolean saveSecretKey(File keyFilename) throws Exception
-    {
-        if (keyFilename == null) return false;
-        //加密一下在保持
+    /**
+     * 各种加密方式需要的密钥长度不同，这里解密并调整到合适的长度
+     * @param key 密钥
+     * @param keyFormatType 解码格式
+     * @param len 保留长度
+     * @return 返回合规的key
+     */
+    public static byte[] getTypeKeyBytes(String key,KeyFormatEnumType keyFormatType,int len) {
+        if (StringUtil.isNull(key))
+        {
+            //固定生成一个满足条件的key
+            byte[] tempKey = EncryptUtil.ALPHABET.getBytes(StandardCharsets.UTF_8);
+            byte[] resultIv = new byte[len];
+            System.arraycopy(tempKey, 0, resultIv, 0, len);
+            return resultIv;
+        }
+        if (KeyFormatEnumType.HEX.equals(keyFormatType))
+        {
+            if (key.length()==len)
+            {
+                return key.getBytes(StandardCharsets.UTF_8);
+            }
+            byte[] tempKey = Hex.decodeStrict(key);
+            byte[] resultIv = new byte[len];
+            System.arraycopy(tempKey, 0, resultIv, 0, len);
+            return resultIv;
+        }
+        if (KeyFormatEnumType.BASE64.equals(keyFormatType) && EncryptUtil.isBase64(key)  && !EncryptUtil.isHex(key))
+        {
+            byte[] tempkey = EncryptUtil.getBase64Decode(key);
+            if (tempkey.length==len)
+            {
+                return tempkey;
+            }
+            byte[] resultIv = new byte[len];
+            System.arraycopy(tempkey, 0, resultIv, 0, len);
+            return resultIv;
+        }
+        return StringUtil.csubstring(key,0,len).getBytes(StandardCharsets.UTF_8);
+    }
 
-        return FileUtil.writeFile(keyFilename, secretKey.getBytes(Environment.defaultEncode));
-    }
-    public String readSecretKey(File keyFilename) throws Exception
-    {
-        if (keyFilename == null) return StringUtil.empty;
-        return new String(FileUtil.readFileByte(keyFilename),Environment.defaultEncode);
-    }
- */
 }

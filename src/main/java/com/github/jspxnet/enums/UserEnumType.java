@@ -29,6 +29,8 @@ public enum UserEnumType implements EnumType {
 
     INTENDANT(10, "子站操作人员"),
 
+    PROXY(6, "代理用户"),
+
     VIP(5, "VIP用户"),
 
     USER(3, "普通用户"),

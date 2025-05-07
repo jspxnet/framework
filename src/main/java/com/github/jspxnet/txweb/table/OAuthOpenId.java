@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 /**
  * 用于微信，QQ等系统登陆
  *
- * 下一版本删除
+ *
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -32,12 +32,8 @@ public class OAuthOpenId extends OperateTable {
     private String openId = StringUtil.empty;
 
     //微信 认证企业才有这
-    @Column(caption = "unionid", length = 120, dataType = "isLengthBetween(1,120)")
-    private String unionid = StringUtil.empty;
-
-    //qq在做一些 外挂发布的时候会用到
-    @Column(caption = "accessToken", length = 240, dataType = "isLengthBetween(1,240)")
-    private String accessToken;
+    @Column(caption = "unionId", length = 120, dataType = "isLengthBetween(1,120)")
+    private String unionId = StringUtil.empty;
 
     //第三方软件的昵称
     @Column(caption = "昵称", length = 50, dataType = "isLengthBetween(2,50)", notNull = true)
@@ -59,16 +55,9 @@ public class OAuthOpenId extends OperateTable {
     @Column(caption = "头像URL", length = 240)
     private String faceImage = StringUtil.empty;
 
-    //qq ,微信，sina
-    @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
+    //qq;wx;sinaK
+    @Column(caption = "命名空间", option = "", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;
-
-    public String getAccessToken() {
-        if (accessToken == null) {
-            return StringUtil.empty;
-        }
-        return accessToken;
-    }
 
     public Member createMember() {
         Member member = new Member();
@@ -91,8 +80,7 @@ public class OAuthOpenId extends OperateTable {
         }
         //为了方便移动应用调用
         openId = json.getString("openId");
-        unionid = json.getString("unionid");
-        accessToken = json.getString("accessToken");
+        unionId = json.getIgnoreString("unionid");
         name = json.getString("name");
         sex = json.getString("sex");
         country = json.getString("country");
@@ -105,8 +93,7 @@ public class OAuthOpenId extends OperateTable {
         //为了方便移动应用调用
         JSONObject json = new JSONObject();
         json.put("openId", openId);
-        json.put("unionid", unionid);
-        json.put("accessToken", accessToken);
+        json.put("unionid", unionId);
         json.put("name", name);
         json.put("sex", sex);
         json.put("country", country);

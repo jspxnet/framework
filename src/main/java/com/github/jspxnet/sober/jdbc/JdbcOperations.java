@@ -882,7 +882,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public <T> List<T> query(Class<T> cla, String sql, Object[] param, int currentPage, int totalCount, boolean loadChild) {
-        return JdbcUtil.query(this, getDialect(), cla, sql, param, currentPage, totalCount, loadChild);
+        return JdbcUtil.query(this, cla, sql, param, currentPage, totalCount, loadChild);
     }
 
     /**
@@ -895,7 +895,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public <T> List<T> query(Class<T> cla, String sql, Object[] param) {
-        return JdbcUtil.query(this, getDialect(), cla, sql, param);
+        return JdbcUtil.query(this,cla, sql, param);
     }
 
     /**
@@ -907,12 +907,12 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public List<?> query(String sqlText, Object[] param, int currentPage, long totalCount) {
-        return JdbcUtil.query(this, getDialect(), sqlText, param, currentPage, totalCount);
+        return JdbcUtil.query(this,  sqlText, param, currentPage, totalCount);
     }
 
     @Override
     public List<?> query(String sqlText, Object[] param, int currentPage, int totalCount) {
-        return JdbcUtil.query(this, getDialect(), sqlText, param, currentPage, totalCount);
+        return JdbcUtil.query(this,  sqlText, param, currentPage, totalCount);
     }
     //------------------------------------------------------------------------------------------------------------------
 

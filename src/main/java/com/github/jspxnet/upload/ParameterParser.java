@@ -111,7 +111,7 @@ public class ParameterParser {
         String[] values = req.getParameterValues(name);
         if (values == null) {
             throw new ParameterNotFoundException(name + " not found");
-        } else if (values[0].length() == 0) {
+        } else if (values[0].isEmpty()) {
             throw new ParameterNotFoundException(name + " was empty");
         } else {
             if (encoding == null) {
@@ -218,7 +218,7 @@ public class ParameterParser {
     public char getCharParameter(String name)
             throws ParameterNotFoundException {
         String param = getStringParameter(name);
-        if (param.length() == 0) {
+        if (param.isEmpty()) {
             throw new ParameterNotFoundException(name + " is empty string");
         } else {
             return (param.charAt(0));
@@ -406,7 +406,7 @@ public class ParameterParser {
                 missing.addElement(s);
             }
         }
-        if (missing.size() == 0) {
+        if (missing.isEmpty()) {
             return null;
         } else {
             String[] ret = new String[missing.size()];

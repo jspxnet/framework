@@ -116,6 +116,10 @@ public interface MemberDAO extends SoberSupport {
 
     int getForPhoneCount(String phone);
 
+    boolean isRepeatPhone(String phone, long uid);
+
+    boolean isRepeatName(String name, long uid);
+
     //------------------------------------------------------------------------------------------------------------------
     List<Member> getList(String[] field, String[] find, String[] departmentId, String term, String sortString, int page, int count, boolean load);
 

@@ -5,10 +5,11 @@ package com.github.jspxnet.enums;
  */
 public enum  KeyFormatEnumType implements EnumType {
 
+    //默认
     STRING(0, "字符串"),
-    //好
+    //推荐
     HEX(1, "16进制"),
-    //否
+    //
     BASE64(2, "Base64编码");
 
     private final int value;

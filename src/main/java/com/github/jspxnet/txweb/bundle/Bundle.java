@@ -46,6 +46,8 @@ public interface Bundle extends Serializable {
 
     long getLong(String key);
 
+    List<SoberColumnDto> getColumnList();
+
     int getInt(String key);
 
     int getInt(String key, int defVar);

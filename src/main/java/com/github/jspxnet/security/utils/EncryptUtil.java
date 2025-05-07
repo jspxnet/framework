@@ -18,6 +18,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Objects;
 
@@ -31,6 +32,7 @@ import java.util.Objects;
  */
 @Slf4j
 public class EncryptUtil {
+    public static final String ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     //base64编码使用 begin
     /***
      * Default values for encoder/decoder flags.
@@ -76,13 +78,7 @@ public class EncryptUtil {
     public static final int NO_CLOSE = 16;
     //base64编码使用 end
 
-    /*
 
-        public static final String RSA = "RSA";
-        private static final String SHA1WithRSA = "SHA1WithRSA";
-        public static final String MD5withRSA = "MD5withRSA";
-
-     */
     private EncryptUtil() {
     }
 
@@ -820,9 +816,7 @@ public class EncryptUtil {
      */
     public static byte[] subByte(byte[] input, int startIndex, int length) {
         byte[] bt = new byte[length];
-        for (int i = 0; i < length; i++) {
-            bt[i] = input[i + startIndex];
-        }
+        System.arraycopy(input, startIndex, bt, 0, length);
         return bt;
     }
 
@@ -903,4 +897,24 @@ public class EncryptUtil {
         return params;
     }
 
+
+    //base58算法实现
+    // Base58 编码
+
+    public static String getBase58EncodeString(String input) {
+        if (StringUtil.isNull(input)) {
+            input = StringUtil.empty;
+        }
+        return Base58.encode(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String getBase58Encode(byte[] input) {
+        return Base58.encode(input);
+    }
+    public static byte[] getBase58Decode(String base58) {
+        return Base58.decode(base58);
+    }
+    public static String getBase58DecodeString(String base58) {
+        return new String(Base58.decode(base58),StandardCharsets.UTF_8);
+    }
 }

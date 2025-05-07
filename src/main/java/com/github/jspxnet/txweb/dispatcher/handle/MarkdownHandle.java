@@ -29,7 +29,7 @@ public class MarkdownHandle extends ActionHandle {
         ActionConfig actionConfig = webConfigManager.getActionConfig((String) envParams.get(ActionEnv.Key_ActionName), MD_NAMESPACE, true);
         ActionInvocation actionInvocation = null;
         try {
-            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
+            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response,false);
             actionInvocation.initAction();
             actionInvocation.invoke();
         } finally {

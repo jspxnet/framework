@@ -15,6 +15,8 @@ public enum  PayWaysEnumType implements EnumType {
 
     TRANSFER(2,"系统内转账支付"),
 
+    CAMRAM(3,"混合支付"),
+
     MONEY(9,"现金");
 
     private final int value;

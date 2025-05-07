@@ -16,7 +16,7 @@ public enum OperatorEnumType implements EnumType {
     EQ(1, "EQ","等于","=", SimpleExpression.class.getName()),
     GT(2, "GT","大于",">", SimpleExpression.class.getName()),
     LT(3, "LT","小于","<", SimpleExpression.class.getName()),
-    GE(4, "GE","大于等于","=>", SimpleExpression.class.getName()),
+    GE(4, "GE","大于等于",">=", SimpleExpression.class.getName()),
     LE(5, "LE","小于等于","<=", SimpleExpression.class.getName()),
 
     NE(6, "NE","不等于","<>", SimpleExpression.class.getName()),

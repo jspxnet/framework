@@ -85,4 +85,12 @@ public interface Cache extends Serializable, Cloneable {
     int getEventSize();
 
     IStore getStore();
+
+    boolean lock(String key);
+
+    boolean lock(String key, int timeToLive);
+
+    boolean isLock(String key);
+
+    boolean unLock(String key);
 }

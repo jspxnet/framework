@@ -43,7 +43,7 @@ public abstract class MultipartRequest implements HttpServletRequest {
             {
                 continue;
             }
-            result.put(name,list.toArray(new String[list.size()]));
+            result.put(name,list.toArray(new String[0]));
         }
         return result;
     }
@@ -75,7 +75,7 @@ public abstract class MultipartRequest implements HttpServletRequest {
     public String getParameter(String name) {
         try {
             List<String> values = parameters.get(name);
-            if (values == null || values.size() == 0) {
+            if (values == null || values.isEmpty()) {
                 return null;
             }
             return values.get(values.size() - 1);
@@ -98,7 +98,7 @@ public abstract class MultipartRequest implements HttpServletRequest {
     public String[] getParameterValues(String name) {
         try {
             List<String> values = parameters.get(name);
-            if (values == null || values.size() == 0) {
+            if (values == null || values.isEmpty()) {
                 return null;
             }
             return values.toArray(new String[0]);

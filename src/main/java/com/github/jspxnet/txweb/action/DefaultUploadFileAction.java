@@ -807,6 +807,7 @@ public class DefaultUploadFileAction extends MultipartSupport {
         }
         upFile.setCreateDate(createDate);
         result[0] = saveUploadFile;
+        json.clear();
         return result;
     }
 

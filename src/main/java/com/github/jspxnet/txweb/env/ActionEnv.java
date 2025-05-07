@@ -68,8 +68,10 @@ public final class ActionEnv {
     //日志记录对象begin
     static public final String Key_ActionLogContent = "ActionLogContent";
     static public final String Key_ActionLogTitle = "ActionLogTitle";
-
     //日志记录对象end
+
+    //参数来源是否加密
+    final public static String KEY_SECRET_DATA = "src_roc_secret";
 
     //返回数据对象
     //static public final String KEY_ACTION_RESULT_OBJECT = "ActionResultObject";
@@ -87,4 +89,6 @@ public final class ActionEnv {
 
     //组件方式
     public final static  String COMPONENT_MODEL = "COMPONENT";
+
+    final static public String KEY_TOKEN = "token";
 }

@@ -2,6 +2,7 @@ package com.github.jspxnet.security.symmetry.impl;
 
 import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.security.symmetry.AbstractEncrypt;
+import com.github.jspxnet.utils.StringUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import javax.crypto.Cipher;
@@ -51,6 +52,7 @@ public class SM4Encrypt extends AbstractEncrypt {
     public byte[] getEncode(byte[] plainText) throws Exception {
         byte[] rawKey = getSecretKeyBytes();
         // 创建Cipher对象
+
         Cipher cipher = Cipher.getInstance(cipherAlgorithm);
         // 初始化为加密模式
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(rawKey, algorithm), getCipherIV());
@@ -69,6 +71,7 @@ public class SM4Encrypt extends AbstractEncrypt {
     public byte[] getDecode(byte[] classData) throws Exception {
         byte[] rawKey = getSecretKeyBytes();
         // 创建Cipher对象
+
         Cipher cipher = Cipher.getInstance(cipherAlgorithm);
         // 初始化为加密模式
         cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(rawKey, algorithm), getCipherIV());

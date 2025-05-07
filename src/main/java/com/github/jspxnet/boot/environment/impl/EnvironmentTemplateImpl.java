@@ -260,7 +260,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     private String getAwtToolkit() {
         String awtToolkit = (String) VALUE_MAP.get("awt.toolkit");
-        if (awtToolkit == null || awtToolkit.length() < 1) {
+        if (awtToolkit == null || awtToolkit.isEmpty()) {
             return System.getProperty("awt.toolkit");
         }
         return awtToolkit;

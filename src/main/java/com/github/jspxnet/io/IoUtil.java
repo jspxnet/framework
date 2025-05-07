@@ -9,6 +9,7 @@ import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by jspx.net
@@ -57,7 +58,7 @@ public class IoUtil {
         if (file!=null&&file.startsWith("http"))
         {
             HttpClient httpClient = HttpClientFactory.createHttpClient(file);
-            httpClient.setEncode(StringUtil.isNull(encode)?"UTF-8":encode);
+            httpClient.setEncode(StringUtil.isNull(encode)? StandardCharsets.UTF_8.name():encode);
             return httpClient.getString();
         }
 

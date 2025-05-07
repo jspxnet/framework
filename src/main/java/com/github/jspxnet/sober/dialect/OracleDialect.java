@@ -13,7 +13,6 @@ import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.StringUtil;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -262,8 +261,11 @@ public class OracleDialect extends Dialect {
      */
     @Override
     public Object getResultSetValue(ResultSet rs, int index) throws SQLException {
-        String typeName = rs.getMetaData().getColumnTypeName(index).toLowerCase();
-        int colSize = rs.getMetaData().getColumnDisplaySize(index);
+
+        ResultSetMetaData resultSetMetaData = rs.getMetaData();
+        String typeName = resultSetMetaData.getColumnTypeName(index).toLowerCase();
+        int colSize = resultSetMetaData.getColumnDisplaySize(index);
+
         ///////大数值
         if ("ROWID".equalsIgnoreCase(typeName)) {
             return rs.getString(index);
@@ -278,6 +280,9 @@ public class OracleDialect extends Dialect {
             return rs.getInt(index);
         }
 
+        if ("number".equals(typeName)) {
+            return rs.getBigDecimal(index);
+        }
         ///////长整型
         if ("bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName))) {
             return rs.getLong(index);
@@ -294,7 +299,7 @@ public class OracleDialect extends Dialect {
         }
 
         ///////双精度
-        if ("number".equals(typeName) || "double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
+        if ("double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
             return rs.getDouble(index);
         }
 
@@ -328,15 +333,14 @@ public class OracleDialect extends Dialect {
         }
 
         ////////////大文本类型
-        if ("CLOB".equalsIgnoreCase(typeName) || "mediumtext".equals(typeName) || " long varchar".equals(typeName)
+        if ("CLOB".equalsIgnoreCase(typeName) || "mediumtext".equals(typeName) || "long varchar".equals(typeName)
                 || "ntext".equals(typeName) || "text".equals(typeName) || "long raw".equals(typeName)) {
             //oracle.sql.CLOB clob = (oracle.sql.CLOB) rs.getClob(index);
             Clob clob = rs.getClob(index);
             if (clob == null) {
-                return StringUtil.empty;
+                return null;
             }
             Reader bodyReader = clob.getCharacterStream();
-
             StringWriter out = new StringWriter(255);
             try {
                 char[] buf = new char[256];

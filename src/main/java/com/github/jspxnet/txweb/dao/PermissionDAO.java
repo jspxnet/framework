@@ -56,6 +56,8 @@ public interface PermissionDAO extends SoberSupport {
 
     List<Role> getRoleList(String find, int count, int page);
 
+    List<Role> getRoleList(String namespace, String organizeId, String find, int page, int count);
+
     Map<String, ActionConfigBean> getActionList() throws Exception;
 
     boolean deleteRoles(String[] ids);

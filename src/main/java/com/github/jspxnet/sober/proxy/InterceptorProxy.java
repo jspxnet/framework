@@ -118,11 +118,11 @@ public class InterceptorProxy implements Serializable {
                     if ((o instanceof Map)) {
                         valueMap.putAll((Map) o);
                         haveMap = true;
-                    } else if (currentPage == null && (o instanceof Number)) {
-                        log.debug("分页参数,页数请是用标准名称:" + sqlMapConf.getCurrentPage());
+                    } else if (sqlMapConf.getQueryModel()==QueryModelEnumType.LIST.getValue()&&currentPage == null && (o instanceof Number)) {
+                        log.debug(exeMethod+"分页参数,页数请是用标准名称:" + sqlMapConf.getCurrentPage());
                         currentPage = ((Number) o).intValue();
-                    } else if (count == null && (o instanceof Number)) {
-                        log.debug("分页参数,返回行数请是用标准名称:" + sqlMapConf.getCount());
+                    } else if (sqlMapConf.getQueryModel()==QueryModelEnumType.LIST.getValue()&&count == null && (o instanceof Number)) {
+                        log.debug(exeMethod+"分页参数,返回行数请是用标准名称:" + sqlMapConf.getCount());
                         count = ((Number) o).intValue();
                     }
                     if (cls == null && (o instanceof Class)) {

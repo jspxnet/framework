@@ -59,7 +59,7 @@ public final class ValidUtil {
             return false;
         }
         String s = numStr.replaceAll("[0-9;]+", "");
-        return "".equals(s.trim());
+        return s.trim().isEmpty();
     }
 
 

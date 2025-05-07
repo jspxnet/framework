@@ -129,7 +129,6 @@ public class HtmlImgResult extends ResultSupport {
             Document dom =  XMLResource.load(is).getDocument();
             g2r.setDocument(dom, action.getTemplatePath());
             Dimension dim = new Dimension(width, 1000);
-
             // do layout with temp buffer
             BufferedImage buff = new BufferedImage((int) dim.getWidth(), (int) dim.getHeight(), BufferedImage.TYPE_INT_ARGB);
             Graphics2D g = (Graphics2D) buff.getGraphics();

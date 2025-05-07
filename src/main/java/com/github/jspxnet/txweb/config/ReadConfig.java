@@ -62,6 +62,7 @@ public class ReadConfig extends DefaultHandler {
         this.extendMap = extendMap;
         this.defaultResultMap = defaultResultMap;
         this.defaultInterceptorMap = defaultInterceptorMap;
+
     }
 
     @Override
@@ -71,7 +72,6 @@ public class ReadConfig extends DefaultHandler {
                              Attributes attr) {
         contents.reset();
         if (localName.equalsIgnoreCase(TXWeb.CONFIG_INCLUDE)) {
-
             include = ArrayUtil.add(include, attr.getValue(TXWeb.CONFIG_FILE));
         }
         if (localName.equalsIgnoreCase(TXWeb.CONFIG_PACKAGE)) {
@@ -88,7 +88,7 @@ public class ReadConfig extends DefaultHandler {
             }
             groupMap = allMap.get(namespace);
             if (groupMap == null) {
-                groupMap = new HashMap<String, ActionConfigBean>();
+                groupMap = new HashMap<>();
                 allMap.put(namespace, groupMap);
             }
         }
@@ -98,7 +98,7 @@ public class ReadConfig extends DefaultHandler {
         if (isDefault && localName.equalsIgnoreCase(TXWeb.CONFIG_INTERCEPTOR_REF)) {
             List<DefaultInterceptorBean> defaultInterceptors = defaultInterceptorMap.get(namespace);
             if (defaultInterceptors == null) {
-                defaultInterceptors = new LinkedList<DefaultInterceptorBean>();
+                defaultInterceptors = new LinkedList<>();
                 defaultInterceptorMap.put(namespace, defaultInterceptors);
             }
             DefaultInterceptorBean defaultInterceptorBean = new DefaultInterceptorBean();
@@ -154,7 +154,7 @@ public class ReadConfig extends DefaultHandler {
             }
 
             actionConfigBean.setPassInterceptor(StringUtil.split(StringUtil.replace(attr.getValue(TAG_pass), StringUtil.SEMICOLON, ","), ","));
-            actionConfigBean.setSecret(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_SECRET)));
+            //actionConfigBean.setSecret(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_SECRET)));
             actionConfigBean.setMobile(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_MOBILE)));
             actionConfigBean.setCache(StringUtil.toBoolean(attr.getValue(TXWeb.CONFIG_CACHE)));
             actionConfigBean.setCacheName(StringUtil.trim(attr.getValue(TXWeb.CONFIG_CACHE_NAME)));

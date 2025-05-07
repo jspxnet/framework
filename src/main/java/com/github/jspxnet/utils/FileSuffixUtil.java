@@ -111,8 +111,7 @@ public final  class FileSuffixUtil {
         if (!f.isFile() || !f.canRead()) {
             return null;
         }
-        try {
-            FileInputStream fis = new FileInputStream(f);
+        try (FileInputStream fis = new FileInputStream(f)) {
             FileChannel fileC = fis.getChannel();
             ByteArrayOutputStream aos = new ByteArrayOutputStream();
             WritableByteChannel outC = Channels.newChannel(aos);
@@ -123,7 +122,6 @@ public final  class FileSuffixUtil {
                 outC.write(buffer);
             }
             buffer.clear();
-            fis.close();
             return aos.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();
@@ -143,7 +141,48 @@ public final  class FileSuffixUtil {
         return StringUtil.encodeHex(Objects.requireNonNull(getFileHead(filename, headLength)), " ").trim();
     }
 
-
+    public static String getContentType(String fileType) {
+        //为了兼容 jdk 1.6
+        String contentType = null;
+        if ("mp4".equalsIgnoreCase(fileType)) {
+            contentType = "video/mpeg4";
+        } else if ("bt".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-bittorrent";
+        } else if ("m4v".equalsIgnoreCase(fileType)) {
+            contentType = "video/mp4";
+        } else if ("swf".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-shockwave-flash";
+        } else if ("xls".equalsIgnoreCase(fileType)||"xlsx".equalsIgnoreCase(fileType)) {
+            contentType = "application/vnd.ms-excel";
+        } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
+            contentType = "application/msword";
+        } else if ("mdb".equalsIgnoreCase(fileType)) {
+            contentType = "application/msaccess";
+        } else if ("ppt".equalsIgnoreCase(fileType)||"pptx".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-ppt";
+        } else if ("xml".equalsIgnoreCase(fileType)) {
+            contentType = "application/xml";
+        } else if ("txt".equalsIgnoreCase(fileType) || "htm".equalsIgnoreCase(fileType) || "html".equalsIgnoreCase(fileType)) {
+            contentType = "text/html";
+        } else if ("css".equalsIgnoreCase(fileType) || "style".equalsIgnoreCase(fileType)) {
+            contentType = "text/css";
+        } else if ("zip".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-zip-compressed";
+        } else if ("rar".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-rar-compressed";
+        } else if (FileSuffixUtil.isImageSuffix(fileType)) {
+            contentType = "image/" + fileType;
+        } else if ("js".equalsIgnoreCase(fileType)) {
+            contentType = "application/x-javascript";
+        } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
+            contentType = "application/msword";
+        } else if ("pdf".equalsIgnoreCase(fileType)) {
+            contentType = "application/pdf";
+        } else {
+            contentType = "application/octet-stream";
+        }
+        return contentType;
+    }
     /**
      * 得到文件的http  ContentType 类型
      *
@@ -154,53 +193,17 @@ public final  class FileSuffixUtil {
         if (fileName == null) {
             return "application/octet-stream";
         }
-        String fileType = FileUtil.getTypePart(fileName.getName());
         String contentType = null;
         if (SystemUtil.jdkVersion >= 1.7) {
             try {
                 contentType = Files.probeContentType(Paths.get(fileName.getAbsolutePath()));
             } catch (IOException e) {
-                e.printStackTrace();
+               //...
             }
         }
-
         if (StringUtil.isNull(contentType)) {
-            //为了兼容 jdk 1.6
-            if ("mp4".equalsIgnoreCase(fileType)) {
-                contentType = "video/mpeg4";
-            } else if ("bt".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-bittorrent";
-            } else if ("m4v".equalsIgnoreCase(fileType)) {
-                contentType = "video/mp4";
-            } else if ("swf".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-shockwave-flash";
-            } else if ("xls".equalsIgnoreCase(fileType)) {
-                contentType = "application/vnd.ms-excel";
-            } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
-                contentType = "application/msword";
-            } else if ("mdb".equalsIgnoreCase(fileType)) {
-                contentType = "application/msaccess";
-            } else if ("ppt".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-ppt";
-            } else if ("xml".equalsIgnoreCase(fileType)) {
-                contentType = "application/xml";
-            } else if ("txt".equalsIgnoreCase(fileType) || "htm".equalsIgnoreCase(fileType) || "html".equalsIgnoreCase(fileType)) {
-                contentType = "text/html";
-            } else if ("css".equalsIgnoreCase(fileType) || "style".equalsIgnoreCase(fileType)) {
-                contentType = "text/css";
-            } else if ("zip".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-zip-compressed";
-            } else if ("rar".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-rar-compressed";
-            } else if (FileSuffixUtil.isImageSuffix(fileType)) {
-                contentType = "image/" + fileType;
-            } else if ("js".equalsIgnoreCase(fileType)) {
-                contentType = "application/x-javascript";
-            } else if ("doc".equalsIgnoreCase(fileType) || "docx".equalsIgnoreCase(fileType)) {
-                contentType = "application/msword";
-            } else {
-                contentType = "application/octet-stream";
-            }
+            String fileType = FileUtil.getTypePart(fileName.getName());
+            return getContentType(fileType);
         }
         return contentType;
     }

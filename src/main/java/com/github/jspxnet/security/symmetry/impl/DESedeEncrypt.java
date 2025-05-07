@@ -1,7 +1,6 @@
 package com.github.jspxnet.security.symmetry.impl;
 
 import com.github.jspxnet.enums.KeyFormatEnumType;
-import com.github.jspxnet.security.symmetry.AbstractEncrypt;
 
 /**
  * Created by ChenYuan on 2017/6/18.

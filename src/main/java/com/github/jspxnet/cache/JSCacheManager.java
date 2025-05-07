@@ -4,7 +4,7 @@
  * @Mail:39793751@qq.com
  * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
- * @jvm:jdk1.6+  x86/amd64
+ * @jvm:jdk1.8+  x86/amd64
  *
  */
 package com.github.jspxnet.cache;
@@ -23,7 +23,6 @@ import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.*;
 
 /**
@@ -91,6 +90,10 @@ public class JSCacheManager implements CacheManager {
     @Override
     public boolean containsKey(String key) {
         for (Cache cache : caches) {
+            if (cache==null)
+            {
+                continue;
+            }
             if (cache.getName().equalsIgnoreCase(key)) {
                 return true;
             }
@@ -99,7 +102,7 @@ public class JSCacheManager implements CacheManager {
     }
 
     @Override
-    public void registeredCache(JSCache cache) {
+    synchronized public void registeredCache(JSCache cache) {
         if (cache == null) {
             return;
         }
@@ -167,11 +170,21 @@ public class JSCacheManager implements CacheManager {
 
     }
 
+    /**
+     *
+     * @return 得到缓存列表
+     */
     @Override
     public Collection<Cache> getCaches() {
         return caches;
     }
 
+    /**
+     *
+     * @param cacheName 缓存名称
+     * @param key key
+     * @return 得到缓存对象
+     */
     static public Object get(String cacheName, String key) {
         Cache cache = CACHE_MANAGER.getCache(cacheName);
         if (cache == null) {
@@ -187,47 +200,103 @@ public class JSCacheManager implements CacheManager {
         return cacheEntry.getValue();
     }
 
+    /**
+     *
+     * @param tClass  内存类型
+     * @param key key
+     * @return 得到缓存对象
+     */
     static public Object get(Class<?> tClass, String key) {
         return get(tClass.getName(), key);
     }
 
+    /**
+     *
+     * @param cls 内存类型
+     * @param key key
+     * @param o 放入对象
+     * @return 放入缓存
+     */
     static public boolean put(Class<?> cls, String key, Object o) {
-        return put(cls.getName(), key, o);
+        return put(cls.getName(), key, o,0);
     }
 
-    static public boolean put(Class<?> cls, String key, Object o, int timeToLive) {
-        return put(cls.getName(), key, o, timeToLive);
+    /**
+     *
+     * @param key key
+     * @return 锁定
+     */
+    static public boolean lock(String key) {
+        return put(LockCache.class, key, 1, 10);
+    }
+
+    /**
+     *
+     * @param key key
+     * @param timeToLive 锁保持时间，单位为秒
+     * @return 锁定
+     */
+    static public boolean lock(String key, int timeToLive) {
+        Cache cache = CACHE_MANAGER.getCache(LockCache.class);
+        if (cache == null || key == null) {
+            return false;
+        }
+        return cache.lock(key,timeToLive);
+    }
+
+    /**
+     *
+     * @param key key
+     * @return 判断是否加锁
+     */
+    static public boolean isLock(String key) {
+        Cache cache = CACHE_MANAGER.getCache(LockCache.class);
+        if (cache == null || key == null) {
+            return false;
+        }
+        return cache.isLock(key);
+    }
+
+    /**
+     *
+     * @param key key
+     * @return 解锁
+     */
+    static public boolean unLock(String key) {
+        Cache cache = CACHE_MANAGER.getCache(LockCache.class);
+        if (cache == null || key == null) {
+            return false;
+        }
+        return cache.unLock(key);
     }
 
     /**
      * 放入模版类型数据,到期删除,的单例模式
      *
-     * @param cacheName cacheName
+     * @param cls 类对象
      * @param key       key
      * @param o         对象
+     * @param timeToLive 时间单位为秒
      * @return 放入模版类型数据, 到期删除, 的单例模式
      */
-    static public boolean put(String cacheName, String key, Object o) {
+    static public boolean put(Class<?> cls, String key, Object o,int timeToLive) {
         if (key == null) {
             return false;
         }
-
-        Cache cache = CACHE_MANAGER.getCache(cacheName);
-        if (cache == null) {
-            return false;
-        }
-        CacheEntry cacheEntry = new CacheEntry();
-        try {
-            cacheEntry.setKey(key);
-            cacheEntry.setValue(o);
-        } catch (Exception e) {
-            log.error("缓存数据规则不正确", e);
-        }
-        cache.put(cacheEntry);
-        return true;
+        return put(cls.getName(), key, o, timeToLive);
     }
 
-
+    /**
+     *
+     * @param cacheName 缓存名称
+     * @param key key
+     * @param o 对象
+     * @return 放入缓存
+     */
+    static public boolean put(String cacheName, String key, Object o)
+    {
+        return put(cacheName, key, o,0);
+    }
     /**
      * @param cacheName  缓存名称
      * @param key        key

@@ -42,9 +42,17 @@ public class BundleTable implements Serializable {
     @Column(caption = "内容", length = 1000, notNull = true)
     private String context = StringUtil.empty;
 
-    //todo 新版本在加入
-    //@Column(caption = "描述", length = 100)
+    @Column(caption = "排序")
+    private int sort = 0;
+
+    @Column(caption = "名称", length = 50)
     private String caption = StringUtil.empty;
+
+    @Column(caption = "描述", length = 100)
+    private String describe = StringUtil.empty;
+
+    @Column(caption = "输入框", length = 50)
+    private String input = "text";
 
     @Column(caption = "类型", length = 50, notNull = true)
     private String dataType = StringUtil.empty;

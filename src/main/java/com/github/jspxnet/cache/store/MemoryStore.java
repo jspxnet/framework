@@ -12,6 +12,7 @@ package com.github.jspxnet.cache.store;
 import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.cache.IStore;
 import com.github.jspxnet.cache.CacheException;
+import com.github.jspxnet.utils.ObjectUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +39,40 @@ public class MemoryStore extends Store implements IStore {
         return true;
     }
 
+    @Override
+    public boolean lock(String key) {
+        return lock( key, 10);
+    }
+
+    @Override
+    public boolean lock(String key, int timeToLive) {
+        CacheEntry cacheEntry = new CacheEntry();
+        try {
+            cacheEntry.setKey(key);
+            cacheEntry.setValue(1);
+            cacheEntry.setLive(timeToLive);
+        } catch (Exception e) {
+            //...
+        }
+        put(cacheEntry);
+        return true;
+    }
+
+    @Override
+    public boolean isLock(String key) {
+        CacheEntry cacheEntry = get(key);
+        if (cacheEntry==null)
+        {
+            return false;
+        }
+        return 1 == ObjectUtil.toInt(cacheEntry.getValue());
+    }
+
+    @Override
+    public boolean unLock(String key) {
+        cacheList.remove(key);
+        return true;
+    }
 
     @Override
     public void put(CacheEntry entry) {

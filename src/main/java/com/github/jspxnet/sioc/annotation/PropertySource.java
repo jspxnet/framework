@@ -2,6 +2,8 @@ package com.github.jspxnet.sioc.annotation;
 
 import com.github.jspxnet.utils.StringUtil;
 import java.lang.annotation.*;
+
+
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

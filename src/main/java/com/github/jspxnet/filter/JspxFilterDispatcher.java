@@ -49,7 +49,6 @@ public class JspxFilterDispatcher implements Filter {
                     }
                 } catch (Exception e) {
                     log.error(className, e);
-                    e.printStackTrace();
                 }
             }
         }

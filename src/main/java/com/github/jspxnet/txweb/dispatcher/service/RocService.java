@@ -30,13 +30,8 @@ public class RocService extends IService {
     @Override
     public String doing(HttpServletRequest request, HttpServletResponse response, String call) throws Exception {
         ///////////////////读取ajax请求 end
-        if (StringUtil.isNull(call)) {
+        if (StringUtil.isNullOrWhiteSpace(call)||call.length() > REQUEST_MAX_LENGTH) {
             JSONObject errorResultJson = new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "Invalid params.参数无效,无效的请求"));
-            return errorResultJson.toString(4);
-        }
-        //////////////////初始begin
-        if (call.length() > REQUEST_MAX_LENGTH) {
-            JSONObject errorResultJson = new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "Invalid params.参数无效,长度超出范围"));
             return errorResultJson.toString(4);
         }
         return callAction(request, response, call, false);
@@ -103,15 +98,12 @@ public class RocService extends IService {
             return new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "class not found.找不到执行对象")).toString(4);
         }
 
-        if (secret != actionConfig.isSecret()) {
-            return new JSONObject(RocResponse.error(ErrorEnumType.PARAMETERS.getValue(), "forbidden not secret request roc.禁止非加密方式调用")).toString(4);
-            //加密调用这里返回
-        }
+
         jsonData.put(Environment.rocFormat, jsonFormat ? "json" : "xml");
         //在高并发下，ajax请求会出现异常，必须使用synchronized
 
         //执行action返回数据begin
-        ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
+        ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response,secret);
         actionInvocation.initAction();
         actionInvocation.invoke();
         WebServiceResult serviceResult = new WebServiceResult();

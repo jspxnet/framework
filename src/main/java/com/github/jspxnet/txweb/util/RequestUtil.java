@@ -57,11 +57,8 @@ public class RequestUtil {
     final public static String requestContentType = "Content-Type";
     final public static String REQUEST_X_REQUESTED_WITH = "X-Requested-With";
     final public static String requestContentDisposition = "Content-Disposition";
-/*
-    //微信小程序
-    final public static String BROWSER_MINIPROGRAM = "miniprogram";
-    //微信浏览器
-    final public static String BROWSER_MICROMESSENGER = "micromessenger";*/
+    private static final String WX_AGENT = "micromessenger";
+
 
     private static final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     private static final boolean REPAIR_ENCODE = ENV_TEMPLATE.getBoolean(Environment.repairEncode);
@@ -98,7 +95,7 @@ public class RequestUtil {
         systemKeywords.put("linux", "Linux");
         systemKeywords.put("sunos", "SunOS");
         //--------------------------------------------------------------------------------------------------------------
-        browserKeywords.put("micromessenger", "MicroMessenger"); //微信
+        browserKeywords.put(WX_AGENT, "MicroMessenger"); //微信
         browserKeywords.put("miniprogram", "miniprogram"); //微信 小程序
         browserKeywords.put("netcaptor", "NetCaptor");
         browserKeywords.put("maxthon", "Maxthon");
@@ -940,6 +937,14 @@ public class RequestUtil {
         }
     }
 
+
+    public static boolean isWeChatBrowser(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent == null) {
+            return false;
+        }
+        return userAgent.toLowerCase().contains(WX_AGENT);
+    }
     static public boolean isMobileBrowser(HttpServletRequest request) {
         if (request == null) {
             return false;
@@ -948,6 +953,11 @@ public class RequestUtil {
         return isMobileBrowser(agent);
     }
 
+    /**
+     *
+     * @param agent 请求头
+     * @return 判断是否位位手机浏览器
+     */
     static public boolean isMobileBrowser(String agent) {
         if (!StringUtil.hasLength(agent)) {
             return false;

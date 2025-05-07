@@ -8,12 +8,17 @@ import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.util.TXWebUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * 专门显示错误信息
  */
+@Slf4j
 public class ErrorResult extends ResultSupport {
     final private static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
 
@@ -38,6 +43,10 @@ public class ErrorResult extends ResultSupport {
             response.setDateHeader("Expires", 0);
         }
         //浏览器缓存控制end
-        TXWebUtil.errorPrint("",actionContext.getFieldInfo(), response, HttpStatusType.HTTP_status_500);
+        Map<String, String>  fieldInfo = actionContext.getFieldInfo();
+        if (!ObjectUtil.isEmpty(fieldInfo))
+        {
+            TXWebUtil.errorPrint("",fieldInfo, response, HttpStatusType.HTTP_status_500);
+        }
     }
 }

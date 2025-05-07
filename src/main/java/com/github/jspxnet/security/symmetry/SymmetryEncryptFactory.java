@@ -1,5 +1,4 @@
 package com.github.jspxnet.security.symmetry;
-
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
@@ -9,7 +8,6 @@ import com.github.jspxnet.security.symmetry.impl.DESedeEncrypt;
 import com.github.jspxnet.security.symmetry.impl.SM4Encrypt;
 import com.github.jspxnet.utils.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,6 +83,7 @@ public class SymmetryEncryptFactory {
         }
         return null;
     }
+/*
 
     public static void main(String[] args) {
 
@@ -95,17 +94,18 @@ public class SymmetryEncryptFactory {
             System.out.println(cls);
             try {
                 AbstractEncrypt encrypt = (AbstractEncrypt) cls.newInstance();
+                encrypt.setKeyFormatType(KeyFormatEnumType.HEX);
                 encrypt.setSecretKey(password);
                 String enStr = encrypt.getEncode(srcStr);
                 String oldStr = encrypt.getDecode(enStr);
                 System.out.println(enStr);
                 System.out.println(oldStr);
-
             } catch (Exception e) {
                 e.printStackTrace();
-
             }
         }
+
     }
+*/
 
 }

@@ -26,11 +26,11 @@ import com.github.jspxnet.utils.StringUtil;
  * Time: 11:06:21
  */
 public class BetweenExpression implements Criterion {
-    private final String field;
+    private final Object field;
     private final Object low;
     private final Object high;
 
-    public BetweenExpression(String field, Object lo, Object hi) {
+    public BetweenExpression(Object field, Object lo, Object hi) {
         this.field = field;
         this.low = lo;
         this.high = hi;
@@ -46,8 +46,10 @@ public class BetweenExpression implements Criterion {
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
         if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName))) {
-
-            return StringUtil.quote(field, true) + " " + OperatorEnumType.BETWEEN.getSql() + " ? " + FilterLogicEnumType.AND.getKey() + " ? ";
+            if (field instanceof String)
+            {
+                return StringUtil.quote((String)field, true) + " " + OperatorEnumType.BETWEEN.getSql() + " ? " + FilterLogicEnumType.AND.getKey() + " ? ";
+            }
         }
         return field + " " + OperatorEnumType.BETWEEN.getKey() + " ? " + FilterLogicEnumType.AND.getKey() + " ? ";
     }
@@ -65,7 +67,16 @@ public class BetweenExpression implements Criterion {
 
     @Override
     public String[] getFields() {
-        return new String[]{field};
+        if (field instanceof String)
+        {
+            return new String[]{(String)field};
+        }
+
+        if (low instanceof String && high instanceof String)
+        {
+            return new String[]{(String)low, (String)high};
+        }
+        return new String[]{(String)field};
     }
 
 

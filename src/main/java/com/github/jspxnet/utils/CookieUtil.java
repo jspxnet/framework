@@ -50,7 +50,13 @@ public final  class CookieUtil {
             if (cook == null) {
                 continue;
             }
-            cook.setMaxAge(0);
+            Cookie newCookie = new Cookie(cook.getName(), null);
+            newCookie.setMaxAge(0); // 设置生命周期为0，浏览器立即删除
+            newCookie.setPath(cook.getPath()); // 匹配原Cookie路径
+            if (cook.getDomain() != null) {
+                newCookie.setDomain(cook.getDomain()); // 匹配原Cookie域名（可选）
+            }
+            response.addCookie(newCookie); // 添加到响应
             response.addCookie(cook);
         }
     }

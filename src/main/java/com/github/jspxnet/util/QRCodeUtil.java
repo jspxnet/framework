@@ -33,32 +33,24 @@ public final class QRCodeUtil {
     private static final String CHARSET = StandardCharsets.UTF_8.name();
     private static final String FORMAT_NAME = "jpg";
     // 二维码尺寸
-    private static final int QRCODE_SIZE = 200;
+    private static final int QRCODE_SIZE = 344;
     // LOGO宽度
-    private static final int WIDTH = 60;
+    private static final int WIDTH = 38;
     // LOGO高度
-    private static final int HEIGHT = 60;
+    private static final int HEIGHT = 38;
 
     private static final int secretKey = 269;
 
-
-    /**
-     * 创建二维码图片
-     *
-     * @param content      二维码内容
-     * @param logoImgPath  Logo
-     * @param needCompress 是否压缩Logo
-     * @return 图片数据
-     * @throws WriterException 异常
-     * @throws IOException     异常
-     */
-
-    public static BufferedImage createImage(String content, String logoImgPath, boolean needCompress) throws Exception {
+    public static BufferedImage createImage(String content, String logoImgPath, boolean needCompress,int size) throws Exception {
         Map<EncodeHintType, Object> hints = new Hashtable<EncodeHintType, Object>();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         hints.put(EncodeHintType.CHARACTER_SET, CHARSET);
         hints.put(EncodeHintType.MARGIN, 1);
-        BitMatrix bitMatrix = new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, QRCODE_SIZE, QRCODE_SIZE, hints);
+        if (size<=0)
+        {
+            size=QRCODE_SIZE;
+        }
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, size, size, hints);
         int width = bitMatrix.getWidth();
         int height = bitMatrix.getHeight();
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -73,6 +65,20 @@ public final class QRCodeUtil {
         // 插入图片
         insertImage(image, logoImgPath, needCompress);
         return image;
+    }
+    /**
+     * 创建二维码图片
+     *
+     * @param content      二维码内容
+     * @param logoImgPath  Logo
+     * @param needCompress 是否压缩Logo
+     * @return 图片数据
+     * @throws WriterException 异常
+     * @throws IOException     异常
+     */
+
+    public static BufferedImage createImage(String content, String logoImgPath, boolean needCompress) throws Exception {
+        return createImage(content,logoImgPath,needCompress,QRCODE_SIZE);
     }
 
     /**

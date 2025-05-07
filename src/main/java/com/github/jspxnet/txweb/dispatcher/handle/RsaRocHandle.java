@@ -3,6 +3,7 @@ package com.github.jspxnet.txweb.dispatcher.handle;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.enums.ErrorEnumType;
+import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.XML;
@@ -104,7 +105,7 @@ public class RsaRocHandle extends RocHandle {
         if (symmetryEncrypt == null) {
             throw new Exception("加密配置错误");
         }
-
+        symmetryEncrypt.setKeyFormatType(KeyFormatEnumType.STRING);
         symmetryEncrypt.setSecretKey(key);
         symmetryEncrypt.setCipherIv(iv);
         return symmetryEncrypt.getDecode(dataString); //默认16 hex

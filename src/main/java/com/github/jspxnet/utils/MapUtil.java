@@ -333,4 +333,16 @@ public final class MapUtil {
         return valueMap;
     }
 
+    public static boolean getBoolean(Map<?,?> map,String key) {
+        return ObjectUtil.toBoolean(map.get(key));
+    }
+
+    public static int getInt(Map<?,?> map,String key) {
+        return ObjectUtil.toInt(map.get(key));
+    }
+
+    public static long getLong(Map<?,?> map,String key) {
+        return ObjectUtil.toLong(map.get(key));
+    }
+
 }

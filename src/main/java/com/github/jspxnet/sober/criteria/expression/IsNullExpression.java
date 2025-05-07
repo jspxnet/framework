@@ -40,14 +40,14 @@ public class IsNullExpression implements Criterion {
     }
 
     @Override
-    public String toSqlString(TableModels soberTable, String databaseName) {
+    public String toSqlString(TableModels soberTable, String databaseType) {
 
         SoberColumn soberColumn = soberTable.getColumn(propertyName);
         if (soberColumn!=null&&"String".equalsIgnoreCase(soberColumn.getTypeString()))
         {
-            if (DatabaseEnumType.inArray(noNullDb,databaseName))
+            if (DatabaseEnumType.inArray(noNullDb, databaseType))
             {
-                if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
+                if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseType)))
                 {
 
                     return "(" + StringUtil.quote(propertyName,true) + " "+OperatorEnumType.ISNULL.getSql()+" "+ FilterLogicEnumType.OR.getKey()+" " + StringUtil.quote(propertyName,true) + "='')";

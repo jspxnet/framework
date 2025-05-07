@@ -35,7 +35,7 @@ package com.github.jspxnet.sober.annotation;
     serial:数据库 自动增加
 
     果 auto=false 就会 type＝serial 更具数据库得到
-    auto=true 如果里边已经有值，将不创建id,否则更具type生成
+    auto=true 如果里边已经有值，将不创建id,否则根据type生成
 *
 */
 

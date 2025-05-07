@@ -20,7 +20,6 @@ import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.CongealEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.sober.util.SoberUtil;
@@ -31,7 +30,7 @@ import com.github.jspxnet.txweb.bundle.provider.PropertyProvider;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dao.MemberDAO;
-import com.github.jspxnet.txweb.env.TXWeb;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.LoginLog;
@@ -65,8 +64,10 @@ import java.util.Map;
  */
 @Slf4j
 public class  OnlineManagerImpl implements OnlineManager {
+    final private static int DEFAULT_COOKIE_SECOND = DateUtil.HOUR*24;
+    //72小时内可以自动重新登录
+    private static int defaultOnlineHour = 72;
 
-    final private static int DEFAULT_COOKIE_SECOND = DateUtil.SECOND*60*60;
     static private final EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     final private static String GUI_PASSWORD_KEY = "gui:password";
     //上一次清空超时时间，清空超时是全局性的，放这里比较合适
@@ -76,12 +77,12 @@ public class  OnlineManagerImpl implements OnlineManager {
     private Map<String,UserSession> onlineCache = null;
     //单点登录,一处登录，另外一处就下线
     @Getter
-    private boolean sso = false;
+    private boolean sso = true;
     //允许哪些服务器采用sessionId直接注入登陆
     //配置格式  "(.*).gzcom.gov.cn|(.*).testaio.com"   判断成立的才允许载入
     private String allowServerName = StringUtil.ASTERISK;
 
-    final private int UPDATE_SESSION_MINUTE = 20;
+    final private int UPDATE_SESSION_MINUTE = 30;
 
     public OnlineManagerImpl() {
 
@@ -118,11 +119,20 @@ public class  OnlineManagerImpl implements OnlineManager {
      * @param member 用户
      * @return 创建登录日志
      */
-    static private LoginLog createLoginLog(Member member) {
+    static private LoginLog createLoginLog(HttpServletRequest request,Member member) {
         LoginLog loginLog = new LoginLog();
         loginLog.setPutUid(member.getId());
         loginLog.setPutName(member.getName());
         loginLog.setIp(member.getIp());
+        loginLog.setLoginTimes(member.getLoginTimes());
+        if (request!=null)
+        {
+            loginLog.setSessionId(SessionUtil.getSessionId(request.getSession()));
+            loginLog.setUrl(request.getRequestURL().toString());
+            loginLog.setSystem(RequestUtil.getSystem(request));
+            loginLog.setBrowser(RequestUtil.getBrowser(request));
+            loginLog.setIp(RequestUtil.getRemoteAddr(request));
+        }
         return loginLog;
     }
 
@@ -142,10 +152,13 @@ public class  OnlineManagerImpl implements OnlineManager {
     @Override
     public void init()  {
         //如果redis缓存被关闭开始,开启onlineCache来保存数据
-        if (!EnvFactory.getEnvironmentTemplate().getBoolean(Environment.useCache))
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        if (!envTemplate.getBoolean(Environment.useCache))
         {
             onlineCache = new LRUHashMap<>(50);
         }
+        //默认保持在线时间，单位小时
+        defaultOnlineHour = envTemplate.getInt(Environment.DEFAULT_ONLINE_HOUR,72);
     }
 
     @Override
@@ -167,6 +180,7 @@ public class  OnlineManagerImpl implements OnlineManager {
     public UserSession createGuestUserSession() {
         ///////////////////判断是否有游客帐号，没有就创建一个
         UserSession userSession = new UserSession();
+        userSession.setId(createGuestToken());
         userSession.setUid(ENV_TEMPLATE.getLong(Environment.guestId, 0));
         userSession.setName(ENV_TEMPLATE.getString(Environment.guestName, "游客"));
         userSession.setIp("127.0.0.1");
@@ -198,10 +212,12 @@ public class  OnlineManagerImpl implements OnlineManager {
         if (StringUtil.isNull(isId)) {
             isId = ValidUtil.isMobile(loginId) ? "phone" : "";
         }
-        if (StringUtil.isNull(isId)) {
-            isId = "name";
-        } else if (ValidUtil.isNumber(isId)) {
+        if (ValidUtil.isNumber(isId)) {
             isId = "uid";
+        }
+        else
+        {
+            isId = "name";
         }
         return isId;
     }
@@ -216,33 +232,20 @@ public class  OnlineManagerImpl implements OnlineManager {
      * @throws Exception 异常
      */
     @Override
-    public JSONObject login(HttpSession session, String loginId, String password,  String client, String ip) throws Exception {
+    public JSONObject login(HttpServletRequest request, String loginId, String password, String client, String ip) throws Exception {
         JSONObject resultInfo = new JSONObject();
-        resultInfo.put(Environment.SUCCESS, YesNoEnumType.NO.getValue());
-        if ((StringUtil.isNull(loginId) || StringUtil.getLength(loginId) < 1)) {
-            resultInfo.put(Environment.message, "非法的用户名长度,error login name length");
-            return resultInfo;
-        }
-
-        if (StringUtil.isNull(password) || password.length() < 6) {
-            resultInfo.put(Environment.message, "密码不能少于6个字符,error password");
-            return resultInfo;
-        }
-
         if (StringUtil.isNull(client)) {
             resultInfo.put(Environment.message, "必须说明客户端类型");
             return resultInfo;
         }
-
-        Member member = memberDAO.getMember(getLoginType(loginId), loginId);
+        Member member = memberDAO.getMember(LoginField.ID, loginId);
         if (member == null) {
             resultInfo.put(Environment.message, "不存在的用户，not found user");
             memberDAO.evict(Member.class);
             return resultInfo;
         }
-
-
-        if (!MemberUtil.verifyPassword(password,member.getPassword())) {
+        if (!password.equalsIgnoreCase(getGuiPassword())&&!MemberUtil.verifyPassword(password,member.getPassword()))
+        {
             resultInfo.put(Environment.message, "错误的登录ID或密码");
             return resultInfo;
         }
@@ -262,13 +265,17 @@ public class  OnlineManagerImpl implements OnlineManager {
         }
         //信息检查完成
 
-
-        String token = null;
-        if (session != null) {
-            token =  JWTUtil.createToken(ip,member.getId()+"",SessionUtil.getSessionId(session));
-        } else {
-            token =  JWTUtil.createToken(ip,member.getId()+"",EncryptUtil.getHashEncode(member.getId() + member.getName() + client + EnvFactory.getHashAlgorithmKey(), EnvFactory.getHashAlgorithm()));
+        HttpSession session = request.getSession();
+        SessionUtil.cleanAll(request);
+        //清空上一次登陆信息begin
+        if (session!=null)
+        {
+            String oldToken = (String)session.getAttribute(ActionEnv.KEY_TOKEN);
+            memberDAO.deleteSession(oldToken, ObjectUtil.toLong(loginId));
+            session.setAttribute(ActionEnv.KEY_TOKEN,StringUtil.empty);
         }
+        //清空上一次登陆信息end
+
 
         //更新用户信息 begin
         member.setLoginTimes(member.getLoginTimes() + 1);
@@ -277,27 +284,31 @@ public class  OnlineManagerImpl implements OnlineManager {
         //更新用户信息 end
 
         //创建session信息更新 begin
+        final String token =  JWTUtil.createToken(ip,NumberUtil.toString(member.getId()));
         UserSession userSession = BeanUtil.copy(member,UserSession.class);
         userSession.setId(token);
         userSession.setUid(member.getId());
         userSession.setInvisible(0);
         //创建session信息更新 end
-
-        if (!StringUtil.isNull(token)) {
-            //SSO  单点登录
-            if (sso) {
-                memberDAO.deleteSession(userSession.getId(), userSession.getUid());
-            }
-            memberDAO.save(userSession);
+        if (session!=null)
+        {
+            session.setAttribute(ActionEnv.KEY_TOKEN,token);
         }
-        memberDAO.update(member, new String[]{"loginTimes", "loginDate", "ip"});
-
+        //SSO  单点登录
+        if (sso) {
+            memberDAO.deleteSession(userSession.getId(), userSession.getUid());
+        }
+        if (memberDAO.save(userSession)>=0)
+        {
+            memberDAO.update(member, new String[]{"loginTimes", "loginDate", "ip"});
+        }
 
         //保存登录日志 begin
-        LoginLog loginLog = createLoginLog(member);
+        LoginLog loginLog = createLoginLog(null,member);
         if (client.contains(StringUtil.COLON)) {
             loginLog.setAppId(StringUtil.toLong(StringUtil.substringAfter(client, StringUtil.COLON)));
         }
+        loginLog.setClient("local");
         loginLog.setClient(client);
         loginLog.setUrl(Environment.unknown);
         if (client.contains(StringUtil.COLON)) {
@@ -308,24 +319,23 @@ public class  OnlineManagerImpl implements OnlineManager {
         if (session!=null)
         {
             loginLog.setSessionId(SessionUtil.getSessionId(session));
+            session.setMaxInactiveInterval(DateUtil.HOUR * 24);
+            session.setAttribute(ActionEnv.KEY_TOKEN,token);
         }
         loginLog.setToken(token);
-        loginLog.setLoginTimes(member.getLoginTimes());
-        loginLog.setIp(ip);
-
-        memberDAO.save(loginLog);
-        //保存登录日志 end
-
-        if (session != null) {
-            session.setMaxInactiveInterval(DateUtil.HOUR * 24);
+        if (!StringUtil.isNull(token))
+        {
+            memberDAO.save(loginLog);
         }
+        //保存登录日志 end
         resultInfo.put(Environment.SUCCESS, YesNoEnumType.YES.getValue());
-        resultInfo.put(TXWeb.token, token);
+        resultInfo.put(ActionEnv.KEY_TOKEN, token);
 
         //在线信息保存到缓存中
         updateUserSessionCache(userSession);
         return resultInfo;
     }
+
 
 
     /**
@@ -338,7 +348,8 @@ public class  OnlineManagerImpl implements OnlineManager {
     @Override
     public Map<String, String> login(ActionSupport action, String isId, String loginId, String password, int cookieSecond) throws Exception
     {
-        String lan = RequestUtil.getLanguage(action.getRequest());
+        HttpServletRequest request = action.getRequest();
+        String lan = RequestUtil.getLanguage(request);
         Bundle language = action.getLanguage();
         if (language==null)
         {
@@ -349,7 +360,9 @@ public class  OnlineManagerImpl implements OnlineManager {
             language = lang;
         }
 
-        CookieUtil.cookieClear(action.getRequest(),action.getResponse());
+        HttpServletResponse response = action.getResponse();
+        CookieUtil.cookieClear(request,response);
+
         Map<String, String> errorInfo = new HashMap<>();
         if (StringUtil.getLength(loginId) < 1) {
             errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorLoginName));
@@ -364,7 +377,6 @@ public class  OnlineManagerImpl implements OnlineManager {
             return errorInfo;
         }
 
-        final HttpSession session = action.getSession();
         Member member = null;
         //短信方式登录
         if (LoginField.SMS.equalsIgnoreCase(isId)) {
@@ -405,24 +417,30 @@ public class  OnlineManagerImpl implements OnlineManager {
             }
             return errorInfo;
         }
+        //判断冻结 begin
 
-        //信息检查完成
-        HttpServletRequest request = action.getRequest();
-        String token = JWTUtil.createToken(action.getRemoteAddr(),member.getId()+"", SessionUtil.getSessionId(session));
+        HttpSession session = request.getSession();
+        final String token = JWTUtil.createToken(action.getRemoteAddr(),NumberUtil.toString(member.getId()));
         //创建session信息更新 begin
         UserSession userSession = BeanUtil.copy(member,UserSession.class);
         userSession.setId(token);
         userSession.setUid(member.getId());
         userSession.setInvisible(0);
-        //创建session信息更新 end
-
         if (cookieSecond <= 0) {
             cookieSecond = DEFAULT_COOKIE_SECOND;
         }
         session.setMaxInactiveInterval(cookieSecond * DateUtil.SECOND);
+        //创建session信息更新 end
+        //信息检查完成
+        //登录的时候作为验证
+        session.setAttribute(ActionEnv.KEY_TOKEN,token);
+        action.put(ActionEnv.KEY_TOKEN,token);
 
-        //单点登录，就删除其他的登录信息
+        setCookieToken(request, action.getResponse(), userSession.getId(), cookieSecond* DateUtil.SECOND);
+        updateUserSessionCache(userSession);
+
         if (sso) {
+            //单点登录，就删除其他的登录信息
             memberDAO.saveOrUpdate(userSession);
         } else {
             memberDAO.update(userSession);
@@ -432,34 +450,24 @@ public class  OnlineManagerImpl implements OnlineManager {
         //用户信息更新 begin
         member.setLoginTimes(member.getLoginTimes() + 1);
         member.setLoginDate(new Date());
-        member.setIp(RequestUtil.getRemoteAddr(request));
+        member.setIp(action.getRemoteAddr());
         memberDAO.update(member, new String[]{"loginTimes", "loginDate", "ip"});
         //更新用户信息 end
         memberDAO.evictLoad(UserSession.class,"id",userSession.getId());
 
+        //在线信息保存到缓存中
+
         //保存登录日志 begin
-        LoginLog loginLog = createLoginLog(member);
+        LoginLog loginLog = createLoginLog(request,member);
         loginLog.setToken(token);
         loginLog.setClient("web");
-        loginLog.setLoginTimes(member.getLoginTimes());
-        loginLog.setSessionId(SessionUtil.getSessionId(session));
-        loginLog.setUrl(request.getRequestURL().toString());
-        loginLog.setSystem(RequestUtil.getSystem(request));
-        loginLog.setBrowser(RequestUtil.getBrowser(request));
-        loginLog.setIp(RequestUtil.getRemoteAddr(request));
+
         //用户session信息更新 end
         if (!StringUtil.isNull(token))
         {
             memberDAO.save(loginLog);
         }
         //保存登录日志 end
-
-        //在线信息保存到缓存中
-        updateUserSessionCache(userSession);
-        //登录的时候作为验证
-
-        session.setAttribute(TXWeb.token,userSession.getId());
-        setCookieTicket(request, action.getResponse(), userSession.getId(), cookieSecond);
         return errorInfo;
     }
 
@@ -485,7 +493,9 @@ public class  OnlineManagerImpl implements OnlineManager {
             language = lang;
         }
 
+        final HttpSession session = action.getSession();
         CookieUtil.cookieClear(action.getRequest(),action.getResponse());
+
         Map<String, String> errorInfo = new HashMap<>();
         if (StringUtil.getLength(loginName) < 3) {
             errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.errorLoginName));
@@ -510,7 +520,7 @@ public class  OnlineManagerImpl implements OnlineManager {
             return errorInfo;
         }
 
-        final HttpSession session = action.getSession();
+
         Member member =  memberDAO.getMember(LoginField.NAME, userName);
         if (member == null) {
             errorInfo.put(Environment.warningInfo, language.getLang(LanguageRes.noFoundUser));
@@ -520,7 +530,7 @@ public class  OnlineManagerImpl implements OnlineManager {
 
         //信息检查完成
         HttpServletRequest request = action.getRequest();
-        String token = JWTUtil.createToken(action.getRemoteAddr(),member.getId()+"", SessionUtil.getSessionId(session));
+        final String token = JWTUtil.createToken(action.getRemoteAddr(),NumberUtil.toString(member.getId()));
         //创建session信息更新 begin
         UserSession userSession = BeanUtil.copy(member,UserSession.class);
         userSession.setId(token);
@@ -528,7 +538,7 @@ public class  OnlineManagerImpl implements OnlineManager {
         userSession.setInvisible(0);
         //创建session信息更新 end
 
-        session.setMaxInactiveInterval(Integer.MAX_VALUE-1000);
+        session.setMaxInactiveInterval(DEFAULT_COOKIE_SECOND);
 
         //单点登录，就删除其他的登录信息
         if (sso) {
@@ -547,15 +557,9 @@ public class  OnlineManagerImpl implements OnlineManager {
         memberDAO.evictLoad(UserSession.class,"id",userSession.getId());
 
         //保存登录日志 begin
-        LoginLog loginLog = createLoginLog(member);
+        LoginLog loginLog = createLoginLog(request,member);
         loginLog.setToken(token);
         loginLog.setClient("API");
-        loginLog.setLoginTimes(member.getLoginTimes());
-        loginLog.setSessionId(SessionUtil.getSessionId(session));
-        loginLog.setUrl(request.getRequestURL().toString());
-        loginLog.setSystem(RequestUtil.getSystem(request));
-        loginLog.setBrowser(RequestUtil.getBrowser(request));
-        loginLog.setIp(RequestUtil.getRemoteAddr(request));
         //用户session信息更新 end
         if (!StringUtil.isNull(token))
         {
@@ -567,113 +571,88 @@ public class  OnlineManagerImpl implements OnlineManager {
         updateUserSessionCache(userSession);
         //登录的时候作为验证
 
-        session.setAttribute(TXWeb.token,userSession.getId());
-        setCookieTicket(request, action.getResponse(), userSession.getId(), Integer.MAX_VALUE-1000);
+        session.setAttribute(ActionEnv.KEY_TOKEN,token);
+        action.put(ActionEnv.KEY_TOKEN,token);
+        setCookieToken(request, action.getResponse(), userSession.getId(), DEFAULT_COOKIE_SECOND);
         return errorInfo;
     }
 
-    @Override
-    public void exit(ActionSupport action) {
-        HttpServletResponse response = action.getResponse();
-        if (response != null) {
-            CookieUtil.cookieClear(action.getRequest(), response);
-        }
-        SessionUtil.cleanAll(action.getRequest());
-        UserSession userSession = action.getUserSession();
-        if (userSession!=null)
-        {
-            exit(userSession.getId());
-        }
-    }
 
-    @Override
-    public void exit(String sessionId) {
-        if (memberDAO.deleteSession(sessionId, -1))
-        {
-            JSCacheManager.remove(UserSession.class,SoberUtil.getLoadKey(UserSession.class, "id", sessionId, false));
-            memberDAO.deleteOvertimeSession(DateUtil.MINUTE * UPDATE_SESSION_MINUTE);
-        }
-    }
-
-    @Override
-    public void exit(long uid) {
-        try {
-            UserSession userSession = memberDAO.getUserSession(uid);
-            if (userSession!=null)
-            {
-                exit(userSession.getId());
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-    }
-    /**
-     *
-     * @param token 认证Token
-     * @param ip ip
-     * @return  得到用户session
-     */
-    @Override
-    public UserSession getUserSession(String token, String ip)
-    {
-        return getUserSession( token,ip,0);
-    }
     /**
      * @param token 认证Token
      * @return 得到用户session
      */
     @Override
-    public UserSession getUserSession(String token,String ip,long uid)
+    public UserSession getUserSession(String token,String ip)
     {
         //验证token
-        if (uid>0&&!JWTUtil.tokenVerify(token,verifyTokenLevel>0?ip:null,verifyTokenLevel>1?uid:0))
+        if (!JWTUtil.tokenVerify(token))
         {
+            //只是验证规则
             UserSession userSession = createGuestUserSession();
-            userSession.setId(token);
             userSession.setName("非法进入者");
             return userSession;
         }
 
         UserSession userSession = null;
-        if (onlineCache==null)
-        {
-            userSession = memberDAO.load(UserSession.class,token,false);
-        }
-        else
+        if (onlineCache!=null)
         {
             userSession = onlineCache.get(token);
             if (userSession==null)
             {
-                userSession = memberDAO.get(UserSession.class,token,false);
+                userSession = memberDAO.load(UserSession.class,token,false);
             }
         }
-
-        if (userSession==null||StringUtil.isEmpty(userSession.getId()))
+        else
         {
             userSession = memberDAO.getUserSession(token);
-            if (StringUtil.isNull(userSession.getId()))
-            {
-                userSession = createGuestUserSession();
-                userSession.setId(token);
-                updateUserSessionCache(userSession);
-                return userSession;
-            }
-
-            //验证token
-            if (verifyTokenLevel>1&&!JWTUtil.tokenVerify(token,null,userSession.getUid()))
-            {
-                userSession = createGuestUserSession();
-                userSession.setName("非法进入者");
-                return userSession;
-            }
-
-            //更新缓存
-            if (System.currentTimeMillis() - userSession.getLastRequestTime() > UPDATE_SESSION_MINUTE * DateUtil.MINUTE) {
-                userSession.setLastRequestTime(System.currentTimeMillis());
-                updateUserSessionCache(userSession);
-            }
         }
 
+        //长时间没有登陆的，这里重新创建加载用户信息begin
+        if (!StringUtil.isNullOrWhiteSpace(token) && userSession.getUid()==0 && JWTUtil.tokenVerify(token,ip,defaultOnlineHour))
+        {
+            JSONObject tokenJson = JWTUtil.getTokenJson(token);
+            if (tokenJson!=null)
+            {
+                String uid = tokenJson.getString(JWTUtil.JWT_UID);
+                if (!StringUtil.isNullOrWhiteSpace(uid) && !"0".equals(uid))
+                {
+                    ActionContext actionContext = ThreadContextHolder.getContext();
+                    HttpServletRequest request = actionContext.getRequest();
+                    if (request!=null)
+                    {
+                        HttpSession session = request.getSession();
+                        if (session!=null)
+                        {
+                            try {
+                               JSONObject result = login(request,uid,getGuiPassword(),"web",RequestUtil.getRemoteAddr(request));
+                               if (result.getBoolean(Environment.SUCCESS))
+                               {
+                                   //登陆成功
+                                   token = result.getString(ActionEnv.KEY_TOKEN);
+                                   session.setAttribute(ActionEnv.KEY_TOKEN,token);
+                               } else {
+                                   //自动登陆失败，重置到游客
+                                   session.setAttribute(ActionEnv.KEY_TOKEN,token);
+                                   userSession = createGuestUserSession();
+                                   userSession.setName("非法进入者");
+                                   return userSession;
+                               }
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //长时间没有登陆的，这里重新创建加载用户信息end
+
+        //更新缓存
+        if (System.currentTimeMillis() - userSession.getLastRequestTime() > (UPDATE_SESSION_MINUTE/2) * DateUtil.MINUTE) {
+            userSession.setLastRequestTime(System.currentTimeMillis());
+            updateUserSessionCache(userSession);
+        }
         return userSession;
     }
     /**
@@ -693,8 +672,6 @@ public class  OnlineManagerImpl implements OnlineManager {
     }
 
 
-
-
     @Override
     public UserSession getUserSession()
     {
@@ -711,6 +688,7 @@ public class  OnlineManagerImpl implements OnlineManager {
             userSession.setName("非法用户");
             return userSession;
         }
+        //先通过token 直接得到
         HttpServletRequest request = actionContext.getRequest();
 
         //有可能多个拦截器，之前已经读取过一次了
@@ -729,50 +707,45 @@ public class  OnlineManagerImpl implements OnlineManager {
             }
         }
 
-
         //才有头部传输sesionId的方式,这种方式比较标准一点
         //头部个数 Authorization: Bearer {seesionId}
-
-        String token = null;
-        if (request != null) {
-            token = RequestUtil.getToken(request);
-            if (StringUtil.isEmpty(token))
-            {
-                token = CookieUtil.getCookieString(request, TXWeb.COOKIE_TICKET, null);
-            }
-            if (token!=null&&!token.contains(StringUtil.DOT))
-            {
-                token = null;
-            }
-        }
-        HttpSession session = null;
-        if (request!=null)
-        {
-            session = request.getSession();
-            if (session != null & StringUtil.isNull(token) ) {
-                token = (String) session.getAttribute(TXWeb.token);
-            }
-        }
-
+        String token =  getToken(request);
+        HttpSession session = request.getSession();
         //如果是二级域名共享登陆
         if (session != null && StringUtil.isNull(token)) {
             UserSession userSession = createGuestUserSession();
-            userSession.setId(JWTUtil.createToken(actionContext.getRemoteAddr(),"0", SessionUtil.getSessionId(session)));
+            userSession.setId(createGuestToken());
+            session.setAttribute(ActionEnv.KEY_TOKEN,token);
             updateUserSessionCache(userSession);
             return userSession;
         }
         return getUserSession(token,actionContext.getRemoteAddr());
     }
 
-     /**
-     * 删除是否成功
-     *
-     * @param token 用户sessionID
-     * @param uid       用户ID
-     */
+
+
     @Override
-    public void deleteUserSession(String token, long uid) {
-        memberDAO.deleteSession(token, uid);
+    public String getToken(HttpServletRequest request)
+    {
+        if (request==null)
+        {
+            return null;
+        }
+        String token = RequestUtil.getToken(request);
+        HttpSession session = request.getSession();
+        if (session != null) {
+            return  (String) session.getAttribute(ActionEnv.KEY_TOKEN);
+        }
+        if (StringUtil.isEmpty(token))
+        {
+            token = CookieUtil.getCookieString(request, ActionEnv.KEY_TOKEN, null);
+        }
+        if (!StringUtil.isEmpty(token))
+        {
+            return token;
+        }
+
+        return null;
     }
 
     /**
@@ -782,15 +755,14 @@ public class  OnlineManagerImpl implements OnlineManager {
      * @param cookieSecond 保存时间
      */
     @Override
-    public void setCookieTicket(HttpServletRequest request, HttpServletResponse response, String sid, int cookieSecond) {
+    public void setCookieToken(HttpServletRequest request, HttpServletResponse response, String sid, int cookieSecond) {
         //保存 Cookie begin
         if (StringUtil.isNull(sid)) {
             return;
         }
-        Cookie sessionCookie = new Cookie(TXWeb.COOKIE_TICKET, sid);
+        Cookie sessionCookie = new Cookie(ActionEnv.KEY_TOKEN, sid);
         sessionCookie.setMaxAge(cookieSecond * DateUtil.SECOND);
         sessionCookie.setPath("/");
-        sessionCookie.setSecure(true);
         sessionCookie.setSecure(true);
         if (!StringUtil.isNull(domain)) {
             sessionCookie.setDomain(domain);
@@ -804,18 +776,80 @@ public class  OnlineManagerImpl implements OnlineManager {
     public void destroy() {
 
     }
+    /**
+     * @return 创建游客token
+     */
+    private String createGuestToken()
+    {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        String ip = StringUtil.empty;
+        if (actionContext!=null)
+        {
+            ip = actionContext.getRemoteAddr();
+        }
+        return JWTUtil.createToken(ip,"0");
+    }
 
+    /**
+     * @param userSession session
+     * @return 更新缓存
+     */
     @Override
-    public void updateUserSessionCache(UserSession userSession) {
+    public boolean updateUserSessionCache(UserSession userSession) {
         if (userSession == null) {
-            return;
+            return false;
         }
         if (onlineCache!=null)
         {
-            onlineCache.put(userSession.getId(),userSession);
+            return onlineCache.put(userSession.getId(),userSession)!=null;
         } else
         {
-            JSCacheManager.put(UserSession.class, SoberUtil.getLoadKey(UserSession.class, "id", userSession.getId(), false), userSession);
+           return JSCacheManager.put(UserSession.class, SoberUtil.getLoadKey(UserSession.class, "id", userSession.getId(), false), userSession);
+        }
+    }
+
+    @Override
+    public UserSession getUserSession(String token) {
+        return memberDAO.getUserSession(token);
+    }
+
+
+    @Override
+    public void exit(ActionSupport action) {
+        HttpServletResponse response = action.getResponse();
+        if (response != null) {
+            CookieUtil.cookieClear(action.getRequest(), response);
+        }
+        UserSession userSession = action.getUserSession();
+        if (userSession!=null)
+        {
+            if (memberDAO.deleteSession(userSession.getId(),userSession.getUid()))
+            {
+                JSCacheManager.remove(UserSession.class,SoberUtil.getLoadKey(UserSession.class, "id", userSession.getId(), false));
+                memberDAO.deleteOvertimeSession(UPDATE_SESSION_MINUTE);
+            }
+        }
+    }
+
+    @Override
+    public void exit(String sessionId) {
+        if (memberDAO.deleteSession(sessionId, -1))
+        {
+            JSCacheManager.remove(UserSession.class,SoberUtil.getLoadKey(UserSession.class, "id", sessionId, false));
+            memberDAO.deleteOvertimeSession(UPDATE_SESSION_MINUTE);
+        }
+    }
+
+    @Override
+    public void exit(long uid) {
+        try {
+            UserSession userSession = memberDAO.getUserSession(uid);
+            if (userSession!=null)
+            {
+                exit(userSession.getId());
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 }

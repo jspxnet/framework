@@ -266,7 +266,11 @@ public final class SoberUtil {
         Map<String, Object> resultMap = new HashMap<>(numColumns);
         for (int c = 1; c <= numColumns; c++) {
             String colName = resultSetMetaData.getColumnLabel(c);
-            resultMap.put(StringUtil.underlineToCamel(colName), dialect.getResultSetValue(resultSet, c));
+            String dbField = StringUtil.underlineToCamel(colName);
+            if (!resultMap.containsKey(dbField))
+            {
+                resultMap.put(dbField, dialect.getResultSetValue(resultSet, c));
+            }
         }
         return resultMap;
     }
@@ -938,7 +942,7 @@ public final class SoberUtil {
         if ("map".equalsIgnoreCase(resultType)) {
             return DataMap.class;
         }
-        if (resultType == null) {
+        if (StringUtil.isNullOrWhiteSpace(resultType)) {
             return null;
         }
         return (Class<?>) TypeUtil.getJavaType(resultType);

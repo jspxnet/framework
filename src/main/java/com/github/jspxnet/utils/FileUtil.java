@@ -1182,7 +1182,7 @@ public final class FileUtil {
         if (filename == null) {
             return null;
         }
-        return readFileByte(filename, BUFFER_SIZE);
+        return readFileByte(filename, (int)filename.length());
     }
 
     /**

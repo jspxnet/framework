@@ -203,7 +203,7 @@ public class RpcCmd extends INetCommand {
         IocResponse response = new IocResponse();
         ActionInvocation actionInvocation = null;
         try {
-            actionInvocation = new DefaultActionInvocation(actionConfig,envParam , RocHandle.NAME,json,requestTo,responseTo);
+            actionInvocation = new DefaultActionInvocation(actionConfig,envParam , RocHandle.NAME,json,requestTo,responseTo,false);
             actionInvocation.initAction();
             actionInvocation.invoke();
         } catch (Throwable t) {

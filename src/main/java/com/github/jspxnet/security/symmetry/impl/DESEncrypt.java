@@ -13,22 +13,11 @@ package com.github.jspxnet.security.symmetry.impl;
   密码只能是8位
    PKCS5Padding 和 PKCS7Padding 基本一样
  */
-
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.security.symmetry.AbstractEncrypt;
-import com.github.jspxnet.security.utils.EncryptUtil;
-import com.github.jspxnet.utils.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.util.encoders.Hex;
-
 import javax.crypto.SecretKey;
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.Provider;
-import java.security.Security;
-
-
 @Slf4j
 public class DESEncrypt extends AbstractEncrypt {
     //随机数，会使加密的key和数据不一样,
@@ -37,13 +26,7 @@ public class DESEncrypt extends AbstractEncrypt {
         //设置  DESede  就是 3DES加密算法
         cipherIv = "12345678";
         cipherAlgorithm = "DES/CBC/PKCS5Padding";
-        try {
-            //判断log4j是否存在
-            Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider");
-            Security.addProvider((Provider) ClassUtil.newInstance("org.bouncycastle.jce.provider.BouncyCastleProvider"));
-        } catch (Exception e) {
-            log.error("bcprov-jdk15.jar not find,can not transfer use PKCS7Padding");
-        }
+
     }
 
     /**

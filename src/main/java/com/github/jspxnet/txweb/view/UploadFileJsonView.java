@@ -169,7 +169,7 @@ public class UploadFileJsonView extends ActionSupport {
         return NONE;
     }
 
-    public class NameComparator implements Comparator {
+    public static class NameComparator implements Comparator {
         @Override
         public int compare(Object a, Object b) {
             Hashtable hashA = (Hashtable) a;
@@ -184,7 +184,7 @@ public class UploadFileJsonView extends ActionSupport {
         }
     }
 
-    public class SizeComparator implements Comparator {
+    public static class SizeComparator implements Comparator {
         @Override
         public int compare(Object a, Object b) {
             Hashtable hashA = (Hashtable) a;
@@ -205,7 +205,7 @@ public class UploadFileJsonView extends ActionSupport {
         }
     }
 
-    public class TypeComparator implements Comparator {
+    public static class TypeComparator implements Comparator {
         @Override
         public int compare(Object a, Object b) {
             Hashtable hashA = (Hashtable) a;

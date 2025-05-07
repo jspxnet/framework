@@ -147,7 +147,7 @@ public final class Expression {
      * @param hi           value
      * @return Criterion
      */
-    public static Criterion between(String propertyName, Object lo, Object hi) {
+    public static Criterion between(Object propertyName, Object lo, Object hi) {
         return new BetweenExpression(propertyName, lo, hi);
     }
 

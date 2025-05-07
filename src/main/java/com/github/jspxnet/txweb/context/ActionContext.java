@@ -9,6 +9,8 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,19 +20,32 @@ import java.util.*;
 
 
 public class ActionContext implements Serializable {
+    @Getter
     final private Map<String, Object> environment = new HashMap<>();
+    @Setter
+    @Getter
     private HttpServletRequest request;
+    @Setter
+    @Getter
     private HttpServletResponse response;
+    @Getter
     private Object result;
     //如果执行了完整的一次变成 true
+    @Setter
+    @Getter
     private boolean executed = false;
 
     //执行过程中 resultCode 会不断的变动,最后为返回需要的
   //  private String resultCode;
     //action执行返回
+    @Setter
+    @Getter
     private String actionResult;
     //执行方法,替代代理类里边的变量,这样更加安全
+    @Getter
     private Method method = null;
+    @Setter
+    @Getter
     private String exeType;
 
     //用来保存action自己的子变量, key 为类名_hashCode_变量名
@@ -267,10 +282,6 @@ public class ActionContext implements Serializable {
         //如果是void 方法，自动设置 NONE end
     }
 
-    public Map<String, Object> getEnvironment() {
-        return environment;
-    }
-
     public void setEnvironment(Map<String, Object> environment) {
         this.environment.clear();
         this.environment.putAll(environment);
@@ -301,54 +312,6 @@ public class ActionContext implements Serializable {
         return map;
     }
 
-    public HttpServletRequest getRequest() {
-        return request;
-    }
-
-    public void setRequest(HttpServletRequest request) {
-        this.request = request;
-    }
-
-    public HttpServletResponse getResponse() {
-        return response;
-    }
-
-    public void setResponse(HttpServletResponse response) {
-        this.response = response;
-    }
-
-    public Object getResult() {
-        return result;
-    }
-
-    public boolean isExecuted() {
-        return executed;
-    }
-
-    public void setExecuted(boolean executed) {
-        this.executed = executed;
-    }
-
-    public String getActionResult() {
-        return actionResult;
-    }
-
-    public void setActionResult(String actionResult) {
-        this.actionResult = actionResult;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public String getExeType() {
-        return exeType;
-    }
-
-    public void setExeType(String exeType) {
-        this.exeType = exeType;
-    }
-
     /**
      * 释放内存
      */
@@ -357,7 +320,5 @@ public class ActionContext implements Serializable {
         ObjectUtil.free(environment);
         ObjectUtil.free(componentEnvironment);
     }
-
-
 
 }

@@ -12,6 +12,7 @@ package com.github.jspxnet.txweb.bundle.provider;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;
 import com.github.jspxnet.txweb.bundle.BundleProvider;
+import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.io.AbstractWrite;
@@ -122,6 +123,8 @@ public class PropertyProvider extends BundleProvider {
         }
         return list;
     }
+
+
 
     @Override
     public String getValue(String key) {

@@ -156,7 +156,7 @@ public class TemplateResult extends ResultSupport {
         //如果使用cache 就使用uri
 
         String cacheKey = ScriptmarkEnv.noCache;
-        if (!ENV_TEMPLATE.getBoolean(Environment.DEBUG)) {
+        if (!DEBUG) {
             cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
         }
         CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), TEMPLATE_PATH});
@@ -194,10 +194,12 @@ public class TemplateResult extends ResultSupport {
             }
         }
         //页面缓存支持end
-        PrintWriter writer = response.getWriter();
-        writer.print(out);
-        writer.flush();
-        writer.close();
-        out.close();
+        try (PrintWriter writer = response.getWriter()){
+            writer.print(out);
+            writer.flush();
+        } finally {
+            out.close();
+        }
+
     }
 }

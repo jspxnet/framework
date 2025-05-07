@@ -12,6 +12,8 @@ package com.github.jspxnet.txweb;
 import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.txweb.table.UserSession;
+import org.apache.poi.ss.formula.functions.T;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -130,9 +132,8 @@ public interface Action extends Serializable {
 
     boolean isComponent();
 
-    //环境数据
+    @Deprecated
     Map<String, Object> getEnv();
-
 
     void initEnv(Map<String, Object> paramMap, String exeType);
 
@@ -253,6 +254,8 @@ public interface Action extends Serializable {
     String toQueryString(String name) throws Exception;
 
     String toQueryString(Map<String, String> param) throws Exception;
+
+    <T> T getEnv(String keys, Class<T> t);
 
     //用户seesion
     UserSession getUserSession();

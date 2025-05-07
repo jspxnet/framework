@@ -11,6 +11,7 @@ package com.github.jspxnet.utils;
 
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import lombok.extern.slf4j.Slf4j;
@@ -360,6 +361,10 @@ final public class NumberUtil {
      * @return 字符串
      */
     public static String toString(Object value) {
+        if (value==null)
+        {
+            return "0";
+        }
         try {
             if (value instanceof String)
             {
@@ -385,11 +390,14 @@ final public class NumberUtil {
             {
                 return toString((short)value);
             }
-
+            if (value instanceof BigInteger || value instanceof BigDecimal)
+            {
+                return value.toString();
+            }
         } catch (NumberFormatException e) {
             log.error("toString value:{},error:{}",value,e.getMessage());
         }
-        return "0";
+        return value.toString();
     }
     /**
      * @param value 数字
@@ -550,7 +558,7 @@ final public class NumberUtil {
      * @param bytes the bytes transfer convert
      * @return the formated String representation of the bytes
      */
-    public static String toFormatBytesSize(long bytes) {
+    public static String getFormatBytesSize(long bytes) {
         if (bytes > (5 * 1000 * 1000)) {
             return (bytes / 1000000) + " MB";
 
@@ -567,7 +575,7 @@ final public class NumberUtil {
      * 例如:36进制的互换
      * String str32 = NumberUtil.getRadix(Integer.toString(i),10,36);
      * NumberUtil.getRadix(str32,36,10));
-     *
+     * 可以将36内的数字转换到  0-z
      * @param num  数字字符串
      * @param form 从 某进制转换到
      * @param to   to结果进制表示

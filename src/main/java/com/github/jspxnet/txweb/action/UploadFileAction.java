@@ -46,12 +46,14 @@ import com.github.jspxnet.utils.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -248,8 +250,6 @@ public class UploadFileAction extends MultipartSupport {
         }
         return setupPath;
     }
-
-
 
 
     /**
@@ -469,7 +469,9 @@ public class UploadFileAction extends MultipartSupport {
         }
 
         IUserSession userSession = getUserSession();
-        boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
+//        boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
+        // 默认所有上传都要缩略图片
+        boolean thumbnail = true;
         Object[] objects = localUploadFile(userSession, thumbnail);
         if (ObjectUtil.isEmpty(objects)) {
             printErrorInfo("上传失败", getFieldInfo());
@@ -502,7 +504,9 @@ public class UploadFileAction extends MultipartSupport {
             //其他方式不能释放,否则不会返回
             json.clear();
         }
-        uploadFileDAO.evict(uploadFileDAO.getClassType());
+//        uploadFileDAO.evict(uploadFileDAO.getClassType());
+        // 原因每个命名空间表名相同，位置不同，统一释放缓存
+        uploadFileDAO.evict(Class.forName("jspx.jcommon.table.UploadFile"));
         if (multipartRequest != null) {
             multipartRequest.destroy();
         }
@@ -526,6 +530,11 @@ public class UploadFileAction extends MultipartSupport {
         String[] contentArray = multipartRequest.getParameterValues(CONTENT_VAR_NAME);
 
         int index = -1;
+
+        // 检验是否批量上传
+        boolean batchImage = getBoolean("batchImage");
+
+        List<IUploadFile> list = new ArrayList<>();
         for (UploadedFile uf : multipartRequest.getFiles()) {
             index++;
             if (ArrayUtil.inArray(STOP_EXS, uf.getFileType(), true)) {
@@ -600,29 +609,23 @@ public class UploadFileAction extends MultipartSupport {
                 if (ObjectUtil.isEmpty(uploadObjArray)) {
                     return null;
                 }
-                if (!useCloudFile && uploadObjArray[0] != null) {
-                    IUploadFile uploadFile = (IUploadFile) uploadObjArray[0];
+                AssertException.isNull(uploadObjArray[0], "附件上传失效！");
+                IUploadFile uploadFile = (IUploadFile) uploadObjArray[0];
+                if (!useCloudFile) {
                     // 拼接成绝对路径
                     uploadFile.setFileName(String.format("http://%s/%s/%s", commonConfig.getString("bindDomain"),
                             uploadFileDAO.getNamespace(), uploadFile.getFileName()));
-                    //上传到本地目录
-                    uploadFileDAO.save(uploadFile);
+                    // 设置缩略图地址
+                    IUploadFile thumbnailFile = (IUploadFile) uploadObjArray[1];
+                    uploadFile.setThumbnail(String.format("http://%s/%s/%s", commonConfig.getString("bindDomain"),
+                            uploadFileDAO.getNamespace(), thumbnailFile.getFileName()));
 
-                    long pid = uploadFile.getId();
-                    for (int i = 1; i < uploadObjArray.length; i++) {
-                        if (uploadObjArray[i] == null) {
-                            continue;
-                        }
-                        IUploadFile tmpUploadFile = (IUploadFile) uploadObjArray[i];
-                        tmpUploadFile.setPid(pid);
-                        // 拼接成绝对路径
-                        tmpUploadFile.setFileName(String.format("http://%s/%s/%s", commonConfig.getString("bindDomain"),
-                                uploadFileDAO.getNamespace(), tmpUploadFile.getFileName()));
-
-                        uploadFileDAO.save(uploadObjArray[i]);
+                    if (!batchImage) {
+                        //上传到本地目录
+                        uploadFileDAO.save(uploadFile);
+                        // 不是批量图片，直接返回
+                        return uploadObjArray;
                     }
-
-                    return uploadObjArray;
                 } else {
 
                     //上传到云盘
@@ -630,36 +633,40 @@ public class UploadFileAction extends MultipartSupport {
                     AssertException.isNull(cloudFileConfig, "云盘空间没有配置");
                     CloudFileClient cloudFileClient = CloudServiceFactory.createCloudClient(cloudFileConfig);
                     AssertException.isNull(cloudFileClient, "云盘空间没有配置正确");
-                    long pid = 0;
+
                     String fileName = cloudFileConfig.getNamespace() + StringUtil.BACKSLASH + RandomUtil.getRandomGUID(28);
-                    for (int i = 0; i < uploadObjArray.length; i++) {
-                        if (uploadObjArray[i] == null) {
-                            continue;
-                        }
-                        IUploadFile tmpUploadFile = (IUploadFile) uploadObjArray[i];
-                        File localFile = new File(tmpUploadFile.getTempFilePath());
-                        String createUrlFileName = fileName + StringUtil.DOT + FileUtil.getTypePart(localFile);
-                        // 如果是缩图后面加_s
-                        if (i == YesNoEnumType.YES.getValue()) {
-                            createUrlFileName = String.format("%s_s%s", fileName, StringUtil.DOT + FileUtil.getTypePart(localFile));
-                        }
-                        String cloudUrl = cloudFileClient.upload(createUrlFileName, localFile);
-                        tmpUploadFile.setFileName(cloudUrl);
-                        StringMap<String, String> attributeMap = tmpUploadFile.getAttributeMap();
-                        attributeMap.put("configId", cloudFileConfig.getId() + "");
-                        attributeMap.put("bucket", cloudFileConfig.getBucket());
-                        tmpUploadFile.setAttributes(attributeMap.toString());
-                        if (i == 0) {
-                            uploadFileDAO.save(uploadObjArray[i]);
-                            pid = tmpUploadFile.getId();
-                        } else {
-                            tmpUploadFile.setPid(pid);
-                            uploadFileDAO.save(uploadObjArray[i]);
-                        }
+                    if (batchImage) {
+                        fileName = cloudFileConfig.getNamespace() + StringUtil.BACKSLASH + uf.getOriginal().replaceAll(".\\w+$", "");
                     }
-                    return uploadObjArray;
+                    File localFile = new File(uploadFile.getTempFilePath());
+                    String createUrlFileName = fileName + StringUtil.DOT + FileUtil.getTypePart(localFile);
+                    uploadFile.setFileName(cloudFileClient.upload(createUrlFileName, localFile));
+                    // 再次设置属性
+                    StringMap<String, String> attributeMap = uploadFile.getAttributeMap();
+                    attributeMap.put("configId", cloudFileConfig.getId() + "");
+                    attributeMap.put("bucket", cloudFileConfig.getBucket());
+                    uploadFile.setAttributes(attributeMap.toString());
+                    // 设置缩略图地址
+                    if (batchImage && index == YesNoEnumType.NO.getValue()) {
+                        uploadFile.setThumbnail(cloudFileClient.upload(createUrlFileName.replaceAll("\\.","_s."), localFile));
+                    }else{
+                        IUploadFile thumbnailFile = (IUploadFile) uploadObjArray[1];
+                        File thumbnailLocalFile = new File(thumbnailFile.getTempFilePath());
+                        String thumbnailCreateUrlFileName = String.format("%s_s%s", fileName, StringUtil.DOT + FileUtil.getTypePart(thumbnailLocalFile));
+                        uploadFile.setThumbnail(cloudFileClient.upload(thumbnailCreateUrlFileName, thumbnailLocalFile));
+                    }
+
+                    if (!batchImage) {
+                        uploadFileDAO.save(uploadFile);
+                        // 不是批量图片，直接返回
+                        return uploadObjArray;
+                    }
                 }
+                list.add(uploadFile);
             }
+        }
+        if (batchImage && !ObjectUtil.isEmpty(list)) {
+            return list.toArray(new Object[0]);
         }
         return null;
     }
@@ -703,10 +710,10 @@ public class UploadFileAction extends MultipartSupport {
             int w = image.getWidth();
             int h = image.getHeight();
             if (w > config.getInt(Environment.maxImageWidth)) {
-                w=config.getInt(Environment.maxImageWidth);
+                w = config.getInt(Environment.maxImageWidth);
             }
             if (h > config.getInt(Environment.maxImageHeight)) {
-                h=config.getInt(Environment.maxImageHeight);
+                h = config.getInt(Environment.maxImageHeight);
             }
 
 
@@ -810,6 +817,7 @@ public class UploadFileAction extends MultipartSupport {
         }
         upFile.setCreateDate(createDate);
         result[0] = saveUploadFile;
+        json.clear();
         return result;
     }
 
@@ -862,7 +870,6 @@ public class UploadFileAction extends MultipartSupport {
         }
         return objects;
     }
-
 
 
     /**

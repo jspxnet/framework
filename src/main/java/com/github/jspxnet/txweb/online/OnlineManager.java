@@ -49,7 +49,7 @@ public interface OnlineManager extends Serializable {
 
     UserSession getUserSession(String sessionId, String ip);
 
-    UserSession getUserSession(String sessionId, String ip, long uid);
+
 
     UserSession getUserSession(Action action);
 
@@ -57,9 +57,10 @@ public interface OnlineManager extends Serializable {
 
     UserSession getUserSession(ActionContext actionContext);
 
-    void deleteUserSession(String sid, long uid) throws Exception;
+    String getToken(HttpServletRequest request);
 
-    JSONObject login(HttpSession session, String loginId, String password, String client, String ip) throws Exception;
+
+    JSONObject login(HttpServletRequest request, String loginId, String password, String client, String ip) throws Exception;
 
     Map<String, String> login(ActionSupport action, String isId, String loginId, String password, int cookieSecond) throws Exception;
 
@@ -67,9 +68,15 @@ public interface OnlineManager extends Serializable {
 
     void exit(ActionSupport action);
 
-    void setCookieTicket(HttpServletRequest request, HttpServletResponse response, String sid, int cookieSecond);
+    //void setCookieTicket(HttpServletRequest request, HttpServletResponse response, String sid, int cookieSecond);
+
+    void setCookieToken(HttpServletRequest request, HttpServletResponse response, String sid, int cookieSecond);
 
     void destroy();
 
-    void updateUserSessionCache(UserSession userSession);
+    //boolean updateUserSessionCache(UserSession userSession);
+
+    boolean updateUserSessionCache(UserSession userSession);
+
+    UserSession getUserSession(String token);
 }

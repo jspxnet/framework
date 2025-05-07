@@ -47,6 +47,10 @@ public final class SessionUtil {
 
 
     public static String getSessionId(HttpSession session) {
+        if (session==null)
+        {
+            return null;
+        }
         String str = session.getId();
         if (str!=null&&str.contains(StringUtil.DOT))
         {

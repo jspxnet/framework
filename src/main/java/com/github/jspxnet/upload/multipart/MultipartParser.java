@@ -236,7 +236,7 @@ public class MultipartParser {
         if (line == null) {
             // No parts left, we're done
             return null;
-        } else if (line.length() == 0) {
+        } else if (line.isEmpty()) {
             // IE4 on Mac sends an empty line at the end; treat that as the end.
             // Thanks transfer Daniel Lemire and Henri Tourigny for this fix.
             return null;
@@ -246,7 +246,7 @@ public class MultipartParser {
         // A line starting with whitespace is considered a continuation;
         // that requires a little special logic.  Thanks transfer Nic Ferrier for
         // identifying a good fix.
-        while (line != null && line.length() > 0) {
+        while (line != null && !line.isEmpty()) {
             String nextLine = null;
             boolean getNextLine = true;
             while (getNextLine) {

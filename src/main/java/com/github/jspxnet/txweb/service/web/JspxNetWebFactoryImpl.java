@@ -123,8 +123,8 @@ public class JspxNetWebFactoryImpl extends AuthenticationAction implements WebBe
         actionContext.setResponse((HttpServletResponse) messageContext.get(MessageContext.SERVLET_RESPONSE));
         HttpSession session = actionContext.getRequest().getSession();
         try {
-            if (session != null && session.getAttribute(TXWeb.token) == null) {
-                session.setAttribute(TXWeb.token, token);
+            if (session != null && session.getAttribute(ActionEnv.KEY_TOKEN) == null) {
+                session.setAttribute(ActionEnv.KEY_TOKEN, token);
             }
             onlineManager.exit(this);
         } catch (Exception e) {
@@ -191,10 +191,10 @@ public class JspxNetWebFactoryImpl extends AuthenticationAction implements WebBe
         envParams.put(ActionEnv.Key_RealPath, Dispatcher.getRealPath());
         envParams.put(ActionEnv.Key_Request, actionContext.getRequest());
         envParams.put(ActionEnv.Key_Response, actionContext.getResponse());
-        envParams.put(TXWeb.token, token);
+        envParams.put(ActionEnv.KEY_TOKEN, token);
         //setSessionId(sessionId);
         HttpSession session = actionContext.getRequest().getSession();
-        session.setAttribute(TXWeb.token, token);
+        session.setAttribute(ActionEnv.KEY_TOKEN, token);
         ///////////////////////////////////环境参数 end
         ///////////////////读取ajax请求 end
         if (StringUtil.isNull(call)) {

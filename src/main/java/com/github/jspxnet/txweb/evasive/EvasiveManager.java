@@ -274,7 +274,6 @@ public class EvasiveManager {
             try {
                 sql = EnvFactory.getPlaceholder().processTemplate(envParams, sql);
             } catch (Exception e) {
-                e.printStackTrace();
                 log.error(queryBlack.getName() + " sql " + sql, e);
             }
             if (debug) {
@@ -364,7 +363,7 @@ public class EvasiveManager {
 
             //如果创建的时间大于一个周期时间, 访问次数大于最大允许次数的数据，清空，重置,从黑名单里边放出来
             if (evasiveIp.getTimes() > evasiveRule.getMaxTimes()) {
-                if (System.currentTimeMillis() - evasiveIp.getCreateTimeMillis() >= evasiveRule.getInterval() * DateUtil.SECOND) {
+                if (System.currentTimeMillis() - evasiveIp.getCreateTimeMillis() >= (long) evasiveRule.getInterval() * DateUtil.SECOND) {
                     evasiveIp.setCreateTimeMillis(System.currentTimeMillis());
                     evasiveIp.setTimes(0);
                 } else {

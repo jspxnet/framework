@@ -51,14 +51,9 @@ public interface HttpClient {
 
 
     boolean download(File file,Map<String,Object> map) throws Exception;
-    /**
-     * 上传文件
-     * @param files 文件
-     * @param name 文件变量名
-     * @param params 参数
-     * @return 返回信息
-     */
-    String upload(File[] files, String name, Map<String, String> params);
+
+
+    String upload(File[] files, String name, Object params);
 
     boolean download(File file, JSONObject json) throws Exception;
 

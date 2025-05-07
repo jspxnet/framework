@@ -251,7 +251,7 @@ public final class JxlsUtil {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
             }
         }
@@ -442,6 +442,87 @@ public final class JxlsUtil {
             list.add(ReflectUtil.createDynamicBean(org,newFieldMap));
         }
         return list;
+    }
+
+
+
+    /**
+     *
+     * @param in 输入流
+     * @param sheetIndex 第几个 sheet
+     * @param startRow 开始行
+     * @param startCol 开始列
+     * @return 完整的将excle 读出来
+     * @throws Exception 异常
+     */
+    public static List<Map<Integer,Object>> getMap(InputStream in,int sheetIndex, int startRow, int startCol) throws Exception
+    {
+        List<Map<Integer,Object>> result = new ArrayList<>();
+        try {
+            Workbook workbook = WorkbookFactory.create(in);
+            Sheet sheet = workbook.getSheetAt(sheetIndex);
+
+            int rowNum = sheet.getLastRowNum() + 1;
+            // 行循环开始
+            for (int i = startRow; i < rowNum; i++) {
+                // 行
+                Row row = sheet.getRow(i);
+                // 每行的最后一个单元格位置
+                Map<Integer,Object> valueMap = new LinkedHashMap<>();
+                // 列循环开始
+                for (int j = startCol; j < sheet.getRow(i).getLastCellNum(); j++) {
+                    Cell cell = row.getCell(j);
+                    if (null == cell)
+                    {
+                        continue;
+                    }
+                    Object cellValue = null;
+
+                    short format = cell.getCellStyle().getDataFormat();
+                    // 判断excel单元格内容的格式，并对其进行转换，以便插入数据库
+                    try {
+                        if (CellType.NUMERIC == cell.getCellType()) {
+                            if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                                if (format == 20 || format == 32) {
+                                    Date date = cell.getDateCellValue();
+                                    cellValue = DateUtil.toString(date,DateUtil.TIME_FORMAT);
+                                } else if (format == 14 || format == 31 || format == 57 || format == 58) {
+                                    // 处理自定义日期格式：m月d日(通过判断单元格的格式id解决，id的值是58)
+                                    double value = cell.getNumericCellValue();
+                                    Date date = org.apache.poi.ss.usermodel.DateUtil.getJavaDate(value);
+                                    cellValue =  DateUtil.toString(date,DateUtil.DAY_FORMAT);
+                                }else {// 日期
+                                    Date date = cell.getDateCellValue();
+                                    cellValue = DateUtil.toString(date, DateUtil.FULL_ST_FORMAT);
+                                }
+
+                            } else {
+                                BigDecimal bd = BigDecimal.valueOf(cell.getNumericCellValue());
+                                cellValue = bd.toPlainString();// 数值 这种用BigDecimal包装再获取plainString，可以防止获取到科学计数值
+                            }
+                        }
+                        else if (CellType.FORMULA == cell.getCellType()) {
+                            cellValue =  cell.getCellFormula();
+                        }
+                        else if (CellType.BLANK == cell.getCellType()) {
+                            cellValue = StringUtil.empty;
+                        }
+                        else {
+                            cellValue = cell.getStringCellValue();
+                        }
+                        valueMap.put(j,cellValue);
+                    } catch (Exception e)
+                    {
+                       e.printStackTrace();
+                    }
+                }
+                result.add(valueMap);
+            }
+        } finally {
+            in.close();
+        }
+
+        return result;
     }
 
 }

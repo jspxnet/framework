@@ -9,8 +9,11 @@
  */
 package com.github.jspxnet.filter;
 
+import com.github.jspxnet.boot.environment.Environment;
+
 import javax.servlet.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,8 +26,8 @@ public class CharacterFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         chain.doFilter(request, response);
     }
 

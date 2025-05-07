@@ -28,6 +28,7 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.io.CloseMode;
 import org.apache.hc.core5.net.URIBuilder;
+
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -64,16 +65,14 @@ public class HttpClientAdapter implements HttpClient {
 
 
     @Override
-    public void close()
-    {
-        if (httpClient!=null)
-        {
+    public void close() {
+        if (httpClient != null) {
             try {
                 cookieStore.clear();
 
                 httpClient.close(CloseMode.IMMEDIATE);
             } catch (Exception e) {
-                log.error(e.getMessage(),e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -203,8 +202,8 @@ public class HttpClientAdapter implements HttpClient {
      *
      * @param url url
      * @return 请求
-     * @throws Exception 异常
-     * @throws IOException             异常
+     * @throws Exception   异常
+     * @throws IOException 异常
      */
     @Override
     public CloseableHttpResponse getHttpResponse(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception {
@@ -224,34 +223,33 @@ public class HttpClientAdapter implements HttpClient {
 
     /**
      * 未了支持 Elasticsearch
+     *
      * @param json json
      * @return 请求结果
      * @throws Exception 异常
      */
     @Override
-    public String get(JSONObject json) throws Exception
-    {
-        return EntityUtils.toString(get( url,  json, defaultHeaders));
+    public String get(JSONObject json) throws Exception {
+        return EntityUtils.toString(get(url, json, defaultHeaders));
     }
 
 
     /**
      * 未了支持 Elasticsearch
-     * @param json json
+     *
+     * @param json    json
      * @param headers 请求头
      * @return 请求结果
      * @throws Exception 异常
      */
     @Override
-    public String get(JSONObject json, Map<String, String> headers) throws Exception
-    {
-        return EntityUtils.toString(get( url,  json, headers));
+    public String get(JSONObject json, Map<String, String> headers) throws Exception {
+        return EntityUtils.toString(get(url, json, headers));
     }
 
 
     @Override
-    public HttpEntity get(String url, JSONObject json, Map<String, String> headers) throws Exception
-    {
+    public HttpEntity get(String url, JSONObject json, Map<String, String> headers) throws Exception {
         if (headers == null || headers.isEmpty()) {
             return null;
         }
@@ -282,7 +280,7 @@ public class HttpClientAdapter implements HttpClient {
         }
         if (json != null) {
             //(String string, ContentType contentType, String contentEncoding, boolean chunked)
-            StringEntity s = new StringEntity(json.toString(4),ContentType.APPLICATION_JSON.withCharset(Charset.forName(encode)));
+            StringEntity s = new StringEntity(json.toString(4), ContentType.APPLICATION_JSON.withCharset(Charset.forName(encode)));
             httpPost.setEntity(s);
         }
         /*AbstractHttpClientResponseHandler<String> handler = new BasicHttpClientResponseHandler();
@@ -346,14 +344,15 @@ public class HttpClientAdapter implements HttpClient {
     }
 
     @Override
-    public String post(String url,  Map<String, ?> params) throws Exception {
+    public String post(String url, Map<String, ?> params) throws Exception {
         return EntityUtils.toString(post(url, params, defaultHeaders));
     }
 
     @Override
-    public String post( Map<String, ?> params) throws Exception {
+    public String post(Map<String, ?> params) throws Exception {
         return post(url, params);
     }
+
     @Override
     public HttpEntity put(String url, Map<String, ?> params, Map<String, String> headers) throws Exception {
         HttpPut httpPost = new HttpPut(url);
@@ -369,8 +368,7 @@ public class HttpClientAdapter implements HttpClient {
     }
 
     @Override
-    public HttpEntity put(JSONObject json, Map<String, String> headers) throws Exception
-    {
+    public HttpEntity put(JSONObject json, Map<String, String> headers) throws Exception {
         if (ObjectUtil.isEmpty(headers)) {
             return null;
         }
@@ -410,8 +408,7 @@ public class HttpClientAdapter implements HttpClient {
     @Override
     public HttpEntity put(String url, String body, Map<String, String> headers) throws Exception {
         HttpPut httpPost = new HttpPut(url);
-        if (body!=null)
-        {
+        if (body != null) {
             StringEntity postEntity = new StringEntity(body, Charset.forName(encode));
             httpPost.setEntity(postEntity);
         }
@@ -456,9 +453,8 @@ public class HttpClientAdapter implements HttpClient {
     @Override
     public HttpEntity post(String url, String body, Map<String, String> headers) throws Exception {
         HttpPost httpPost = new HttpPost(url);
-        if (body!=null)
-        {
-            StringEntity postEntity = new StringEntity(body,Charset.forName(encode));
+        if (body != null) {
+            StringEntity postEntity = new StringEntity(body, Charset.forName(encode));
             httpPost.setEntity(postEntity);
         }
         if (headers != null && !headers.isEmpty()) {
@@ -470,20 +466,17 @@ public class HttpClientAdapter implements HttpClient {
 
 
     @Override
-    public String post(String url, String body) throws Exception
-    {
+    public String post(String url, String body) throws Exception {
         return EntityUtils.toString(post(url, body, defaultHeaders));
     }
 
     @Override
-    public String post(String body) throws Exception
-    {
+    public String post(String body) throws Exception {
         return post(url, body);
     }
 
     @Override
-    public HttpEntity post(String url, JSONObject json, Map<String, String> headers) throws Exception
-    {
+    public HttpEntity post(String url, JSONObject json, Map<String, String> headers) throws Exception {
         if (headers == null || headers.isEmpty()) {
             return null;
         }
@@ -513,21 +506,19 @@ public class HttpClientAdapter implements HttpClient {
             json = posts;
         }
         if (json != null) {
-            StringEntity s = new StringEntity(json.toString(4),ContentType.APPLICATION_JSON.withCharset(Charset.forName(encode)));
+            StringEntity s = new StringEntity(json.toString(4), ContentType.APPLICATION_JSON.withCharset(Charset.forName(encode)));
             httpPost.setEntity(s);
         }
         httpResponse = httpClient.execute(httpPost);
-        if (httpResponse.getCode()==405)
-        {
+        if (httpResponse.getCode() == 405) {
             httpResponse.close();
-            return get(url,json,headers);
+            return get(url, json, headers);
         }
         return httpResponse.getEntity();
     }
 
     @Override
-    public HttpEntity put(String url, JSONObject json, Map<String, String> headers) throws Exception
-    {
+    public HttpEntity put(String url, JSONObject json, Map<String, String> headers) throws Exception {
         if (headers == null || headers.isEmpty()) {
             return null;
         }
@@ -571,12 +562,12 @@ public class HttpClientAdapter implements HttpClient {
 
     @Override
     public String post() throws Exception {
-        return EntityUtils.toString(post(url, (String)null, defaultHeaders));
+        return EntityUtils.toString(post(url, (String) null, defaultHeaders));
     }
 
     @Override
     public String post(JSONObject json) throws Exception {
-        return EntityUtils.toString(post(url, json, defaultHeaders),encode);
+        return EntityUtils.toString(post(url, json, defaultHeaders), encode);
     }
 
     @Override
@@ -606,45 +597,41 @@ public class HttpClientAdapter implements HttpClient {
 
 
     /**
-     *
      * @param files 文件
-     * @param name 文件变量名
-     * @return  返回信息
+     * @param name  文件变量名
+     * @return 返回信息
      */
     @Override
-    public String upload(File[] files, String name)
-    {
-        return upload( files,  name,null);
+    public String upload(File[] files, String name) {
+        return upload(files, name, null);
     }
 
     /**
      * 上传文件
-     * @param files 文件
-     * @param name 文件变量名
-     * @param params 参数
+     *
+     * @param files  文件
+     * @param name   文件变量名
+     * @param params 参数,目前支持map和json两种类型格式
      * @return 返回信息
      */
     @Override
-    public String upload(File[] files, String name,Map<String,String> params)
-    {
+    public String upload(File[] files, String name, Object params) {
         String response = "";
-        if (files==null) {
+        if (files == null) {
             return "file not exists";
         }
 
         HttpPost postMethod = new HttpPost(url);
 
-        for (String key:defaultHeaders.keySet())
-        {
-            if ("CONTENT-TYPE".contains(key.toUpperCase()))
-            {
+        for (String key : defaultHeaders.keySet()) {
+            if ("CONTENT-TYPE".contains(key.toUpperCase())) {
                 continue;
             }
-            postMethod.addHeader(key,defaultHeaders.get(key));
+            postMethod.addHeader(key, defaultHeaders.get(key));
         }
 
         Charset defCharset = Charset.forName(encode);
-        MultipartEntityBuilder builder  = MultipartEntityBuilder.create();
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.setCharset(defCharset);
         builder.setMode(HttpMultipartMode.EXTENDED);
         builder.setContentType(ContentType.MULTIPART_FORM_DATA.withCharset(defCharset));
@@ -652,36 +639,32 @@ public class HttpClientAdapter implements HttpClient {
             //----------------------------------------------
             // FilePart：用来上传文件的类,file即要上传的文件
             for (File file : files) {
-                builder.addBinaryBody(name,file,ContentType.APPLICATION_OCTET_STREAM.withCharset(defCharset),file.getName());
+                builder.addBinaryBody(name, file, ContentType.APPLICATION_OCTET_STREAM.withCharset(defCharset), file.getName());
             }
-           if (params!=null)
-            {
-                for (String key:params.keySet())
-                {
-                    if (key==null)
-                    {
-                        continue;
+            if (params != null) {
+                if (params instanceof JSONObject) {
+                    JSONObject param = (JSONObject) params;
+                    for (String key : param.keySet()) {
+                        if (key == null) {
+                            continue;
+                        }
+                        builder.addTextBody(key, param.getJSONObject(key).toString(), ContentType.TEXT_PLAIN.withCharset(defCharset));
                     }
-                    builder.addTextBody(key,params.get(key),ContentType.TEXT_PLAIN.withCharset(defCharset));
+                }  else
+                if (params instanceof Map) {
+                    Map<String,Object> param = (Map) params;
+                    for (String key : param.keySet()) {
+                        if (key == null) {
+                            continue;
+                        }
+                        builder.addTextBody(key, ObjectUtil.toString(param.get(key)), ContentType.TEXT_PLAIN.withCharset(defCharset));
+                    }
                 }
             }
             postMethod.setEntity(builder.build());
-            response = httpClient.execute(postMethod,new BasicHttpClientResponseHandler());
-
-            //httpResponse = httpClient.execute(postMethod,basicHttpClientResponseHandler);
-
-          /*  int status = httpResponse.getCode() ;
-            if (status == HttpStatus.SC_OK) {
-                response =  EntityUtils.toString(httpResponse.getEntity(), defCharset);
-            } else {
-                response = httpResponse.getReasonPhrase();
-                if (StringUtil.isEmpty(response))
-                {
-                    response = "fail";
-                }
-            }*/
+            response = httpClient.execute(postMethod, new BasicHttpClientResponseHandler());
         } catch (Exception e) {
-            log.error(e.getMessage(),e);
+            log.error(e.getMessage(), e);
         } finally {
             // 释放连接
             postMethod.reset();
@@ -691,14 +674,12 @@ public class HttpClientAdapter implements HttpClient {
     }
 
     @Override
-    public boolean download(File file,JSONObject json) throws Exception
-    {
+    public boolean download(File file, JSONObject json) throws Exception {
         return FileUtil.writeFile(file, EntityUtils.toByteArray(post(url, json, defaultHeaders)));
     }
 
     @Override
-    public boolean download(File file,Map<String,Object> map) throws Exception
-    {
+    public boolean download(File file, Map<String, Object> map) throws Exception {
         return FileUtil.writeFile(file, EntityUtils.toByteArray(post(url, map, defaultHeaders)));
     }
 

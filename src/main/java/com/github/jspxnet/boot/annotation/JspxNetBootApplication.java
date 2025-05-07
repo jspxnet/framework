@@ -28,4 +28,6 @@ public @interface JspxNetBootApplication {
 
     int maxPostSize() default 10000000; //100M
 
+    boolean debug() default true;
+
 }

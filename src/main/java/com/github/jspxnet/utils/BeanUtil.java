@@ -209,7 +209,6 @@ public final class BeanUtil {
         {
             ParameterizedType ptype = (ParameterizedType)aType;
             Type rawType = ptype.getRawType();
-            //System.out.println("最外层<>前面那个类型 rawType："+rawType.getTypeName());
             Type type = ptype.getActualTypeArguments()[0];
             if (rawType.getTypeName().contains("java.util.List")||rawType.getTypeName().contains(".Collection"))
             {
@@ -1470,27 +1469,5 @@ public final class BeanUtil {
         }
     }
 
-/*
-    public static void main(String[] args) {
-
-        CityItem cityItem = new CityItem();
-        cityItem.setCaption(null);
-        cityItem.setRoleIds(" ");
-        cityItem.setDescription("sdfsd士大夫的,()（）【】，。");
-        List<Object> list = new ArrayList<>();
-        list.add(cityItem);
-
-        JSONObject json = new JSONObject(cityItem);
-        stringNullOrWhiteSpaceToEmpty(json);
-        System.out.println(ObjectUtil.toString(json));
-        stringFullToHalf(cityItem);
-        System.out.println(ObjectUtil.toString(cityItem));
-        System.out.println(ObjectUtil.toString(list));
-        cityItem.setDescription(null);
-        stringNullToEmpty(cityItem);
-        System.out.println(ObjectUtil.toString(cityItem));
-
-    }
-*/
 
 }

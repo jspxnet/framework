@@ -117,7 +117,7 @@ public class IpLocationDAOImpl extends JdbcOperations implements IpLocationDAO {
                     saveList.clear();
                 }
             }
-            if (saveList.size() > 0) {
+            if (!saveList.isEmpty()) {
 
                 super.save(saveList);
                 saveList.clear();

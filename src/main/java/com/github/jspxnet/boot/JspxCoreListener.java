@@ -38,9 +38,11 @@ import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import javax.crypto.Cipher;
 import javax.servlet.ServletContextListener;
+import java.io.File;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.Provider;
 import java.security.Security;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -77,13 +79,13 @@ public class JspxCoreListener implements ServletContextListener {
         return isRun;
     }
 
-    private String defaultPath = null;
+    private static String defaultPath = null;
 
     public void setDefaultPath(String defaultPath) {
         if (!defaultPath.endsWith("/") && !defaultPath.endsWith("\\")) {
             defaultPath = defaultPath + "/";
         }
-        this.defaultPath = defaultPath;
+        JspxCoreListener.defaultPath = defaultPath;
     }
 
     @Override
@@ -92,35 +94,40 @@ public class JspxCoreListener implements ServletContextListener {
         //开始不能调用时间,调用了时间设置不了时区
         copyright = Environment.frameworkName + " " + Environment.VERSION + " " + Environment.licenses + " Powered By chenYuan ";
         log.info("-" + copyright + " start-" + startTimes++);
+        log.debug("提示:启动参数中加入jspx.env.active=dev,配置文件指向到jspx-dev.properties,这样可以缺环配置到dev模式");
+
         //////初始化环境变量 begin
-        log.info("开始载入org.bouncycastle.jce.provider.BouncyCastleProvider");
         try {
+            //log.debug("开始载入org.bouncycastle.jce.provider.BouncyCastleProvider,它是加密解密的重要库");
             Security.addProvider(new BouncyCastleProvider());
-            Security.addProvider((Provider) ClassUtil.newInstance("com.sun.crypto.provider.SunJCE"));
-            Security.addProvider((Provider) ClassUtil.newInstance("org.bouncycastle.jce.provider.BouncyCastleProvider"));
+            ClassLoader loader = BouncyCastleProvider.class.getClassLoader();
+            URL url = loader.getResource("org/bouncycastle/jce/provider/BouncyCastleProvider.class");
+            log.debug("BouncyCastle加载路径：{}", url);
+            Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
+            log.debug("完成载入org.bouncycastle.jce.provider.BouncyCastleProvider");
         } catch (Exception e) {
-            e.printStackTrace();
-            log.info("1. 加密类bcprov-jdk15on-1.69.jar 拷贝到 %JAVA_HOME%\\jre\\lib\\ext 目录，一般jdk安装后有两个位置");
-            log.info("2. 在 jdk安装目录下（%JAVA_HOME%\\jre\\lib\\security）修改 java.security 文件修改为 security.provider.7=org.bouncycastle.jce.provider.BouncyCastleProvider");
+            log.error("1. 加密类bcprov-jdk18on-xxx.jar 拷贝到 %JAVA_HOME%\\jre\\lib\\ext 目录，一般jdk安装后有两个位置\r\n"
+                    + "2. 在 jdk安装目录下（%JAVA_HOME%\\jre\\lib\\security）修改 java.security 文件修改为 security.provider.7=org.bouncycastle.jce.provider.BouncyCastleProvider\r\n" +
+                      "3.上边两步如果不能启动，添加java -Djava.ext.dirs=%JAVA_HOME%\\jre\\lib\\ext 指定到jar所在目录",e);
         }
-
-        JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
-        if (!StringUtil.isNull(defaultPath)) {
-            jspxConfiguration.setDefaultPath(defaultPath);
-        }
-
         String jspx_properties_file = Environment.jspx_properties_file;
-        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-
-        String active_config =  System.getenv(Environment.JSPX_ENV_ACTIVE);
+        String active_config = System.getenv(Environment.JSPX_ENV_ACTIVE);
+        JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!StringUtil.isNull(active_config))
         {
+            log.info("当前启动配置文件指向到jspx-{}.properties",active_config);
             Map<String,Object> valueMap = new HashMap<>();
             valueMap.put("active",active_config);
             jspx_properties_file = EnvFactory.getPlaceholder().processTemplate(valueMap,Environment.jspx_properties_template);
             jspxConfiguration.setDefaultConfigFile(jspx_properties_file);
+            jspxConfiguration.loadPath();
         }
 
+        if (!StringUtil.isNull(defaultPath)) {
+            jspxConfiguration.setDefaultPath(defaultPath);
+        }
+
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         Map<String,String> properties = envTemplate.readDefaultProperties(jspxConfiguration.getDefaultPath() + jspx_properties_file);
         String bootConfMode = properties.getOrDefault(Environment.BOOT_CONF_MODE,Environment.defaultValue);
         if (BootConfigEnumType.VCS.getName().equalsIgnoreCase(bootConfMode))
@@ -144,10 +151,10 @@ public class JspxCoreListener implements ServletContextListener {
         //默认方式
         envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
         //jdbc配置
-        if (!FileUtil.isFileExist(jspxConfiguration.getDefaultPath() + jspx_properties_file)) {
-            String info = "not found " + jspx_properties_file + ",不能找到基本的配置文件" + jspx_properties_file + ",构架将不能正常工作";
-            log.info(info);
-            log.info("你需要放入" + jspx_properties_file + "配置文件,然后重新启动java服务器");
+        File confFile = new File(jspxConfiguration.getDefaultPath(),jspx_properties_file);
+        if (!FileUtil.isFileExist(confFile.getPath())) {
+            String info = "not found " + confFile + ",不能找到基本的配置文件" + jspx_properties_file + ",构架将不能正常工作";
+            log.error(info);
             return;
         }
 
@@ -192,8 +199,6 @@ public class JspxCoreListener implements ServletContextListener {
         EntryFactory beanFactory = (EntryFactory) com.github.jspxnet.boot.EnvFactory.getBeanFactory();
         beanFactory.setIocContext(iocContext);
 
-
-
         //系统默认超时时间begin
         System.setProperty("sun.net.client.defaultConnectTimeout", "5000");
         System.setProperty("sun.net.client.defaultReadTimeout", "5000");
@@ -220,13 +225,10 @@ public class JspxCoreListener implements ServletContextListener {
         }
         //启动的时候清空缓存
 
-
-
         com.github.jspxnet.txweb.config.Configuration configuration = DefaultConfiguration.getInstance();
         try {
             configuration.loadConfigMap();
         } catch (Exception e) {
-
             log.error("载入Web配置错误", e);
         }
 
@@ -263,8 +265,6 @@ public class JspxCoreListener implements ServletContextListener {
         EvasiveConfiguration.getInstance().shutdown();
         log.info("Evasive config clean");
         //Evasive配置卸载begin
-
-
 
         if (RpcConfig.getInstance().isUseNettyRpc()) {
             log.info("关闭RPC服务器");
