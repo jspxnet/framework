@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.79</version>
+    <version>6.80</version>
     <description>jspx cloud framework</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -14,16 +14,17 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <github.global.server>github</github.global.server>
-        <tomcat.version>9.0.97</tomcat.version>
-        <jackson.version>2.18.2</jackson.version>
-        <redisson.version>3.39.0</redisson.version>
-        <log4j2.version>2.24.2</log4j2.version>
+        <tomcat.version>9.0.102</tomcat.version>
+        <jackson.version>2.18.3</jackson.version>
+        <redisson.version>3.45.1</redisson.version>
+        <log4j2.version>2.24.3</log4j2.version>
         <poi.version>5.3.0</poi.version>
         <jxls.version>2.14.0</jxls.version>
-        <logback.version>1.3.14</logback.version>
-        <slf4j.version>2.0.16</slf4j.version>
+        <!--1.8只能这个版本-->
+        <logback.version>1.3.15</logback.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <imageio.version>3.12.0</imageio.version>
-        <bouncycastle.version>1.79</bouncycastle.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
         <sshd.version>2.13.2</sshd.version>
         <maven.plugin.validation>VERBOSE</maven.plugin.validation>
         <maven.test.skip>true</maven.test.skip>
@@ -78,7 +79,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.34</version>
+            <version>1.18.38</version>
             <scope>compile</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
@@ -230,40 +231,44 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
+            <version>4.5.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
             <version>${bouncycastle.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpg-jdk18on -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpg-jdk18on</artifactId>
             <version>${bouncycastle.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcmail-jdk18on -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk18on</artifactId>
             <version>${bouncycastle.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.xhtmlrenderer/flying-saucer-pdf -->
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf</artifactId>
+            <version>9.4.1</version>
+            <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.xhtmlrenderer/flying-saucer-pdf-itext5 -->
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-pdf-itext5</artifactId>
             <version>9.4.1</version>
+            <scope>provided</scope>
         </dependency>
 
-        <!--
-        <dependency>
-            <groupId>org.xhtmlrenderer</groupId>
-            <artifactId>core-renderer</artifactId>
-            <version>R8</version>
-            <scope>provided</scope>
-        </dependency>-->
         <!-- https://mvnrepository.com/artifact/com.rometools/rome-fetcher -->
         <!--
         <dependency>
@@ -276,7 +281,7 @@
         <dependency>
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
-            <version>2.3.0</version>
+            <version>2.4.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -300,7 +305,7 @@
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.11.0</version>
+            <version>3.11.1</version>
         </dependency>
         <!-- 华为 -->
         <dependency>
@@ -329,7 +334,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>2.0.51</version>
+            <version>2.0.57</version>
         </dependency>
         <dependency>
             <groupId>com.aliyun.oss</groupId>
@@ -486,7 +491,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.4</version>
+            <version>42.7.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -515,7 +520,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.11.0</version>
+            <version>2.12.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
         <!--        <dependency>
@@ -527,7 +532,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.115.Final</version>
+            <version>4.2.0.Final</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
@@ -597,7 +602,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.3.0-jre</version>
+            <version>33.4.7-jre</version>
         </dependency>
         <dependency>
             <groupId>org.bidib.jbidib.org.qbang.rxtx</groupId>
@@ -745,7 +750,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.16.2</version>
+                    <version>2.17.1</version>
                     <configuration>
                         <generateBackupPoms>false</generateBackupPoms>
                     </configuration>
@@ -753,7 +758,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>3.4.0</version>
                     <executions>
                         <execution>
                             <goals>
@@ -779,7 +784,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.1.1</version>
                     <configuration>
                         <arguments>-Psonatype-oss-release</arguments>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
@@ -809,7 +814,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.10.0</version>
+                    <version>3.10.1</version>
                     <configuration>
                         <encoding>UTF-8</encoding>
                         <charset>UTF-8</charset>
@@ -834,34 +839,6 @@
                     </executions>
                 </plugin>
 
-                <!--
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.3.0</version>
-                    <configuration>
-                        <finalName>jspxnet-${project.version}</finalName>
-                        <archive>
-                            <manifest>
-                                <mainClass>com.github.jspxnet.boot.TomcatApplication</mainClass>
-                            </manifest>
-                        </archive>
-
-                        <descriptorRefs>
-                            <descriptorRef>jar-with-dependencies</descriptorRef>
-                        </descriptorRefs>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>create-archive</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
--->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -920,10 +897,9 @@
                     </executions>
                 </plugin>
 
-
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                     <!--
                     mvn clean deploy -P sonatype-oss-release
                     -->

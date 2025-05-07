@@ -31,7 +31,7 @@ b/s,c/s ,分布式集群调用支持, 语言上只使用了标准的 java 和jav
 <dependency>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.79</version>
+    <version>6.80</version>
 </dependency>
 ```
     
@@ -151,3 +151,4 @@ b/s,c/s ,分布式集群调用支持, 语言上只使用了标准的 java 和jav
 * 2024年06-07月：Jspx cloud Framework 6.77 优化代码生成结构，httpclent升级到httpclent5支持.去掉spring嵌入支持,修复多数据源事物异常，修复jdk11下启动异常。优化代码自动生功能。精简依赖，修复上传bug。
 * 2024年07月：Jspx cloud Framework 6.78 修复多数据源事物异常，修复jdk11下启动异常。修复嵌入方式配置文件多环境bug。
 * 2024年12月：Jspx cloud Framework 6.79 修复国密加密不统一,优化缓存和部分bug，作为7x版本的最后版本，下一个版本计划配合整合周边功能，提供兼容性。
+* 2025年5月：Jspx cloud Framework 6.80 修复bug为主。兼容性和稳定性增强。微调了很多细节。稳定版本。
