@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
-    <version>6.80</version>
+    <version>6.81</version>
     <description>jspx cloud framework</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -14,7 +14,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <github.global.server>github</github.global.server>
-        <tomcat.version>9.0.102</tomcat.version>
+        <tomcat.version>9.0.106</tomcat.version>
         <jackson.version>2.18.3</jackson.version>
         <redisson.version>3.45.1</redisson.version>
         <log4j2.version>2.24.3</log4j2.version>
@@ -82,7 +82,6 @@
             <version>1.18.38</version>
             <scope>compile</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-catalina</artifactId>
