@@ -2443,11 +2443,11 @@ public final class StringUtil {
     }
 
     /**
-     *  能支持复杂的表达式  {@code  "A#[arr[1] +']' + \"[{\"]]B，B#[arr[2] +']' + \"[{\"]]C"; }
+     *  能支持复杂的表达式  A#[arr[1] +']' + \"[{\"]]B，B#[arr[2] +']' + \"[{\"]]C
      * @param input 模版
      * @param varBegin  开始字符
      * @param varEnd 结尾字符
-     * @return
+     * @return 表达式
      */
     public static List<String> extractExpressions(String input,String varBegin,char varEnd) {
         List<String> results = new ArrayList<>();
