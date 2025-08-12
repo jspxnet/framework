@@ -11,7 +11,6 @@ package com.github.jspxnet.txweb.view;
 import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -24,6 +23,7 @@ import lombok.Getter;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.awt.*;
 
 /**
@@ -94,7 +94,7 @@ public class ValidateExpImgView extends ActionSupport {
         if (safe && RequestUtil.isPirated(getRequest())) {
             return NONE;
         }
-        IUserSession userSession = getUserSession();
+
         HttpServletResponse response = getResponse();
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
@@ -114,9 +114,10 @@ public class ValidateExpImgView extends ActionSupport {
             C = A + B;
             viewCode = NumberUtil.toString(A) + "+" + NumberUtil.toString(B) + StringUtil.EQUAL;
         }
+        HttpSession session = getSession();
         PhotoString validateCode = new PhotoString(width, height, new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(bgColor, "#", "")), 16)), StringUtil.isNull(color) ? null : new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(color, "#", "")), 16)), viewCode);
-        if (userSession != null) {
-            validateCodeCache.addImgCode(EncryptUtil.getMd5(userSession.getId()), NumberUtil.toString(C));
+        if (session != null) {
+            validateCodeCache.addImgCode(EncryptUtil.getMd5(session.getId()), NumberUtil.toString(C));
         }
         if (!response.isCommitted())
         {

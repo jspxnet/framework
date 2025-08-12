@@ -77,6 +77,24 @@ public class ScriptConverter {
         return ((String) o).trim();
     }
 
+    /**
+     * 简单的判断是否为日期
+     * @param o 对象
+     * @return 是否
+
+    public static boolean isDate(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (o instanceof Date) {
+            return true;
+        }
+        if (o instanceof String) {
+            return StringUtil.isDate((String)o,DateUtil.DAY_FORMAT);
+        }
+        return false;
+    }
+     */
     public static String replaceAll(String o, String a, String b) {
         return StringUtil.replace(o, a, b);
     }

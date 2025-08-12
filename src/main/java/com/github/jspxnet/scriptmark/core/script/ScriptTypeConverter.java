@@ -308,20 +308,30 @@ public final class ScriptTypeConverter {
                 if (c == '\'' && ys % 2 == 0) {
                     yd++;
                 }
-                if (ys % 2 == 0 && yd % 2 == 0 && old != escapeVariable && variableEnd.equalsIgnoreCase(str.substring(i, i + variableEnd.length()))) {
-                    String varName = str.substring(ivb, i);
-                    try {
+                if (ys % 2 == 0 && yd % 2 == 0 && old != escapeVariable
+                        && variableEnd.equalsIgnoreCase(str.substring(i, i + variableEnd.length()))) {
+
+
+                    //得到 表达式 ${ xxx } 中的 xxx，支持引号闭合，括号对应
+                    int start = ivb-variableBegin.length();
+                    int end = StringUtil.findClosingBracket(str, start + variableBegin.length(),variableBegin,variableEnd.charAt(0));
+                    if (end == -1) continue;
+                    String varName = str.substring(start + 2, end);
+                    i = end;
+                    try
+                    {
                         if (quote)
                         {
                             out.write(StringUtil.quoteSql(toString(scriptEngine.eval(varName, tagNode.getLineNumber()),tagNode.getTemplate().getConfigurable())));
                         }
                         else
                         {
-                            out.write( toString(scriptEngine.eval(varName, tagNode.getLineNumber()),tagNode.getTemplate().getConfigurable()) );
+                            out.write(toString(scriptEngine.eval(varName, tagNode.getLineNumber()),tagNode.getTemplate().getConfigurable()) );
                         }
                     } finally {
                         ivb = -1;
                     }
+
                 }
             } else {
                 if (!(escapeVariable == c && (str.startsWith(variableBegin, i + 1)||str.startsWith(variableSafeBegin, i + 1)))) {

@@ -31,7 +31,9 @@ public enum UserEnumType implements EnumType {
 
     PROXY(6, "代理用户"),
 
-    VIP(5, "VIP用户"),
+    VIP(5, "VIP"),
+
+    DEMO(4, "演示角色"),
 
     USER(3, "普通用户"),
 

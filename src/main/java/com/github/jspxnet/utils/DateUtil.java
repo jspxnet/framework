@@ -329,7 +329,7 @@ public final  class DateUtil {
         long begin = calendar.getTime().getTime();
         calendar.set(Calendar.YEAR, year + 1);
         begin = calendar.getTime().getTime() - begin;
-        return (int) NumberUtil.getRound(begin / WEEK, 0);
+        return (int) NumberUtil.getRound((float) begin / WEEK, 0);
     }
 
     /**
@@ -1091,4 +1091,24 @@ public final  class DateUtil {
         return sb.toString();
     }
 
+
+    /**
+     *
+     * @param dates 日期列表
+     * @return 返回最小日期
+     */
+    public static Date min(Date ... dates) {
+        List<Date> dateList = Arrays.asList(dates);
+        return Collections.min(dateList);
+    }
+
+    /**
+     *
+     * @param dates 日期列表
+     * @return 返回最大日期
+     */
+    public static Date max(Date ... dates) {
+        List<Date> dateList = Arrays.asList(dates);
+        return Collections.max(dateList);
+    }
 }

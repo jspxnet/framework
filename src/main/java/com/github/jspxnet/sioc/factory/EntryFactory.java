@@ -27,14 +27,12 @@ import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.util.AnnotationUtil;
 import com.github.jspxnet.sioc.util.Empty;
 import com.github.jspxnet.sioc.util.TypeUtil;
-import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

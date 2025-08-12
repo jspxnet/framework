@@ -29,6 +29,8 @@ public enum PayStatusEnumType implements EnumType {
 
     PAYING(7, "支付中"),
 
+    RETURN(8, "退款"),
+
     //专用于支付订单查询
     ERROR(99, "查询错误"),
     ;

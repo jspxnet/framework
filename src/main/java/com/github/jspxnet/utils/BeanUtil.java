@@ -12,8 +12,8 @@ import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.beans.BeanCopier;
 import net.sf.cglib.beans.BeanMap;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+
+import java.io.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -416,20 +416,39 @@ public final class BeanUtil {
 
     }
 
+    /**
+     *
+     * @param object bean对象
+     * @param name 方法名称
+     * @param clazz 类型
+     * @return  泛型支持的返回结果
+     * @param <T> 返回对象类型
+     */
+    public static  <T> T getProperty(Object object, String name, Class<T> clazz) {
+        Object obj = getProperty(object,name);
+        return getTypeValue(obj,clazz);
+    }
+
+    /**
+     *
+     * @param object  bean对象
+     * @param name 方法名称
+     * @return 返回字段数据
+     */
     public static Object getProperty(Object object, String name) {
         return getProperty(object, name, ArrayUtil.NULL, true);
     }
 
-
     /**
+     * 保留外部显示，返回的有可能是复杂对象
      * @param object    bean对象
      * @param name      方法名称
      * @param parameter 参数列表
      * @param jump      跳过不满足条件的方法,并且不会报错
      * @return 返回对象
      */
-    //@SuppressWarnings("unchecked")
-    public static Object getProperty(Object object, String name, Object[] parameter, boolean jump) {
+    public static Object getProperty(Object object, String name, Object[] parameter, boolean jump)
+    {
         if (!StringUtil.hasLength(name)) {
             return null;
         }
@@ -440,7 +459,6 @@ public final class BeanUtil {
             Map<String,Object> map = (Map<String,Object>) object;
             return map.get(name);
         }
-
         if (object instanceof  PropertyContainer)
         {
             PropertyContainer container = (PropertyContainer)object;
@@ -449,10 +467,11 @@ public final class BeanUtil {
                 return container.get(name);
             }
         }
-
+        //数据库中进入的
         if (ClassUtil.isProxy(object.getClass())&&parameter==null)
         {
             BeanMap beanMap = BeanMap.create(object);
+            //代理方式都是小心的
             return beanMap.get(name);
         }
 

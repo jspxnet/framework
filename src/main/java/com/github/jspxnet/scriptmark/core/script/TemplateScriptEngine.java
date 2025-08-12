@@ -160,7 +160,7 @@ public class TemplateScriptEngine implements ScriptRunner {
      */
     @Override
     public void putVar(String name, Object o) throws ScriptRunException {
-        if (name == null || "".equals(name)) {
+        if (name == null || name.isEmpty()) {
             return;
         }
         String value = o.toString();

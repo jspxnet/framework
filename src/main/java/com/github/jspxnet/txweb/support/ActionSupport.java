@@ -34,6 +34,7 @@ import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,6 +55,7 @@ import java.util.Map;
  * Time: 17:23:13
  * InterceptorSupport
  */
+@Slf4j
 public abstract class ActionSupport implements Action {
 
 
@@ -763,7 +765,7 @@ public abstract class ActionSupport implements Action {
                 try {
                     return StringUtil.getDate(params.getString(name), format);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -780,7 +782,7 @@ public abstract class ActionSupport implements Action {
                 try {
                     return params.keySet().toArray(new String[0]);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -1026,18 +1028,11 @@ public abstract class ActionSupport implements Action {
     }
 
     public IRole getRole() {
-        UserSession userSession = getUserSession();
-        if (userSession == null) {
-            Role guestRole = new Role();
-            guestRole.setId(config.getString(Environment.guestRole));
-            guestRole.setName(language.getLang(Environment.guestName));
-            guestRole.setUserType(UserEnumType.NONE.getValue());
-            guestRole.setNamespace(getRootNamespace());
-            return guestRole;
-        }
         ActionContext actionContext = ThreadContextHolder.getContext();
-        IRole role = userSession.getRole(getRootNamespace(),getString(ActionEnv.KEY_organizeId, (String)actionContext.getOrDefault(ActionEnv.KEY_organizeId,StringUtil.empty),true));
-        if (role==null||role.getId()==null)
+        UserSession userSession = onlineManager.getUserSession(actionContext);
+        IRole role = userSession.getRole(getRootNamespace(),getString(ActionEnv.KEY_organizeId,
+                (String)actionContext.getOrDefault(ActionEnv.KEY_organizeId,StringUtil.empty),true));
+        if (role==null||StringUtil.isNull(role.getId()))
         {
             Role guestRole = new Role();
             guestRole.setId(config.getString(Environment.guestRole));

@@ -78,13 +78,5 @@ public abstract class AuthenticationView extends ActionSupport {
         return param;
     }
 
-/*    @Operate(caption = "得到自己登陆后的信息")
-    public MemberVo getMember() {
-        UserSession userSession = onlineManager.getUserSession();
-        if (userSession == null || userSession.isGuest()) {
-            return new MemberVo();
-        }
-        return BeanUtil.copy(userSession, MemberVo.class);
-    }*/
 
 }

@@ -2436,52 +2436,76 @@ public final class StringUtil {
      * @return 通用的
      */
     public static String[] getFreeMarkerVar(String str) {
-        String[] varArray1 = StringUtil.getFreeMarkerVar(str,'$','{','}');
-        String[] varArray2 = StringUtil.getFreeMarkerVar(str,'#','{','}');
+        String[] varArray1 = getFreeMarkerVar(str,"${",'}');
+        String[] varArray2 = getFreeMarkerVar(str,"#{",'}');
         Set<String> set = new LinkedHashSet<String>(Arrays.asList(ArrayUtil.join(varArray1, varArray2)));
         return set.toArray(new String[0]);
     }
 
     /**
-     * 得到Freemarker 的变量列表
-     * 并且清除相同的变量
-     *
-     * @param str 字符串
-     * @return 得到变量列表
+     *  能支持复杂的表达式  {@code  "A#[arr[1] +']' + \"[{\"]]B，B#[arr[2] +']' + \"[{\"]]C"; }
+     * @param input 模版
+     * @param varBegin  开始字符
+     * @param varEnd 结尾字符
+     * @return
      */
+    public static List<String> extractExpressions(String input,String varBegin,char varEnd) {
+        List<String> results = new ArrayList<>();
+        int pos = 0;
+        while (pos < input.length()) {
+            int start = input.indexOf(varBegin, pos);
+            if (start == -1) break;
+
+            int end = findClosingBracket(input, start + varBegin.length(),varBegin,varEnd);
+            if (end == -1) break;
+
+            results.add(input.substring(start + 2, end));
+            pos = end + 1;
+        }
+        return results;
+    }
+
+    public static int findClosingBracket(String str, int from,String varBegin,char varEnd) {
+        int depth = 1;  // 初始深度为1（已包含#[的[）
+        boolean inSingleQuote = false;
+        boolean inDoubleQuote = false;
+
+        for (int i = from; i < str.length(); i++) {
+            char c = str.charAt(i);
+
+            // 处理转义字符（跳过下一字符）
+            if (c == '\\') {
+                i++;  // 跳过转义后的字符
+                continue;
+            }
+
+            // 更新引号状态（单双引号互斥）
+            if (c == '\'' && !inDoubleQuote) {
+                inSingleQuote = !inSingleQuote;
+            } else if (c == '\"' && !inSingleQuote) {
+                inDoubleQuote = !inDoubleQuote;
+            }
+
+            // 仅非引号状态处理括号
+            if (!inSingleQuote && !inDoubleQuote) {
+                if (c == varBegin.charAt(1)) depth++;
+                else if (c == varEnd && --depth == 0) return i;
+            }
+        }
+        return -1;
+    }
+
 
     /**
-     *
+     * 得到Freemarker 的变量列表
+     * 并且清除相同的变量
      * @param str 字符串
-     * @param head 开头标识
      * @param begin 变量前括号符号
      * @param end 变量后括号符号
      * @return 得到变量列表
      */
-    public static String[] getFreeMarkerVar(String str,char head,char begin,char end) {
-        if (str==null)
-        {
-            return new String[0];
-        }
-        StringBuilder sb = new StringBuilder();
-        int length = str.length();
-        boolean isVar = false;
-        for (int i = 0; i < length; i++) {
-            char c = str.charAt(i);
-            if (c == head && str.charAt(i + 1) == begin) {
-                isVar = true;
-            }
-            if (isVar && c == end) {
-                isVar = false;
-                sb.append(StringUtil.SEMICOLON);
-            }
-            if (isVar && str.charAt(i) != head && str.charAt(i) != begin) {
-                sb.append(c);
-            }
-        }
-        //过滤重复
-        Set<String> set = new LinkedHashSet<String>(Arrays.asList(StringUtil.split(sb.toString(),StringUtil.SEMICOLON)));
-        return set.toArray(new String[0]);
+    public static String[] getFreeMarkerVar(String str,String begin,char end) {
+        return extractExpressions(str,begin,end).toArray(new String[0]);
     }
 
 
@@ -2798,63 +2822,61 @@ public final class StringUtil {
             return empty;
         }
         String temp = str;
-        if (str != null) {
-            String str2 = str.toUpperCase();
-            if ((str2.contains("=?GB2312?Q?")) ||
-                    (str2.contains("=?GB2312?B?")) ||
-                    (str2.contains("=?ISO-8859-1?Q?")) ||
-                    (str2.contains("=?ISO-8859-1?B?")) ||
-                    (str2.contains("=?BIG5?Q?")) ||
-                    (str2.contains("=?BIG5?B?")) ||
-                    (str2.contains("=?US-ASCII?Q?")) ||
-                    (str2.contains("=?US-ASCII?B?")) ||
-                    (str2.contains("=?UNICODE-1-1-UTF-7?Q?")) ||
-                    (str2.contains("=?UNICODE-1-1-UTF-7?B?"))) {
-                str = temp;
-                str = replaceIgnoreCase(str, "=?us-ascii?Q?", "");
-                str = replaceIgnoreCase(str, "=?us-ascii?B?", "");
-                str = replaceIgnoreCase(str, "=?big5?Q?", "");
-                str = replaceIgnoreCase(str, "=?big5?B?", "");
-                str = replaceIgnoreCase(str, "=?ISO-8859-1?Q?", "");
-                str = replaceIgnoreCase(str, "=?ISO-8859-1?B?", "");
-                str = replaceIgnoreCase(str, "=?GB2312?Q?", "");
-                str = replaceIgnoreCase(str, "=?GB2312?B?", "");
-                str = replaceIgnoreCase(str, "=?UNICODE-1-1-UTF-7?Q?", "");
-                str = replaceIgnoreCase(str, "=?UNICODE-1-1-UTF-7?B?", "");
-                str = replaceIgnoreCase(str, "?=", "");
+        String str2 = str.toUpperCase();
+        if ((str2.contains("=?GB2312?Q?")) ||
+                (str2.contains("=?GB2312?B?")) ||
+                (str2.contains("=?ISO-8859-1?Q?")) ||
+                (str2.contains("=?ISO-8859-1?B?")) ||
+                (str2.contains("=?BIG5?Q?")) ||
+                (str2.contains("=?BIG5?B?")) ||
+                (str2.contains("=?US-ASCII?Q?")) ||
+                (str2.contains("=?US-ASCII?B?")) ||
+                (str2.contains("=?UNICODE-1-1-UTF-7?Q?")) ||
+                (str2.contains("=?UNICODE-1-1-UTF-7?B?"))) {
+            str = temp;
+            str = replaceIgnoreCase(str, "=?us-ascii?Q?", "");
+            str = replaceIgnoreCase(str, "=?us-ascii?B?", "");
+            str = replaceIgnoreCase(str, "=?big5?Q?", "");
+            str = replaceIgnoreCase(str, "=?big5?B?", "");
+            str = replaceIgnoreCase(str, "=?ISO-8859-1?Q?", "");
+            str = replaceIgnoreCase(str, "=?ISO-8859-1?B?", "");
+            str = replaceIgnoreCase(str, "=?GB2312?Q?", "");
+            str = replaceIgnoreCase(str, "=?GB2312?B?", "");
+            str = replaceIgnoreCase(str, "=?UNICODE-1-1-UTF-7?Q?", "");
+            str = replaceIgnoreCase(str, "=?UNICODE-1-1-UTF-7?B?", "");
+            str = replaceIgnoreCase(str, "?=", "");
 
-                byte[] main = str.getBytes();
-                byte[] remain = new byte[main.length];
-                int index = 0;
-                int i = 0;
-                while (index < main.length) {
-                    if (main[index] == '=') {
+            byte[] main = str.getBytes();
+            byte[] remain = new byte[main.length];
+            int index = 0;
+            int i = 0;
+            while (index < main.length) {
+                if (main[index] == '=') {
 
-                        index++;
-                        byte a1 = main[index];
-                        if (a1 >= 65) {
-                            a1 -= 55;
-                        } else {
-                            a1 -= 48;
-                        }
-                        index++;
-                        byte a2 = main[index];
-                        if (a2 >= 65) {
-                            a2 -= 55;
-                        } else {
-                            a2 -= 48;
-                        }
-                        remain[i] = (byte) (a1 * 16 + a2);
-                        index++;
-                        i++;
+                    index++;
+                    byte a1 = main[index];
+                    if (a1 >= 65) {
+                        a1 -= 55;
                     } else {
-                        remain[i] = main[index];
-                        i++;
-                        index++;
+                        a1 -= 48;
                     }
+                    index++;
+                    byte a2 = main[index];
+                    if (a2 >= 65) {
+                        a2 -= 55;
+                    } else {
+                        a2 -= 48;
+                    }
+                    remain[i] = (byte) (a1 * 16 + a2);
+                    index++;
+                    i++;
+                } else {
+                    remain[i] = main[index];
+                    i++;
+                    index++;
                 }
-                str = new String(remain).substring(0, i);
             }
+            str = new String(remain).substring(0, i);
         }
         return str;
     }

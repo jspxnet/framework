@@ -820,6 +820,10 @@ public class  OnlineManagerImpl implements OnlineManager {
         if (response != null) {
             CookieUtil.cookieClear(action.getRequest(), response);
         }
+        HttpSession session = action.getSession();
+        if (session != null) {
+            session.removeAttribute(ActionEnv.KEY_TOKEN);
+        }
         UserSession userSession = action.getUserSession();
         if (userSession!=null)
         {

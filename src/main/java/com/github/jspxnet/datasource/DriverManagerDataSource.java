@@ -112,7 +112,7 @@ public abstract class DriverManagerDataSource implements ReadWriteDataSource {
             Class<?> cls = Class.forName(this.driverClass);
             DriverManager.registerDriver((Driver)cls.newInstance() );
         } catch (ClassNotFoundException ex) {
-            throw new ClassNotFoundException("Could not load JDBC driver class [" + this.driverClass + "]", ex);
+            throw new ClassNotFoundException("Could not load JDBC driver class [" + driverClass + "]", ex);
         }
     }
 
@@ -129,6 +129,9 @@ public abstract class DriverManagerDataSource implements ReadWriteDataSource {
         this.jdbcUrl = url.trim();
     }
 
+
+    //兼容c3p0
+    public abstract void setMinPoolSize(int minPoolSize);
 
     /**
      * This implementation delegates transfer [code]getConnectionFromDriverManager } ,

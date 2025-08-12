@@ -188,15 +188,14 @@ String.prototype.isChinese = function () {
 };
 //是否为日期
 String.prototype.isDate = function () {
-    var r = this.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/);
-    if (this.isInteger() && this.getLength() === 6) return r = this.match(/^(\d{1,2})(\d{1,2})(\d{1,2})$/);
-    if (this.isInteger() && this.getLength() === 8) return r = this.match(/^(\d{1,4})(\d{1,2})(\d{1,2})$/);
-
-    if (r == null) return false;
-    var d = new Date(r[1], r[3] - 1, r[4]);
-    if (this.getLength() === 6)
-        return (d.getYear() === r[1] && (d.getMonth() + 1) === r[3] && d.getDate() === r[4]);
-    return (d.getFullYear() === r[1] && (d.getMonth() + 1) === r[3] && d.getDate() === r[4]);
+    var regEx = /^\d{4}-\d{1,2}-\d{1,2}$/; // 正则表达式匹配年-月-日格式
+    var str = this;
+    if (regEx.test(str)) {
+        var d = new Date(str);
+        return !isNaN(d.getTime()); // 验证日期是否合法
+    } else {
+        return false;
+    }
 };
 //判断文本输入是不是时间格式,如13:25
 String.prototype.isTime = function () {
@@ -353,46 +352,61 @@ String.prototype.isDateTime = function () {
     if (this.countMatches(':') === 0)
         return this.isDate();
 };
+
+
+/**
+ * 计算18位身份证校验位
+ * @param {string} idCard 前17位身份证号
+ * @returns {string} 校验位
+ */
+function calculateCheckCode(idCard) {
+    const weightFactors = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
+    const checkCodes = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
+
+    let sum = 0;
+    for (let i = 0; i < 17; i++) {
+        sum += parseInt(idCard.charAt(i)) * weightFactors[i];
+    }
+    return checkCodes[sum % 11];
+}
 String.prototype.isCardCode = function () {
-    var intStrLen = this.getLength();
-    if ((intStrLen !== 15) && (intStrLen !== 18)) return false;
-    var factorArr = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2, 1];
-    var varArray = [];
-    var lngProduct = 0;
-    var intCheckDigit;
-    var idNumber = this;
-    // check and set value
-    for (var i = 0; i < intStrLen; i++) {
-        varArray[i] = idNumber.charAt(i);
-        if ((varArray[i] < '0' || varArray[i] > '9') && (i != 17)) {
-            return false;
-        } else if (i < 17) {
-            varArray[i] = varArray[i] * factorArr[i];
-        }
+    var idCard = this;
+    // 基础格式校验
+    const reg = /(^\d{15}$)|(^\d{17}(\d|X|x)$)/;
+    if (!reg.test(idCard)) return false;
+
+    // 15位身份证处理（转18位）
+    if (idCard.length === 15) {
+        // 补全年份为19XX
+        const birthDate = '19' + idCard.substr(6, 2);
+        // 计算校验位
+        idCard = idCard.substring(0, 6) + birthDate + idCard.substring(8);
+        idCard += calculateCheckCode(idCard);
     }
-    if (intStrLen === 18) {
-        var date8 = idNumber.substring(6, 14);
-        if (!date8.isDate()) return false;
-        for (i = 0; i < 17; i++) lngProduct = lngProduct + varArray[i];
-        intCheckDigit = 12 - lngProduct % 11;
-        switch (intCheckDigit) {
-            case 10:
-                intCheckDigit = 'X';
-                break;
-            case 11:
-                intCheckDigit = 0;
-                break;
-            case 12:
-                intCheckDigit = 1;
-                break;
-        }
-        if (varArray[17].toUpperCase() !== intCheckDigit) return false;
-    } else {
-        var date6 = idNumber.substring(6, 12);
-        if (!date6.isDate())
-            return false;
+
+    // 校验省份代码
+    const provinceCode = idCard.substring(0, 2);
+    const provinceCodes = ['11','12','13','14','15','21','22','23','31','32','33','34','35','36','37','41','42','43','44','45','46','50','51','52','53','54','61','62','63','64','65','71','81','82','91'];
+    if (provinceCodes.indexOf(provinceCode) === -1) return false;
+
+    // 校验出生日期
+    const year = parseInt(idCard.substr(6, 4));
+    const month = parseInt(idCard.substr(10, 2));
+    const day = parseInt(idCard.substr(12, 2));
+    const currentYear = new Date().getFullYear();
+    if (year < 1900 || year > currentYear || month < 1 || month > 12) return false;
+
+    const maxDay = new Date(year, month, 0).getDate();
+    if (day < 1 || day > maxDay) return false;
+
+    // 校验校验位（仅18位）
+    if (idCard.length === 18) {
+        const checkCode = calculateCheckCode(idCard);
+        if (checkCode !== idCard.charAt(17).toUpperCase()) return false;
     }
+
     return true;
+
 };
 String.prototype.toArray = function (sp) {
     if (sp === undefined) sp = ";";

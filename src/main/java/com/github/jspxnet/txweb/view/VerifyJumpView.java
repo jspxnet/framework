@@ -25,7 +25,6 @@ public class VerifyJumpView extends ActionSupport {
 
     public VerifyJumpView() {
 
-
     }
 
     private String link = StringUtil.empty;

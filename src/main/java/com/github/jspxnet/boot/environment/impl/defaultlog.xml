@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="120 seconds" debug="${debug}">
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="120 seconds" debug="${debug}" >
     <!-- 定义日志文件 输入位置 -->
     <property name="logPath" value="${logPath}" />
-    <!-- 日志最大的历史 30天 -->
-    <property name="logMaxHistory" value="30"/>
     <!-- ConsoleAppender 控制台输出日志 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- 对日志进行格式化 -->

@@ -304,7 +304,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             System.setProperty("file.encoding", getEncode());
         }
 
-
         System.setProperty("javax.xml.soap.character-set-encoding", getEncode());
         //awtToolkit
         String awtToolkit = getAwtToolkit();
@@ -365,9 +364,8 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (keys == null) {
                 continue;
             }
-            VALUE_MAP.put(keys, System.getProperty(keys, ""));
+            VALUE_MAP.put(keys, System.getProperty(keys, StringUtil.empty));
         }
-
 
 
         //监测当前的web 服务器 begin
@@ -444,7 +442,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             return valueMap;
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
-            e.printStackTrace();
         }
         //创建配置 begin
         return new HashMap<>(0);
@@ -502,7 +499,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             valueMap.clear();
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
-            e.printStackTrace();
+
         }
         //创建配置 end
 
@@ -540,9 +537,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                         VALUE_MAP.put(key, processTemplate(value));
                     } catch (Exception e) {
                         log.error("检查配置key:{},value:{}", key, value);
-                        e.printStackTrace();
                     }
-
                 }
             }
         }

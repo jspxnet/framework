@@ -27,7 +27,6 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.xml.XmlConfigurationFactory;
-
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -112,7 +111,6 @@ public class LogBackConfigUtil {
         {
             valueMap.put("logMaxHistory",60);
         }
-
         String confTxt = isDefaultConfig?EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt):defaultConfigTxt;
         if (!StringUtil.isEmpty(confTxt))
         {
@@ -122,7 +120,6 @@ public class LogBackConfigUtil {
                 configurator.doConfigure(inputSource);
             } catch (JoranException e) {
                 System.err.println("1.默认路径是否配置错误;2.检查defaultlog.xml文件是否存在");
-                e.printStackTrace();
                 StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
             }
         }
@@ -227,12 +224,8 @@ public class LogBackConfigUtil {
                 }
             }
         }
-        if (StringUtil.isNull(defaultConfigTxt))
-        {
-            System.err.println("LogBack defaultConfig:" + defaultConfigTxt);
-        }
-        Map<String, Object> valueMap = envTemplate.getVariableMap();
 
+        Map<String, Object> valueMap = envTemplate.getVariableMap();
         String confTxt = isDefaultConfig?EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt):defaultConfigTxt;
         if (!StringUtil.isEmpty(confTxt))
         {

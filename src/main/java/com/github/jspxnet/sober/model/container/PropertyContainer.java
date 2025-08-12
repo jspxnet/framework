@@ -1,12 +1,13 @@
 package com.github.jspxnet.sober.model.container;
 
 import com.github.jspxnet.sober.annotation.Column;
-import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 可扩展的表对象
@@ -15,7 +16,7 @@ import java.util.Date;
  */
 @Data
 public abstract class PropertyContainer implements Serializable {
-    protected final DataMap<String, Object> values = new DataMap<>();
+    protected final Map<String, Object> values = new HashMap<>();
 
     @Column(caption = "操作人", length = 50, notNull = true)
     protected String putName = StringUtil.empty;

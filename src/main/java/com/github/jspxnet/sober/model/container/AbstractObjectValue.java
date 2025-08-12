@@ -21,7 +21,7 @@ public abstract class AbstractObjectValue extends PropertyContainer implements I
     private transient TableModels tableModels;
 
     @JsonIgnore
-    protected transient DataMap<String, Object> oldValues = null;
+    protected transient Map<String, Object> oldValues = new HashMap<>();
 
     @JsonIgnore
     private boolean available = true;
@@ -52,8 +52,7 @@ public abstract class AbstractObjectValue extends PropertyContainer implements I
     @Override
     public void copyNewToOld() {
         this.oldValues.clear();
-        Map<String, Object> result = new HashMap<>(getValues());
-        this.oldValues.putAll(result);
+        this.oldValues.putAll(getValues());
     }
 
     public boolean compareNewToOld() {

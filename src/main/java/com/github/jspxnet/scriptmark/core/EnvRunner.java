@@ -232,6 +232,10 @@ public class EnvRunner {
      */
     public void fixUndefinedMap(Map<String, Object> map)
     {
+        if (map==null)
+        {
+            return;
+        }
         String[] varArray = StringUtil.getFreeMarkerVar(this.template.getSource());
         for (String var:varArray)
         {
