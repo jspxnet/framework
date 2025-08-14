@@ -6,7 +6,9 @@
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
     <version>6.81</version>
+    <name>${project.groupId}:${project.artifactId}</name>
     <description>jspx-framework</description>
+    <url>https://github.com/jspxnet/framework</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -28,7 +30,18 @@
         <sshd.version>2.13.2</sshd.version>
         <maven.plugin.validation>VERBOSE</maven.plugin.validation>
         <maven.test.skip>true</maven.test.skip>
+        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+        <jacoco.path>${project.build.directory}/jacoco.exec</jacoco.path>
+        <jacoco.skip>false</jacoco.skip>
         <!--
+        user:chenyuan ps:C*=51*X
+<server>
+	<id>${server}</id>
+	<username>mYS4fA</username>
+	<password>zj2q3RxgKyE18VwCKAS13j8MLCCewu6C2</password>
+</server>
+
+        mvn deploy -P sonatype-oss-release -X -DskipTests -DaltDeploymentRepository=sonatype-nexus-staging::default::https://s01.oss.sonatype.org/service/local/staging/deploy/maven2
         查看依赖树：mvn dependency:tree
         分析依赖树：mvn dependency:analyze
         $JAVA_PATH/jre/lib/security/java.security文件。
@@ -49,21 +62,6 @@
         <url>https://github.com/jspxnet/framework</url>
         <connection>https://github.com/jspxnet/framework.git</connection>
     </scm>
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-    </distributionManagement>
     <issueManagement>
         <system>GitHub Issues</system>
         <url>https://github.com/jspxnet/framework/issues</url>
@@ -636,7 +634,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
@@ -734,6 +731,7 @@
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.5.0</version>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
@@ -766,20 +764,43 @@
                         </execution>
                     </executions>
                 </plugin>
+
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.14</version>
-                    <extensions>true</extensions>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
                     <configuration>
-                        <serverId>sonatype-oss-release</serverId>
-                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        <sslAllowAll>true</sslAllowAll>
-                        <stagingProgressPauseDurationSeconds>20</stagingProgressPauseDurationSeconds>
-                        <stagingProgressTimeoutMinutes>20</stagingProgressTimeoutMinutes>
+                        <skip>${jacoco.skip}</skip>
+                        <destFile>${jacoco.path}</destFile>
+                        <dataFile>${jacoco.path}</dataFile>
+                        <sessionId>jacoco_coverage</sessionId>
+                        <!-- 排除配置 -->
+                        <excludes>
+                            <exclude>**/ParameterizedTypeReference**</exclude>
+                        </excludes>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>pre-test</id>
+                            <phase>process-classes</phase>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+
+                        <execution>
+                            <id>post-unit-test</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                            <configuration>
+                                <dataFile>target/jacoco.exec</dataFile>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
@@ -918,7 +939,16 @@
                     <artifactId>maven-scm-plugin</artifactId>
                     <version>2.1.0</version>
                 </plugin>
-
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.8.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <publishingServerId>central</publishingServerId>
+                        <deploymentName>${project.groupId}:${project.artifactId}:${project.version}</deploymentName>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
@@ -933,9 +963,45 @@
                         </execution>
                     </executions>
                 </plugin>
-            </plugins>
+               </plugins>
         </pluginManagement>
+
     </build>
+    <repositories>
+        <repository>
+            <name>Central Portal Snapshots</name>
+            <id>central-portal-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <!--
+                        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            -->
+            <!--
+                        <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            -->
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <!--
+                        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            -->
+            <!--
+                        <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            -->
+            <url>https://ossrh-staging-api.central.sonatype.com/service/local/</url>
+        </repository>
+    </distributionManagement>
     <reporting>
         <plugins>
             <plugin>
