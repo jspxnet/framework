@@ -9,17 +9,13 @@
  */
 package com.github.jspxnet.sioc.util;
 
-import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
-import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sioc.type.*;
 import com.github.jspxnet.sioc.tag.*;
 import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.scriptmark.core.TagNode;
-import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.ReflectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Array;
@@ -90,6 +86,11 @@ public final class TypeUtil {
         TYPE_MAP.put(Float.class.getName(), typeSerializer);
         TYPE_MAP.put("float", typeSerializer);
 
+        typeSerializer = new DoubleXmlType();
+        TYPE_MAP.put(Double.class.getName(), typeSerializer);
+        TYPE_MAP.put(Double.class.getName(), typeSerializer);
+        TYPE_MAP.put("double", typeSerializer);
+
         typeSerializer = new BigDecimalXmlType();
         TYPE_MAP.put(BigDecimal.class.getName(), typeSerializer);
         TYPE_MAP.put("BigDecimal", typeSerializer);
@@ -102,6 +103,11 @@ public final class TypeUtil {
         TYPE_MAP.put(Date.class.getName(), typeSerializer);
         TYPE_MAP.put(java.sql.Date.class.getName(), typeSerializer);
         TYPE_MAP.put("Date", typeSerializer);
+
+        typeSerializer = new DateXmlType();
+        TYPE_MAP.put(java.sql.Timestamp.class.getName(), typeSerializer);
+        TYPE_MAP.put("Date", typeSerializer);
+
 
         TYPE_MAP.put(Object[].class.getName(), new ArrayXmlType());
 
@@ -118,6 +124,11 @@ public final class TypeUtil {
         TYPE_MAP.put(float[].class.getName(), typeSerializer);
         TYPE_MAP.put(Float[].class.getName(), typeSerializer);
         TYPE_MAP.put("float[]", typeSerializer);
+
+        typeSerializer = new DoubleArrayXmlType();
+        TYPE_MAP.put(double[].class.getName(), typeSerializer);
+        TYPE_MAP.put(double[].class.getName(), typeSerializer);
+        TYPE_MAP.put("double[]", typeSerializer);
 
         typeSerializer = new BooleanArrayXmlType();
         TYPE_MAP.put(boolean[].class.getName(), typeSerializer);
@@ -182,8 +193,7 @@ public final class TypeUtil {
                 Class<?> classType = Class.forName(typeString);
                 result = (Object[]) Array.newInstance(classType, length);
             } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("XML配置错误,数组类型:" + typeString);
+                log.error("XML配置错误,数组类型:{}",typeString,e);
             }
         }
         return result;
@@ -209,7 +219,6 @@ public final class TypeUtil {
             try {
                 return ClassUtil.loadClass(typeString);
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
                 log.error("loadClass :{}",typeString,e);
             }
         }
@@ -379,7 +388,7 @@ public final class TypeUtil {
         }
         return namespace;
     }
-
+/*
     public static List<Object> getOptionList(String option)
     {
         if (StringUtil.isNull(option))
@@ -416,5 +425,5 @@ public final class TypeUtil {
             }
         }
         return result;
-    }
+    }*/
 }

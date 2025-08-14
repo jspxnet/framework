@@ -18,6 +18,7 @@ import java.io.Serializable;
  * Time: 10:13:54
  */
 public class Order implements Serializable {
+    public static final String DEFAULT_SORT = "sortType:A;sortDate:D";
     //排序
     final private boolean ascending;
     //排序字段

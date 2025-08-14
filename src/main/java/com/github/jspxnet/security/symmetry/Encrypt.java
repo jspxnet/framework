@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.security.symmetry;
 
+import com.github.jspxnet.enums.KeyFormatEnumType;
+
 import java.io.File;
 
 /**
@@ -18,6 +20,10 @@ import java.io.File;
  * Time: 14:49:03
  */
 public interface Encrypt {
+    KeyFormatEnumType getKeyFormatType();
+
+    void setKeyFormatType(KeyFormatEnumType keyFormatType);
+
     void setSecretKey(String secretKey);
 
     void setCipherAlgorithm(String cipherAlgorithm);

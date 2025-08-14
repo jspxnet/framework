@@ -13,6 +13,8 @@ import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.*;
@@ -28,34 +30,40 @@ import java.util.*;
  */
 @Table(name = "jspx_action", caption = "TXWeb配置", create = false)
 public class ActionConfigBean implements ActionConfig, Serializable {
+    @Setter
     @Column(caption = "名称", length = 200, notNull = true)
     private String caption = StringUtil.empty;
+    @Setter
     @Column(caption = "对象名称", length = 200, notNull = true)
     private String actionName;
     @Column(caption = "ioc对象", length = 200, notNull = true)
     private String iocBean;
+    @Setter
     @Column(caption = "操作类", length = 200, dataType = "isLengthBetween(2,200)", notNull = true)
     private String className = StringUtil.empty;
+    @Setter
     @Column(caption = "执行方法", length = 200)
     private String method = "";
+    @Setter
     @Column(caption = "手机支持", notNull = true)
     private boolean mobile = false;
     @Column(caption = "页面缓存", notNull = true)
     private boolean cache = false;
     @Column(caption = "页面缓存名称", notNull = true)
     private String cacheName = DefaultCache.class.getName();
+    @Setter
     @Column(caption = "所在命名空间", length = 250)
     private String namespace =  StringUtil.empty;
-    //判断是否为加密传输
-    @Column(caption = "保密", notNull = true)
-    private boolean secret = false;
+
+    @Setter
+    @Getter
     @Column(caption = "动态载入", notNull = true)
     private boolean register = false;
 
 
-    private Map<String, Object> param = new HashMap<String, Object>();
-    private List<String> interceptors = new LinkedList<String>();
-    private List<ResultConfigBean> resultConfigs = new ArrayList<ResultConfigBean>();
+    private final Map<String, Object> param = new HashMap<String, Object>();
+    private final List<String> interceptors = new LinkedList<String>();
+    private final List<ResultConfigBean> resultConfigs = new ArrayList<ResultConfigBean>();
     private String[] passInterceptor = null;
 
 
@@ -69,17 +77,9 @@ public class ActionConfigBean implements ActionConfig, Serializable {
         return caption;
     }
 
-    public void setCaption(String caption) {
-        this.caption = caption;
-    }
-
     @Override
     public String getActionName() {
         return actionName;
-    }
-
-    public void setActionName(String actionName) {
-        this.actionName = actionName;
     }
 
     @Override
@@ -97,18 +97,10 @@ public class ActionConfigBean implements ActionConfig, Serializable {
         return className;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
 
     @Override
     public String getMethod() {
         return method;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
     }
 
     void addParam(String name, Object value) {
@@ -187,9 +179,6 @@ public class ActionConfigBean implements ActionConfig, Serializable {
         return mobile;
     }
 
-    public void setMobile(boolean mobile) {
-        this.mobile = mobile;
-    }
     @Override
     public String getCacheName() {
         return cacheName;
@@ -200,29 +189,8 @@ public class ActionConfigBean implements ActionConfig, Serializable {
     }
 
     @Override
-    public boolean isSecret() {
-        return secret;
-    }
-
-    public void setSecret(boolean secret) {
-        this.secret = secret;
-    }
-
-    public boolean isRegister() {
-        return register;
-    }
-
-    public void setRegister(boolean register) {
-        this.register = register;
-    }
-
-    @Override
     public String getNamespace() {
         return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
     }
 
     @Override
@@ -236,9 +204,6 @@ public class ActionConfigBean implements ActionConfig, Serializable {
         if (!StringUtil.isNull(method)) {
             sb.append("method=\"").append(method).append("\" ");
         }
-        if (secret) {
-            sb.append("secret=\"").append(secret).append("\" ");
-        }
         if (mobile) {
             sb.append("mobile=\"").append(mobile).append("\" ");
         }
@@ -250,20 +215,14 @@ public class ActionConfigBean implements ActionConfig, Serializable {
         }
 
         sb.append(">\r\n");
-        if (param != null) {
-            for (String pkey : param.keySet()) {
-                sb.append("<param name=\"").append(pkey).append("\">").append(param.get(pkey)).append("</param>\r\n");
-            }
+        for (String pkey : param.keySet()) {
+            sb.append("<param name=\"").append(pkey).append("\">").append(param.get(pkey)).append("</param>\r\n");
         }
-        if (resultConfigs != null) {
-            for (ResultConfigBean resultConfigBean : resultConfigs) {
-                sb.append(resultConfigBean.toString());
-            }
+        for (ResultConfigBean resultConfigBean : resultConfigs) {
+            sb.append(resultConfigBean.toString());
         }
-        if (interceptors != null) {
-            for (String interceptor : interceptors) {
-                sb.append("<interceptor-ref name=\"").append(interceptor).append("\" />\r\n");
-            }
+        for (String interceptor : interceptors) {
+            sb.append("<interceptor-ref name=\"").append(interceptor).append("\" />\r\n");
         }
         sb.append("</action>\r\n");
         return sb.toString();

@@ -22,6 +22,9 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 /**
@@ -46,32 +49,29 @@ public class ActionLogView extends ActionSupport {
     }
 
     private int count = 0;
+    @Setter
+    @Getter
     private long uid = 0;
+    @Getter
     private int currentPage = 0;
+    @Getter
     private String term = StringUtil.empty;
+    @Getter
     private String sort = "createDate:D";
+    @Getter
     private String[] field = ArrayUtil.EMPTY_STRING_ARRAY;
+    @Getter
     private String[] find = ArrayUtil.EMPTY_STRING_ARRAY;
+    @Getter
     private String id = StringUtil.empty;
 
+    @Getter
     @TurnPage(params = "find;field;sort;uid")
     private String turnPage = StringUtil.empty;
-
-    public String getTurnPage() {
-        return turnPage;
-    }
-
-    public String[] getField() {
-        return field;
-    }
 
     @Param(caption = "查询字段", max = 20)
     public void setField(String[] field) {
         this.field = field;
-    }
-
-    public String[] getFind() {
-        return find;
     }
 
     @Param(caption = "查询数据", max = 20)
@@ -79,34 +79,14 @@ public class ActionLogView extends ActionSupport {
         this.find = find;
     }
 
-    public String getTerm() {
-        return term;
-    }
-
     @Param(caption = "条件", max = 50)
     public void setTerm(String term) {
         this.term = term;
     }
 
-    public String getSort() {
-        return sort;
-    }
-
     @Param(caption = "排序", max = 20)
     public void setSort(String sort) {
         this.sort = sort;
-    }
-
-    public long getUid() {
-        return uid;
-    }
-
-    public void setUid(long uid) {
-        this.uid = uid;
-    }
-
-    public int getCurrentPage() {
-        return currentPage;
     }
 
     @Param(caption = "页数", min = 1)
@@ -124,10 +104,6 @@ public class ActionLogView extends ActionSupport {
     @Param(caption = "行数")
     public void setCount(int count) {
         this.count = count;
-    }
-
-    public String getId() {
-        return id;
     }
 
     @Param(caption = "ID")

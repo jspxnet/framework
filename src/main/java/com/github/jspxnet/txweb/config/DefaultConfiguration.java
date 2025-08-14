@@ -32,7 +32,6 @@ import java.io.File;
 @Slf4j
 public class DefaultConfiguration implements Configuration {
 
-
     //包含的文件,用作判断，如果已经载入的文件将不再载入
     final private List<String> includeFiles = new ArrayList<>() ;
     //默认载入的文件名

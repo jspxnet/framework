@@ -215,7 +215,13 @@ public class JSONArray extends LinkedList<Object> {
                 } else if (ClassUtil.isStandardProperty(o.getClass())) {
                     super.add(o);
                 } else {
-                    super.add(new JSONObject(o, includeSuperClass));
+                    if (o instanceof JSONObject)
+                    {
+                        super.add(o);
+                    } else
+                    {
+                        super.add(new JSONObject(o, includeSuperClass));
+                    }
                 }
             }
         } else if (array instanceof Collection) {
@@ -726,7 +732,7 @@ public class JSONArray extends LinkedList<Object> {
      * @throws JSONException If any of the names are null.
      */
     public JSONObject toJSONObject(JSONArray names) throws JSONException {
-        if (names == null || names.size() == 0 || super.size() == 0) {
+        if (names == null || names.size() == 0 || super.isEmpty()) {
             return null;
         }
         JSONObject jo = new JSONObject();

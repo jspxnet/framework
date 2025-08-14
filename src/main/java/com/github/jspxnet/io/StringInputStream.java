@@ -11,6 +11,7 @@ package com.github.jspxnet.io;
 
 
 import com.github.jspxnet.boot.environment.Environment;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -22,6 +23,7 @@ import java.io.UnsupportedEncodingException;
  * date: 2007-10-10
  * Time: 14:04:44
  */
+@Slf4j
 public class StringInputStream extends java.io.InputStream {
     protected InputStream inputStream;
 
@@ -36,7 +38,7 @@ public class StringInputStream extends java.io.InputStream {
         try {
             inputStream = new ByteArrayInputStream(string.getBytes(encode));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 
@@ -50,11 +52,17 @@ public class StringInputStream extends java.io.InputStream {
 
     @Override
     public int read(byte[] bytes) throws java.io.IOException {
+        if (bytes == null) {
+            bytes = new byte[0];
+        }
         return inputStream.read(bytes);
     }
 
     @Override
     public int read(byte[] bytes, int i, int i1) throws java.io.IOException {
+        if (bytes == null) {
+            bytes = new byte[0];
+        }
         return inputStream.read(bytes, i, i1);
     }
 

@@ -18,6 +18,7 @@ import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.tag.MapElement;
 import com.github.jspxnet.sioc.tag.ValueElement;
 import com.github.jspxnet.sober.Criteria;
+import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
@@ -176,7 +177,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         if (optionBundle == null) {
             return false;
         }
-        Map<String, Object> valueMap = new LinkedHashMap<String, Object>();
+        Map<String, Object> valueMap = new LinkedHashMap<>();
         valueMap.put("selected", 0);
         if (super.createCriteria(OptionBundle.class).add(Expression.eq("namespace", optionBundle.getNamespace())).update(valueMap) > 0) {
             optionBundle.setSelected(1);
@@ -247,7 +248,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
     @Override
     public List<OptionBundle> getList(String[] field, String[] find, String term,String namespace, String sortString, int page, int count){
         if (StringUtil.isNull(sortString)) {
-            sortString = "sortType:A;sortDate:D";
+            sortString = Order.DEFAULT_SORT;
         }
         Criteria criteria = createCriteria(OptionBundle.class);
         if (!ArrayUtil.isEmpty(find) && !ArrayUtil.isEmpty(field)) {
@@ -295,7 +296,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         } else {
             return new OptionBundle();
         }
-        return (OptionBundle) criteria.objectUniqueResult(false);
+        return criteria.objectUniqueResult(false);
     }
 
     /**
@@ -312,7 +313,7 @@ public class OptionDAOImpl extends JdbcOperations implements OptionDAO {
         } else {
             return new OptionBundle();
         }
-        return (OptionBundle) criteria.objectUniqueResult(false);
+        return criteria.objectUniqueResult(false);
     }
 
 

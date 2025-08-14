@@ -44,6 +44,8 @@ public class ScriptmarkEnv {
     //目录读取的根目录
     public static final String BasePath = "basePath";
 
+    public static final String FixUndefined = "fixUndefined";
+
     //////变量开始
     public static final String VariableBegin = "variableBegin";
 

@@ -10,7 +10,6 @@
 package com.github.jspxnet.scriptmark.load;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,8 +20,7 @@ import java.io.FileNotFoundException;
 public class FileSourceLoader extends AbstractSourceLoader {
 
     @Override
-    public Source loadResource(String path, String name, String encoding)
-            throws FileNotFoundException {
+    public Source loadResource(String path, String name, String encoding) {
         return new FileSource(new File(path), name, encoding);
     }
 

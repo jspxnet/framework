@@ -14,10 +14,7 @@ package com.github.jspxnet.network.mail.core;
 
 
 import javax.mail.*;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.InternetAddress;
+import javax.mail.internet.*;
 import javax.activation.FileDataSource;
 import javax.activation.DataHandler;
 import java.util.LinkedList;
@@ -28,6 +25,8 @@ import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.network.mail.MailAuthenticator;
 import com.github.jspxnet.boot.environment.Environment;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,86 +43,57 @@ public class SendEmailAdapter {
 
 
     private MimeMessage mimeMsg; //MIME邮件对象
-    private Properties props = new Properties(); //系统属性
+    private final Properties props = new Properties(); //系统属性
+
+    @Setter
+    @Getter
     private String user = StringUtil.empty; //smtp认证用户名和密码
+    @Setter
+    @Getter
     private String password = StringUtil.empty;
+    @Setter
+    @Getter
     private String from = StringUtil.empty;
+    /**
+     * -- SETTER --
+     *
+     * @param encode 设置编码
+     */
+    @Setter
+    @Getter
     private String encode = Environment.defaultEncode;
+    @Setter
+    @Getter
     private String smtpHost = null;
+    @Setter
+    @Getter
     private int port = 25;
+    /**
+     * -- SETTER --
+     *  设置收件人
+     *
+     * @param sendTo String
+     */
+    @Setter
     private String sendTo = StringUtil.empty;
+    @Setter
     private String subject = StringUtil.empty;
+    /**
+     * -- SETTER --
+     *  设置发件内容
+     *
+     * @param body 正文
+     */
+    @Setter
     private String body = StringUtil.empty;
 
-    private List<BodyPart> bodyParts = new LinkedList<BodyPart>();
+    private final List<BodyPart> bodyParts = new LinkedList<BodyPart>();
 
 
 //Multipart对象,邮件内容,标题,附件等内容均添加到其中后再生成MimeMessage对象
 
     public SendEmailAdapter() {
 
-    }
-
-
-    public String getSmtpHost() {
-        return smtpHost;
-    }
-
-    public void setSmtpHost(String smtpHost) {
-        this.smtpHost = smtpHost;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEncode() {
-        return encode;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    /**
-     * @param encode 设置编码
-     */
-    public void setEncode(String encode) {
-        this.encode = encode;
-    }
-
-
-    public String getFrom() {
-        return from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
-
-    /**
-     * 设置发件内容
-     *
-     * @param body 正文
-     */
-    public void setBody(String body) {
-        this.body = body;
     }
 
 
@@ -161,30 +131,22 @@ public class SendEmailAdapter {
         }
         try {
             if (FileUtil.isFileExist(file)) {
-                BodyPart bp = new MimeBodyPart();
+                MimeBodyPart bp = new MimeBodyPart();
                 FileDataSource fileDataSource = new FileDataSource(file);
                 bp.setDataHandler(new DataHandler(fileDataSource));
                 if (!StringUtil.isNull(id)) {
                     bp.setHeader("Content-ID", "<" + id + ">");
                 }
-                bp.setFileName(fileDataSource.getName());
+                String fileName = MimeUtility.encodeText(fileDataSource.getName());
+                bp.setFileName(fileName);
                 bodyParts.add(bp);
                 return true;
             }
             return false;
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("增加邮件附件：" + file + "发生错误！", e);
             return false;
         }
-    }
-
-    /**
-     * 设置收件人
-     *
-     * @param sendTo String
-     */
-    public void setSendTo(String sendTo) {
-        this.sendTo = sendTo;
     }
 
     /**
@@ -201,10 +163,6 @@ public class SendEmailAdapter {
         } catch (MessagingException e) {
             return false;
         }
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
     }
 
 
@@ -271,7 +229,6 @@ public class SendEmailAdapter {
             log.debug("send mail succeed！");
             bodyParts.clear();
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("send mail error:username=" + user + "  from=" + from + " smtpHost=" + smtpHost, e);
             return false;
         } finally {

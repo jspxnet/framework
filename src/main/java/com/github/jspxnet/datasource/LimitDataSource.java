@@ -52,11 +52,7 @@ public class LimitDataSource extends DriverManagerDataSource {
 
 
     public void setMaxConnectionTime(int maxConnectionTime) {
-        if (maxConnectionTime < 1000) {
-            this.maxConnectionTime = 1000;
-        } else {
-            this.maxConnectionTime = maxConnectionTime;
-        }
+        this.maxConnectionTime = Math.max(maxConnectionTime, 1000);
     }
 
     @Override

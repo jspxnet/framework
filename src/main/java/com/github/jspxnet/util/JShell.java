@@ -22,7 +22,7 @@ import java.io.*;
  */
 public class JShell {
     private Process child = null;    //child process
-    private StringBuilder out = new StringBuilder();//handle error output of child process
+    private final StringBuilder out = new StringBuilder();//handle error output of child process
 
     public JShell(String shellCommand, String encode, long sleep) throws UnsupportedEncodingException {
         try {

@@ -181,7 +181,7 @@ public  class LanguageRes {
 
     static public final String notAllowedSaveRepeatNodeId = "notAllowedSaveRepeatNodeId";
 
-    static public final String repeatNodeIdPrompt = "repeatNodeIdPrompt";
+    //static public final String repeatNodeIdPrompt = "repeatNodeIdPrompt";
 
     static public final String importData = "importData";
 

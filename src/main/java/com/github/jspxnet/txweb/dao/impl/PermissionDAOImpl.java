@@ -11,16 +11,19 @@ package com.github.jspxnet.txweb.dao.impl;
 
 
 import com.github.jspxnet.enums.CongealEnumType;
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sober.Criteria;
 import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.sober.criteria.expression.Expression;
+import com.github.jspxnet.sober.criteria.projection.Projections;
 import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfigBean;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
 import com.github.jspxnet.txweb.dao.PermissionDAO;
 import com.github.jspxnet.txweb.table.MemberRole;
+import com.github.jspxnet.txweb.table.MemberSpace;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.txweb.util.RoleUtil;
 import com.github.jspxnet.utils.*;
@@ -73,6 +76,17 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
     @Override
     public Role getRole(String roleId) {
         return load(Role.class, roleId);
+    }
+
+    @Override
+    public boolean existsCreate(String oid, long uid) {
+
+        return createCriteria(MemberSpace.class)
+                .add(Expression.eq("memberId", YesNoEnumType.NO.getValue()))
+                .add(Expression.eq("childId", uid))
+                .add(Expression.eq("organizeId", oid))
+                .setProjection(Projections.rowCount())
+                .intUniqueResult() > 0;
     }
 
     /**
@@ -161,6 +175,10 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
     @Override
     public Role getComposeRole(long uid,String organizeId)
     {
+        if (uid<=0)
+        {
+            return null;
+        }
         Criteria criteria = createCriteria(MemberRole.class).add(Expression.eq("namespace", namespace)).add(Expression.eq("uid", uid));
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
@@ -225,14 +243,15 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         {
             criteria = criteria.add(Expression.isNull("organizeId"));
         }
-        return criteria.intUniqueResult();
+        return criteria.setProjection(Projections.rowCount()).intUniqueResult();
     }
 
     /**
      * 得到本软件的角色列表
-     *
+     * 规范不对 ，避免误解，去用
      * @return 返回角色列表
      */
+    @Deprecated
     @Override
     public List<Role> getRoleList(String find,int count,int page) {
         Criteria criteria = createCriteria(Role.class).add(Expression.eq("namespace", namespace));
@@ -245,11 +264,30 @@ public class PermissionDAOImpl extends JdbcOperations implements PermissionDAO {
         {
             criteria = criteria.add(Expression.isNull("organizeId"));
         }
-        return criteria.addOrder(Order.desc("sortDate")).addOrder(Order.desc("userType")).setTotalCount(count).setCurrentPage(page)
+        return criteria.addOrder(Order.desc("userType")).addOrder(Order.desc("sortDate")).setTotalCount(count).setCurrentPage(page)
                 .list(false);
     }
 
-
+    /**
+     * 得到本软件的角色列表
+     *
+     * @return 返回角色列表
+     */
+    @Override
+    public List<Role> getRoleList(String namespace,String organizeId,String find,int page,int count) {
+        Criteria criteria = createCriteria(Role.class).add(Expression.eq("namespace", namespace));
+        if (!StringUtil.isNull(find)) {
+            criteria = criteria.add(Expression.like("name", "%" + find + "%"));
+        }
+        if (!StringUtil.isEmpty(organizeId)) {
+            criteria = criteria.add(Expression.or(Expression.eq("organizeId", organizeId),Expression.eq("organizeId", ADMIN_ORGANIZE_ID)) );
+        }  else
+        {
+            criteria = criteria.add(Expression.isNull("organizeId"));
+        }
+        return criteria.addOrder(Order.desc("userType")).addOrder(Order.desc("sortDate")).setTotalCount(count).setCurrentPage(page)
+                .list(false);
+    }
     /**
      * 得到本软件的所有动作事件
      *

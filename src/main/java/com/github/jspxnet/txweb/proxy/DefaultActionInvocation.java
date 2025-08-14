@@ -68,9 +68,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         MULTIPART_SUPPORT_ERROR_JSON.put("state", "error");
         MULTIPART_SUPPORT_ERROR_JSON.put("thumbnail", 0);
         MULTIPART_SUPPORT_ERROR_JSON.put(Environment.MESSAGE, "need login,no authority");
-    }
-
-    static {
+        //--------------------------------------------------
         RESULT_MAP.put(ActionSupport.NONE, NoneResult.class.getName());
         RESULT_MAP.put(ActionSupport.TEMPLATE, TemplateResult.class.getName());
         RESULT_MAP.put(ActionSupport.HtmlImg, HtmlImgResult.class.getName());
@@ -107,7 +105,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         return actionConfig;
     }
 
-    public DefaultActionInvocation(ActionConfig actionConfig, Map<String, Object> params, String exeType, JSONObject jsonData, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public DefaultActionInvocation(ActionConfig actionConfig, Map<String, Object> params, String exeType, JSONObject jsonData, HttpServletRequest request, HttpServletResponse response,boolean secret) throws Exception {
         DefultContextHolderStrategy.createContext(request,response,params);
         this.actionProxy = new DefaultActionProxy();
         String namespace = (String)params.getOrDefault(ActionEnv.Key_Namespace,actionConfig.getNamespace());
@@ -118,8 +116,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         try {
             action = (Action) obj;
         } catch (Exception e) {
-            log.debug("ioc class " + obj + " is not action");
-            e.printStackTrace();
+            log.error("ioc class {} is not action", obj);
         }
 
         if (action == null) {
@@ -135,6 +132,8 @@ public class DefaultActionInvocation implements ActionInvocation {
         if (actionConfig.isMobile()) {
             action.put(ActionEnv.KEY_MobileTemplate, true);
         }
+
+        action.put(ActionEnv.KEY_SECRET_DATA,secret);
 
         //////////////载入配置参数 begin
         Placeholder placeholder = EnvFactory.getPlaceholder();
@@ -167,7 +166,6 @@ public class DefaultActionInvocation implements ActionInvocation {
         //放入action
         actionProxy.setAction(action);
 
-        String actionName = action.getEnv(ActionEnv.Key_ActionName);
 
         //设置执行方法 begin
         if ((exeType.equalsIgnoreCase(RocHandle.NAME) || exeType.equalsIgnoreCase(RsaRocHandle.NAME) || exeType.equalsIgnoreCase(CommandHandle.NAME)) && jsonData != null) {
@@ -178,6 +176,8 @@ public class DefaultActionInvocation implements ActionInvocation {
             //先放入参数 begin
             TXWebUtil.putJsonParams(action,jsonData);
             //先放入参数 end
+
+            String actionName = action.getEnv(ActionEnv.Key_ActionName);
             //这里只是做安全配置检查，屏蔽调用不允许的方法
             String requestMethodName;
             JSONObject methodJson = jsonData.getJSONObject(Environment.rocMethod);
@@ -190,6 +190,7 @@ public class DefaultActionInvocation implements ActionInvocation {
         } else {
             //传统方式,如果发现是一个Roc配置的
             String methodName = actionConfig.getMethod();
+            String actionName = action.getEnv(ActionEnv.Key_ActionName);
             if (TXWebUtil.AT.equals(methodName) && !StringUtil.isEmpty(actionName)) {
                 actionProxy.setMethod(actionName);
             } else if(methodName!=null&&methodName.startsWith(TXWebUtil.AT)&&!StringUtil.isEmpty(StringUtil.substringAfter(methodName,TXWebUtil.AT)))
@@ -225,7 +226,6 @@ public class DefaultActionInvocation implements ActionInvocation {
      * @return 拦截器列表
      */
     private Iterator<Interceptor> createInterceptorList(String namespace) {
-
         LinkedList<String> interceptNameList = new LinkedList<>();
         List<String> tmpList = WEB_CONFIG_MANAGER.getDefaultInterceptors(namespace);
         if (tmpList != null && !tmpList.isEmpty()) {
@@ -408,6 +408,8 @@ public class DefaultActionInvocation implements ActionInvocation {
      */
     @Override
     public String invoke()  {
+
+
         ActionContext actionContext = ThreadContextHolder.getContext();
         if (actionContext.isExecuted()) {
             return actionContext.getActionResult();
@@ -520,14 +522,14 @@ public class DefaultActionInvocation implements ActionInvocation {
             if (ActionSupport.LOGIN.equalsIgnoreCase(resultCode)) {
 
                 TXWebUtil.print(new JSONObject(RocResponse.error(ErrorEnumType.NEED_LOGIN.getValue(), action.getFailureMessage())),
-                        WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_401);
+                        WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_OK);
             } else
             if (ActionSupport.UNTITLED.equalsIgnoreCase(resultCode)) {
 
                 RocResponse<?> rocResponse = RocResponse.error(ErrorEnumType.POWER.getValue(), action.getFailureMessage());
                 rocResponse.setProperty("isGuest", NumberUtil.toString(ObjectUtil.toInt(action.isGuest())));
                 TXWebUtil.print(new JSONObject(rocResponse).toString(),
-                        WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_403);
+                        WebOutEnumType.JSON.getValue(), action.getResponse(), HttpStatusType.HTTP_status_OK);
             }
         } else {
             String loginUrl = EnvFactory.getEnvironmentTemplate().getString(Environment.userLoginUrl);
@@ -543,6 +545,7 @@ public class DefaultActionInvocation implements ActionInvocation {
                 redirectResult.execute(this);
             } else
             {
+                log.info("非ROC请求未知处理. action:{}, resultCode:{}, loginUrl:{}", action, resultCode, loginUrl);
                 Result result = new ErrorResult();
                 result.execute(this);
             }
@@ -558,19 +561,5 @@ public class DefaultActionInvocation implements ActionInvocation {
         ActionContext actionContext = ThreadContextHolder.getContext();
         return actionContext.isExecuted();
     }
-
-
-    /**
-     * 只为了兼容
-     * @return 返回action name
-     */
-/*
-    @Deprecated
-    @Override
-    public String getActionName() {
-        ActionContext actionContext = ThreadContextHolder.getContext();
-        return actionContext.getActionName();
-    }
-*/
 
 }

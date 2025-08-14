@@ -24,10 +24,10 @@ import java.io.CharArrayWriter;
 public  class BaseXML extends DefaultHandler {
     private String result;
     private String attributesResult;
-    private String Key;
-    private String Att;
+    private final String Key;
+    private final String Att;
 
-    private CharArrayWriter contents = new CharArrayWriter();
+    private final CharArrayWriter contents = new CharArrayWriter();
 
     public BaseXML(String key, String Att) {
         this.Key = key;

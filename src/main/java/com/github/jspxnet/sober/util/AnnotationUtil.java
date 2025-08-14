@@ -13,6 +13,9 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.sioc.BeanFactory;
+import com.github.jspxnet.sober.SoberFactory;
+import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.*;
 import com.github.jspxnet.sober.config.SoberCalcUnique;
@@ -21,8 +24,8 @@ import com.github.jspxnet.sober.config.SoberNexus;
 import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
-import com.github.jspxnet.sober.jdbc.JdbcOperations;
 import com.github.jspxnet.sober.model.container.PropertyContainer;
+import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -46,21 +49,20 @@ public final class AnnotationUtil {
 
 
     /**
-     * postgre 数据库seq修复
+     * postgresql 数据库seq修复
      *
      * @param soberTable     模型
      * @param jdbcOperations jdbc
      */
-    public static void postgreSqlFixSeqId(TableModels soberTable, JdbcOperations jdbcOperations) {
+    public static void postgresqlFixSeqId(TableModels soberTable, SoberSupport jdbcOperations) {
         try {
             jdbcOperations.update(" SELECT setval('" + soberTable.getName() + "_id_seq', (SELECT MAX(id) FROM " + soberTable.getName() + ")+1)");
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error("注意：{}你的字段类型，关键字配置", soberTable.getName());
+            log.error("注意：{}你的字段类型，关键字配置", soberTable.getName(),e);
         }
     }
 
-    public static void fixIdCacheMax(TableModels soberTable, Object object, JdbcOperations jdbcOperations) {
+    public static void fixIdCacheMax(TableModels soberTable, Object object, SoberSupport jdbcOperations) {
         if (jdbcOperations == null || object == null) {
             return;
         }
@@ -108,7 +110,7 @@ public final class AnnotationUtil {
      * @param jdbcOperations 系列化DAO对象
      *                       验证错误
      */
-    public static void autoSetId(Object object, String fieldName, JdbcOperations jdbcOperations) {
+    public static void autoSetId(Object object, String fieldName, SoberSupport jdbcOperations) {
         if (object == null || StringUtil.isNull(fieldName)) {
             return;
         }
@@ -173,7 +175,7 @@ public final class AnnotationUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("autoSetId",e);
         }
     }
 
@@ -197,9 +199,9 @@ public final class AnnotationUtil {
                 soberColumn.setNotNull(column.notNull());
                 soberColumn.setDataType(column.dataType());
                 soberColumn.setHidden(column.hidden());
+                soberColumn.setSearchHidden(column.searchHidden());
                 soberColumn.setInput(column.input());
-                if (!NullClass.class.equals(column.enumType()))
-                {
+                if (!NullClass.class.equals(column.enumType())) {
                     soberColumn.setOption(new JSONArray(column.enumType().getEnumConstants()).toString());
                 } else {
                     soberColumn.setOption(column.option());
@@ -290,6 +292,7 @@ public final class AnnotationUtil {
         }
         return null;
     }
+
     /**
      * @param cls 类
      * @return 得到的显示名称
@@ -327,17 +330,17 @@ public final class AnnotationUtil {
                 return ((Table) anAnnotation).name();
             }
         }
+
         return StringUtil.empty;
     }
 
 
     /**
-     *
-     * @param cls 实体对象
-     * @param extend  0:所有;1:可扩展;2:不可扩展
+     * @param cls    实体对象
+     * @param extend 0:所有;1:可扩展;2:不可扩展
      * @return 生成 SoberTable
      */
-    public static SoberTable getSoberTable(Class<?> cls,int extend) {
+    public static SoberTable getSoberTable(Class<?> cls, int extend) {
         if (cls == null) {
             return null;
         }
@@ -350,6 +353,8 @@ public final class AnnotationUtil {
         soberTable.setName(table.name());  //得到数据库表名
         soberTable.setTableCaption(table.caption());//表的别名
         soberTable.setUseCache(table.cache()); //是否使用cache 默认使用
+        //是否自动清理缓存
+        soberTable.setAutoCleanCache(table.autoCleanCache());
         soberTable.setCreate(table.create());
         soberTable.setColumns(getColumnList(cls)); //数据库字段
         soberTable.setCalcUniqueMap(getSoberCalcUnique(cls)); //单个计算
@@ -365,16 +370,13 @@ public final class AnnotationUtil {
             }
         }
         soberTable.setCanExtend(PropertyContainer.class.isAssignableFrom(cls));
-        if (extend==0)
-        {
+        if (extend == 0) {
             return soberTable;
         }
-        if (extend==1 && soberTable.isCanExtend())
-        {
+        if (extend == 1 && soberTable.isCanExtend()) {
             return soberTable;
         }
-        if (extend==2 && !soberTable.isCanExtend())
-        {
+        if (extend == 2 && !soberTable.isCanExtend()) {
             return soberTable;
         }
         return null;
@@ -459,61 +461,87 @@ public final class AnnotationUtil {
     }
 
     /**
+     * 这里处理的是Roc返回方式
      *
      * @param cla 查询过滤出枚举类型列表
-     * @return 得到枚举列表,包括选项
+     * @return 得到枚举列表, 包括选项
      */
-    public static Map<String,JSONArray> getEnumType(Class<?> cla)
-    {
-        Map<String,JSONArray> result = new HashMap<>();
+    public static Map<String, JSONArray> getEnumType(Class<?> cla) {
+        Map<String, JSONArray> result = new HashMap<>();
         Field[] fields = ClassUtil.getDeclaredFields(cla);
-        for (Field field:fields)
-        {
+        for (Field field : fields) {
             Column column = field.getAnnotation(Column.class);
-            if (column==null)
-            {
+            if (column == null) {
                 continue;
             }
-            if (StringUtil.isNull(column.option()) && column.enumType()==NullClass.class)
-            {
+            if (!column.enumTypes()) {
+                continue;
+            }
+            if (StringUtil.isNull(column.option()) && column.enumType() == NullClass.class) {
                 continue;
             }
             //1:小;2:中;3:大
-            if (!NullClass.class.getName().equals(column.enumType().getName()))
-            {
+            if (!NullClass.class.getName().equals(column.enumType().getName())) {
                 Object[] enumObj = column.enumType().getEnumConstants();
-                if (!result.containsKey(column.enumType().getSimpleName()))
-                {
-                    result.put(StringUtil.uncapitalize(column.enumType().getSimpleName()),new JSONArray(enumObj));
+                if (!result.containsKey(column.enumType().getSimpleName())) {
+                    result.put(StringUtil.uncapitalize(column.enumType().getSimpleName()), new JSONArray(enumObj));
                 }
             }
-            else if (!StringUtil.isNull(column.option()))
-            {
+            //文本方式
+            else if (!StringUtil.isNull(column.option()) && !StringUtil.AT.equals(column.option())) {
                 List<JSONObject> temp = new ArrayList<>();
                 String option = column.option();
-                if (StringUtil.isJsonArray(option))
-                {
+                if (StringUtil.isJsonArray(option)) {
                     JSONArray array = new JSONArray(option);
-                    for (int i=0;i<array.length();i++)
-                    {
+                    for (int i = 0; i < array.length(); i++) {
                         JSONObject obj = array.getJSONObject(i);
                         temp.add(obj);
                     }
-                } else
-                {
-                    StringMap<String,String> stringMap = new StringMap<>();
-                    stringMap.setKeySplit(StringUtil.COLON);
-                    stringMap.setLineSplit(StringUtil.EQUAL);
-                    stringMap.setString(column.option());
-                    for (String key:stringMap.keySet())
-                    {
-                        JSONObject json = new JSONObject();
-                        json.put("value",key);
-                        json.put("name",stringMap.getString(key));
-                        temp.add(json);
+                } else {
+                    //这里有两种格式,先判断是不是简写的
+                    if (column.option() != null && !column.option().contains(StringUtil.COLON)) {
+                        //简写方式  男;女
+                        String[] dataArray = StringUtil.split(column.option(), StringUtil.SEMICOLON);
+                        if (!ObjectUtil.isEmpty(dataArray)) {
+                            for (String value : dataArray) {
+                                JSONObject json = new JSONObject();
+                                json.put("value", value);
+                                json.put("name", value);
+                                temp.add(json);
+                            }
+                        }
+                    } else {
+                        //标准格式
+                        StringMap<String, String> stringMap = new StringMap<>();
+                        stringMap.setKeySplit(StringUtil.COLON);
+                        stringMap.setLineSplit(StringUtil.SEMICOLON);
+                        stringMap.setString(column.option());
+                        for (String key : stringMap.keySet()) {
+                            JSONObject json = new JSONObject();
+                            json.put("value", key);
+                            json.put("name", stringMap.getString(key));
+                            temp.add(json);
+                        }
                     }
                 }
-                result.put(StringUtil.uncapitalize(field.getName())+"EnumType",new JSONArray(temp));
+                result.put(StringUtil.uncapitalize(field.getName()) + "EnumType", new JSONArray(temp));
+            } else if (StringUtil.AT.equals(column.option())) {
+                //数据库绑定方式
+                //未了实现低耦合，这里还是,在去查询数据库
+                BeanFactory beanFactory = EnvFactory.getBeanFactory();
+                GenericDAO genericDAO = beanFactory.getBean(GenericDAO.class);
+                if (genericDAO == null) {
+                    continue;
+                }
+                //begin 载入默认数据源
+                if (genericDAO.getSoberFactory() == null) {
+                    String soberFactoryName = EnvFactory.getEnvironmentTemplate().getString("soberFactory", "jspxSoberFactory");
+                    SoberFactory soberFactory = (SoberFactory) beanFactory.getBean(soberFactoryName);
+                    genericDAO.setSoberFactory(soberFactory);
+                }
+                //end 载入默认数据源
+                JSONArray optionBundles = genericDAO.getFieldEnumType(cla, field.getName());
+                result.put(StringUtil.uncapitalize(field.getName()) + "EnumType", optionBundles);
             }
         }
         return result;

@@ -24,6 +24,7 @@ import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
 import com.github.jspxnet.scriptmark.exception.ScriptException;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
@@ -317,7 +318,7 @@ public class DataTypeValidator implements Validator {
             ActionSupport actionSupport = (ActionSupport) checkObject;
             if (RequestUtil.isRocRequest(actionSupport.getRequest()))
             {
-                JSONObject json = (JSONObject)actionSupport.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                JSONObject json = (JSONObject)ThreadContextHolder.getContext().getEnvironment().get(ActionEnv.Key_CallRocJsonData);
                 if (json!=null)
                 {
                     //内部方法优先

@@ -9,22 +9,30 @@
  */
 package com.github.jspxnet.utils;
 
-/**
+/*
  * Created by IntelliJ IDEA.
  * author chenYuan (mail:39793751@qq.com)
  * date: 2007-11-19
  * Time: 16:43:38
  */
 
+import com.github.jspxnet.network.mac.NetworkInfo;
+import com.github.jspxnet.security.utils.EncryptUtil;
+
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.net.ServerSocket;
+import java.nio.charset.Charset;
 
 public final class SystemUtil {
     private SystemUtil()
     {
 
     }
+
+    final public static float jdkVersion = StringUtil.toFloat(System.getProperty("java.vm.specification.version"));
+
     /**
      * Operating system state flag for error.
      */
@@ -61,9 +69,9 @@ public final class SystemUtil {
     public static final int OS;
 
 
-    public static String encode = System.getProperty("file.encoding");
+    public static String encode = Charset.defaultCharset().displayName();
 
-    public static String lineSeparator = System.getProperty("line.separator");
+    public static final String SYSTEM_GUID;
 
     static {
 
@@ -109,7 +117,7 @@ public final class SystemUtil {
         }
         OS = os;
 
-
+        SYSTEM_GUID = getSystemGuid();
     }
 
 
@@ -131,7 +139,6 @@ public final class SystemUtil {
             int exitVal = p.exitValue();
             showInfo.append("exit value:").append(exitVal);
         } catch (Exception e) {
-            e.printStackTrace();
             return e.getLocalizedMessage();
         } finally {
             if (p != null) {
@@ -208,7 +215,6 @@ public final class SystemUtil {
             process.waitFor();
             return showInfo.toString();
         } catch (Exception e) {
-            e.printStackTrace();
             return e.getLocalizedMessage();
         } finally {
             if (process != null) {
@@ -217,7 +223,7 @@ public final class SystemUtil {
         }
     }
 
-    public static String saveScreensHot(String file) throws IOException, InterruptedException {
+    public static String saveScreensHot(String file)  {
         StringBuilder showInfo = new StringBuilder();
         Process process = null;
         try {
@@ -231,7 +237,6 @@ public final class SystemUtil {
             process.waitFor();
             return showInfo.toString();
         } catch (Exception e) {
-            e.printStackTrace();
             return e.getLocalizedMessage();
         } finally {
             if (process != null) {
@@ -240,7 +245,7 @@ public final class SystemUtil {
         }
     }
 
-    public static String reboot() throws IOException, InterruptedException {
+    public static String reboot()  {
         StringBuilder showInfo = new StringBuilder();
         Process process = null;
         try {
@@ -254,7 +259,6 @@ public final class SystemUtil {
             process.waitFor();
             return showInfo.toString();
         } catch (Exception e) {
-            e.printStackTrace();
             return e.getLocalizedMessage();
         } finally {
             if (process != null) {
@@ -316,6 +320,70 @@ public final class SystemUtil {
     }
 
 
+   public static String getCPUSerial() {
+        StringBuilder result = new StringBuilder();
+        try {
+            File file = File.createTempFile("tmp", ".vbs");
+            file.deleteOnExit();
+            FileWriter fw = new java.io.FileWriter(file);
+            String vbs = "Set objWMIService = GetObject(\"winmgmts:\\\\.\\root\\cimv2\")\n"
+                    + "Set colItems = objWMIService.ExecQuery _ \n"
+                    + "   (\"Select * from Win32_Processor\") \n"
+                    + "For Each objItem in colItems \n"
+                    + "    Wscript.Echo objItem.ProcessorId \n"
+                    + "    exit for  ' do the first cpu only! \n" + "Next \n";
+
+            // + "    exit for  \r\n" + "Next";
+            fw.write(vbs);
+            fw.close();
+            Process p = Runtime.getRuntime().exec(
+                    "cscript //NoLogo " + file.getPath());
+            BufferedReader input = new BufferedReader(new InputStreamReader(
+                    p.getInputStream()));
+            String line;
+            while ((line = input.readLine()) != null) {
+                result.append(line);
+            }
+            input.close();
+            file.delete();
+        } catch (Exception e) {
+            e.fillInStackTrace();
+        }
+        if (StringUtil.isNullOrWhiteSpace(result.toString().trim())) {
+            //没有读取到
+            result = new StringBuilder("00000000");
+        }
+        return result.toString().trim();
+    }
+
+
+
+    /**
+     * 绑定网卡，ip和操作系统
+     * @return 根据当前系统环境生成一个GUID，主要用于许可
+     */
+   public static String getSystemGuid()
+   {
+        OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
+        String osArch = osBean.getArch();
+        String osName = osBean.getName();
+        StringBuilder sb = new StringBuilder();
+        try {
+            sb.append(getCPUSerial()).append("/").append(NetworkInfo.getMacAddress()).append(osName).append(osArch);
+            return EncryptUtil.getMd5(sb.toString()).toUpperCase();
+        } catch (IOException e) {
+            return EncryptUtil.getMd5(sb.toString()).toUpperCase();
+        }
+   }
+
+/*
+
+   public static void main(String[] args) {
+        System.out.println(getCPUSerial());
+        System.out.println(getSystemGuid());
+        System.out.println(SYSTEM_GUID );
+   }
+*/
 
 
 }

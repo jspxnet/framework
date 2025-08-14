@@ -2,8 +2,8 @@ package com.github.jspxnet.security.utils;
 
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -92,7 +92,7 @@ public class Rsa256   {
 
 
     public String decrypt(String data, String key, String encode) throws Exception {
-        if(StringUtils.isBlank(encode)){
+        if(StringUtil.isBlank(encode)){
             encode = Environment.defaultEncode;
         }
         PrivateKey prikey = getPrivateKey(key);

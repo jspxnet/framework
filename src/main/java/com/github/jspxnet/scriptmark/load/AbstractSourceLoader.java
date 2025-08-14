@@ -112,11 +112,6 @@ public abstract class AbstractSourceLoader implements SourceLoader {
      * @throws java.net.MalformedURLException 格式错误
      */
     private Source loadResource(String abspath, String encoding) throws FileNotFoundException, MalformedURLException {
-        if (rootDirectory != null && !abspath.startsWith(abspath)) {
-            FileNotFoundException e = new FileNotFoundException("sdk.security  error: " + abspath + " not in " + rootDirectory);
-            log.info("sdk.security  error: " + abspath + " not in " + rootDirectory + " 目录安全错误,文件不能超出根目录", e);
-            throw e;
-        }
         return loadResource(abspath, fileName, encoding);
     }
 

@@ -17,8 +17,7 @@ import java.util.Date;
 
 /**
  *
- * author chenyuan
- * @author Administrator
+ * @author chenyuan
  */
 @Data
 public abstract class OperateTable implements Serializable {

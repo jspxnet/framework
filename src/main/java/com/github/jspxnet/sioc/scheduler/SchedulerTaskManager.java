@@ -1,6 +1,8 @@
 package com.github.jspxnet.sioc.scheduler;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.cron4j.Scheduler;
 import com.github.jspxnet.cron4j.SchedulingPattern;
 import com.github.jspxnet.enums.YesNoEnumType;
@@ -52,13 +54,16 @@ public class SchedulerTaskManager implements SchedulerManager {
             pattern = "* * * * * *";
         }
 
-        TaskProxy taskProxy = new TaskProxy();
+        TaskProxy taskProxy = new TaskProxy(runnable);
         taskProxy.setTaskType(taskType);
         taskProxy.setName(name);
         taskProxy.setOnce(YesNoEnumType.NO.getValue());
-        taskProxy.setBean(runnable);
         taskProxy.setPattern(pattern);
         taskProxy.setMethodName("run");
+
+        EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
+        String registerName = environmentTemplate.getString(Environment.SCHEDULER_REGISTER_NAME);
+        taskProxy.setRegisterName(registerName);
         return add(taskProxy);
 
     }
@@ -76,20 +81,24 @@ public class SchedulerTaskManager implements SchedulerManager {
         if (methods == null) {
             return -1;
         }
-        Map<String, Object> valueMap = EnvFactory.getEnvironmentTemplate().getVariableMap();
+        EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
+        Map<String, Object> valueMap = environmentTemplate.getVariableMap();
         for (Method method : methods) {
             Scheduled scheduled = method.getAnnotation(Scheduled.class);
             if (scheduled == null) {
                 continue;
             }
 
-            TaskProxy taskProxy = new TaskProxy();
-            taskProxy.setBean(bean);
+            TaskProxy taskProxy = new TaskProxy(bean);
             taskProxy.setMethodName(method.getName());
             taskProxy.setName(scheduled.name());
             if (StringUtil.isNull(taskProxy.getName())) {
                 taskProxy.setName(method.getName());
             }
+
+            String registerName = environmentTemplate.getString(Environment.SCHEDULER_REGISTER_NAME);
+            taskProxy.setRegisterName(registerName);
+
             //scheduled.cron() 变量替换
             String cron = scheduled.cron();
             if (scheduled.cron()!=null&&scheduled.cron().contains("${")) {
@@ -152,6 +161,14 @@ public class SchedulerTaskManager implements SchedulerManager {
             log.error("Scheduled cron is cron4j,定时器表达式错误:{}，类对象:{}",taskProxy.getPattern(),taskProxy.getBean().getClass());
             return false;
         }
+
+        if (StringUtil.isNull(taskProxy.getRegisterName()))
+        {
+            EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
+            String registerName = environmentTemplate.getString(Environment.SCHEDULER_REGISTER_NAME);
+            taskProxy.setRegisterName(registerName);
+        }
+
         Scheduler scheduler = new Scheduler(taskProxy);
         scheduler.start();
         SCHEDULER_MAP.put(scheduledId, scheduler);

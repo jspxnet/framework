@@ -34,10 +34,10 @@ public class ImgFilter extends HTMLFilter {
 
     @Override
     public String convertString() {
-        return ImgConverter();
+        return imgConverter();
     }
 
-    public String ImgConverter() {
+    public String imgConverter() {
         Pattern pattern = compile("(\\[img=(.[^\\[]*)\\])(.[^\\[]*)(\\[\\/img\\])", Pattern.DOTALL);
         Matcher matcher = pattern.matcher(s);
         StringBuffer stringbuffer = new StringBuffer();

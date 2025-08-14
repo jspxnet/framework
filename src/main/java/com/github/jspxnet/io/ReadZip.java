@@ -17,7 +17,7 @@ package com.github.jspxnet.io;
  */
 
 import com.github.jspxnet.utils.FileUtil;
-
+import lombok.extern.slf4j.Slf4j;
 import javax.swing.*;
 import java.util.HashMap;
 import java.util.Enumeration;
@@ -26,14 +26,14 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.awt.*;
 import java.net.URL;
 import java.net.MalformedURLException;
 
+@Slf4j
 public class ReadZip extends AbstractRead {
-    private Map entries = new HashMap();
-    private Map names = new HashMap();
+    private Map<String,ZipEntry> entries = new HashMap<>();
+    private Map<String,String> names = new HashMap<>();
     private String fileName;
     private ZipFile file;
 
@@ -52,11 +52,11 @@ public class ReadZip extends AbstractRead {
      */
 
     @Override
-    @SuppressWarnings("unchecked")
+
     protected boolean open() {
         try {
             file = new ZipFile(fileName);
-            Enumeration enumeration = file.entries();
+            Enumeration<?> enumeration = file.entries();
             while (enumeration.hasMoreElements()) {
                 ZipEntry entry = (ZipEntry) enumeration.nextElement();
                 if (!entry.isDirectory()) {
@@ -64,11 +64,8 @@ public class ReadZip extends AbstractRead {
                     names.put(FileUtil.mendPath(entry.getName()), entry.getName());
                 }
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error(e.getMessage());
             return false;
         }
         return true;
@@ -106,14 +103,13 @@ public class ReadZip extends AbstractRead {
     public byte[] getResource(String fileName) {
         ZipEntry entry = getEntry(fileName);
         if (entry != null) {
-            try {
-                InputStream inputStream = file.getInputStream(entry);
+            try (InputStream inputStream = file.getInputStream(entry)){
                 int length = inputStream.available();
                 byte[] contents = new byte[length];
                 inputStream.read(contents);
-                inputStream.close();
                 return contents;
             } catch (IOException e) {
+                log.error(e.getMessage());
                 return null;
             }
         } else {
@@ -173,7 +169,7 @@ public class ReadZip extends AbstractRead {
             file.close();
             file = null;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         if (entries != null) {
             entries.clear();

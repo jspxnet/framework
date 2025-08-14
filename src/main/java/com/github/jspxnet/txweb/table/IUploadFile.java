@@ -60,6 +60,9 @@ public abstract class IUploadFile extends OperateTable {
     @Column(caption = "描述", length = 2000)
     private String content = StringUtil.empty;
 
+    @Column(caption = "缩图地址", length = 2000)
+    private String thumbnail = StringUtil.empty;
+
     //有可能是url ,本地路径是相对路径
     @Column(caption = "文件路径", length = 500, notNull = true)
     private String fileName = StringUtil.empty;

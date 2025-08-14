@@ -5,16 +5,18 @@ import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 public abstract class BasePermissionInterceptor extends InterceptorSupport {
 
     protected final static EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
 
-    protected final static String GUEST_STOP_URL_TXT = "guest_stop_url_txt";
-    protected final static String ADMIN_RULE_URL_TXT = "admin_rule_url_txt";
+    public final static String GUEST_STOP_URL_TXT = "guest_stop_url_txt";
+    public final static String ADMIN_RULE_URL_TXT = "admin_rule_url_txt";
 
-
-
+    @Setter
+    @Getter
     protected String guestUrlFile = "guesturl.properties";
     protected static String[] guestStopUrl = null;
     protected static String[] ruleOutUrl = null;
@@ -23,59 +25,46 @@ public abstract class BasePermissionInterceptor extends InterceptorSupport {
     protected static String[] adminRuleUrl = null;
     protected static String[] adminRuleOutUrl = null;
 
+    @Setter
     protected boolean permission = true;
 
-    public void setPermission(boolean permission) {
-        this.permission = permission;
-    }
-
+    @Setter
     protected boolean autoOrganizeId = true;
 
-    public void setAutoOrganizeId(boolean autoOrganizeId) {
-        this.autoOrganizeId = autoOrganizeId;
-    }
-
+    @Setter
     protected boolean useGuestUrl = true;
 
-    public void setUseGuestUrl(boolean useGuestUrl) {
-        this.useGuestUrl = useGuestUrl;
-    }
-
-    public String getGuestUrlFile() {
-        return guestUrlFile;
-    }
-
-    public void setGuestUrlFile(String guestUrlFile) {
-        this.guestUrlFile = guestUrlFile;
-    }
-
-    public static void decodeGuestUrl(String txt)
-    {
+    public static void decodeGuestUrl(String txt) {
 
         String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
         for (String str : array) {
             if (str == null) {
                 continue;
             }
-            if (str.startsWith("!")) {
-                guestStopUrl = ArrayUtil.add(guestStopUrl, StringUtil.substringAfter(str, "!"));
-            } else {
+            String substringAfter = StringUtil.substringAfter(str, "!");
+            if (str.startsWith("!") && !ArrayUtil.contains(guestStopUrl, substringAfter)) {
+                guestStopUrl = ArrayUtil.add(guestStopUrl, substringAfter);
+                continue;
+            }
+            if (!ArrayUtil.contains(ruleOutUrl, str)) {
                 ruleOutUrl = ArrayUtil.add(ruleOutUrl, str);
             }
         }
     }
 
-    public static void decodeAdminUrl(String txt)
-    {
+    public static void decodeAdminUrl(String txt) {
 
         String[] array = StringUtil.split(StringUtil.replace(txt, StringUtil.CRLF, StringUtil.CR), StringUtil.CR);
         for (String str : array) {
             if (str == null) {
                 continue;
             }
-            if (str.startsWith("!")) {
-                adminRuleOutUrl = ArrayUtil.add(adminRuleOutUrl, StringUtil.substringAfter(str, "!"));
-            } else {
+            String substringAfter = StringUtil.substringAfter(str, "!");
+            if (str.startsWith("!") && !ArrayUtil.contains(adminRuleOutUrl, substringAfter)) {
+                adminRuleOutUrl = ArrayUtil.add(adminRuleOutUrl,substringAfter);
+                continue;
+            }
+            if (!ArrayUtil.contains(ruleOutUrl, str)) {
                 adminRuleUrl = ArrayUtil.add(adminRuleUrl, str);
             }
         }

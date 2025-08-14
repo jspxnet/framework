@@ -24,6 +24,8 @@ import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.BooleanUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.Getter;
+
 import java.io.File;
 import java.util.*;
 
@@ -49,13 +51,22 @@ public class Scheduler {
     /**
      * The daemon flag. If true the scheduler and its spawned threads acts like
      * daemons.
+     * -- GETTER --
+     *  Tests whether this scheduler is a daemon scheduler.
+     *
      */
+    @Getter
     private boolean daemon = true;
 
     /**
      * The state flag. If true the scheduler is started and running, otherwise
      * it is paused and no task is launched.
+     * -- GETTER --
+     *  Tests if this scheduler is started.
+     *
+
      */
+    @Getter
     private boolean started = false;
 
     /**
@@ -98,10 +109,7 @@ public class Scheduler {
      */
     final private List<TaskExecutor> executors = Collections.synchronizedList(new ArrayList<>());
 
-    /**
-     * Internal lock, used to synchronize status-aware operations.
-     */
-    private final Object lock = new Object();
+    //private final Lock lock = new ReentrantLock();
 
     /**
      * It builds and prepares a brand new Scheduler instance.
@@ -115,7 +123,7 @@ public class Scheduler {
     public Scheduler(TaskProxy taskProxy) {
         collectors.add(memoryTaskCollector);
         collectors.add(fileTaskCollector);
-        setDaemon(true);
+        setDaemon(daemon);
         schedule(taskProxy);
     }
 
@@ -126,6 +134,9 @@ public class Scheduler {
      * @return The GUID for this scheduler.
      */
     public String getGuid() {
+        if (taskProxy == null) {
+            return "NONE";
+        }
         return taskProxy.getScheduledId();
     }
 
@@ -169,15 +180,6 @@ public class Scheduler {
     }
 
     /**
-     * Tests whether this scheduler is a daemon scheduler.
-     *
-     * @return true if this scheduler is a daemon scheduler; false otherwise.
-     */
-    public boolean isDaemon() {
-        return daemon;
-    }
-
-    /**
      * Marks this scheduler daemon flag. When a scheduler is marked as a daemon
      * scheduler it spawns only daemon threads. The Java Virtual Machine exits
      * when the only threads running are all daemon threads.
@@ -188,23 +190,8 @@ public class Scheduler {
      * @throws IllegalStateException If the scheduler is started.
      */
     public void setDaemon(boolean on) throws IllegalStateException {
-        synchronized (lock) {
-            if (started) {
-                throw new IllegalStateException("scheduler already started");
-            }
-            this.daemon = on;
-        }
-    }
+         this.daemon = on;
 
-    /**
-     * Tests if this scheduler is started.
-     *
-     * @return true if the scheduler is started, false if it is stopped.
-     */
-    public boolean isStarted() {
-        synchronized (lock) {
-            return started;
-        }
     }
 
     public SchedulerDto getTaskConf() {
@@ -214,17 +201,21 @@ public class Scheduler {
         SchedulerDto dto = BeanUtil.copy(taskProxy, SchedulerDto.class);
         dto.setGuid(taskProxy.getScheduledId());
         dto.setClassName(taskProxy.getBean().getClass().getName());
+        dto.setRegisterName(taskProxy.getRegisterName());
         dto.setStarted(BooleanUtil.toInt(started));
+        dto.setRunTimes(taskProxy.getRunTimes());
+        dto.setTaskType(taskProxy.getTaskType());
         return dto;
     }
 
     /**
      * 强制运行
+     *
      * @throws Exception 异常
      */
     public void forceRun() throws Exception {
         if (taskProxy == null) {
-           throw  new Exception("forceRun 运行错误， taskProxy 不能为空");
+            throw new Exception("forceRun 运行错误， taskProxy 不能为空");
         }
         taskProxy.forceRun();
     }
@@ -274,9 +265,7 @@ public class Scheduler {
      * @param collector The custom {@link TaskCollector} instance.
      */
     public void addTaskCollector(TaskCollector collector) {
-        synchronized (collectors) {
-            collectors.add(collector);
-        }
+          collectors.add(collector);
     }
 
     /**
@@ -285,9 +274,7 @@ public class Scheduler {
      * @param collector The custom {@link TaskCollector} instance.
      */
     public void removeTaskCollector(TaskCollector collector) {
-        synchronized (collectors) {
-            collectors.remove(collector);
-        }
+        collectors.remove(collector);
     }
 
     /**
@@ -331,9 +318,7 @@ public class Scheduler {
      * @param listener The listener.
      */
     public void removeSchedulerListener(SchedulerListener listener) {
-        synchronized (listeners) {
-            listeners.remove(listener);
-        }
+         listeners.remove(listener);
     }
 
     /**
@@ -384,9 +369,10 @@ public class Scheduler {
 
     /**
      * This method schedules a task execution.
+     * <p>
+     * //    @param pattern The scheduling pattern for the task.
      *
-//    @param pattern The scheduling pattern for the task.
-     * @param task              The task, as a plain Runnable object.
+     * @param task The task, as a plain Runnable object.
      * @return The task auto-generated ID assigned by the scheduler. This ID can
      * be used later to reschedule and deschedule the task, and also to
      * retrieve informations about it.
@@ -398,7 +384,7 @@ public class Scheduler {
             throw new RuntimeException("不允许放入空任务");
         }
         this.taskProxy = task;
-        return schedule(task.getPattern(), new RunnableTask(task,task.getScheduledId()));
+        return schedule(task.getPattern(), new RunnableTask(task, task.getScheduledId()));
     }
 
     /**
@@ -452,10 +438,8 @@ public class Scheduler {
      * @since 2.0
      */
     public void reschedule(String id, SchedulingPattern schedulingPattern) {
-
         SchedulingPattern result = memoryTaskCollector.update(id, schedulingPattern);
-        if (result!=null)
-        {
+        if (result != null) {
             taskProxy.setPattern(result.toString());
         }
     }
@@ -541,12 +525,7 @@ public class Scheduler {
      * @throws IllegalStateException If the scheduler is not started.
      */
     public TaskExecutor launch(Task task) {
-        synchronized (lock) {
-            if (!started) {
-                throw new IllegalStateException("Scheduler not started");
-            }
-            return spawnExecutor(task);
-        }
+        return spawnExecutor(task);
     }
 
     /**
@@ -556,9 +535,9 @@ public class Scheduler {
      * @throws IllegalStateException Thrown if this scheduler is already started.
      */
     public void start() throws IllegalStateException {
-        synchronized (lock) {
+        synchronized (this) {
             if (started) {
-                throw new IllegalStateException("Scheduler already started");
+                return;
             }
             // Starts the timer thread.
             timer = new TimerThread(this);
@@ -580,58 +559,35 @@ public class Scheduler {
         if (timer == null) {
             return;
         }
-        synchronized (lock) {
+        synchronized (this) {
             if (!started) {
-                throw new IllegalStateException("Scheduler not started");
+                return;
             }
             // Interrupts the timer and waits for its death.
-            timer.interrupt();
-            tillThreadDies(timer);
-            timer = null;
-            // Interrupts any running launcher and waits for its death.
-            for (LauncherThread launcher : launchers) {
-                launcher.interrupt();
-                tillThreadDies(launcher);
-            }
-            launchers.clear();
-			/*for (;;) {
-				LauncherThread launcher = null;
-				synchronized (launchers) {
-					if (launchers.size() == 0) {
-						break;
-					}
-					launcher = launchers.remove(0);
-				}
-				launcher.interrupt();
-				tillThreadDies(launcher);
-			}
-			launchers.clear();*/
-            // Interrupts any running executor and waits for its death.
-            // Before exiting wait for all the active tasks end.
-            for (TaskExecutor executor : executors) {
-                if (executor.canBeStopped()) {
-                    executor.stop();
+            try {
+                timer.interrupt();
+                tillThreadDies(timer);
+                // Interrupts any running launcher and waits for its death.
+                for (LauncherThread launcher : launchers) {
+                    launcher.interrupt();
+                    tillThreadDies(launcher);
                 }
-                tillExecutorDies(executor);
+
+                // Interrupts any running executor and waits for its death.
+                // Before exiting wait for all the active tasks end.
+                for (TaskExecutor executor : executors) {
+                    if (executor.canBeStopped()) {
+                        executor.stop();
+                    }
+                    tillExecutorDies(executor);
+                }
+            } finally {
+                executors.clear();
+                launchers.clear();
+                timer = null;
+                started = false;
+
             }
-            executors.clear();
-			/*
-			for (;;) {
-				TaskExecutor executor = null;
-				synchronized (executors) {
-					if (executors.size() == 0) {
-						break;
-					}
-					executor = executors.remove(0);
-				}
-				if (executor.canBeStopped()) {
-					executor.stop();
-				}
-				tillExecutorDies(executor);
-			}
-			executors.clear();*/
-            // Change the state of the object.
-            started = false;
         }
     }
 
@@ -641,25 +597,19 @@ public class Scheduler {
      * Starts a launcher thread.
      *
      * @param referenceTimeInMillis Reference time in millis for the launcher.
-     * @return The spawned launcher.
      */
-    LauncherThread spawnLauncher(long referenceTimeInMillis) {
-        TaskCollector[] nowCollectors;
+    void spawnLauncher(long referenceTimeInMillis) {
         synchronized (collectors) {
             int size = collectors.size();
-            nowCollectors = new TaskCollector[size];
+            TaskCollector[] nowCollectors = new TaskCollector[size];
             for (int i = 0; i < size; i++) {
                 nowCollectors[i] = collectors.get(i);
             }
-        }
-        LauncherThread l = new LauncherThread(this, nowCollectors,
-                referenceTimeInMillis);
-        synchronized (launchers) {
+            LauncherThread l = new LauncherThread(this, nowCollectors, referenceTimeInMillis);
+            l.setDaemon(daemon);
+            l.start();
             launchers.add(l);
         }
-        l.setDaemon(daemon);
-        l.start();
-        return l;
     }
 
     /**
@@ -668,12 +618,10 @@ public class Scheduler {
      * @param task The task.
      * @return The spawned task executor.
      */
-    TaskExecutor spawnExecutor(Task task) {
+    synchronized TaskExecutor spawnExecutor(Task task) {
         TaskExecutor e = new TaskExecutor(this, task);
-        synchronized (executors) {
-            executors.add(e);
-        }
         e.start();
+        executors.add(e);
         return e;
     }
 
@@ -684,9 +632,7 @@ public class Scheduler {
      * @param launcher The launcher which has completed its task.
      */
     void notifyLauncherCompleted(LauncherThread launcher) {
-        synchronized (launchers) {
-            launchers.remove(launcher);
-        }
+        launchers.remove(launcher);
     }
 
     /**
@@ -696,9 +642,7 @@ public class Scheduler {
      * @param executor The executor which has completed its task.
      */
     void notifyExecutorCompleted(TaskExecutor executor) {
-        synchronized (executors) {
-            executors.remove(executor);
-        }
+         executors.remove(executor);
     }
 
     /**
@@ -764,7 +708,7 @@ public class Scheduler {
                 thread.join(DateUtil.MINUTE);
                 dead = true;
             } catch (InterruptedException e) {
-                ;
+                //
             }
         } while (!dead);
     }
@@ -783,7 +727,7 @@ public class Scheduler {
                 executor.join();
                 dead = true;
             } catch (InterruptedException e) {
-                ;
+                ///
             }
         } while (!dead);
     }

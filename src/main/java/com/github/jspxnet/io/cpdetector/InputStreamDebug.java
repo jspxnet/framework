@@ -65,7 +65,7 @@ public class InputStreamDebug extends InputStream {
     @Override
     public synchronized int read() throws IOException {
         int ret = this.m_delegate.read();
-        System.out.print((char) ret);
+       // System.out.print((char) ret);
         return ret;
     }
 

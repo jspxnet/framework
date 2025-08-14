@@ -6,7 +6,6 @@ import java.util.List;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2021/1/5 12:37
  * description: Consul接口

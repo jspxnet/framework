@@ -9,12 +9,8 @@
  */
 package com.github.jspxnet.sioc.factory;
 
-import com.github.jspxnet.boot.conf.AppolloBootConfig;
 import com.github.jspxnet.boot.environment.Environment;
 import lombok.Data;
-
-
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

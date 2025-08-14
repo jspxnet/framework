@@ -18,8 +18,6 @@ import com.github.jspxnet.io.AbstractWrite;
 import java.util.*;
 import java.io.*;
 import java.net.URL;
-
-
 import lombok.extern.slf4j.Slf4j;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.SAXException;
@@ -163,7 +161,7 @@ public class XMLBundleProvider extends BundleProvider {
     }
 
 
-    class ReadXMLProperties extends DefaultHandler {
+    static class ReadXMLProperties extends DefaultHandler {
         private CharArrayWriter contents = new CharArrayWriter();
         private Map<String, String> map = new HashMap<String, String>();
         private String key = StringUtil.empty;

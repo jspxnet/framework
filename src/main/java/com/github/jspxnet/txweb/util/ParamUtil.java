@@ -3,6 +3,7 @@ package com.github.jspxnet.txweb.util;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sober.enums.ParamModeType;
+import com.github.jspxnet.txweb.annotation.*;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.handle.RocHandle;
@@ -15,10 +16,6 @@ import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.tag.BeanModel;
 import com.github.jspxnet.sober.annotation.NullClass;
 import com.github.jspxnet.txweb.Action;
-import com.github.jspxnet.txweb.annotation.Operate;
-import com.github.jspxnet.txweb.annotation.Param;
-import com.github.jspxnet.txweb.annotation.PathVar;
-import com.github.jspxnet.txweb.annotation.Validate;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.model.param.SignParam;
@@ -441,6 +438,7 @@ public final class ParamUtil {
                             HttpServletRequest request = actionContext.getRequest();
                             if (RequestUtil.isParameter(request,paramName))
                             {
+                                //url?name=value 形式的参数
                                 boolean checkSql = !SafetyEnumType.NONE.equals(param.level());
                                 if (ClassUtil.isArrayType(pType) || ClassUtil.isCollection(pType))
                                 {
@@ -471,7 +469,10 @@ public final class ParamUtil {
                         return paramObj;
                     }
                 }
-
+                if (annotation instanceof RequestBody) {
+                    isParam = true;
+                    paramObj[i] = RequestUtil.getReader(actionContext.getRequest());
+                }
                 if (annotation instanceof PathVar) {
                     //路径作为参数方式
                     HttpServletRequest request = action.getRequest();

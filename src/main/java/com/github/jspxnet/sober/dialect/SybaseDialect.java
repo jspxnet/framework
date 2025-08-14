@@ -141,4 +141,10 @@ public class SybaseDialect extends Dialect {
     public boolean commentPatch() {
         return false;
     }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT TOP 1 * FROM (" + sql + ") zs";
+    }
+
 }

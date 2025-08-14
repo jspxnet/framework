@@ -67,7 +67,8 @@ public class StringList extends LinkedList<String> implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (String s : this) {
+        for (String s : this)
+        {
             if (StringUtil.isNull(s)) {
                 continue;
             }

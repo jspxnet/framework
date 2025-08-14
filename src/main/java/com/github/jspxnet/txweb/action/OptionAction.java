@@ -63,7 +63,6 @@ public class OptionAction extends OptionView {
         if (userSession != null) {
             optionBundle.setPutName(userSession.getName());
             optionBundle.setPutUid(userSession.getUid());
-
         }
         optionBundle.setIp(getRemoteAddr());
         optionBundle.setNamespace(params.getNamespace());

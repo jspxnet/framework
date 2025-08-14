@@ -52,7 +52,7 @@ public class HessianHandle extends ActionHandle {
         //synchronized 这里不能有同步,否则调用不成功
         ActionInvocation actionInvocation = null;
         try {
-            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response);
+            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, null, request, response,false);
             actionInvocation.initAction();
             actionInvocation.invoke();
         } finally {

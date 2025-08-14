@@ -2,7 +2,7 @@
  * Copyright © 2004-2014 chenYuan. All rights reserved.
  * @Website:wwww.jspx.net
  * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
+ * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
  * @jvm:jdk1.6+  x86/amd64
  *
@@ -13,14 +13,17 @@ package com.github.jspxnet.boot.environment;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.utils.StringUtil;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Created by IntelliJ IDEA.
+ *
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2004-4-1
  * Time: 16:45:27
  * 陈原
  */
-public abstract class Environment {
+public final class Environment {
     private Environment() {
 
     }
@@ -71,23 +74,24 @@ public abstract class Environment {
     final public static String repairRequestMethod = "repairRequestMethod";
 
 
-    //final public static String Date_format = "date_format";
+    final public static String DATE_FORMAT = "date_format";
 
-    //final public static String Time_format = "time_format";
+    final public static String DATETIME_FORMAT = "datetime_format";
 
-    //final public static String Number_format = "number_format";
+    final public static String TIME_FORMAT = "time_format";
+
+
+    final public static String NUMBER_FORMAT = "number_format";
 
     final public static String autoImports = "autoImports";
 
     final public static String autoIncludes = "autoIncludes";
 
-    final public static String dateTimeFormat = "dateTimeFormat";
+    final public static String templateFixUndefined = "templateFixUndefined";
 
     final public static String defaultPath = "defaultPath";
 
     final public static String sqlXmlPath = "sqlXmlPath";
-
-    final public static String lucenePath = "lucenePath";
 
     final public static String databasePath = "databasePath";
 
@@ -117,21 +121,13 @@ public abstract class Environment {
 
     final public static String realPath = "realPath";
 
-    final public static String log4jPath = "log4jPath";
-
     final public static String logPath = "logPath";
 
     final public static String startRunDate = "startRunDate";
 
-    final public static String upgradeXMLFile = "upgrade.cfg.xml";
-
-    final public static String versionId = "version";
-
     final public static String filterSuffix = "suffix";
 
     final public static String ApiFilterSuffix = "apiSuffix";
-
-    final public static String domainName = "domainName";
 
     final public static String remote = "remote";
 
@@ -148,7 +144,7 @@ public abstract class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.71";
+    final static public String VERSION = "6.81";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -166,11 +162,7 @@ public abstract class Environment {
 
     final public static String logInfoFile = "logInfoFile";
 
-    final public static String logDebugFile = "logDebugFile";
-
     final public static String logErrorFile = "logErrorFile";
-
-    final public static String logFatalFile = "logFatalFile";
 
     final public static String log_info_file = "sys_info.log";
 
@@ -182,11 +174,11 @@ public abstract class Environment {
 
     final public static String jspx_properties_template = "jspx-${active}.properties";
 
-    final public static String logInfo = "info";
-
-    final public static String logError = "error";
 
     final public static String DEBUG = "debug";
+
+    final public static String SHOW_API_RUN_TIME = "showApiRunTime";
+
 
     final public static String LOGIN_TIMES = "loginTimes";
 
@@ -200,14 +192,12 @@ public abstract class Environment {
 
     static public final String UserBundleDAO = "userBundleDAO";
 
-    //文件上传对象Ueditor里边使用
-    //static public final String uploadFileAction = "uploadFileAction";
     //验证
     static public final String validate = "validate";
 
 
     //最高金额
-    static public final String MAX_AMOUNT = "maxAmount";
+  /*  static public final String MAX_AMOUNT = "maxAmount";
 
     static public final String MAX_POINTS = "maxPoints";
 
@@ -223,7 +213,7 @@ public abstract class Environment {
 
     //组织
     final static public String organise = "organise";
-
+*/
     //字符编码
     final static public String encode = "encode";
 
@@ -234,7 +224,7 @@ public abstract class Environment {
 
     final static public String defaultLanguage = "zh";
 
-    final static public String defaultEncode = "UTF-8";
+    final static public String defaultEncode = StandardCharsets.UTF_8.name();
 
     final static public String timezone = "user.timezone";
 
@@ -244,9 +234,6 @@ public abstract class Environment {
     final static public String scriptPath = "scriptPath";
 
     final static public String sitePath = "sitePath";
-
-    //拦截器里边使用
-    final static public String interceptorRole = "interceptorRole";
 
     //FTP权限
     final static public String permission = "permission";
@@ -258,9 +245,6 @@ public abstract class Environment {
     final static public String setupPath = "setupPath";
     //上传路径
 
-    //上传是否覆盖
-    final static public String uploadCovering = "uploadCovering";
-
     //上传提起txt保存
     final static public String useUploadConverterTxt = "useUploadConverterTxt";
 
@@ -269,9 +253,6 @@ public abstract class Environment {
     final static public String maxImageHeight = "maxImageHeight";
     //上传路径
     final static public String uploadPath = "uploadPath";
-
-    //备份路径
-    final static public String BackupPath = "backupPath";
 
     //允许上传的文件类型
     final static public String allowedTypes = "allowedTypes";
@@ -284,9 +265,6 @@ public abstract class Environment {
 
     //上传类型
     final static public String uploadPathType = "uploadPathType";
-
-    //用户上传次数
-    static public final String userUploadTimes = "userUploadTimes";
 
     //最大下载数
     final static public String maxDownloader = "maxDownloader";
@@ -346,10 +324,7 @@ public abstract class Environment {
 
     static public final String closeGuestVisitInfo = "closeGuestVisitInfo";
 
-    static public final String useMail = "useMail";
-
     static public final String useSms = "useSms";
-
 
     static public final String mailSmtp = "mailSmtp";
 
@@ -361,23 +336,13 @@ public abstract class Environment {
 
     static public final String manageMail = "manageMail";
 
-    static public final String languageDAO = "languageDAO";
-
     static public final String rowCount = "rowCount";
-
-
-    static public final String mobileRowCount = "mobileRowCount";
-
-
-    static public final String notRefurbish = "notRefurbish";
 
     static public final String registerRole = "registerRole";
 
     static public final String guestRole = "guestRole";
 
     static public final String SUCCESS = "success";
-
-    public static final String FAIL = "fail";
 
     static public final String ERROR = "error";
 
@@ -387,10 +352,12 @@ public abstract class Environment {
 
     static public final String DEFAULT_STORE = "defaultStore";
 
-
-
     static public final String useCache = "useCache";
+
     static public final String useTxWeb = "useTxWeb";
+
+    static public final String DEFAULT_ONLINE_HOUR = "defaultOnlineHour";
+
 
     static public final String onlinePrivilege = "onlinePrivilege";
 
@@ -412,6 +379,8 @@ public abstract class Environment {
     static public final String photoModel = "photoModel";
 
     static public final int enterprise = 1;
+
+    static public final String LICENSE_VERIFY_VALUE = "licenseVerifyValue";
 
 
     static public final String mac = "mac";
@@ -453,6 +422,9 @@ public abstract class Environment {
     //系统默认密钥
     static public final String secretKey = "secretKey";
 
+    //系统默认密钥,配置的格式 是16进组，还是base64
+    static public final String keyFormatType = "keyFormatType";
+
     //密码算法模式
     static public final String cipherAlgorithm = "cipherAlgorithm";
 
@@ -484,10 +456,6 @@ public abstract class Environment {
 
     //私秘Key，2个地方在用，远程登陆，和非对称加密
     final static public String privateKey = "privateKey";
-
-
-    //支付标识，是用户自己定义的标识
-    final static public String paySign = "paySign";
 
     //加密签名
     final static public String sign = "sign";
@@ -621,6 +589,8 @@ public abstract class Environment {
 
     static public final String SERVER_CORS = "server.cors";
 
+    static public final String tcpNoDelay = "tcpNoDelay";
+
     static public final String SERVER_THREADS = "server.threads";
 
     static public final String SERVER_CACHING_ALLOWED = "server.CachingAllowed";
@@ -634,7 +604,6 @@ public abstract class Environment {
     static public final String SERVER_FILTER_MODE = "server.filter.mode";
 
     public final static String SPRING_PATH_SIGN = ".jar!/BOOT-INF/classes!";
-
 
     final public static String forceExit = "forceExit";
 
@@ -657,5 +626,10 @@ public abstract class Environment {
     public static final String SCHEDULER_REGISTER_NAME = "schedulerRegisterName";
     public static final String SCHEDULER_REGISTER_TOKEN = "schedulerRegisterToken";
     //任务注册中心end
+
+    //超级API接口登陆begin
+    public static final String API_LOGIN_NAME = "API_LOGIN_NAME";
+    public static final String API_LOGIN_PASSWORD = "API_LOGIN_PASSWORD";
+    //超级API接口登陆end
 
 }

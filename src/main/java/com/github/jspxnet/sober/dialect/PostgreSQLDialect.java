@@ -9,14 +9,13 @@
  */
 package com.github.jspxnet.sober.dialect;
 
-import com.caucho.quercus.lib.db.ColumnType;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.utils.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.sql.*;
 
@@ -48,7 +47,7 @@ public class PostgreSQLDialect extends Dialect {
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=\"" + COLUMN_LENGTH + "&lt;255\">varchar(${" + COLUMN_LENGTH + "})<#else>text</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
         put(Integer.class.getName(), "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
-        put("int", "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+        put("int",                   "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
 
         put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">BIGSERIAL<#else>BIGINT</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
         put("long", "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">BIGSERIAL<#else>BIGINT</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
@@ -59,7 +58,12 @@ public class PostgreSQLDialect extends Dialect {
         put(Float.class.getName(), "${" + COLUMN_NAME + "} real <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
         put("float", "${" + COLUMN_NAME + "} real <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
-        put(Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
+        put(BigDecimal.class.getName(), "${" + COLUMN_NAME + "} double precision <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("BigDecimal", "${" + COLUMN_NAME + "} double precision <#if where=\"" +
+                 COLUMN_NOT_NULL + "\">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
+        put(java.util.Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
+        put(java.sql.Date.class.getName(), "${" + COLUMN_NAME + "} timestamp <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default now()");
 
         put(Time.class.getName(), "${" + COLUMN_NAME + "} time <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '${" + COLUMN_DEFAULT + "}'</#if>");
 
@@ -74,7 +78,7 @@ public class PostgreSQLDialect extends Dialect {
         //修改系列开始
         put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE ${" + SERIAL_NAME + "} RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
 
-        put(SQL_TABLE_NAMES, "SELECT tablename FROM pg_tables WHERE tablename NOT LIKE 'pg%' AND tablename NOT LIKE 'sql_%' ORDER   BY tablename");
+        put(SQL_TABLE_NAMES, "SELECT tablename FROM pg_tables WHERE tablename NOT LIKE 'pg%' AND tablename NOT LIKE 'sql_%' ORDER BY tablename");
 
         put(DATABASE_SIZE, "SELECT pg_database_size('${" + KEY_TABLE_NAME + "}'");
 
@@ -304,6 +308,11 @@ public class PostgreSQLDialect extends Dialect {
     @Override
     public boolean commentPatch() {
         return true;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs limit 1";
     }
 
 }

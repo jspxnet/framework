@@ -56,7 +56,7 @@ public class DevCenterInterceptor extends BasePermissionInterceptor {
                 log.error(guestUrlFile + "没有找到");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("init ",e);
         }
 
     }
@@ -106,13 +106,13 @@ public class DevCenterInterceptor extends BasePermissionInterceptor {
         UserSession userSession = onlineManager.getUserSession(actionContext);
         String userListStr = ENV_TEMPLATE.getString(Environment.KEY_DCV_ENTER_USER_LIST);
         if (StringUtil.isNull(userListStr)) {
-            action.addFieldInfo(Environment.warningInfo, "配置文件中先配置dev_user_list,用户名授权后才可进入");
+            action.addFieldInfo(Environment.warningInfo, "配置文件中先配置dev_center_user_list,用户名授权后才可进入");
             return ActionSupport.UNTITLED;
         }
 
         String[] userList = StringUtil.split(userListStr, StringUtil.SEMICOLON);
         if (ObjectUtil.isEmpty(userList)) {
-            action.addFieldInfo(Environment.warningInfo, "配置文件中先配置dev_user_list,用户名授权后才可进入");
+            action.addFieldInfo(Environment.warningInfo, "配置文件中先配置dev_center_user_list,用户名授权后才可进入");
             return ActionSupport.UNTITLED;
         }
 

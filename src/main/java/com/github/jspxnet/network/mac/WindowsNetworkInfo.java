@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.network.mac;
 
-/**
+/*
  * Created by IntelliJ IDEA.
  * User: chenYuan
  * date: 2004-8-31
@@ -32,7 +32,6 @@ public class WindowsNetworkInfo extends NetworkInfo {
         try {
             ipConfigResponse = runConsoleCommand(IPCONFIG_COMMAND);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new ParseException(e.getMessage(), 0);
         }        // get localhost address
         String localHost = getLocalHost();
@@ -56,7 +55,6 @@ public class WindowsNetworkInfo extends NetworkInfo {
             }
         }
         ParseException ex = new ParseException("Cannot read MAC address from [" + ipConfigResponse + "]", 0);
-        ex.printStackTrace();
         throw ex;
     }
 

@@ -13,34 +13,20 @@ package com.github.jspxnet.security.symmetry.impl;
   密码只能是8位
    PKCS5Padding 和 PKCS7Padding 基本一样
  */
-
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.security.symmetry.AbstractEncrypt;
-import com.github.jspxnet.utils.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.crypto.SecretKey;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.Provider;
-import java.security.Security;
-import java.util.logging.Level;
-
 @Slf4j
 public class DESEncrypt extends AbstractEncrypt {
     //随机数，会使加密的key和数据不一样,
     public DESEncrypt() {
         algorithm = "DES";
         //设置  DESede  就是 3DES加密算法
-
+        cipherIv = "12345678";
         cipherAlgorithm = "DES/CBC/PKCS5Padding";
-        try {
-            //判断log4j是否存在
-            Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider");
-            Security.addProvider((Provider) ClassUtil.newInstance("org.bouncycastle.jce.provider.BouncyCastleProvider"));
-        } catch (Exception e) {
-            log.error("bcprov-jdk15.jar not find,can not transfer use PKCS7Padding");
-        }
+
     }
 
     /**
@@ -52,7 +38,7 @@ public class DESEncrypt extends AbstractEncrypt {
      */
     @Override
     public byte[] getEncode(byte[] classData) throws Exception {
-        byte[] rawKey = secretKey.length() > 8 ? secretKey.substring(0, 8).getBytes(Environment.defaultEncode) : secretKey.getBytes(Environment.defaultEncode);
+        byte[] rawKey = getSecretKeyBytes();
         SecretKey key = new SecretKeySpec(rawKey, algorithm);
         Cipher cipher = Cipher.getInstance(cipherAlgorithm);
         //设置为加密模式
@@ -67,12 +53,11 @@ public class DESEncrypt extends AbstractEncrypt {
      */
     @Override
     public byte[] getDecode(byte[] classData) throws Exception {
-        byte[] rawKey = secretKey.length() > 8 ? secretKey.substring(0, 8).getBytes(Environment.defaultEncode) : secretKey.getBytes(Environment.defaultEncode);
+        byte[] rawKey = getSecretKeyBytes();
         SecretKeySpec key = new SecretKeySpec(rawKey, algorithm);
         Cipher cipher = Cipher.getInstance(cipherAlgorithm); //"算法/模式/补码方式"
         cipher.init(Cipher.DECRYPT_MODE, key, getCipherIV());
         return cipher.doFinal(classData);
-
     }
 
 }

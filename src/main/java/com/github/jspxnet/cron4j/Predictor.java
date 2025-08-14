@@ -147,8 +147,8 @@ public class Predictor {
 	/**
 	 * Sets the time zone for predictions.
 	 * 
-	 * @param timeZone
-	 *            The time zone for predictions.
+	 * @param timeZone The time zone for predictions.
+	 *
 	 * @since 2.2.5
 	 */
 	public void setTimeZone(TimeZone timeZone) {
@@ -160,7 +160,8 @@ public class Predictor {
 	 * 
 	 * @return The next matching moment as a millis value.
 	 */
-	public synchronized long nextMatchingTime() {
+	public long nextMatchingTime() {
+		//synchronized
 		// Go a minute ahead.
 		time += 1000;
 		// Is it matching?

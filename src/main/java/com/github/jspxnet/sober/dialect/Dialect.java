@@ -35,6 +35,16 @@ public abstract class Dialect extends HashMap<String,String> {
     final protected static Placeholder PLACEHOLDER = EnvFactory.getPlaceholder();
     final protected static Placeholder SQL_PLACEHOLDER = EnvFactory.getSqlPlaceholder();
 
+    final public static String POSTGRESQL_CURRENT_DATABASE = "select current_database()";
+
+    final public static String MYSQL_CURRENT_DATABASE = "select database()";
+
+    final public static String MSSQL_CURRENT_DATABASE = " select db_name()";
+
+    final public static String MSSQL_CURRENT_VESION = " SELECT @@VERSION";
+
+
+    //生产部,王建
 
     public static final String ORACLE_CREATE_SEQUENCE = "oracle_create_sequence";
     public static final String ORACLE_CREATE_SEQ_TIGGER = "oracle_create_seq_tigger";
@@ -77,10 +87,8 @@ public abstract class Dialect extends HashMap<String,String> {
     public static final String SQL_DELETE = "sql_delete";
     public static final String SQL_UPDATE = "sql_update";
 
-
-
-    public static final String SQL_RESULT_BEGIN_ROW = "sql_result_begin_row";
-    public static final String SQL_RESULT_END_ROW = "sql_result_end_row";
+    public static final String SQL_RESULT_BEGIN_ROW = "beginRow";
+    public static final String SQL_RESULT_END_ROW = "endRow";
 
     public static final String SQL_HAVE = "sql_have";
     public static final String SQL_DELETE_IN = "sql_delete_in";
@@ -125,7 +133,9 @@ public abstract class Dialect extends HashMap<String,String> {
 
     public static final String SQL_CRITERIA_GROUP_QUERY = "sql_criteria_group_query";
 
-//    public final Map<String, String> standard_SQL = new HashMap<>(100);
+    public static final String CHECK_SQL = "check_sql";
+
+
 
     public Dialect() {
         put(SQL_QUERY_ONE_FIELD, "SELECT * FROM ${" + KEY_TABLE_NAME + "} WHERE ${" + KEY_FIELD_NAME + "}=?");
@@ -156,7 +166,8 @@ public abstract class Dialect extends HashMap<String,String> {
         put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>bigint(${" + COLUMN_LENGTH + "})<#else>bigint(16)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
         put(Double.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;15>double(${" + COLUMN_LENGTH + "},3)<#else>double(15,3)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
         put(Float.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;9>float(${" + COLUMN_LENGTH + "},3)<#else>float(9,3)</#if></#else><#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
-        put(Date.class.getName(), "${" + COLUMN_NAME + "} datetime NOT NULL default '0000-00-00 00:00:00'");
+        put(java.util.Date.class.getName(), "${" + COLUMN_NAME + "} datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT now()</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(java.sql.Date.class.getName(), "${" + COLUMN_NAME + "} datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT now()</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
         put(Time.class.getName(), "${" + COLUMN_NAME + "} time DEFAULT <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
         put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
         put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
@@ -166,6 +177,11 @@ public abstract class Dialect extends HashMap<String,String> {
         put(SQL_CREATE_TABLE_INDEX, "ALTER TABLE ${" + KEY_TABLE_NAME + "} ADD <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX ${"+KEY_INDEX_NAME+"}(${"+KEY_INDEX_FIELD+"})");
 
         //
+        put(CHECK_SQL, "SELECT 1");
+
+        //查询字段列表
+      //  put(FIELD_QUERY_SQL, "SELECT * FROM (${" + QUERY_SQL + "}) zs WHERE limit 1");
+
         //SQL_MODIFY_COLUMN
     }
 
@@ -191,10 +207,10 @@ public abstract class Dialect extends HashMap<String,String> {
      * @param sql        sql
      * @param begin      开始
      * @param end        结束
-     * @param soberTable 表信息
+     * @param soberTable      表结构，这个主要是mssql分页要使用
      * @return 返回sql
      */
-    public abstract String getLimitString(String sql, int begin, int end, TableModels soberTable);
+    public abstract String getLimitString(String sql, int begin, int end,TableModels soberTable);
 
 
     abstract public boolean supportsConcurReadOnly();
@@ -418,7 +434,6 @@ public abstract class Dialect extends HashMap<String,String> {
             }
             return rs.getObject(index);
         } catch (SQLException e) {
-            e.printStackTrace();
             log.error("typeName=" + typeName + " size=" + colSize + " columnName=" + rs.getMetaData().getColumnName(index), e);
         }
         return null;
@@ -491,7 +506,6 @@ public abstract class Dialect extends HashMap<String,String> {
         SoberColumn column = new SoberColumn();
         //统一全小写
         column.setTableName(rs.getValue("tableName"));
-
         //数据库名
         column.setDatabaseName(rs.getValue("tableCat"));
         //rs.getValue("table_cat");
@@ -499,7 +513,7 @@ public abstract class Dialect extends HashMap<String,String> {
         column.setLength(colSize);
         column.setCaption(rs.getValue("remarks"));
         column.setName(rs.getValue("columnName"));
-        column.setNotNull(!ObjectUtil.toBoolean(rs.getValue("isNullable")));
+        column.setNotNull("NO".equalsIgnoreCase(rs.getValue("isNullable")) || rs.getInt("isNullable")==ResultSetMetaData.columnNoNulls);
         column.setDefaultValue(rs.getValue("columnDef"));
         column.setAutoincrement(ObjectUtil.toBoolean(rs.getValue("isAutoincrement")));
         String typeName = StringUtil.toLowerCase(rs.getValue("typeName"));
@@ -584,6 +598,11 @@ public abstract class Dialect extends HashMap<String,String> {
     }
     //能够自动获取的配置数据end
 
+    public abstract String fieldQuerySql(String sql);
 
+    public String getCountSql(String sql)
+    {
+        return "SELECT count(1) as Num FROM (" + sql + ") tmp";
 
+    }
 }

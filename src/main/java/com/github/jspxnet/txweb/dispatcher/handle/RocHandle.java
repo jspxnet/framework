@@ -35,6 +35,7 @@ public class RocHandle extends WebHandle {
     final public static String DATA_FIELD = "dataField";
 
 
+
     static String getRequestReader(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String callStr = RequestUtil.getReader(request);
         //////////////////初始begin
@@ -47,80 +48,33 @@ public class RocHandle extends WebHandle {
 
     @Override
     public void doing(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String callStr = getRequestReader(request, response);
+        String callStr = StringUtil.trim(getRequestReader(request, response));
         callAction(request, response, callStr, false);
     }
 
     static void callAction(HttpServletRequest request, HttpServletResponse response, String call, boolean secret) throws Exception {
         //判断是XML还是JSON begin
-        String rpc = StringUtil.trim(call);
         JSONObject jsonData = null;
-        if (StringUtil.isXml(rpc)) {
+        if (StringUtil.isXml(call)) {
             //XML格式
             try {
-                jsonData = XML.toJSONObject(rpc);
+                jsonData = XML.toJSONObject(call);
             } catch (JSONException e) {
                 log.error("xml的ROC请求数据错误", e);
                 JSONObject errorResultJson = new JSONObject(RocResponse.error(-32600, "xml的ROC请求数据错误"));
                 TXWebUtil.print("<?xml version=\"1.0\" encoding=\"" + Dispatcher.getEncode() + "\"?>\r\n" + XMLUtil.format(XML.toString(errorResultJson, Environment.rocResult)), WebOutEnumType.XML.getValue(), response);
             }
         }
-        if (!StringUtil.isNull(rpc)&&StringUtil.isJsonObject(rpc)) {
+        if (!StringUtil.isNull(call)&&StringUtil.isJsonObject(call)) {
             //JSON格式
             try {
-                jsonData = new JSONObject(rpc);
+                jsonData = new JSONObject(call);
             } catch (JSONException e) {
                 log.error("json的ROC请求错误", e);
-                e.printStackTrace();
                 TXWebUtil.print(new JSONObject(RocResponse.error(-32600, "json的ROC请求错误")).toString(4), WebOutEnumType.JSON.getValue(), response);
                 return;
             }
-        } /*else if (!StringUtil.isNull(rpc)&&rpc.contains("="))
-        {
-            //把www_form 格式转换为json
-            Map<String, String[]> queryParameters = HttpUtil.parseQueryString(rpc);
-
-            jsonData = new JSONObject();
-            for (String varName:queryParameters.keySet())
-            {
-                String[] values = queryParameters.get(varName);
-                if (ObjectUtil.isEmpty(values))
-                {
-                    jsonData.put(varName,StringUtil.empty);
-                } else if (values.length==1)
-                {
-                    jsonData.put(varName,values[0]);
-                } else
-                {
-                    jsonData.put(varName,values);
-                }
-            }
-        }*/
-
-        //为了兼用 api restFull 方式，这里允许为空,默认构造配置
-/*        if (jsonData == null) {
-            jsonData = new JSONObject();
-            JSONObject methodJson = new JSONObject();
-            jsonData.put(Environment.rocMethod, methodJson);
-            jsonData.put(Environment.rocFormat, WebOutEnumType.JSON.getName());
-        }*/
-        /*
-        {
-     "version": "3.0",  //版本,不是必须
-     "protocol": "jspx.net-roc",  //协议说明
-     "format": "json",  //返回的格式要求,可以是xml，默认位json
-      "method": {
-        "name": "调用的方法",    //调用的方法名称
-        "params": {'参数名称1':'参数值1','参数名称2':'参数值2',...}       //方法参数
-       }
-
-    },
-    "params": {                //类对象参数就是类的set方法,文档中叫全局参数
-        "参数1": 1,
-        "参数2": 2
-    }
-    }
-         */
+        }
 
         ///////////////////////////////////环境参数 begin
         ActionConfig actionConfig = getActionConfig(request);
@@ -129,31 +83,32 @@ public class RocHandle extends WebHandle {
             return;
         }
 
-        if (actionConfig.isSecret() && !secret) {
+     /*   if (actionConfig.isSecret() && !secret) {
             TXWebUtil.print(new JSONObject(RocResponse.error(-32600, "forbidden not secret request roc.禁止非加密方式调用")).toString(4), WebOutEnumType.JSON.getValue(), response);
             return;
             //加密调用这里返回
-        }
+        }*/
 
         //在高并发下，ajax请求会出现异常，必须使用synchronized response 存在线程安全问题
         //执行action返回数据begin  多例模式下为必须
         jsonData = ParamUtil.getRequestStdJson(jsonData);
-        executeActionInvocation( actionConfig, jsonData, request, response);
+        executeActionInvocation( actionConfig, jsonData, request, response,secret);
     }
 
 
-    static public void executeActionInvocation(ActionConfig actionConfig, JSONObject jsonData,HttpServletRequest request,HttpServletResponse response) throws Exception
+    static public void executeActionInvocation(ActionConfig actionConfig, JSONObject jsonData,HttpServletRequest request,HttpServletResponse response,boolean secret) throws Exception
     {
-        JSONObject dataField = jsonData.getJSONObject(DATA_FIELD);
+
         Map<String, Object> envParams = createRocEnvironment(actionConfig,request, response);
         ActionInvocation actionInvocation = null;
         try {
-            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response);
+            actionInvocation = new DefaultActionInvocation(actionConfig, envParams, NAME, jsonData, request, response,secret);
             actionInvocation.initAction();
             actionInvocation.invoke();
         } finally {
             if (actionInvocation!=null)
             {
+                JSONObject dataField = jsonData.getJSONObject(DATA_FIELD);
                 actionInvocation.executeResult(new RocResult(dataField));
             }
         }

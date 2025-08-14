@@ -29,6 +29,8 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Setter;
+
 import java.util.Date;
 
 /**
@@ -74,6 +76,7 @@ public class Role extends OperateTable implements IRole {
     @Column(caption = "上传的文件大小", notNull = true)
     private int uploadSize = 10240;
 
+    @Setter
     @Column(caption = "上传的图片大小", notNull = true)
     private int uploadImageSize = 1024;
 
@@ -121,7 +124,7 @@ public class Role extends OperateTable implements IRole {
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;
 
-
+    @Column(caption = "组织", length = 50)
     private String organizeId = StringUtil.empty;
 
 
@@ -234,10 +237,6 @@ public class Role extends OperateTable implements IRole {
     @Override
     public int getUploadImageSize() {
         return uploadImageSize == 0 ? 1024 : uploadImageSize;
-    }
-
-    public void setUploadImageSize(int uploadImageSize) {
-        this.uploadImageSize = uploadImageSize;
     }
 
     @Override

@@ -16,8 +16,8 @@ package com.github.jspxnet.sober.criteria.projection;
  * Time: 9:15:26
  */
 public class AliasedProjection implements Projection {
-    private Projection projection;
-    private String alias;
+    final private Projection projection;
+    final private String alias;
 
     @Override
     public String toString() {

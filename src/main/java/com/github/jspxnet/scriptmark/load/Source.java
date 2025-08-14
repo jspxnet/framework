@@ -98,7 +98,7 @@ public abstract class Source {
         try {
             reader = getReader();
             reader.skip(beginIndex);
-            char[] cBuf = new char[4096];
+            char[] cBuf = new char[ReadFileUtil.BUFFER_SIZE];
             int len;
             while ((len = reader.read(cBuf)) != -1) {
                 if (len >= offset - buf.length()) {

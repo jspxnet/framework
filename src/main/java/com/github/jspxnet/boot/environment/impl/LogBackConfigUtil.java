@@ -27,7 +27,6 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.xml.XmlConfigurationFactory;
-
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -69,7 +68,7 @@ public class LogBackConfigUtil {
 
     public static void createLogBackConfig(LoggerContext lc)
     {
-        lc.reset();
+
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
         boolean isDefaultConfig = false;
@@ -112,16 +111,15 @@ public class LogBackConfigUtil {
         {
             valueMap.put("logMaxHistory",60);
         }
-
         String confTxt = isDefaultConfig?EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt):defaultConfigTxt;
         if (!StringUtil.isEmpty(confTxt))
         {
             org.xml.sax.InputSource inputSource = new InputSource(new StringReader(confTxt));
             try {
+                lc.reset();
                 configurator.doConfigure(inputSource);
             } catch (JoranException e) {
                 System.err.println("1.默认路径是否配置错误;2.检查defaultlog.xml文件是否存在");
-                e.printStackTrace();
                 StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
             }
         }
@@ -161,7 +159,6 @@ public class LogBackConfigUtil {
 
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(loggerContext);
-
         if (StringUtil.isNull(defaultConfigTxt))
         {
             System.err.println("LogBack defaultConfig:" + defaultConfigTxt);
@@ -227,12 +224,8 @@ public class LogBackConfigUtil {
                 }
             }
         }
-        if (StringUtil.isNull(defaultConfigTxt))
-        {
-            System.err.println("LogBack defaultConfig:" + defaultConfigTxt);
-        }
-        Map<String, Object> valueMap = envTemplate.getVariableMap();
 
+        Map<String, Object> valueMap = envTemplate.getVariableMap();
         String confTxt = isDefaultConfig?EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt):defaultConfigTxt;
         if (!StringUtil.isEmpty(confTxt))
         {

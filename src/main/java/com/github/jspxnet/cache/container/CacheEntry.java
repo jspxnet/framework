@@ -59,6 +59,8 @@ public class CacheEntry implements Serializable, Cloneable {
      */
     private int live = 0;
 
+    // 主要同步redis使用
+    private boolean expired;
 
     /**
      * 更新后继续

@@ -1,8 +1,9 @@
 package com.github.jspxnet.boot;
 
 
+import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.StringUtil;
-import org.springframework.context.ApplicationContext;
+
 
 /**
  * Created by jspx.net
@@ -13,9 +14,9 @@ import org.springframework.context.ApplicationContext;
  **/
 
 public class SpringBeanContext {
-    private static ApplicationContext context;
+    private static Object context;
 
-    public static void setApplicationContext(ApplicationContext applicationContext)  {
+    public static void setApplicationContext(Object applicationContext)  {
         if (context == null) {
             context = applicationContext;
         }
@@ -25,7 +26,7 @@ public class SpringBeanContext {
      *
      * @return 获取applicationContext
      */
-    public static ApplicationContext getApplicationContext() {
+    public static Object getApplicationContext() {
         return context;
     }
 
@@ -46,7 +47,7 @@ public class SpringBeanContext {
         {
             return null;
         }
-        return context.getBean(beanId);
+        return BeanUtil.getProperty(context,"getBean",new Object[]{beanId},false);
     }
 
 }

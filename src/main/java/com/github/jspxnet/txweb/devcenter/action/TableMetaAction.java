@@ -17,6 +17,10 @@ import com.github.jspxnet.utils.StringUtil;
 
 //devcenter/meta/save/viewscript
 //meta/fieldlist
+
+/**
+ * 表单数据模型结构,里边包括了表单字段及表结构,同时包含了表单的基本信息,UI信息,确保能够构建出一个完整的页面
+ */
 @HttpMethod(caption = "表单管理", actionName = "*", namespace = Environment.DEV_CENTER+"/meta")
 @Bean(singleton = true)
 public class TableMetaAction extends TableMetaView {
@@ -33,8 +37,6 @@ public class TableMetaAction extends TableMetaView {
         }
         return RocResponse.success(i);
     }
-
-
 
 
     /**
@@ -73,6 +75,7 @@ public class TableMetaAction extends TableMetaView {
             tableMeta = create(tableName);
         }
         tableMeta.setViewScript(json.toString());
+        json.clear();
         if (tableMeta.getId()==0)
         {
             int x = genericDAO.save(tableMeta,true);
@@ -90,11 +93,11 @@ public class TableMetaAction extends TableMetaView {
             }
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(), language.getLang(LanguageRes.updateFailure));
         }
+
     }
 
     @Override
     public String execute() throws Exception {
-        // clear缓存
         if (isMethodInvoked()) {
             genericDAO.evict(TableMeta.class);
         }

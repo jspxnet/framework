@@ -1,6 +1,6 @@
 package com.github.jspxnet.txweb.ueditor;
 
-/**
+/*
  * Created by chenyuan
  * on 2015-8-6.
  */
@@ -9,6 +9,7 @@ package com.github.jspxnet.txweb.ueditor;
 import com.github.jspxnet.txweb.ueditor.define.AppInfo;
 import com.github.jspxnet.txweb.ueditor.define.BaseState;
 import com.github.jspxnet.txweb.ueditor.define.State;
+import com.github.jspxnet.upload.multipart.JspxNetFileRenamePolicy;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 
@@ -96,7 +97,7 @@ public class StorageManager {
         if (targetFile.canWrite()) {
             return new BaseState(false, AppInfo.PERMISSION_DENIED);
         }
-        if (!FileUtil.moveFile(tmpFile, targetFile, true)) {
+        if (!FileUtil.moveFile(tmpFile, targetFile,  new JspxNetFileRenamePolicy(),true,false)) {
             return new BaseState(false, AppInfo.IO_ERROR);
         }
 

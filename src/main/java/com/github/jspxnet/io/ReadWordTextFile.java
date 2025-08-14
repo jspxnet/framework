@@ -60,7 +60,7 @@ public class ReadWordTextFile extends AbstractRead {
                 log.info("此文件不是word文件！");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 

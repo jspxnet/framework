@@ -1,8 +1,8 @@
 /*
  * cron4j - A pure Java cron-like scheduler
- * 
+ *
  * Copyright (C) 2007-2010 Carlo Pelliccia (www.sauronsoftware.it)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version
  * 2.1, as published by the Free Software Foundation.
@@ -21,10 +21,14 @@ package com.github.jspxnet.cron4j;
 import com.github.jspxnet.boot.DaemonThreadFactory;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.RandomUtil;
+import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -39,559 +43,546 @@ import java.util.List;
  * {@link Scheduler#getExecutingTasks()} method, and they expose method to
  * control the ongoing execution.
  * </p>
- * 
- * @see Scheduler#getExecutingTasks()
+ *
  * @author Carlo Pelliccia
+ * @see Scheduler#getExecutingTasks()
  * @since 2.0
  */
-public class TaskExecutor {
+public class TaskExecutor implements Serializable {
 
-	/**
-	 * The scheduler whose this executor belongs to.
-	 */
-	private final Scheduler scheduler;
+    /**
+     * The scheduler whose this executor belongs to.
+     */
+    private final Scheduler scheduler;
 
-	/**
-	 * The executed task.
-	 */
-	private final Task task;
+    /**
+     * The executed task.
+     */
+    private final Task task;
 
-	/**
-	 * A task execution context.
-	 */
-	private final MyContext context;
+    /**
+     * A task execution context.
+     */
+    private final MyContext context;
 
-	/**
-	 * A unique ID for this executor (used also as a lock object).
-	 */
-	private final String guid = RandomUtil.getRandomGUID(24);
+    /**
+     * A unique ID for this executor (used also as a lock object).
+     */
+    private final String guid = RandomUtil.getRandomGUID(24);
 
-	/**
-	 * An alternative to this (inner classes need it).
-	 */
-	private final TaskExecutor myself = this;
+    /**
+     * An alternative to this (inner classes need it).
+     */
+    private final TaskExecutor myself = this;
 
-	/**
-	 * A list of {@link TaskExecutorListener} instances.
-	 */
-	private final List<TaskExecutorListener> listeners = new ArrayList<>();
+    /**
+     * A list of {@link TaskExecutorListener} instances.
+     */
+    private final List<TaskExecutorListener> listeners = new ArrayList<>();
 
-	/**
-	 * A time stamp reporting the start time of this thread.
-	 */
-	private long startTime = -1;
+    /**
+     * A time stamp reporting the start time of this thread.
+     */
+    private long startTime = -1;
 
-	/**
-	 * The thread actually executing the task.
-	 */
-	private Thread thread;
+    /**
+     * The thread actually executing the task.
+     */
+    private Thread thread;
 
-	/**
-	 * Is this executor paused now?
-	 */
-	private boolean paused = false;
+    /**
+     * Is this executor paused now?
+     */
+    private boolean paused = false;
 
-	/**
-	 * Has been this executor stopped?
-	 */
-	private boolean stopped = false;
+    /**
+     * Has been this executor stopped?
+     */
+    private boolean stopped = false;
 
-	/**
-	 * A lock object, for synchronization purposes.
-	 */
+    /**
+     * A lock object, for synchronization purposes.
+     */
+    private final Lock lock = new ReentrantLock();
+    //private final Object lock = new Object();
 
-	private final Object lock = new Object();
+    /**
+     * Builds the executor.
+     *
+     * @param scheduler The scheduler whose this executor belongs to.
+     * @param task      The task that has to be executed.
+     */
+    TaskExecutor(Scheduler scheduler, Task task) {
+        this.scheduler = scheduler;
+        this.task = task;
+        this.context = new MyContext();
+    }
 
-	/**
-	 * Builds the executor.
-	 * 
-	 * @param scheduler
-	 *            The scheduler whose this executor belongs to.
-	 * @param task
-	 *            The task that has to be executed.
-	 */
-	TaskExecutor(Scheduler scheduler, Task task) {
-		this.scheduler = scheduler;
-		this.task = task;
-		this.context = new MyContext();
-	}
+    /**
+     * Adds a listener to the executor.
+     *
+     * @param listener The listener.
+     */
+    public void addTaskExecutorListener(TaskExecutorListener listener) {
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
+    }
 
-	/**
-	 * Adds a listener to the executor.
-	 * 
-	 * @param listener
-	 *            The listener.
-	 */
-	public void addTaskExecutorListener(TaskExecutorListener listener) {
-		synchronized (listeners) {
-			listeners.add(listener);
-		}
-	}
+    /**
+     * Removes a listener from the executor.
+     *
+     * @param listener The listener.
+     */
+    public void removeTaskExecutorListener(TaskExecutorListener listener) {
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
+    }
 
-	/**
-	 * Removes a listener from the executor.
-	 * 
-	 * @param listener
-	 *            The listener.
-	 */
-	public void removeTaskExecutorListener(TaskExecutorListener listener) {
-		synchronized (listeners) {
-			listeners.remove(listener);
-		}
-	}
+    /**
+     * Returns an array containing any {@link TaskExecutorListener} previously
+     * registered with the
+     * {@link TaskExecutor#addTaskExecutorListener(TaskExecutorListener)}
+     * method.
+     *
+     * @return An array containing any {@link TaskExecutorListener} previously
+     * registered with the
+     * {@link TaskExecutor#addTaskExecutorListener(TaskExecutorListener)}
+     * method.
+     */
+    public TaskExecutorListener[] getTaskExecutorListeners() {
+        synchronized (listeners) {
+            int size = listeners.size();
+            TaskExecutorListener[] ret = new TaskExecutorListener[size];
+            for (int i = 0; i < size; i++) {
+                ret[i] = listeners.get(i);
+            }
+            return ret;
+        }
+    }
 
-	/**
-	 * Returns an array containing any {@link TaskExecutorListener} previously
-	 * registered with the
-	 * {@link TaskExecutor#addTaskExecutorListener(TaskExecutorListener)}
-	 * method.
-	 * 
-	 * @return An array containing any {@link TaskExecutorListener} previously
-	 *         registered with the
-	 *         {@link TaskExecutor#addTaskExecutorListener(TaskExecutorListener)}
-	 *         method.
-	 */
-	public TaskExecutorListener[] getTaskExecutorListeners() {
-		synchronized (listeners) {
-			int size = listeners.size();
-			TaskExecutorListener[] ret = new TaskExecutorListener[size];
-			for (int i = 0; i < size; i++) {
-				ret[i] = listeners.get(i);
-			}
-			return ret;
-		}
-	}
+    /**
+     * Returns a GUID for this executor.
+     *
+     * @return A GUID for this executor.
+     */
+    public String getGuid() {
+        return guid;
+    }
 
-	/**
-	 * Returns a GUID for this executor.
-	 * 
-	 * @return A GUID for this executor.
-	 */
-	public String getGuid() {
-		return guid;
-	}
+    /**
+     * Returns the {@link Scheduler} instance whose this executor belongs to.
+     *
+     * @return The scheduler.
+     */
+    public Scheduler getScheduler() {
+        return scheduler;
+    }
 
-	/**
-	 * Returns the {@link Scheduler} instance whose this executor belongs to.
-	 * 
-	 * @return The scheduler.
-	 */
-	public Scheduler getScheduler() {
-		return scheduler;
-	}
+    /**
+     * Returns the representation of the executed task.
+     *
+     * @return The executing/executed task.
+     */
+    public Task getTask() {
+        return task;
+    }
 
-	/**
-	 * Returns the representation of the executed task.
-	 * 
-	 * @return The executing/executed task.
-	 */
-	public Task getTask() {
-		return task;
-	}
+    /**
+     * Returns a time stamp reporting the start time of this executor, or a
+     * value less than 0 if this executor has not been yet started.
+     *
+     * @return A time stamp reporting the start time of this executor, or a
+     * value less than 0 if this executor has not been yet started.
+     */
+    public long getStartTime() {
+        return startTime;
+    }
 
-	/**
-	 * Returns a time stamp reporting the start time of this executor, or a
-	 * value less than 0 if this executor has not been yet started.
-	 * 
-	 * @return A time stamp reporting the start time of this executor, or a
-	 *         value less than 0 if this executor has not been yet started.
-	 */
-	public long getStartTime() {
-		return startTime;
-	}
+    /**
+     * Checks whether this executor supports pausing.
+     *
+     * @return true if this executor supports pausing.
+     */
+    public boolean canBePaused() {
+        return task.canBePaused();
+    }
 
-	/**
-	 * Checks whether this executor supports pausing.
-	 * 
-	 * @return true if this executor supports pausing.
-	 */
-	public boolean canBePaused() {
-		return task.canBePaused();
-	}
+    /**
+     * Checks whether this executor supports stopping.
+     *
+     * @return true if this executor supports stopping.
+     */
+    public boolean canBeStopped() {
+        return task.canBeStopped();
+    }
 
-	/**
-	 * Checks whether this executor supports stopping.
-	 * 
-	 * @return true if this executor supports stopping.
-	 */
-	public boolean canBeStopped() {
-		return task.canBeStopped();
-	}
+    /**
+     * Checks whether this executor provides completeness tracking informations.
+     *
+     * @return true if this executor provides completeness tracking
+     * informations.
+     */
+    public boolean supportsCompletenessTracking() {
+        return task.supportsCompletenessTracking();
+    }
 
-	/**
-	 * Checks whether this executor provides completeness tracking informations.
-	 * 
-	 * @return true if this executor provides completeness tracking
-	 *         informations.
-	 */
-	public boolean supportsCompletenessTracking() {
-		return task.supportsCompletenessTracking();
-	}
+    /**
+     * Checks whether this executor provides status tracking messages.
+     *
+     * @return true if this executor provides status tracking messages.
+     */
+    public boolean supportsStatusTracking() {
+        return task.supportsStatusTracking();
+    }
 
-	/**
-	 * Checks whether this executor provides status tracking messages.
-	 * 
-	 * @return true if this executor provides status tracking messages.
-	 */
-	public boolean supportsStatusTracking() {
-		return task.supportsStatusTracking();
-	}
+    /**
+     * Starts executing the task (spawns a secondary thread).
+     * daemon true to spawn a daemon thread; false otherwise.
+     */
+    void start() {
+        lock.lock();
+        try {
+            startTime = System.currentTimeMillis();
+            String name = "cron4j::[" + scheduler.getTaskConf().getName() + "]::executor[" + guid + "]";
+            thread = new DaemonThreadFactory(name).newThread(new Runner());
+            thread.setDaemon(true);
+            thread.start();
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	/**
-	 * Starts executing the task (spawns a secondary thread).
-	 * 
-	 * daemon true to spawn a daemon thread; false otherwise.
-	 */
-	void start() {
+    /**
+     * Pauses the ongoing execution.
+     *
+     * @throws UnsupportedOperationException The operation is not supported if
+     *                                       {@link TaskExecutor#canBePaused()} returns <em>false</em>.
+     */
+    public void pause() throws UnsupportedOperationException {
+        if (!canBePaused()) {
+            throw new UnsupportedOperationException("Pause not supported");
+        }
+        lock.lock();
+        try {
+            if (thread != null && !paused) {
+                notifyExecutionPausing();
+                paused = true;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
 
-		synchronized (lock) {
-			startTime = System.currentTimeMillis();
+    /**
+     * Resumes the execution after it has been paused.
+     */
+    public void resume() {
+        lock.lock();
+        try {
+            if (thread != null && paused) {
+                notifyExecutionResuming();
+                paused = false;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
 
-			String name = "cron4j::[" + scheduler.getTaskConf().getName() + "]::executor[" + guid + "]";
-			thread = new DaemonThreadFactory(name).newThread(new Runner());
-			thread.start();
-		}
-	}
+    /**
+     * Stops the ongoing execution.
+     *
+     * @throws UnsupportedOperationException The operation is not supported if
+     *                                       {@link TaskExecutor#canBeStopped()} returns <em>false</em>.
+     */
+    public void stop() throws UnsupportedOperationException {
+        if (!canBeStopped()) {
+            throw new UnsupportedOperationException("Stop not supported");
+        }
+        boolean joinit = false;
+        lock.lock();
+        try {
+            if (thread != null && !stopped) {
+                stopped = true;
+                if (paused) {
+                    resume();
+                }
+                notifyExecutionStopping();
+                thread.interrupt();
+                joinit = true;
+            }
+        } finally {
+            lock.unlock();
+        }
 
-	/**
-	 * Pauses the ongoing execution.
-	 * 
-	 * @throws UnsupportedOperationException
-	 *             The operation is not supported if
-	 *             {@link TaskExecutor#canBePaused()} returns <em>false</em>.
-	 */
-	public void pause() throws UnsupportedOperationException {
-		if (!canBePaused()) {
-			throw new UnsupportedOperationException("Pause not supported");
-		}
-		synchronized (lock) {
-			if (thread != null && !paused) {
-				notifyExecutionPausing();
-				paused = true;
-			}
-		}
-	}
+        if (joinit) {
+            do {
+                try {
+                    thread.join(DateUtil.MINUTE);
+                    break;
+                } catch (InterruptedException e) {
+                    //...
+                }
+            } while (true);
+            thread = null;
+        }
+    }
 
-	/**
-	 * Resumes the execution after it has been paused.
-	 */
-	public void resume() {
-		synchronized (lock) {
-			if (thread != null && paused) {
-				notifyExecutionResuming();
-				paused = false;
-				lock.notifyAll();
-			}
-		}
-	}
+    /**
+     * Waits for this executor to die.
+     *
+     * @throws InterruptedException If any thread has interrupted the current thread. The
+     *                              interrupted status of the current thread is cleared when this
+     *                              exception is thrown.
+     */
+    public void join() throws InterruptedException {
+        if (thread != null) {
+            thread.join(DateUtil.MINUTE);
+        }
+    }
 
-	/**
-	 * Stops the ongoing execution.
-	 * 
-	 * @throws UnsupportedOperationException
-	 *             The operation is not supported if
-	 *             {@link TaskExecutor#canBeStopped()} returns <em>false</em>.
-	 */
-	public void stop() throws UnsupportedOperationException {
-		if (!canBeStopped()) {
-			throw new UnsupportedOperationException("Stop not supported");
-		}
-		boolean joinit = false;
-		synchronized (lock) {
-			if (thread != null && !stopped) {
-				stopped = true;
-				if (paused) {
-					resume();
-				}
-				notifyExecutionStopping();
-				thread.interrupt();
-				joinit = true;
-			}
-		}
-		if (joinit) {
-			do {
-				try {
-					thread.join(DateUtil.MINUTE);
-					break;
-				} catch (InterruptedException e) {
-					thread.stop();
-				}
-			} while (true);
-			thread = null;
-		}
-	}
+    /**
+     * Tests if this executor is alive. An executor is alive if it has been
+     * started and has not yet died.
+     *
+     * @return true if this executor is alive; false otherwise.
+     */
+    public boolean isAlive() {
+        if (thread != null) {
+            return thread.isAlive();
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * Waits for this executor to die.
-	 * 
-	 * @throws InterruptedException
-	 *             If any thread has interrupted the current thread. The
-	 *             interrupted status of the current thread is cleared when this
-	 *             exception is thrown.
-	 */
-	public void join() throws InterruptedException {
-		if (thread != null) {
-			thread.join(DateUtil.MINUTE);
-		}
-	}
+    /**
+     * Returns the current status message.
+     *
+     * @return The current status message.
+     * @throws UnsupportedOperationException The operation is not supported if
+     *                                       {@link TaskExecutor#supportsStatusTracking()} returns
+     *                                       <em>false</em>.
+     */
+    public String getStatusMessage() throws UnsupportedOperationException {
+        if (!supportsStatusTracking()) {
+            throw new UnsupportedOperationException(
+                    "Status tracking not supported");
+        }
+        return context.getStatusMessage();
+    }
 
-	/**
-	 * Tests if this executor is alive. An executor is alive if it has been
-	 * started and has not yet died.
-	 * 
-	 * @return true if this executor is alive; false otherwise.
-	 */
-	public boolean isAlive() {
-		if (thread != null) {
-			return thread.isAlive();
-		} else {
-			return false;
-		}
-	}
+    /**
+     * 监控是否完成
+     *
+     * @return The current completeness value, which is a value between 0 and 1.
+     * @throws UnsupportedOperationException The operation is not supported if
+     *                                       {@link TaskExecutor#supportsCompletenessTracking()} returns
+     *                                       <em>false</em>.
+     */
+    public double getCompleteness() throws UnsupportedOperationException {
+        if (!supportsCompletenessTracking()) {
+            throw new UnsupportedOperationException(
+                    "Completeness tracking not supported");
+        }
+        return context.getCompleteness();
+    }
 
-	/**
-	 * Returns the current status message.
-	 * 
-	 * @return The current status message.
-	 * @throws UnsupportedOperationException
-	 *             The operation is not supported if
-	 *             {@link TaskExecutor#supportsStatusTracking()} returns
-	 *             <em>false</em>.
-	 */
-	public String getStatusMessage() throws UnsupportedOperationException {
-		if (!supportsStatusTracking()) {
-			throw new UnsupportedOperationException(
-					"Status tracking not supported");
-		}
-		return context.getStatusMessage();
-	}
+    /**
+     * Tests whether this executor has been paused.
+     *
+     * @return true if this executor is paused; false otherwise.
+     */
+    public boolean isPaused() {
+        return paused;
+    }
 
-	/**
-	 * Returns the current completeness value, which is a value between 0 and 1.
-	 * 
-	 * @return The current completeness value, which is a value between 0 and 1.
-	 * @throws UnsupportedOperationException
-	 *             The operation is not supported if
-	 *             {@link TaskExecutor#supportsCompletenessTracking()} returns
-	 *             <em>false</em>.
-	 */
-	public double getCompleteness() throws UnsupportedOperationException {
-		if (!supportsCompletenessTracking()) {
-			throw new UnsupportedOperationException(
-					"Completeness tracking not supported");
-		}
-		return context.getCompleteness();
-	}
+    /**
+     * Tests whether this executor has been stopped.
+     *
+     * @return true if this executor is stopped; false otherwise.
+     */
+    public boolean isStopped() {
+        return stopped;
+    }
 
-	/**
-	 * Tests whether this executor has been paused.
-	 * 
-	 * @return true if this executor is paused; false otherwise.
-	 */
-	public boolean isPaused() {
-		return paused;
-	}
+    /**
+     * Notify registered listeners the execution has been paused.
+     */
+    private void notifyExecutionPausing() {
+        synchronized (listeners) {
+            for (TaskExecutorListener l : listeners) {
+                l.executionPausing(this);
+            }
+        }
+    }
 
-	/**
-	 * Tests whether this executor has been stopped.
-	 * 
-	 * @return true if this executor is stopped; false otherwise.
-	 */
-	public boolean isStopped() {
-		return stopped;
-	}
+    /**
+     * Notify registered listeners the execution has been resumed.
+     */
+    private void notifyExecutionResuming() {
+        synchronized (listeners) {
+            for (TaskExecutorListener l : listeners) {
+                l.executionResuming(this);
+            }
+        }
+    }
 
-	/**
-	 * Notify registered listeners the execution has been paused.
-	 */
-	private void notifyExecutionPausing() {
-		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				TaskExecutorListener l = (TaskExecutorListener) i.next();
-				l.executionPausing(this);
-			}
-		}
-	}
+    /**
+     * Notify registered listeners the executor is stopping.
+     */
+    private void notifyExecutionStopping() {
+        synchronized (listeners) {
+            for (TaskExecutorListener l : listeners) {
+                l.executionStopping(this);
+            }
+        }
+    }
 
-	/**
-	 * Notify registered listeners the execution has been resumed.
-	 * 
-	 */
-	private void notifyExecutionResuming() {
-		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				TaskExecutorListener l = (TaskExecutorListener) i.next();
-				l.executionResuming(this);
-			}
-		}
-	}
+    /**
+     * Notify registered listeners the execution has been terminated.
+     *
+     * @param exception If the execution has been terminated due to an error, this is
+     *                  the encountered exception; otherwise the parameter is null.
+     */
+    private void notifyExecutionTerminated(Throwable exception) {
+        synchronized (listeners) {
+            for (TaskExecutorListener l : listeners) {
+                l.executionTerminated(this, exception);
+            }
+        }
+    }
 
-	/**
-	 * Notify registered listeners the executor is stopping.
-	 */
-	private void notifyExecutionStopping() {
-		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				TaskExecutorListener l = (TaskExecutorListener) i.next();
-				l.executionStopping(this);
-			}
-		}
-	}
+    /**
+     * Notify registered listeners the execution status message has changed.
+     *
+     * @param statusMessage The new status message.
+     */
+    private void notifyStatusMessageChanged(String statusMessage) {
+        synchronized (listeners) {
+            for (TaskExecutorListener l : listeners) {
+                l.statusMessageChanged(this, statusMessage);
+            }
+        }
+    }
 
-	/**
-	 * Notify registered listeners the execution has been terminated.
-	 * 
-	 * @param exception
-	 *            If the execution has been terminated due to an error, this is
-	 *            the encountered exception; otherwise the parameter is null.
-	 */
-	private void notifyExecutionTerminated(Throwable exception) {
-		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				TaskExecutorListener l = (TaskExecutorListener) i.next();
-				l.executionTerminated(this, exception);
-			}
-		}
-	}
+    /**
+     * Notify registered listeners the execution completeness value has changed.
+     *
+     * @param completenessValue The new completeness value.
+     */
+    private void notifyCompletenessValueChanged(double completenessValue) {
+        synchronized (listeners) {
+            for (TaskExecutorListener l : listeners) {
+                l.completenessValueChanged(this, completenessValue);
+            }
+        }
+    }
 
-	/**
-	 * Notify registered listeners the execution status message has changed.
-	 * 
-	 * @param statusMessage
-	 *            The new status message.
-	 */
-	private void notifyStatusMessageChanged(String statusMessage) {
-		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				TaskExecutorListener l = (TaskExecutorListener) i.next();
-				l.statusMessageChanged(this, statusMessage);
-			}
-		}
-	}
+    /**
+     * Inner Runnable class.
+     */
+    private class Runner implements Runnable {
 
-	/**
-	 * Notify registered listeners the execution completeness value has changed.
-	 * 
-	 * @param completenessValue
-	 *            The new completeness value.
-	 */
-	private void notifyCompletenessValueChanged(double completenessValue) {
-		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				TaskExecutorListener l = (TaskExecutorListener) i.next();
-				l.completenessValueChanged(this, completenessValue);
-			}
-		}
-	}
+        /**
+         * It implements {@link Thread#run()}, executing the wrapped task.
+         */
+        @Override
+        public void run() {
+            Throwable error = null;
+            startTime = System.currentTimeMillis();
+            try {
+                // Notify.
+                scheduler.notifyTaskLaunching(myself);
+                // Task execution.
+                task.execute(context);
+                // Succeeded.
+                scheduler.notifyTaskSucceeded(myself);
+            } catch (Throwable exception) {
+                // Failed.
+                error = exception;
+                scheduler.notifyTaskFailed(myself, exception);
+            } finally {
+                // Notify.
+                notifyExecutionTerminated(error);
+                scheduler.notifyExecutorCompleted(myself);
+            }
+        }
+    }
 
-	/**
-	 * Inner Runnable class.
-	 */
-	private class Runner implements Runnable {
+    /**
+     * Inner TaskExecutionHelper implementation.
+     */
+    private class MyContext implements TaskExecutionContext {
 
-		/**
-		 * It implements {@link Thread#run()}, executing the wrapped task.
-		 */
-		@Override
-		public void run() {
-			Throwable error = null;
-			startTime = System.currentTimeMillis();
-			try {
-				// Notify.
-				scheduler.notifyTaskLaunching(myself);
-				// Task execution.
-				task.execute(context);
-				// Succeeded.
-				scheduler.notifyTaskSucceeded(myself);
-			} catch (Throwable exception) {
-				// Failed.
-				error = exception;
-				scheduler.notifyTaskFailed(myself, exception);
-			} finally {
-				// Notify.
-				notifyExecutionTerminated(error);
-				scheduler.notifyExecutorCompleted(myself);
-			}
-		}
-	}
+        /**
+         * Status message.
+         */
+        private String message = "";
 
-	/**
-	 * Inner TaskExecutionHelper implementation.
-	 */
-	private class MyContext implements TaskExecutionContext {
+        /**
+         * Completeness value.
+         * -- GETTER --
+         *
+         */
+        @Getter
+        private double completeness = 0D;
 
-		/**
-		 * Status message.
-		 */
-		private String message = "";
+        @Override
+        public Scheduler getScheduler() {
+            return scheduler;
+        }
 
-		/**
-		 * Completeness value.
-		 */
-		private double completeness = 0D;
+        @Override
+        public TaskExecutor getTaskExecutor() {
+            return myself;
+        }
 
-		@Override
-		public Scheduler getScheduler() {
-			return scheduler;
-		}
+        @Override
+        public boolean isStopped() {
+            return stopped;
+        }
 
-		@Override
-		public TaskExecutor getTaskExecutor() {
-			return myself;
-		}
+        @Override
+        public void pauseIfRequested() {
+            lock.lock();
+            try {
+                if (paused) {
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        //....;
+                    }
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
 
-		@Override
-		public boolean isStopped() {
-			return stopped;
-		}
+        @Override
+        public void setCompleteness(double completeness) {
+            if (completeness >= 0D && completeness <= 1D) {
+                this.completeness = completeness;
+                notifyCompletenessValueChanged(completeness);
+            }
+        }
 
-		@Override
-		public void pauseIfRequested() {
-			synchronized (lock) {
-				if (paused) {
-					try {
-						lock.wait();
-					} catch (InterruptedException e) {
-						;
-					}
-				}
-			}
-		}
+        @Override
+        public void setStatusMessage(String message) {
+            this.message = message != null ? message : "";
+            notifyStatusMessageChanged(message);
+        }
 
-		@Override
-		public void setCompleteness(double completeness) {
-			if (completeness >= 0D && completeness <= 1D) {
-				this.completeness = completeness;
-				notifyCompletenessValueChanged(completeness);
-			}
-		}
+        /**
+         * Returns the current status message.
+         *
+         * @return The current status message.
+         */
+        public String getStatusMessage() {
+            return message;
+        }
 
-		@Override
-		public void setStatusMessage(String message) {
-			this.message = message != null ? message : "";
-			notifyStatusMessageChanged(message);
-		}
 
-		/**
-		 * Returns the current status message.
-		 * 
-		 * @return The current status message.
-		 */
-		public String getStatusMessage() {
-			return message;
-		}
-
-		/**
-		 * Returns the current completeness value, which is a value between 0
-		 * and 1.
-		 * 
-		 * @return The current completeness value, which is a value between 0
-		 *         and 1.
-		 */
-		public double getCompleteness() {
-			return completeness;
-		}
-
-	}
+    }
 
 }

@@ -29,6 +29,10 @@ public interface SoberFactory extends Serializable {
 
     void setMaxRows(int maxRows);
 
+    boolean isShowSql();
+
+    void setShowSql(boolean showsql);
+
     String getDatabaseType();
 
     String getDatabaseName();
@@ -49,7 +53,7 @@ public interface SoberFactory extends Serializable {
 
     /**
      * @param type 读写分离 0 ReadWrite 1 ReadOnly 2 WriteOnly
-     * @param tid  事务连接ID
+     * @param tid  事务连接ID   SoberEnv.NOT_TRANSACTION
      * @return 通过各种方式得到连接，包括XA连接
      * @throws SQLException sql异常
      */
@@ -72,10 +76,9 @@ public interface SoberFactory extends Serializable {
 
     /**
      *
-     * @return 调试开启显示sql
+     * @param autoCommit 自动提交
      */
-    boolean isShowsql();
-
+    void setAutoCommit(boolean autoCommit);
     /**
      *
      * @return 是否自动提交
@@ -97,7 +100,12 @@ public interface SoberFactory extends Serializable {
     boolean isValid();
 
     void setValid(boolean valid);
-
+    /**
+     *
+     * @param tableName  表明
+     * @param soberSupport 数据库操作对象
+     * @return 返回模型
+     */
     TableModels getTableModels(String tableName, SoberSupport soberSupport);
 
     void evictTableModels(Class<?> cla);

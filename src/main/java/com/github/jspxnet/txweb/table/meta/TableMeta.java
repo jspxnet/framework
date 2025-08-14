@@ -55,6 +55,10 @@ public class TableMeta extends OperateTable {
     @Nexus(mapping = MappingType.OneToMany, field = "tableName", targetField = "tableName", targetEntity = OperatePlug.class)
     private List<OperatePlug> operatePlugList = new LinkedList<>();
 
+    @Nexus(mapping = MappingType.OneToOne, field = "tableName", targetField = "tableName", targetEntity = BaseBillType.class)
+    private BaseBillType billType = new BaseBillType();
+
+
     //所有的界面功能脚本
     @Column(caption = "功能脚本", length = 20000)
     private String actionScript = StringUtil.empty;

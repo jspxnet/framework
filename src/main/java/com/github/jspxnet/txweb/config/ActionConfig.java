@@ -61,7 +61,7 @@ public interface ActionConfig extends Serializable {
      *
      * @return  强制要求加密传输
      */
-    boolean isSecret();
+    //boolean isSecret();
 
     /**
      *

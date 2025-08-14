@@ -16,9 +16,7 @@ package com.github.jspxnet.sober.criteria.projection;
  * Time: 8:45:45
  */
 public class AggregateProjection extends SimpleProjection {
-
-
-    protected String propertyName;
+    final private String propertyName;
     final private String aggregate;
 
     protected AggregateProjection(String aggregate, String propertyName) {

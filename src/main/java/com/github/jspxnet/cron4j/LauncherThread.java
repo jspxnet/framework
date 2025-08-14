@@ -69,7 +69,12 @@ class LauncherThread extends Thread {
 		this.collectors = collectors;
 		this.referenceTimeInMillis = referenceTimeInMillis;
 		// Thread name.
-		guid = SystemUtil.getPid() + "_" + scheduler.getGuid();
+		if (this.scheduler == null || "NONE".equals(this.scheduler.getGuid())) {
+			setName("cron4j::[NONE]");
+			guid = "NONE";
+			return;
+		}
+		guid = SystemUtil.getPid() + "_" + this.scheduler.getGuid();
 		String name = "cron4j::[" + scheduler.getTaskConf().getName() + "]::launcher[" + guid + "]";
 		setName(name);
 	}
@@ -89,20 +94,20 @@ class LauncherThread extends Thread {
 	@Override
 	public void run() {
 		outer:
-		for (TaskCollector collector : collectors) {
-			TaskTable taskTable = collector.getTasks();
-			int size = taskTable.size();
-			for (int j = 0; j < size; j++) {
-				if (isInterrupted()) {
-					break outer;
-				}
-				SchedulingPattern pattern = taskTable.getSchedulingPattern(j);
-				if (pattern.match(scheduler.getTimeZone(), referenceTimeInMillis)) {
-					Task task = taskTable.getTask(j);
-					scheduler.spawnExecutor(task);
-				}
-			}
-		}
+        for (TaskCollector collector : collectors) {
+            TaskTable taskTable = collector.getTasks();
+            int size = taskTable.size();
+            for (int j = 0; j < size; j++) {
+                if (isInterrupted()) {
+                    break outer;
+                }
+                SchedulingPattern pattern = taskTable.getSchedulingPattern(j);
+                if (pattern.match(scheduler.getTimeZone(), referenceTimeInMillis)) {
+                    Task task = taskTable.getTask(j);
+                    scheduler.spawnExecutor(task);
+                }
+            }
+        }
 		// Notifies completed.
 		scheduler.notifyLauncherCompleted(this);
 	}

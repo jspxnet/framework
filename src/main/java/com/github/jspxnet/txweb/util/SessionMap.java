@@ -9,11 +9,10 @@
  */
 package com.github.jspxnet.txweb.util;
 
-import com.github.jspxnet.txweb.env.TXWeb;
+import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
-
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -40,8 +39,8 @@ public class SessionMap extends HashMap<String,Object> implements Map<java.lang.
         }
         Object o = super.get(key);
         if (o == null) {
-            if (TXWeb.token.equals(key)) {
-                String sid = (String) session.getAttribute(TXWeb.token);
+            if (ActionEnv.KEY_TOKEN.equals(key)) {
+                String sid = (String) session.getAttribute(ActionEnv.KEY_TOKEN);
                 if (StringUtil.hasLength(sid)) {
                     return sid;
                 }

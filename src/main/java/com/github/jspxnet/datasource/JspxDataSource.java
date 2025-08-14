@@ -115,7 +115,7 @@ public class JspxDataSource extends DriverManagerDataSource {
             connectionPool = new ConnectionProxy[(this.maxPoolSize)];
         }
     }
-
+    @Override
     //兼容c3p0
     public void setMinPoolSize(int minPoolSize) {
         //不需要，系统默认保持最优

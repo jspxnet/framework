@@ -44,12 +44,14 @@ public class PageHelper implements Serializable {
      */
     private String getFileName() {
         File file = new File(path, configFile);
-        if (file.isFile()) {
+        if (FileUtil.isFileExist(file))
+        {
             return file.getPath();
         }
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
         file = new File(environmentTemplate.getString(Environment.defaultPath), configFile);
-        if (file.isFile()) {
+        if (FileUtil.isFileExist(file))
+        {
             return file.getPath();
         }
         file = new File(environmentTemplate.getString(Environment.defaultPath), FileUtil.getFileName(configFile));

@@ -34,7 +34,6 @@ public class SqlMapConfDAOImpl extends JdbcOperations implements SqlMapConfDAO {
             criteria = criteria.add(Expression.eq("namespace", namespace));
         }
         criteria = criteria.add(Expression.eq("name", name));
-
         String databaseType = getSoberFactory().getDatabaseType();
         criteria = criteria.add(Expression.eq("databaseType", databaseType));
         SqlMapConf sqlMapConf = criteria.addOrder(Order.desc("version")).objectUniqueResult(false);
@@ -128,8 +127,6 @@ public class SqlMapConfDAOImpl extends JdbcOperations implements SqlMapConfDAO {
         criteria = SSqlExpression.getTermExpression(criteria, param.getTerm());
         return criteria.setProjection(Projections.rowCount()).longUniqueResult();
     }
-
-    //---------------------------------------
     /**
      *
      * @param param 翻页参数
@@ -177,4 +174,6 @@ public class SqlMapConfDAOImpl extends JdbcOperations implements SqlMapConfDAO {
         criteria = SSqlExpression.getTermExpression(criteria, param.getTerm());
         return criteria.setProjection(Projections.rowCount()).longUniqueResult();
     }
+
+
 }

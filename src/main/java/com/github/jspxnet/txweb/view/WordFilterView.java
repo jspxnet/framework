@@ -5,6 +5,7 @@ import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.DFAFilter;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Setter;
 
 import java.util.Set;
 
@@ -13,10 +14,8 @@ import java.util.Set;
  */
 public class WordFilterView extends ActionSupport {
     ///////////////载入IOC DAO 对象 begin
+    @Setter
     protected DFAFilter filter;
-    public void setFilter(DFAFilter filter) {
-        this.filter = filter;
-    }
 
     ///////////////载入IOC DAO 对象 end
     public int matchType = 1;      //最小匹配规则

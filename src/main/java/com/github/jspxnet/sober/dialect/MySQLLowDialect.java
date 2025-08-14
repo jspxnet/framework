@@ -18,13 +18,4 @@ public class MySQLLowDialect extends MySQLDialect {
         put(Date.class.getName(), "`${" + COLUMN_NAME + "}` datetime <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL DEFAULT '0000-00-00 00:00:00'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
     }
 
-    @Override
-    public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
-        int length = end - begin;
-        if (length < 0) {
-            length = 0;
-        }
-        return sql + " limit " + begin + "," + length;
-    }
-
 }

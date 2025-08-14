@@ -18,7 +18,10 @@ import com.github.jspxnet.scriptmark.core.script.ScriptTypeConverter;
 import com.github.jspxnet.scriptmark.exception.ScriptException;
 import com.github.jspxnet.scriptmark.exception.ScriptRunException;
 import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +37,8 @@ import java.io.*;
 @Slf4j
 public class EnvRunner {
     final private Map<String, Phrase> phrases;
+
+    @Getter
     final private TemplateModel template;
     private ScriptRunner scriptEngine = null;
     private String variableBegin = "${";
@@ -44,7 +49,23 @@ public class EnvRunner {
     private String breakBlockName = "#break";
     private String continueBlockName = "#continue";
 
+    @Getter
+    private boolean fixUndefined = false;
+
+
+    /**
+     *  currentPath 当前路径
+     */
+    @Setter
+    @Getter
     private String currentPath = FileUtil.mendPath(System.getProperty("user.dir")); //当前路径，f方便include 使用
+    /**
+     * -- GETTER --
+     * -- SETTER --
+     *rootDirectory 根路径
+     */
+    @Setter
+    @Getter
     private String rootDirectory = FileUtil.mendPath(System.getProperty("user.dir")); //路径范围
 
     /**
@@ -61,6 +82,7 @@ public class EnvRunner {
         breakBlockName = config.getString(ScriptmarkEnv.BreakBlockName);
         continueBlockName = config.getString(ScriptmarkEnv.ContinueBlockName);
         escapeVariable = config.getString(ScriptmarkEnv.escapeVariable).charAt(0);
+        fixUndefined = config.getBoolean(ScriptmarkEnv.FixUndefined);
         /////////配置初始end
 
         phrases = config.getPhrases();
@@ -76,13 +98,6 @@ public class EnvRunner {
             scriptEngine = new TemplateScriptEngine();
         }
         return scriptEngine;
-    }
-
-    /**
-     * @return 得到模板
-     */
-    public TemplateModel getTemplate() {
-        return template;
     }
 
 
@@ -110,34 +125,6 @@ public class EnvRunner {
                 break;
             }
         }
-    }
-
-    /**
-     * @return 当前路径
-     */
-    public String getCurrentPath() {
-        return currentPath;
-    }
-
-    /**
-     * @param currentPath 当前路径
-     */
-    public void setCurrentPath(String currentPath) {
-        this.currentPath = currentPath;
-    }
-
-    /**
-     * @return 根路径
-     */
-    public String getRootDirectory() {
-        return rootDirectory;
-    }
-
-    /**
-     * @param rootDirectory 根路径
-     */
-    public void setRootDirectory(String rootDirectory) {
-        this.rootDirectory = rootDirectory;
     }
 
     /**
@@ -185,6 +172,13 @@ public class EnvRunner {
      * @throws ScriptRunException 脚本错误
      */
     static private List<TagNode> getAutoImport(Configurable configurable) throws ScriptRunException {
+        //这里很耗时
+        List<TagNode> result = configurable.getAutoImportTagNodeList();
+        if (!ObjectUtil.isEmpty(result))
+        {
+            return result;
+        }
+
         String[] paths = configurable.getSearchPath();
         if (paths == null) {
             return null;
@@ -226,6 +220,35 @@ public class EnvRunner {
             }
         }
         TemplateElement templateEl = new TemplateElement(autoImportSrc.toString(), 0, configurable);
-        return templateEl.getRootTree();
+        result = templateEl.getRootTree();
+        configurable.setAutoImportTagNodeList(result);
+        return result;
     }
+
+
+    /**
+     * 修复没有定义的参数变量，如果没有定义的给空字符串
+     * @param map 参数变量
+     */
+    public void fixUndefinedMap(Map<String, Object> map)
+    {
+        if (map==null)
+        {
+            return;
+        }
+        String[] varArray = StringUtil.getFreeMarkerVar(this.template.getSource());
+        for (String var:varArray)
+        {
+            if (!StringUtil.isVarName(var))
+            {
+                continue;
+            }
+            if (!map.containsKey(var))
+            {
+                map.put(var,StringUtil.empty);
+            }
+        }
+    }
+
+
 }

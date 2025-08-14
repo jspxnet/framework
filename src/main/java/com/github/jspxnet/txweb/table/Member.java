@@ -10,6 +10,7 @@
 package com.github.jspxnet.txweb.table;
 
 import com.github.jspxnet.enums.CongealEnumType;
+import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.json.JsonField;
@@ -178,8 +179,8 @@ public class Member extends OperateTable implements IMember {
     private Date confineDate = DateUtil.addYear(-1);
     //基本属性end
 
-    @Column(caption = "用户类型", option = "0:个人;1:企业;2:管理人员")
-    private int userType = 0;
+    @Column(caption = "用户类型", enumType = UserEnumType.class)
+    private int userType = UserEnumType.NONE.getValue();
 
     @Column(caption = "皮肤", length = 50)
     private String skin = "default";
@@ -365,11 +366,11 @@ public class Member extends OperateTable implements IMember {
     }
 
 
-    @Override
+/*    @Override
     public void setMemberRoles(List<MemberRole> memberRoles) {
         this.memberRoles.clear();
         this.memberRoles.addAll(memberRoles);
-    }
+    }*/
 
     @Override
     public void setRole(Role role) {
@@ -407,7 +408,7 @@ public class Member extends OperateTable implements IMember {
     @Override
     public String getProperty(String key)
     {
-        StringMap<String, String> hashMap = new StringMap();
+        StringMap<String, String> hashMap = new StringMap<>();
         hashMap.setKeySplit(StringUtil.EQUAL);
         hashMap.setLineSplit(StringUtil.CRLF);
         hashMap.setString(other);

@@ -10,8 +10,6 @@
 package com.github.jspxnet.boot.environment.impl;
 
 
-import com.caucho.hessian.io.EnvelopeFactory;
-import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Placeholder;
@@ -24,7 +22,8 @@ import com.github.jspxnet.sioc.CatalinaObject;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import java.io.*;
+
+import java.io.File;
 import java.util.*;
 
 
@@ -158,7 +157,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             webInfPath = FileUtil.mendPath(webInfPath);
 
             boolean createWebInf = webInfPath.toLowerCase().contains("web-inf");
-
             VALUE_MAP.put(Environment.webInfPath, webInfPath);
             String tempDir = webInfPath + "template/";
             if (createWebInf&&!FileUtil.isDirectory(tempDir)) {
@@ -173,6 +171,10 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 tempDir = new File(defaultPath, "template/").getPath();
             } else if (ArrayUtil.isEmpty(files) && FileUtil.isDirectory(new File(defaultPath, "resources/template/").getPath())) {
                 tempDir = new File(defaultPath, "resources/template/").getPath();
+            }
+            if (!FileUtil.isDirectory(tempDir)&&defaultPath!=null&&defaultPath.contains("classes")&&defaultPath.toLowerCase().contains("web-inf"))
+            {
+                tempDir = new File( new File(defaultPath).getPath(), "template/").getPath();
             }
 
             if (!VALUE_MAP.containsKey(Environment.templatePath)) {
@@ -201,14 +203,14 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             }
 
             VALUE_MAP.put(Environment.libPath, tempDir);
-
-            //fontsPath    字体目录
-            tempDir = webInfPath + "fonts/";
-            if (createWebInf)
-            {
-                FileUtil.makeDirectory(tempDir);
+            if (!VALUE_MAP.containsKey(Environment.fontsPath)) {
+                if (SystemUtil.OS==SystemUtil.WINDOWS)
+                {
+                    VALUE_MAP.put(Environment.fontsPath, "C:/Windows/Fonts");
+                } else {
+                    VALUE_MAP.put(Environment.fontsPath, "/usr/share/fonts");
+                }
             }
-            VALUE_MAP.put(Environment.fontsPath, tempDir);
 
             //ResPath    资源目录
             tempDir = webInfPath + "reslib/";
@@ -258,7 +260,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
 
     private String getAwtToolkit() {
         String awtToolkit = (String) VALUE_MAP.get("awt.toolkit");
-        if (awtToolkit == null || awtToolkit.length() < 1) {
+        if (awtToolkit == null || awtToolkit.isEmpty()) {
             return System.getProperty("awt.toolkit");
         }
         return awtToolkit;
@@ -271,7 +273,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
         return System.getProperty("java2d.font.usePlatformFont");
     }
 
-    private Object getGraphicsenv() {
+    private Object getGraphicsEnv() {
         if (VALUE_MAP.containsKey("java.awt.graphicsenv")) {
             return VALUE_MAP.get("java.awt.graphicsenv");
         }
@@ -314,7 +316,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             System.setProperty("java2d.font.usePlatformFont", usePlatformFont);
         }
         //graphicsenv
-        String getGraphicsenv = (String) getGraphicsenv();
+        String getGraphicsenv = (String) getGraphicsEnv();
         if (!StringUtil.isNull(getGraphicsenv)) {
             System.setProperty("java.awt.graphicsenv", getGraphicsenv);
         }
@@ -362,9 +364,8 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             if (keys == null) {
                 continue;
             }
-            VALUE_MAP.put(keys, System.getProperty(keys, ""));
+            VALUE_MAP.put(keys, System.getProperty(keys, StringUtil.empty));
         }
-
 
 
         //监测当前的web 服务器 begin
@@ -441,7 +442,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             return valueMap;
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
-            e.printStackTrace();
         }
         //创建配置 begin
         return new HashMap<>(0);
@@ -499,7 +499,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             valueMap.clear();
         } catch (Exception e) {
             log.info("create Jspx.net Env fileName=" + fileName + " " + e.getLocalizedMessage());
-            e.printStackTrace();
+
         }
         //创建配置 end
 
@@ -537,9 +537,7 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                         VALUE_MAP.put(key, processTemplate(value));
                     } catch (Exception e) {
                         log.error("检查配置key:{},value:{}", key, value);
-                        e.printStackTrace();
                     }
-
                 }
             }
         }

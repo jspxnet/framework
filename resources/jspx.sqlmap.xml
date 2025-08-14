@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sqlMap namespace="global" database="true">
+    <init>
+        <table class="com.github.jspxnet.sober.table.LockTable"/>
+        <table class="com.github.jspxnet.sober.table.SoberTableModel"/>
+        <table class="com.github.jspxnet.sober.table.SqlMapConf"/>
+        <table class="com.github.jspxnet.txweb.table.SearchScheme"/>
+    </init>
+   <querys>
+       <query id="com.github.jspxnet.txweb.dao.MemberDAO.getMemberListForRole" class="com.github.jspxnet.txweb.table.Member">
+            SELECT distinct m.* FROM ${memberTable} m,${memberRoleTable} v WHERE m.id=v.uid AND v.roleId=${roleId.quote()} AND m.congealType=0 ORDER BY m.createDate DESC
+       </query>
+       <query id="com.github.jspxnet.txweb.dao.MemberDAO.getMemberListForRoleCount" class="int">
+           SELECT count(1) FROM
+           (
+                SELECT distinct m.* FROM ${memberTable} m,${memberRoleTable} v WHERE m.id=v.uid AND v.roleId=${roleId.quote()} AND m.congealType=0
+           ) z
+       </query>
+       <!--SELECT count(m.id) FROM ${memberTable} m,${memberRoleTable} v WHERE m.id=v.uid AND v.roleId='${roleId}' -->
+    </querys>
+    <executes>
+   </executes>
+</sqlMap>

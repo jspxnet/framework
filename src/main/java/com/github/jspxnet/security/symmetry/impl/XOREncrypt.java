@@ -10,6 +10,7 @@
 package com.github.jspxnet.security.symmetry.impl;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.security.symmetry.AbstractEncrypt;
 import com.github.jspxnet.security.utils.EncryptUtil;
 
@@ -20,12 +21,11 @@ import com.github.jspxnet.security.utils.EncryptUtil;
  * Time: 下午9:47
  */
 public class XOREncrypt extends AbstractEncrypt {
-    static private byte[] fileHead = new byte[]{'x', 'o', 'r'};
+    final static private byte[] FILE_HEAD = new byte[]{'x', 'o', 'r'};
 
     //随机数，会使加密的key和数据不一样,
     public XOREncrypt() {
-
-
+        keyFormatType = KeyFormatEnumType.HEX;
     }
 
     public boolean isEncrypt(String source) throws Exception {
@@ -33,9 +33,11 @@ public class XOREncrypt extends AbstractEncrypt {
             return false;
         }
         byte[] data = EncryptUtil.hexToByte(source);
-        byte[] head = new byte[fileHead.length];
-        System.arraycopy(data, 0, head, 0, fileHead.length);
-        return new String(head).equals(new String(fileHead));
+        byte[] head = new byte[FILE_HEAD.length];
+        if (data != null) {
+            System.arraycopy(data, 0, head, 0, FILE_HEAD.length);
+        }
+        return new String(head).equals(new String(FILE_HEAD));
     }
 
 
@@ -46,11 +48,9 @@ public class XOREncrypt extends AbstractEncrypt {
         for (int i = 0; i < aSource.length; i++) {
             aSource[i] = (byte) (aSource[i] ^ fSecretKey[i % fSecretKey.length]);
         }
-
-        byte[] data3 = new byte[fileHead.length + aSource.length];
-        System.arraycopy(fileHead, 0, data3, 0, fileHead.length);
-        System.arraycopy(aSource, 0, data3, fileHead.length, aSource.length);
-
+        byte[] data3 = new byte[FILE_HEAD.length + aSource.length];
+        System.arraycopy(FILE_HEAD, 0, data3, 0, FILE_HEAD.length);
+        System.arraycopy(aSource, 0, data3, FILE_HEAD.length, aSource.length);
         return data3;
     }
 
@@ -64,17 +64,20 @@ public class XOREncrypt extends AbstractEncrypt {
         if (source == null) {
             return null;
         }
-        byte[] head = new byte[fileHead.length];
-        System.arraycopy(source, 0, head, 0, fileHead.length);
-        byte[] aSource = new byte[source.length - fileHead.length];
-        System.arraycopy(source, fileHead.length, aSource, 0, aSource.length);
-
+        byte[] head = new byte[FILE_HEAD.length];
+        System.arraycopy(source, 0, head, 0, FILE_HEAD.length);
+        if (!new String(head).equals(new String(FILE_HEAD)))
+        {
+            throw new Exception("文件标识错误");
+        }
+        byte[] aSource = new byte[source.length - FILE_HEAD.length];
+        System.arraycopy(source, FILE_HEAD.length, aSource, 0, aSource.length);
         byte[] fSecretKey = secretKey.getBytes(Environment.defaultEncode);
         for (int i = 0; i < aSource.length; i++) {
             aSource[i] = (byte) (aSource[i] ^ fSecretKey[i % fSecretKey.length]);
         }
-
         return aSource;
     }
+
 
 }

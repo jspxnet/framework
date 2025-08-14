@@ -106,7 +106,7 @@ public class SqlMapClientImpl implements SqlMapClient {
             mapSql = getSqlMapConf(namespace,exeId,ExecuteEnumType.QUERY);
             return SoberUtil.invokeSqlMapInvocation(getSoberSupport(),mapSql,valueMap) ;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("getUniqueResult exeId:{}",exeId,e);
             return new ArrayList<>(0);
         }
     }
@@ -253,7 +253,7 @@ public class SqlMapClientImpl implements SqlMapClient {
         try {
             sqlMapConf = sqlMapBase.getSqlMapConf(namespace,exeId,ExecuteEnumType.QUERY,null);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryCount exeId:{}",exeId,e);
             return 0;
         }
         return sqlMapBase.queryCount(sqlMapConf,valueMap);

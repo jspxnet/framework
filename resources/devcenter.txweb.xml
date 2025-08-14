@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<txweb>
+    <package namespace="devcenter" extends="global">
+        <default>
+            <interceptor-ref name="com.github.jspxnet.txweb.devcenter.interceptor.DevCenterInterceptor" extends="true"/>
+        </default>
+    </package>
+    <package namespace="dynout" extends="global">
+
+    </package>
+</txweb>

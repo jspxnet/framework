@@ -1,9 +1,9 @@
 package com.github.jspxnet.mq.util;
 
-import org.apache.rocketmq.client.ClientConfig;
+/*import org.apache.rocketmq.client.ClientConfig;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.impl.MQClientManager;
-import org.apache.rocketmq.client.impl.factory.MQClientInstance;
+import org.apache.rocketmq.client.impl.factory.MQClientInstance;*/
 
 /**
  * Created by jspx.net
@@ -22,12 +22,13 @@ public class MQClientUtil {
      * @return 客户端接口, 主要是得到 MQClientAPIImpl
      * @throws MQClientException 异常
      */
-    public static MQClientInstance getMqClientInstance(ClientConfig producer) throws MQClientException {
+
+    /*public static MQClientInstance getMqClientInstance(ClientConfig producer) throws MQClientException {
         MQClientManager mqClientManager = MQClientManager.getInstance();
         MQClientInstance mqClientInstance = mqClientManager.getOrCreateMQClientInstance(producer);
         mqClientInstance.start();
         return mqClientInstance;
-    }
+    }*/
 
 
 }

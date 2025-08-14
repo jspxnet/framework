@@ -18,12 +18,16 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.Server;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.core.JreMemoryLeakPreventionListener;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.core.StandardHost;
+import org.apache.catalina.core.ThreadLocalLeakPreventionListener;
 import org.apache.catalina.loader.ParallelWebappClassLoader;
 import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.valves.ErrorReportValve;
 import org.apache.catalina.webresources.StandardRoot;
-import org.apache.coyote.http11.Http11NioProtocol;
+import org.apache.coyote.http11.Http11Nio2Protocol;
 import org.apache.jasper.servlet.JspServlet;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
@@ -33,7 +37,6 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.redisson.tomcat.JndiRedissonSessionManager;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +69,11 @@ public class TomcatApplication {
     //@Parameter(names = "-config", description = "application config path")
     private static int config;
 
-    private static int maxPostSize;
+    private static int maxPostSize = -1;
+
+    private static boolean tcpNoDelay;
+
+    private static boolean debug = false;
 
 
     private static JspxNetBootApplication jspxNetBootApplication;
@@ -79,15 +86,30 @@ public class TomcatApplication {
 
         //把目录的绝对的路径获取到
         //arg[0] 运行路径
+        System.setProperty("log4j.ignoreTCL", "true");
+        System.setProperty("rocketmq.client.logLevel","ERROR");
+        //System.setProperty("rocketmq.client.logUseSlf4j","true");
+
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         if (!ArrayUtil.isEmpty(args)) {
             log.debug("tomcat param:{}", args[0]);
             jspxConfiguration.setDefaultPath(args[0]);
         }
-        System.setProperty("log4j.ignoreTCL", "true");
+
+        String jspx_properties_file = Environment.jspx_properties_file;
+        String active_config =  System.getenv(Environment.JSPX_ENV_ACTIVE);
+        if (!StringUtil.isNull(active_config))
+        {
+            Map<String,Object> valueMap = new HashMap<>();
+            valueMap.put("active",active_config);
+            jspx_properties_file = EnvFactory.getPlaceholder().processTemplate(valueMap,Environment.jspx_properties_template);
+            jspxConfiguration.setDefaultConfigFile(jspx_properties_file);
+            jspxConfiguration.loadPath();
+        }
+
         String defaultPath = jspxConfiguration.getDefaultPath();
         EnvironmentTemplate environmentTemplate = EnvFactory.getEnvironmentTemplate();
-        Map<String,String>  properties = environmentTemplate.readDefaultProperties(FileUtil.mendFile((defaultPath == null ? "" : defaultPath) + "/" + Environment.jspx_properties_file));
+        Map<String,String>  properties = environmentTemplate.readDefaultProperties(FileUtil.mendFile((defaultPath == null ? "" : defaultPath) + "/" + jspx_properties_file));
 
         if (properties.size() > 3 && properties.containsKey(Environment.SERVER_PORT) && properties.containsKey(Environment.SERVER_WEB_PATH)) {
             port = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_PORT, "8080"));
@@ -96,8 +118,8 @@ public class TomcatApplication {
             cors = StringUtil.toBoolean(properties.getOrDefault(Environment.SERVER_CORS, "true"));
             threads = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_THREADS, "3"));
             maxPostSize = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_MAX_POST_SIZE, "10000000"));
-
-
+            tcpNoDelay = StringUtil.toBoolean(properties.getOrDefault(Environment.tcpNoDelay, "true"));
+            debug = StringUtil.toBoolean(properties.getOrDefault(Environment.DEBUG, "true"));
         } else if (TomcatApplication.jspxNetBootApplication != null && properties.size() < 2) {
             port = TomcatApplication.jspxNetBootApplication.port();
             webPath = TomcatApplication.jspxNetBootApplication.webPath();
@@ -105,6 +127,7 @@ public class TomcatApplication {
             cors = TomcatApplication.jspxNetBootApplication.cors();
             threads = TomcatApplication.jspxNetBootApplication.threads();
             maxPostSize = TomcatApplication.jspxNetBootApplication.maxPostSize();
+            debug = TomcatApplication.jspxNetBootApplication.debug();
 
         } else {
             port = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_PORT, "8080"));
@@ -113,6 +136,7 @@ public class TomcatApplication {
             cors = StringUtil.toBoolean(properties.getOrDefault(Environment.SERVER_CORS, "true"));
             threads = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_THREADS, "3"));
             maxPostSize = StringUtil.toInt(properties.getOrDefault(Environment.SERVER_MAX_POST_SIZE, "10000000"));
+            debug = StringUtil.toBoolean(properties.getOrDefault(Environment.DEBUG, "true"));
         }
 
 
@@ -143,7 +167,7 @@ public class TomcatApplication {
         String encode = properties.getOrDefault(Environment.encode, Environment.defaultEncode);
 
         Tomcat tomcat = new Tomcat();
-        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+        Connector connector = new Connector("org.apache.coyote.http11.Http11Nio2Protocol");
         connector.setPort(port);
         connector.setURIEncoding(encode);
         //让 URI 和 body 编码一致。(针对POST请求)
@@ -154,16 +178,20 @@ public class TomcatApplication {
         connector.setMaxCookieCount(threads * 100000);
         connector.setUseBodyEncodingForURI(true);
 
-        Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
+        Http11Nio2Protocol protocol = (Http11Nio2Protocol) connector.getProtocolHandler();
         //设置最大连接数
-        protocol.setMaxConnections(threads * 1000);
+        protocol.setMaxConnections(threads * 200);
         //设置最大线程数
-        protocol.setMaxThreads(threads * 1000);
+        protocol.setMaxThreads(threads * 70);
         protocol.setConnectionTimeout(80000);
+        protocol.setTcpNoDelay(tcpNoDelay);
+        protocol.setDisableUploadTimeout(false);
+        protocol.setConnectionUploadTimeout(80000);
+        protocol.setMinSpareThreads(5);
+        protocol.setMaxQueueSize(threads * 70);
 
         //设置Host
         tomcat.setConnector(connector);
-
         tomcat.setSilent(true);
         tomcat.setAddDefaultWebXmlToWebapp(true);
         tomcat.setHostname("localhost");
@@ -175,15 +203,40 @@ public class TomcatApplication {
         host.setCreateDirs(false);
         //host.setAppBase(FileUtil.mendPath(file.getParent()));
         host.setAppBase(webPath);
-        Context standardContext = tomcat.addWebapp("", webPath);
-        //100000
-        //92160
 
+
+        //页面上不显示错误信息begin
+        if (!debug)
+        {
+            //<Valve className=\"org.apache.catalina.valves.ErrorReportValve\" showReport=\"false\" showServerInfo=\"false\"/>
+            StandardHost stdHost = (StandardHost) host;
+            ErrorReportValve errorReportValve = new ErrorReportValve();
+            errorReportValve.setShowReport(false);
+            errorReportValve.setShowServerInfo(false);
+            stdHost.addValve(errorReportValve);
+        }
+        //页面上不显示错误信息end
+
+
+        Context standardContext = tomcat.addWebapp("", webPath);
+        //修复tomcat 自己的一个bug CVE-2024-56337  begin
         StandardRoot standardRoot = new StandardRoot();
-        standardRoot.setCacheMaxSize((threads * 20) * 1024); //最大100M
-        standardRoot.setCacheObjectMaxSize(1024);
+        standardRoot.setCacheMaxSize(threads * 4096L); //最大100M
+        standardRoot.setCacheObjectMaxSize((int) ((threads * 4096L)/20));
         standardRoot.setCachingAllowed(cachingAllowed);
+        standardRoot.setAllowLinking(true);
         standardContext.setResources(standardRoot);
+        //修复tomcat 自己的一个bug end
+
+        /*
+
+<Resources
+    cachingAllowed="true"
+    cacheMaxSize="163840"    <!-- 总缓存大小（160MB） -->
+    cacheObjectMaxSize="8192" <!-- 单个资源最大缓存（8MB） -->
+/>
+         */
+
 
         //前面的那个步骤只是把Tomcat起起来了，但是没啥东西
         //要把class加载进来,把启动的工程加入进来了
@@ -192,8 +245,8 @@ public class TomcatApplication {
         standardContext.setPrivileged(true);
         standardContext.setAddWebinfClassesResources(false);
 
-
         standardContext.addLifecycleListener(new Tomcat.FixContextListener());
+        standardContext.addLifecycleListener(new ThreadLocalLeakPreventionListener());
 
         if (filterMode) {
             FilterDef jspxFilterDef = new FilterDef();
@@ -213,8 +266,7 @@ public class TomcatApplication {
         }
 
         //放入环境变量begin
-        for (Object key : properties.keySet()) {
-            String keyName = (String) key;
+        for (String keyName : properties.keySet()) {
             if (!environmentTemplate.containsName(keyName)) {
                 environmentTemplate.put(keyName, properties.get(keyName));
             }
@@ -228,7 +280,6 @@ public class TomcatApplication {
         environmentTemplate.put(Environment.SERVER_FILTER_MODE, filterMode);
         environmentTemplate.put(Environment.SERVER_SESSION_REDIS, openRedis);
         environmentTemplate.put(Environment.SERVER_EMBED, true);
-
         //放入环境变量end
 
 
@@ -273,6 +324,10 @@ public class TomcatApplication {
             redisResource.setProperty("factory", TomcatJndiRedissonFactory.class.getName());
             tomcat.getServer().getGlobalNamingResources().addResource(redisResource);
         }
+
+
+
+
 
         /*
         <Manager className="org.redisson.tomcat.RedissonSessionManager"
@@ -331,14 +386,15 @@ public class TomcatApplication {
             standardContext.addFilterMap(corsFilterMap);
 
         }
+        //<Resources cachingAllowed="true" />
 
         //Tomcat跑起来
         //设置Tomcat的端口tomcat.setPort(9091)。两种写法都可以设置端口
         tmpContext.addApplicationLifecycleListener(new JspxNetListener());
         tmpContext.setValidateClientProvidedNewSessionId(true);
-        tmpContext.setSessionTimeout(60);
+        tmpContext.setSessionTimeout(720);
         tmpContext.setSessionCookiePathUsesTrailingSlash(false);
-        tmpContext.setOverride(false);
+        //tmpContext.setOverride(false);
         tmpContext.setDistributable(true);
         tmpContext.setSessionCookiePath("/");
         tmpContext.setSkipMemoryLeakChecksOnJvmShutdown(true);
@@ -351,17 +407,19 @@ public class TomcatApplication {
         standardContext.setSessionCookiePathUsesTrailingSlash(true);
         standardContext.setResponseCharacterEncoding(encode);
         standardContext.setRequestCharacterEncoding(encode);
-        standardContext.setReloadable(true);
+        standardContext.setReloadable(debug);
+
+
+        // 将 Resources 绑定到 Context
+
 
         if (standardContext.getLoader() == null) {
             WebappLoader webappLoader = new WebappLoader();
             webappLoader.setDelegate(true);
             webappLoader.setLoaderClass(ParallelWebappClassLoader.class.getName());
             webappLoader.setLoaderInstance(new ParallelWebappClassLoader());
-
             standardContext.setLoader(webappLoader);
         }
-
 
         //强制Tomcat server等待，避免main线程执行结束后关闭
         Server server = tomcat.getServer();
@@ -375,7 +433,11 @@ public class TomcatApplication {
         }
         server.setAddress(ip);
         server.setUtilityThreads(threads);
+        //内存管理
+        server.addLifecycleListener(new JreMemoryLeakPreventionListener());
+
         Dispatcher.setRealPath(webPath);
+
 
         System.out.println("defaultPath=" + defaultPath);
         System.out.println("webPath=" + webPath);

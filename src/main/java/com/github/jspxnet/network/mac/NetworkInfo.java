@@ -9,13 +9,17 @@
  */
 package com.github.jspxnet.network.mac;
 
-/**
+/*
  * Created by IntelliJ IDEA.
  * User: chenYuan
  * date: 2004-8-31
  * Time: 16:12:22
  */
 
+import com.github.jspxnet.utils.StringUtil;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.net.*;
 import java.io.*;
 import java.text.*;
@@ -42,6 +46,60 @@ public abstract class NetworkInfo {
     public abstract String parseMacAddress() throws Exception;
 
     private static String localMac = null;
+
+    private static String getHardwareMac() throws SocketException {
+        if (localMac!=null)
+        {
+            return localMac;
+        }
+        Enumeration<NetworkInterface> el = NetworkInterface.getNetworkInterfaces();
+        while (el.hasMoreElements()) {
+            NetworkInterface networkInterface  = el.nextElement();
+            String displayName = StringUtil.toLowerCase(networkInterface.getDisplayName());
+            if (displayName.contains("software"))
+            {
+                continue;
+            }
+            if (displayName.contains("virtual"))
+            {
+                continue;
+            }
+            if (displayName.contains("adapter"))
+            {
+                continue;
+            }
+            if (displayName.contains("wan"))
+            {
+                continue;
+            }
+            if (displayName.contains("vpn"))
+            {
+                continue;
+            }
+            if (displayName.contains("tap"))
+            {
+                continue;
+            }
+            byte[] mac = networkInterface.getHardwareAddress();
+            if (mac == null || mac.length < 1) {
+                continue;
+            }
+            StringBuilder builder = new StringBuilder();
+            for (byte b : mac) {
+                builder.append(hexByte(b));
+                builder.append("-");
+            }
+            if (builder.length() > 1) {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+            if (builder.toString().toUpperCase().startsWith("00-00-00-00") || builder.toString().toUpperCase().startsWith("FF-FF-FF-FF")) {
+                continue;
+            }
+            return localMac = builder.toString().toUpperCase();
+        }
+        return null;
+    }
+
     /**
      * JDK1.6新特性获取网卡MAC地址
      */
@@ -49,6 +107,11 @@ public abstract class NetworkInfo {
         if (localMac!=null)
         {
             return localMac;
+        }
+        String hardwareMac = getHardwareMac();
+        if (!StringUtil.isNullOrWhiteSpace(hardwareMac))
+        {
+            return hardwareMac;
         }
         Enumeration<NetworkInterface> el = NetworkInterface.getNetworkInterfaces();
         while (el.hasMoreElements()) {
@@ -95,7 +158,6 @@ public abstract class NetworkInfo {
                 NetworkInfo info = getNetworkInfo();
                 return localMac = info.parseMacAddress();
             } catch (Exception ex) {
-                ex.printStackTrace();
                 throw new IOException(ex.getMessage());
             }
         }
@@ -111,28 +173,26 @@ public abstract class NetworkInfo {
             NetworkInfo info = getNetworkInfo();
             return info.parseDomain();
         } catch (Exception ex) {
-            ex.printStackTrace();
             throw new IOException(ex.getMessage());
         }
     }
 
-    protected String parseDomain(String hostname) throws Exception {        // get the address of the host we are looking for - verification
+    protected String parseDomain(String hostName) throws Exception {        // get the address of the host we are looking for - verification
         java.net.InetAddress addy;
         try {
-            addy = java.net.InetAddress.getByName(hostname);
+            addy = java.net.InetAddress.getByName(hostName);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+
             throw new ParseException(e.getMessage(), 0);
         }
         // back out transfer the hostname - just validating
-        hostname = addy.getCanonicalHostName();
-        String nslookupCommand = NSLOOKUP_CMD + " " + hostname;
+        hostName = addy.getCanonicalHostName();
+        String nslookupCommand = NSLOOKUP_CMD + " " + hostName;
         // run the lookup command
         String nslookupResponse;
         try {
             nslookupResponse = runConsoleCommand(nslookupCommand);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new ParseException(e.getMessage(), 0);
         }
         StringTokenizer tokeit = new StringTokenizer(nslookupResponse, "\n", false);
@@ -141,8 +201,8 @@ public abstract class NetworkInfo {
             if (line.startsWith("Name:")) {
                 line = line.substring(line.indexOf(":") + 1);
                 line = line.trim();
-                if (isDomain(line, hostname)) {
-                    line = line.substring(hostname.length() + 1);
+                if (isDomain(line, hostName)) {
+                    line = line.substring(hostName.length() + 1);
                     return line;
                 }
             }
@@ -186,15 +246,55 @@ public abstract class NetworkInfo {
         }
     }
 
-    protected String getLocalHost() throws Exception {
+    public static String getLocalHost()  {
         try {
-            return java.net.InetAddress.getLocalHost().getHostAddress();
-        } catch (java.net.UnknownHostException e) {
-            e.printStackTrace();
-            throw new ParseException(e.getMessage(), 0);
+           InetAddress inetAddress = getLocalHostLANAddress();
+           return inetAddress.getHostAddress();
+        } catch (Exception e) {
+            try {
+                return InetAddress.getLocalHost().getHostAddress();
+            } catch (UnknownHostException ex) {
+                return "127.0.0.1";
+            }
         }
     }
 
+    protected static InetAddress getLocalHostLANAddress() throws UnknownHostException {
+        try {
+            InetAddress candidateAddress = null;
+            // 遍历所有的网络接口
+            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements();) {
+                NetworkInterface iface =  ifaces.nextElement();
+                // 在所有的接口下再遍历IP
+                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
+                    InetAddress inetAddr = inetAddrs.nextElement();
+                    if (!inetAddr.isLoopbackAddress()) {// 排除loopback类型地址
+                        if (inetAddr.isSiteLocalAddress()) {
+                            // 如果是site-local地址，就是它了
+                            return inetAddr;
+                        } else if (candidateAddress == null) {
+                            // site-local类型的地址未被发现，先记录候选地址
+                            candidateAddress = inetAddr;
+                        }
+                    }
+                }
+            }
+            if (candidateAddress != null) {
+                return candidateAddress;
+            }
+            // 如果没有发现 non-loopback地址.只能用最次选的方案
+            InetAddress jdkSuppliedAddress = InetAddress.getLocalHost();
+            if (jdkSuppliedAddress == null) {
+                throw new UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.");
+            }
+            return jdkSuppliedAddress;
+        } catch (Exception e) {
+            UnknownHostException unknownHostException = new UnknownHostException(
+                    "Failed to determine LAN address: " + e);
+            unknownHostException.initCause(e);
+            throw unknownHostException;
+        }
+    }
 
     /**
      * 验收
@@ -202,10 +302,17 @@ public abstract class NetworkInfo {
      * @param args 无效
      */
     public static void main(String[] args) {
+
+        OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
+        String osArch = osBean.getArch();
+        String osName = osBean.getName();
+
         try {
             System.out.println("Network infos");
+            System.out.println("osArch:" + osArch);
+            System.out.println("osName:" + osName);
             System.out.println("  Operating System: " + System.getProperty("os.name"));
-            System.out.println("  IP/Localhost: " + InetAddress.getLocalHost().getHostAddress());
+            System.out.println("  IP/Localhost: " + getLocalHost());
             System.out.println("  MAC Address: " + getMacAddress());
             System.out.println("  Domain: " + getNetworkDomain());
         } catch (Throwable t) {

@@ -33,6 +33,7 @@ import com.github.jspxnet.txweb.table.UserSession;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -55,11 +56,8 @@ public class UserInterceptor extends InterceptorSupport {
 
     }
 
+    @Setter
     private boolean permission = true;
-
-    public void setPermission(boolean permission) {
-        this.permission = permission;
-    }
 
     /**
      * 载入在线管理
@@ -77,7 +75,6 @@ public class UserInterceptor extends InterceptorSupport {
         ActionProxy actionProxy = actionInvocation.getActionProxy();
         Action action = actionProxy.getAction();
         UserSession userSession = onlineManager.getUserSession(actionContext);
-
 
         String organizeId = action.getString("organizeId", true);
         if (!StringUtil.isEmpty(organizeId)) {
@@ -97,7 +94,6 @@ public class UserInterceptor extends InterceptorSupport {
             role = debugRole;
             onlineManager.updateUserSessionCache(userSession);
         }
-
 
         if (action.isGuest() && role == null) {
             userSession.setRole(permissionDAO.getRole(config.getString(Environment.guestRole)));

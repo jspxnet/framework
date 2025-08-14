@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="120 seconds" debug="${debug}">
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="120 seconds" debug="${debug}" >
     <!-- 定义日志文件 输入位置 -->
     <property name="logPath" value="${logPath}" />
-    <!-- 日志最大的历史 30天 -->
-    <property name="logMaxHistory" value="30"/>
     <!-- ConsoleAppender 控制台输出日志 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- 对日志进行格式化 -->
@@ -40,6 +38,7 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
+
         <!-- 最常用的滚动策略，它根据时间来制定滚动策略.既负责滚动也负责出发滚动 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--日志输出位置  可相对、和绝对路径 -->
@@ -117,15 +116,30 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
-    <logger name="io.netty.buffer.PooledByteBufAllocator" level="WARN" />
-    <logger name="org.redisson.connection.DNSMonitor" level="WARN" />
-    <logger name="org.redisson.connection" level="WARN" />
-    <logger name="org.redisson.command.RedisExecutor" level="WARN" />
-    <logger name="org.redisson.connection.ClientConnectionsEntry" level="WARN" />
-    <logger name="org.hibernate" level="WARN" />
-    <logger name="org.hibernate.type.descriptor.sql" level="TRACE" />
+    <logger name="io.netty.buffer.PooledByteBufAllocator" level="ERROR" />
+    <logger name="org.redisson.connection.DNSMonitor" level="ERROR" />
+    <logger name="org.redisson.connection" level="ERROR" />
+    <logger name="org.redisson.command.RedisExecutor" level="ERROR" />
+    <logger name="org.redisson.connection.ClientConnectionsEntry" level="ERROR" />
+    <logger name="org.hibernate" level="ERROR" />
+    <logger name="org.hibernate.type.descriptor.sql" level="ERROR" />
+    <logger name="org.apache.rocketmq" level="ERROR" />
+    <logger name="org.apache" level="ERROR" />
+    <logger name="org.apache.http.wire" level="ERROR" />
+    <logger name="org.apache.http.headers" level="ERROR" />
+    <logger name="io.netty.util.Recycler" level="ERROR" />
+    <logger name="io.netty.buffer.ByteBufUtil" level="ERROR" />
+    <logger name="org.redisson.client.RedisConnection" level="WARN" />
+    <Logger name="org.redisson.client.RedirectedLog" level="WARN"/>
+    <Logger name="org.redisson.client" level="WARN"/>
+    <Logger name="org.redisson" level="WARN"/>
+    <logger name="RocketmqClient" additivity="false">
+        <level value="ERROR" />
+        <appender-ref ref="RocketmqClientAppender"/>
+    </logger>
+
     <!-- root级别   DEBUG -->
-    <root level="${debug=='true'?'DEBUG':'INFO'}">
+    <root level="${debug=='true'?'DEBUG':'WARN'}">
         <!-- 控制台输出 -->
         <#if where="debug=='true'">
               <appender-ref ref="DEBUG"/>

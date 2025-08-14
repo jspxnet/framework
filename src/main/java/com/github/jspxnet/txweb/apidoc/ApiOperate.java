@@ -7,6 +7,7 @@ import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -48,12 +49,12 @@ public class ApiOperate implements Serializable {
     private List<ApiField> result;
 
 
-    @JsonField(name = "methodJson")
-    public String getMethodJson() {
+   @JsonField(name = "stdMethodJson")
+    public String getStdMethodJson() {
         JSONObject callDemo = new JSONObject();
         if (method != null) {
             JSONObject rocMethod = new JSONObject();
-            rocMethod.put(Environment.rocName, method.getName());
+
             if (method.getParams() != null && !method.getParams().isEmpty()) {
                 if (method.getName().contains("/"))
                 {
@@ -144,4 +145,60 @@ public class ApiOperate implements Serializable {
         return StringUtil.trim(callDemo.toString(4));
     }
 
+    @JsonField(name = "methodJson")
+    public String getMethodJson() {
+        JSONObject paramJson = new JSONObject();
+        if (method != null) {
+
+            if (method.getParams() != null && !method.getParams().isEmpty()) {
+
+                for (ApiParam apiParam : method.getParams().values()) {
+                    if ("PathVar".equals(apiParam.getFiledType())) {
+                        return url;
+                    }
+                    if (ObjectUtil.isEmpty(apiParam.getChildren()))
+                    {
+                        paramJson.put(apiParam.getName(), apiParam.getCaption());
+                    } else
+                    {
+                        if ("JSONObject".equalsIgnoreCase(apiParam.getFiledType()))
+                        {
+                            paramJson.put(apiParam.getName(), apiParam.getCaption());
+                        } else
+                        {
+                            for (ApiParam chilParam:apiParam.getChildren())
+                            {
+                                paramJson.put(chilParam.getName(), chilParam.getCaption());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (params != null) {
+
+            for (ApiParam apiParam : params.values()) {
+                if (ObjectUtil.isEmpty(apiParam.getChildren()))
+                {
+                    paramJson.put(apiParam.getName(), apiParam.getCaption());
+                } else
+                {
+                    if ("JSONObject".equalsIgnoreCase(apiParam.getFiledType()))
+                    {
+                        paramJson.put(apiParam.getName(), apiParam.getCaption());
+                    } else
+                    {
+                        for (ApiParam chilParam:apiParam.getChildren())
+                        {
+                            paramJson.put(chilParam.getName(), chilParam.getCaption());
+                        }
+                    }
+                }
+            }
+
+        }
+
+        return StringUtil.trim(paramJson.toString(4));
+    }
 }

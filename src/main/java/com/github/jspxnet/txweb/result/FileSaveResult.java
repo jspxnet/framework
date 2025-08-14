@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.util.Map;
 
 /**
@@ -89,7 +90,7 @@ public class FileSaveResult extends ResultSupport {
         File saveFileName = new File(action.getEnv(SAVE_FILE));
         //输出模板数据
         FileUtil.makeDirectory(saveFileName.getParent());
-        Writer out = new OutputStreamWriter(new FileOutputStream(saveFileName), Dispatcher.getEncode());
+        Writer out = new OutputStreamWriter(Files.newOutputStream(saveFileName.toPath()), Dispatcher.getEncode());
         Map<String, Object> valueMap = action.getEnv();
         initPageEnvironment(action, valueMap);
         try {

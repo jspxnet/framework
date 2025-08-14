@@ -61,11 +61,15 @@ class IntArrayValueMatcher implements ValueMatcher {
 	 */
 	@Override
 	public boolean match(int value) {
-		for (int j : values) {
-			if (j == value) {
-				return true;
-			}
+	    if (values==null)
+		{
+		    return false;
 		}
+        for (int j : values) {
+            if (j == value) {
+                return true;
+            }
+        }
 		return false;
 	}
 

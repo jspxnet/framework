@@ -117,7 +117,7 @@ public class DSAEncrypt extends AbstractEncrypt {
      * @param publicKey 公钥(BASE64编码)
      * @return 解密数据
      */
-    @Override
+   /* @Override
     public byte[] decryptByPublicKey(byte[] data, byte[] publicKey) throws Exception {
         if (ArrayUtil.isEmpty(data) || ArrayUtil.isEmpty(publicKey)) {
             return StringUtil.empty.getBytes();
@@ -131,7 +131,7 @@ public class DSAEncrypt extends AbstractEncrypt {
         cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(data);
     }
-
+*/
     /**
      * 公钥加密
      *
@@ -161,7 +161,7 @@ public class DSAEncrypt extends AbstractEncrypt {
      * @param privateKey 私钥(BASE64编码)
      * @return 密文
      */
-    @Override
+   /* @Override
     public byte[] encryptByPrivateKey(byte[] data, byte[] privateKey) throws Exception {
         if (ArrayUtil.isEmpty(data) || ArrayUtil.isEmpty(privateKey)) {
             return StringUtil.empty.getBytes();
@@ -175,6 +175,6 @@ public class DSAEncrypt extends AbstractEncrypt {
         cipher.init(Cipher.ENCRYPT_MODE, priKey);
         return cipher.doFinal(data);
     }
-
+*/
 
 }

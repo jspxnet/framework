@@ -18,8 +18,8 @@ import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -35,10 +35,8 @@ public class K3cloudServiceImpl implements K3cloudService {
 
     private final Map<String, K3TableConf> tableMap = new LinkedHashMap<>();
     private KingdeeAccount kingdeeAccount;
+    @Setter
     private String configFile = "kingdee.table.xml";
-    public void setConfigFile(String configFile) {
-        this.configFile = configFile;
-    }
 
     @Init
     public void init()
@@ -57,6 +55,11 @@ public class K3cloudServiceImpl implements K3cloudService {
     private void loadConfig() throws Exception {
 
         File file = EnvFactory.getFile(configFile);
+        if (file==null)
+        {
+            log.error("K3cloudService 不能读取配置文件:{}",configFile);
+            throw new Exception("K3cloudService 不能读取配置文件"+configFile);
+        }
         String configString = IoUtil.autoReadText(file);
         XmlEngine xmlEngine = new XmlEngineImpl();
         xmlEngine.putTag(KingdeeAccountElement.TAG_NAME, KingdeeAccountElement.class.getName());
@@ -185,6 +188,11 @@ public class K3cloudServiceImpl implements K3cloudService {
         return KingdeeUtil.createBeanFields(k3TableConf.getContent());
     }
 
+    /**
+     *
+     * @param cls 表类
+     * @return 得到key
+     */
     @Override
     public String getKey(Class<?> cls)
     {

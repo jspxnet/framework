@@ -1,7 +1,5 @@
 package com.github.jspxnet.cache.redis;
 
-import com.github.jspxnet.boot.EnvFactory;
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.cache.container.StringEntry;
 import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.security.utils.EncryptUtil;
@@ -9,11 +7,12 @@ import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
-
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
@@ -24,19 +23,22 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
     /**
      * 短信验证
      */
-    final static String SMS_STORE_KEY = "jspx:validate:sms:code:map";
+    public final static String SMS_STORE_KEY = "jspx:validate:sms:code:map";
     /**
      * 图片验证
      */
-    final static String IMG_STORE_KEY = "jspx:validate:img:code:map";
+    public final static String IMG_STORE_KEY = "jspx:validate:img:code:map";
     /**
      *
      */
-    final static String GENERAL_VERIFY_KEY = "jspx:validate:general:code:map";
+    public final static String GENERAL_VERIFY_KEY = "jspx:validate:general:code:map";
     /**
      * 验证次数记录
      */
-    final static String VALIDATE_TIMES_KEY = "jspx:validate:times:%s";
+    public final static String VALIDATE_TIMES_KEY = "jspx:validate:times:%s";
+
+    //肖佳后期补充
+    public final static String VALIDATE_REMAINING_KEY = "jspx:validate:remaining:%s";
 
 
     @Ref(bind = RedissonClientConfig.class)
@@ -45,28 +47,16 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
     /**
      * 默认为3分钟
      */
+    @Setter
+    @Getter
     private int smsTimeOutSecond = 900;
+    @Setter
+    @Getter
     private int imgTimeOutSecond = 600;
     /**
      * 默认时间
      */
     private final int generalTimeOutSecond = 900;
-
-    public int getSmsTimeOutSecond() {
-        return smsTimeOutSecond;
-    }
-
-    public void setSmsTimeOutSecond(int smsTimeOutSecond) {
-        this.smsTimeOutSecond = smsTimeOutSecond;
-    }
-
-    public int getImgTimeOutSecond() {
-        return imgTimeOutSecond;
-    }
-
-    public void setImgTimeOutSecond(int imgTimeOutSecond) {
-        this.imgTimeOutSecond = imgTimeOutSecond;
-    }
 
     private String getTimesKey(String id) {
         return String.format(VALIDATE_TIMES_KEY, id);
@@ -315,6 +305,26 @@ public class ValidateCodeCacheService implements ValidateCodeCache {
             bucket.set(times,10,TimeUnit.MINUTES);
         }
         return times;
+    }
+
+    /**
+     * @return 返回登入剩余时长
+     */
+    @Override
+    public long getTimeRemaining(String loginId) {
+        String key = String.format(VALIDATE_REMAINING_KEY, EncryptUtil.getMd5(loginId));
+        RBucket<Object> bucket = redissonClient.getBucket(key);
+        if (!bucket.isExists()) {
+            bucket.set(loginId, 1800, TimeUnit.SECONDS);
+        }
+        long expireTime = bucket.remainTimeToLive();
+        if (expireTime <= 0) {
+            bucket.delete();
+            // 删除一个getTimesKey
+            redissonClient.getBucket(String.format(VALIDATE_REMAINING_KEY, EncryptUtil.getMd5(loginId))).delete();
+        }
+        // 倒计时返回
+        return expireTime / 1000;
     }
 
     /**

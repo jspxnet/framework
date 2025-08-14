@@ -175,7 +175,7 @@ public class CookieParser {
     public char getCharCookie(String name)
             throws CookieNotFoundException {
         String param = getStringCookie(name);
-        if (param.length() == 0) {
+        if (param.isEmpty()) {
             throw new CookieNotFoundException(name + " is empty string");
         } else {
             return (param.charAt(0));

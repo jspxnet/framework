@@ -18,21 +18,21 @@
  */
 package com.github.jspxnet.cron4j;
 
+import lombok.Getter;
+
+import java.io.Serializable;
+
 /**
 
  * @author Carlo Pelliccia
  * @since 2.0
  */
-public abstract class Task {
+@Getter
+public abstract class Task implements Serializable {
 
 	final private String id;
 
-	public String getId()
-	{
-		return id;
-	}
-
-	/**
+    /**
 	 *
 	 * @param id 放个id号
 	 */

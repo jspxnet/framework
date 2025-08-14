@@ -13,10 +13,10 @@ import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.StringUtil;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.Date;
 
@@ -43,7 +43,7 @@ public class OracleDialect extends Dialect {
 
         //oracle
         put(ORACLE_CREATE_SEQUENCE,"create sequence ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ minvalue 1 maxvalue 99999999 increment by 1  start with 1");
-        put(ORACLE_CREATE_SEQ_TIGGER,"create or replace trigger ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ_TIGGER\n" +
+        put(ORACLE_CREATE_SEQ_TIGGER,"create or replace trigger ${" + KEY_TABLE_NAME + ".toUpperCase()}_TIG\n" +
                 "before insert on ${" + KEY_TABLE_NAME + ".toUpperCase()}\n" +
                 "for each row\r\n" +
                 "begin if (:new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} is null or :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()}=0) then select ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ.nextval into :new.${" + KEY_PRIMARY_KEY + ".toUpperCase()} from dual; end if; end;");
@@ -53,24 +53,41 @@ public class OracleDialect extends Dialect {
         put(Boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         put(boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+
         put(Integer.class.getName(), "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
-        put("int", "${" + COLUMN_NAME + "} <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>NUMBER(10)</#else></#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+
+        put(int.class.getName(), "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
+
+        put("int", "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
 
         put(Long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
+        put(long.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
         put("long", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + "})<#else>NUMBER(16)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
         put(Double.class.getName(), "${" + COLUMN_NAME + "} BINARY_DOUBLE default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
         put("double", "${" + COLUMN_NAME + "} BINARY_DOUBLE default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
+        put(BigDecimal.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + ",10})<#else>NUMBER(23,10)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+        put("BigDecimal", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;16>NUMBER(${" + COLUMN_LENGTH + ",10})<#else>NUMBER(23,10)</#else></#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
+
         put(Float.class.getName(), "${" + COLUMN_NAME + "} BINARY_FLOAT default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
         put("float", "${" + COLUMN_NAME + "} BINARY_FLOAT default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if>");
 
         put(Date.class.getName(), "${" + COLUMN_NAME + "} TIMESTAMP default SYSDATE");
+        put(java.sql.Date.class.getName(),"${" + COLUMN_NAME + "} TIMESTAMP default SYSDATE");
+
         put(byte[].class.getName(), "${" + COLUMN_NAME + "} blob");
         put(InputStream.class.getName(), "${" + COLUMN_NAME + "} blob");
         put(char.class.getName(), "${" + COLUMN_NAME + "} char(2) NOT NULL default ''");
-        put(SQL_DROP_TABLE, "DROP TABLE \"${" + KEY_TABLE_NAME + "}\"");
-        put(FUN_TABLE_EXISTS, "SELECT count(1) FROM tab WHERE tname=upper('${" + KEY_TABLE_NAME + "}')");
+        put(SQL_DROP_TABLE, "DROP TABLE ${" + KEY_TABLE_NAME + ")");
+        //CREATE INDEX 索引名 ON 表名 (列名)TABLESPACE 表空间名; INDEX  ${" + KEY_TABLE_NAME + "} ADD
+        put(SQL_CREATE_TABLE_INDEX, "CREATE <#if where=" + KEY_IS_UNIQUE + ">UNIQUE</#if> INDEX ${"+KEY_INDEX_NAME+"} ON ${" + KEY_TABLE_NAME + "} (${"+KEY_INDEX_FIELD+"})");
+        //put(FUN_TABLE_EXISTS, "SELECT COUNT(1) FROM ALL_TABLES WHERE OWNER=UPPER('${"+KEY_DATABASE_NAME+"}') AND TABLE_NAME=UPPER('${" + KEY_TABLE_NAME + "}')");
+
+        put(FUN_TABLE_EXISTS, "SELECT COUNT(1) FROM ALL_TABLES WHERE TABLE_NAME=UPPER('${" + KEY_TABLE_NAME + "}')");
+        put(CHECK_SQL, "SELECT 1 FROM DUAL");
     }
 
     @Override
@@ -244,10 +261,13 @@ public class OracleDialect extends Dialect {
      */
     @Override
     public Object getResultSetValue(ResultSet rs, int index) throws SQLException {
-        String typeName = rs.getMetaData().getColumnTypeName(index).toLowerCase();
-        int colSize = rs.getMetaData().getColumnDisplaySize(index);
+
+        ResultSetMetaData resultSetMetaData = rs.getMetaData();
+        String typeName = resultSetMetaData.getColumnTypeName(index).toLowerCase();
+        int colSize = resultSetMetaData.getColumnDisplaySize(index);
+
         ///////大数值
-        if ("ROWID".equals(typeName)) {
+        if ("ROWID".equalsIgnoreCase(typeName)) {
             return rs.getString(index);
         }
 
@@ -260,8 +280,11 @@ public class OracleDialect extends Dialect {
             return rs.getInt(index);
         }
 
+        if ("number".equals(typeName)) {
+            return rs.getBigDecimal(index);
+        }
         ///////长整型
-        if ("number".equals(typeName) || "bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName))) {
+        if ("bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName))) {
             return rs.getLong(index);
         }
 
@@ -269,10 +292,12 @@ public class OracleDialect extends Dialect {
         if ("money".equals(typeName) || "float".equals(typeName) || "real".equals(typeName) || "binary_float".equals(typeName)) {
             return rs.getFloat(index);
         }
+
         ///////大数值
         if ("decimal".equals(typeName)) {
             return rs.getBigDecimal(index);
         }
+
         ///////双精度
         if ("double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
             return rs.getDouble(index);
@@ -308,15 +333,14 @@ public class OracleDialect extends Dialect {
         }
 
         ////////////大文本类型
-        if ("CLOB".equals(typeName) || "mediumtext".equals(typeName) || " long varchar".equals(typeName)
+        if ("CLOB".equalsIgnoreCase(typeName) || "mediumtext".equals(typeName) || "long varchar".equals(typeName)
                 || "ntext".equals(typeName) || "text".equals(typeName) || "long raw".equals(typeName)) {
             //oracle.sql.CLOB clob = (oracle.sql.CLOB) rs.getClob(index);
             Clob clob = rs.getClob(index);
             if (clob == null) {
-                return StringUtil.empty;
+                return null;
             }
             Reader bodyReader = clob.getCharacterStream();
-
             StringWriter out = new StringWriter(255);
             try {
                 char[] buf = new char[256];
@@ -345,6 +369,8 @@ public class OracleDialect extends Dialect {
         return rs.getObject(index);
     }
 
+
+
     @Override
     public boolean supportsSequenceName() {
         return false;
@@ -359,6 +385,11 @@ public class OracleDialect extends Dialect {
     @Override
     public boolean commentPatch() {
         return true;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs WHERE ROWNUM=1";
     }
 
 }

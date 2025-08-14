@@ -20,7 +20,6 @@ public class JspxLoggingEvent implements Serializable {
     @Column(caption = "类名",length = 255)
     private String loggerName;
 
-
     @Column(caption = "类名",length = 50)
     private String level;
 

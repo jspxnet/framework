@@ -11,8 +11,13 @@ package com.github.jspxnet.boot.environment.impl;
 
 import java.util.Map;
 import java.io.*;
+
+import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.io.IoUtil;
+import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.ScriptMark;
@@ -33,8 +38,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class PlaceholderImpl implements Placeholder {
+    final static protected EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
+    final static protected Configurable configurable = TemplateConfigurable.getInstance();
     private String currentPath = FileUtil.mendPath(System.getProperty("user.dir")); //当前路径，f方便include 使用
     private String rootDirectory = FileUtil.mendPath(System.getProperty("user.dir")); //路径范围
+
 
     public PlaceholderImpl() {
 
@@ -50,8 +58,9 @@ public class PlaceholderImpl implements Placeholder {
         if (templateString == null || valueMap==null) {
             return StringUtil.empty;
         }
+        configurable.put(ScriptmarkEnv.FixUndefined,ENV_TEMPLATE.getBoolean(Environment.templateFixUndefined));
         try (Writer writer = new StringWriter()) {
-            ScriptMark scriptMark = new ScriptMarkEngine(ScriptmarkEnv.noCache, new StringSource(templateString), TemplateConfigurable.getInstance());
+            ScriptMark scriptMark = new ScriptMarkEngine(ScriptmarkEnv.noCache, new StringSource(templateString), configurable);
             scriptMark.process(writer, valueMap);
             return writer.toString();
         } catch (Exception e) {
@@ -59,14 +68,21 @@ public class PlaceholderImpl implements Placeholder {
         }
         return StringUtil.empty;
     }
-
+    /**
+     * 和上边的区别是是否报出异常
+     * @param valueMap 变量map
+     * @param templateString 字符方式
+     * @return 模版转换后的字符串
+     * @throws Exception 异常
+     */
     @Override
     public String processTemplateException(Map<String, Object> valueMap, String templateString) throws Exception {
         if (templateString == null || valueMap==null) {
             return StringUtil.empty;
         }
+        configurable.put(ScriptmarkEnv.FixUndefined,ENV_TEMPLATE.getBoolean(Environment.templateFixUndefined));
         try (Writer writer = new StringWriter()){
-            ScriptMark scriptMark = new ScriptMarkEngine(ScriptmarkEnv.noCache, new StringSource(templateString), TemplateConfigurable.getInstance());
+            ScriptMark scriptMark = new ScriptMarkEngine(ScriptmarkEnv.noCache, new StringSource(templateString),configurable);
             scriptMark.process(writer, valueMap);
             return writer.toString();
         }
@@ -92,7 +108,7 @@ public class PlaceholderImpl implements Placeholder {
             }
         }
         try (Writer writer = new StringWriter()) {
-            ScriptMark scriptMark = new ScriptMarkEngine(EncryptUtil.getMd5(file.getAbsolutePath()), fs, TemplateConfigurable.getInstance());
+            ScriptMark scriptMark = new ScriptMarkEngine(EncryptUtil.getMd5(file.getAbsolutePath()), fs, configurable);
             scriptMark.process(writer, valueMap);
             writer.close();
             return writer.toString();

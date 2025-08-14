@@ -26,6 +26,7 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -40,8 +41,9 @@ import java.io.PrintWriter;
  */
 @HttpMethod(caption = "下载代理")
 public class DownloadFileNameProxy extends ActionSupport {
+    @Getter
     private String[] stopArray = new String[]{"sourceforge.net", "xunlei", "flashget", "dirbuster", "nikto", "sqlmap", "whatweb", "openvas", "jbrofuzz", "libwhisker", "webshag", "baiduspider", "googlebot", "yahoo", "msnbot", "scooter", "docin", "douban", "eapoo", "doc88", "baidu", "renrendoc"};
-    private static boolean DEBUG = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.DEBUG);
+    private final static boolean DEBUG = EnvFactory.getEnvironmentTemplate().getBoolean(Environment.DEBUG);
 
     public DownloadFileNameProxy() {
 
@@ -51,10 +53,6 @@ public class DownloadFileNameProxy extends ActionSupport {
     @Ref
     private UploadFileDAO uploadFileDAO;
     ///////////////载入IOC DAO 对象 end
-
-    public String[] getStopArray() {
-        return stopArray;
-    }
 
     @Param(request = false)
     public void setStopArray(String[] stopArray) {

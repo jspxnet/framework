@@ -10,6 +10,7 @@
 package com.github.jspxnet.io;
 
 import com.github.jspxnet.boot.environment.Environment;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -20,6 +21,7 @@ import java.io.UnsupportedEncodingException;
  * date: 2007-10-10
  * Time: 14:12:31
  */
+@Slf4j
 public class StringOutputStream extends java.io.OutputStream {
     protected ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -62,7 +64,7 @@ public class StringOutputStream extends java.io.OutputStream {
         try {
             return outputStream.toString(charsetName);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return outputStream.toString();
     }

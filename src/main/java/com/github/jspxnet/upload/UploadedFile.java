@@ -123,7 +123,10 @@ public class UploadedFile implements Serializable {
     }
 
     public String getFilePath() {
-
+        if (dir.endsWith("\\") || dir.endsWith("/"))
+        {
+            return dir + fileName;
+        }
         return dir + File.separator + fileName;
     }
 
@@ -143,7 +146,7 @@ public class UploadedFile implements Serializable {
         File nFile = new File(dir, newName);
         nFile = renamePolicy.rename(nFile);
         File oldFile = getFile();
-        if (FileUtil.moveFile(oldFile, nFile, true)) {
+        if (FileUtil.moveFile(oldFile, nFile, renamePolicy,true,false)) {
             dir = FileUtil.mendPath(nFile.getParent());
             fileName = nFile.getName();
             fileType = FileUtil.getTypePart(nFile);
@@ -166,7 +169,7 @@ public class UploadedFile implements Serializable {
         if (!oldFile.exists()) {
             return false;
         }
-        if (FileUtil.copy(oldFile, newFile, true)) {
+        if (FileUtil.copy(oldFile, newFile,renamePolicy,true,false)) {
             dir = FileUtil.mendPath(newFile.getParent());
             fileName = newFile.getName();
             FileUtil.delete(oldFile);
@@ -208,7 +211,7 @@ public class UploadedFile implements Serializable {
         String typePart = FileUtil.getTypePart(original);
         File newFile = new File(newDir, body + "-[" + chunk + "]" + StringUtil.DOT + typePart);
         File oldFile = getFile();
-        boolean result = FileUtil.moveFile(oldFile, newFile, true);
+        boolean result = FileUtil.moveFile(oldFile, newFile, renamePolicy,true,false);
         if (result) {
             FileUtil.delete(oldFile);
             if (chunk == 0) {

@@ -9,8 +9,10 @@
  */
 package com.github.jspxnet.sober.criteria.expression;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.sober.criteria.OperatorEnumType;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.util.JdbcUtil;
 
@@ -40,7 +42,6 @@ public class FindExpression implements Criterion {
     final static private String field_tags = "tags"; //搜索关键字
     final static private String field_title = "title"; //支持空格 or 搜索
     final static private String field_name = "name"; //支持空格 or 搜索
-    //final static private String field_organize = "organize"; //支持空格 or 搜索
 
     private String[] propertyName;
     private Object[] value;
@@ -67,7 +68,10 @@ public class FindExpression implements Criterion {
         }
         return str;
     }
-
+    public FindExpression(JSONObject json) {
+        propertyName = json.getIgnoreJSONArray(JsonExpression.JSON_FIELD).toArray(new String[0]);
+        value = json.getIgnoreJSONArray(JsonExpression.JSON_VALUE).toArray(new Object[0]);
+    }
 
     public FindExpression(String[] propertyName, Object[] value) {
         initExpression(propertyName, value, false, true);
@@ -495,12 +499,17 @@ public class FindExpression implements Criterion {
     }
 
     @Override
-    public String termString() {
-        return toString();
+    public OperatorEnumType getOperatorEnumType() {
+        return OperatorEnumType.FIND;
     }
 
-    public static void main(String[] args) {
-        FindExpression findExpression = new FindExpression(new String[]{"f1","f2"},new String[]{"%aaa","bbb"});
-        System.out.println(findExpression.toString());
+    @Override
+    public JSONObject getJson()
+    {
+        JSONObject json = new JSONObject();
+        json.put(JsonExpression.JSON_FIELD,propertyName);
+        json.put(JsonExpression.JSON_OPERATOR,OperatorEnumType.FIND.getKey());
+        json.put(JsonExpression.JSON_VALUE,value);
+        return json;
     }
 }

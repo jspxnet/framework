@@ -11,17 +11,16 @@ package com.github.jspxnet.txweb.support;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.HttpStatusType;
-import com.github.jspxnet.txweb.*;
-
-import com.github.jspxnet.txweb.context.ActionContext;
-import com.github.jspxnet.txweb.context.ThreadContextHolder;
-
-import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.enums.UserEnumType;
+import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.txweb.*;
 import com.github.jspxnet.txweb.bundle.Bundle;
+import com.github.jspxnet.txweb.context.ActionContext;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.Dispatcher;
+import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.txweb.enums.WebOutEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.env.TXWeb;
@@ -35,12 +34,18 @@ import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -50,8 +55,8 @@ import java.util.*;
  * Time: 17:23:13
  * InterceptorSupport
  */
+@Slf4j
 public abstract class ActionSupport implements Action {
-
 
 
     public ActionSupport() {
@@ -215,6 +220,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public void setEnv(Map<String, Object> environment) {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return;
+        }
         actionContext.getEnvironment().clear();
         actionContext.getEnvironment().putAll(environment);
     }
@@ -223,11 +232,26 @@ public abstract class ActionSupport implements Action {
     @Override
     public String getEnv(String keys) {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return null;
+        }
         String o = actionContext.getString(keys);
         if (o == null) {
             return StringUtil.empty;
         }
         return o;
+    }
+
+
+    @Override
+    public <T> T getEnv(String keys, Class<T> t) {
+        ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return null;
+        }
+        return (T)actionContext.get(keys);
     }
 
     /**
@@ -237,7 +261,7 @@ public abstract class ActionSupport implements Action {
     public UserSession getUserSession() {
         //调整到cahce里边保存，不保存在session里边了，session里边只保存关联ID
         AssertException.isNull(onlineManager,"配置不完整,onlineManager在容器中没有找到");
-        return onlineManager.getUserSession(this);
+        return onlineManager.getUserSession();
     }
 
     /**
@@ -434,7 +458,7 @@ public abstract class ActionSupport implements Action {
         {
             return null;
         }
-        return actionContext.getRequest().getSession();
+        return actionContext.getRequest().getSession(false);
     }
 
     @Override
@@ -741,7 +765,7 @@ public abstract class ActionSupport implements Action {
                 try {
                     return StringUtil.getDate(params.getString(name), format);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -758,7 +782,7 @@ public abstract class ActionSupport implements Action {
                 try {
                     return params.keySet().toArray(new String[0]);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -822,6 +846,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public String getRemoteAddr() {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return "127.0.0.1";
+        }
         HttpServletRequest request = actionContext.getRequest();
         return RequestUtil.getRemoteAddr(request);
     }
@@ -879,16 +907,28 @@ public abstract class ActionSupport implements Action {
      */
     @Override
     public boolean isMethodInvoked() {
-        if (isComponent())
-        {
+        if (isComponent()) {
             return false;
         }
         ActionContext actionContext = ThreadContextHolder.getContext();
-        if (actionContext==null || actionContext.getMethod()==null)
-        {
+        // 响应结果为失败不清理缓存
+        Object result = actionContext.getResult();
+        if(!ObjectUtil.isEmpty(result)){
+            JSONObject resultStatus = new JSONObject(actionContext.getResult());
+            if (resultStatus.getInt("success") == YesNoEnumType.NO.getValue()) {
+                resultStatus.clear();
+                return false;
+            }
+        }
+
+        if (actionContext.getMethod() == null) {
             return false;
         }
-        return actionContext.isExecuted() && actionContext.getMethod().toString().contains("Action." + actionContext.getMethod().getName());
+        Method method = actionContext.getMethod();
+        if (method.getDeclaringClass().isInterface()) {
+            return false;
+        }
+        return actionContext.isExecuted() && method.toString().contains("Action." + actionContext.getMethod().getName());
     }
 
     private String templatePath = null;
@@ -988,18 +1028,11 @@ public abstract class ActionSupport implements Action {
     }
 
     public IRole getRole() {
-        UserSession userSession = getUserSession();
-        if (userSession == null) {
-            Role guestRole = new Role();
-            guestRole.setId(config.getString(Environment.guestRole));
-            guestRole.setName(language.getLang(Environment.guestName));
-            guestRole.setUserType(UserEnumType.NONE.getValue());
-            guestRole.setNamespace(getRootNamespace());
-            return guestRole;
-        }
         ActionContext actionContext = ThreadContextHolder.getContext();
-        IRole role = userSession.getRole(getRootNamespace(),getString(ActionEnv.KEY_organizeId, (String)actionContext.getOrDefault(ActionEnv.KEY_organizeId,StringUtil.empty),true));
-        if (role==null||role.getId()==null)
+        UserSession userSession = onlineManager.getUserSession(actionContext);
+        IRole role = userSession.getRole(getRootNamespace(),getString(ActionEnv.KEY_organizeId,
+                (String)actionContext.getOrDefault(ActionEnv.KEY_organizeId,StringUtil.empty),true));
+        if (role==null||StringUtil.isNull(role.getId()))
         {
             Role guestRole = new Role();
             guestRole.setId(config.getString(Environment.guestRole));

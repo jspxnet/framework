@@ -17,22 +17,24 @@ public interface SchedulerTaskService {
      * @return 得到注册列表
      */
     Collection<SchedulerRegisterDto> getRegisterList();
+
     /**
-     * 刷新所有
-     * @throws Exception  异常
+     *
+     * @return 刷新所有
+     * @throws Exception 异常
      */
-    void refreshAll() throws Exception;
+    RocResponse<?> refreshAll() throws Exception;
 
-    void forceRun(String id, String[] guids) throws Exception;
+    RocResponse<?> forceRun(String id, String[] guids) throws Exception;
 
-    void start(String id, String[] guids) throws Exception;
+    RocResponse<?> start(String id, String[] guids) throws Exception;
 
 
-    void stop(String id, String[] guids) throws Exception;
+    RocResponse<?> stop(String id, String[] guids) throws Exception;
 
-    void runOne(String id, String[] guids) throws Exception;
+    RocResponse<?> runOne(String id, String[] guids) throws Exception;
 
-    void updatePattern(String id, String guid, String pattern) throws Exception;
+    RocResponse<?>  updatePattern(String id, String guid, String pattern) throws Exception;
 
     /**
      *
@@ -51,4 +53,6 @@ public interface SchedulerTaskService {
      * @return 注册信息
      */
     SchedulerRegisterDto getSchedulerRegisterDto(String id);
+
+    List<SchedulerDto> getTaskList(String find, Integer currentPage, Integer count);
 }

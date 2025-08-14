@@ -5,6 +5,7 @@ import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.enums.ExecuteEnumType;
 import com.github.jspxnet.sober.table.SqlMapConf;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -155,4 +156,12 @@ public interface SqlMapBase {
      * @throws Exception 异常
      */
     int update(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws Exception;
+    /**
+     *
+     * @param sqlMapConf sql配置
+     * @param valueMap 参数map
+     * @return 更新是否成功
+     * @throws SQLException 异常
+     */
+    int[] batchUpdate(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws SQLException;
 }

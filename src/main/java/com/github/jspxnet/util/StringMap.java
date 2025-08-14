@@ -12,6 +12,8 @@ package com.github.jspxnet.util;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.SecurityReadFile;
 import com.github.jspxnet.utils.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.*;
 import java.util.*;
@@ -30,56 +32,26 @@ public class StringMap<K, V> extends LinkedHashMap<K, V> implements Serializable
     final private String[] keySplits = new String[]{StringUtil.COMMAS, StringUtil.EQUAL, StringUtil.COLON};
     final private String[] lineSplits = new String[]{StringUtil.SEMICOLON, StringUtil.CRLF};
 
+    @Getter
     private String keySplit = StringUtil.COLON;
+    @Getter
     private String lineSplit = StringUtil.CRLF;
+    @Setter
+    @Getter
     private String encode = Environment.defaultEncode;
+    @Setter
+    @Getter
     private boolean filter = false;
+    @Setter
+    @Getter
     private boolean split = false;
+    @Setter
+    @Getter
     private boolean security = false;
-
-    public boolean isSecurity() {
-        return security;
-    }
-
-    public void setSecurity(boolean security) {
-        this.security = security;
-    }
-
-    public boolean isFilter() {
-        return filter;
-    }
-
-    public void setFilter(boolean filter) {
-        this.filter = filter;
-    }
-
-    public String getEncode() {
-        return encode;
-    }
-
-    public void setEncode(String encode) {
-        this.encode = encode;
-    }
-
-    public String getKeySplit() {
-        return keySplit;
-    }
 
     public void setKeySplit(String keySplit) {
         this.keySplit = keySplit;
         split = true;
-    }
-
-    public boolean isSplit() {
-        return split;
-    }
-
-    public void setSplit(boolean split) {
-        this.split = split;
-    }
-
-    public String getLineSplit() {
-        return lineSplit;
     }
 
     public void setLineSplit(String lineSplit) {
@@ -98,10 +70,6 @@ public class StringMap<K, V> extends LinkedHashMap<K, V> implements Serializable
 
     public void setMap(Map<K, V> map) {
         putAll(map);
-    }
-
-    public String getFileName() {
-        return fileName;
     }
 
     public void loadFile(String fileName) throws Exception {
@@ -184,9 +152,8 @@ public class StringMap<K, V> extends LinkedHashMap<K, V> implements Serializable
 
     public Object removeLast() {
         K lastKey = null;
-        Iterator<K> it = keySet().iterator();
-        while (it.hasNext()) {
-            lastKey = it.next();
+        for (K k : keySet()) {
+            lastKey = k;
         }
         return remove(lastKey);
     }
@@ -212,6 +179,7 @@ public class StringMap<K, V> extends LinkedHashMap<K, V> implements Serializable
     }
 
 
+    @Getter
     private String fileName;
 
     public boolean save() {
@@ -259,24 +227,22 @@ public class StringMap<K, V> extends LinkedHashMap<K, V> implements Serializable
 
 
         String[] textArray = StringUtil.split(text, lineSplit);
-        if (textArray.length > 0) {
-            for (String str : textArray) {
-                if (str.startsWith("#")) {
-                    continue;
+        for (String str : textArray) {
+            if (str.startsWith("#")) {
+                continue;
+            }
+            if (!filter && !str.contains(keySplit)) {
+                put((K) str, (V) str);
+            } else if (filter && !str.contains(keySplit)) {
+                //..
+            } else {
+                String keys = StringUtil.trim(StringUtil.substringBefore(str, keySplit));
+                if (keys.contains("/~")) {
+                    StringUtil.replace(keys, "/~", keySplit);
                 }
-                if (!filter && !str.contains(keySplit)) {
-                    put((K) str, (V) str);
-                } else if (filter && !str.contains(keySplit)) {
-                    //..
-                } else {
-                    String keys = StringUtil.trim(StringUtil.substringBefore(str, keySplit));
-                    if (keys.contains("/~")) {
-                        StringUtil.replace(keys, "/~", keySplit);
-                    }
-                    String value = StringUtil.trim(StringUtil.substringAfter(str, keySplit));
-                    if (StringUtil.hasLength(keys)) {
-                        put((K) keys, (V) value);
-                    }
+                String value = StringUtil.trim(StringUtil.substringAfter(str, keySplit));
+                if (StringUtil.hasLength(keys)) {
+                    put((K) keys, (V) value);
                 }
             }
         }
@@ -295,7 +261,7 @@ public class StringMap<K, V> extends LinkedHashMap<K, V> implements Serializable
     }
 
     public Map<K, V> getValueMap() {
-        Map<K, V> vMap = new HashMap();
+        Map<K, V> vMap = new HashMap<>();
         for (K key : super.keySet()) {
             vMap.put(key, super.get(key));
         }
@@ -311,7 +277,7 @@ public class StringMap<K, V> extends LinkedHashMap<K, V> implements Serializable
 
 
     public void sortByKey(boolean delNull) {
-        Map<K, V> vMap = new LinkedHashMap();
+        Map<K, V> vMap = new LinkedHashMap<>();
         List<K> keyList = getSortByKey();
         for (K key : keyList) {
             if (key == null || StringUtil.empty.equals(key)) {

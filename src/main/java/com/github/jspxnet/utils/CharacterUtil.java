@@ -64,7 +64,7 @@ public final class CharacterUtil {
     }
 
     public static String native2Unicode(String s) {
-        if (s == null || s.length() == 0) {
+        if (s == null || s.isEmpty()) {
             return StringUtil.empty;
         }
         byte[] buffer = new byte[s.length()];
@@ -75,7 +75,7 @@ public final class CharacterUtil {
     }
 
     public static String unicode2Native(String s) {
-        if (s == null || s.length() == 0) {
+        if (s == null || s.isEmpty()) {
             return null;
         }
         char[] buffer = new char[s.length() * 2];

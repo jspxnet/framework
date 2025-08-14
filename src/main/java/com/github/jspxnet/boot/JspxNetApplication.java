@@ -20,10 +20,11 @@ import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.sioc.IocContext;
 import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.sioc.factory.EntryFactory;
+import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.SystemUtil;
-import org.springframework.context.ApplicationContext;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -88,9 +89,9 @@ public final class JspxNetApplication {
      * 最小嵌入方式，实用二开环境,嵌入致远OA类似系统
      * @param path 默认配置路径
      * @param fileName 默认配置文件
-     * @param context spring 上下文
+     * @param context spring import org.springframework.context.ApplicationContext上下文
      */
-    public static void runInEmbed(String path,String fileName,ApplicationContext context)
+    public static void runInEmbed(String path,String fileName,Object context)
     {
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         jspxConfiguration.setDefaultConfigFile(fileName);
@@ -103,9 +104,13 @@ public final class JspxNetApplication {
         envTemplate.createPathEnv(jspxConfiguration.getDefaultPath());
         if (context!=null)
         {
-            envTemplate.put(Environment.DEBUG,context.getEnvironment().getProperty(Environment.DEBUG));
-            envTemplate.put("jspxDebug",context.getEnvironment().getProperty(Environment.DEBUG));
-            envTemplate.put("useCache",context.getEnvironment().getProperty(Environment.useCache));
+            Object springEnvironment = BeanUtil.getProperty(context,"getEnvironment");
+            Object debug = BeanUtil.getProperty(springEnvironment,"getProperty",new Object[]{Environment.DEBUG},false);
+            Object useCache = BeanUtil.getProperty(springEnvironment,"getProperty",new Object[]{Environment.useCache},false);
+
+            envTemplate.put(Environment.DEBUG,debug);
+            envTemplate.put("jspxDebug",debug);
+            envTemplate.put("useCache",useCache);
             envTemplate.put(Environment.useTxWeb,false);
         } else
         {
@@ -152,9 +157,9 @@ public final class JspxNetApplication {
     /**
      * 嵌入spring方式运行
      * @param fileName 默认配置文件
-     * @param context spring 上下文
+     * @param context spring org.springframework.context.ApplicationContext 上下文
      */
-    public static void runInSpring(String fileName, ApplicationContext context)
+    public static void runInSpring(String fileName, Object context)
     {
         runInSpring( fileName,  context,null);
     }
@@ -163,10 +168,10 @@ public final class JspxNetApplication {
      *
      * 嵌入spring方式运行
      * @param fileName 默认配置文件
-     * @param context spring 上下文
+     * @param context spring org.springframework.context.ApplicationContext 上下文
      * @param cacheList 超小应用直接配置缓存
      */
-    public static void runInSpring(String fileName, ApplicationContext context,Class<?>[] cacheList)
+    public static void runInSpring(String fileName, Object context,Class<?>[] cacheList)
     {
         JspxConfiguration jspxConfiguration = EnvFactory.getBaseConfiguration();
         jspxConfiguration.setDefaultConfigFile(fileName);
@@ -174,9 +179,14 @@ public final class JspxNetApplication {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         envTemplate.createPathEnv(defaultPath);
 
-        envTemplate.put(Environment.DEBUG,context.getEnvironment().getProperty(Environment.DEBUG));
-        envTemplate.put("jspxDebug",context.getEnvironment().getProperty(Environment.DEBUG));
-        envTemplate.put("useCache",context.getEnvironment().getProperty(Environment.useCache));
+        Object springEnvironment = BeanUtil.getProperty(context,"getEnvironment");
+        Object debug = BeanUtil.getProperty(springEnvironment,"getProperty",new Object[]{Environment.DEBUG},false);
+        Object useCache = BeanUtil.getProperty(springEnvironment,"getProperty",new Object[]{Environment.useCache},false);
+
+
+        envTemplate.put(Environment.DEBUG,debug);
+        envTemplate.put("jspxDebug",debug);
+        envTemplate.put("useCache",useCache);
         envTemplate.put(Environment.useTxWeb,false);
         envTemplate.createSystemEnv();
 

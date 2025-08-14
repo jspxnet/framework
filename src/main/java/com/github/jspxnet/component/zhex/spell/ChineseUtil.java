@@ -41,6 +41,10 @@ public class ChineseUtil {
      * @return 转换成全拼后的字符串
      */
     public static String fullSpell(String src, String separator) {
+        if (StringUtil.isNullOrWhiteSpace(src))
+        {
+            return StringUtil.empty;
+        }
         char[] t1;
         t1 = src.toCharArray();
         String[] t2;

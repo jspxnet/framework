@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/12/25 18:09
  * description: 得到http的 ContentType

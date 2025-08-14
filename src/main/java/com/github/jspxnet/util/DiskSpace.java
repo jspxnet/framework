@@ -105,7 +105,7 @@ public class DiskSpace {
                 continue;
             }
             ss[i] = ss[i].trim();
-            if (ss[i].length() == 0) {
+            if (ss[i].isEmpty()) {
                 continue;
             }
             ssl.add(ss[i]);
@@ -193,16 +193,8 @@ public class DiskSpace {
         args[x++] = "C:";
         args[x++] = "D:";
         args[x++] = "E:";
-        if (args.length == 0) {
-            for (char c = 'A'; c <= 'Z'; c++) {
-                String dirName = c + ":\\";  //C:\ C:
-                log.info(dirName + " " +
-                        getFreeDiskSpace(dirName));
-            }
-        } else {
-            for (String arg : args) {
-                log.info(arg + " 剩余空间（B）:" + getFreeDiskSpace(arg));
-            }
+        for (String arg : args) {
+            log.info(arg + " 剩余空间（B）:" + getFreeDiskSpace(arg));
         }
     }
 

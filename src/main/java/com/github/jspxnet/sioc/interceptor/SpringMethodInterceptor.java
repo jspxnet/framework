@@ -31,7 +31,6 @@ import java.util.Map;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2021/3/30 22:36
  * description: jspx 嵌入 spring事务执行
@@ -166,12 +165,12 @@ public class SpringMethodInterceptor implements MethodInterceptor {
                             valueMap.putAll(( Map)o);
                         }
                     } else
-                    if (currentPage==null&&( o instanceof Number))
+                    if (sqlMap.mode().equals(QueryModelEnumType.LIST)&&currentPage==null&&( o instanceof Number))
                     {
                         log.debug("分页参数,页数请是用标准名称:" + sqlMap.currentPage());
                         currentPage = ((Number)o).intValue();
                     } else
-                    if (totalCount==null&&(o instanceof Number))
+                    if (sqlMap.mode().equals(QueryModelEnumType.LIST)&&totalCount==null&&(o instanceof Number))
                     {
                         log.debug("分页参数,返回行数请是用标准名称:" + sqlMap.count());
                         totalCount =  ((Number)o).intValue();

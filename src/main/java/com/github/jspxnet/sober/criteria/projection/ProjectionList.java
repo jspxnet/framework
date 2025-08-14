@@ -19,7 +19,7 @@ import java.util.ArrayList;
  * Time: 9:01:08
  */
 public class ProjectionList implements Projection {
-    private List<Projection> elements = new ArrayList<Projection>();
+    private final List<Projection> elements = new ArrayList<>();
 
     protected ProjectionList() {
     }

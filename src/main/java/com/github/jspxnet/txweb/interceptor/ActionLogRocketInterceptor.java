@@ -1,9 +1,7 @@
 package com.github.jspxnet.txweb.interceptor;
 
-import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.mq.RocketMqProducer;
 import com.github.jspxnet.mq.env.MqIoc;
-import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionInvocation;
@@ -15,11 +13,9 @@ import com.github.jspxnet.txweb.online.OnlineManager;
 import com.github.jspxnet.txweb.table.ActionLog;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.*;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.producer.SendCallback;
-import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.common.message.Message;
-import org.apache.rocketmq.remoting.common.RemotingHelper;
+
 
 /**
  * Created by jspx.net
@@ -27,9 +23,11 @@ import org.apache.rocketmq.remoting.common.RemotingHelper;
  * author: chenYuan
  * date: 2020/12/20 21:58
  * description: 消息服务器方式发送保存日志
+ *  将迁移出去，减少依赖
  **/
 @Slf4j
-@Bean
+//@Bean
+@Deprecated
 public class ActionLogRocketInterceptor extends InterceptorSupport {
 
     /**
@@ -38,30 +36,20 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
     @Ref
     private OnlineManager onlineManager;
 
-    @Ref(name = MqIoc.actionLogMqProducer)
+    @Ref(name = MqIoc.ACTION_LOG_MQ_PRODUCER,test = true)
     private RocketMqProducer rocketMqProducer;
 
+    @Setter
     private String topic;
 
+    @Setter
     private String tags;
 
-
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
-
-    private boolean guestLog = false;
-
     /**
-     * @param guestLog 是否记录游客日志
+     * guestLog 是否记录游客日志
      */
-    public void setGuestLog(boolean guestLog) {
-        this.guestLog = guestLog;
-    }
+    @Setter
+    private boolean guestLog = false;
 
     @Override
     public void init() {
@@ -110,10 +98,10 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
             actionLog.setMethodCaption(actionProxy.getMethodCaption());
             actionLog.setActionResult(actionContext.getActionResult());
 
-            if (rocketMqProducer != null) {
-                JSONObject json = new JSONObject(actionLog);
-                Message message = new Message(topic, tags, json.toString().getBytes(RemotingHelper.DEFAULT_CHARSET));
-                rocketMqProducer.send(message, new SendCallback() {
+            /*if (rocketMqProducer != null && rocketMqProducer.getDefaultMQProducer()!=null) {
+                DefaultMQProducer mqProducer = (DefaultMQProducer)rocketMqProducer.getDefaultMQProducer();
+                Message message = new Message(topic, tags,  new JSONObject(actionLog).toString().getBytes(RemotingHelper.DEFAULT_CHARSET));
+                mqProducer.send(message, new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         log.debug("日志保存成功,{}", sendResult.getMsgId());
@@ -125,7 +113,7 @@ public class ActionLogRocketInterceptor extends InterceptorSupport {
                         log.error("日志记录保存发生错误", e);
                     }
                 });
-            }
+            }*/
             //删除3年前的记录数据
         }
         //执行下一个动作,可能是下一个拦截器,也可能是action取决你的配置

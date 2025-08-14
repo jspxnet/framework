@@ -9,7 +9,11 @@
  */
 package com.github.jspxnet.sober.criteria.expression;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.sober.criteria.FilterLogicEnumType;
+import com.github.jspxnet.sober.criteria.OperatorEnumType;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.utils.StringUtil;
@@ -21,6 +25,7 @@ import com.github.jspxnet.utils.StringUtil;
  * Time: 11:23:21
  */
 public class NotNullExpression implements Criterion {
+
     private final DatabaseEnumType[] noNullDb = new DatabaseEnumType[]{
             DatabaseEnumType.POSTGRESQL,DatabaseEnumType.MYSQL,DatabaseEnumType.MSSQL,DatabaseEnumType.ORACLE
     };
@@ -31,20 +36,30 @@ public class NotNullExpression implements Criterion {
         this.propertyName = propertyName;
     }
 
+    public NotNullExpression(JSONObject json) {
+        propertyName = json.getString(JsonExpression.JSON_FIELD);
+    }
+
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
-        if (DatabaseEnumType.inArray(noNullDb,databaseName))
+        SoberColumn soberColumn = soberTable.getColumn(propertyName);
+        if (soberColumn!=null&&"String".equalsIgnoreCase(soberColumn.getTypeString()))
         {
-            if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
+            if (DatabaseEnumType.inArray(noNullDb,databaseName))
             {
-                return "(" + StringUtil.quote(propertyName,true) + " IS NOT NULL AND " + StringUtil.quote(propertyName,true) + "<>'')";
-            } else
-            {
-                return "(" + propertyName + " IS NOT NULL AND " + propertyName + "<>'')";
+                if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
+                {
+                    return "(" + StringUtil.quote(propertyName, true) +
+                            " " + OperatorEnumType.NOT_NULL.getSql() + " "+ FilterLogicEnumType.AND.getKey()+" " +
+                            StringUtil.quote(propertyName, true) + "<>'')";
+                } else
+                {
+                    return "(" + propertyName + " " + OperatorEnumType.NOT_NULL.getSql()+" "+FilterLogicEnumType.AND.getKey()
+                            +" " + propertyName + "<>'')";
+                }
             }
-
         }
-        return propertyName + " IS NOT NULL";
+        return propertyName + " " + OperatorEnumType.NOT_NULL.getSql();
     }
 
     @Override
@@ -59,11 +74,21 @@ public class NotNullExpression implements Criterion {
 
     @Override
     public String toString() {
-        return propertyName + " IS NOT NULL";
+        return propertyName + " " + OperatorEnumType.NOT_NULL.getSql();
+    }
+
+
+    @Override
+    public OperatorEnumType getOperatorEnumType() {
+        return OperatorEnumType.NOT_NULL;
     }
 
     @Override
-    public String termString() {
-        return toString();
+    public JSONObject getJson()
+    {
+        JSONObject json = new JSONObject();
+        json.put(JsonExpression.JSON_FIELD,propertyName);
+        json.put(JsonExpression.JSON_OPERATOR,OperatorEnumType.NOT_NULL.getKey());
+        return json;
     }
 }

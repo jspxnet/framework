@@ -1,9 +1,5 @@
 package com.github.jspxnet.txweb.dao.impl;
 
-/*
-  Created by ChenYuan on 2016/10/24.
- */
-
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.LoginField;
@@ -36,7 +32,7 @@ import java.util.*;
  * @author chenYuan (mail:39793751@qq.com)
  * date: 2005-6-1
  * Time: 17:46:45
- * <p>
+ *
  * 将userSession 合并为一个dao处理
  *
  */
@@ -334,15 +330,13 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
             return StringUtil.empty;
         }
         if (ValidUtil.isMobile(loginId)) {
-            return LoginField.Phone;
+            return LoginField.PHONE;
         } else if (ValidUtil.isMail(loginId)) {
-            return LoginField.Mail;
+            return LoginField.MAIL;
         } else if (ValidUtil.isGoodName(loginId)) {
-            return LoginField.Name;
+            return LoginField.NAME;
         } else if (ValidUtil.isNumber(loginId) && loginId.length() == 16) {
-            return LoginField.Kid;
-        } else if (ValidUtil.isNumber(loginId) && loginId.length() < 10) {
-            return LoginField.UID;
+            return LoginField.KID;
         }
         return LoginField.UID;
     }
@@ -352,18 +346,26 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
         Member member;
         if ((LoginField.ID.equalsIgnoreCase(loginType) || LoginField.UID.equalsIgnoreCase(loginType)) && ValidUtil.isNumber(loginId)) {
             member = getForId(StringUtil.toLong(loginId));
-        } else if (LoginField.Phone.equalsIgnoreCase(loginType)) {
+        } else if (LoginField.PHONE.equalsIgnoreCase(loginType)) {
             member = getForPhone(loginId);
-        } else if (LoginField.Name.equalsIgnoreCase(loginType)) {
+        } else if (LoginField.NAME.equalsIgnoreCase(loginType)) {
             member = getForName(loginId);
-        } else if (LoginField.Mail.equalsIgnoreCase(loginType)) {
+        } else if (LoginField.MAIL.equalsIgnoreCase(loginType)) {
             member = getForMail(loginId);
-        } else if (LoginField.Kid.equalsIgnoreCase(loginType)) {
+        } else if (LoginField.KID.equalsIgnoreCase(loginType)) {
             member = getForKid(loginId);
         } else {
             member = getForName(loginId);
         }
         return member;
+    }
+
+    @Override
+    public Member getMemberV2(String loginType, String loginId) {
+
+        return createCriteria(Member.class)
+                .add(Expression.eq(loginType,loginId))
+                .objectUniqueResult(false);
     }
 
     /**
@@ -429,6 +431,28 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
     @Override
     public int getForPhoneCount(String phone) {
         return createCriteria(Member.class).add(Expression.eq("phone", phone)).setProjection(Projections.rowCount()).intUniqueResult();
+    }
+
+    /**
+     *
+     * @param phone 手机号
+     * @param uid 排除账号id
+     * @return 编辑的时候判断手机号是否重复
+     */
+    @Override
+    public boolean isRepeatPhone(String phone, long uid) {
+        return createCriteria(Member.class).add(Expression.eq("phone", phone)).add(Expression.ne("id", uid)).setProjection(Projections.rowCount()).intUniqueResult()>0;
+    }
+
+    /**
+     *
+     * @param name 用户名
+     * @param uid 排除账号id
+     * @return 编辑的时候判断手机号是否重复
+     */
+    @Override
+    public boolean isRepeatName(String name,long uid) {
+        return createCriteria(Member.class).add(Expression.eq("name", name)).add(Expression.ne("id", uid)).setProjection(Projections.rowCount()).intUniqueResult()>0;
     }
     /**
      * @param find       关键字
@@ -641,7 +665,6 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
     @Override
     public boolean deleteOvertimeSession(long overtime) {
         long delTime = System.currentTimeMillis() - overtime;
-
         try {
             if (tableExists(getSoberTable(UserSession.class))) {
                 return createCriteria(UserSession.class).add(Expression.lt("lastRequestTime", delTime)).delete(false) > 0;
@@ -659,18 +682,12 @@ public class MemberDAOImpl extends JdbcOperations implements MemberDAO {
      */
     @Override
     public boolean deleteSession(String sessionId, long uid) {
-
-        if (uid == 0 && sessionId != null) {
+        if (!StringUtil.isNull(sessionId)) {
             evictLoad(UserSession.class, "id", sessionId);
             return createCriteria(UserSession.class).add(Expression.eq("id", sessionId)).delete(false) > 0;
-        } else if (uid > 0 && StringUtil.isNull(sessionId)) {
-            evictLoad(UserSession.class, "uid", uid);
-            return createCriteria(UserSession.class).add(Expression.eq("uid", uid)).delete(false) > 0;
-        } else {
-            evictLoad(UserSession.class, "id", sessionId);
-            evictLoad(UserSession.class, "uid", uid);
-            return createCriteria(UserSession.class).add(Expression.or(Expression.eq("id", sessionId), Expression.eq("uid", uid))).delete(false) > 0;
         }
+        evictLoad(UserSession.class, "uid", uid);
+        return createCriteria(UserSession.class).add(Expression.eq("uid", uid)).delete(false) > 0;
     }
 
     /**

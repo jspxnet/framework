@@ -5,7 +5,6 @@ import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.sober.enums.QueryModelEnumType;
 import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.txweb.AssertException;
@@ -17,14 +16,13 @@ import com.github.jspxnet.txweb.model.param.GenericPageParam;
 import com.github.jspxnet.txweb.model.param.PageParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
-import com.github.jspxnet.txweb.table.HelpTip;
-import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Slf4j
 public class DataCallView extends ActionSupport {
     @Ref
     protected GenericDAO genericDAO;
@@ -58,7 +56,7 @@ public class DataCallView extends ActionSupport {
             sqlMapConf = SoberUtil.getSqlMapConf(genericDAO.getSoberFactory(), namespace, exeName);
             return RocResponse.success(SoberUtil.invokeSqlMapInvocation(genericDAO, sqlMapConf, json));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("sqlmap", e);
             return RocResponse.error(ErrorEnumType.WARN.getValue(), e.getMessage());
         }
     }
@@ -91,7 +89,7 @@ public class DataCallView extends ActionSupport {
             PageParam pageParam = json.parseObject(PageParam.class);
             return RocResponse.success(list, pageParam, totalCount);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("sqlMapPage", e);
             return RocResponse.error(ErrorEnumType.WARN.getValue(), e.getMessage());
         }
     }

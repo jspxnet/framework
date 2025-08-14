@@ -10,14 +10,14 @@ public class LoginField {
 
     public static final String UID = "uid";
 
-    public static final String Phone = "phone";
+    public static final String PHONE = "phone";
 
-    public static final String Name = "name";
+    public static final String NAME = "name";
 
-    public static final String Mail = "mail";
+    public static final String MAIL = "mail";
 
-    public static final String Kid = "kid";
+    public static final String KID = "kid";
 
-    public static final String Sms = "sms";
+    public static final String SMS = "sms";
 
 }

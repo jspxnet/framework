@@ -10,20 +10,21 @@
 package com.github.jspxnet.txweb.result;
 
 import com.github.jspxnet.txweb.Action;
+import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.context.ActionContext;
 import com.github.jspxnet.txweb.context.ThreadContextHolder;
+import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import com.github.jspxnet.txweb.ActionInvocation;
-import com.github.jspxnet.txweb.dispatcher.Dispatcher;
+
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
 
 
 /**
@@ -59,16 +60,16 @@ public class PdfPageImgResult extends ResultSupport {
             currentPage = 0;
         }
         ServletOutputStream outputStream = response.getOutputStream();
-        InputStream is = new FileInputStream(file);
+
         try {
-            PDDocument pdf = PDDocument.load(is);
+            PDDocument pdf = Loader.loadPDF(file);
             if (currentPage >= pdf.getNumberOfPages()) {
                 currentPage = (pdf.getNumberOfPages() - 1);
             }
             PDFRenderer renderer = new PDFRenderer(pdf);
             BufferedImage rendererImg = renderer.renderImageWithDPI(currentPage, 120, ImageType.RGB);
             ImageIO.write(rendererImg, "jpg", outputStream);// 写图片
-            is.close();
+
         } catch (Exception e) {
             e.printStackTrace();
             log.error(file.getPath(), e);

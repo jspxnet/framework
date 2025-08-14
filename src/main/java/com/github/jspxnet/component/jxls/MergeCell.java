@@ -29,20 +29,14 @@ public class MergeCell implements WritableCellValue {
      */
     @Override
     public Object writeToCell(Cell cell, Context context) {
-        if (value==null)
-        {
+        if (value == null) {
             cell.setCellValue(StringUtil.empty);
-        } else
-        if (value instanceof Date)
-        {
-            cell.setCellValue(DateUtil.toString((Date)value,DateUtil.CURRENCY_ST_FORMAT));
-        } else
-        if (value instanceof Number)
-        {
-            cell.setCellValue(NumberUtil.getNumberStdFormat(value+""));
-        } else
-        {
-            cell.setCellValue((String)value);
+        } else if (value instanceof Date) {
+            cell.setCellValue(DateUtil.toString((Date) value, DateUtil.CURRENCY_ST_FORMAT));
+        } else if (value instanceof Number) {
+            cell.setCellValue(NumberUtil.getNumberStdFormat(value + ""));
+        } else {
+            cell.setCellValue((String) value);
         }
         if (mergerRows == 0) {
             return cell;

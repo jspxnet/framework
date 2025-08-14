@@ -112,9 +112,12 @@ public class RocResult extends ResultSupport {
             String result = json.toString(4);
             if (1 != json.getInt(ActionSupport.SUCCESS)) {
                 if (json.containsKey("code") && ErrorEnumType.NEED_LOGIN.getValue() == json.getInt("code")) {
-                    TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_401);
+                    //新版本谷歌浏览器需要返回200
+                    TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_OK);
                 } else if (json.containsKey("code") && ErrorEnumType.POWER.getValue() == json.getInt("code")) {
-                    TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_403);
+                    //TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_403);
+                    //新版本谷歌浏览器需要返回200
+                    TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, HttpStatusType.HTTP_status_OK);
                 } else {
                     TXWebUtil.print(json, WebOutEnumType.JSON.getValue(), response, null);
                 }

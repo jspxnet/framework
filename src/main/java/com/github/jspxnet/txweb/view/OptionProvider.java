@@ -11,13 +11,14 @@ package com.github.jspxnet.txweb.view;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.sober.jdbc.JdbcOperations;
+import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.txweb.Option;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.OptionDAO;
 import com.github.jspxnet.txweb.table.OptionBundle;
 import com.github.jspxnet.utils.StringUtil;
 import java.util.List;
-
 
 /**
  * Created by yuan on 14-3-13.
@@ -28,7 +29,6 @@ public class OptionProvider implements Option {
     @Ref
     protected OptionDAO optionDAO;
     public static final String ALL_NAMESPACE = "all";
-    public static final String ALL_GROUP = "group";
 
     /**
      *
@@ -40,6 +40,16 @@ public class OptionProvider implements Option {
         return optionDAO.getList(null, null, null, namespace,null, 1, 500);
     }
 
+
+    @Override
+    public List<OptionBundle> getList(@Param(caption = "分组号") String groupCode,
+                                      @Param(caption = "命名空间") String namespace) {
+        if (StringUtil.isEmpty(groupCode))
+        {
+            return null;
+        }
+        return JdbcUtil.getOptionBundleList((JdbcOperations)optionDAO,groupCode,namespace);
+    }
 
     /**
      * 字典表中得到key数据

@@ -18,7 +18,9 @@
  */
 package com.github.jspxnet.cron4j;
 
+import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.SystemUtil;
+import lombok.Getter;
 
 /**
  * <p>
@@ -34,13 +36,15 @@ class TimerThread extends Thread {
 
 	/**
 	 * A GUID for this object.
-	 */
-	final private String guid;
+     * -- GETTER --
+     */
+	@Getter
+    private final String guid;
 
 	/**
 	 * The owner scheduler.
 	 */
-	private Scheduler scheduler;
+	private final Scheduler scheduler;
 
 	/**
 	 * Builds the timer thread.
@@ -50,22 +54,19 @@ class TimerThread extends Thread {
 	 */
 	public TimerThread(Scheduler scheduler) {
 		this.scheduler = scheduler;
+		if (this.scheduler == null || "NONE".equals(this.scheduler.getGuid())) {
+			setName("cron4j::[NONE]");
+			guid = SystemUtil.getPid();
+			return;
+		}
 		guid = SystemUtil.getPid() + "_" + scheduler.getGuid();
 		// Thread name.
-		final String name = "cron4j::[" + scheduler.getTaskConf().getName() + "]::timer[" + guid + "]";
-		setName(name);
+		//final String name = "cron4j::[" + scheduler.getTaskConf().getName() + "]::timer[" + guid + "]";
+		setName("cron4j::[" + this.scheduler.getTaskConf().getName() + "]::timer[" + guid + "]");
 	}
 
-	/**
-	 * Returns the GUID for this object.
-	 * 
-	 * @return The GUID for this object.
-	 */
-	public String getGuid() {
-		return guid;
-	}
 
-	/**
+    /**
 	 * It has been reported that the {@link Thread#sleep(long)} method sometimes
 	 * exits before the requested time has passed. This one offers an
 	 * alternative that sometimes could sleep a few millis more than requested,
@@ -96,16 +97,12 @@ class TimerThread extends Thread {
 	public void run() {
 		// What time is it?
 		long millis = System.currentTimeMillis();
+		// Calculating next minute.
+		long nextSecond = ((millis / DateUtil.SECOND) + 1) * DateUtil.SECOND;
 		// Work until the scheduler is started.
 		for (;;) {
-			// Calculating next seconds.
-			long nextSecond = ((System.currentTimeMillis() / 1000) + 1) * 1000;
-			// Coffee break 'till next seconds comes!
+			// Coffee break 'till next minute comes!
 			long sleepTime = (nextSecond - System.currentTimeMillis());
-			//time is changed
-			if(sleepTime > 1000) {
-				continue;
-			}
 			if (sleepTime > 0) {
 				try {
 					safeSleep(sleepTime);
@@ -114,11 +111,12 @@ class TimerThread extends Thread {
 					break;
 				}
 			}
+			//当前时间
 			millis = System.currentTimeMillis();
 			// Launching the launching thread!
 			scheduler.spawnLauncher(millis);
+			// Calculating next minute.
+			nextSecond = ((millis / DateUtil.SECOND) + 1) * DateUtil.SECOND;
 		}
-		scheduler = null;
 	}
-
 }

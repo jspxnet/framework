@@ -292,15 +292,14 @@ public class ConfigureContext implements IocContext {
                 schedulerMap.put(beanElement.getId(), beanElement.getNamespace());
             }
         } catch (ClassNotFoundException e) {
-            log.error("class not found {}",beanElement.getClassName());
-            e.printStackTrace();
+            log.error("class not found {}",beanElement.getClassName(),e);
         }
     }
 
     private String readFileText(String fileName) throws Exception {
         String fileNamePath = fileName;
-        if (!FileUtil.isFileExist(fileName)) {
 
+        if (!FileUtil.isFileExist(fileName)) {
             File file = EnvFactory.getFile(fileName);
             if (file != null) {
                 fileNamePath = file.getPath();
@@ -311,7 +310,6 @@ public class ConfigureContext implements IocContext {
                 return null;
             }
         }
-
         return IoUtil.autoReadText(fileNamePath,envTemplate.getString(Environment.encode, Environment.defaultEncode));
     }
 
@@ -346,7 +344,6 @@ public class ConfigureContext implements IocContext {
             if (StringUtil.isNull(encode)) {
                 encode = Environment.defaultEncode;
             }
-
             File findFile = EnvFactory.getFile(loadFile);
             if (findFile==null)
             {
@@ -566,8 +563,6 @@ public class ConfigureContext implements IocContext {
     public List<BeanElement> getInjectionBeanElements() {
         return injectionBeanElements;
     }
-
-
 
 
     @Override

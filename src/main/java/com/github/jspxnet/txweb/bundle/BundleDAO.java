@@ -21,9 +21,9 @@ import java.util.List;
  * Time: 12:00:12
  */
 public interface BundleDAO extends SoberSupport {
-    BundleTable getBundleTable(final String keys, final String dataType, final String namespace);
+    //BundleTable getBundleTable(final String keys, final String dataType, final String namespace);
 
-    List getList(String dataType, String namespace);
+    //List getList(String dataType, String namespace);
 
     boolean deleteAll(String dataType, String namespace);
 }

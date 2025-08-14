@@ -235,4 +235,9 @@ public class SmallDBDialect extends Dialect {
     public boolean commentPatch() {
         return false;
     }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return sql;
+    }
 }

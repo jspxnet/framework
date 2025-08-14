@@ -283,11 +283,13 @@ public class SqliteDialect extends Dialect {
             }
             return rs.getObject(index);
         } catch (SQLException e) {
-            e.printStackTrace();
             log.error("typeName=" + typeName + " size=" + colSize + " columnName=" + rs.getMetaData().getColumnName(index), e);
         }
         return null;
     }
-
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs limit 1";
+    }
 
 }

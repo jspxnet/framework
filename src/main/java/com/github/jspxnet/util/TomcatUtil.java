@@ -24,7 +24,7 @@ public class TomcatUtil {
     public static List<PortInfo> getPortList() {
         try {
             MBeanServer server = null;
-            if (MBeanServerFactory.findMBeanServer(null).size() > 0) {
+            if (!MBeanServerFactory.findMBeanServer(null).isEmpty()) {
                 server = MBeanServerFactory.findMBeanServer(null).get(0);
             }
             if (server==null)

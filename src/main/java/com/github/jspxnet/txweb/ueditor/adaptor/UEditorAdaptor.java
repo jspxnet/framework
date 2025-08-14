@@ -28,14 +28,15 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.upload.multipart.RenamePolicy;
 import com.github.jspxnet.utils.*;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.Map;
 
 /**
@@ -47,6 +48,7 @@ import java.util.Map;
  * ,serverUrl: "${action.getString('namespace')}ueditorcontroller.js.${suffix}"
  *
  */
+@Slf4j
 @HttpMethod(caption = "UEditor上传适配器")
 public class UEditorAdaptor extends ActionSupport {
 
@@ -208,8 +210,10 @@ public class UEditorAdaptor extends ActionSupport {
                 break;
             }
         }
-        return state.toJsonString();
-
+        if (state != null) {
+            return state.toJsonString();
+        }
+        return StringUtil.empty;
     }
 
     private State binarySave() {
@@ -221,7 +225,7 @@ public class UEditorAdaptor extends ActionSupport {
             try {
                 request.setCharacterEncoding(Environment.defaultEncode);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         }
         if (!RequestUtil.isMultipart(request)) {
@@ -274,7 +278,7 @@ public class UEditorAdaptor extends ActionSupport {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         finally {
             uploadFileAction.destroy();
@@ -284,6 +288,7 @@ public class UEditorAdaptor extends ActionSupport {
 
     private State base64Save(String content, String saveDirectory, String setupPath, long maxSize) throws Exception {
 
+
         byte[] data = com.github.jspxnet.security.utils.Base64.decode(content, com.github.jspxnet.security.utils.Base64.DEFAULT);
         if (!validSize(data, maxSize)) {
             return new BaseState(false, AppInfo.MAX_SIZE);
@@ -291,7 +296,7 @@ public class UEditorAdaptor extends ActionSupport {
         String suffix = FileType.getSuffix("JPG");
         RenamePolicy fileRenamePolicy = FileCoveringPolicyEnumType.JSPX.getRenamePolicy();
         File file = new File(saveDirectory, System.currentTimeMillis() + suffix);
-        file = FileUtil.moveToTypeDir(file, fileRenamePolicy, false);
+        file = FileUtil.moveToTypeDir(file, fileRenamePolicy, false,false);
         if (file == null) {
             return new BaseState(false, AppInfo.IO_ERROR);
         }
@@ -339,14 +344,14 @@ public class UEditorAdaptor extends ActionSupport {
                 if (image.getWidth() > maxImageWidth) {
                     h = (maxImageWidth / w) * h;
                     File tempFile = FileUtil.createFile(new File(file.getParent(), System.currentTimeMillis() + "_thumbnail.tmp"));
-                    boolean repair = ImageUtil.thumbnail(new FileInputStream(file), new FileOutputStream(tempFile), suffix, maxImageWidth, h) && FileUtil.copy(tempFile, file, true);
+                    boolean repair = ImageUtil.thumbnail(Files.newInputStream(file.toPath()), Files.newOutputStream(tempFile.toPath()), suffix, maxImageWidth, h) && FileUtil.copy(tempFile, file,null,true,false);
                     state.putInfo("repair", repair + "");
                 }
                 upFile.setAttributes("width=" + w + "\r\nheight=" + h);
                 String thumbnailImg = "s_" + upFile.getFileName();
                 int width = config.getInt("thumbnailWidth", 400);
                 int height = config.getInt("thumbnailHeight", 400);
-                if (thumbnail && ImageUtil.thumbnail(new FileInputStream(file), new FileOutputStream(new File(file.getParent(), thumbnailImg)), suffix, width, height)) {
+                if (thumbnail && ImageUtil.thumbnail(Files.newInputStream(file.toPath()), Files.newOutputStream(new File(file.getParent(), thumbnailImg).toPath()), suffix, width, height)) {
                     state.putInfo("fileName", thumbnailImg);
                     state.putInfo("name", FileUtil.getNamePart(thumbnailImg));
                     state.putInfo("thumbnail", 1);

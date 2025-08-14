@@ -50,7 +50,7 @@ public class HtmlEngineImpl implements HtmlEngine {
         Configurable config = this.templateElement.getConfigurable();
         macroCallTag = config.getString(ScriptmarkEnv.MacroCallTag);
         String syncopate = config.getString(ScriptmarkEnv.Syncopate);
-        if (syncopate == null || syncopate.length() < 1) {
+        if (syncopate == null || syncopate.isEmpty()) {
             syncopate = "<>";
         }
         beginTag = syncopate.charAt(0);
@@ -196,8 +196,7 @@ public class HtmlEngineImpl implements HtmlEngine {
                                     Object obj = ClassUtil.newInstance(className);
                                     tagNode = (TagNode) obj;
                                 } catch (Exception e) {
-                                    log.error("反射载入 " + className + "失败,newInstance load class error need extends:" + TagNode.class.getName());
-                                    e.printStackTrace();
+                                    log.error("反射载入 " + className + " 失败,newInstance load class error need extends:" + TagNode.class.getName());
                                 }
                             }
                             if (tagNode!=null)
@@ -251,11 +250,11 @@ public class HtmlEngineImpl implements HtmlEngine {
                     }
                     if (mi != -1) {
                         sTemp = sTemp.substring(1, mi);
-                        if (sTemp.equalsIgnoreCase(tagNode.getTagName())) {
+                        if (tagNode != null && sTemp.equalsIgnoreCase(tagNode.getTagName())) {
                             times--;
                         }
                     }
-                } else if (i > tagName.length()) {
+                } else if (tagNode!=null&&i > tagName.length()) {
                     String temp = code.substring(i - 1 - tagNode.getTagName().length(), i + 1);
                     if (temp.equalsIgnoreCase(fenTag + tagNode.getTagName() + endTag))         //</#if>   </#if>
                     {
@@ -265,12 +264,15 @@ public class HtmlEngineImpl implements HtmlEngine {
                 if (times < 1) {
                     in = false;
                 }
-                tagNode.setEndLength(i + 1);
+                if (tagNode!=null)
+                {
+                    tagNode.setEndLength(i + 1);
+                }
             }
             i++;
             //最后修复
             ////////////翻转修复 begin
-            if (i == end && in && !NONE_TAG.equals(tagNode.getTagName()) && tagNode.isRepair()) {
+            if (tagNode!=null&&i == end && in && !NONE_TAG.equals(tagNode.getTagName()) && tagNode.isRepair()) {
                 int ri = code.indexOf(endTag, tagNode.getStarLength());
                 if (ri != -1) {
                     tagNode.setEndLength(ri + 1);

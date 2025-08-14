@@ -23,7 +23,7 @@ public class VcsBootConfig {
             String localPath = StringUtil.trim(properties.get(Environment.VCS_LOCAL_PATH));
             String name = StringUtil.trim(properties.get(Environment.VCS_USER_NAME));
             String password = StringUtil.trim(properties.get(Environment.VCS_USER_PASSWORD));
-            Map<String, Object> valueMap =  new HashMap<String, Object>((Map) properties);
+            Map<String, Object> valueMap =  new HashMap<String, Object>(properties);
             valueMap.put(Environment.defaultPath, jspxConfiguration.getDefaultPath());
             localPath = EnvFactory.getPlaceholder().processTemplate(valueMap, localPath);
             VcsClient vcsClient = VcsFactory.createClient(url, localPath, name, password);

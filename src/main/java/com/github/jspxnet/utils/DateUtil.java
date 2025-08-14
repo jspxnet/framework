@@ -9,11 +9,11 @@
  */
 package com.github.jspxnet.utils;
 
-import java.text.DateFormat;
-import java.util.*;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
 import java.sql.Time;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,16 +33,21 @@ public final  class DateUtil {
     final static public String UTC_FTP_FORMAT = "yyyyMMddHHmmss";
     final static public String UTC_ST_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
     final static public String UTC_SHORT_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+
     final static public String FULL_ST_FORMAT = "yyyy-MM-dd HH:mm:ss";
     final static public String UTC_ST_MILLISECOND_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     final static public String FULL_J_FORMAT = "yyyy/MM/dd HH:mm:ss";
     final static public String CURRENCY_ST_FORMAT = "yyyy-MM-dd HH:mm";
     final static public String CURRENCY_J_FORMAT = "yyyy/MM/dd HH:mm";
+
+    //脚本模版配置begin
+    final static public String TIME_FORMAT = "HH:mm";
     final static public String DATA_FORMAT = "yyyyMMddHHmmss";
     final static public String DAY_NUMBER_FORMAT = "yyyyMMdd";
     final static public String ST_FORMAT = "yyyy-MM-dd HH:mm";
-    final static public String ST_CN_FORMAT = "yyyy年MM月dd日 HH:mm";
+    //脚本模版配置end
     final static public String CN_FORMAT = "yy年MM月dd日 HH:mm";
+
     final static public String DAY_FORMAT = "yyyy-MM-dd";
     final static public String SHORT_DATE_FORMAT = "yy-MM-dd";
     final static public String DATE_GUID = "yyMMddHHmmssSSS";
@@ -50,7 +55,7 @@ public final  class DateUtil {
     //空日期日期 1800-01-01 01:01:01  太小有些数据库和语言不支持
     final static public Date empty = new Date(-5364687539000L);
     final static public String EMPTY_DATE_STRING = "1800-01-01";
-
+    public static final String ST_CN_FORMAT = "yyyy年MM月dd日 HH:mm";
 
     private DateUtil() {
 
@@ -324,7 +329,7 @@ public final  class DateUtil {
         long begin = calendar.getTime().getTime();
         calendar.set(Calendar.YEAR, year + 1);
         begin = calendar.getTime().getTime() - begin;
-        return (int) NumberUtil.getRound(begin / WEEK, 0);
+        return (int) NumberUtil.getRound((float) begin / WEEK, 0);
     }
 
     /**
@@ -1086,4 +1091,24 @@ public final  class DateUtil {
         return sb.toString();
     }
 
+
+    /**
+     *
+     * @param dates 日期列表
+     * @return 返回最小日期
+     */
+    public static Date min(Date ... dates) {
+        List<Date> dateList = Arrays.asList(dates);
+        return Collections.min(dateList);
+    }
+
+    /**
+     *
+     * @param dates 日期列表
+     * @return 返回最大日期
+     */
+    public static Date max(Date ... dates) {
+        List<Date> dateList = Arrays.asList(dates);
+        return Collections.max(dateList);
+    }
 }

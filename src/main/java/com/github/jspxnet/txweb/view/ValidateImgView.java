@@ -20,6 +20,7 @@ import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.ValidateCode;
+import lombok.Getter;
 
 /**
  * Created by IntelliJ IDEA.
@@ -38,12 +39,15 @@ public class ValidateImgView extends ActionSupport {
     private ValidateCodeCache validateCodeCache;
 
     // 图片的宽度。
+    @Getter
     private int width = 76;
     // 图片的高度。
+    @Getter
     private int height = 25;
     // 验证码干扰线数
     private int lineCount = 20;
 
+    @Getter
     private int length = 5;
 
     private String fileType = "png";
@@ -51,17 +55,9 @@ public class ValidateImgView extends ActionSupport {
     private boolean safe = true;
 
 
-    public int getWidth() {
-        return width;
-    }
-
     @Param(caption = "宽")
     public void setWidth(int width) {
         this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     @Param(caption = "高")
@@ -72,10 +68,6 @@ public class ValidateImgView extends ActionSupport {
     @Param(caption = "干扰线条数", request = false)
     public void setLineCount(int lineCount) {
         this.lineCount = lineCount;
-    }
-
-    public int getLength() {
-        return length;
     }
 
     @Param(request = false)

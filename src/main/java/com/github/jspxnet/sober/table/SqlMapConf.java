@@ -13,6 +13,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.util.LinkedList;
 
+/**
+ * sqlmap配置
+ * com.github.jspxnet.sober.table.SqlMapConf
+ * @author chenYuan
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Table(name = "jspx_sql_map", caption = "sqlmap配置")
@@ -52,7 +57,9 @@ public class SqlMapConf extends OperateTable {
     @Column(caption = "拦截器", length = 1000)
     private String interceptor = StringUtil.empty;
 
-    //当前页变量名称
+    /**
+     * 当前页变量名称
+     */
     @Column(caption = "分页变量", length = 50,defaultValue = "currentPage")
     private String currentPage = "currentPage";
 
@@ -67,13 +74,21 @@ public class SqlMapConf extends OperateTable {
     @Column(caption = "版本号",defaultValue = "1")
     private int version = 1;
 
+    //和对应的实体名称一直，这样sql 执行的结果才能正确的放入对应的redis 缓存中
+    @Column(caption = "缓存名称", length = 100)
+    private String cache;
+    //Class<T> criteriaClass
+
     //做初始化标识
     @JsonIgnore
     private boolean replenished = false;
 
+    //是否引用
     @JsonIgnore
     private String quote = null;
 
+
+    //索引信息
     @JsonIgnore
     private String index = null;
 

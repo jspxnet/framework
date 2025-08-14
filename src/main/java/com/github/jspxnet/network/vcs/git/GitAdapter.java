@@ -8,8 +8,7 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 
 /**
  * Created by jspx.net
- *
-  * author: chenYuan
+ * author: chenYuan
  * date: 2020/2/10 23:36
  * description: jspxpro
  **/
@@ -43,8 +42,8 @@ public class GitAdapter extends BaseVcsClient   {
         CredentialsProvider credentialsProvider = GitUtil.getCredentialsProvider(getName(),getPassword());
         Git git = GitUtil.getGit(credentialsProvider,getUrl(),getLocalPath());
         GitUtil.download(git,credentialsProvider);
-        Iterable<RevCommit> gitlog= git.log().call();
-        for (RevCommit revCommit : gitlog) {
+        Iterable<RevCommit> gitLog= git.log().call();
+        for (RevCommit revCommit : gitLog) {
             return revCommit.getName();//版本号
         }
         return null;

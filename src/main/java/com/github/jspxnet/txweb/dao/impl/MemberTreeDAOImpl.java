@@ -176,7 +176,8 @@ public class MemberTreeDAOImpl extends JdbcOperations implements MemberTreeDAO {
         if (!StringUtil.isEmpty(organizeId)) {
             criteria = criteria.add(Expression.eq("organizeId", organizeId));
         }
-        criteria = criteria.add(Expression.not(Expression.in("nodeId", treeItemId)));
+
+        criteria = criteria.add(Expression.notIn("nodeId", treeItemId));
         return criteria.delete(false) > 0;
     }
 

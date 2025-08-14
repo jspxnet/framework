@@ -1,11 +1,9 @@
 package com.github.jspxnet.txweb.model.param;
 
 import com.github.jspxnet.enums.YesNoEnumType;
-import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
-
 import java.io.Serializable;
 
 /**

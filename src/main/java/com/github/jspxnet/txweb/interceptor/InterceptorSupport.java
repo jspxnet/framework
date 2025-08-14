@@ -12,12 +12,9 @@ package com.github.jspxnet.txweb.interceptor;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.boot.environment.Environment;
-
-
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.txweb.Interceptor;
 import com.github.jspxnet.txweb.ActionInvocation;
-
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.bundle.Bundle;
 import com.github.jspxnet.txweb.table.Role;
@@ -68,4 +65,5 @@ public abstract class InterceptorSupport implements Interceptor {
 
     @Override
     public abstract String intercept(ActionInvocation actionInvocation) throws Exception;
+
 }

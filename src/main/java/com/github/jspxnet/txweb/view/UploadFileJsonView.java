@@ -16,6 +16,8 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -34,26 +36,17 @@ import java.util.*;
  */
 @HttpMethod(caption = "附件Json kindeditor")
 public class UploadFileJsonView extends ActionSupport {
-    private String[] fileTypes = new String[]{"gif", "jpg", "jpeg", "png", "bmp"};
+    private final String[] fileTypes = new String[]{"gif", "jpg", "jpeg", "png", "bmp"};
+    @Getter
     private String path = StringUtil.empty;
+    @Setter
+    @Getter
     private String order = "name";
 
     public UploadFileJsonView() {
 
     }
 
-
-    public String getOrder() {
-        return order;
-    }
-
-    public void setOrder(String order) {
-        this.order = order;
-    }
-
-    public String getPath() {
-        return path;
-    }
 
     @Param(caption = "路径")
     public void setPath(String path) {
@@ -176,7 +169,7 @@ public class UploadFileJsonView extends ActionSupport {
         return NONE;
     }
 
-    public class NameComparator implements Comparator {
+    public static class NameComparator implements Comparator {
         @Override
         public int compare(Object a, Object b) {
             Hashtable hashA = (Hashtable) a;
@@ -191,7 +184,7 @@ public class UploadFileJsonView extends ActionSupport {
         }
     }
 
-    public class SizeComparator implements Comparator {
+    public static class SizeComparator implements Comparator {
         @Override
         public int compare(Object a, Object b) {
             Hashtable hashA = (Hashtable) a;
@@ -212,7 +205,7 @@ public class UploadFileJsonView extends ActionSupport {
         }
     }
 
-    public class TypeComparator implements Comparator {
+    public static class TypeComparator implements Comparator {
         @Override
         public int compare(Object a, Object b) {
             Hashtable hashA = (Hashtable) a;

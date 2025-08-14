@@ -4,7 +4,6 @@ import com.github.jspxnet.sober.config.BaseXmlTagNode;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/10/15 23:16
  * description: jspbox

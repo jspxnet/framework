@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.security.cert;
 
-/**
+/*
  * Created by IntelliJ IDEA.
  * User: chenYuan
  * date: 2004-7-26

@@ -20,15 +20,20 @@ import com.github.jspxnet.txweb.evasive.EvasiveManager;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.RequestWrapper;
 import com.github.jspxnet.txweb.util.TXWebUtil;
-import com.github.jspxnet.utils.FileUtil;
+import com.github.jspxnet.utils.FileSuffixUtil;
 import com.github.jspxnet.utils.StreamUtil;
 import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
-import javax.servlet.*;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * Created by IntelliJ IDEA.
@@ -77,7 +82,7 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
             servletRequest.setCharacterEncoding(Dispatcher.getEncode());
             servletResponse.setCharacterEncoding(Dispatcher.getEncode());
         } catch (UnsupportedEncodingException e) {
-            TXWebUtil.errorPrint("系统编码错误", null, (HttpServletResponse)servletResponse, HttpStatusType.HTTP_status_403);
+            TXWebUtil.errorPrint("系统编码错误", null, (HttpServletResponse)servletResponse, HttpStatusType.HTTP_status_OK);
             log.debug("系统编码错误", e);
             return;
         }
@@ -113,16 +118,16 @@ public class ServletDispatcher extends HttpServlet implements javax.servlet.Serv
             //不支持过滤功能,只能自己实现
             File file = new File(Dispatcher.getRealPath(), URLUtil.getNamespace(url) + "/" + URLUtil.getFileName(url));
             if (!file.isFile()) {
-                TXWebUtil.errorPrint("不存在的资源", null, response, HttpStatusType.HTTP_status_403);
+                TXWebUtil.errorPrint("不存在的资源", null, response, HttpStatusType.HTTP_status_OK);
                 log.debug("not find file:{}",file.getPath());
                 return;
             }
-            String contentType = FileUtil.getContentType(file);
+            String contentType = FileSuffixUtil.getContentType(file);
             response.setContentType(contentType);
-            try (InputStream in = new FileInputStream(file); OutputStream out = response.getOutputStream();) {
+            try (InputStream in = Files.newInputStream(file.toPath()); OutputStream out = response.getOutputStream();) {
                 StreamUtil.copy(in, out);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("not find file:{}",file.getPath());
             }
         }
     }

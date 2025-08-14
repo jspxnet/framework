@@ -38,13 +38,25 @@ public @interface Column {
     /**
      * 选择范围
      * 例如:"小;中;大"或者 "1:小;2:中;3:大"
-     *
+     * 绑定到数据库：OptionBundle  @code
      * @return 选择范围
      */
     String option() default StringUtil.empty;
 
-
+    /**
+     *
+     * @return 枚举方式
+     */
     Class<?> enumType() default NullClass.class;
+
+
+    /**
+     *
+     * @return 转json的时候是否显示枚举
+     */
+    boolean enumTypes() default true;
+
+
 
     /**
      * 验证更具js库 函数，和配置验证里边的条件一样
@@ -76,4 +88,8 @@ public @interface Column {
      */
     boolean hidden() default false;
 
+    /**
+     * @return 是否允许搜索
+     */
+    boolean searchHidden() default false;
 }

@@ -14,7 +14,6 @@ import java.util.Date;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2021/7/31 2:17
  * description: 达梦数据库支持
@@ -78,7 +77,7 @@ public class DmDialect extends Dialect {
         put(InputStream.class.getName(), "\"${" + COLUMN_NAME + "}\" blob");
         put(char.class.getName(), "\"${" + COLUMN_NAME + "}\" char(2) NOT NULL default ''");
         put(SQL_DROP_TABLE, "DROP TABLE  \"${"+ KEY_DATABASE_NAME +"}\".\"${" + KEY_TABLE_NAME + "}\"");
-        put(FUN_TABLE_EXISTS, " SELECT COUNT(1)  FROM all_tables WHERE OWNER='${"+KEY_DATABASE_NAME+"}' AND TABLE_NAME='${" + KEY_TABLE_NAME + "}'");
+        put(FUN_TABLE_EXISTS, "SELECT COUNT(1)  FROM all_tables WHERE OWNER='${"+KEY_DATABASE_NAME+"}' AND TABLE_NAME='${" + KEY_TABLE_NAME + "}'");
     }
 
     @Override
@@ -144,7 +143,7 @@ public class DmDialect extends Dialect {
     }
 
     @Override
-    public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
+    public String getLimitString(String sql, int begin, int end,TableModels soberTable) {
         int length = end - begin;
         if (length < 0) {
             length = 0;
@@ -251,7 +250,7 @@ public class DmDialect extends Dialect {
         }
 
         ///////长整型
-        if ("number".equals(typeName) || "bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName))) {
+        if ("bigint".equals(typeName) || "int8".equals(typeName) || ("fixed".equals(typeName))) {
             return rs.getLong(index);
         }
 
@@ -264,7 +263,7 @@ public class DmDialect extends Dialect {
             return rs.getBigDecimal(index);
         }
         ///////双精度
-        if ("double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
+        if ("number".equals(typeName) || "double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
             return rs.getDouble(index);
         }
 
@@ -349,6 +348,11 @@ public class DmDialect extends Dialect {
     @Override
     public boolean commentPatch() {
         return true;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs WHERE ROWNUM=1";
     }
 
 }

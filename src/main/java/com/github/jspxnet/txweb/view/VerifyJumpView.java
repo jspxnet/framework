@@ -7,6 +7,8 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -18,15 +20,11 @@ import javax.servlet.http.HttpServletRequest;
 @HttpMethod(caption = "微信跳转验证")
 public class VerifyJumpView extends ActionSupport {
     public static final String KEY_VERIFY_CODE = "verifyCode";
+    @Getter
     private final String verifyCode = RandomUtil.getRandomAlphanumeric(4) + DateUtil.toString("yyMMddHHmmssS");
 
     public VerifyJumpView() {
 
-
-    }
-
-    public String getVerifyCode() {
-        return verifyCode;
     }
 
     private String link = StringUtil.empty;

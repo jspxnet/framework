@@ -16,10 +16,7 @@ import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +34,6 @@ public class SqlMapBaseImpl implements SqlMapBase {
     public SqlMapBaseImpl(JdbcOperations jdbcOperations) {
         this.jdbcOperations = jdbcOperations;
         this.soberFactory = jdbcOperations.getSoberFactory();
-
     }
 
     /**
@@ -235,13 +231,14 @@ public class SqlMapBaseImpl implements SqlMapBase {
         valueMap.put("totalCount", totalCount);
         valueMap.put("loadChild", loadChild);
         valueMap.put("rollRows", rollRows);
-        valueMap.put("beginRow", beginRow);
-        valueMap.put("endRow", endRow);
+        valueMap.put(Dialect.SQL_RESULT_BEGIN_ROW, beginRow);
+        valueMap.put(Dialect.SQL_RESULT_END_ROW, endRow);
         valueMap.put("namespace", sqlMapConf.getNamespace());
 
         //修复变量,避免空异常 begin
         ScriptMarkUtil.fixVarNull(valueMap, sqlMapConf.getContext());
         //修复变量,避免空异常 end
+
 
         String sqlText = dialect.processSql(sqlMapConf.getContext(), valueMap);
         if (StringUtil.isNull(sqlText)) {
@@ -249,11 +246,17 @@ public class SqlMapBaseImpl implements SqlMapBase {
         }
 
         //判断是否是用缓存
-        Table table = AnnotationUtil.getTable(cls);
         String cacheKey = null;
+        Class<?> cacheCls = cls;
+        String cacheClass = sqlMapConf.getCache();
+        if (!StringUtil.isNullOrWhiteSpace(cacheClass))
+        {
+            cacheCls = ClassUtil.loadClass(cacheClass);
+        }
+        Table table = AnnotationUtil.getTable(cacheCls);
         if (table != null && soberFactory.isUseCache() && table.cache()) {
-            cacheKey = SoberUtil.getListKey(cls, sqlText, StringUtil.empty, beginRow, endRow, loadChild);
-            List<T> resultList = (List<T>) JSCacheManager.get(cls, cacheKey);
+            cacheKey = SoberUtil.getListKey(cacheCls, sqlText, cls.getName(), beginRow, endRow, loadChild);
+            List<T> resultList = (List<T>) JSCacheManager.get(cacheCls, cacheKey);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
             }
@@ -319,9 +322,7 @@ public class SqlMapBaseImpl implements SqlMapBase {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("error SQL:{},info:{}", sqlText, e.getMessage());
-            throw new Exception("SQL:" + sqlText);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(preparedStatement);
@@ -329,8 +330,8 @@ public class SqlMapBaseImpl implements SqlMapBase {
         }
         //放入cache
 
-        if (table != null && soberFactory.isUseCache() && table.cache()) {
-            JSCacheManager.put(cls, cacheKey, list);
+        if (cacheKey!=null&&table != null && soberFactory.isUseCache() && table.cache()) {
+            JSCacheManager.put(cacheCls, cacheKey, list);
         }
         return list;
     }
@@ -395,7 +396,6 @@ public class SqlMapBaseImpl implements SqlMapBase {
     public boolean execute(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws Exception {
         Dialect dialect = soberFactory.getDialect();
         return jdbcOperations.execute(dialect.processSql(sqlMapConf.getContext(), valueMap));
-
     }
 
     /**
@@ -412,7 +412,7 @@ public class SqlMapBaseImpl implements SqlMapBase {
 
     /**
      * @param sqlMapConf sql配置
-     * @param valueMap   参数msp
+     * @param valueMap   参数map
      * @return 更新是否成功
      * @throws Exception 异常
      */
@@ -421,4 +421,18 @@ public class SqlMapBaseImpl implements SqlMapBase {
         Dialect dialect = soberFactory.getDialect();
         return jdbcOperations.update(dialect.processSql(sqlMapConf.getContext(), valueMap));
     }
+
+    /**
+     *
+     * @param sqlMapConf sql配置
+     * @param valueMap 参数map
+     * @return 更新是否成功
+     * @throws SQLException 异常
+     */
+    @Override
+    public int[] batchUpdate(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws SQLException {
+        return jdbcOperations.batchUpdate(sqlMapConf,valueMap);
+    }
+
 }
+

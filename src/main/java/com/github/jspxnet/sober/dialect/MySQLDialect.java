@@ -15,7 +15,7 @@ import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
-import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.Date;
 
@@ -52,10 +52,14 @@ public class MySQLDialect extends Dialect {
         put(Float.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;9>decimal(${" + COLUMN_LENGTH + "},2)<#else>decimal(10,2)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
         put("float", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;9>decimal(${" + COLUMN_LENGTH + "},2)<#else>decimal(9,2)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
+        put(BigDecimal.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;15>decimal(${" + COLUMN_LENGTH + "},8)<#else>decimal(15,8)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put("BigDecimal", "`${" + COLUMN_NAME + "}` <#if where=" + COLUMN_LENGTH + "&gt;15>decimal(${" + COLUMN_LENGTH + "},8)<#else>decimal(15,8)</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+
         put(Boolean.class.getName(), "`${" + COLUMN_NAME + "}` int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>  COMMENT '${" + COLUMN_CAPTION + "}'");
         put(boolean.class.getName(), "`${" + COLUMN_NAME + "}` int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>  COMMENT '${" + COLUMN_CAPTION + "}'");
 
         put(Date.class.getName(), "`${" + COLUMN_NAME + "}` datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT now()</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(java.sql.Date.class.getName(), "`${" + COLUMN_NAME + "}` datetime <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT now()</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
         put(Time.class.getName(), "`${" + COLUMN_NAME + "}` time <#if where=" + COLUMN_NOT_NULL + ">NOT NULL DEFAULT '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
         put(byte[].class.getName(), "`${" + COLUMN_NAME + "}` LONGBLOB COMMENT '${" + COLUMN_CAPTION + "}'");
@@ -255,7 +259,7 @@ public class MySQLDialect extends Dialect {
                 return rs.getBigDecimal(index);
             }
             ///////双精度
-            if ("double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
+            if ("number".equals(typeName) || "double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)) {
                 return rs.getDouble(index);
             }
 
@@ -299,10 +303,14 @@ public class MySQLDialect extends Dialect {
             }
             return rs.getObject(index);
         } catch (SQLException e) {
-            e.printStackTrace();
             log.error("typeName=" + typeName + " size=" + colSize + " columnName=" + rs.getMetaData().getColumnName(index), e);
         }
         return null;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs limit 1";
     }
 
 }

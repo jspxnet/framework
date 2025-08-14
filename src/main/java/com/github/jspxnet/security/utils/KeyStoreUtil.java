@@ -248,9 +248,7 @@ public class KeyStoreUtil {
         FileInputStream fis = null;
         try {
             KeyStore inputKeyStore = KeyStore.getInstance("BKS",
-                    new org.bouncycastle.jce.provider.BouncyCastleProvider());
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-            fis = new FileInputStream(jksFilePath);
+                    new org.bouncycastle.jce.provider.BouncyCastleProvider());            fis = new FileInputStream(jksFilePath);
             char[] srcPwd = jksPasswd == null ? null : jksPasswd.toCharArray();
             char[] destPwd = pfxPasswd == null ? null : pfxPasswd.toCharArray();
             inputKeyStore.load(fis, srcPwd);
@@ -335,7 +333,7 @@ public class KeyStoreUtil {
             FileInputStream in = new FileInputStream(jksFilePath);
             KeyStore ks = KeyStore.getInstance(algName,
                     new org.bouncycastle.jce.provider.BouncyCastleProvider());
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
             ks.load(in, srcPwd);
             Enumeration<String> e = ks.aliases();
             while (e.hasMoreElements()) {

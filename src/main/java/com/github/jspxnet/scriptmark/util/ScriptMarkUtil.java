@@ -17,6 +17,7 @@ import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ValidUtil;
 import com.github.jspxnet.utils.XMLUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedList;
 import java.io.UnsupportedEncodingException;
@@ -29,7 +30,8 @@ import java.util.Map;
  * date: 2008-11-27
  * Time: 15:28:52
  */
-public class ScriptMarkUtil {
+@Slf4j
+public final class ScriptMarkUtil {
     private static final char[] ESCAPES = createEscapes();
 
     private static char[] createEscapes() {
@@ -398,7 +400,7 @@ public class ScriptMarkUtil {
                     throw new MalformedURLException("非法路径访问，不允许\"../\"访问根目录\"/\"以上的目录！");
                 }
                 list.removeLast();
-            } else if (token != null && token.trim().length() > 0
+            } else if (token != null && !token.trim().isEmpty()
                     && !CURRENT_PATH.equals(token)) {
                 list.addLast(token);
             }
@@ -432,30 +434,6 @@ public class ScriptMarkUtil {
         return -1;
     }
 
-
-    /**
-     * 语法参考:https://github.com/coreyti/showdown
-     *
-     * @param markdown Markdown格式字符串
-     * @return html字符串
-     */
-    public static String getMarkdownHtml(String markdown) {
-        if (StringUtil.isNull(markdown)) {
-            return StringUtil.empty;
-        }
-        ScriptRunner scriptRunner = new TemplateScriptEngine();
-        scriptRunner.put("markdownString", markdown);
-        try {
-            return (String) scriptRunner.eval("(new Showdown.converter()).makeHtml(markdownString)", 0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            scriptRunner.exit();
-        }
-        return StringUtil.empty;
-
-    }
-
     public static void fixVarNull(Map<String, Object> valueMap,String txt)
     {
         //修复变量,避免空异常 begin
@@ -473,5 +451,76 @@ public class ScriptMarkUtil {
         //修复变量,避免空异常 end
     }
 
+
+    /**
+     * 语法参考:https://github.com/coreyti/showdown
+     *
+     * @param markdown Markdown格式字符串
+     * @return html字符串
+     */
+   /* public static String getMarkdownHtml(String markdown) {
+        if (StringUtil.isNull(markdown)) {
+            return StringUtil.empty;
+        }
+        ScriptRunner scriptRunner = new TemplateScriptEngine();
+        scriptRunner.put("markdownString", markdown);
+        try {
+            return (String) scriptRunner.eval("(new Showdown.converter()).makeHtml(markdownString)", 0);
+        } catch (Exception e) {
+            log.error("getMarkdownHtml",e);
+            //...
+        } finally {
+            scriptRunner.exit();
+        }
+        return StringUtil.empty;
+
+    }*/
+   public static String getMarkdownHtml(String markdown) {
+        if (StringUtil.isNull(markdown)) {
+            return StringUtil.empty;
+        }
+        ScriptRunner scriptRunner = new TemplateScriptEngine();
+        scriptRunner.put("markdownString", markdown);
+
+        try {
+            return (String) scriptRunner.eval("(new showdown.Converter()).makeHtml(markdownString)", 0);
+        } catch (Exception e) {
+            log.error("getMarkdownHtml",e);
+            //...
+        } finally {
+            scriptRunner.exit();
+        }
+        return StringUtil.empty;
+
+    }
+
+    public static void main(String[] args) {
+
+        String markdown = "# Jspx.net Framework 6.X注释标签\n" +
+                "\n" +
+                "## 一.简介\n" +
+                "\n" +
+                "Jspx.net Framework 6.X 支持传统方式的页面模版方式和微服务方式,注释标签涉及数据库,容器,WEB和JSON三部分.\n" +
+                "\n" +
+                "## 二. sober数据库注释标签\n" +
+                "\n" +
+                "*\t**@Column**标签,用于配置字段属性\n" +
+                "\n" +
+                "\n" +
+                "|标签属性      |类型       |  参数说明                                                                     |\n" +
+                "|=============|:==========|:==============================================================================|\n" +
+                "|caption      |String     |字段文字说明                                                                    |\n" +
+                "|notNull      |boolean    |字段是否可以为空                                                                |\n" +
+                "|option       |String     |选择范围，例如:\"小;中;大\"或者 \"1:小;2:中;3:大\",不建议是用,尽量是用enumType代替  |\n" +
+                "|dataType     |String     |验证表达式,配置和TXWeb里边的验证配置是一样的，这里配置好后可以自动生成web页面的配置 |\n" +
+                "|defaultValue |String     |默认值,映射到数据库,如果是数字等，例如：\"1.14\"                                    |\n" +
+                "|length       |int        |字段长度,映射到数据库,日期类型不需要配置                                          |\n" +
+                "|input        |String     |输入框类型,对应html表单  的type 属性，例如:text，number,date                     |\n" +
+                "|hidden       |boolean    |表单中是否隐藏，例如密码或者一些辅助字段就可以设置为true,传统方式是用                       |\n" +
+                "|enumType     |枚举类型   |当这个字段保存的为枚举类型的时候,这里为枚举类的class,枚举类value,name两个字段必须,会到API文档 |\n" +
+                "|dataType       |boolean    |在导出的时候是否隐藏，例如密码或者一些辅助字段就可以设置为true                     |\n";
+
+        System.out.println(getMarkdownHtml(markdown));
+    }
 
 }

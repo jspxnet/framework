@@ -34,6 +34,7 @@ public class InterceptorProxy implements Serializable {
     public static final String KEY_LOAD_CHILD = "loadChild";
     public static final String KEY_ROLL_ROWS = "rollRows";
 
+    public static final String KEY_BATCH_DATA = "batchData";
 
     private final LinkedList<Interceptor> interceptors;
     private final SoberSupport soberSupport;
@@ -117,11 +118,11 @@ public class InterceptorProxy implements Serializable {
                     if ((o instanceof Map)) {
                         valueMap.putAll((Map) o);
                         haveMap = true;
-                    } else if (currentPage == null && (o instanceof Number)) {
-                        log.debug("分页参数,页数请是用标准名称:" + sqlMapConf.getCurrentPage());
+                    } else if (sqlMapConf.getQueryModel()==QueryModelEnumType.LIST.getValue()&&currentPage == null && (o instanceof Number)) {
+                        log.debug(exeMethod+"分页参数,页数请是用标准名称:" + sqlMapConf.getCurrentPage());
                         currentPage = ((Number) o).intValue();
-                    } else if (count == null && (o instanceof Number)) {
-                        log.debug("分页参数,返回行数请是用标准名称:" + sqlMapConf.getCount());
+                    } else if (sqlMapConf.getQueryModel()==QueryModelEnumType.LIST.getValue()&&count == null && (o instanceof Number)) {
+                        log.debug(exeMethod+"分页参数,返回行数请是用标准名称:" + sqlMapConf.getCount());
                         count = ((Number) o).intValue();
                     }
                     if (cls == null && (o instanceof Class)) {
@@ -174,7 +175,12 @@ public class InterceptorProxy implements Serializable {
                 Map<String, Type> parameterMap = ClassUtil.getParameterNames(exeMethod);
                 if (parameterMap != null) {
                     for (String key : parameterMap.keySet()) {
-                        valueMap.put(key, ClassUtil.getParameterValue(exeMethod, key, arg));
+                        Object obj = ClassUtil.getParameterValue(exeMethod, key, arg);
+                        valueMap.put(key, obj);
+                        if (obj instanceof Collection && ExecuteEnumType.BATCH_UPDATE.getValue()==sqlMapConf.getExecuteType())
+                        {
+                            valueMap.put(KEY_BATCH_DATA, key);
+                        }
                     }
                 }
             }
@@ -215,6 +221,10 @@ public class InterceptorProxy implements Serializable {
         if (ExecuteEnumType.UPDATE.getValue()==sqlMapConf.getExecuteType())
         {
             return soberSupport.getBaseSqlMap().update(sqlMapConf, valueMap);
+        }
+        if (ExecuteEnumType.BATCH_UPDATE.getValue()==sqlMapConf.getExecuteType())
+        {
+            return soberSupport.getBaseSqlMap().batchUpdate(sqlMapConf, valueMap);
         }
         if (ExecuteEnumType.EXECUTE.getValue()==sqlMapConf.getExecuteType())
         {

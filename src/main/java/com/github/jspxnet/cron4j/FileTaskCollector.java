@@ -18,6 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import java.util.List;
  * @author Carlo Pelliccia
  * @since 2.0
  */
+@Slf4j
 class FileTaskCollector implements TaskCollector {
 
 	/**
@@ -45,7 +48,7 @@ class FileTaskCollector implements TaskCollector {
 	 * @param file
 	 *            The file.
 	 */
-	public synchronized void addFile(File file) {
+	public void addFile(File file) {
 		FILES.add(file);
 	}
 
@@ -64,7 +67,7 @@ class FileTaskCollector implements TaskCollector {
 	 * 
 	 * @return The file list.
 	 */
-	public synchronized File[] getFiles() {
+	public File[] getFiles() {
 		int size = FILES.size();
 		File[] ret = new File[size];
 		for (int i = 0; i < size; i++) {
@@ -86,7 +89,7 @@ class FileTaskCollector implements TaskCollector {
 			} catch (IOException e) {
 				Exception e1 = new Exception("Cannot parse cron file: "
 						+ f.getAbsolutePath(), e);
-				e1.printStackTrace();
+				log.error("getTasks",e1);
 			}
 			if (aux != null) {
 				int auxSize = aux.size();

@@ -520,7 +520,7 @@ public class ZipFile {
                     continue;
                 }
                 zout.putNextEntry(new ZipEntry(ze.getName()));
-                log.debug(ze.getName());
+
                 while ((len = zin.read(b)) != -1) {
                     zout.write(b, 0, len);
                 }

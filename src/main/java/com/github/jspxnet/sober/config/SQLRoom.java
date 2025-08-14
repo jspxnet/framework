@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Time: 18:24:23
  */
 @Slf4j
-@Table(caption = "SqlMap配置",cache = true,create = false)
+@Table(caption = "SqlMap配置",create = false)
 public class SQLRoom implements Serializable {
     //命名空间
     private String namespace;

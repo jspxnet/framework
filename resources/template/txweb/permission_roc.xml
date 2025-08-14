@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<txweb>
+        <!--角色用户 begin-->
+        <action name="permission" class="com.github.jspxnet.txweb.view.PermissionView">
+            <param name="BrowserCache">false</param>
+            <result name="*" type="roc"/>
+        </action>
+        <action name="userlist" class="userListView">
+            <param name="BrowserCache">false</param>
+            <result name="*" type="roc"/>
+        </action>
+        <!--角色用户 end-->
+</txweb>

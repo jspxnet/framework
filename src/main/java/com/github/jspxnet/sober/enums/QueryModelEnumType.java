@@ -4,20 +4,17 @@ import com.github.jspxnet.enums.EnumType;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/10/20 21:54
  * description: 查询返回模式
  **/
 public enum  QueryModelEnumType implements EnumType {
-
     //返回list
     LIST(0, "LIST"),
     //单个对象 int  bean 对象
     SINGLE(1, "SINGLE"),
     //得到总行数
     COUNT(2, "COUNT");
-
 
     final private int value;
     final private String name;

@@ -25,6 +25,8 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.UserSession;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -41,88 +43,13 @@ public class UserSessionListView extends ActionSupport {
 
     }
 
-    private String find = StringUtil.empty;
-    private String term = StringUtil.empty;
-    private String sort = StringUtil.empty;
-    private int count = 0;
-    private int currentPage = 1;
+    @Setter
+    @Getter
     private boolean load = false;
 
     @Ref
     private MemberDAO memberDAO;
 
-    @Param(caption = "行数")
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public int getCount() {
-        if (count <= 0) {
-            count = config.getInt(Environment.rowCount, 18);
-        }
-        return count;
-    }
-
-    public boolean isLoad() {
-        return load;
-    }
-
-    @Param(caption = "载入关系")
-    public void setLoad(boolean load) {
-        this.load = load;
-    }
-
-    @TurnPage(params = "find;sort;term")
-    private String turnPage = StringUtil.empty;
-
-    public String getTurnPage() {
-        return turnPage;
-    }
-
-
-    public String getFind() {
-        return find;
-    }
-
-    @Param(caption = "查询数据")
-    public void setFind(String find) {
-        this.find = find;
-    }
-
-    public String getTerm() {
-        return term;
-    }
-
-    @Param(caption = "条件", max = 50)
-    public void setTerm(String term) {
-        this.term = term;
-    }
-
-    public String getSort() {
-        return sort;
-    }
-
-    @Param(caption = "排序", max = 20)
-    public void setSort(String sort) {
-        this.sort = sort;
-    }
-
-    public int getCurrentPage() {
-        return currentPage;
-    }
-
-    @Param(caption = "页数", min = 1)
-    public void setCurrentPage(int currentPage) {
-        this.currentPage = currentPage;
-    }
-
-    public List<UserSession> getList()  {
-        return memberDAO.getOnlineList(term, sort, getCurrentPage(), getCount(), load);
-    }
-
-    public long getTotalCount()  {
-        return memberDAO.getOnlineCount(term);
-    }
 
 
     @Operate(caption = "在线人数翻页列表", method = "/list/page")

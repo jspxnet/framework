@@ -42,7 +42,6 @@ public class IfPhrase implements Phrase {
     public int getRun(EnvRunner env, TagNode tagNode, Writer out) throws ScriptRunException {
         ScriptRunner scriptEngine = env.getScriptRunner();
         BaseIfBlock ifBlock = (BaseIfBlock) tagNode;
-
         String w = ifBlock.getWhere();
         boolean bw = false;
         try {

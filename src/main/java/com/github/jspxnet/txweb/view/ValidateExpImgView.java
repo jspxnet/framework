@@ -11,7 +11,6 @@ package com.github.jspxnet.txweb.view;
 import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Ref;
-import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -20,8 +19,11 @@ import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.NumberUtil;
 import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.awt.*;
 
 /**
@@ -40,29 +42,25 @@ public class ValidateExpImgView extends ActionSupport {
     private ValidateCodeCache validateCodeCache;
 
     // 图片的宽度。
-    private int width = 70;
+    @Getter
+    private int width = 100;
     // 图片的高度。
-    private int height = 24;
+    @Getter
+    private int height = 32;
     // 验证码干扰线数
 
+    @Getter
     private String bgColor = "#FFFFFF";
+    @Getter
     private String color = null;
 
     private String fileType = "png";
     private boolean safe = true;
 
 
-    public int getWidth() {
-        return width;
-    }
-
     @Param(caption = "宽", min = 0)
     public void setWidth(int width) {
         this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     @Param(caption = "高", min = 0)
@@ -70,17 +68,9 @@ public class ValidateExpImgView extends ActionSupport {
         this.height = height;
     }
 
-    public String getBgColor() {
-        return bgColor;
-    }
-
     @Param(caption = "背景色", min = 0)
     public void setBgColor(String bgColor) {
         this.bgColor = bgColor;
-    }
-
-    public String getColor() {
-        return color;
     }
 
     @Param(caption = "颜色", min = 0)
@@ -104,7 +94,7 @@ public class ValidateExpImgView extends ActionSupport {
         if (safe && RequestUtil.isPirated(getRequest())) {
             return NONE;
         }
-        IUserSession userSession = getUserSession();
+
         HttpServletResponse response = getResponse();
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
@@ -124,11 +114,14 @@ public class ValidateExpImgView extends ActionSupport {
             C = A + B;
             viewCode = NumberUtil.toString(A) + "+" + NumberUtil.toString(B) + StringUtil.EQUAL;
         }
+        HttpSession session = getSession();
         PhotoString validateCode = new PhotoString(width, height, new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(bgColor, "#", "")), 16)), StringUtil.isNull(color) ? null : new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(color, "#", "")), 16)), viewCode);
-        ImageIO.write(validateCode.getBufferImage(), fileType, response.getOutputStream());
-
-        if (userSession != null) {
-            validateCodeCache.addImgCode(EncryptUtil.getMd5(userSession.getId()), NumberUtil.toString(C));
+        if (session != null) {
+            validateCodeCache.addImgCode(EncryptUtil.getMd5(session.getId()), NumberUtil.toString(C));
+        }
+        if (!response.isCommitted())
+        {
+            ImageIO.write(validateCode.getBufferImage(), fileType, response.getOutputStream());
         }
         return super.execute();
     }

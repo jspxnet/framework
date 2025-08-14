@@ -7,10 +7,8 @@ import com.github.jspxnet.network.mac.NetworkInfo;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.SchedulerManager;
 import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.SystemUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -39,11 +37,18 @@ public class TaskProxy implements Runnable {
     //调用方法名称
     private String methodName;
 
-    private Object bean;
+    private final Object bean;
+
+    //注册名
+    private String registerName;
 
     //运行次数
     private int runTimes = 0;
 
+    public TaskProxy(Object bean)
+    {
+        this.bean = bean;
+    }
 
     @Override
     public String toString()
@@ -57,6 +62,7 @@ public class TaskProxy implements Runnable {
         }
         json.put("taskType",taskType);
         json.put("methodName",methodName);
+        json.put("registerName",registerName);
         if (bean!=null)
         {
             json.put("bean",bean.getClass().getName());
@@ -73,6 +79,7 @@ public class TaskProxy implements Runnable {
 
     public void forceRun() throws Exception {
         BeanUtil.invoke(bean, methodName);
+        runTimes++;
     }
 
 
@@ -89,10 +96,7 @@ public class TaskProxy implements Runnable {
                 try {
                     runTimes++;
                     BeanUtil.invoke(bean, methodName);
-                    if (bean.getClass().getName().contains("SchedulerRegisterTask"))
-                    {
-                        System.out.println(once);
-                    }
+
                     //关闭一次性任务 begin
                     if (once== YesNoEnumType.YES.getValue()&&runTimes>=1)
                     {
@@ -102,7 +106,7 @@ public class TaskProxy implements Runnable {
                             schedulerManager.stopRemove(getScheduledId());
                         } catch (IllegalStateException e)
                         {
-                            e.printStackTrace();
+                            log.error("run ",e);
                         }
                     }
                     //关闭一次性任务 end
@@ -112,7 +116,6 @@ public class TaskProxy implements Runnable {
             }
         } catch (Exception e) {
             log.error(bean + " method " + methodName, e);
-            e.printStackTrace();
         }
     }
 }

@@ -10,9 +10,12 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 
 import java.util.Collection;
 
+/**
+ * @author chenYuan
+ */
 @HttpMethod(caption = "访问管理")
 public class EvasiveView extends ActionSupport {
-    private EvasiveManager evasiveManager = EvasiveManager.getInstance();
+    private final EvasiveManager evasiveManager = EvasiveManager.getInstance();
 
 
     public String[] getWhiteList() {

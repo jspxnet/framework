@@ -1,10 +1,10 @@
 package com.github.jspxnet.network.http;
 
 import com.github.jspxnet.json.JSONObject;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpResponse;
 import org.apache.http.ParseException;
-import org.apache.http.client.CookieStore;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -50,15 +50,10 @@ public interface HttpClient {
     HttpResponse getHttpResponse(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception;
 
 
-    boolean download(File file,Map map) throws Exception;
-    /**
-     *
-     * @param files 文件
-     * @param name 文件变量名
-     * @param params 参数
-     * @return 返回信息
-     */
-    String upload(File[] files, String name, Map<String, String> params);
+    boolean download(File file,Map<String,Object> map) throws Exception;
+
+
+    String upload(File[] files, String name, Object params);
 
     boolean download(File file, JSONObject json) throws Exception;
 
@@ -69,13 +64,13 @@ public interface HttpClient {
 
     HttpClient build(String url);
 
-    int getStatusCode() throws ParseException;
+    int getStatusCode();
 
     String get(JSONObject json) throws Exception;
 
     String get(JSONObject json, Map<String, String> headers) throws Exception;
 
-    HttpEntity get(String url, JSONObject json, Map<String, String> headers) throws Exception;
+    org.apache.hc.core5.http.HttpEntity get(String url, JSONObject json, Map<String, String> headers) throws Exception;
 
     String getString(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception;
 
@@ -91,7 +86,7 @@ public interface HttpClient {
 
     byte[] getBytes(String url, Map<String, ?> parameterMap, Map<String, String> headers) throws Exception;
 
-    String getResponseString() throws ParseException, IOException;
+    String getResponseString() throws Exception;
 
     String post() throws Exception;
     /**
@@ -102,24 +97,23 @@ public interface HttpClient {
      */
     String upload(File[] files, String name);
 
-    HttpEntity put(String url, Map<String, ?> params, Map<String, String> headers) throws ParseException, IOException;
+    org.apache.hc.core5.http.HttpEntity put(String url, Map<String, ?> params, Map<String, String> headers) throws Exception;
 
-
-    HttpEntity put(JSONObject json, Map<String, String> headers) throws Exception;
+    org.apache.hc.core5.http.HttpEntity put(JSONObject json, Map<String, String> headers) throws Exception;
 
     String put(JSONObject json) throws Exception;
 
-    HttpEntity post(String url, Map<String, ?> params, Map<String, String> headers) throws ParseException, IOException;
+    org.apache.hc.core5.http.HttpEntity post(String url, Map<String, ?> params, Map<String, String> headers) throws Exception;
 
-    String post(String url, Map<String, ?> params) throws ParseException, IOException;
+    String post(String url, Map<String, ?> params) throws Exception;
 
-    String post(Map<String, ?> params) throws ParseException, IOException;
+    String post(Map<String, ?> params) throws Exception;
 
     void setHeaders(Map<String, String> header);
 
     void cleanHeaders();
 
-    HttpEntity post(String url, JSONObject json, Map<String, String> headers) throws Exception;
+    org.apache.hc.core5.http.HttpEntity post(String url, JSONObject json, Map<String, String> headers) throws Exception;
 
     HttpEntity put(String url, JSONObject json, Map<String, String> headers) throws Exception;
 
@@ -127,11 +121,11 @@ public interface HttpClient {
 
     String post(JSONObject json) throws Exception;
 
-    HttpEntity put(String url, String body, Map<String, String> headers) throws ParseException, IOException;
+    org.apache.hc.core5.http.HttpEntity put(String url, String body, Map<String, String> headers) throws Exception;
 
-    String post(String url, String body) throws ParseException, IOException;
+    String post(String url, String body) throws Exception;
 
-    HttpEntity post(String url, String body, Map<String, String> headers) throws ParseException, IOException;
+    org.apache.hc.core5.http.HttpEntity post(String url, String body, Map<String, String> headers) throws Exception;
 
-    String post(String body) throws ParseException, IOException;
+    String post(String body) throws Exception;
 }

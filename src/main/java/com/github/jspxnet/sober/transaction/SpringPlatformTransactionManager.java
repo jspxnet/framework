@@ -1,8 +1,8 @@
 package com.github.jspxnet.sober.transaction;
 
 
-import com.github.jspxnet.sober.SoberFactory;
-import org.springframework.transaction.*;
+
+
 
 /**
  * Created by jspx.net
@@ -11,6 +11,8 @@ import org.springframework.transaction.*;
  * date: 2021/3/16 1:23
  * description: sober 在spring中的事物管理器
  **/
+/*
+
 public class SpringPlatformTransactionManager implements PlatformTransactionManager {
     private final com.github.jspxnet.sober.transaction.TransactionManager transactionManager = TransactionManager.getInstance();
     private final SoberFactory soberFactory;
@@ -27,7 +29,10 @@ public class SpringPlatformTransactionManager implements PlatformTransactionMana
             AbstractTransaction abstractTransaction = soberFactory.createTransaction();
             String transactionId = abstractTransaction.getTransactionId();
             abstractTransaction.begin();
-            return new SpringTransactionStatus(transactionId,!transactionManager.containsKey(transactionId));
+            Object[] param = new Object[2];
+            param[0]=transactionId;
+            param[1]=!transactionManager.containsKey(transactionId);
+            return (TransactionStatus)ClassUtil.newInstance("org.springframework.transaction.support.AbstractTransactionStatus",param);
         } catch (Throwable throwables) {
             throwables.printStackTrace();
         }
@@ -68,3 +73,4 @@ public class SpringPlatformTransactionManager implements PlatformTransactionMana
         }
     }
 }
+*/

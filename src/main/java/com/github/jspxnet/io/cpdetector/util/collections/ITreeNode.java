@@ -725,7 +725,7 @@ public interface ITreeNode {
          */
         @Override
         public final boolean isLeaf() {
-            return this.m_children.size() == 0;
+            return this.m_children.isEmpty();
         }
 
         /*

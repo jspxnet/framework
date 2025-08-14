@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.sober.criteria.projection;
 
-import com.github.jspxnet.sober.criteria.expression.Restrictions;
+import com.github.jspxnet.sober.criteria.expression.Expression;
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,13 +22,13 @@ public class CountProjection extends AggregateProjection {
     private boolean distinct;
 
     protected CountProjection(String prop) {
-        super(Restrictions.KEY_COUNT, prop);
+        super(Expression.KEY_COUNT, prop);
     }
 
     @Override
     public String toString() {
         if (distinct) {
-            return Restrictions.KEY_DISTINCT + super.toString();
+            return Expression.KEY_DISTINCT + super.toString();
         } else {
             return super.toString();
         }
@@ -38,7 +38,7 @@ public class CountProjection extends AggregateProjection {
     @Override
     public String toSqlString(String databaseName) {
         if (distinct) {
-            return Restrictions.KEY_DISTINCT + super.toString();
+            return Expression.KEY_DISTINCT + super.toString();
         } else {
             return super.toString();
         }

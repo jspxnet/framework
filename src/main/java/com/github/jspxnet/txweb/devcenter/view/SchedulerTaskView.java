@@ -1,8 +1,11 @@
 package com.github.jspxnet.txweb.devcenter.view;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.res.LanguageRes;
+import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
+import com.github.jspxnet.sober.SoberFactory;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.GenericDAO;
@@ -14,8 +17,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SchedulerTaskView extends ActionSupport {
-    @Ref
+
     protected GenericDAO genericDAO;
+
+    @Ref
+    public void setGenericDAO(GenericDAO genericDAO)
+    {
+        this.genericDAO = genericDAO;
+        //begin 载入默认数据源
+        if (genericDAO.getSoberFactory() == null) {
+            String soberFactoryName = EnvFactory.getEnvironmentTemplate().getString("soberFactory", "jspxSoberFactory");
+            BeanFactory beanFactory = EnvFactory.getBeanFactory();
+            SoberFactory soberFactory = (SoberFactory) beanFactory.getBean(soberFactoryName);
+            genericDAO.setSoberFactory(soberFactory);
+        }
+        //end 载入默认数据源
+    }
 
     @Operate(caption = "任务管理器", method = "index", post = false)
     public String index()  {
@@ -38,4 +55,5 @@ public class SchedulerTaskView extends ActionSupport {
         }
         return RocResponse.success(schedulerTaskManager.getList(pageParam.getFind(),pageParam.getCurrentPage(), pageParam.getCount()));
     }
+
 }

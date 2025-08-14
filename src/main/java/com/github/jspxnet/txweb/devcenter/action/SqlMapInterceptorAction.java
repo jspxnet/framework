@@ -14,7 +14,9 @@ import com.github.jspxnet.txweb.model.param.SqlMapInterceptorConfParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.devcenter.view.SqlMapInterceptorView;
 import com.github.jspxnet.utils.BeanUtil;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @HttpMethod(caption = "SqlMap拦截器", actionName = "*", namespace = Environment.DEV_CENTER+"/sqlmap/interceptor")
 @Bean(namespace = Environment.DEV_CENTER, singleton = true)
 public class SqlMapInterceptorAction extends SqlMapInterceptorView {
@@ -48,7 +50,7 @@ public class SqlMapInterceptorAction extends SqlMapInterceptorView {
                 return RocResponse.success(sqlMapInterceptorConf.getId(),language.getLang(LanguageRes.saveSuccess));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("save",e);
             return RocResponse.error(ErrorEnumType.DATABASE.getValue(),e.getMessage());
         }
         return RocResponse.error(ErrorEnumType.WARN.getValue(),language.getLang(LanguageRes.saveFailure));

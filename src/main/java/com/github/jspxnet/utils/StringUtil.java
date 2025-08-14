@@ -9,7 +9,6 @@
  */
 package com.github.jspxnet.utils;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.util.StringMap;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
@@ -17,13 +16,14 @@ import org.dom4j.DocumentHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static java.util.regex.Pattern.*;
 import static java.util.regex.Pattern.compile;
 
@@ -38,10 +38,10 @@ import static java.util.regex.Pattern.compile;
  * Class stringUtil = ClassUtil.loadClass(class.getName());
  */
 @Slf4j
-public class StringUtil {
+public final class StringUtil {
     public static final char[] BR_TAG = "<BR>".toCharArray();
 
-
+    public static final String UTF8_BOM="\uFEFF";
     public static final char SINGLE_QUOTE_TAG = '\'';
     public static final char DOUBLE_QUOTE_TAG = '\"';
     public static final char UNDERLINE = '_';
@@ -82,9 +82,82 @@ public class StringUtil {
 
     public static final String CRLF = "\r\n";
 
+    //帆软的分隔方式
+    public static final String FINE_SPLIT = "','";
+
     //split 中需要转义的字符
     public static final String[] SPLIT_TRANSFERRED  = {"|",StringUtil.DOT,StringUtil.ASTERISK,"+"};
 
+
+    //字段名称标准化修复
+
+
+    //SQL名称特殊支付修复过滤
+    final private static List<String> captionFixChars = new ArrayList<>();
+    static {
+        captionFixChars.add("(");
+        captionFixChars.add(")");
+        captionFixChars.add("/");
+        captionFixChars.add("-");
+        captionFixChars.add("+");
+        captionFixChars.add("、");
+        captionFixChars.add("%");
+        captionFixChars.add("&");
+        captionFixChars.add("*");
+        captionFixChars.add("#");
+        captionFixChars.add("@");
+        captionFixChars.add(QUESTION);
+        captionFixChars.add("\"");
+        captionFixChars.add("'");
+    }
+
+    private StringUtil()
+    {
+
+    }
+    /**
+     *
+     * @param caption 字段名称
+     * @return 修复名称字段中的特殊支付，确保sql能正常执行
+     */
+    public static String filterFiledCaption(String caption) {
+        String fieldCaption = StringUtil.fullToHalf(caption);
+        for (String clean:captionFixChars)
+        {
+            fieldCaption = StringUtil.replace(fieldCaption,clean,"");
+        }
+        if (fieldCaption.contains("、"))
+        {
+            fieldCaption = StringUtil.substringAfter(fieldCaption,"、");
+        }
+        if (fieldCaption.length()>10)
+        {
+            fieldCaption = StringUtil.cut(fieldCaption,10,"");
+        }
+        if (!StringUtil.isChinese(fieldCaption))
+        {
+            fieldCaption = StringUtil.underlineToCamel(fieldCaption);
+        }
+        return StringUtil.replace(fieldCaption," ","");
+    }
+
+
+    /**
+     *
+     * @param str 字符串
+     * @return 判断是否为一个变量名
+     */
+    public static boolean isVarName(String str)
+    {
+        for (String c:captionFixChars)
+        {
+            if (str.contains(c))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * 判断是否为空
@@ -92,7 +165,7 @@ public class StringUtil {
      * @return 是否为空
      */
     public static boolean isNull(String value) {
-        return value == null || value.equals(StringUtil.empty) || "null".equals(value) || value.length() < 1;
+        return value == null || value.equals(StringUtil.empty) || "null".equals(value) || value.isEmpty();
     }
     /**
      * @param sqlText sql
@@ -124,6 +197,16 @@ public class StringUtil {
             }
         }
         return sqlText;
+    }
+    /**
+     * @param sqlText sql
+     * @return 返回SQL 删除排序
+     */
+    public static String getCountSql(String sqlText) {
+        if (sqlText == null) {
+            return empty;
+        }
+        return "SELECT count(1) AS NUM FROM (" + sqlText + ") C";
     }
 
     /**
@@ -239,10 +322,7 @@ public class StringUtil {
      * @since 2.0
      */
     public static String substringBefore(String str, String separator) {
-        if (isNull(str) || separator == null) {
-            return empty;
-        }
-        if (separator.length() == 0) {
+        if (isNull(str) || separator == null || separator.isEmpty()) {
             return empty;
         }
         int pos = str.indexOf(separator);
@@ -686,7 +766,7 @@ public class StringUtil {
      * StringUtils.hasLength("Hello") = true
      */
     public static boolean hasLength(String str) {
-        return (str != null && str.length() > 0);
+        return (str != null && !str.isEmpty());
     }
 
     /**
@@ -944,7 +1024,7 @@ public class StringUtil {
         }
         StringBuilder sb = new StringBuilder();
         try {
-            while (str.length() > 0) {
+            while (!str.isEmpty()) {
                 //4位长度
                 if (str.startsWith("\\u") && str.length() >= 6 && !str.substring(2, 6).contains("\\")) {
                     sb.append((char) Integer.parseInt(str.substring(2, 6), 16));
@@ -1090,9 +1170,7 @@ public class StringUtil {
      * @return 包含时返回true，否则返回false
      * @since 0.4
      */
-    public static boolean contains
-    (String[] strings, String
-            string) {
+    public static boolean contains(String[] strings, String string) {
         return contains(strings, string, true);
     }
 
@@ -1139,11 +1217,11 @@ public class StringUtil {
      * @since 0.6
      */
     public static String fillString(char c, int length) {
-        String ret = empty;
+        StringBuilder ret = new StringBuilder(empty);
         for (int i = 0; i < length; i++) {
-            ret += c;
+            ret.append(c);
         }
-        return ret;
+        return ret.toString();
     }
 
     /**
@@ -1156,6 +1234,11 @@ public class StringUtil {
         if (StringUtil.isNull(value)) {
             return empty;
         } else {
+            if (value.startsWith(UTF8_BOM))
+            {
+                //去掉bom标识
+                value=value.substring(1);
+            }
             return value.trim();
         }
     }
@@ -1453,7 +1536,16 @@ public class StringUtil {
     }
 
     public static boolean isEmpty(String value) {
-        return value == null || value.length() ==0;
+        return value == null || value.isEmpty();
+    }
+
+    /**
+     *
+     * @param value 字符串
+     * @return 判断空
+     */
+    public static boolean isNullOrWhiteSpace(String value) {
+        return isEmpty(value) || value.trim().isEmpty();
     }
 
 
@@ -1462,10 +1554,11 @@ public class StringUtil {
             return true;
         }
         String tmp = replace(value, "\t", empty);
-        tmp = replace(value, "\n", empty);
-        tmp = replace(value, "\f", empty);
-        tmp = replace(value, "\r", empty);
-        return hasLength(tmp.trim());
+        tmp = replace(tmp, "\n", empty);
+        tmp = replace(tmp, "\f", empty);
+        tmp = replace(tmp, "\r", empty);
+        tmp = replace(tmp, " ", empty);
+        return !hasLength(tmp.trim());
     }
 
 
@@ -1504,9 +1597,9 @@ public class StringUtil {
             return "http://";
         }
         if (http.toLowerCase().startsWith("http://")) {
-            return http;
+            return StringUtil.replace(http,"\\","/");
         } else {
-            return "http://" + http;
+            return "http://" + StringUtil.replace(http,"\\","/");
         }
     }
 
@@ -1871,7 +1964,7 @@ public class StringUtil {
      * @return float  转换为Float
      */
     public static float toFloat(String sdouble, long nint) {
-        if (sdouble == null) {
+        if (StringUtil.isNullOrWhiteSpace(sdouble)) {
             return nint;
         }
         try {
@@ -1900,7 +1993,14 @@ public class StringUtil {
             return nint;
         }
         try {
-            return Long.parseLong(replace(sdouble, ",", ""));
+            String tmp = replace(sdouble, ",", "");
+            if (tmp!=null&&tmp.contains(DOT))
+            {
+                BigDecimal bigDecimal = new BigDecimal(tmp);
+                BigDecimal truncated = bigDecimal.setScale(0, RoundingMode.DOWN); // 截断，不进行四舍五入
+                return truncated.longValue();
+            }
+            return Long.parseLong(tmp);
         } catch (NumberFormatException e) {
             return nint;
         }
@@ -1942,11 +2042,16 @@ public class StringUtil {
             format = DateUtil.FULL_J_FORMAT;
         } else if (date.length() > 14 && date.length() <= 17 && countMatches(date, "/") == 2 && countMatches(date, ":") == 1) {
             format = DateUtil.CURRENCY_J_FORMAT;
-        } else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, ":") == 2) {
+        } else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, "时") == 1
+                && countMatches(date, "分") == 1 && countMatches(date, "秒") == 1) {
+            format = "yy年MM月dd日 HH时mm分ss秒";
+        }  else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, ":") == 2) {
             format = "yy年MM月dd日 HH:mm:ss";
         } else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, ":") == 1) {
             format = DateUtil.CN_FORMAT;
-        } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "-") == 2) {
+        }  else if (date.contains("年") && date.contains("月") && date.contains("日") && countMatches(date, "时") == 1 && countMatches(date, "分") == 1) {
+            format = "yy年MM月dd日 HH时mm分";
+        }  else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "-") == 2) {
             format = DateUtil.DAY_FORMAT;
         } else if (date.length() >= 8 && date.length() < 11 && countMatches(date, "/") == 2) {
             if (date.indexOf("/")==2)
@@ -2110,17 +2215,17 @@ public class StringUtil {
      * @return boolean 编码是否有效
      */
     static public boolean UTF8CodeCheck(String text) {
-        String sign = empty;
+        StringBuilder sign = new StringBuilder(empty);
         if (text.startsWith("%e")) {
             for (int p = 0; p != -1; ) {
                 p = text.indexOf("%", p);
                 if (p != -1) {
                     p++;
                 }
-                sign += p;
+                sign.append(p);
             }
         }
-        return "147-1".equals(sign);
+        return "147-1".equals(sign.toString());
     }
 
     /**
@@ -2326,43 +2431,81 @@ public class StringUtil {
     }
 
     /**
-     * 得到Freemarker 的变量列表
-     * 并且清除相同的变量
      *
-     * @param str 字符串
-     * @return 得到变量列表
+     * @param str 代码字符串
+     * @return 通用的
      */
     public static String[] getFreeMarkerVar(String str) {
-        if (str==null)
-        {
-            return new String[0];
-        }
-        StringBuilder sb = new StringBuilder();
-        int length = str.length();
-        boolean isVar = false;
-        for (int i = 0; i < length; i++) {
-            char c = str.charAt(i);
-            if (c == '$' && i < length && str.charAt(i + 1) == '{') {
-                isVar = true;
-            }
-            if (isVar && c == '}') {
-                isVar = false;
-                sb.append(StringUtil.SEMICOLON);
-            }
-            if (isVar && str.charAt(i) != '$' && str.charAt(i) != '{') {
-                sb.append(c);
-            }
-        }
+        String[] varArray1 = getFreeMarkerVar(str,"${",'}');
+        String[] varArray2 = getFreeMarkerVar(str,"#{",'}');
+        Set<String> set = new LinkedHashSet<String>(Arrays.asList(ArrayUtil.join(varArray1, varArray2)));
+        return set.toArray(new String[0]);
+    }
 
-        String[] nameArray = split(sb.toString(), StringUtil.SEMICOLON);
-        for (int i = 0; i < nameArray.length; i++) {
-            if (nameArray[i].contains("#(")) {
-                nameArray[i] = StringUtil.substringBeforeLast(nameArray[i], "#(");
+    /**
+     *  能支持复杂的表达式  A#[arr[1] +']' + \"[{\"]]B，B#[arr[2] +']' + \"[{\"]]C
+     * @param input 模版
+     * @param varBegin  开始字符
+     * @param varEnd 结尾字符
+     * @return 表达式
+     */
+    public static List<String> extractExpressions(String input,String varBegin,char varEnd) {
+        List<String> results = new ArrayList<>();
+        int pos = 0;
+        while (pos < input.length()) {
+            int start = input.indexOf(varBegin, pos);
+            if (start == -1) break;
+
+            int end = findClosingBracket(input, start + varBegin.length(),varBegin,varEnd);
+            if (end == -1) break;
+
+            results.add(input.substring(start + 2, end));
+            pos = end + 1;
+        }
+        return results;
+    }
+
+    public static int findClosingBracket(String str, int from,String varBegin,char varEnd) {
+        int depth = 1;  // 初始深度为1（已包含#[的[）
+        boolean inSingleQuote = false;
+        boolean inDoubleQuote = false;
+
+        for (int i = from; i < str.length(); i++) {
+            char c = str.charAt(i);
+
+            // 处理转义字符（跳过下一字符）
+            if (c == '\\') {
+                i++;  // 跳过转义后的字符
+                continue;
+            }
+
+            // 更新引号状态（单双引号互斥）
+            if (c == '\'' && !inDoubleQuote) {
+                inSingleQuote = !inSingleQuote;
+            } else if (c == '\"' && !inSingleQuote) {
+                inDoubleQuote = !inDoubleQuote;
+            }
+
+            // 仅非引号状态处理括号
+            if (!inSingleQuote && !inDoubleQuote) {
+                if (c == varBegin.charAt(1)) depth++;
+                else if (c == varEnd && --depth == 0) return i;
             }
         }
-        //过滤重复
-        Set<String> set = new LinkedHashSet<String>(Arrays.asList(nameArray));
-        return set.toArray(new String[set.size()]);
+        return -1;
+    }
+
+
+    /**
+     * 得到Freemarker 的变量列表
+     * 并且清除相同的变量
+     * @param str 字符串
+     * @param begin 变量前括号符号
+     * @param end 变量后括号符号
+     * @return 得到变量列表
+     */
+    public static String[] getFreeMarkerVar(String str,String begin,char end) {
+        return extractExpressions(str,begin,end).toArray(new String[0]);
     }
 
 
@@ -2427,6 +2570,10 @@ public class StringUtil {
      * @return 全角
      */
     public static String halfToFull(String input) {
+        if (input==null)
+        {
+            return empty;
+        }
         char[] c = input.toCharArray();
         for (int i = 0; i < c.length; i++) {
             if (c[i] == 32) {
@@ -2446,6 +2593,10 @@ public class StringUtil {
      * @return 半角
      */
     public static String fullToHalf(String input) {
+        if (input==null)
+        {
+            return empty;
+        }
         char[] c = input.toCharArray();
         for (int i = 0; i < c.length; i++) {
             if (c[i] == 12288) {
@@ -2496,7 +2647,7 @@ public class StringUtil {
     public static String quote(String input, boolean dou)
     {
         if (input == null) {
-            return StringUtil.empty;
+            return empty;
         }
         StringBuilder filtered = new StringBuilder(input.length() * 50);
         if (dou) {
@@ -2559,7 +2710,7 @@ public class StringUtil {
     public static String quoteSql(String input)
     {
         if (input == null) {
-            return StringUtil.empty;
+            return empty;
         }
         StringBuilder filtered = new StringBuilder(input.length() * 50);
         filtered.append("'");
@@ -2597,6 +2748,10 @@ public class StringUtil {
     }
 
     public static String escape(String src) {
+        if (src==null)
+        {
+            return empty;
+        }
         int i;
         char j;
         StringBuilder tmp = new StringBuilder();
@@ -2620,6 +2775,10 @@ public class StringUtil {
     }
 
     public static String unescape(String src) {
+        if (src==null)
+        {
+            return empty;
+        }
         StringBuilder tmp = new StringBuilder();
         tmp.ensureCapacity(src.length());
         int lastPos = 0, pos;
@@ -2658,64 +2817,66 @@ public class StringUtil {
      * @return String 转换好的字符串
      */
     public static String mailTitleConverter(String str) {
+        if (str==null)
+        {
+            return empty;
+        }
         String temp = str;
-        if (str != null) {
-            String str2 = str.toUpperCase();
-            if ((str2.contains("=?GB2312?Q?")) ||
-                    (str2.contains("=?GB2312?B?")) ||
-                    (str2.contains("=?ISO-8859-1?Q?")) ||
-                    (str2.contains("=?ISO-8859-1?B?")) ||
-                    (str2.contains("=?BIG5?Q?")) ||
-                    (str2.contains("=?BIG5?B?")) ||
-                    (str2.contains("=?US-ASCII?Q?")) ||
-                    (str2.contains("=?US-ASCII?B?")) ||
-                    (str2.contains("=?UNICODE-1-1-UTF-7?Q?")) ||
-                    (str2.contains("=?UNICODE-1-1-UTF-7?B?"))) {
-                str = temp;
-                str = replaceIgnoreCase(str, "=?us-ascii?Q?", "");
-                str = replaceIgnoreCase(str, "=?us-ascii?B?", "");
-                str = replaceIgnoreCase(str, "=?big5?Q?", "");
-                str = replaceIgnoreCase(str, "=?big5?B?", "");
-                str = replaceIgnoreCase(str, "=?ISO-8859-1?Q?", "");
-                str = replaceIgnoreCase(str, "=?ISO-8859-1?B?", "");
-                str = replaceIgnoreCase(str, "=?GB2312?Q?", "");
-                str = replaceIgnoreCase(str, "=?GB2312?B?", "");
-                str = replaceIgnoreCase(str, "=?UNICODE-1-1-UTF-7?Q?", "");
-                str = replaceIgnoreCase(str, "=?UNICODE-1-1-UTF-7?B?", "");
-                str = replaceIgnoreCase(str, "?=", "");
+        String str2 = str.toUpperCase();
+        if ((str2.contains("=?GB2312?Q?")) ||
+                (str2.contains("=?GB2312?B?")) ||
+                (str2.contains("=?ISO-8859-1?Q?")) ||
+                (str2.contains("=?ISO-8859-1?B?")) ||
+                (str2.contains("=?BIG5?Q?")) ||
+                (str2.contains("=?BIG5?B?")) ||
+                (str2.contains("=?US-ASCII?Q?")) ||
+                (str2.contains("=?US-ASCII?B?")) ||
+                (str2.contains("=?UNICODE-1-1-UTF-7?Q?")) ||
+                (str2.contains("=?UNICODE-1-1-UTF-7?B?"))) {
+            str = temp;
+            str = replaceIgnoreCase(str, "=?us-ascii?Q?", "");
+            str = replaceIgnoreCase(str, "=?us-ascii?B?", "");
+            str = replaceIgnoreCase(str, "=?big5?Q?", "");
+            str = replaceIgnoreCase(str, "=?big5?B?", "");
+            str = replaceIgnoreCase(str, "=?ISO-8859-1?Q?", "");
+            str = replaceIgnoreCase(str, "=?ISO-8859-1?B?", "");
+            str = replaceIgnoreCase(str, "=?GB2312?Q?", "");
+            str = replaceIgnoreCase(str, "=?GB2312?B?", "");
+            str = replaceIgnoreCase(str, "=?UNICODE-1-1-UTF-7?Q?", "");
+            str = replaceIgnoreCase(str, "=?UNICODE-1-1-UTF-7?B?", "");
+            str = replaceIgnoreCase(str, "?=", "");
 
-                byte[] main = str.getBytes();
-                byte[] remain = new byte[main.length];
-                int index = 0;
-                int i = 0;
-                while (index < main.length) {
-                    if (main[index] == '=') {
+            byte[] main = str.getBytes();
+            byte[] remain = new byte[main.length];
+            int index = 0;
+            int i = 0;
+            while (index < main.length) {
+                if (main[index] == '=') {
 
-                        index++;
-                        byte a1 = main[index];
-                        if (a1 >= 65) {
-                            a1 -= 55;
-                        } else {
-                            a1 -= 48;
-                        }
-                        index++;
-                        byte a2 = main[index];
-                        if (a2 >= 65) {
-                            a2 -= 55;
-                        } else {
-                            a2 -= 48;
-                        }
-                        remain[i] = (byte) (a1 * 16 + a2);
-                        index++;
-                        i++;
+                    index++;
+                    byte a1 = main[index];
+                    if (a1 >= 65) {
+                        a1 -= 55;
                     } else {
-                        remain[i] = main[index];
-                        i++;
-                        index++;
+                        a1 -= 48;
                     }
+                    index++;
+                    byte a2 = main[index];
+                    if (a2 >= 65) {
+                        a2 -= 55;
+                    } else {
+                        a2 -= 48;
+                    }
+                    remain[i] = (byte) (a1 * 16 + a2);
+                    index++;
+                    i++;
+                } else {
+                    remain[i] = main[index];
+                    i++;
+                    index++;
                 }
-                str = new String(remain).substring(0, i);
             }
+            str = new String(remain).substring(0, i);
         }
         return str;
     }
@@ -2825,11 +2986,11 @@ public class StringUtil {
      * @return 获取替换字符串
      */
     public static String replaceChars(String replaceChar, int length) {
-        String resultReplace = replaceChar;
+        StringBuilder resultReplace = new StringBuilder(replaceChar);
         for (int i = 1; i < length; i++) {
-            resultReplace += replaceChar;
+            resultReplace.append(replaceChar);
         }
-        return resultReplace;
+        return resultReplace.toString();
     }
 
     /*
@@ -3075,7 +3236,8 @@ public class StringUtil {
      * @return  驼峰格式字符串转换为下划线格式字符串
      */
     public static String camelToUnderline(String value,boolean lower) {
-        if (StringUtil.isNull(value)) {
+        if (value==null)
+        {
             return empty;
         }
         String param = value;
@@ -3119,28 +3281,38 @@ public class StringUtil {
         if (isNull(value)) {
             return empty;
         }
+        String result;
         if (!value.contains(UNDERLINE+""))
         {
-            if (Character.isUpperCase(value.charAt(0)))
+            String param= value;
+            if (value.toUpperCase().equals(value))
             {
-                return uncapitalize(value);
+                //如果全部是大写的，就全部转换为小写
+                param= value.toLowerCase();
             }
-            return value;
-        }
-        String param= value.toLowerCase();
-        int len = param.length();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            char c = param.charAt(i);
-            if (c == UNDERLINE) {
-                if (++i < len) {
-                    sb.append(Character.toUpperCase(param.charAt(i)));
+            if (Character.isUpperCase(param.charAt(0)))
+            {
+                //其他情况转换为首字母小写
+                return uncapitalize(param);
+            }
+            result = param;
+        } else {
+            String param= value.toLowerCase();
+            int len = param.length();
+            StringBuilder sb = new StringBuilder(len);
+            for (int i = 0; i < len; i++) {
+                char c = param.charAt(i);
+                if (c == UNDERLINE) {
+                    if (++i < len) {
+                        sb.append(Character.toUpperCase(param.charAt(i)));
+                    }
+                } else {
+                    sb.append(c);
                 }
-            } else {
-                sb.append(c);
             }
+            result = sb.toString();
         }
-        return sb.toString();
+        return result;
     }
 
     //---------------------------------
@@ -3168,6 +3340,21 @@ public class StringUtil {
         s = s.replaceAll("#", ".?");
         s = "^" + s + "$";
         return matches(s, url);
+    }
+
+    /**
+     *
+     * @param str 字符串
+     * @return 去掉excel表导出的时候会出现Ensp空格
+     */
+    public static String replaceENSP(String str) {
+        char[] chars = str.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == 0x2002 || chars[i] == 0x2003 || chars[i] == 0x00a0) {
+                chars[i] = ' ';
+            }
+        }
+        return new String(chars);
     }
 
     public static String deleteAny(String inString, String charsToDelete) {
@@ -3278,6 +3465,11 @@ public class StringUtil {
     }
 
 
+    /**
+     *
+     * @param name 修复变量名
+     * @return 好的变量名
+     */
     public static String fixedVarName(String name) {
         if (name == null) {
             return null;
@@ -3322,6 +3514,5 @@ public class StringUtil {
         }
         return result;
     }
-
 
 }

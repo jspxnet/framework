@@ -35,7 +35,7 @@ public class ValidateCode {
     // 验证码
     private String code = null;
 
-    private char[] codeSequence = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+    private final char[] CODE_SEQUENCE = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
             'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
             'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7', '9'};
 
@@ -119,7 +119,7 @@ public class ValidateCode {
     public String makeCode() {
         StringBuilder randomCode = new StringBuilder();
         for (int i = 0; i < this.codeCount; i++) {
-            randomCode.append(codeSequence[RandomUtil.getRandomInt(0, codeSequence.length - 1)]);
+            randomCode.append(CODE_SEQUENCE[RandomUtil.getRandomInt(0, CODE_SEQUENCE.length - 1)]);
         }
         code = randomCode.toString();
         return code;

@@ -62,7 +62,7 @@ public class ApiDocView extends ActionSupport {
     private Map<String, ApiAction> createIndex()  {
 
         String softName = getRootNamespace();
-        Map<String, ApiAction> resultMap = new HashMap<>();
+        Map<String, ApiAction> resultMap = new LinkedHashMap<>();
         IocContext iocContext = beanFactory.getIocContext();
         Map<String, String> extendList = webConfigManager.getExtendList();
         for (String name : extendList.keySet()) {
@@ -93,6 +93,10 @@ public class ApiDocView extends ActionSupport {
                     {
                         continue;
                     }
+                    if (vo.getTitle()!=null&&vo.getTitle().startsWith("#"))
+                    {
+                        continue;
+                    }
                     resultMap.put(vo.getId(), vo);
                 }
             }
@@ -113,7 +117,7 @@ public class ApiDocView extends ActionSupport {
             }
         });
 
-        Map<String, ApiAction> sortMap = new LinkedHashMap<>();
+        LinkedHashMap<String, ApiAction> sortMap = new LinkedHashMap<>();
         for(Map.Entry<String, ApiAction> mapping:list){
             sortMap.put(mapping.getKey(),mapping.getValue());
         }
@@ -216,10 +220,8 @@ public class ApiDocView extends ActionSupport {
         ApiAction apiAction = indexCache.get(id);
         AssertException.isNull(apiAction, "不存在的文档id");
 
-
         ApiDocument apiDocument = BeanUtil.copy(apiAction, ApiDocument.class);
         Class<?> cla = ClassUtil.loadClass(apiDocument.getClassName());
-
 
         Map<String, ApiParam> params = ApiDocUtil.getSetMethodApiOperate(cla);
         apiDocument.setParams(params);
@@ -228,7 +230,7 @@ public class ApiDocView extends ActionSupport {
         Map<Operate, Method> operateMap = TXWebUtil.getClassOperateList(cla);
         for (Method exeMethod : operateMap.values()) {
             ApiOperate apiOperate = ApiDocUtil.getMethodApiOperate(cla,exeMethod, apiDocument.getUrl(),apiDocument.getNamespace());
-            Map<String, ApiParam> methodParamList = apiOperate.getMethod().getParams();
+            //Map<String, ApiParam> methodParamList = apiOperate.getMethod().getParams();
             apiOperate.setParams(params);
             operateList.add(apiOperate);
             ApiDocUtil.putReturnApiField(exeMethod,apiOperate);
@@ -261,16 +263,4 @@ public class ApiDocView extends ActionSupport {
     }
 
 
-/*
-    public static void main(String[] arg) throws Exception {
-
-        JspxNetApplication.autoRun();
-        ApiDocView apiDocView = new ApiDocView();
-        //System.out.println(new JSONObject(apiDocView.indexing(),true).toString(4));
-
-        String id = "9f3d18c59fbbf4e71aae4640f5f8e059";
-        ApiDocument response = apiDocView.getDocument(id);
-
-        System.out.println(new JSONObject(response, true).toString(4));
-    }*/
 }

@@ -1,12 +1,11 @@
 package com.github.jspxnet.sober.util;
 
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.cache.JSCacheManager;
+import com.github.jspxnet.cache.LockCache;
+import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.sober.criteria.expression.Expression;
-import com.github.jspxnet.sober.criteria.projection.Projections;
-import com.github.jspxnet.sober.jdbc.JdbcOperations;
-import com.github.jspxnet.sober.table.LockTable;
 import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
@@ -14,75 +13,104 @@ import com.github.jspxnet.utils.StringUtil;
  * 数据锁,数据库保存的方式
  */
 public final class LockUtil {
-    private LockUtil()
-    {
+    private LockUtil() {
 
     }
 
     /**
      * 锁定表
-     * @param jdbcOperations jdbc操作类
-     * @param obj 锁定表实体
+     *
+     * @param soberSupport jdbc操作类
+     * @param obj          锁定表实体
      * @return 是否成功锁定
      */
-    public static boolean lock(JdbcOperations jdbcOperations,Object obj)  {
+    public static boolean lock(SoberSupport soberSupport, Object obj) {
 
-        Class<?> cls = obj.getClass();
-        TableModels tableModels  = jdbcOperations.getSoberTable(cls);
-        Object id = BeanUtil.getProperty(obj,tableModels.getPrimary());
-        LockTable lockTable = new LockTable();
-        lockTable.setTableName(tableModels.getName());
-        lockTable.setLockId(ObjectUtil.toString(id));
-        if (ClassUtil.haveMethodsName(cls,"putName"))
-        {
-            Object putName = BeanUtil.getProperty(obj,"putName");
-            lockTable.setPutName(ObjectUtil.toString(putName));
+        Class<?> cls = null;
+        if (obj instanceof Class) {
+            cls = (Class<?>) obj;
+        } else {
+            cls = obj.getClass();
         }
-        if (ClassUtil.haveMethodsName(cls,"putUid"))
-        {
-            Object putUid = BeanUtil.getProperty(obj,"putUid");
-            lockTable.setPutUid(ObjectUtil.toLong(putUid));
+
+        //会循环调用
+        String id = StringUtil.empty;
+        String tableName = StringUtil.empty;
+        if (obj instanceof Class) {
+            tableName = AnnotationUtil.getTableName(cls);
+            if (StringUtil.isNullOrWhiteSpace(tableName)) {
+                tableName = cls.getName();
+            }
+            id = Environment.Global;
+        } else {
+            TableModels tableModels = soberSupport.getSoberTable(cls);
+            id = ObjectUtil.toString(BeanUtil.getProperty(obj, tableModels.getPrimary()));
         }
-        if (ClassUtil.haveMethodsName(cls,"ip"))
-        {
-            Object ip = BeanUtil.getProperty(obj,"ip");
-            lockTable.setIp(ObjectUtil.toString(ip));
-        }
-        if (StringUtil.isNull(lockTable.getIp()))
-        {
-            lockTable.setIp("127.0.0.1");
-        }
-        try {
-            return jdbcOperations.save(lockTable)>0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+
+        String key = tableName + "_" + id;
+        //保存到缓存，如果保存到数据库，自动建库的时候有可能死循环 begin
+        return JSCacheManager.put(LockCache.class, key, 1);
+        //保存到缓存，如果保存到数据库，自动建库的时候有可能死循环 end
     }
 
     /**
-     *
-     * @param jdbcOperations jdbc操作类
-     * @param obj 判断对象
+     * @param soberSupport jdbc操作类
+     * @param obj          判断对象
      * @return 是否成功锁定
      */
-    public static boolean isLock(JdbcOperations jdbcOperations,Object obj) {
-        Class<?> cls = obj.getClass();
-        TableModels tableModels  = jdbcOperations.getSoberTable(cls);
-        Object id = BeanUtil.getProperty(obj,tableModels.getPrimary());
-        return jdbcOperations.createCriteria(LockTable.class).add(Expression.eq("tableName", tableModels.getName()))
-                .add(Expression.eq(tableModels.getPrimary(),id)).setProjection(Projections.rowCount()).intUniqueResult()>0;
+    public static boolean isLock(SoberSupport soberSupport, Object obj) {
+        Class<?> cls = null;
+        if (obj instanceof Class) {
+            cls = (Class<?>) obj;
+        } else {
+            cls = obj.getClass();
+        }
+
+        String id = StringUtil.empty;
+        String tableName = StringUtil.empty;
+        if (obj instanceof Class) {
+            tableName = AnnotationUtil.getTableName(cls);
+            if (StringUtil.isNullOrWhiteSpace(tableName)) {
+                tableName = Environment.defaultValue;
+            }
+            id = Environment.Global;
+        } else {
+            TableModels tableModels = soberSupport.getSoberTable(cls);
+            id = ObjectUtil.toString(BeanUtil.getProperty(obj, tableModels.getPrimary()));
+        }
+        String key = tableName + "_" + id;
+        //保存到缓存，如果保存到数据库，自动建库的时候有可能死循环 begin
+        return JSCacheManager.get(LockCache.class, key) != null;
     }
 
     /**
-     *
-     * @param jdbcOperations jdbc操作类
-     * @param obj 判断对象
+     * @param soberSupport jdbc操作类
+     * @param obj          判断对象
      * @return 解锁是否成功
      */
-    public static boolean unLock(JdbcOperations jdbcOperations,Object obj) {
-        Class<?> cls = obj.getClass();
-        TableModels tableModels  = jdbcOperations.getSoberTable(cls);
-        return jdbcOperations.delete(LockTable.class,"tableName",tableModels.getName())>=0;
+    public static boolean unLock(SoberSupport soberSupport, Object obj) {
+        Class<?> cls = null;
+        if (obj instanceof Class) {
+            cls = (Class<?>) obj;
+        } else {
+            cls = obj.getClass();
+        }
+
+        String id = StringUtil.empty;
+        String tableName = StringUtil.empty;
+        if (obj instanceof Class) {
+            tableName = AnnotationUtil.getTableName(cls);
+            if (StringUtil.isNullOrWhiteSpace(tableName)) {
+                tableName = Environment.defaultValue;
+            }
+            id = Environment.Global;
+        } else {
+            TableModels tableModels = soberSupport.getSoberTable(cls);
+            id = ObjectUtil.toString(BeanUtil.getProperty(obj, tableModels.getPrimary()));
+        }
+
+        String key = tableName + "_" + id;
+        //保存到缓存，如果保存到数据库，自动建库的时候有可能死循环 begin
+        return JSCacheManager.remove(LockCache.class, key);
     }
 }

@@ -6,7 +6,6 @@ import java.io.Serializable;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2021/1/5 13:07
  * description: Consul配置

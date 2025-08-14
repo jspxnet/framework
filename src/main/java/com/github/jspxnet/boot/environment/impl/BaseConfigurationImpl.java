@@ -20,6 +20,7 @@ package com.github.jspxnet.boot.environment.impl;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.utils.*;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.net.URL;
@@ -28,17 +29,14 @@ import java.util.List;
 
 @Slf4j
 public class BaseConfigurationImpl implements JspxConfiguration {
-    private String defaultPath = null;
+    private static String defaultPath = null;
     private String configFilePath = null;
     final private static Date START_RUN_DATE = new Date();
+    @Getter
     private String defaultConfigFile = Environment.jspx_properties_file;
 
     public BaseConfigurationImpl() {
 
-    }
-
-    public String getDefaultConfigFile() {
-        return defaultConfigFile;
     }
 
     @Override
@@ -48,13 +46,14 @@ public class BaseConfigurationImpl implements JspxConfiguration {
 
     @Override
     public void setDefaultPath(String defaultPath) {
-        this.defaultPath = defaultPath;
+        BaseConfigurationImpl.defaultPath = defaultPath;
     }
 
     /**
      * 得到配置文件路径
      */
-    private void loadPath() {
+    @Override
+    public void loadPath() {
         String path = null;
         URL url = Environment.class.getResource("/" + defaultConfigFile);
 
@@ -196,7 +195,7 @@ public class BaseConfigurationImpl implements JspxConfiguration {
      */
     @Override
     public String getDefaultPath() {
-        if (defaultPath==null)
+        if (StringUtil.isNullOrWhiteSpace(defaultPath))
         {
             loadPath();
         }

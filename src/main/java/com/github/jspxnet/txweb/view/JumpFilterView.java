@@ -15,6 +15,8 @@ import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,25 +31,16 @@ public class JumpFilterView extends ActionSupport {
     }
 
     //1:表示本页代理处理跳转
+    @Setter
+    @Getter
     private int promptly = 0;
 
     //安全判断表达式
+    @Getter
     private String[] expressions = ArrayUtil.EMPTY_STRING_ARRAY;
 
     private String url = StringUtil.empty;
 
-    public int getPromptly() {
-        return promptly;
-    }
-
-    public void setPromptly(int promptly) {
-        this.promptly = promptly;
-    }
-
-
-    public String[] getExpressions() {
-        return expressions;
-    }
 
     @Param(request = false)
     public void setExpressions(String[] expressions) {

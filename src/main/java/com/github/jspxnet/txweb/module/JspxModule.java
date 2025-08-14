@@ -104,7 +104,7 @@ public class JspxModule {
                 envParams.clear();
                 return null;
             }
-            ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, ActionHandle.NAME, null, request, response);
+            ActionInvocation actionInvocation = new DefaultActionInvocation(actionConfig, envParams, ActionHandle.NAME, null, request, response,false);
             actionInvocation.initAction();
             actionInvocation.invoke();
             return actionInvocation.getActionProxy().getAction();

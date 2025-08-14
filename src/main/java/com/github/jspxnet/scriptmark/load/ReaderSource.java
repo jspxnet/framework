@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.scriptmark.load;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.FileNotFoundException;
 
@@ -36,7 +37,7 @@ public class ReaderSource extends Source {
     }
 
     @Override
-    public Reader getReader() throws FileNotFoundException {
+    public Reader getReader()  {
         return reader;
     }
 

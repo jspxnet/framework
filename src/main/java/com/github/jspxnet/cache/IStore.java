@@ -93,4 +93,34 @@ public interface IStore extends Serializable {
     void setSecond(int second);
 
     int getSecond();
+
+    /**
+     * 锁定
+     * @param key key
+     * @return 是否成功
+     */
+    boolean lock(String key);
+
+    /**
+     * 锁定
+     * @param key key
+     * @param timeToLive 锁定最多时间
+     * @return 是否成功
+     */
+    boolean lock(String key, int timeToLive);
+
+    /**
+     *
+     * @param key key
+     * @return 判断锁定
+     */
+    boolean isLock(String key);
+
+    /**
+     *
+     * @param key key
+     * @return 解锁
+     */
+    boolean unLock(String key);
+
 }

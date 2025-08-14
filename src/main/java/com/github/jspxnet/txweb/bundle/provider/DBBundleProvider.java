@@ -13,13 +13,16 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.security.symmetry.Encrypt;
+import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.txweb.dao.impl.GenericDAOImpl;
+import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.txweb.bundle.BundleProvider;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.SoberFactory;
 import com.github.jspxnet.sober.SoberSupport;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
@@ -32,28 +35,20 @@ import java.util.*;
  */
 @Slf4j
 public class DBBundleProvider extends BundleProvider {
-    private SoberSupport soberTemplate = new GenericDAOImpl();
+    private final SoberSupport soberTemplate = new GenericDAOImpl();
     final private static String BUNDLE_MODEL = "bundle";
     final private static String LANGUAGE_MODEL = "language";
-
-
-
 
     public void setSoberFactory(SoberFactory soberFactory) {
         soberTemplate.setSoberFactory(soberFactory);
     }
 
-
     public DBBundleProvider() {
 
     }
 
-
+    @Setter
     private String model = BUNDLE_MODEL;
-
-    public void setModel(String model) {
-        this.model = model;
-    }
 
     /**
      * 得到绑定值
@@ -66,7 +61,7 @@ public class DBBundleProvider extends BundleProvider {
         if (StringUtil.isNull(keys)) {
             return null;
         }
-        return (BundleTable) soberTemplate.createCriteria(BundleTable.class)
+        return soberTemplate.createCriteria(BundleTable.class)
                 .add(Expression.eq("namespace", namespace))
                 .add(Expression.eq("dataType", dataType))
                 .add(Expression.eq("idx", keys))
@@ -77,7 +72,6 @@ public class DBBundleProvider extends BundleProvider {
     public boolean save(String key, String value) throws Exception {
         return super.save(key, value, 0);
     }
-
 
     /**
      * 保存
@@ -102,7 +96,7 @@ public class DBBundleProvider extends BundleProvider {
             try {
                 return soberTemplate.update(editBundleTable, new String[]{"context", "encrypt"}) >= 0;
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("save",e);
             }
         }
         return soberTemplate.save(bundletable) > 0;
@@ -112,10 +106,12 @@ public class DBBundleProvider extends BundleProvider {
      * @return 返回列表
      */
     @Override
-    public List<BundleTable> getList() {
+    public List<BundleTable> getList()
+    {
         List<BundleTable> bundleTableList = soberTemplate.createCriteria(BundleTable.class)
                 .add(Expression.eq("namespace", namespace))
                 .add(Expression.eq("dataType", dataType))
+                .addOrder(Order.asc("sort"))
                 .setCurrentPage(1)
                 .setTotalCount(10000)
                 .list(false);
@@ -131,8 +127,11 @@ public class DBBundleProvider extends BundleProvider {
                 log.error("bundleTable list", e);
             }
         }
+
         return bundleTableList;
     }
+
+
 
     /**
      * @return boolean 删除所有
@@ -201,5 +200,9 @@ public class DBBundleProvider extends BundleProvider {
                 .add(Expression.eq("dataType", dataType)).getDeleteListCacheKey();
         JSCacheManager.queryRemove(BundleTable.class, key);
         cache.clear();
+    }
+
+    public String getModel() {
+        return model;
     }
 }

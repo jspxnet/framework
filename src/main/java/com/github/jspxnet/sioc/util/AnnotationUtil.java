@@ -3,14 +3,19 @@ package com.github.jspxnet.sioc.util;
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.sioc.annotation.*;
+import com.github.jspxnet.sioc.interceptor.GlobalMethodInterceptor;
 import com.github.jspxnet.sober.annotation.SqlMap;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Transaction;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
+import net.sf.cglib.proxy.MethodProxy;
+
 import java.lang.reflect.Method;
 
+@Slf4j
 public final class AnnotationUtil {
     private AnnotationUtil() {
     }
@@ -19,9 +24,8 @@ public final class AnnotationUtil {
      * 执行Init 标签
      *
      * @param bean bean对象
-     * @throws Exception 异常
      */
-    public static void invokeInit(Object bean) throws Exception {
+    public static void invokeInit(Object bean)  {
         if (bean == null) {
             return;
         }
@@ -29,10 +33,19 @@ public final class AnnotationUtil {
         //如果没有配置就检查是否有标签方式的
         Method[] methods = ClassUtil.getDeclaredMethods(bean.getClass());
         for (Method method : methods) {
+            if (method==null)
+            {
+                continue;
+            }
             Init init = method.getAnnotation(Init.class);
-            if (init != null && method.getParameterTypes().length==0) {
+            Class<?>[] paramTypes = method.getParameterTypes();
+            if (init != null &&  paramTypes.length==0) {
                 method.setAccessible(true);
-                method.invoke(bean);
+                try {
+                    method.invoke(bean);
+                } catch (Exception e) {
+                    log.error("invokeInit ",e);
+                }
             }
         }
     }
@@ -128,10 +141,13 @@ public final class AnnotationUtil {
      * @return  判断是否有需要代理执行的方法
      */
     public static boolean hasProxyMethod(Class<?> cls) {
-        if (cls==null)
+
+        //避免出现嵌套循环
+        if (cls==null || GlobalMethodInterceptor.class.equals(cls) || MethodProxy.class.equals(cls))
         {
             return false;
         }
+
         for (Method method:cls.getDeclaredMethods())
         {
             if (method.getAnnotation(Transaction.class)!=null)

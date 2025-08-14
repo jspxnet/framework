@@ -18,6 +18,8 @@
  */
 package com.github.jspxnet.cron4j;
 
+import lombok.Getter;
+
 /**
  * <p>
  * A {@link Task} implementation acting as a wrapper around a {@link Runnable}
@@ -27,11 +29,15 @@ package com.github.jspxnet.cron4j;
  * @author Carlo Pelliccia
  * @since 2.0
  */
+@Getter
 class RunnableTask extends Task {
 
 	/**
 	 * The wrapped runnable object.
-	 */
+     * -- GETTER --
+     *  Returns the wrapped Runnable object.
+     *
+     */
 	private final Runnable runnable;
 
 	/**
@@ -47,16 +53,7 @@ class RunnableTask extends Task {
 		this.runnable = runnable;
 	}
 
-	/**
-	 * Returns the wrapped Runnable object.
-	 * 
-	 * @return The wrapped Runnable object.
-	 */
-	public Runnable getRunnable() {
-		return runnable;
-	}
-
-	/**
+    /**
 	 * Implements {@link Task#execute(TaskExecutionContext)}, launching the
 	 * {@link Runnable#run()} method on the wrapped object.
 	 */
@@ -70,11 +67,10 @@ class RunnableTask extends Task {
 	 */
 	@Override
 	public String toString() {
-		String b = "Task[" +
+		return "Task[" +
 				"runnable=" +
 				runnable +
 				"]";
-		return b;
 	}
 
 }

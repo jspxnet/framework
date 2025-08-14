@@ -18,6 +18,7 @@ import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.TemplateModel;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.scriptmark.cache.TemplateLifecycle;
+import lombok.Setter;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,6 +27,7 @@ import com.github.jspxnet.scriptmark.cache.TemplateLifecycle;
  * Time: 16:11:47
  * 模版容器，包括缓存及解析
  */
+@Setter
 public class TemplateManager implements TemplateLoader {
 
     static private final TemplateManager INSTANCE = new TemplateManager();
@@ -61,10 +63,6 @@ public class TemplateManager implements TemplateLoader {
     @Override
     public boolean isUseCache() {
         return useCache;
-    }
-
-    public void setUseCache(boolean useCache) {
-        this.useCache = useCache;
     }
 
     @Override

@@ -22,6 +22,8 @@ import com.github.jspxnet.txweb.view.UploadFileView;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.util.List;
 
@@ -31,6 +33,7 @@ import java.util.List;
  * date: 12-12-4
  * Time: 下午2:34
  */
+@Slf4j
 @HttpMethod(caption = "附件管理")
 public class UploadFileManageAction extends UploadFileView {
 
@@ -68,7 +71,7 @@ public class UploadFileManageAction extends UploadFileView {
                 addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.updateFailure));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("sortType error", e);
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.updateFailure));
         }
     }
@@ -107,8 +110,8 @@ public class UploadFileManageAction extends UploadFileView {
             setActionLogContent(actionLog.toString());
             addActionMessage(language.getLang(LanguageRes.deleteSuccess));
         } catch (Exception e) {
+            log.error("delete error", e);
             addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.deleteFailure));
-            e.printStackTrace();
         }
     }
 
@@ -127,7 +130,6 @@ public class UploadFileManageAction extends UploadFileView {
                 FileUtil.delete(phoneImgFile);
                 //todo另外还要删除子图片
             }
-
         }
     }
 

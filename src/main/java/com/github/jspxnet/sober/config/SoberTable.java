@@ -17,6 +17,8 @@ import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.IDType;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ArrayUtil;
+import lombok.Setter;
+
 import java.util.*;
 
 /**
@@ -25,45 +27,77 @@ import java.util.*;
  * date: 2007-1-6
  * Time: 23:07:57
  *
- * SoberTableModel
+ *
  */
 public class SoberTable implements TableModels {
 
+    @Setter
+    private boolean empty = false;
+
+    @Override
+    public boolean isEmpty() {
+        return empty;
+    }
+
     //数据库名 ，这里不是数据库类型
+
     private String databaseName = StringUtil.empty;
+
     //数据库表名
+    @Setter
     private String name = StringUtil.empty;
-    //表别名
+
+    @Setter
+    //表别名，中文注释
     private String caption = StringUtil.empty;
 
     //是否动态创建表
+    @Setter
     private boolean create = true;
 
-    //cache
+    //是否使用缓存
+    @Setter
     private boolean useCache = true;
 
+    //是否自动清理缓存
+    @Setter
+    private boolean autoCleanCache = false;
+
     //实体,具体的类
+    @Setter
     @JsonIgnore
     private Class<?> entity;
     //关键字名
     private String primary = StringUtil.empty;
     //是否自动生成ID
-    private boolean autoId = true;
+    private boolean autoId = false;
     //是否使用数据库自增
+    @Setter
     private String idType = StringUtil.empty;
     //映射对应关系
-    private Map<String, SoberNexus> nexusMap = new LinkedHashMap<>();
+    @Setter
+    private Map<String, SoberNexus> nexusMap = new LinkedHashMap<>(0);
     //字段
     private List<SoberColumn> columns = new LinkedList<>();
     //字段
-    private Map<String, SoberCalcUnique> calcUniqueMap = new LinkedHashMap<>();
+    @Setter
+    private Map<String, SoberCalcUnique> calcUniqueMap = new LinkedHashMap<>(0);
 
     //可扩展
     private boolean canExtend = false;
 
     //最后访问时间
+    @Setter
     private long lastDate = System.currentTimeMillis();
 
+    @Override
+    public String getIndexConf() {
+        return indexConf;
+    }
+
+    @Setter
+    //索引 例子: element_page_unique_index(url,namespace,originId)
+    private String indexConf = StringUtil.empty;
     /**
      * 得到表名
      *
@@ -94,31 +128,14 @@ public class SoberTable implements TableModels {
         return idType;
     }
 
-    public void setIdType(String idType) {
-        this.idType = idType;
-    }
-
     @Override
     public boolean isSerial() {
         return IDType.serial.equalsIgnoreCase(idType);
     }
 
-    /**
-     * 设置表名
-     *
-     * @param tableName 表名
-     */
-    public void setName(String tableName) {
-        this.name = tableName;
-    }
-
     @Override
     public Class<?> getEntity() {
         return entity;
-    }
-
-    public void setEntity(Class<?> entity) {
-        this.entity = entity;
     }
 
     @Override
@@ -170,7 +187,7 @@ public class SoberTable implements TableModels {
     @Override
     public SoberColumn getColumn(String keys) {
         for (SoberColumn column : columns) {
-            if (column.getName().equalsIgnoreCase(keys)) {
+            if (column.getName().equalsIgnoreCase(keys) || column.getCaption().equalsIgnoreCase(keys)) {
                 return column;
             }
         }
@@ -190,10 +207,6 @@ public class SoberTable implements TableModels {
     @Override
     public Map<String, SoberCalcUnique> getCalcUniqueMap() {
         return calcUniqueMap;
-    }
-
-    public void setCalcUniqueMap(Map<String, SoberCalcUnique> calcUniqueMap) {
-        this.calcUniqueMap = calcUniqueMap;
     }
 
     @Override
@@ -223,17 +236,9 @@ public class SoberTable implements TableModels {
         return nexusMap;
     }
 
-    public void setNexusMap(Map<String, SoberNexus> nexusMap) {
-        this.nexusMap = nexusMap;
-    }
-
     @Override
     public long getLastDate() {
         return lastDate;
-    }
-
-    public void setLastDate(long lastDate) {
-        this.lastDate = lastDate;
     }
 
     public void updateLastDate() {
@@ -245,15 +250,12 @@ public class SoberTable implements TableModels {
         return useCache;
     }
 
-    public void setUseCache(boolean useCache) {
-        this.useCache = useCache;
-    }
-
     @Override
     public String getDatabaseName() {
         return databaseName;
     }
 
+    @Override
     public void setDatabaseName(String databaseName) {
         this.databaseName = databaseName;
         for (SoberColumn column : columns) {
@@ -267,10 +269,6 @@ public class SoberTable implements TableModels {
     @Override
     public boolean isCreate() {
         return create;
-    }
-
-    public void setCreate(boolean create) {
-        this.create = create;
     }
 
     @Override
@@ -293,6 +291,10 @@ public class SoberTable implements TableModels {
     @JsonField(name="className")
     public String getClassName()
     {
+        if (entity==null)
+        {
+            return StringUtil.empty;
+        }
         return entity.getName();
     }
 
@@ -307,6 +309,11 @@ public class SoberTable implements TableModels {
     }
 
     @Override
+    public boolean isAutoCleanCache() {
+        return autoCleanCache;
+    }
+
+    @Override
     @JsonField(caption = "id")
     public String getId()
     {
@@ -318,4 +325,10 @@ public class SoberTable implements TableModels {
         return EncryptUtil.getMd5(json.toString());
     }
 
+    //生成一个动态表明,主要通过 name
+    @Override
+    public String getDynamicTableName(String name)
+    {
+        return StringUtil.filterFiledCaption(name);
+    }
 }

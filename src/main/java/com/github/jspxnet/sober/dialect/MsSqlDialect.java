@@ -50,12 +50,15 @@ public class MsSqlDialect extends Dialect {
 
 
         put(SQL_INSERT, "INSERT INTO ${" + KEY_TABLE_NAME + "} (<#list field=" + KEY_FIELD_LIST + ">${field}<#if where=field_has_next>,</#if></#list>) VALUES (<#list x=[1.." + KEY_FIELD_COUNT + "]>?<#if where=x_has_next>,</#if></#list>)");
+
         put(SQL_CRITERIA_QUERY, "SELECT top ${" + SQL_RESULT_END_ROW + "} * FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
 
         put(String.class.getName(), "[${" + COLUMN_NAME + "}] <#if where=" + COLUMN_LENGTH + "&gt;1000>[ntext]<#else>nvarchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>NULL</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
-        put(Boolean.class.getName(), "[${" + COLUMN_NAME + "}] smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
-        put(boolean.class.getName(), "[${" + COLUMN_NAME + "}] smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
+        put(Boolean.class.getName(), "[${" + COLUMN_NAME + "}] smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>");
+
+        put(boolean.class.getName(), "[${" + COLUMN_NAME + "}] smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>");
+
 
         put(Integer.class.getName(), "[${" + COLUMN_NAME + "}] int <#if where=" + KEY_FIELD_SERIAL + ">identity(1,1)</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if>  <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + ">0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
         put("int", "[${" + COLUMN_NAME + "}] [int] <#if where=" + KEY_FIELD_SERIAL + ">identity(1,1)</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if>  <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
@@ -184,7 +187,7 @@ GO
     }
 
     @Override
-    public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
+    public String getLimitString(String sql, int begin, int end,TableModels soberTable) {
         return sql;
     }
 
@@ -236,9 +239,13 @@ GO
             //短断整型
             return super.getResultSetValue(rs,index);
         } catch (SQLException e) {
-            e.printStackTrace();
             log.error("typeName=" + typeName + " size=" + colSize + " columnName=" + rs.getMetaData().getColumnName(index), e);
         }
         return null;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT top 1 * FROM (" + sql + ") zs";
     }
 }

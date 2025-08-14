@@ -28,8 +28,8 @@ import javax.tools.JavaCompiler.CompilationTask;
  * 动态编译
  */
 public class DynamicCompile {
-    public class JavaStringObject extends SimpleJavaFileObject {
-        private String code;
+    public static class JavaStringObject extends SimpleJavaFileObject {
+        private final String code;
 
         public JavaStringObject(String name, String code) {
             super(URI.create("string:///" + name.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);

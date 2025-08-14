@@ -10,6 +10,10 @@
 package com.github.jspxnet.utils;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.scriptmark.XmlEngine;
+import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
+import com.github.jspxnet.scriptmark.parse.tag.DescribeTag;
+import com.github.jspxnet.scriptmark.parse.tag.DescribesTag;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -286,23 +290,6 @@ public final class XMLUtil {
             log.error(xml, e);
         }
         return StringUtil.empty;
-    }
-
-    /**
-     * @param key    属性名称
-     * @param value  值
-     * @param xmlstr xml字符串
-     * @return 是否有此属性
-     */
-    static public boolean getInKey(String key, String value, String xmlstr) {
-        try {
-            ReadXML readXml = new ReadXML(key, value);
-            parseXmlString(readXml, xmlstr);
-            return readXml.getValue();
-        } catch (Exception e) {
-            log.error("parse Xml String:" + xmlstr + "  key=" + key + " value=" + value, e);
-            return false;
-        }
     }
 
     /**
@@ -586,6 +573,55 @@ public final class XMLUtil {
         }
 
         return resultMap;
+    }
+
+
+    /**
+     *
+     * api文档描述专用
+     * @param namespace 命名控件
+     * @param key  变量名称
+     * @param id 帮助id
+     * @param flag 多个项目函数区分标识
+     * @param xml xml正文
+     * @return 解析得到描述部分
+     * @throws Exception 异常
+     */
+    public static String getDescribe(String namespace,String key,String id,String flag,String xml) throws Exception {
+        if (id==null||namespace==null)
+        {
+            return StringUtil.empty;
+        }
+        XmlEngine xmlEngine = new XmlEngineImpl();
+        xmlEngine.putTag("describes", DescribesTag.class.getName());
+        List<com.github.jspxnet.scriptmark.core.TagNode> list = xmlEngine.getTagNodes(xml);
+        for (com.github.jspxnet.scriptmark.core.TagNode node : list) {
+            DescribesTag describesTag = (DescribesTag) node;
+            String tmp = describesTag.getStringAttribute("namespace");
+            tmp = XMLUtil.deleteQuote(tmp);
+            if (namespace.equalsIgnoreCase(tmp))
+            {
+                XmlEngine xmlEngine2 = new XmlEngineImpl();
+                xmlEngine2.putTag("describe", DescribeTag.class.getName());
+                List<com.github.jspxnet.scriptmark.core.TagNode> list2 = xmlEngine2.getTagNodes(xml);
+                for (com.github.jspxnet.scriptmark.core.TagNode node2 : list2) {
+                    DescribeTag describeTag = (DescribeTag) node2;
+                    String vid = describeTag.getStringAttribute(key);
+                    vid = XMLUtil.deleteQuote(vid);
+                    String vFlag = describeTag.getFlag();
+                    vFlag = XMLUtil.deleteQuote(vFlag);
+                    if (StringUtil.isNull(vFlag)&&id.equalsIgnoreCase(vid) ||
+                            flag!=null&&flag.equalsIgnoreCase(vFlag)&&id.equalsIgnoreCase(vid)
+                    )
+                    {
+                        return XMLUtil.xmlCdataDecrypt(describeTag.getBody());
+                    }
+                }
+                list2.clear();
+            }
+        }
+        list.clear();
+        return StringUtil.empty;
     }
 
 }

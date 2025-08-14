@@ -392,6 +392,35 @@ public class SqlParser {
         SqlParser.isSingleLine = isSingleLine;
     }
 
+    /*public static void main(String[] args) {
+        List<String> ls=new ArrayList<String>();
+        ls.add("select * from dual");
+        ls.add(" SELECT * FROM (\n" +
+                "                SELECT r.id as id,r.deviceCode,e.fEamDeviceName as deviceName,r.startStopValue,r.errValue,(format(r.runMinute/60,1)) as runHour,ifnull(r.workDesc,'') as workDesc,ifnull(r.noteStatus,'') as noteStatus,e.fBlqAssistant1 as zymxType,a.fDataValue as zyName,d.fname as company,r.createDate\n" +
+                "                FROM `equipment_run_time` r\n" +
+                "                left join e3_equipment e on r.deviceCode=e.fEamDeviceCode\n" +
+                "                left join e3_dept d on e.fEamDeptId=d.fDeptId\n" +
+                "                left join e3_auxiliary a on a.fentryid=e.fBlqAssistant1\n" +
+                "                ORDER BY r.createDate DESC\n" +
+                "            ) z\n" +
+                "            WHERE DATE_FORMAT(createDate,'%Y-%m-%d') BETWEEN  #{startDate.string('yyyy-MM-dd')} AND #{endDate.string('yyyy-MM-dd')}");
+        ls.add("Select C1,c2 From tb");
+        ls.add("select c1,c2 from tb");
+        ls.add("select count(*) from t1");
+        ls.add("select c1,c2,c3 from t1 where condi1=1 ");
+        ls.add("Select c1,c2,c3 From t1 Where condi1=1 ");
+        ls.add("select c1,c2,c3 from t1,t2 where condi3=3 or condi4=5 AND sss='bbbb' order   by o1,o2");
+        ls.add("Select c1,c2,c3 from t1,t2 Where condi3=3 or condi4=5 Order   by o1,o2");
+        ls.add("select c1,c2,c3 from t1,t2,t3 where condi1=5 and condi6=6 or condi7=7 group  by g1,g2");
+        ls.add("Select c1,c2,c3 From t1,t2,t3 Where condi1=5 and condi6=6 or condi7=7 Group  by g1,g2");
+        ls.add("Select c1,c2,c3 From t1,t2,t3 Where condi1=5 and condi6=6 or condi7=7 Group  by g1,g2,g3 order  by g2,g3");
+
+        for(String sql:ls){
+            SqlParser parser = new SqlParser(sql);
+            System.out.println(parser.getSql());
+            //System.out.println(sql);
+        }
+    }*/
   /*
         List<String> ls=new ArrayList<String>();
         ls.add("select * from dual");

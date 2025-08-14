@@ -9,7 +9,9 @@ import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.utils.ClassUtil;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class TableFieldView extends ActionSupport {
     @Ref
     protected GenericDAO genericDAO;
@@ -21,7 +23,7 @@ public class TableFieldView extends ActionSupport {
         try {
             cls = ClassUtil.loadClass(className);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            log.error("detail", e);
             return RocResponse.error(ErrorEnumType.WARN.getValue(),"不存在的类路径");
         }
         TableModels soberTable = genericDAO.getSoberTable(cls);

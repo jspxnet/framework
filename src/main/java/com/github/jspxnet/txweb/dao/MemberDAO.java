@@ -61,6 +61,8 @@ public interface MemberDAO extends SoberSupport {
 
     Member getMember(String loginType, String loginId);
 
+    Member getMemberV2(String loginType, String loginId);
+
     Member getForPhone(String name);
 
     Member getForId(long uid);
@@ -113,6 +115,10 @@ public interface MemberDAO extends SoberSupport {
     Properties getFtpAccount() throws Exception;
 
     int getForPhoneCount(String phone);
+
+    boolean isRepeatPhone(String phone, long uid);
+
+    boolean isRepeatName(String name, long uid);
 
     //------------------------------------------------------------------------------------------------------------------
     List<Member> getList(String[] field, String[] find, String[] departmentId, String term, String sortString, int page, int count, boolean load);

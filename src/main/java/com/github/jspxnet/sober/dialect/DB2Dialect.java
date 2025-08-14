@@ -207,7 +207,7 @@ public class DB2Dialect extends Dialect {
     //////不能使用group by
     //select * from (select tb.*,rownumber() over() as rownumber_,from testBean tb  ) where rownumber_ between 1 and 10
     @Override
-    public String getLimitString(String sql, int ibegin, int iend, TableModels soberTable) {
+    public String getLimitString(String sql, int ibegin, int iend,TableModels soberTable) {
         String table = getTableName(sql);
         StringBuilder pagingSelect = new StringBuilder(sql.length() + 100);
         if (hasDistinct(sql)) {
@@ -253,6 +253,11 @@ public class DB2Dialect extends Dialect {
     @Override
     public boolean commentPatch() {
         return true;
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs FETCH FIRST 1 ROWS ONLY";
     }
 
 }

@@ -43,7 +43,7 @@ public final class OfficeUtil {
             serializer.setOutputProperty (OutputKeys.STANDALONE, "yes");
             serializer.setOutputProperty (OutputKeys.METHOD, "html");
             serializer.transform (domSource, streamResult);
-            content = new String (outStream.toByteArray(), Environment.defaultEncode);
+            content = outStream.toString(Environment.defaultEncode);
         } finally {
             input.close();
         }

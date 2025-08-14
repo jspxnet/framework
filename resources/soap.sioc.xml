@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sioc namespace="soap" extends="global" application="Web Service">
+    <!--aop 启动项 begin-->
+    <bean id="jspxNetWebFactory" class="com.github.jspxnet.txweb.service.web.JspxNetWebFactoryImpl" singleton="false" />
+    <!--aop 启动项 end-->
+</sioc>

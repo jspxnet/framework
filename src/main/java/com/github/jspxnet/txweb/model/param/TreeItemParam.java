@@ -32,7 +32,7 @@ public class TreeItemParam implements Serializable {
     @Param(caption = "父ID", max = 100)
     private String parentNodeId = StringUtil.empty;
 
-    @Param(caption = "名称", max = 100)
+    @Param(caption = "名称", max = 100,required = true)
     private String caption = StringUtil.empty;
 
     @Param(caption = "节点动作", max = 100)

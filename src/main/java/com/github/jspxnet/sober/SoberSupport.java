@@ -9,15 +9,22 @@
  */
 package com.github.jspxnet.sober;
 
-import com.github.jspxnet.txweb.table.meta.OperatePlug;
+import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.exception.ValidException;
+import com.github.jspxnet.sober.table.SqlMapConf;
+import com.github.jspxnet.txweb.table.meta.BaseBillType;
+import com.github.jspxnet.txweb.table.meta.OperatePlug;
+
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Map;
-import java.util.List;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -38,7 +45,6 @@ public interface SoberSupport extends Serializable {
      * @return sql 适配器
      */
     Dialect getDialect();
-
     /**
      *
      * @param soberFactory 数据工厂
@@ -55,8 +61,26 @@ public interface SoberSupport extends Serializable {
      * @return 表结构模型
      */
     TableModels getSoberTable(Class<?> cla);
-
+    /**
+     *
+     * @param tableName  类
+     * @return 表结构模型
+     */
     TableModels getTableModels(String tableName);
+    /**
+     *
+     * @param cla  类对象
+     * @param fieldName  字段名称
+     * @return  返回枚举
+     */
+    JSONArray getFieldEnumType(Class<?> cla, String fieldName);
+    /**
+     *
+     * @param tableName 表明
+     * @param fieldName  字段名称
+     * @return 返回枚举
+     */
+    JSONArray getFieldEnumType(String tableName, String fieldName);
 
     /**
      *
@@ -78,7 +102,14 @@ public interface SoberSupport extends Serializable {
      */
     int getMaxRows();
 
-
+    /**
+     * @param aClass       类
+     * @param <T> 类型
+     * @param field        字段名称
+     * @param serializable 字段值
+     * @param loadChild    是否载入关联
+     * @return 返回对象，如果为空就创建对象，不会有null 返回
+     */
     <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild);
 
     /**
@@ -112,28 +143,6 @@ public interface SoberSupport extends Serializable {
      * @return Object 得到对象
      */
     <T> T get(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild);
-    /**
-     * 查询字段返回一个对象,从缓存中起，查询后放入缓存
-     * 如果为空，如果为空就创建对象,返回永远不为空
-     *
-     * @param aClass 类
-     * @param field 字段
-     * @param serializable 字段值
-     * @param loadChild 载入子对象
-     * @param loadUseCache 是否是用缓存
-     * @param <T> 类型
-     * @return 得到对象
-     */
-   // <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild, boolean loadUseCache);
-    /**
-     * @param aClass       类
-     * @param <T> 类型
-     * @param field        字段名称
-     * @param serializable 字段值
-     * @param loadChild    是否载入关联
-     * @return 返回对象，如果为空就创建对象，不会有null 返回
-     */
-   // <T> T load(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild);
     /**
      * @param aClass       类
      * @param serializable 字段值
@@ -189,6 +198,20 @@ public interface SoberSupport extends Serializable {
      * @return 查询返回
      */
     <T> List<T> load(Class<T> aClass, String field, Serializable[] serializables, boolean loadChild);
+
+    /**
+     *
+     * @param tableName 表名称
+     * @return 单据类型列表
+     */
+    BaseBillType getDefaultBaseBillType(String tableName);
+    /**
+     * 判断是否存在单号
+     * @param tableName 表名
+     * @param billNo  单号
+     * @return 是否存在,int类型,为数量
+     */
+    int existBillNo(String tableName, String billNo);
 
     /**
      *
@@ -250,6 +273,14 @@ public interface SoberSupport extends Serializable {
      * @return 是否成功
      */
     int delete(Class<?> aClass, String field, Serializable serializable);
+    /**
+     * @param savaList 保存数据
+     * @param soberTable  数据模型
+     * @return 执行结果
+     * @throws Exception 异常
+     */
+    int batchSave(List<Map> savaList, TableModels soberTable) throws Exception;
+
     /**
      * 级联删除,不删除ManyToOne,只删除OneToOne 和 OneToMany
      *
@@ -365,6 +396,24 @@ public interface SoberSupport extends Serializable {
      * @throws Exception 异常
      */
     boolean execute(String sqlText, Object[] params) throws Exception;
+
+    /**
+     * 批量更新，这个方法主要为了提高速度
+     * @param sqlMapConf  sql 配置
+     * @param valueMap  变量
+     * @return 执行结果
+     * @throws SQLException 异常
+     */
+    int[] batchUpdate(SqlMapConf sqlMapConf, Map<String, Object> valueMap) throws SQLException;
+    /**
+     * 批量更新
+     * @param template sql模版
+     * @param paramList 参数对象
+     * @return 执行结果
+     * @throws SQLException 异常
+     */
+    int[] batchUpdate(String template, List<?> paramList) throws SQLException;
+
     /**
      * 执行一个sql
      *
@@ -403,6 +452,9 @@ public interface SoberSupport extends Serializable {
      * @return 将表头数据返回给前端
      */
     List<SoberColumn> getColumnModels(Class<?> cla);
+
+    Connection getConnection(int type);
+
     /**
      * 设置字段数据(无映射关系)
      *
@@ -427,7 +479,7 @@ public interface SoberSupport extends Serializable {
      * @param totalCount 返回行数
      * @return 查询返回列表
      */
-    List<?> query(String sql, Object[] param, int currentPage, int totalCount);
+    List<?> query(String sql, Object[] param, int currentPage, long totalCount);
     /**
      * 查询返回列表
      * 使用jdbc完成,比较浪费资源
@@ -470,6 +522,9 @@ public interface SoberSupport extends Serializable {
      * @return 单一返回对象
      */
     Object getUniqueResult(String sql, Object o);
+
+    List<?> query(String sqlText, Object[] param, int currentPage, int totalCount);
+
     /**
      * @param cla 类
      * @param sql sql
@@ -534,6 +589,26 @@ public interface SoberSupport extends Serializable {
      * @return 字段列表
      */
     List<SoberColumn>  getTableColumns(String tableName);
+    /**
+     * 通过sql 得到字段信息
+     * @param sql sql
+     * @return 字段信息
+     */
+    List<SoberColumn>  getSqlColumns(String sql);
+
+    /**
+     * @param sql          sql
+     * @param fixFieldName 是否修复名称
+     * @return 通过sql 得到字段信息
+     */
+    List<SoberColumn>  getSqlColumns(String sql, boolean fixFieldName);
+    /**
+     *
+     * @param sql   sql
+     * @param fixFieldName 是否修复名称
+     * @return 通过sql得到表结构
+     */
+    SoberTable getSoberTable(String sql, boolean fixFieldName);
 
     /**
      * sql map 查询器
@@ -541,15 +616,6 @@ public interface SoberSupport extends Serializable {
      * @return SqlMapClient
      */
     SqlMapClient buildSqlMap();
-
-
-    /**
-     *  有些数据库建表要带上库名
-     * @param createClass 生成表创建sql
-     * @param soberTable 库名等信息
-     * @return 得到创建表的SQL
-     */
-   // String getCreateTableSql(Class<?> createClass, TableModels soberTable);
 
     /**
      * 删除表

@@ -4,10 +4,8 @@ import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.upload.multipart.*;
 import com.github.jspxnet.util.HttpUtil;
 import com.github.jspxnet.utils.*;
-import org.apache.tomcat.util.http.fileupload.FileItem;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+@Slf4j
 public class ApacheMultipartRequest extends MultipartRequest{
     //创建一个“硬盘文件条目工厂”对象
 
@@ -43,7 +42,7 @@ public class ApacheMultipartRequest extends MultipartRequest{
                                String saveDirectory,
                                long maxPostSize,
                                String encoding,
-                               FileRenamePolicy policy, String[] fileTypes) throws IOException {
+                               FileRenamePolicy policy, String[] fileTypes) throws Exception {
 
         super();
         request = req;
@@ -54,7 +53,7 @@ public class ApacheMultipartRequest extends MultipartRequest{
         if (saveDirectory == null) {
             throw new IllegalArgumentException("saveDirectory cannot be null,saveDirectory=" + saveDirectory);
         }
-        DiskFileItemFactory factory = new DiskFileItemFactory();
+        org.apache.commons.fileupload.disk.DiskFileItemFactory factory = new org.apache.commons.fileupload.disk.DiskFileItemFactory();
         //设置阈值，设置JVM一次能够处理的文件大小（默认吞吐量是10KB）
         factory.setSizeThreshold(DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD);
         //设置临时文件的存储位置（文件大小大于吞吐量的话就必须设置这个值，比如文件大小：1GB ，一次吞吐量：1MB）
@@ -62,7 +61,9 @@ public class ApacheMultipartRequest extends MultipartRequest{
 
         factory.setDefaultCharset(encoding);
         //创建核心对象
-        ServletFileUpload fileUpload = new ServletFileUpload(factory);
+
+
+        org.apache.commons.fileupload.servlet.ServletFileUpload fileUpload = new org.apache.commons.fileupload.servlet.ServletFileUpload(factory);
         //设置最大可支持的文件大小（10MB）
         fileUpload.setFileSizeMax(maxPostSize);
         //设置转换时使用的字符集
@@ -76,14 +77,13 @@ public class ApacheMultipartRequest extends MultipartRequest{
             // For our own use, name it a name->Vector structure
             for (String paramName : queryParameters.keySet()) {
                 String[] values = queryParameters.get(paramName);
-                Vector<String> newValues = new Vector<>();
-                newValues.addAll(Arrays.asList(values));
+                Vector<String> newValues = new Vector<>(Arrays.asList(values));
                 parameters.put(paramName, newValues);
             }
         }
 
-        List<FileItem> fileItems = fileUpload.parseRequest(new ServletRequestContext(request));
-        for ( FileItem fileItem : fileItems) {
+        List<org.apache.commons.fileupload.FileItem> fileItems = fileUpload.parseRequest(new org.apache.commons.fileupload.servlet.ServletRequestContext(request));
+        for ( org.apache.commons.fileupload.FileItem fileItem : fileItems) {
             if(fileItem.isFormField()){//判断该FileItem为一个普通的form元素
                 //获取字段名
                 String fieldName = fileItem.getFieldName();
@@ -91,7 +91,8 @@ public class ApacheMultipartRequest extends MultipartRequest{
                 existingValues.add(fileItem.getString(encoding));
             }else{//判断该FileItem为一个文件
                 //获取文件名
-                String fileName = fileItem.getName();
+                String fileName = URLUtil.getUrlDecoder(fileItem.getName(),encoding);
+                //String fileName = fileItem.getName();
                 //获取文件大小
                 long fileSize = fileItem.getSize();
                 String type = FileUtil.getTypePart(fileName);
@@ -113,7 +114,7 @@ public class ApacheMultipartRequest extends MultipartRequest{
                             fileItem.write(file);
                             yesUploadedFile.setUpload(true);
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            log.error("file={}",file,ex);
                             yesUploadedFile.setUpload(false);
                             continue;
                         }

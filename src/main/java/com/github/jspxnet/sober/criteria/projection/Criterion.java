@@ -9,7 +9,9 @@
  */
 package com.github.jspxnet.sober.criteria.projection;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.criteria.OperatorEnumType;
 
 import java.io.Serializable;
 
@@ -21,13 +23,34 @@ import java.io.Serializable;
  */
 public interface Criterion extends Serializable {
 
+
+    /**
+     *
+     * @return 得到涉及的字段
+     */
     String[] getFields();
 
+    /**
+     *
+     * @param soberTable  数据库模型
+     * @param databaseType 数据库类型
+     * @return 得到sql
+     */
     String toSqlString(TableModels soberTable, String databaseType);
 
+    /**
+     *
+     * @param soberTable 数据库模型
+     * @return 得到参数
+     */
     Object[] getParameter(TableModels soberTable);
 
-    String termString();
+    //String termString();
+
+
+    OperatorEnumType getOperatorEnumType();
+
+    JSONObject getJson();
 
 
 }

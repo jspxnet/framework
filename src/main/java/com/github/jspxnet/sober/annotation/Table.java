@@ -39,8 +39,12 @@ public @interface Table {
      * @return 是否适用缓存
      */
     boolean cache() default true;
-    //缓存名称  默认改位类名，保存在redis是用：作为key分割
-    //String cacheName() default "";
+
+    /**
+     * 只有在对象结构的时候生效
+     * @return 是否自动清理缓存
+     */
+    boolean autoCleanCache() default true;
 
     /**
      * 应为 PO，DO，DTO，VO 的的概念太多，实际使用中  PO 持久对象就是Table的映射，

@@ -18,7 +18,6 @@ import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import lombok.Data;
 import java.io.Serializable;
-import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -81,9 +80,14 @@ public class SoberColumn implements Serializable {
     @Column(caption = "隐藏")
     private boolean hidden = false;
 
+    @Column(caption = "不允许搜索")
+    private boolean searchHidden = false;
+
+    @Column(caption = "配置的枚举")
+    private boolean isConfEnum = false;
+
     @Column(caption = "自动ID")
     private boolean autoincrement = false;
-
 
     @JsonField
     public String getTypeString() {
@@ -92,11 +96,6 @@ public class SoberColumn implements Serializable {
             return TypeUtil.getTypeString(classType);
         }
         return  "String";
-    }
-
-    public List<Object> getOptionList()
-    {
-        return TypeUtil.getOptionList(option);
     }
 
 

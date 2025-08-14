@@ -21,7 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ColorFilter extends HTMLFilter {
-
+    private static final String REGEX = "(\\[color=(.[^\\[]*)\\])(.+?)(\\[\\/color\\])";
     public ColorFilter(String s) {
         super(s);
     }
@@ -36,8 +36,8 @@ public class ColorFilter extends HTMLFilter {
 
     public String colorConverter() {
         //([^\\]]*)
-        String regex = "(\\[color=(.[^\\[]*)\\])(.+?)(\\[\\/color\\])";
-        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+
+        Pattern pattern = Pattern.compile(REGEX, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(s);
         StringBuffer stringbuffer = new StringBuffer();
         for (boolean flag = matcher.find(); flag; flag = matcher.find()) {

@@ -20,6 +20,8 @@ import java.util.Date;
 public interface JspxConfiguration {
     void setDefaultConfigFile(String defaultConfigFile);
 
+    void loadPath();
+
     /**
      * 默认路径
      *

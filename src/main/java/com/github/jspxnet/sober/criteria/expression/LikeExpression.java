@@ -9,7 +9,9 @@
  */
 package com.github.jspxnet.sober.criteria.expression;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.criteria.OperatorEnumType;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.util.JdbcUtil;
@@ -22,22 +24,31 @@ import com.github.jspxnet.utils.StringUtil;
  * Time: 11:10:16
  */
 public class LikeExpression implements Criterion {
+
     private final String propertyName;
     private final Object value;
 
-    public LikeExpression(String propertyName,
-                          Object value) {
+    public LikeExpression(String propertyName,Object value) {
         this.propertyName = propertyName;
         this.value = value;
+    }
+
+    public LikeExpression(JSONObject json) {
+        propertyName = json.getString(JsonExpression.JSON_FIELD);
+        value = json.get(JsonExpression.JSON_VALUE);
     }
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
         if (DatabaseEnumType.DM.equals(DatabaseEnumType.find(databaseName)))
         {
-            return StringUtil.quote(propertyName,true)+ " " + Restrictions.KEY_LIKE + " ?";
+            return propertyName + " " + OperatorEnumType.LIKE.getSql() + " ?";
         }
-        return propertyName + " " + Restrictions.KEY_LIKE + " ?";
+        if (DatabaseEnumType.POSTGRESQL.equals(DatabaseEnumType.find(databaseName)))
+        {
+            return propertyName + " " + OperatorEnumType.ILIKE.getSql() + " ?";
+        }
+        return propertyName + " " + OperatorEnumType.LIKE.getSql() + " ?";
     }
 
     @Override
@@ -47,7 +58,7 @@ public class LikeExpression implements Criterion {
 
     @Override
     public String toString() {
-        return propertyName + " " + Restrictions.KEY_LIKE + " " + value;
+        return propertyName + " " + OperatorEnumType.LIKE.getSql() + " " + value;
     }
 
     @Override
@@ -56,7 +67,18 @@ public class LikeExpression implements Criterion {
     }
 
     @Override
-    public String termString() {
-        return toString();
+    public OperatorEnumType getOperatorEnumType() {
+        return OperatorEnumType.LIKE;
     }
+
+    @Override
+    public JSONObject getJson()
+    {
+        JSONObject json = new JSONObject();
+        json.put(JsonExpression.JSON_FIELD,propertyName);
+        json.put(JsonExpression.JSON_OPERATOR,OperatorEnumType.LIKE.getKey());
+        json.put(JsonExpression.JSON_VALUE,value);
+        return json;
+    }
+
 }

@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 锁定表写,防止两个人同时编辑一条记录
- *
+ * com.github.jspxnet.sober.table.LockTable
  */
 
 @EqualsAndHashCode(callSuper = true)

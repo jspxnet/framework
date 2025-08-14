@@ -9,17 +9,24 @@
  */
 package com.github.jspxnet.scriptmark.config;
 
+import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.scriptmark.Configurable;
 import com.github.jspxnet.scriptmark.Phrase;
 import com.github.jspxnet.scriptmark.ScriptmarkEnv;
 import com.github.jspxnet.scriptmark.core.HtmlEngineImpl;
+import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.core.block.*;
 import com.github.jspxnet.scriptmark.core.block.template.*;
 import com.github.jspxnet.scriptmark.core.dispose.*;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,11 +36,15 @@ import java.util.Map;
  * Time: 11:43:55
  */
 
-public class TemplateConfigurable implements Configurable, Cloneable {
+public class TemplateConfigurable implements Configurable {
     private final static Map<String, MacroBlock> REG_MACRO = new HashMap<>();
     private final Map<String, String> tagMap = new HashMap<>();
     private final Map<String, Object> hashMap = new HashMap<>();
     private final Map<String, Phrase> phrases = new HashMap<>(20);
+
+
+    private final List<TagNode> autoImportTagNodeList = new ArrayList<>();
+
 
     private String[] autoImports = null;
     private String[] autoIncludes = null;
@@ -59,14 +70,25 @@ public class TemplateConfigurable implements Configurable, Cloneable {
     }
 
     public TemplateConfigurable() {
-        ///////////
-        hashMap.put(ScriptmarkEnv.NumberFormat, "####.##");
-        hashMap.put(ScriptmarkEnv.DateFormat, DateUtil.DAY_FORMAT);
-        hashMap.put(ScriptmarkEnv.DateTimeFormat, DateUtil.CURRENCY_ST_FORMAT);
-        hashMap.put(ScriptmarkEnv.TimeFormat, "HH:mm");
 
-        hashMap.put(ScriptmarkEnv.Template_update_delay, 360);
-        hashMap.put(ScriptmarkEnv.Template_cache_size, 120);
+        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
+        String number_format = envTemplate.getString(Environment.NUMBER_FORMAT,"####.##");
+        hashMap.put(ScriptmarkEnv.NumberFormat, number_format);
+
+        String date_format = envTemplate.getString(Environment.DATE_FORMAT,DateUtil.DAY_FORMAT);
+        hashMap.put(ScriptmarkEnv.DateFormat, date_format);
+
+        String datetime_format = envTemplate.getString(Environment.DATETIME_FORMAT,DateUtil.CURRENCY_ST_FORMAT);
+        hashMap.put(ScriptmarkEnv.DateTimeFormat, datetime_format);
+
+        String time_format = envTemplate.getString(Environment.TIME_FORMAT,DateUtil.TIME_FORMAT);
+        hashMap.put(ScriptmarkEnv.TimeFormat, time_format);
+
+        int template_update_delay = envTemplate.getInt(ScriptmarkEnv.Template_update_delay,360);
+        hashMap.put(ScriptmarkEnv.Template_update_delay, template_update_delay);
+
+        int template_cache_size = envTemplate.getInt(ScriptmarkEnv.Template_cache_size,120);
+        hashMap.put(ScriptmarkEnv.Template_cache_size, template_cache_size);
 
         hashMap.put(ScriptmarkEnv.MacroCallTag, "@");
         hashMap.put(ScriptmarkEnv.Language, "JavaScript");
@@ -80,6 +102,7 @@ public class TemplateConfigurable implements Configurable, Cloneable {
         hashMap.put(ScriptmarkEnv.CompressBlockName, "#compress");
         hashMap.put(ScriptmarkEnv.htmlExtType, true);
         hashMap.put(ScriptmarkEnv.xmlEscapeClean, false);
+        hashMap.put(ScriptmarkEnv.FixUndefined, true);
         //////////
 
         ////////////Tag配置 begin
@@ -286,6 +309,19 @@ public class TemplateConfigurable implements Configurable, Cloneable {
     }
 
     @Override
+    public List<TagNode> getAutoImportTagNodeList() {
+        return autoImportTagNodeList;
+    }
+
+    @Override
+    public void setAutoImportTagNodeList(List<TagNode> autoImportTagNodeList) {
+        this.autoImportTagNodeList.clear();
+        this.autoImportTagNodeList.addAll(autoImportTagNodeList);
+    }
+
+
+
+    @Override
     public Configurable copy() {
         TemplateConfigurable tc = new TemplateConfigurable();
         tc.setTagMap(new HashMap<>(tagMap));
@@ -294,6 +330,8 @@ public class TemplateConfigurable implements Configurable, Cloneable {
         tc.setAutoImports(autoImports);
         tc.setGlobalMap(new HashMap<>(globalMap));
         tc.setStaticModels(staticModels);
+        tc .setAutoImportTagNodeList(autoImportTagNodeList);
         return tc;
     }
+
 }

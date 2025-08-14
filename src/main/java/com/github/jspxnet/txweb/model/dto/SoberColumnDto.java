@@ -1,5 +1,6 @@
 package com.github.jspxnet.txweb.model.dto;
 
+import com.github.jspxnet.component.zhex.spell.ChineseUtil;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sioc.util.TypeUtil;
@@ -9,7 +10,6 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 @Data
 public class SoberColumnDto implements Serializable {
@@ -66,38 +66,102 @@ public class SoberColumnDto implements Serializable {
         return  "String";
     }
 
-
     @JsonField
-    public String getBeanField() {
+    public String getBeanField(boolean camel) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("@Column(caption = \"").append(caption).append("\", length = ").append(length).append(",notNull=").append(notNull).append(")").append("\r\n");
-        //StringUtil.empty
         String typeStr = getTypeString();
+        if ("string".equalsIgnoreCase(typeStr))
+        {
+            if (length==0)
+            {
+                if (notNull)
+                {
+                    if (!StringUtil.isNull(option))
+                    {
+                        sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(",option=\"").append(option).append("\"").append(",enumTypes=false").append(")").append("\r\n");
+                    } else {
+                        sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(")").append("\r\n");
+                    }
+                } else
+                {
+                    if (!StringUtil.isNull(option))
+                    {
+                        sb.append("@Column(caption = \"").append(caption).append("\"").append(",option=\"").append(option).append("\"").append(")").append("\r\n");
+                    } else {
+                        sb.append("@Column(caption = \"").append(caption).append("\"").append(")").append("\r\n");
+                    }
+                }
+            }
+            else
+            {
+                if (notNull)
+                {
+                    if (!StringUtil.isNull(option))
+                    {
+                        sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(",notNull=").append(notNull).append(",option=\"").append(option).append("\"").append(")").append("\r\n");
+                    } else {
+                        sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(",notNull=").append(notNull).append(")").append("\r\n");
+                    }
 
+                } else {
+                    sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(")").append("\r\n");
+                }
+            }
+
+        } else {
+            if (notNull)
+            {
+                if (!StringUtil.isNull(option))
+                {
+                    sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(",option=\"").append(option).append("\"").append(",enumTypes=false").append(")").append("\r\n");
+                } else {
+                    sb.append("@Column(caption = \"").append(caption).append("\",").append("notNull=").append(notNull).append(")").append("\r\n");
+                }
+            } else {
+                if (!StringUtil.isNull(option))
+                {
+                    sb.append("@Column(caption = \"").append(caption).append("\"").append(",option=\"").append(option).append("\"").append(")").append("\r\n");
+                } else {
+                    sb.append("@Column(caption = \"").append(caption).append("\"").append(")").append("\r\n");
+                }
+
+            }
+        }
+
+
+
+        String fieldName = camel?StringUtil.underlineToCamel(name):name;
         String typeString = TypeUtil.CODE_TYPE_MAP.get(typeStr);
         if (StringUtil.isNull(typeString))
         {
             typeString = typeStr;
         }
-        if (ClassUtil.isNumberType(typeString))
+        if (camel&&StringUtil.isChinese(fieldName))
         {
-            sb.append("private ").append(typeString).append(" ").append(name).append(" = 0;");
+            fieldName = StringUtil.uncapitalize(ChineseUtil.fullSpell(fieldName,StringUtil.empty));
+        }
+        if (ClassUtil.isNumberType(typeString)&&!"BigDecimal".equalsIgnoreCase(typeString))
+        {
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = 0;");
+        } else
+        if ("BigDecimal".equalsIgnoreCase(typeString))
+        {
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = BigDecimal.valueOf(0);");
         } else
         if (typeString.equals(Date.class.getName()) || typeString.equals(Date.class.getSimpleName()) )
         {
-            sb.append("private ").append(typeString).append(" ").append(name).append(" = new Date();");
+            if (notNull)
+            {
+                sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = new Date();");
+            } else {
+                sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = null;");
+            }
         }
         else
         {
-            sb.append("private ").append(typeString).append(" ").append(name).append(" = StringUtil.empty;");
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = StringUtil.empty;");
         }
         return sb.toString();
     }
-
-    public List<Object> getOptionList()
-    {
-        return TypeUtil.getOptionList(option);
-    }
-
 }

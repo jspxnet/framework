@@ -19,6 +19,9 @@ import java.io.Serializable;
  * 作为角色基本接口，用来扩展中间件
  */
 public interface IRole extends Serializable {
+
+    void setOperates(String operates);
+
     /**
      * @return 角色ID
      */

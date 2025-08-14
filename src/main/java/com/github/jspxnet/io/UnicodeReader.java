@@ -19,10 +19,9 @@ import java.nio.charset.StandardCharsets;
  */
 
 public class UnicodeReader extends Reader {
-    PushbackInputStream internalIn;
-    InputStreamReader internalIn2 = null;
-    String defaultEnc;
-
+    protected PushbackInputStream internalIn;
+    protected InputStreamReader internalIn2 = null;
+    protected String defaultEnc;
     private static final int BOM_SIZE = 4;
 
     /**
@@ -109,6 +108,7 @@ public class UnicodeReader extends Reader {
     }
 
     @Override
+
     public int read(char[] buf, int off, int len) throws IOException {
         init();
         return internalIn2.read(buf, off, len);

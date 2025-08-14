@@ -20,6 +20,7 @@ import com.github.jspxnet.cache.store.SingleRedissonStore;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.utils.BeanUtil;
+import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -152,6 +153,7 @@ public class JSCache implements Runnable, Cache {
         if (store instanceof SingleRedissonStore)
         {
             //redis 就直接放了，不限制大小
+
             store.put(entry);
         } else
         {
@@ -201,6 +203,28 @@ public class JSCache implements Runnable, Cache {
     @Override
     public Set<String> getKeys() {
         return store.getKeys();
+    }
+
+
+    @Override
+    public boolean lock(String key) {
+        return lock( key, 10);
+    }
+
+    @Override
+    public boolean lock(String key, int timeToLive) {
+        return store.lock(key,timeToLive);
+
+    }
+
+    @Override
+    public boolean isLock(String key) {
+        return store.isLock(key);
+    }
+
+    @Override
+    public boolean unLock(String key) {
+        return store.unLock(key);
     }
 
     /**

@@ -9,12 +9,7 @@
  */
 package com.github.jspxnet.utils;
 
-/**
- * Created by IntelliJ IDEA.
- * User: chenYuan
- * date: 2004-4-12
- * Time: 15:08:24
- */
+
 
 import java.awt.*;
 

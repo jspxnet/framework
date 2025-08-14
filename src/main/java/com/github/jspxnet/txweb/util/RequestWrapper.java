@@ -33,7 +33,6 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         }
     }
 
-
     private void initParameters()
     {
         String queryString = getQueryString();
@@ -86,7 +85,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         }
         try {
             List<String> values = parameters.get(name);
-            if (values == null || values.size() == 0) {
+            if (values == null || values.isEmpty()) {
                 return null;
             }
             return values.get(values.size() - 1);
@@ -131,7 +130,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         }
         try {
             List<String> values = parameters.get(name);
-            if (values == null || values.size() == 0) {
+            if (values == null || values.isEmpty()) {
                 return null;
             }
             return values.toArray(new String[0]);
@@ -164,7 +163,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
 
             }
             @Override
-            public int read() throws IOException {
+            public int read() {
                 return bais.read();
             }
         };

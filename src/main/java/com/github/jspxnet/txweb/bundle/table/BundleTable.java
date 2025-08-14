@@ -15,6 +15,8 @@ import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.Data;
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,6 +24,7 @@ import com.github.jspxnet.utils.StringUtil;
  * date: 2004-4-13
  * Time: 16:59:33
  */
+@Data
 @Table(name = "jspx_bundle_table", caption = "资源绑定表")
 public class BundleTable implements Serializable {
 
@@ -39,6 +42,18 @@ public class BundleTable implements Serializable {
     @Column(caption = "内容", length = 1000, notNull = true)
     private String context = StringUtil.empty;
 
+    @Column(caption = "排序")
+    private int sort = 0;
+
+    @Column(caption = "名称", length = 50)
+    private String caption = StringUtil.empty;
+
+    @Column(caption = "描述", length = 100)
+    private String describe = StringUtil.empty;
+
+    @Column(caption = "输入框", length = 50)
+    private String input = "text";
+
     @Column(caption = "类型", length = 50, notNull = true)
     private String dataType = StringUtil.empty;
 
@@ -48,51 +63,4 @@ public class BundleTable implements Serializable {
     @Column(caption = "加密", length = 2, option = "0:否;1:是", notNull = true)
     private int encrypt = 0;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getIdx() {
-        return idx;
-    }
-
-    public void setIdx(String idx) {
-        this.idx = idx;
-    }
-
-    public String getContext() {
-        return context;
-    }
-
-    public void setContext(String context) {
-        this.context = context;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    public String getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
-    }
-
-    public int getEncrypt() {
-        return encrypt;
-    }
-
-    public void setEncrypt(int encrypt) {
-        this.encrypt = encrypt;
-    }
 }

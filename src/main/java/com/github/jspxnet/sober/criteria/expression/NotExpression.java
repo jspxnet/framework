@@ -1,26 +1,38 @@
-/*
- * Copyright © 2004-2014 chenYuan. All rights reserved.
- * @Website:wwww.jspx.net
- * @Mail:39793751@qq.com
-  * author: chenYuan , 陈原
- * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
- * @jvm:jdk1.6+  x86/amd64
- *
- */
 package com.github.jspxnet.sober.criteria.expression;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.criteria.OperatorEnumType;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
+import com.github.jspxnet.utils.ClassUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Created by IntelliJ IDEA.
- * @author chenYuan (mail:39793751@qq.com)
- * date: 2007-1-8
- * Time: 11:24:19
+ * @author chenYuan
+ * 都提供了单独的not方式
  */
+@Slf4j
 public class NotExpression implements Criterion {
 
     private final Criterion criterion;
+
+    public NotExpression(JSONObject json) {
+        if (json.containsKey(JsonExpression.JSON_LOGIC))
+        {
+            criterion = new LogicalExpression(json);
+        } else {
+            try {
+                JSONObject jsonObject = json.getIgnoreJSONObject(JsonExpression.JSON_FIELD);
+                String operator = jsonObject.getIgnoreString(JsonExpression.JSON_OPERATOR);
+                OperatorEnumType operatorEnumType =  OperatorEnumType.find(operator);
+                criterion = (Criterion) ClassUtil.newInstance(operatorEnumType.getClassName(),new Object[]{jsonObject});
+            } catch (Exception e) {
+                log.error("NotExpression json 解析错误:{}",json,e);
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 
     public NotExpression(Criterion criterion) {
         this.criterion = criterion;
@@ -28,7 +40,7 @@ public class NotExpression implements Criterion {
 
     @Override
     public String toSqlString(TableModels soberTable, String databaseName) {
-        return Restrictions.KEY_NOT + "(" + criterion.toSqlString(soberTable, databaseName) + ")";
+        return Expression.KEY_NOT + "(" + criterion.toSqlString(soberTable, databaseName) + ")";
     }
 
     @Override
@@ -37,8 +49,13 @@ public class NotExpression implements Criterion {
     }
 
     @Override
+    public OperatorEnumType getOperatorEnumType() {
+        return OperatorEnumType.NOT;
+    }
+
+    @Override
     public String toString() {
-        return Restrictions.KEY_NOT + "(" + criterion.toString() + ")";
+        return Expression.KEY_NOT + "(" + criterion.toString() + ")";
     }
 
     @Override
@@ -50,9 +67,14 @@ public class NotExpression implements Criterion {
         return criterion.getFields();
     }
 
+
     @Override
-    public String termString() {
-        return toString();
+    public JSONObject getJson()
+    {
+        JSONObject json = new JSONObject();
+        json.put(JsonExpression.JSON_FIELD,criterion.getJson());
+        json.put(JsonExpression.JSON_OPERATOR, OperatorEnumType.NOT.getKey());
+        return json;
     }
 
 }

@@ -3,14 +3,14 @@ package com.github.jspxnet.component.formula.service.impl;
 
 import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.component.formula.calc.BaseCalc;
-import com.github.jspxnet.component.formula.service.FormulaService;
-import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.component.formula.dao.FormulaDAO;
+import com.github.jspxnet.component.formula.service.FormulaService;
 import com.github.jspxnet.component.formula.table.FormulaTable;
+import com.github.jspxnet.sioc.annotation.Ref;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-import java.util.HashMap;
+
 import java.util.Map;
 
 /**
@@ -78,41 +78,17 @@ public class FormulaServiceImpl implements FormulaService {
             }
         }
 
-        if (formula.getCalcType()!=null)
+        BaseCalc baseCalc = (BaseCalc) EnvFactory.getBeanFactory().getBean(formula.getCalcType().getCalcClass());
+        if (baseCalc==null)
         {
-            BaseCalc baseCalc = (BaseCalc)EnvFactory.getBeanFactory().getBean(formula.getCalcType().getCalcClass());
-            if (baseCalc==null)
-            {
-                return 0;
-            }
-
-            baseCalc.setFormulaTable(formula);
-            baseCalc.setDao(formulaDAO);
-            return ObjectUtil.toDouble(baseCalc.getFormulaResult());
+            return 0;
         }
 
+        baseCalc.setFormulaTable(formula);
+        baseCalc.setDao(formulaDAO);
+        return ObjectUtil.toDouble(baseCalc.getFormulaResult());
 
-        if (CALC_TYPE_FORMULA.equalsIgnoreCase(formula.getCalcType().getCode()))
-        {
-            Map<String,Object> formulaValueMap = new HashMap<>(valueMap);
-            String[] varList = StringUtil.getFreeMarkerVar(content);
-            for (String varName:varList)
-            {
-                double value = getFormulaResult(valueMap, varName);
-                formulaValueMap.put(varName,value);
-            }
-            try {
-                String out1 = EnvFactory.getPlaceholder().processTemplate(formulaValueMap,content);
-                out1 = StringUtil.replace(out1,"--","- -");
-                String out2 = StringUtil.trim(EnvFactory.getPlaceholder().processTemplate(formulaValueMap,"${" +out1+ "}"));
-                return StringUtil.toDouble(out2);
-            }  catch (Exception e)
-            {
-                log.info("CALC_TYPE_FORMULA 表达式计算异常:{}",content);
-                return 0;
-            }
-        }
-        return 0;
+
     }
 
 }

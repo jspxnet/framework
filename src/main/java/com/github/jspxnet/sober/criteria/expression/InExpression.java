@@ -9,16 +9,16 @@
  */
 package com.github.jspxnet.sober.criteria.expression;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.criteria.OperatorEnumType;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,9 +27,13 @@ import java.util.Arrays;
  * Time: 11:19:11
  */
 public class InExpression implements Criterion {
-    private String propertyName;
-    private Set<Object> values = new HashSet<Object>();
+    private final String propertyName;
+    private final List<Object> values = new LinkedList<>();
 
+    public InExpression(JSONObject json) {
+        propertyName = json.getString(JsonExpression.JSON_FIELD);
+        values.addAll(json.getIgnoreList(JsonExpression.JSON_VALUE));
+    }
 
 
     public InExpression(String propertyName, Object[] values) {
@@ -42,28 +46,28 @@ public class InExpression implements Criterion {
     public InExpression(String propertyName, int[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
     public InExpression(String propertyName, long[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
     public InExpression(String propertyName, float[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
     public InExpression(String propertyName, double[] values) {
         this.propertyName = propertyName;
         if (!ArrayUtil.isEmpty(values)) {
-            this.values.addAll(Arrays.asList(values));
+            this.values.addAll(Collections.singletonList(values));
         }
     }
 
@@ -87,12 +91,12 @@ public class InExpression implements Criterion {
         if (!StringUtil.hasLength(sb.toString())) {
             return propertyName + " IN ('')";
         }
-        return propertyName + " IN (" + sb.toString() + ") ";
+        return propertyName + " IN (" + sb + ") ";
     }
 
     @Override
     public String toString() {
-        if (values == null) {
+        if (ObjectUtil.isEmpty(values)) {
             return propertyName + " IN ('')";
         }
         Object[] objects = values.toArray();
@@ -106,7 +110,7 @@ public class InExpression implements Criterion {
         if (!StringUtil.hasLength(sb.toString())) {
             return propertyName + " IN ('')";
         }
-        return propertyName + " IN (" + sb.toString() + ") ";
+        return propertyName + " IN (" + sb + ") ";
     }
 
     @Override
@@ -114,8 +118,21 @@ public class InExpression implements Criterion {
         return new String[]{propertyName};
     }
 
+
+
     @Override
-    public String termString() {
-        return toString();
+    public OperatorEnumType getOperatorEnumType() {
+        return OperatorEnumType.IN;
+    }
+
+
+    @Override
+    public JSONObject getJson()
+    {
+        JSONObject json = new JSONObject();
+        json.put(JsonExpression.JSON_FIELD,propertyName);
+        json.put(JsonExpression.JSON_OPERATOR,OperatorEnumType.IN.getKey());
+        json.put(JsonExpression.JSON_VALUE,values);
+        return json;
     }
 }

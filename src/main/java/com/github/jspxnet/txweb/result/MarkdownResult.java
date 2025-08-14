@@ -110,7 +110,6 @@ public class MarkdownResult extends ResultSupport {
         action.put(Environment.templateSuffix, Dispatcher.getMarkdownSuffix());
         action.put(Environment.scriptPath,ENV_TEMPLATE.getString(Environment.scriptPath));
 
-
         File mdFile = new File(action.getTemplatePath(), action.getTemplateFile());
         FileSource mdFileSource = new FileSource(mdFile, action.getTemplateFile(), Dispatcher.getEncode());
         //载入md文件end
@@ -142,7 +141,6 @@ public class MarkdownResult extends ResultSupport {
             out.close();
         } catch (Exception e) {
             log.info("TemplateResult file :{} error:{},,检查模版文件是否存在,并且应用的js等存在", mdFile.getPath(), e.getLocalizedMessage());
-            e.printStackTrace();
         }
 
     }

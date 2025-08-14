@@ -24,7 +24,7 @@ import static java.util.regex.Pattern.*;
  */
 
 public class CodeFilter extends HTMLFilter {
-    private String[] codeType = {"c", "c#", "css", "delphi", "java", "js", "php", "python", "ruby", "sql", "vb", "xml"};
+    private final String[] codeType = {"c", "c#", "css", "delphi", "java", "js", "php", "python", "ruby", "sql", "vb", "xml"};
 
     public CodeFilter(String s) {
         super(s);

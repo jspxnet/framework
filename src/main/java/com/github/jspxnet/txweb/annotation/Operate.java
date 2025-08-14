@@ -40,6 +40,9 @@ public @interface Operate {
     //重复提交验证,0 表示不验证, 数字标识间隔时间,单位为秒
     int repeat() default 0;
 
+    //只允许加密方式
+    boolean secret() default false;
+
     //业务逻辑类,关联插件来处理
     Class<?> form() default NullClass.class;
 

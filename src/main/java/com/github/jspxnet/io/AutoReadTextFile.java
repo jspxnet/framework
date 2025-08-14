@@ -19,6 +19,8 @@ import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.jar.JarInputStream;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedInputStream;
@@ -108,12 +110,12 @@ public class AutoReadTextFile extends AbstractRead {
         if (FileUtil.isFileExist(file)) {
             if (StringUtil.isNull(encode) || "auto".equalsIgnoreCase(encode))
             {
-                encode = CharacterUtil.getFileCharacterEnding(file, "UTF-8");
-                isr = new InputStreamReader(new FileInputStream(file), encode);
+                encode = CharacterUtil.getFileCharacterEnding(file, StandardCharsets.UTF_8.name());
+                isr = new InputStreamReader(Files.newInputStream(file.toPath()), encode);
             }
             else
             {
-                UnicodeReader reader = new UnicodeReader(new FileInputStream(file), encode);
+                UnicodeReader reader = new UnicodeReader(Files.newInputStream(file.toPath()), encode);
                 encode = reader.getEncoding();
                 isr = reader;
             }

@@ -53,9 +53,13 @@ public enum ErrorEnumType implements EnumType {
 
     DATABASE(-32640, "数据库操作错误"),
 
+    NO_MONEY(-32641, "需要充值才能开发此功能"),
+
     SIGNATURE_VERIFY(-32642, "签名验证错误"),
 
-    KEY_VERIFY(-32644, "KEY验证错误");
+    KEY_VERIFY(-32644, "KEY验证错误"),
+
+    KEY_LOCK_WAIT(-32645, "当前操作被锁定,稍后操作");
 
     private final int value;
     private final String name;

@@ -25,6 +25,23 @@ public class JxlsFunction {
         return DateUtil.toString(date, fmt);
     }
 
+    /**
+     *
+     * @param f 数字
+     * @return 格式化输入数字,js 默认会在单精度后多个 .0
+     */
+    public String getNumberStdFormat(Number f) {
+        return NumberUtil.getNumberStdFormat(f);
+    }
+
+    /**
+     *
+     * @param f 数字
+     * @return 格式化输入数字,js 默认会在单精度后多个 .0
+     */
+    public String getNumberStdFormat(String f) {
+        return NumberUtil.getNumberStdFormat(f);
+    }
 
     /**
      * @param o      数字,或者 字符串
@@ -65,9 +82,6 @@ public class JxlsFunction {
      * @return 得到拼音
      */
     public String getPinYin(String src, String fen) {
-        if (src == null) {
-            return StringUtil.empty;
-        }
         return ChineseUtil.getFullSpell(src,fen);
     }
 

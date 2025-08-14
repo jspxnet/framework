@@ -34,7 +34,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
     //页数
     protected int currentPage = 1;
     //总行数
-    protected int totalCount = 1;
+    protected long totalCount = 1;
     //总页数
     protected int totalPage = 1;
     //页面参数
@@ -101,7 +101,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
 
     @Override
     public long getFirstRow() {
-        long temp = currentPage * count - count;
+        long temp = (long) currentPage * count - count;
         if (temp < 0) {
             temp = 1;
         }
@@ -129,6 +129,13 @@ public class TurnPageButtonImpl implements TurnPageButton {
     }
 
     @Override
+    public void setTotalCount(long totalCount) {
+        if (totalCount >= 0) {
+            this.totalCount = totalCount;
+        }
+    }
+
+    @Override
     public long getTotalCount() {
         return totalCount;
     }
@@ -144,7 +151,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
         if (ic <= 0) {
             return 1;
         }
-        totalPage = totalCount / ic;
+        totalPage = (int)(totalCount / ic);
         if (totalCount % ic > 0) {
             totalPage = totalPage + 1;
         }
@@ -223,8 +230,8 @@ public class TurnPageButtonImpl implements TurnPageButton {
             beginPage = 2;
         }
         long maxPage = currentPage + bound;
-        if (maxPage - beginPage - 1 < bound * 2) {
-            maxPage = maxPage + bound * 2 - Math.abs(maxPage - beginPage);
+        if (maxPage - beginPage - 1 < bound * 2L) {
+            maxPage = maxPage + bound * 2L - Math.abs(maxPage - beginPage);
         }
         if (maxPage > getTotalPage()) {
             maxPage = getTotalPage();
@@ -237,17 +244,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
         }
 
 
-        Map<String, Object> turnPageMap = new HashMap<>();
-        turnPageMap.put("defaultCount", getDefaultCount());
-        turnPageMap.put("count", getCount());
-        turnPageMap.put("firstRow", getFirstRow());
-        turnPageMap.put("currentPage", currentPage);
-        turnPageMap.put("totalCount", getTotalCount());
-        turnPageMap.put("totalPage", getTotalPage());
-        turnPageMap.put("querystring", getQuerystring());
-        turnPageMap.put("pageLink", getPageLink());
-        turnPageMap.put("beginPage", beginPage);
-        turnPageMap.put("endPage", maxPage);
+        Map<String, Object> turnPageMap = getInitMap(currentPage, beginPage, maxPage);
 
         File file = new File(currentPath, fileName);
         if (!file.exists() && !file.isFile()) {
@@ -262,5 +259,20 @@ public class TurnPageButtonImpl implements TurnPageButton {
         placeholder.setRootDirectory(rootDirectory);
         placeholder.setCurrentPath(currentPath);
         return placeholder.processTemplate(turnPageMap, file, encode);
+    }
+
+    private Map<String, Object> getInitMap(long currentPage, long beginPage, long maxPage) {
+        Map<String, Object> turnPageMap = new HashMap<>();
+        turnPageMap.put("defaultCount", getDefaultCount());
+        turnPageMap.put("count", getCount());
+        turnPageMap.put("firstRow", getFirstRow());
+        turnPageMap.put("currentPage", currentPage);
+        turnPageMap.put("totalCount", getTotalCount());
+        turnPageMap.put("totalPage", getTotalPage());
+        turnPageMap.put("querystring", getQuerystring());
+        turnPageMap.put("pageLink", getPageLink());
+        turnPageMap.put("beginPage", beginPage);
+        turnPageMap.put("endPage", maxPage);
+        return turnPageMap;
     }
 }

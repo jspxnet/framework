@@ -213,9 +213,8 @@ public final class IpUtil {
         if (host != null && host.contains("/")) {
             host = StringUtil.substringAfter(host, "/");
         }
-        if (host.contains(":"))
-        {
-            return StringUtil.substringBefore(host,":");
+        if (host != null && host.contains(":")) {
+            return StringUtil.substringBefore(host, ":");
         }
         return host;
     }
@@ -228,9 +227,8 @@ public final class IpUtil {
         if (host != null && host.contains("/")) {
             host = StringUtil.substringAfter(host, "/");
         }
-        if (host.contains(":"))
-        {
-            return StringUtil.substringBefore(host,":");
+        if (host != null && host.contains(":")) {
+            return StringUtil.substringBefore(host, ":");
         }
         return host;
     }
@@ -384,9 +382,15 @@ public final class IpUtil {
             }
         }
 
-        String ipAddr = inetAddress.getHostAddress();
+        String ipAddr = null;
+        if (inetAddress != null) {
+            ipAddr = inetAddress.getHostAddress();
+        }
         // Filter network card No
-        int index = ipAddr.indexOf('%');
+        int index = 0;
+        if (ipAddr != null) {
+            index = ipAddr.indexOf('%');
+        }
         if (index > 0) {
             ipAddr = ipAddr.substring(0, index);
         }
@@ -549,9 +553,7 @@ public final class IpUtil {
 
         try {
             Socket socket = new Socket(address.getAddress(), address.getPort());  //建立一个Socket连接
-            if (socket != null) {
-                socket.close();
-            }
+            socket.close();
             return true;
         } catch (IOException e) {
             //...

@@ -9,16 +9,18 @@
  */
 package com.github.jspxnet.security.utils;
 
+import com.antherd.smcrypto.sm3.Sm3;
 import com.github.jspxnet.boot.environment.Environment;
-import com.github.jspxnet.security.sm.SM3Digest;
 import com.github.jspxnet.utils.StringUtil;
-
+import lombok.extern.slf4j.Slf4j;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.util.Objects;
 
 
 /**
@@ -28,7 +30,9 @@ import java.security.*;
  * Time: 9:26:04
  * 加密单元,提供不同的加密方式
  */
+@Slf4j
 public class EncryptUtil {
+    public static final String ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     //base64编码使用 begin
     /***
      * Default values for encoder/decoder flags.
@@ -74,13 +78,7 @@ public class EncryptUtil {
     public static final int NO_CLOSE = 16;
     //base64编码使用 end
 
-    /*
 
-        public static final String RSA = "RSA";
-        private static final String SHA1WithRSA = "SHA1WithRSA";
-        public static final String MD5withRSA = "MD5withRSA";
-
-     */
     private EncryptUtil() {
     }
 
@@ -94,16 +92,14 @@ public class EncryptUtil {
         if (origin == null) {
             return StringUtil.empty;
         }
-
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             return toHex(md.digest(origin.getBytes(Environment.defaultEncode))).toLowerCase();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error(ex.getMessage());
         }
         return StringUtil.empty;
     }
-
 
     /**
      * @param origin 来源数据
@@ -115,12 +111,9 @@ public class EncryptUtil {
         }
         byte[] md = new byte[32];
         try {
-            byte[] msg1 = origin.getBytes(Environment.defaultEncode);
-            SM3Digest sm3 = new SM3Digest();
-            sm3.update(msg1, 0, msg1.length);
-            sm3.doFinal(md, 0);
+            return Sm3.sm3(origin); // 杂凑
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error(ex.getMessage());
         }
         return toHex(md);
     }
@@ -220,8 +213,7 @@ public class EncryptUtil {
     }
 
     public static String getBase64Encode(byte[] bytes) {
-
-        return Base64.encodeToString(bytes, URL_SAFE + NO_WRAP);
+        return java.util.Base64.getEncoder().encodeToString(bytes);
     }
 
 
@@ -231,7 +223,6 @@ public class EncryptUtil {
      * @return 改为jdk rt.jar 里边的包使用
      */
     public static String getBase64Encode(byte[] bytes, int flags) {
-
         return Base64.encodeToString(bytes, flags);
     }
 
@@ -242,7 +233,7 @@ public class EncryptUtil {
      */
     public static byte[] getBase64Decode(String str) {
         //有没有换行都可以正确解析
-        return getBase64Decode(str, URL_SAFE + NO_WRAP);
+        return getBase64Decode(str, NO_WRAP);
     }
 
     public static byte[] getBase64Decode(String str, int flags) {
@@ -258,7 +249,7 @@ public class EncryptUtil {
         if (StringUtil.isNull(str)) {
             return StringUtil.empty;
         }
-        return getBase64DecodeString(str, URL_SAFE + NO_WRAP);
+        return getBase64DecodeString(str, NO_WRAP);
     }
 
     public static String getBase64DecodeString(String str, int flags) throws UnsupportedEncodingException {
@@ -274,7 +265,7 @@ public class EncryptUtil {
      * @return base64编码
      */
     public static String getBase64EncodeString(String str) {
-        return getBase64EncodeString(str, URL_SAFE + NO_WRAP);
+        return getBase64EncodeString(str, NO_WRAP);
     }
 
 
@@ -338,7 +329,7 @@ public class EncryptUtil {
         if (src == null) {
             return StringUtil.empty;
         }
-        return toHex(encrypt(src, "SHA"));
+        return toHex(Objects.requireNonNull(encrypt(src, "SHA")));
     }
 
 
@@ -360,7 +351,7 @@ public class EncryptUtil {
             md.update(password.getBytes());
             return toHex(md.digest());
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
         }
     }
@@ -370,7 +361,7 @@ public class EncryptUtil {
             MessageDigest md = MessageDigest.getInstance(encrypt);
             return md.digest(convert);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
         }
     }
@@ -488,8 +479,8 @@ public class EncryptUtil {
      * @param bytes 数据
      */
     public static void printHexString(byte[] bytes) {
-        for (int i = 0; i < bytes.length; i++) {
-            String hex = Integer.toHexString(bytes[i] & 0xFF);
+        for (byte aByte : bytes) {
+            String hex = Integer.toHexString(aByte & 0xFF);
             if (hex.length() == 1) {
                 hex = '0' + hex;
             }
@@ -532,7 +523,7 @@ public class EncryptUtil {
      * @param content 字符串
      * @return ASCII字符串
      */
-    public static String StringToAsciiString(String content) {
+    public static String toAsciiString(String content) {
         String result = "";
         int max = content.length();
         for (int i = 0; i < max; i++) {
@@ -642,16 +633,16 @@ public class EncryptUtil {
      * @param content ASCII字符串
      * @return 字符串
      */
-    public static String AsciiStringToString(String content) {
-        String result = "";
+    public static String asciiStringToString(String content) {
+        StringBuilder result = new StringBuilder();
         int length = content.length() / 2;
         for (int i = 0; i < length; i++) {
             String c = content.substring(i * 2, i * 2 + 2);
             int a = hexStringToAlgorism(c);
             char b = (char) a;
-            result += String.valueOf(b);
+            result.append(String.valueOf(b));
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -762,7 +753,7 @@ public class EncryptUtil {
      * @return byte[]
      */
     public static byte[] hexToByte(String hexString) {
-        if (hexString == null || "".equals(hexString)) {
+        if (StringUtil.isNull(hexString)) {
             return null;
         }
         hexString = hexString.toUpperCase();
@@ -825,9 +816,7 @@ public class EncryptUtil {
      */
     public static byte[] subByte(byte[] input, int startIndex, int length) {
         byte[] bt = new byte[length];
-        for (int i = 0; i < length; i++) {
-            bt[i] = input[i + startIndex];
-        }
+        System.arraycopy(input, startIndex, bt, 0, length);
         return bt;
     }
 
@@ -845,15 +834,16 @@ public class EncryptUtil {
     /**
      * 判断是否为十六进制字符串，避免解码错误
      *
-     * @param str 字符串
+     * @param input 字符串
      * @return 判断是否为十六进制字符串
      */
-    public static boolean isHex(String str) {
-        String validate = "(?i)[0-9a-f]+";
-        return str.matches(validate);
+    public static boolean isHex(String input) {
+        String hexPattern = "^[0-9a-fA-F]+$";
+        if (input.startsWith("0x") || input.startsWith("#")) {
+            input = input.substring(2); // 去除0x或#
+        }
+        return input.matches(hexPattern);
     }
-
-
     /**
      *
      * @param str 数据
@@ -867,14 +857,7 @@ public class EncryptUtil {
         if (str.length() % 4 != 0) {
             return false;
         }
-        char[] strChars = str.toCharArray();
-        for (char c : strChars) {
-            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
-                    || c == '+' || c == '/' || c == '=' || c == '_' | c == '-' | c == ' ')) {
-                return false;
-            }
-        }
-        return true;
+        return str.matches("^[A-Za-z0-9+/]*={0,2}$");
     }
 
 
@@ -889,7 +872,7 @@ public class EncryptUtil {
         if (EncryptUtil.isHex(key)) {
             return hexToByte(key);
         } else {
-            return getBase64Decode(key, URL_SAFE + NO_WRAP);
+            return getBase64Decode(key, NO_WRAP);
         }
     }
 
@@ -914,4 +897,24 @@ public class EncryptUtil {
         return params;
     }
 
+
+    //base58算法实现
+    // Base58 编码
+
+    public static String getBase58EncodeString(String input) {
+        if (StringUtil.isNull(input)) {
+            input = StringUtil.empty;
+        }
+        return Base58.encode(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String getBase58Encode(byte[] input) {
+        return Base58.encode(input);
+    }
+    public static byte[] getBase58Decode(String base58) {
+        return Base58.decode(base58);
+    }
+    public static String getBase58DecodeString(String base58) {
+        return new String(Base58.decode(base58),StandardCharsets.UTF_8);
+    }
 }

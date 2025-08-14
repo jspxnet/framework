@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.sober.criteria.projection;
 
-import com.github.jspxnet.sober.criteria.expression.Restrictions;
+import com.github.jspxnet.sober.criteria.expression.Expression;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,11 +28,11 @@ public class Distinct implements Projection {
     @Override
     public String toSqlString(String databaseName) {
 
-        return Restrictions.KEY_DISTINCT + " " + projection.toSqlString(databaseName);
+        return Expression.KEY_DISTINCT + " " + projection.toSqlString(databaseName);
     }
 
     @Override
     public String toString() {
-        return Restrictions.KEY_DISTINCT + " " + projection.toString();
+        return Expression.KEY_DISTINCT + " " + projection.toString();
     }
 }

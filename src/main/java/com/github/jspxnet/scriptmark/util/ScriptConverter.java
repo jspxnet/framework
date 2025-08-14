@@ -43,7 +43,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * Time: 17:45:19
  * com.github.jspxnet.jspx.test.scriptmark.util.ScriptConverter
  * extends ScriptableObject
- * extends ScriptableObject
  */
 @Slf4j
 public class ScriptConverter {
@@ -78,6 +77,14 @@ public class ScriptConverter {
         return ((String) o).trim();
     }
 
+
+    /**
+     * 替换字符串
+     * @param o 原字符串
+     * @param a 要替换的字符串
+     * @param b 替换为
+     * @return 新的被替换的字符串
+     */
     public static String replaceAll(String o, String a, String b) {
         return StringUtil.replace(o, a, b);
     }
@@ -350,7 +357,7 @@ public class ScriptConverter {
                     }
                     return sb.get().toString();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("getHtmlOptions",e);
                 }
 
             }
@@ -371,9 +378,10 @@ public class ScriptConverter {
                         }
                         sb.append(">").append(vars).append("</option>");
                     }
+                    jsonObject.clear();
                     return sb.toString();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("getHtmlOptions",e);
                 }
 
             }
@@ -468,7 +476,7 @@ public class ScriptConverter {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("show",e);
                 }
                 return StringUtil.empty;
             }
@@ -605,7 +613,7 @@ public class ScriptConverter {
         try {
             return IoUtil.autoReadText(http,encode);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("getHighlight",e);
             return "ERROR";
         }
     }
@@ -881,7 +889,7 @@ public class ScriptConverter {
      * @param cla 类
      * @return 得到字段选项, 用于查询
      */
-    public static String getFields(Class cla) {
+    public static String getFields(Class<?> cla) {
         List<SoberColumn> soberColumns = AnnotationUtil.getColumnList(cla);
         StringBuilder sb = new StringBuilder();
         for (SoberColumn column : soberColumns) {
@@ -910,10 +918,20 @@ public class ScriptConverter {
     }
 
 
+    /**
+     *
+     * @param name 文件名称
+     * @return 将文件名称转换为s_开头的，表示缩图名称
+     */
     public static String getThumbnailFileName(String name) {
         return FileUtil.getThumbnailFileName(name);
     }
 
+    /**
+     *
+     * @param name 文件名称
+     * @return 将文件名称转换为 m_开头的，表示手机图片
+     */
     public static String getMobileFileName(String name) {
         return FileUtil.getMobileFileName(name);
     }

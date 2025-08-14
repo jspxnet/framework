@@ -4,6 +4,7 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sioc.Sioc;
 import com.github.jspxnet.sioc.annotation.Bean;
+import com.github.jspxnet.sober.SoberFactory;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.annotation.SqlMap;
 import com.github.jspxnet.sober.enums.PropagationEnumType;
@@ -12,12 +13,14 @@ import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.sober.transaction.TransactionController;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.txweb.annotation.Transaction;
+import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+
 import java.lang.reflect.Method;
 
 /**
@@ -72,7 +75,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor {
         com.github.jspxnet.sober.Transaction invokeTransaction = null;
         Transaction transaction = exeMethod.getAnnotation(Transaction.class);
         if (transaction != null) {
-            invokeTransaction = getTransactionBegin(transaction, exeMethod);
+            invokeTransaction = getTransactionBegin(transaction, obj, exeMethod);
         }
         Object result;
         try {
@@ -86,6 +89,10 @@ public class GlobalMethodInterceptor implements MethodInterceptor {
             }
         } catch (Exception e) {
             Exception newException = e;
+            if (targetClass!=null&&targetClass.getName().contains("Service"))
+            {
+                log.error("检查{},是否写入了sqlMap注释,sqlMap注释得使用在DAO层",targetClass );
+            }
             if (transaction != null && invokeTransaction != null) {
                 invokeTransaction.rollback();
                 if (!StringUtil.isNull(transaction.message())) {
@@ -98,7 +105,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor {
     }
 
 
-    private static com.github.jspxnet.sober.Transaction getTransactionBegin(Transaction transaction, Method exeMethod) throws Throwable {
+    private static com.github.jspxnet.sober.Transaction getTransactionBegin(Transaction transaction, Object obj, Method exeMethod) throws Throwable {
         //没有配置的情况,直接提示执行返回begin
         if (transaction == null) {
             return null;
@@ -110,12 +117,30 @@ public class GlobalMethodInterceptor implements MethodInterceptor {
             return null;
         }
         //没有配置的情况,直接提示执行返回end
-        //这里开始事务处理
-        com.github.jspxnet.sober.Transaction invokeTransaction = transactionController.createTransaction();
-        if (PropagationEnumType.NEW.equals(transaction.propagation())) {
-            invokeTransaction.reset();
+
+        //放入配置
+        if (transactionController.getSoberFactory() == null) {
+            if (ClassUtil.haveMethodsName(obj.getClass(), "getSoberFactory")) {
+                SoberFactory soberFactory = (SoberFactory) BeanUtil.getProperty(obj, "getSoberFactory");
+                transactionController.setSoberFactory(soberFactory);
+            } else {
+                String soberFactoryName = EnvFactory.getEnvironmentTemplate().getString("soberFactory", "jspxSoberFactory");
+                SoberFactory soberFactory = (SoberFactory) beanFactory.getBean(soberFactoryName);
+                transactionController.setSoberFactory(soberFactory);
+            }
         }
-        invokeTransaction.begin();
+
+        //这里开始事务处理
+        com.github.jspxnet.sober.Transaction invokeTransaction = null;
+        try {
+            invokeTransaction = transactionController.createTransaction();
+            if (PropagationEnumType.NEW.equals(transaction.propagation())) {
+                invokeTransaction.reset();
+            }
+            invokeTransaction.begin();
+        } catch (Exception e) {
+            log.error("事务控制器，创建事物失败", e);
+        }
         return invokeTransaction;
     }
 
@@ -133,7 +158,7 @@ public class GlobalMethodInterceptor implements MethodInterceptor {
         }
         proxy.invokeSuper(obj, arg);
         SoberSupport soberSupport = (SoberSupport) obj;
-        SqlMapConf sqlMapConf = soberSupport.getBaseSqlMap().getSqlMapConf(namespace,exeId,sqlMap.execute(),sqlMap);
-        return SoberUtil.invokeSqlMapInvocation(soberSupport,arg,sqlMapConf,exeMethod);
+        SqlMapConf sqlMapConf = soberSupport.getBaseSqlMap().getSqlMapConf(namespace, exeId, sqlMap.execute(), sqlMap);
+        return SoberUtil.invokeSqlMapInvocation(soberSupport, arg, sqlMapConf, exeMethod);
     }
 }

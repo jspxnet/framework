@@ -169,7 +169,8 @@ public class CodeMakerImpl implements CodeMaker {
             }
 
             if (!StringUtil.isNull(column.getOption())) {
-                jsonObject.put("option", column.getOptionList());
+                //jsonObject.put("option", column.getOptionList());
+                jsonObject.put("option", new ArrayList<>(0));
             }
             jsonObject.put("edit", "id".equalsIgnoreCase(column.getName()));
             jsonArray.put(jsonObject);
@@ -183,9 +184,8 @@ public class CodeMakerImpl implements CodeMaker {
      * @param tableModels 类模型
      * @param jumpFields  排除字段
      * @return 创建列表
-     * @throws Exception 异常
      */
-    private static Map<String, Object> createValueMap(TableModels tableModels,List<String> jumpFields) throws Exception {
+    private static Map<String, Object> createValueMap(TableModels tableModels,List<String> jumpFields)  {
         if (tableModels==null)
         {
             return new HashMap<>(0);

@@ -3,7 +3,10 @@ package com.github.jspxnet.security.asymmetric;
 import com.github.jspxnet.security.utils.EncryptUtil;
 
 /**
+ * 统一公密加密，私密解密
  * Created by ChenYuan on 2017/5/9.
+ * String encryptData = Sm2.doEncrypt(msg, publicKey); // 加密结果
+ * String decryptData = Sm2.doDecrypt(encryptData, privateKey); // 解密结果
  */
 public abstract class AbstractEncrypt implements AsyEncrypt {
 

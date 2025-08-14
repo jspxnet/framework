@@ -179,7 +179,7 @@ public class JSONML {
                             newjo.accumulate(attribute, "");
                         }
                     }
-                    if (arrayForm && newjo.size() > 0) {
+                    if (arrayForm && !newjo.isEmpty()) {
                         newja.put(newjo);
                     }
 

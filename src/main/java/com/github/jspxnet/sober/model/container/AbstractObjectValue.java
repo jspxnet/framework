@@ -1,13 +1,14 @@
 package com.github.jspxnet.sober.model.container;
 
+import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.IPropertyChange;
 import com.github.jspxnet.sober.TableModels;
-import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.utils.ObjectUtil;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -15,21 +16,22 @@ import java.util.Map;
  */
 
 public abstract class AbstractObjectValue extends PropertyContainer implements IPropertyChange {
+    @Setter
+    @Getter
     private transient TableModels tableModels;
-    protected transient DataMap<String, Object> oldValues = null;
 
-    //这里是为了多语言实现
+    @JsonIgnore
+    protected transient Map<String, Object> oldValues = new HashMap<>();
 
+    @JsonIgnore
     private boolean available = true;
 
+    @Setter
+    @JsonIgnore
     private boolean isLoaded;
 
     public boolean isLoaded() {
         return this.isLoaded;
-    }
-
-    public void setIsLoaded(boolean isLoaded) {
-        this.isLoaded = isLoaded;
     }
 
     @Override
@@ -50,8 +52,7 @@ public abstract class AbstractObjectValue extends PropertyContainer implements I
     @Override
     public void copyNewToOld() {
         this.oldValues.clear();
-        Map<String, Object> result = new HashMap<>(getValues());
-        this.oldValues.putAll(result);
+        this.oldValues.putAll(getValues());
     }
 
     public boolean compareNewToOld() {
@@ -95,11 +96,4 @@ public abstract class AbstractObjectValue extends PropertyContainer implements I
         return available;
     }
 
-    public TableModels getTableModels() {
-        return tableModels;
-    }
-
-    public void setTableModels(TableModels tableModels) {
-        this.tableModels = tableModels;
-    }
 }

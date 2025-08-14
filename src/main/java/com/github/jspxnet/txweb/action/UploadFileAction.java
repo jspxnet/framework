@@ -43,20 +43,24 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.upload.UploadedFile;
 import com.github.jspxnet.util.StringMap;
 import com.github.jspxnet.utils.*;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
- * User: chenYuan
+ * User: chenYuan,肖佳 改造版本
  * date: 12-2-4
  * Time: 下午7:48
  * 上传机制说明, 如果采用flash方式上传，每次只是一个上传文件，
@@ -67,40 +71,12 @@ import java.util.Map;
  * 1.参数thumbnail  成立，生成_s缩图
  * 2.所有图都生成_m手机图片
  * 3.如果已经存在的图片，将已经存在的图片返回，如果已经在的图片，就将现有图片拷贝覆盖到原图片
+ * 区别 commonConfig 部分使用外部配置
  * </p>
  */
 @Slf4j
 public class UploadFileAction extends MultipartSupport {
-    final static public String[] OFFICE_FILE_TYPES = FileSuffixUtil.OFFICE_TYPES;
-    final static public String[] STOP_EXS = new String[]{"php", "jsp", "ftl", "html", "htm", "exe", "com", "bat", "asp", "aspx", "sh", "jar", "js", "dll"};
 
-    //分组变量名称
-    final public static String GROUP_VAR_NAME = "groupName";
-    final public static String TITLE_VAR_NAME = "title";
-    final public static String CONTENT_VAR_NAME = "content";
-
-    //宽高控制
-    final public static String THUMBNAIL_WIDTH_VAR_NAME = "thumbnailWidth";
-    final public static String THUMBNAIL_HEIGHT_VAR_NAME = "thumbnailHeight";
-    final public static String MAX_IMAGE_WIDTH_HEIGHT = "maxImageWidthHeight";
-
-    //数据的签名
-    final public static String SIGNATURE_KEY = "signature";
-
-    //时间戳 变量
-    final public static String TIMESTAMP_KEY = "timestamp";
-
-    final private static String WIDTH_NAME = "width";
-    final private static String HEIGHT_NAME = "height";
-
-    final public static String ORGANIZE_ID = "organizeId";
-
-    final public static String SYS_TYPE = "sysType";
-
-    final public static String THUMBNAIL_VAR_NAME = "thumbnail";
-
-    final public static String USE_FAST_UPLOAD = "useFastUpload";
-    final public static String CONTENT_TYPE_VAR_NAME = "contentType";
 
     // 状态
     public static String hashType = "MD5";
@@ -110,6 +86,7 @@ public class UploadFileAction extends MultipartSupport {
 
     private boolean useOriginalDate = false;
 
+    @Getter
     private boolean useFastUpload = false;
 
     private boolean editorUpload = false;
@@ -155,8 +132,16 @@ public class UploadFileAction extends MultipartSupport {
     }
 
 
+    protected Bundle commonConfig;
+
+    @Ref(name = Environment.config, test = true, namespace = "jcommon")
+    public void setCommonConfig(Bundle config) {
+        this.commonConfig = config;
+    }
+
     //验证方式 0:游客方式不允许上传,其他通过角色配置  默认  1:游客也放开； 2:通过验证ApiKey判断
     private int verifyType = UploadVerifyEnumType.DEFAULT.getValue();
+
     @Param(request = false)
     public void setVerifyType(int verifyType) {
         this.verifyType = verifyType;
@@ -169,10 +154,6 @@ public class UploadFileAction extends MultipartSupport {
         this.apiKey = apiKey;
     }
 
-    public boolean isUseFastUpload() {
-        return useFastUpload;
-    }
-
     protected String getOrganizeId() {
         if (!StringUtil.isEmpty(uploadFileDAO.getOrganizeId())) {
             return uploadFileDAO.getOrganizeId();
@@ -181,25 +162,25 @@ public class UploadFileAction extends MultipartSupport {
     }
 
     protected int getSysType(ImageSysEnumType imageSysEnumType) {
-        return getInt(SYS_TYPE,imageSysEnumType.getValue());
+        return getInt(SYS_TYPE, imageSysEnumType.getValue());
     }
 
     protected int getMaxImageWidth() {
-        return getInt(MAX_IMAGE_WIDTH_HEIGHT,config.getInt(Environment.maxImageWidth,1280));
+        return getInt(MAX_IMAGE_WIDTH_HEIGHT, config.getInt(Environment.maxImageWidth, 1280));
     }
 
     protected int getMaxImageHeight() {
-        return getInt(MAX_IMAGE_WIDTH_HEIGHT,config.getInt(Environment.maxImageHeight,1280));
+        return getInt(MAX_IMAGE_WIDTH_HEIGHT, config.getInt(Environment.maxImageHeight, 1280));
     }
 
     //得到请求 签名
     protected String getRequestSignature() {
-        return getString(SIGNATURE_KEY,true);
+        return getString(SIGNATURE_KEY, true);
     }
 
     //得到请求的 时间戳
     protected String getRequestTimestamp() {
-        return getString(TIMESTAMP_KEY,true);
+        return getString(TIMESTAMP_KEY, true);
     }
 
     /**
@@ -270,40 +251,6 @@ public class UploadFileAction extends MultipartSupport {
         return setupPath;
     }
 
-    /**
-     * @param config 配置接口
-     * @return 上传路径的计算方式配置方式
-     */
-    @Param(request = false)
-    public static String getUploadDirectory(Bundle config) {
-        String saveDirectory = FileUtil.mendPath(config.getString(Environment.uploadPath));
-        if (!FileUtil.isDirectory(saveDirectory)) {
-            saveDirectory = FileUtil.mendPath(config.getString(Environment.setupPath)) + FileUtil.mendPath(config.getString(Environment.uploadPath));
-        }
-        boolean uploadPathType = config.getBoolean(Environment.uploadPathType);
-        if (uploadPathType) {
-            saveDirectory = FileUtil.mendPath(saveDirectory) + DateUtil.toString("yyyyMM") + "/";
-        } else {
-            saveDirectory = FileUtil.mendPath(saveDirectory) + DateUtil.toString("yyyy") + "/";
-        }
-        return saveDirectory;
-    }
-
-    /**
-     * @param config 配置
-     * @param name   名称
-     * @return 得到文件
-     */
-    @Param(request = false)
-    public static File getUploadFile(Bundle config, String name) {
-        String setupPath = FileUtil.mendPath(config.getString(Environment.setupPath));
-        String searchPathList = config.getString(Environment.searchPaths);
-        String[] searchPaths = ArrayUtil.remove(StringUtil.split(StringUtil.convertCR(searchPathList), StringUtil.CR), "");
-        searchPaths = ArrayUtil.add(searchPaths, setupPath);
-        searchPaths = ArrayUtil.add(searchPaths, setupPath + config.getString(Environment.uploadPath));
-        searchPaths = ArrayUtil.add(searchPaths, (new File(setupPath).getParent()));
-        return FileUtil.getFile(searchPaths, name);
-    }
 
     /**
      * @param multipartRequest 请求接口
@@ -333,22 +280,18 @@ public class UploadFileAction extends MultipartSupport {
         json.put("success", false);
         setResult(json);
 
-        if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
-        {
+        if (UploadVerifyEnumType.DEFAULT.getValue() == verifyType && isGuest()) {
             printErrorInfo("没有登陆");
             return;
         }
-        if (UploadVerifyEnumType.API_KEY_1.getValue()==verifyType&&!getRequestSignature().equalsIgnoreCase(apiKey))
-        {
+        if (UploadVerifyEnumType.API_KEY_1.getValue() == verifyType && !getRequestSignature().equalsIgnoreCase(apiKey)) {
             printErrorInfo("key签证错误");
             return;
         }
 
-        if (UploadVerifyEnumType.API_KEY_2.getValue()==verifyType)
-        {
+        if (UploadVerifyEnumType.API_KEY_2.getValue() == verifyType) {
             String signature = EncryptUtil.getMd5(apiKey + getRequestTimestamp());
-            if (!signature.equalsIgnoreCase(getRequestSignature()))
-            {
+            if (!signature.equalsIgnoreCase(getRequestSignature())) {
                 printErrorInfo("key签证错误");
                 return;
             }
@@ -384,22 +327,18 @@ public class UploadFileAction extends MultipartSupport {
         json.put("success", false);
         setResult(json);
 
-        if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
-        {
+        if (UploadVerifyEnumType.DEFAULT.getValue() == verifyType && isGuest()) {
             printErrorInfo("没有登陆");
             return;
         }
-        if (UploadVerifyEnumType.API_KEY_1.getValue()==verifyType&&!getRequestSignature().equalsIgnoreCase(apiKey))
-        {
+        if (UploadVerifyEnumType.API_KEY_1.getValue() == verifyType && !getRequestSignature().equalsIgnoreCase(apiKey)) {
             printErrorInfo("key签证错误");
             return;
         }
 
-        if (UploadVerifyEnumType.API_KEY_2.getValue()==verifyType)
-        {
+        if (UploadVerifyEnumType.API_KEY_2.getValue() == verifyType) {
             String signature = EncryptUtil.getMd5(apiKey + getRequestTimestamp());
-            if (!signature.equalsIgnoreCase(getRequestSignature()))
-            {
+            if (!signature.equalsIgnoreCase(getRequestSignature())) {
                 printErrorInfo("key签证错误");
                 return;
             }
@@ -430,11 +369,8 @@ public class UploadFileAction extends MultipartSupport {
 
     }
 
+    @Setter
     private String fileName = StringUtil.empty;
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
 
 
     @Operate(caption = "续传判断")
@@ -444,22 +380,18 @@ public class UploadFileAction extends MultipartSupport {
         json.put("success", false);
         json.put("uploadType", "chunk");
 
-        if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
-        {
+        if (UploadVerifyEnumType.DEFAULT.getValue() == verifyType && isGuest()) {
             printErrorInfo("没有登陆");
             return;
         }
-        if (UploadVerifyEnumType.API_KEY_1.getValue()==verifyType&&!getRequestSignature().equalsIgnoreCase(apiKey))
-        {
+        if (UploadVerifyEnumType.API_KEY_1.getValue() == verifyType && !getRequestSignature().equalsIgnoreCase(apiKey)) {
             printErrorInfo("key签证错误");
             return;
         }
 
-        if (UploadVerifyEnumType.API_KEY_2.getValue()==verifyType)
-        {
+        if (UploadVerifyEnumType.API_KEY_2.getValue() == verifyType) {
             String signature = EncryptUtil.getMd5(apiKey + getRequestTimestamp());
-            if (!signature.equalsIgnoreCase(getRequestSignature()))
-            {
+            if (!signature.equalsIgnoreCase(getRequestSignature())) {
                 printErrorInfo("key签证错误");
                 return;
             }
@@ -509,17 +441,15 @@ public class UploadFileAction extends MultipartSupport {
             return NONE;
         }
 
-        MultipartRequest multipartRequest = (MultipartRequest)request;
-        if (UploadVerifyEnumType.DEFAULT.getValue()==verifyType&&isGuest())
-        {
+        MultipartRequest multipartRequest = (MultipartRequest) request;
+        if (UploadVerifyEnumType.DEFAULT.getValue() == verifyType && isGuest()) {
             printErrorInfo("没有登陆");
             for (UploadedFile uf : multipartRequest.getFiles()) {
                 FileUtil.delete(uf.getFile());
             }
             return NONE;
         }
-        if (UploadVerifyEnumType.API_KEY_1.getValue()==verifyType&&!getRequestSignature().equalsIgnoreCase(apiKey))
-        {
+        if (UploadVerifyEnumType.API_KEY_1.getValue() == verifyType && !getRequestSignature().equalsIgnoreCase(apiKey)) {
             printErrorInfo("key签证错误");
             for (UploadedFile uf : multipartRequest.getFiles()) {
                 FileUtil.delete(uf.getFile());
@@ -527,11 +457,9 @@ public class UploadFileAction extends MultipartSupport {
             return NONE;
         }
 
-        if (UploadVerifyEnumType.API_KEY_2.getValue()==verifyType)
-        {
+        if (UploadVerifyEnumType.API_KEY_2.getValue() == verifyType) {
             String signature = EncryptUtil.getMd5(apiKey + getRequestTimestamp());
-            if (!signature.equalsIgnoreCase(getRequestSignature()))
-            {
+            if (!signature.equalsIgnoreCase(getRequestSignature())) {
                 printErrorInfo("key签证错误");
                 for (UploadedFile uf : multipartRequest.getFiles()) {
                     FileUtil.delete(uf.getFile());
@@ -541,10 +469,12 @@ public class UploadFileAction extends MultipartSupport {
         }
 
         IUserSession userSession = getUserSession();
-        boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
+//        boolean thumbnail = getBoolean(THUMBNAIL_VAR_NAME);
+        // 默认所有上传都要缩略图片
+        boolean thumbnail = true;
         Object[] objects = localUploadFile(userSession, thumbnail);
         if (ObjectUtil.isEmpty(objects)) {
-            printErrorInfo("上传失败",getFieldInfo());
+            printErrorInfo("上传失败", getFieldInfo());
             return NONE;
         }
 
@@ -574,7 +504,9 @@ public class UploadFileAction extends MultipartSupport {
             //其他方式不能释放,否则不会返回
             json.clear();
         }
-        uploadFileDAO.evict(uploadFileDAO.getClassType());
+//        uploadFileDAO.evict(uploadFileDAO.getClassType());
+        // 原因每个命名空间表名相同，位置不同，统一释放缓存
+        uploadFileDAO.evict(Class.forName("jspx.jcommon.table.UploadFile"));
         if (multipartRequest != null) {
             multipartRequest.destroy();
         }
@@ -593,21 +525,26 @@ public class UploadFileAction extends MultipartSupport {
      */
     public Object[] localUploadFile(IUserSession userSession, boolean thumbnail) throws Exception {
         String setupPath = getSetupPath();
-        MultipartRequest multipartRequest = (MultipartRequest)getRequest();
+        MultipartRequest multipartRequest = (MultipartRequest) getRequest();
         String[] titleArray = multipartRequest.getParameterValues(TITLE_VAR_NAME);
         String[] contentArray = multipartRequest.getParameterValues(CONTENT_VAR_NAME);
 
         int index = -1;
+
+        // 检验是否批量上传
+        boolean batchImage = getBoolean("batchImage");
+
+        List<IUploadFile> list = new ArrayList<>();
         for (UploadedFile uf : multipartRequest.getFiles()) {
             index++;
             if (ArrayUtil.inArray(STOP_EXS, uf.getFileType(), true)) {
                 FileUtil.delete(uf.getFile());
-                addFieldInfo(Environment.warningInfo,language.getLang(LanguageRes.notAllowedFileType) + StringUtil.COLON + uf.getFileType());
+                addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notAllowedFileType) + StringUtil.COLON + uf.getFileType());
                 return null;
             }
             if (!uf.isUpload()) {
                 FileUtil.delete(uf.getFile());
-                addFieldInfo(Environment.warningInfo,language.getLang(LanguageRes.notAllowedFileTypeOrUploadError));
+                addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.notAllowedFileTypeOrUploadError));
                 return null;
             }
             //分片上传
@@ -624,7 +561,7 @@ public class UploadFileAction extends MultipartSupport {
 
             if (!uf.moveToTypeDir()) {
                 //没有移动成功的文件
-                addFieldInfo(Environment.warningInfo,language.getLang(LanguageRes.folderWriteError));
+                addFieldInfo(Environment.warningInfo, language.getLang(LanguageRes.folderWriteError));
                 return null;
             }
 
@@ -643,8 +580,7 @@ public class UploadFileAction extends MultipartSupport {
             upFile.setFileSize(uf.getFile().length());
             upFile.setFileType(StringUtil.toLowerCase(uf.getFileType()));
 
-            if (chineseAnalyzer!=null)
-            {
+            if (chineseAnalyzer != null) {
                 upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
             }
             upFile.setGroupName(getString(GROUP_VAR_NAME, "未分类", true));
@@ -664,9 +600,7 @@ public class UploadFileAction extends MultipartSupport {
             if (useFastUpload && checkUploadFile != null && checkUploadFile.getPid() == 0 && !StringUtil.isNull(upFile.getHash()) &&
                     fileEquals(checkUploadFile.getHash(), upFile.getHash()) && checkUploadFile.getPutUid() == userSession.getUid()
                     && (checkUploadFile.getOrganizeId() != null && checkUploadFile.getOrganizeId().equals(getOrganizeId())
-                    && checkUploadFile.getFileSize() == upFile.getFileSize()
-            )
-            ) {
+                    && checkUploadFile.getFileSize() == upFile.getFileSize())) {
                 //已经上传过的,拷贝一份
                 return copyUploadToUser(alreadyUploadFile, userSession);
             } else {
@@ -675,22 +609,23 @@ public class UploadFileAction extends MultipartSupport {
                 if (ObjectUtil.isEmpty(uploadObjArray)) {
                     return null;
                 }
-                if (!useCloudFile && uploadObjArray[0] != null) {
-                    //上传到本地目录
-                    uploadFileDAO.save(uploadObjArray[0]);
-                    IUploadFile uploadFile = (IUploadFile) uploadObjArray[0];
-                    if (uploadFile != null) {
-                        long pid = uploadFile.getId();
-                        for (int i = 1; i < uploadObjArray.length; i++) {
-                            if (uploadObjArray[i] == null) {
-                                continue;
-                            }
-                            IUploadFile tmpUploadFile = (IUploadFile) uploadObjArray[i];
-                            tmpUploadFile.setPid(pid);
-                            uploadFileDAO.save(uploadObjArray[i]);
-                        }
+                AssertException.isNull(uploadObjArray[0], "附件上传失效！");
+                IUploadFile uploadFile = (IUploadFile) uploadObjArray[0];
+                if (!useCloudFile) {
+                    // 拼接成绝对路径
+                    uploadFile.setFileName(String.format("http://%s/%s/%s", commonConfig.getString("bindDomain"),
+                            uploadFileDAO.getNamespace(), uploadFile.getFileName()));
+                    // 设置缩略图地址
+                    IUploadFile thumbnailFile = (IUploadFile) uploadObjArray[1];
+                    uploadFile.setThumbnail(String.format("http://%s/%s/%s", commonConfig.getString("bindDomain"),
+                            uploadFileDAO.getNamespace(), thumbnailFile.getFileName()));
+
+                    if (!batchImage) {
+                        //上传到本地目录
+                        uploadFileDAO.save(uploadFile);
+                        // 不是批量图片，直接返回
+                        return uploadObjArray;
                     }
-                    return uploadObjArray;
                 } else {
 
                     //上传到云盘
@@ -698,31 +633,40 @@ public class UploadFileAction extends MultipartSupport {
                     AssertException.isNull(cloudFileConfig, "云盘空间没有配置");
                     CloudFileClient cloudFileClient = CloudServiceFactory.createCloudClient(cloudFileConfig);
                     AssertException.isNull(cloudFileClient, "云盘空间没有配置正确");
-                    long pid = 0;
-                    for (int i = 0; i < uploadObjArray.length; i++) {
-                        if (uploadObjArray[i] == null) {
-                            continue;
-                        }
-                        IUploadFile tmpUploadFile = (IUploadFile) uploadObjArray[i];
-                        File localFile = new File(tmpUploadFile.getTempFilePath());
-                        String createUrlFileName = cloudFileConfig.getNamespace() + StringUtil.BACKSLASH + RandomUtil.getRandomGUID(28) + StringUtil.DOT + FileUtil.getTypePart(localFile);
-                        String cloudUrl = cloudFileClient.upload(createUrlFileName, localFile);
-                        tmpUploadFile.setFileName(cloudUrl);
-                        StringMap<String, String> attributeMap = tmpUploadFile.getAttributeMap();
-                        attributeMap.put("configId", cloudFileConfig.getId() + "");
-                        attributeMap.put("bucket", cloudFileConfig.getBucket());
-                        tmpUploadFile.setAttributes(attributeMap.toString());
-                        if (i == 0) {
-                            uploadFileDAO.save(uploadObjArray[i]);
-                            pid = tmpUploadFile.getId();
-                        } else {
-                            tmpUploadFile.setPid(pid);
-                            uploadFileDAO.save(uploadObjArray[i]);
-                        }
+
+                    String fileName = cloudFileConfig.getNamespace() + StringUtil.BACKSLASH + RandomUtil.getRandomGUID(28);
+                    if (batchImage) {
+                        fileName = cloudFileConfig.getNamespace() + StringUtil.BACKSLASH + uf.getOriginal().replaceAll(".\\w+$", "");
                     }
-                    return uploadObjArray;
+                    File localFile = new File(uploadFile.getTempFilePath());
+                    String createUrlFileName = fileName + StringUtil.DOT + FileUtil.getTypePart(localFile);
+                    uploadFile.setFileName(cloudFileClient.upload(createUrlFileName, localFile));
+                    // 再次设置属性
+                    StringMap<String, String> attributeMap = uploadFile.getAttributeMap();
+                    attributeMap.put("configId", cloudFileConfig.getId() + "");
+                    attributeMap.put("bucket", cloudFileConfig.getBucket());
+                    uploadFile.setAttributes(attributeMap.toString());
+                    // 设置缩略图地址
+                    if (batchImage && index == YesNoEnumType.NO.getValue()) {
+                        uploadFile.setThumbnail(cloudFileClient.upload(createUrlFileName.replaceAll("\\.","_s."), localFile));
+                    }else{
+                        IUploadFile thumbnailFile = (IUploadFile) uploadObjArray[1];
+                        File thumbnailLocalFile = new File(thumbnailFile.getTempFilePath());
+                        String thumbnailCreateUrlFileName = String.format("%s_s%s", fileName, StringUtil.DOT + FileUtil.getTypePart(thumbnailLocalFile));
+                        uploadFile.setThumbnail(cloudFileClient.upload(thumbnailCreateUrlFileName, thumbnailLocalFile));
+                    }
+
+                    if (!batchImage) {
+                        uploadFileDAO.save(uploadFile);
+                        // 不是批量图片，直接返回
+                        return uploadObjArray;
+                    }
                 }
+                list.add(uploadFile);
             }
+        }
+        if (batchImage && !ObjectUtil.isEmpty(list)) {
+            return list.toArray(new Object[0]);
         }
         return null;
     }
@@ -765,6 +709,12 @@ public class UploadFileAction extends MultipartSupport {
 
             int w = image.getWidth();
             int h = image.getHeight();
+            if (w > config.getInt(Environment.maxImageWidth)) {
+                w = config.getInt(Environment.maxImageWidth);
+            }
+            if (h > config.getInt(Environment.maxImageHeight)) {
+                h = config.getInt(Environment.maxImageHeight);
+            }
 
 
             if (config.getBoolean(Environment.EXIF_SATE)) {
@@ -773,20 +723,17 @@ public class UploadFileAction extends MultipartSupport {
             }
             int maxImageWidth = getMaxImageWidth();
             int maxImageHeight = getMaxImageHeight();
-            if (image.getHeight()>maxImageHeight||image.getWidth() > maxImageWidth)
-            {
-                boolean repair = ImageUtil.thumbnail(image, new FileOutputStream(file), uf.getFileType(), Math.min(maxImageWidth,image.getWidth()) ,Math.min( image.getHeight(),maxImageHeight));
+            if (image.getHeight() > maxImageHeight || image.getWidth() > maxImageWidth) {
+                boolean repair = ImageUtil.thumbnail(image, Files.newOutputStream(file.toPath()), uf.getFileType(), w, h);
                 image = ImageIO.read(file);
-                if (image!=null)
-                {
+                if (image != null) {
                     StringMap<String, String> attributeMap = upFile.getAttributeMap();
                     attributeMap.put(WIDTH_NAME, NumberUtil.toString(image.getWidth()));
                     attributeMap.put(HEIGHT_NAME, NumberUtil.toString(image.getHeight()));
                     upFile.setAttributes(attributeMap.toString());
                 }
-               json.put("repair", repair);
-            } else
-            {
+                json.put("repair", repair);
+            } else {
                 StringMap<String, String> attributeMap = upFile.getAttributeMap();
                 attributeMap.put(WIDTH_NAME, NumberUtil.toString(w));
                 attributeMap.put(HEIGHT_NAME, NumberUtil.toString(h));
@@ -795,14 +742,12 @@ public class UploadFileAction extends MultipartSupport {
             upFile.setFileSize(file.length());
 
             String thumbnailImg = FileUtil.getThumbnailFileName(uf.getFileName());
-            if (thumbnail)
-            {
+            if (thumbnail) {
                 int width = getInt(THUMBNAIL_WIDTH_VAR_NAME, config.getInt(THUMBNAIL_WIDTH_VAR_NAME, 400));
                 int height = getInt(THUMBNAIL_HEIGHT_VAR_NAME, config.getInt(THUMBNAIL_HEIGHT_VAR_NAME, 400));
                 //创建缩图
                 File thumbnailFile = new File(file.getParent(), thumbnailImg);
-                if (ImageUtil.thumbnail(image, new FileOutputStream(thumbnailFile), uf.getFileType(), width, height))
-                {
+                if (ImageUtil.thumbnail(image, Files.newOutputStream(thumbnailFile.toPath()), uf.getFileType(), width, height)) {
                     String thumbnailPath = FileUtil.mendPath(FileUtil.getDecrease(setupPath, uf.getDir())) + thumbnailImg;
                     IUploadFile thumbnailUploadFile = (IUploadFile) uploadFileDAO.getClassType().newInstance();
                     thumbnailUploadFile.setHash(FileUtil.getFileGuid(thumbnailFile, hashType));
@@ -847,14 +792,12 @@ public class UploadFileAction extends MultipartSupport {
                 }
                 content = StringUtil.cut(content, 2000, StringUtil.empty);
                 upFile.setContent(content);
-                if (chineseAnalyzer!=null)
-                {
+                if (chineseAnalyzer != null) {
                     upFile.setTags(chineseAnalyzer.getTag(content, StringUtil.space, 6, true));
                 }
             } catch (Exception e) {
                 upFile.setContent(uf.getOriginal());
-                if (chineseAnalyzer!=null)
-                {
+                if (chineseAnalyzer != null) {
                     upFile.setTags(chineseAnalyzer.getTag(uf.getOriginal(), StringUtil.space, 3, true));
                 }
             }
@@ -874,6 +817,7 @@ public class UploadFileAction extends MultipartSupport {
         }
         upFile.setCreateDate(createDate);
         result[0] = saveUploadFile;
+        json.clear();
         return result;
     }
 
@@ -927,14 +871,6 @@ public class UploadFileAction extends MultipartSupport {
         return objects;
     }
 
-    //---------------------------------------------
-    public static boolean fileEquals(String hash1, String hash2) {
-        if (StringUtil.isNull(hash1) || StringUtil.isNull(hash2)) {
-            return false;
-        }
-        return hash1.equals(hash2);
-    }
-    //---------------------------------------------
 
     /**
      * 分片上传,打印返回协议信息,返回

@@ -7,6 +7,7 @@ import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Table;
+import com.github.jspxnet.txweb.IRole;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.utils.DateUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -161,7 +162,7 @@ public class MemberVo implements Serializable {
     private List<MemberDeptVo> deptList = new ArrayList<>(0);
 
     @JsonIgnore
-    private List<Role> roleList = new ArrayList<>();
+    private List<IRole> roleList = new ArrayList<>();
 
     @JsonField(name = "roleCaption", caption = "角色列表")
     public String getRoleCaption()
@@ -169,7 +170,7 @@ public class MemberVo implements Serializable {
         StringBuilder sb = new StringBuilder();
     //    sb.append(":").append("无").append(StringUtil.SEMICOLON);
         if (roleList != null) {
-            for (Role role : roleList)
+            for (IRole role : roleList)
             {
                 if (role != null) {
                     sb.append(role.getNamespace()).append(":").append(role.getName()).append(StringUtil.SEMICOLON);

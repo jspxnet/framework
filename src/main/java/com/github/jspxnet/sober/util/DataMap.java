@@ -11,11 +11,9 @@ package com.github.jspxnet.sober.util;
 
 
 import com.github.jspxnet.utils.*;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import java.util.Date;
-import java.io.Serializable;
+
 
 
 /**
@@ -25,8 +23,7 @@ import java.io.Serializable;
  * Time: 0:41:16
  * DataMap特点，key不区分大小写，提供类型转换功能
  */
-public class DataMap<K extends String, V> extends HashMap<K, V> implements Serializable {
-    private final Map<String, String> keyMap = new HashMap<>();
+public class DataMap<K extends String, V> extends CaseInsensitiveMap<K, V> {
     public DataMap() {
 
     }
@@ -40,12 +37,15 @@ public class DataMap<K extends String, V> extends HashMap<K, V> implements Seria
         if (o == null) {
             return 0;
         }
-        return (Double) o;
+        return ObjectUtil.toDouble(o);
     }
 
 
     public float getFloat(String name) {
         Object o = get(name);
+        if (o == null) {
+            return 0;
+        }
         return ObjectUtil.toFloat(o);
     }
 
@@ -68,7 +68,7 @@ public class DataMap<K extends String, V> extends HashMap<K, V> implements Seria
         if (o == null) {
             return 0;
         }
-        return StringUtil.toInt(o.toString());
+        return ObjectUtil.toInt(o);
     }
 
     public long getLong(String name) {
@@ -76,7 +76,7 @@ public class DataMap<K extends String, V> extends HashMap<K, V> implements Seria
         if (o == null) {
             return 0;
         }
-        return StringUtil.toLong(o.toString());
+        return ObjectUtil.toLong(o);
     }
 
 
@@ -85,55 +85,48 @@ public class DataMap<K extends String, V> extends HashMap<K, V> implements Seria
         if (o == null) {
             return StringUtil.empty;
         }
-        String s = o.toString();
-        if (StringUtil.isNull(s)) {
-            return StringUtil.empty;
+        if (o instanceof String) {
+            return (String) o;
         }
-        return s;
+        return ObjectUtil.toString(o);
     }
 
     /**
-     * @param fname 字段
+     * @param name 字段
      * @return 得到boolean 类型
      */
-    public boolean getBoolean(String fname) {
-        return StringUtil.toBoolean(getValue(fname));
-    }
-
-    /**
-     * @param fname  字段
-     * @param strue  成立的数据
-     * @param sfalse 不成立的数据
-     * @return 判断条件输出结果String
-     */
-    public String getBoolean(String fname, String strue, String sfalse) {
-        if (getBoolean(fname)) {
-            return strue;
-        }
-        return sfalse;
+    public boolean getBoolean(String name) {
+        return ObjectUtil.toBoolean(get(name));
     }
 
 
     /**
-     * @param fname      字段
+     * @param name      字段
      * @param dateFormat 日期格式
      * @return 得到Date类型String
      */
-    public String getDateString(String fname, String dateFormat) {
-        Object o = get(fname);
+    public String getDateString(String name, String dateFormat) {
+        Object o = get(name);
         if (o == null) {
             return StringUtil.empty;
         }
-        Date date = (Date) o;
-        return DateUtil.toString(date, dateFormat);
+        if (o instanceof Date) {
+            Date date = (Date) o;
+            return DateUtil.toString(date, dateFormat);
+        }
+        if (o instanceof String) {
+            String dateStr = (String) o;
+            return DateUtil.toString(StringUtil.getDate(dateStr), dateFormat);
+        }
+        return ObjectUtil.toString(o);
     }
 
     /**
-     * @param fname 字段
+     * @param name 字段
      * @return 得到Date类型
      */
-    public Date getDate(String fname) {
-        Object o = get(fname);
+    public Date getDate(String name) {
+        Object o = get(name);
         if (o == null) {
             return null;
         }
@@ -141,11 +134,11 @@ public class DataMap<K extends String, V> extends HashMap<K, V> implements Seria
     }
 
     public String getValue(String name, int length) {
-        return getValue(name, length, false, "");
+        return getValue(name, length, false, StringUtil.empty);
     }
 
     public String getValue(String name, int length, boolean nohtml) {
-        return getValue(name, length, nohtml, "");
+        return getValue(name, length, nohtml, StringUtil.empty);
     }
 
     public String getValueNewlines(String name) {
@@ -174,54 +167,17 @@ public class DataMap<K extends String, V> extends HashMap<K, V> implements Seria
         }
         return result;
     }
+/*
+    public static void main(String[] args) {
+        CaseInsensitiveMap<String,Object> test =  new CaseInsensitiveMap<>();
+        test.put("aaA","123");
+        test.put("aBc","456");
+        DataMap<String,Object> rs = new DataMap<>();
+        rs.putAll(test);
 
-    @Override
-    public V get(java.lang.Object o) {
-        String key = (String) o;
-        if (key == null) {
-            return null;
-        }
-        key = keyMap.get(key.toLowerCase());
-        return super.get(key);
-    }
+        System.out.println(test.get("aaA"));
+        System.out.println(test.get("ABC"));
+        System.out.println(rs instanceof Map);
 
-    @Override
-    public boolean containsKey(Object key) {
-        return keyMap.containsKey(((String)key).toLowerCase());
-    }
-
-
-    @Override
-    public V put(K k, V v) {
-        if (k==null)
-        {
-           return null;
-        }
-        String key = k.toLowerCase();
-        keyMap.put(key,k);
-        return super.put(k, v);
-    }
-
-    @Override
-    public V remove(java.lang.Object o) {
-        String key = (String) o;
-        key = keyMap.get(key.toLowerCase());
-        return super.remove(key);
-    }
-
-    @Override
-    public void putAll(java.util.Map<? extends K, ? extends V> inmap) {
-        Map<K, V> xmap = (Map<K, V>) inmap;
-        for (K myk : xmap.keySet()) {
-            put(myk, xmap.get(myk));
-        }
-    }
-
-    @Override
-    public void clear()
-    {
-        keyMap.clear();
-        super.clear();
-    }
-
+    }*/
 }

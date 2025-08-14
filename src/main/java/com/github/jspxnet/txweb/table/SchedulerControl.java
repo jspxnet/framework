@@ -8,6 +8,7 @@ import com.github.jspxnet.sober.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.io.Serializable;
+import java.util.Date;
 
 @EqualsAndHashCode(callSuper = false)
 @Data
@@ -52,4 +53,10 @@ public class SchedulerControl implements Serializable {
     //运行状态
     @Column(caption = "运行次数", notNull = true)
     private int started = 0;
+
+    @Column(caption = "注册名", length = 200)
+    private String registerName;
+
+    @Column(caption = "创建时间", notNull = true)
+    private Date createDate = new Date();
 }

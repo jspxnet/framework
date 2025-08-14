@@ -9,10 +9,10 @@ import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/12/27 0:09
  * description: 封装一下都起单元
@@ -58,7 +58,7 @@ public class IoUtil {
         if (file!=null&&file.startsWith("http"))
         {
             HttpClient httpClient = HttpClientFactory.createHttpClient(file);
-            httpClient.setEncode(StringUtil.isNull(encode)?"UTF-8":encode);
+            httpClient.setEncode(StringUtil.isNull(encode)? StandardCharsets.UTF_8.name():encode);
             return httpClient.getString();
         }
 
@@ -79,6 +79,7 @@ public class IoUtil {
         abstractRead.setFile(file);
         return abstractRead.getContent();
     }
+
 
 
 }

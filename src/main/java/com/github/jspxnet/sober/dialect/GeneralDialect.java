@@ -35,7 +35,7 @@ public class GeneralDialect extends Dialect {
     }
 
     @Override
-    public String getLimitString(String sql, int begin, int end, TableModels soberTable) {
+    public String getLimitString(String sql, int begin, int end,TableModels soberTable) {
         return sql;
     }
 
@@ -118,5 +118,10 @@ public class GeneralDialect extends Dialect {
             return "char("+soberColumn.getLength()+")";
         }
         return "varchar(512)";
+    }
+
+    @Override
+    public String fieldQuerySql(String sql) {
+        return "SELECT * FROM (" + sql + ") zs limit 1";
     }
 }

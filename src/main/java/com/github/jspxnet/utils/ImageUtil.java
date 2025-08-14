@@ -501,7 +501,6 @@ public final  class ImageUtil {
      */
     static public BufferedImage scale(BufferedImage source, int targetW, int targetH) {
         int type = source.getType();
-        BufferedImage target = null;
         double sx = 0;
         double sy = 0;
         int targetWidth = source.getWidth();
@@ -519,7 +518,7 @@ public final  class ImageUtil {
         } else if (targetWidth <= targetW) {
             return source;
         }
-
+        BufferedImage target = null;
         if (type == BufferedImage.TYPE_CUSTOM) {
             ColorModel cm = source.getColorModel();
             WritableRaster raster = cm.createCompatibleWritableRaster(targetWidth, targetHeight);
@@ -1197,7 +1196,6 @@ public final  class ImageUtil {
         int src_height = image.getHeight();
         // calculate the new image size
         Rectangle rect_des = calcRotatedSize(new Rectangle(new Dimension(src_width, src_height)), angel);
-
         BufferedImage res = new BufferedImage(rect_des.width, rect_des.height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2 = res.createGraphics();
         // transform
@@ -1338,6 +1336,11 @@ public final  class ImageUtil {
         g = bufIma.createGraphics();
         g.drawImage(ima, 0, 0, null);
         return ima;
+    }
+
+
+    public static boolean isRgb(BufferedImage image) {
+        return BufferedImage.TYPE_INT_RGB == image.getType();
     }
 
 }

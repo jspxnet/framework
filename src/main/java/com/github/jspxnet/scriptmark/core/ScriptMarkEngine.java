@@ -16,6 +16,8 @@ import com.github.jspxnet.scriptmark.exception.ScriptRunException;
 import com.github.jspxnet.scriptmark.load.Source;
 import com.github.jspxnet.scriptmark.config.TemplateConfigurable;
 import com.github.jspxnet.utils.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -27,7 +29,7 @@ import java.util.HashMap;
  * Time: 15:18:28
  * 脚本引擎 com.github.jspxnet.scriptmark.core.ScriptMarkEngine
  */
-
+@Slf4j
 public class ScriptMarkEngine implements ScriptMark {
     final private EnvRunner runner;
 
@@ -89,6 +91,10 @@ public class ScriptMarkEngine implements ScriptMark {
         try {
             //放入全局变量
             putVarMap(scriptRunner, runner.getTemplate().getConfigurable().getGlobalMap());
+            if (runner.isFixUndefined())
+            {
+                runner.fixUndefinedMap(map);
+            }
             //放入私有变量
             putVarMap(scriptRunner, map);
             //运行
@@ -99,6 +105,11 @@ public class ScriptMarkEngine implements ScriptMark {
         }
     }
 
+    /**
+     * 放入变量
+     * @param scriptRunner js运行环境
+     * @param map 参数变量
+     */
     static private void putVarMap(ScriptRunner scriptRunner, Map<String, Object> map) {
         if (map == null) {
             return;
@@ -130,12 +141,14 @@ public class ScriptMarkEngine implements ScriptMark {
                         try {
                             scriptRunner.putVar(varNames[0],value);
                         } catch (ScriptRunException e) {
-                            e.printStackTrace();
+                            log.error("putVarMap",e);
                         }
                     }
                 }
             }
             scriptRunner.put(name, o);
         }
+
+
     }
 }

@@ -11,23 +11,23 @@ package com.github.jspxnet.boot;
 
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
+import com.github.jspxnet.boot.environment.JspxConfiguration;
+import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.boot.environment.impl.BaseConfigurationImpl;
 import com.github.jspxnet.boot.environment.impl.EnvironmentTemplateImpl;
 import com.github.jspxnet.boot.environment.impl.PlaceholderImpl;
-import com.github.jspxnet.boot.environment.JspxConfiguration;
-import com.github.jspxnet.boot.environment.EnvironmentTemplate;
-import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.boot.environment.impl.SqlMapPlaceholderImpl;
+import com.github.jspxnet.enums.KeyFormatEnumType;
 import com.github.jspxnet.security.asymmetric.AsyEncrypt;
 import com.github.jspxnet.security.asymmetric.impl.RSAEncrypt;
 import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.security.symmetry.impl.SM4Encrypt;
 import com.github.jspxnet.security.utils.EncryptUtil;
-import com.github.jspxnet.sioc.factory.EntryFactory;
 import com.github.jspxnet.sioc.BeanFactory;
-import com.github.jspxnet.utils.ClassUtil;
-import com.github.jspxnet.utils.FileUtil;
-import com.github.jspxnet.utils.StringUtil;
+import com.github.jspxnet.sioc.factory.EntryFactory;
+import com.github.jspxnet.utils.*;
+
 import java.io.File;
 
 /**
@@ -120,10 +120,10 @@ public class EnvFactory {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        int keyFormatType = ENV_TEMPLATE.getInt(Environment.keyFormatType,0);
+        symmetryEncrypt.setKeyFormatType(KeyFormatEnumType.find(keyFormatType));
         String secretKey = ENV_TEMPLATE.getString(Environment.secretKey, Environment.defaultDrug);
-        if (secretKey.length() > 16) {
-            secretKey = StringUtil.cut(secretKey, 16, StringUtil.empty);
-        }
         symmetryEncrypt.setSecretKey(secretKey);
         symmetryEncrypt.setCipherAlgorithm(ENV_TEMPLATE.getString(Environment.cipherAlgorithm));
         symmetryEncrypt.setCipherIv(ENV_TEMPLATE.getString(Environment.cipherIv));
@@ -148,7 +148,6 @@ public class EnvFactory {
         try {
             asymmetricEncrypt = (AsyEncrypt) ClassUtil.newInstance(encryptionAlgorithmClass);
         } catch (Exception e) {
-            e.printStackTrace();
             return new RSAEncrypt();
         }
         return asymmetricEncrypt;
@@ -195,7 +194,25 @@ public class EnvFactory {
         {
             return new File(loadFile);
         }
-        String[]  findDirs = new String[]{ENV_TEMPLATE.getString(Environment.defaultPath), ENV_TEMPLATE.getString(Environment.templatePath), ENV_TEMPLATE.getString(Environment.resPath)};
+        String defaultPath = jspxConfiguration.getDefaultPath();
+        String templatePath = ENV_TEMPLATE.getString(Environment.templatePath,"template");
+        if (!FileUtil.isDirectory(templatePath))
+        {
+            if (defaultPath!=null&&defaultPath.contains("classes")&&defaultPath.toLowerCase().contains("web-inf"))
+            {
+                templatePath = new File(new File(defaultPath).getParent(),templatePath).getPath();
+            } else
+            {
+                templatePath = new File(defaultPath,ENV_TEMPLATE.getString(Environment.templatePath,"template")).getPath();
+            }
+        }
+        String[]  findDirs = new String[]{templatePath,defaultPath, ENV_TEMPLATE.getString(Environment.resPath)};
         return FileUtil.scanFile(findDirs, loadFile);
     }
+
+/*    public static void main(String[] args) {
+        JspxNetApplication.autoRun("D:/hyinter/hyinter-1.0.0.jar!/");
+      //  File file = getFile("ioc/definterceptor.xml");
+
+    }*/
 }
