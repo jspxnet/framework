@@ -6,9 +6,10 @@
     <groupId>com.github.jspxnet</groupId>
     <artifactId>jspx-framework</artifactId>
     <version>6.81</version>
-    <name>${project.groupId}:${project.artifactId}</name>
     <description>jspx-framework</description>
+    <name>${project.groupId}:${project.artifactId}</name>
     <url>https://github.com/jspxnet/framework</url>
+    <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -16,9 +17,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <github.global.server>github</github.global.server>
-        <tomcat.version>9.0.106</tomcat.version>
+        <tomcat.version>9.0.108</tomcat.version>
         <jackson.version>2.18.3</jackson.version>
-        <redisson.version>3.45.1</redisson.version>
+        <redisson.version>3.50.0</redisson.version>
         <log4j2.version>2.24.3</log4j2.version>
         <poi.version>5.3.0</poi.version>
         <jxls.version>2.14.0</jxls.version>
@@ -30,17 +31,7 @@
         <sshd.version>2.13.2</sshd.version>
         <maven.plugin.validation>VERBOSE</maven.plugin.validation>
         <maven.test.skip>true</maven.test.skip>
-        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-        <jacoco.path>${project.build.directory}/jacoco.exec</jacoco.path>
-        <jacoco.skip>false</jacoco.skip>
         <!--
-        user:chenyuan ps:C*=51*X
-<server>
-	<id>${server}</id>
-	<username>mYS4fA</username>
-	<password>zj2q3RxgKyE18VwCKAS13j8MLCCewu6C2</password>
-</server>
-
         mvn deploy -P sonatype-oss-release -X -DskipTests -DaltDeploymentRepository=sonatype-nexus-staging::default::https://s01.oss.sonatype.org/service/local/staging/deploy/maven2
         查看依赖树：mvn dependency:tree
         分析依赖树：mvn dependency:analyze
@@ -50,29 +41,41 @@
     </properties>
     <licenses>
         <license>
-            <name>GPLv3</name>
-            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-    <!--
-    mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=compile
-    -->
-    <scm>
-        <developerConnection>scm:git:git@github.com:jspxnet/framework.git</developerConnection>
-        <url>https://github.com/jspxnet/framework</url>
-        <connection>https://github.com/jspxnet/framework.git</connection>
-    </scm>
-    <issueManagement>
-        <system>GitHub Issues</system>
-        <url>https://github.com/jspxnet/framework/issues</url>
-    </issueManagement>
     <developers>
         <developer>
             <name>chenyuan</name>
             <email>39793751@qq.com</email>
-            <url>http://www.jspx.net</url>
+            <organization>chenyuan</organization>
+            <organizationUrl>http://www.jspx.net</organizationUrl>
         </developer>
     </developers>
+    <!--
+    mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=compile
+    -->
+    <scm>
+        <connection>scm:git:git://github.com/jspxnet/framework.git</connection>
+        <developerConnection>scm:git:ssh://github.com:jspxnet/framework.git</developerConnection>
+        <url>https://github.com/jspxnet/framework.git</url>
+    </scm>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/jspxnet/framework/issues</url>
+    </issueManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -115,11 +118,11 @@
             <artifactId>tomcat-servlet-api</artifactId>
             <version>${tomcat.version}</version>
         </dependency>
-<!--        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>tomcat-websocket-api</artifactId>
-            <version>${tomcat.version}</version>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-websocket-api</artifactId>
+                    <version>${tomcat.version}</version>
+                </dependency>-->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -201,8 +204,11 @@
             <version>1.26</version>
             <scope>provided</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
-
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+        </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
@@ -223,7 +229,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.27.1</version>
+            <version>1.28.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -485,16 +491,17 @@
         </dependency>
 
         <!--测试基础支持begin -->
+        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.5</version>
+            <version>42.7.7</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>9.1.0</version>
+            <version>9.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -509,11 +516,11 @@
                 <version>1.3.1</version>
                 <scope>provided</scope>
             </dependency>-->
-<!--        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>3.23.4</version>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                    <version>3.23.4</version>
+                </dependency>-->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -571,12 +578,12 @@
             <scope>provided</scope>
         </dependency>
 
-<!--        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.12.1</version>
-            <scope>provided</scope>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.12.1</version>
+                    <scope>provided</scope>
+                </dependency>-->
         <!--   <dependency>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -589,12 +596,12 @@
                     <version>3.2.0</version>
                     <scope>provided</scope>
                 </dependency>-->
-<!--        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jxr-plugin</artifactId>
-            <version>3.5.0</version>
-            <scope>provided</scope>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jxr-plugin</artifactId>
+                    <version>3.5.0</version>
+                    <scope>provided</scope>
+                </dependency>-->
         <!-- https://mvnrepository.com/artifact/com.vladsch.flexmark/flexmark-all -->
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -634,6 +641,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
@@ -685,8 +693,9 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.4.1</version>
+            <version>5.5</version>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -716,8 +725,38 @@
                 <filtering>false</filtering>
             </resource>
         </resources>
+
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.2.1</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.8.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <publishingServerId>central</publishingServerId>
+                        <autoPublish>true</autoPublish>
+                        <waitUntil>published</waitUntil>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>3.15.0</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
@@ -730,8 +769,24 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.5.0</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-no-snapshots</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireReleaseDeps>
+                                        <message>No Snapshots Allowed!</message>
+                                        <onlyWhenRelease>true</onlyWhenRelease>
+                                    </requireReleaseDeps>
+                                </rules>
+                                <fail>true</fail>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
@@ -763,55 +818,6 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco-maven-plugin.version}</version>
-                    <configuration>
-                        <skip>${jacoco.skip}</skip>
-                        <destFile>${jacoco.path}</destFile>
-                        <dataFile>${jacoco.path}</dataFile>
-                        <sessionId>jacoco_coverage</sessionId>
-                        <!-- 排除配置 -->
-                        <excludes>
-                            <exclude>**/ParameterizedTypeReference**</exclude>
-                        </excludes>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>pre-test</id>
-                            <phase>process-classes</phase>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-
-                        <execution>
-                            <id>post-unit-test</id>
-                            <phase>test</phase>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                            <configuration>
-                                <dataFile>target/jacoco.exec</dataFile>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>3.1.1</version>
-                    <configuration>
-                        <arguments>-Psonatype-oss-release</arguments>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <useReleaseProfile>true</useReleaseProfile>
-                        <releaseProfiles>release</releaseProfiles>
-                        <goals>deploy</goals>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -916,13 +922,10 @@
                         </execution>
                     </executions>
                 </plugin>
-
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.2</version>
-                    <!--
-                    mvn clean deploy -P sonatype-oss-release
-                    -->
+                    <version>3.1.2</version> <!-- 使用最新版本 -->
                     <executions>
                         <execution>
                             <id>default-deploy</id>
@@ -933,26 +936,33 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>3.1.2</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <useReleaseProfile>false</useReleaseProfile>
+                        <releaseProfiles>release</releaseProfiles>
+                        <goals>deploy</goals>
+                    </configuration>
+                </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-scm-plugin</artifactId>
                     <version>2.1.0</version>
                 </plugin>
-                <plugin>
-                    <groupId>org.sonatype.central</groupId>
-                    <artifactId>central-publishing-maven-plugin</artifactId>
-                    <version>0.8.0</version>
-                    <extensions>true</extensions>
-                    <configuration>
-                        <publishingServerId>central</publishingServerId>
-                        <deploymentName>${project.groupId}:${project.artifactId}:${project.version}</deploymentName>
-                    </configuration>
-                </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>3.2.4</version>
+                    <configuration>
+                        <gpgArguments>
+                            <arg>--batch</arg>
+                        </gpgArguments>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>sign-artifacts</id>
@@ -963,9 +973,37 @@
                         </execution>
                     </executions>
                 </plugin>
-               </plugins>
-        </pluginManagement>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.2</version> <!-- 使用最新版本 -->
+                    <executions>
+                        <execution>
+                            <id>generate-sha1</id>
+                            <phase>package</phase> <!-- 在package阶段运行 -->
+                            <goals>
+                                <goal>build-classpath</goal> <!-- 使用build-classpath目标 -->
+                            </goals>
+                            <configuration>
+                                <outputFile>${project.build.directory}/dependency-classpath.txt</outputFile> <!-- 输出文件 -->
+                            </configuration>
+                        </execution>
+                        <!-- 添加一个额外的执行来生成SHA-1 -->
+                        <execution>
+                            <id>generate-sha1-file</id> <!-- 唯一ID -->
+                            <phase>package</phase> <!-- 绑定到package阶段 -->
 
+                            <configuration> <!-- 配置输出目录和算法 -->
+                                <hashAlgorithms>[SHA-1]</hashAlgorithms>
+                                <outputDirectoryPathPattern>[SHA-1]</outputDirectoryPathPattern>
+                                <outputFilePattern>[SHA-1]</outputFilePattern>
+                                <!-- 其他可能的配置，例如指定要计算的jar文件 -->
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
     <repositories>
         <repository>
@@ -980,28 +1018,6 @@
             </snapshots>
         </repository>
     </repositories>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <!--
-                        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            -->
-            <!--
-                        <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-            -->
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <!--
-                        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-            -->
-            <!--
-                        <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-            -->
-            <url>https://ossrh-staging-api.central.sonatype.com/service/local/</url>
-        </repository>
-    </distributionManagement>
     <reporting>
         <plugins>
             <plugin>
