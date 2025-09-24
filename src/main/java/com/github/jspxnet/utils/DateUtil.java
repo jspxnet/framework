@@ -1099,6 +1099,7 @@ public final  class DateUtil {
      */
     public static Date min(Date ... dates) {
         List<Date> dateList = Arrays.asList(dates);
+
         return Collections.min(dateList);
     }
 

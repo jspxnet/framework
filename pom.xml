@@ -7,9 +7,8 @@
     <artifactId>jspx-framework</artifactId>
     <version>6.81</version>
     <description>jspx-framework</description>
-    <name>${project.groupId}:${project.artifactId}</name>
+    <name>com.github.jspxnet:jspx-framework</name>
     <url>https://github.com/jspxnet/framework</url>
-    <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -17,9 +16,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <github.global.server>github</github.global.server>
-        <tomcat.version>9.0.108</tomcat.version>
+        <tomcat.version>9.0.109</tomcat.version>
         <jackson.version>2.18.3</jackson.version>
-        <redisson.version>3.50.0</redisson.version>
+        <redisson.version>3.51.0</redisson.version>
         <log4j2.version>2.24.3</log4j2.version>
         <poi.version>5.3.0</poi.version>
         <jxls.version>2.14.0</jxls.version>
@@ -41,36 +40,38 @@
     </properties>
     <licenses>
         <license>
-            <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <name>GPLv3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
         </license>
     </licenses>
     <developers>
         <developer>
             <name>chenyuan</name>
             <email>39793751@qq.com</email>
-            <organization>chenyuan</organization>
-            <organizationUrl>http://www.jspx.net</organizationUrl>
+            <url>http://www.jspx.net</url>
         </developer>
     </developers>
     <!--
     mvn dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=compile
     -->
     <scm>
-        <connection>scm:git:git://github.com/jspxnet/framework.git</connection>
-        <developerConnection>scm:git:ssh://github.com:jspxnet/framework.git</developerConnection>
-        <url>https://github.com/jspxnet/framework.git</url>
+        <url>scm:git:git@github.com:jspxnet/framework.git</url>
+        <connection>https://github.com/jspxnet/framework.git</connection>
+        <developerConnection>scm:git:git@github.com:jspxnet/framework.git</developerConnection>
+        <tag>master</tag>
     </scm>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
     <issueManagement>
         <system>GitHub Issues</system>
         <url>https://github.com/jspxnet/framework/issues</url>
@@ -80,7 +81,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
+            <version>1.18.42</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -207,7 +208,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.15</version>
+            <version>1.19.0</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -321,11 +322,24 @@
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-core</artifactId>
-            <version>4.6.4</version>
+            <version>4.7.6</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcprov-jdk15on</artifactId>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -342,7 +356,8 @@
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
-            <version>3.17.1</version>
+            <version>3.18.3</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.atomikos</groupId>
@@ -488,6 +503,7 @@
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
             <version>5.13.3.202401111512-r</version>
+            <scope>provided</scope>
         </dependency>
 
         <!--测试基础支持begin -->
@@ -536,13 +552,13 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.2.0.Final</version>
+            <version>4.2.4.Final</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.18.0</version>
+            <version>2.20.0</version>
         </dependency>
         <!--测试基础支持end -->
         <!-- https://mvnrepository.com/artifact/com.thetransactioncompany/cors-filter -->
@@ -570,6 +586,12 @@
             <groupId>org.redisson</groupId>
             <artifactId>redisson-tomcat-9</artifactId>
             <version>${redisson.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.beust</groupId>
@@ -730,28 +752,40 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>2.2.1</version>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version> <!-- 使用适合你项目的版本 -->
                     <executions>
                         <execution>
-                            <id>attach-sources</id>
+                            <id>default-deploy</id>
+                            <phase>deploy</phase>
                             <goals>
-                                <goal>jar-no-fork</goal>
+                                <goal>deploy</goal>
                             </goals>
+                            <configuration>
+                                <skip>true</skip>
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>org.sonatype.central</groupId>
-                    <artifactId>central-publishing-maven-plugin</artifactId>
-                    <version>0.7.0</version> <!-- 建议检查最新版本 -->
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.7</version>
                     <extensions>true</extensions>
                     <configuration>
-                        <publishingServerId>maven-central-release</publishingServerId>
-                        <autoPublish>false</autoPublish> <!-- 手动发布 -->
-                        <waitUntil>uploaded</waitUntil> <!-- 等待上传完成 -->
+                        <serverId>ossrh</serverId>
+                        <!--
+                                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                        -->
+
+                        <!--
+                                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                        -->
+                        <nexusUrl>https://ossrh-staging-api.central.sonatype.com/</nexusUrl>
+                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     </configuration>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
@@ -922,20 +956,7 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.2</version> <!-- 使用最新版本 -->
-                    <executions>
-                        <execution>
-                            <id>default-deploy</id>
-                            <phase>deploy</phase>
-                            <goals>
-                                <goal>deploy</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
@@ -953,7 +974,19 @@
                     <artifactId>maven-scm-plugin</artifactId>
                     <version>2.1.0</version>
                 </plugin>
-
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.8.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <publishingServerId>central</publishingServerId>
+                        <autoPublish>true</autoPublish>
+                        <!--
+                        <waitUntil>published</waitUntil>
+                        -->
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
@@ -1005,19 +1038,7 @@
             </plugins>
         </pluginManagement>
     </build>
-    <repositories>
-        <repository>
-            <name>Central Portal Snapshots</name>
-            <id>central-portal-snapshots</id>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+
     <reporting>
         <plugins>
             <plugin>
