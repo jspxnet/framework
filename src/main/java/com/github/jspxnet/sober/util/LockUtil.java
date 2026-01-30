@@ -44,7 +44,7 @@ public final class LockUtil {
             id = Environment.Global;
         } else {
             TableModels tableModels = soberSupport.getSoberTable(cls);
-            id = ObjectUtil.toString(BeanUtil.getProperty(obj, tableModels.getPrimary()));
+            id = ObjectUtil.toString(BeanUtil.getProperty(obj, tableModels.getPrimaryKey()));
         }
 
         String key = tableName + "_" + id;
@@ -76,7 +76,7 @@ public final class LockUtil {
             id = Environment.Global;
         } else {
             TableModels tableModels = soberSupport.getSoberTable(cls);
-            id = ObjectUtil.toString(BeanUtil.getProperty(obj, tableModels.getPrimary()));
+            id = ObjectUtil.toString(BeanUtil.getProperty(obj, tableModels.getPrimaryKey()));
         }
         String key = tableName + "_" + id;
         //保存到缓存，如果保存到数据库，自动建库的时候有可能死循环 begin
@@ -106,7 +106,7 @@ public final class LockUtil {
             id = Environment.Global;
         } else {
             TableModels tableModels = soberSupport.getSoberTable(cls);
-            id = ObjectUtil.toString(BeanUtil.getProperty(obj, tableModels.getPrimary()));
+            id = ObjectUtil.toString(BeanUtil.getProperty(obj, tableModels.getPrimaryKey()));
         }
 
         String key = tableName + "_" + id;

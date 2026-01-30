@@ -2,12 +2,12 @@ package com.github.jspxnet.txweb.devcenter.action;
 
 import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.enums.ErrorEnumType;
-import com.github.jspxnet.txweb.table.meta.ControlEvent;
-import com.github.jspxnet.txweb.table.meta.ControlBase;
+import com.github.jspxnet.sober.table.meta.ControlEvent;
+import com.github.jspxnet.sober.table.meta.ControlBase;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.result.RocResponse;
-import com.github.jspxnet.txweb.table.meta.ControlProperty;
+import com.github.jspxnet.sober.table.meta.ControlProperty;
 import com.github.jspxnet.txweb.devcenter.view.ControlView;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.txweb.model.param.component.ControlParam;

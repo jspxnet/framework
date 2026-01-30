@@ -26,6 +26,10 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
     /**
+     * @return 字段名
+     */
+    String field() default "";
+    /**
      * @return 字段文字说明
      */
     String caption();

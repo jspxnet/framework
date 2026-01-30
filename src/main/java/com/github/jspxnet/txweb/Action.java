@@ -132,6 +132,9 @@ public interface Action extends Serializable {
 
     boolean isComponent();
 
+    //@Deprecated
+    //Map<String, Object> getEnv();
+
     @Deprecated
     Map<String, Object> getEnv();
 

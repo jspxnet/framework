@@ -216,11 +216,6 @@ public final class JspxNetApplication {
         //载入定时任务
         beanFactory.initScheduler();
 
-        //系统默认超时时间begin
-        System.setProperty("sun.net.client.defaultConnectTimeout", "5000");
-        System.setProperty("sun.net.client.defaultReadTimeout", "5000");
-        //系统默认超时时间end
-
         SpringBeanContext.setApplicationContext(context);
 
         //jdk java.sdk.security 文件中添加配置        sdk.security.provider.11=org.bouncycastle.jce.provider.BouncyCastleProvider

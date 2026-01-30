@@ -36,7 +36,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
     //总行数
     protected long totalCount = 1;
     //总页数
-    protected int totalPage = 1;
+    protected long totalPage = 1;
     //页面参数
     protected String querystring = StringUtil.empty;
     //连接地址
@@ -146,12 +146,12 @@ public class TurnPageButtonImpl implements TurnPageButton {
     }
 
     @Override
-    public int getTotalPage() {
+    public long getTotalPage() {
         int ic = getCount();
         if (ic <= 0) {
             return 1;
         }
-        totalPage = (int)(totalCount / ic);
+        totalPage = (long)(totalCount / ic);
         if (totalCount % ic > 0) {
             totalPage = totalPage + 1;
         }
@@ -248,8 +248,7 @@ public class TurnPageButtonImpl implements TurnPageButton {
 
         File file = new File(currentPath, fileName);
         if (!file.exists() && !file.isFile()) {
-            EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-            String templatePath = envTemplate.getString(Environment.templatePath);
+            String templatePath = EnvFactory.getTemplatePath();
             file = new File(templatePath, fileName);
         }
         if (!file.isFile()) {

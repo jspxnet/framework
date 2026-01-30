@@ -45,6 +45,9 @@ public class PostgreSQLDialect extends Dialect {
         put(boolean.class.getName(), "${" + COLUMN_NAME + "} boolean <#if where=\"" + COLUMN_NOT_NULL + "\">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toBoolean()}</#if>");
 
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=\"" + COLUMN_LENGTH + "&lt;255\">varchar(${" + COLUMN_LENGTH + "})<#else>text</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(String[].class.getName(), "${" + COLUMN_NAME + "} <#if where=\"" + COLUMN_LENGTH + "&lt;255\">varchar(${" + COLUMN_LENGTH + "})<#else>text</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put("java.lang.String[]", "${" + COLUMN_NAME + "} <#if where=\"" + COLUMN_LENGTH + "&lt;255\">varchar(${" + COLUMN_LENGTH + "})<#else>text</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put("java.lang.Class", "${" + COLUMN_NAME + "} <#if where=\"" + COLUMN_LENGTH + "&lt;255\">varchar(${" + COLUMN_LENGTH + "})<#else>text</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
         put(Integer.class.getName(), "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
         put("int",                   "${" + COLUMN_NAME + "} <#if where=\"" + KEY_FIELD_SERIAL + "\">SERIAL<#else>integer</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
@@ -76,15 +79,45 @@ public class PostgreSQLDialect extends Dialect {
         put(FUN_TABLE_EXISTS, "SELECT (count(*)>0) FROM pg_class WHERE relname ILIKE '${" + KEY_TABLE_NAME + "}'");
 
         //修改系列开始
-        put(ALTER_SEQUENCE_RESTART, "ALTER SEQUENCE ${" + SERIAL_NAME + "} RESTART WITH ${" + KEY_SEQUENCE_RESTART + "}");
+        put(ALTER_SEQUENCE_RESTART, "SELECT setval('${" + SERIAL_NAME + "}', ${" + KEY_SEQUENCE_RESTART + "})");
 
         put(SQL_TABLE_NAMES, "SELECT tablename FROM pg_tables WHERE tablename NOT LIKE 'pg%' AND tablename NOT LIKE 'sql_%' ORDER BY tablename");
 
         put(DATABASE_SIZE, "SELECT pg_database_size('${" + KEY_TABLE_NAME + "}'");
 
-        put(SEQUENCE_NAME, "SELECT adsrc FROM pg_attrdef WHERE adsrc like 'nextval(_${" + KEY_TABLE_NAME + "}_${" + KEY_PRIMARY_KEY + "}_seq%::regclass)'");
+        put(SEQUENCE_NAME, "SELECT pg_get_serial_sequence('${" + KEY_TABLE_NAME + "}', '${" + KEY_PRIMARY_KEY + "}') AS sequence_name");
 
         put(SQL_CREATE_TABLE_INDEX, "CREATE <#if where=" + KEY_IS_UNIQUE + ">unique</#if> INDEX IF NOT EXISTS ${"+KEY_INDEX_NAME+"} ON ${" + KEY_TABLE_NAME + "} (${" + KEY_INDEX_FIELD +"})");
+
+
+        //查询关键字
+        put(PRIMARY_SQL, "SELECT kcu.column_name AS name FROM information_schema.table_constraints tc\n" +
+                "JOIN information_schema.key_column_usage kcu  ON tc.constraint_name = kcu.constraint_name\n" +
+                "WHERE tc.constraint_type = 'PRIMARY KEY'  AND tc.table_name=LOWER('${" + KEY_TABLE_NAME + "}')");
+
+        //查询表字段
+        put(COLUMN_LIST_SQL, "SELECT\n" +
+                "    c.table_name AS tableName,\n" +
+                "    c.column_name AS name,\n" +
+                "    c.data_type AS dataType,\n" +
+                "    c.character_maximum_length AS length,\n" +
+                "    c.is_nullable AS notNull,\n" +
+                "    pd.description AS caption\n" +
+                "FROM\n" +
+                "    information_schema.columns c\n" +
+                "LEFT JOIN\n" +
+                "    pg_catalog.pg_statio_all_tables st ON (c.table_schema = st.schemaname AND c.table_name = st.relname)\n" +
+                "LEFT JOIN\n" +
+                "    pg_catalog.pg_description pd ON (pd.objoid = st.relid AND pd.objsubid = c.ordinal_position)\n" +
+                "WHERE\n" +
+                "    c.table_schema = 'public'\n" +
+                "    AND c.table_name = LOWER('${" + KEY_TABLE_NAME + "}')\n" +
+                "    AND c.table_catalog = LOWER('${"+KEY_DATABASE_NAME+"}')\n" +
+                "ORDER BY\n" +
+                "    c.ordinal_position");
+
+        //查看当前用户拥有的所有表及其拥有者
+        put(ALL_TABLES_SQL, "SELECT tablename AS name FROM pg_catalog.pg_tables WHERE schemaname='public'");
     }
 
     @Override
@@ -124,7 +157,7 @@ public class PostgreSQLDialect extends Dialect {
         {
             return "boolean";
         }
-        if (soberColumn.getClassType()==String.class)
+        if (soberColumn.getClassType()==String.class|| soberColumn.getClassType()==String[].class || soberColumn.getClassType()==Class.class)
         {
             if (soberColumn.getLength()<512)
             {
@@ -297,7 +330,7 @@ public class PostgreSQLDialect extends Dialect {
 
     @Override
     public boolean supportsConcurReadOnly() {
-        return false;
+        return true;
     }
 
     @Override

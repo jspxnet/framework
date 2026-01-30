@@ -559,10 +559,10 @@ public class Scheduler {
         if (timer == null) {
             return;
         }
+        if (!started) {
+            return;
+        }
         synchronized (this) {
-            if (!started) {
-                return;
-            }
             // Interrupts the timer and waits for its death.
             try {
                 timer.interrupt();
@@ -586,7 +586,6 @@ public class Scheduler {
                 launchers.clear();
                 timer = null;
                 started = false;
-
             }
         }
     }

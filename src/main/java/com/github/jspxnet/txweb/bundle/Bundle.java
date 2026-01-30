@@ -10,8 +10,8 @@
 package com.github.jspxnet.txweb.bundle;
 
 import com.github.jspxnet.json.JSONException;
+import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;
-import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 
 import java.io.Serializable;
 import java.util.List;
@@ -46,7 +46,7 @@ public interface Bundle extends Serializable {
 
     long getLong(String key);
 
-    List<SoberColumnDto> getColumnList();
+    List<SoberColumn> getColumnList();
 
     int getInt(String key);
 
@@ -56,7 +56,7 @@ public interface Bundle extends Serializable {
 
     BundleTable getBundleTable(final String keys);
 
-    SoberColumnDto getSoberColumn(final String keys);
+    SoberColumn getSoberColumn(final String keys);
 
     boolean save(BundleTable bundletable) throws Exception;
 

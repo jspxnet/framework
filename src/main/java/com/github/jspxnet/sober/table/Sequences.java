@@ -29,7 +29,7 @@ import java.io.Serializable;
  *
  */
 @Data
-@Table(name = "jspx_sequences")
+@Table(name = "jspx_sequences",caption = "序列表")
 public class Sequences implements Serializable {
 
     @Id(type = IDType.none)

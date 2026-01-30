@@ -144,7 +144,7 @@ public final class Environment {
     final static public String myDomainName = "<a href=\"http://www.jspx.net\">www.jspx.net</a>";
 
     //版本号
-    final static public String VERSION = "6.81";
+    final static public String VERSION = "6.83";
 
     //发布许可方式
     final static public String licenses = "AGPLv3";
@@ -631,5 +631,12 @@ public final class Environment {
     public static final String API_LOGIN_NAME = "API_LOGIN_NAME";
     public static final String API_LOGIN_PASSWORD = "API_LOGIN_PASSWORD";
     //超级API接口登陆end
+
+    //系统环境属性
+    public static final String JVM = "jvm.";
+
+
+    //服务平台
+    static public final String SERVICE = "service";
 
 }

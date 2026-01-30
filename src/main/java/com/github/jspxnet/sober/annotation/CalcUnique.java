@@ -9,6 +9,8 @@
  */
 package com.github.jspxnet.sober.annotation;
 
+import com.github.jspxnet.sioc.util.TypeUtil;
+
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -39,8 +41,13 @@ public @interface CalcUnique {
      *
      * @return 实体对象
      */
-    Class<?>[] entity();
+    String[] entity();
 
-    //本实体的字段，将作为参数传递给SQL
-    String[] value() default {};
+
+    String type() default  TypeUtil.TYPE_STRING;
+
+
+    //是优化参数,不用全部带入,没入全部带入
+    String[] params();
+
 }

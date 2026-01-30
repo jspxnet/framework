@@ -49,6 +49,10 @@ public class SqliteDialect extends Dialect {
         put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">${field}=?<#if where=field_has_next>,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
 
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(String[].class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+
+        put("java.lang.String[]","${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put("java.lang.Class","${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
         put(Integer.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
         put("int", "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">PRIMARY KEY ASC AUTOINCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + ">'0'<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if>");
@@ -114,7 +118,7 @@ public class SqliteDialect extends Dialect {
         {
             return "integer";
         }
-        if (soberColumn.getClassType()==String.class)
+        if (soberColumn.getClassType()==String.class|| soberColumn.getClassType()==String[].class || soberColumn.getClassType()==Class.class)
         {
             if (soberColumn.getLength()<512)
             {

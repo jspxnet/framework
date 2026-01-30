@@ -213,7 +213,7 @@ public abstract class DriverManagerDataSource implements ReadWriteDataSource {
         //mysql
         props.put("useInformationSchema","true"); //表注释
         props.setProperty("remarks","true");
-        //oracle
+        //oracle 能够得到字段注释
         props.put("remarksReporting", "true");
         return DriverManager.getConnection(url, props);
     }

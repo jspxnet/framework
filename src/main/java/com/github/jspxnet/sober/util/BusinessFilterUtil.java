@@ -10,7 +10,7 @@ import com.github.jspxnet.txweb.enums.DocumentStatusEnumType;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.model.container.AbstractBillObject;
 import com.github.jspxnet.txweb.table.UserSession;
-import com.github.jspxnet.txweb.table.meta.BaseBillType;
+import com.github.jspxnet.sober.table.meta.BaseBillType;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.utils.CookieUtil;
 import com.github.jspxnet.utils.StringUtil;

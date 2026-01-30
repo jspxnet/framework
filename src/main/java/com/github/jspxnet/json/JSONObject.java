@@ -28,6 +28,7 @@ ConcurrentHashMap
 public class JSONObject extends LinkedHashMap<String,Object> {
     final static private String KEY_ENUM_TYPE = "enumTypes";
     final static private String KEY_DATA = "data";
+    final static public String KEY_NULL_DATE_STR = "0000-00-00";
 
     static public String[] NO_JSON_PACKAGE = new String[]{
             "java.lang.Package","com.seeyon.ctp.common.po.BasePO","org.apache.commons","org.apache.logging.log4j.message"
@@ -268,7 +269,6 @@ public class JSONObject extends LinkedHashMap<String,Object> {
      * @param bean 对象
      * @param includeSuperClass 是否包含子对象
      * @param dataField 显示字段
-     *
      *  {
      *      data:[company,name,addresss,user]
      *      user:[name,sex]
@@ -327,12 +327,7 @@ public class JSONObject extends LinkedHashMap<String,Object> {
                     continue;
                 }
                 Object v = map.get(objKey);
-                if (v==null)
-                {
-                    super.put(key, null);
-                } else {
-                    super.put(key, v);
-                }
+                super.put(key, v);
             }
             if (!(bean instanceof PropertyContainer))
             {
@@ -811,7 +806,6 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         {
             return null;
         }
-
         return (List<Object>) o;
     }
 
@@ -897,32 +891,45 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         return getLong(key);
     }
 
-    public Date getDate(String key) throws JSONException
+    /**
+     *
+     * @param key key
+     * @return 返回日期
+     * @throws JSONException 异常
+     */
+    public Date getDate(String key)
     {
         Object o = get(key);
-        if (o == null) {
+        if (o == null || KEY_NULL_DATE_STR.equals(o)) {
             return null;
         }
-        if (o instanceof JSONObject) {
+        if (o instanceof JSONObject && ((JSONObject)o).containsKey("time")) {
             JSONObject json = (JSONObject) o;
             long time = json.getLong("time");
-            return new Date(time);
+            if (time>0)
+            {
+                return new Date(time);
+            }
         }
 
-        if (o instanceof String && o.toString().contains("{") && o.toString().contains("}")) {
+        if (o instanceof String && o.toString().contains("{") && o.toString().contains("}") && o.toString().contains("time") ) {
             long time = new JSONObject(o.toString()).getLong("time");
             return new Date(time);
         }
-        try {
-            if (o instanceof String) {
-                return StringUtil.getDate((String) o);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (o instanceof  Long) {
+            return new Date((Long) o);
+        }
+        if (o instanceof String) {
+            return StringUtil.getDate((String) o);
         }
         return null;
     }
 
+    /**
+     *
+     * @param key key
+     * @return 返回日期
+     */
     public Date getIgnoreDate(String key) {
         key = getIgnoreKey(key);
         if (key==null)
@@ -1785,7 +1792,7 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         T t = parseObject(this, clazz);
         if (tableValue)
         {
-            SoberTable soberTable = AnnotationUtil.getSoberTable(clazz,0);
+            SoberTable soberTable = AnnotationUtil.getSoberTable(clazz);
             if (soberTable==null)
             {
                 return t;
@@ -1793,7 +1800,7 @@ public class JSONObject extends LinkedHashMap<String,Object> {
 
             for (SoberColumn soberColumn:soberTable.getColumns())
             {
-                if (soberColumn.isNotNull()&&BeanUtil.getProperty(t,soberColumn.getName())==null)
+                if (soberColumn.isNoNull()&&BeanUtil.getProperty(t,soberColumn.getName())==null)
                 {
                     Field field = ClassUtil.getDeclaredField(clazz,soberColumn.getName());
                     if (field.getType()==Date.class)
@@ -1825,21 +1832,25 @@ public class JSONObject extends LinkedHashMap<String,Object> {
     }
 
     public static <T> T parseObject(JSONObject json, Class<T> clazz) {
+        if (clazz==null)
+        {
+            return null;
+        }
         String className = null;
         //检查内部是否保存了对象名称
-        if (clazz == null || ClassUtil.isStandardProperty(clazz) || Object.class.equals(clazz) || Class.class.equals(clazz)) {
+        if (ClassUtil.isStandardProperty(clazz) || Object.class.equals(clazz) || Class.class.equals(clazz)) {
             className = json.getString(CLASS_NAME);
         }
         if (clazz.equals(JSONObject.class))
         {
-            return (T)json;
+            return clazz.cast(json);
         }
 
-        if (clazz != null && StringUtil.isEmpty(className)) {
+        if (StringUtil.isEmpty(className)) {
             className = clazz.getName();
         }
 
-        if (clazz!=null&&(Map.class.isAssignableFrom(clazz)))
+        if ((Map.class.isAssignableFrom(clazz)))
         {
             T obj = null;
             try {
@@ -1848,13 +1859,13 @@ public class JSONObject extends LinkedHashMap<String,Object> {
                 return obj;
             } catch (Exception e) {
                 log.error("创建对象实例错误:{}",clazz);
-                return (T)json.toMap();
+                return clazz.cast(json.toMap());
             }
         }
         if (StringUtil.isEmpty(className) || ClassUtil.isProxy(clazz)) {
             //动态创建返回
             Map<String, Object> valueMap = json.toMap();
-            return (T) ReflectUtil.createDynamicBean(valueMap);
+            return clazz.cast(ReflectUtil.createDynamicBean(valueMap));
         }
         Class<?> cls = null;
         try {
@@ -1866,7 +1877,7 @@ public class JSONObject extends LinkedHashMap<String,Object> {
             return null;
         }
         Gson gson = GsonUtil.createGson();
-        return (T) gson.fromJson(json.toString(), cls);
+        return clazz.cast(gson.fromJson(json.toString(), cls));
     }
 
     /**
@@ -1901,17 +1912,54 @@ public class JSONObject extends LinkedHashMap<String,Object> {
         BeanUtil.stringNullOrWhiteSpaceToEmpty(this);
     }
 
-    /*public static void main(String[] args) {
+
+    /**
+     * There is only intended transfer be a single instance of the NULL object,
+     * so the clone method returns itself.
+     *
+     * @return NULL.
+     */
+    @Override
+    public JSONObject clone() {
+        return new JSONObject(toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+/*
+
+    public static void main(String[] args) {
 
         JSONObject json = new JSONObject();
         json.put("name1"," ");
+        json.put("A","1");
+        json.put("B","2");
         JSONObject json2 = new JSONObject();
         json2.put("name2"," ");
         json.put("json2",json2);
 
         //BeanUtil.stringNullOrWhiteSpaceToEmpty(json);
-
         json.stringNullOrWhiteSpaceToEmpty();
-        System.out.println(json);
+        System.out.println(json.toSortString());
+
+        JSONObject json3 = json.clone();
+
+        System.out.println(json3.toSortString());
+
+        json.put("C",3);
+        json3.put("E",4);
+
+        json3.put("NULLDATE","0000-00-00");
+
+        System.out.println(json.toSortString());
+        System.out.println(json3.toSortString());
+
+        System.out.println(json.hashCode());
+        System.out.println(json3.hashCode());
+
+        System.out.println(json3.getDate("NULLDATE"));
+
     }*/
 }

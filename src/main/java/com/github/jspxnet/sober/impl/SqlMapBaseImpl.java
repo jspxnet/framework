@@ -80,7 +80,7 @@ public class SqlMapBaseImpl implements SqlMapBase {
         if (o != null) {
             TableModels soberTable = jdbcOperations.getSoberTable(o.getClass());
             valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-            valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
+            valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimaryKey());
         }
         return valueMap;
     }

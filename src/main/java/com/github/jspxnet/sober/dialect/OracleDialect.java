@@ -11,8 +11,11 @@ package com.github.jspxnet.sober.dialect;
 
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ObjectUtil;
+
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -43,6 +46,7 @@ public class OracleDialect extends Dialect {
 
         //oracle
         put(ORACLE_CREATE_SEQUENCE,"create sequence ${" + KEY_TABLE_NAME + ".toUpperCase()}_SEQ minvalue 1 maxvalue 99999999 increment by 1  start with 1");
+
         put(ORACLE_CREATE_SEQ_TIGGER,"create or replace trigger ${" + KEY_TABLE_NAME + ".toUpperCase()}_TIG\n" +
                 "before insert on ${" + KEY_TABLE_NAME + ".toUpperCase()}\n" +
                 "for each row\r\n" +
@@ -53,6 +57,9 @@ public class OracleDialect extends Dialect {
         put(Boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         put(boolean.class.getName(), "${" + COLUMN_NAME + "} number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(String[].class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put("java.lang.String[]", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put("java.lang.Class", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
         put(Integer.class.getName(), "${" + COLUMN_NAME + "} NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
 
@@ -88,6 +95,35 @@ public class OracleDialect extends Dialect {
 
         put(FUN_TABLE_EXISTS, "SELECT COUNT(1) FROM ALL_TABLES WHERE TABLE_NAME=UPPER('${" + KEY_TABLE_NAME + "}')");
         put(CHECK_SQL, "SELECT 1 FROM DUAL");
+
+        //查询关键字
+        put(PRIMARY_SQL, "SELECT tm1.column_name as name FROm user_cons_columns tm1 \n" +
+                "LEFT JOIN all_constraints tm2 ON tm1.owner=tm2.owner AND tm1.table_name=tm2.table_name AND tm1.constraint_name=tm2.constraint_name \n" +
+                "WHERE  tm1.owner=UPPER('${"+KEY_DATABASE_NAME+"}') AND tm1.table_name=UPPER('${" + KEY_TABLE_NAME + "}') AND tm2.constraint_type='P'");
+
+        //查询表字段
+        put(COLUMN_LIST_SQL, "SELECT \n" +
+                "    t.table_name AS tableName,\n" +
+                "    t.column_name AS name,\n" +
+                "    t.data_type AS dataType,\n" +
+                "    t.data_length AS length,\n" +
+                "    t.nullable AS notNull,\n" +
+                "    c.comments AS caption\n" +
+                "FROM \n" +
+                "    user_tab_columns t\n" +
+                "LEFT JOIN \n" +
+                "    user_col_comments c \n" +
+                "ON \n" +
+                "    t.table_name = c.table_name \n" +
+                "    AND t.column_name = c.column_name\n" +
+                "WHERE \n" +
+                "    t.table_name = UPPER('${" + KEY_TABLE_NAME + "}')\n" +
+                "ORDER BY \n" +
+                "    t.column_id");
+
+        //查看当前用户拥有的所有表及其拥有者
+        put(ALL_TABLES_SQL, "SELECT table_name as name FROM all_tables WHERE owner=USER");
+
     }
 
     @Override
@@ -122,7 +158,7 @@ public class OracleDialect extends Dialect {
         {
             return "number(1)";
         }
-        if (soberColumn.getClassType()==String.class)
+        if (soberColumn.getClassType()==String.class|| soberColumn.getClassType()==String[].class || soberColumn.getClassType()==Class.class)
         {
             if (soberColumn.getLength()<2000)
             {
@@ -267,7 +303,8 @@ public class OracleDialect extends Dialect {
         int colSize = resultSetMetaData.getColumnDisplaySize(index);
 
         ///////大数值
-        if ("ROWID".equalsIgnoreCase(typeName)) {
+        if ("rowid".equals(typeName) ) {
+            //|| typeName.contains("xmltype")
             return rs.getString(index);
         }
 
@@ -366,6 +403,33 @@ public class OracleDialect extends Dialect {
             // return clob.getBinaryStream();
             return rs.getAsciiStream(index);
         }
+
+        if (typeName.contains("xmltype")) {
+            Object object = rs.getObject(index);
+            if (object == null) {
+                return null;
+            }
+            if (object.getClass().getName().toLowerCase().contains("xmltype")) {
+                return BeanUtil.getProperty(object,"getString");
+                //XMLType xml = (XMLType)object;
+                //return  xml.getString();
+            }
+
+            if (object instanceof Blob) {
+                Clob clob = (Clob)object;
+                return  clob.getSubString(1, (int)clob.length());
+            }
+        }
+// 方案2：通过CLOB类型中转
+
+       /* if (typeName.contains("xmltype")) {
+            OPAQUE op = (OPAQUE)rs.getObject(index);
+            XMLType xml = XMLType.createXML(op);
+            String result = xml.stringValue();
+            xml.close();
+            return result;
+
+        }*/
         return rs.getObject(index);
     }
 

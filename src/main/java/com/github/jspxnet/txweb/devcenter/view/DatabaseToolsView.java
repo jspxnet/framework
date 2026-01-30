@@ -10,7 +10,6 @@ import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.GenericDAO;
-import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.FieldWordUtil;
@@ -44,7 +43,7 @@ public class DatabaseToolsView  extends ActionSupport {
         StringBuilder sb = new StringBuilder();
         for (SoberColumn column:list)
         {
-            SoberColumnDto dto = BeanUtil.copy(column, SoberColumnDto.class);
+            SoberColumn dto = BeanUtil.copy(column, SoberColumn.class);
             sb.append(dto.getBeanField(false)).append("\r\n");
         }
         return RocResponse.success(sb.toString());
@@ -58,7 +57,7 @@ public class DatabaseToolsView  extends ActionSupport {
         StringBuilder sb = new StringBuilder();
         for (SoberColumn column:list)
         {
-            SoberColumnDto dto = BeanUtil.copy(column, SoberColumnDto.class);
+            SoberColumn dto = BeanUtil.copy(column, SoberColumn.class);
 
             //中文字段名称修复为英文方式begin
             if (StringUtil.isChinese(dto.getName()))
@@ -75,7 +74,7 @@ public class DatabaseToolsView  extends ActionSupport {
                            fieldName = StringUtil.substringAfter(fieldName,StringUtil.DOT);
                        }
                        dto.setName(StringUtil.underlineToCamel(fieldName));
-                       dto.setNotNull(false);
+                       dto.setNoNull(false);
                    }
                }
 
@@ -88,13 +87,13 @@ public class DatabaseToolsView  extends ActionSupport {
 
     @Operate(caption = "sql生成Bean字段带过滤", method = "sqlbeanfield",post = true)
     public RocResponse<String> sqlBeanField(@Param(caption = "sql",min = 2,max = 100,required = true) String sql,
-                                            @Param(caption = "Column列表") List<SoberColumnDto> listNew)
+                                            @Param(caption = "Column列表") List<SoberColumn> listNew)
     {
 
 
         //中文方式放入去对应begin
-        Map<String,SoberColumnDto> columnCaptionMap = new HashMap<>();
-        for (SoberColumnDto dto:listNew)
+        Map<String,SoberColumn> columnCaptionMap = new HashMap<>();
+        for (SoberColumn dto:listNew)
         {
             if (!columnCaptionMap.containsKey(dto.getCaption()))
             {
@@ -106,8 +105,8 @@ public class DatabaseToolsView  extends ActionSupport {
         //中文方式放入去对应end
 
         //中文方式放入去对应begin
-        Map<String,SoberColumnDto> columnFieldMap = new HashMap<>();
-        for (SoberColumnDto dto:listNew)
+        Map<String,SoberColumn> columnFieldMap = new HashMap<>();
+        for (SoberColumn dto:listNew)
         {
             if (!columnFieldMap.containsKey(dto.getName().toUpperCase()))
             {
@@ -122,7 +121,7 @@ public class DatabaseToolsView  extends ActionSupport {
         List<SoberColumn> list = genericDAO.getSqlColumns(sql);
         for (SoberColumn column:list)
         {
-            SoberColumnDto dto = columnCaptionMap.get(column.getCaption());
+            SoberColumn dto = columnCaptionMap.get(column.getCaption());
             if (dto==null)
             {
                 dto = columnFieldMap.get(column.getName().toUpperCase());
@@ -135,7 +134,7 @@ public class DatabaseToolsView  extends ActionSupport {
             }
             if (dto==null)
             {
-                dto = BeanUtil.copy(column, SoberColumnDto.class);
+                dto = BeanUtil.copy(column, SoberColumn.class);
             }
             if (dto.getName()!=null&&dto.getName().startsWith("F_"))
             {
@@ -156,7 +155,7 @@ public class DatabaseToolsView  extends ActionSupport {
                             fieldName = StringUtil.substringAfter(fieldName,StringUtil.DOT);
                         }
                         dto.setName(StringUtil.underlineToCamel(fieldName));
-                        dto.setNotNull(false);
+                        dto.setNoNull(false);
                     }
                 }
             }

@@ -20,10 +20,8 @@ import com.github.jspxnet.cache.store.SingleRedissonStore;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -55,7 +53,7 @@ public class JSCache implements Runnable, Cache {
     /**
      * 生命周期 以秒为单位
      */
-    private int second = 0;
+    private int second = 3600;
 
     /**
      * 这个cache 是否为永远的
@@ -408,13 +406,16 @@ public class JSCache implements Runnable, Cache {
         }
 
         try {
-            for (String keys : store.getKeys()) {
-                CacheEntry entry = store.get(keys);
-                if (entry != null && entry.isExpired()) {
-                    for (CacheEventListener eventListener : cacheEventListeners) {
-                        eventListener.notifyElementExpired(this, entry);
+            synchronized (this)
+            {
+                for (String keys : store.getKeys()) {
+                    CacheEntry entry = store.get(keys);
+                    if (entry != null && entry.isExpired()) {
+                        for (CacheEventListener eventListener : cacheEventListeners) {
+                            eventListener.notifyElementExpired(this, entry);
+                        }
+                        store.remove(keys);
                     }
-                    store.remove(keys);
                 }
             }
         } catch (Exception e) {

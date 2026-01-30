@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration scan="true" scanPeriod="120 seconds" debug="${debug}" >
+    <property name="SAX_FEATURE" value="http://xml.org/sax/features/external-general-entities"/>
+    <property name="DISABLE_EXTERNAL_ENTITIES" value="false"/>
+    <!-- 其他配置 -->
     <!-- 定义日志文件 输入位置 -->
     <property name="logPath" value="${logPath}" />
     <!-- ConsoleAppender 控制台输出日志 -->

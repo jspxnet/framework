@@ -25,7 +25,9 @@ import com.github.jspxnet.cache.JSCacheManager;
 public class TemplateLifecycle implements TemplateLoader {
     private static boolean useCache = false;
 
+    private int second = 0 ;
     public TemplateLifecycle(int second, int size) {
+        this.second = second;
         CacheManager cacheManager = JSCacheManager.getCacheManager();
         try {
             Cache cache = cacheManager.createCache(new MemoryStore(), TemplateLifecycle.class, second, size, false, null);
@@ -46,7 +48,7 @@ public class TemplateLifecycle implements TemplateLoader {
         if (lifecycleObject == null) {
             return;
         }
-        JSCacheManager.put(TemplateLifecycle.class, beanName, lifecycleObject);
+        JSCacheManager.put(TemplateLifecycle.class, beanName, lifecycleObject,second);
     }
 
     @Override

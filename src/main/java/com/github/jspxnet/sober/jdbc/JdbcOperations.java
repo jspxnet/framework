@@ -21,9 +21,10 @@ import com.github.jspxnet.sober.annotation.NullClass;
 import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.table.SoberFieldEnum;
 import com.github.jspxnet.sober.table.SqlMapConf;
+import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.txweb.table.OptionBundle;
-import com.github.jspxnet.txweb.table.meta.BaseBillType;
-import com.github.jspxnet.txweb.table.meta.OperatePlug;
+import com.github.jspxnet.sober.table.meta.BaseBillType;
+import com.github.jspxnet.sober.table.meta.OperatePlug;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.projection.Projections;
@@ -83,6 +84,14 @@ public abstract class JdbcOperations implements SoberSupport {
     }
 
     /**
+     *
+     * @return 默认批次保存的行数
+     */
+    @Override
+    public int getBatchRows() {
+        return this.soberFactory.getBatchRows();
+    }
+    /**
      * @return 得到数据工程对象
      */
     @Override
@@ -114,6 +123,17 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public TableModels getSoberTable(Class<?> cla) {
         return soberFactory.getTableModels(cla, this);
+    }
+
+    /**
+     * 返回表结构
+     * @param tableName 表明
+     * @return 居于数据库表结构生成 DDL
+     */
+    @Override
+    public SoberTable getSoberTable(String tableName)
+    {
+        return JdbcUtil.getBaseSoberTable(this,tableName);
     }
 
     /**
@@ -209,19 +229,15 @@ public abstract class JdbcOperations implements SoberSupport {
         }
 
         SoberColumn soberColumn = tableModels.getColumn(fieldName);
-        if (soberColumn != null && soberColumn.isConfEnum()) {
+        if (soberColumn != null && soberColumn.getFieldEnum()!=null) {
             //数据库绑定方式
-            //未了实现低耦合，这里还是,在去查询数据库
-            SoberFieldEnum soberFieldEnum = JdbcUtil.getSoberFieldEnum(this, tableName, fieldName);
-            if (soberFieldEnum == null) {
-                return null;
-            }
-
-            List<OptionBundle> optionBundles = JdbcUtil.getOptionBundleList(this, soberFieldEnum.getGroupCode(), soberFieldEnum.getNamespace());
+            //为了实现低耦合，这里还是,在去查询数据库
+            SoberFieldEnum soberFieldEnum = soberColumn.getFieldEnum();
+            List<OptionBundle> optionBundles = JdbcUtil.getOptionBundleList(this, soberFieldEnum.getCode(), soberFieldEnum.getNamespace());
             if (ObjectUtil.isEmpty(optionBundles)) {
                 return null;
             }
-            List<JSONObject> temp = new ArrayList<>();
+            List<JSONObject> temp = new ArrayList<>(optionBundles.size());
             for (OptionBundle bundle : optionBundles) {
                 JSONObject json = new JSONObject();
                 json.put("value", bundle.getCode());
@@ -241,12 +257,11 @@ public abstract class JdbcOperations implements SoberSupport {
      * 并且根据数据模型自动创建缓存
      *
      * @param dto    是否包含DTO
-     * @param extend 类型,0:所有
      * @return 得到所有表结构的模型
      */
     @Override
-    public Map<String, TableModels> getAllTableModels(boolean dto, int extend) {
-        return JdbcUtil.getAllTableModels(soberFactory, dto, extend);
+    public Map<Long, TableModels> getAllTableModels(boolean dto) {
+        return JdbcUtil.getAllTableModels(soberFactory, dto);
     }
 
     /**
@@ -316,7 +331,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public <T> T loadColumnsValue(Class<T> tClass, ResultSet resultSet) throws Exception {
-        return JdbcUtil.loadColumnsValue(this, getDialect(), tClass, resultSet);
+        return JdbcUtil.loadColumnsValue(this, tClass, resultSet);
     }
 
     /**
@@ -328,7 +343,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public Object calcUnique(TableModels soberTable, Object inObj) {
-        return JdbcUtil.calcUnique(this, getDialect(), soberTable, inObj);
+        return JdbcUtil.calcUnique(this, soberTable, inObj);
     }
 
     /**
@@ -439,7 +454,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public <T> T get(Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild) {
-        return JdbcUtil.get(this, getDialect(), aClass, field, serializable, loadChild);
+        return JdbcUtil.get(this, aClass, field, serializable, loadChild);
     }
 
 
@@ -452,7 +467,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public <T> List<T> load(Class<T> aClass, Serializable[] serializable) {
         TableModels soberTable = getSoberTable(aClass);
-        String field = soberTable.getPrimary();
+        String field = soberTable.getPrimaryKey();
         return load(aClass, field, serializable, true);
     }
 
@@ -467,7 +482,7 @@ public abstract class JdbcOperations implements SoberSupport {
     public <T> List<T> load(Class<T> aClass, Collection<?> values, boolean loadChild) {
         //载入一个ID列表
         TableModels soberTable = getSoberTable(aClass);
-        String field = soberTable.getPrimary();
+        String field = soberTable.getPrimaryKey();
         Criteria criteria = createCriteria(aClass);
         criteria = criteria.add(Expression.in(field, values));
         criteria = criteria.setCurrentPage(1).setTotalCount(getMaxRows());
@@ -559,7 +574,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int save(Object object, final boolean child) throws Exception {
-        return JdbcUtil.save(this, getDialect(), object, child);
+        return JdbcUtil.save(this, object, child);
     }
 
     /**
@@ -633,7 +648,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return -2;
         }
         TableModels soberTable = getSoberTable(o.getClass());
-        return delete(o.getClass(), soberTable.getPrimary(), (Serializable) BeanUtil.getProperty(o, soberTable.getPrimary()), null, delChild);
+        return delete(o.getClass(), soberTable.getPrimaryKey(), (Serializable) BeanUtil.getProperty(o, soberTable.getPrimaryKey()), null, delChild);
     }
 
     /**
@@ -648,7 +663,7 @@ public abstract class JdbcOperations implements SoberSupport {
             return -2;
         }
         TableModels soberTable = getSoberTable(aClass);
-        return createCriteria(aClass).add(Expression.in(soberTable.getPrimary(), ids)).delete(delChild);
+        return createCriteria(aClass).add(Expression.in(soberTable.getPrimaryKey(), ids)).delete(delChild);
     }
 
     /**
@@ -666,8 +681,8 @@ public abstract class JdbcOperations implements SoberSupport {
             log.debug("delete 参数错误，必须传入对象{}", o);
         }
         TableModels soberTable = getSoberTable(o.getClass());
-        Object key = BeanUtil.getProperty(o, soberTable.getPrimary());
-        return delete(o.getClass(), soberTable.getPrimary(), (Serializable) key);
+        Object key = BeanUtil.getProperty(o, soberTable.getPrimaryKey());
+        return delete(o.getClass(), soberTable.getPrimaryKey(), (Serializable) key);
     }
 
     /**
@@ -677,7 +692,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int delete(Class<?> aClass, Serializable serializable) {
-        return delete(aClass, getSoberTable(aClass).getPrimary(), serializable);
+        return delete(aClass, getSoberTable(aClass).getPrimaryKey(), serializable);
     }
 
     /**
@@ -704,7 +719,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int delete(Class<?> aClass, Serializable serializable, boolean delChild) {
-        return delete(aClass, getSoberTable(aClass).getPrimary(), serializable, null, delChild);
+        return delete(aClass, getSoberTable(aClass).getPrimaryKey(), serializable, null, delChild);
     }
 
     /**
@@ -762,7 +777,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int update(Object object, String[] updateFiled) throws Exception {
-        return JdbcUtil.update(this, getDialect(), object, updateFiled);
+        return JdbcUtil.update(this,  object, updateFiled);
     }
 
     /**
@@ -784,7 +799,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int update(String sqlText, Object[] params) throws Exception {
-        return JdbcUtil.update(this, getDialect(), sqlText, params);
+        return JdbcUtil.update(this, sqlText, params);
     }
 
 
@@ -825,7 +840,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public boolean execute(Class<?> cla, String sqlText, Object params) throws Exception {
-        return JdbcUtil.execute(this, getDialect(), cla, sqlText, params);
+        return JdbcUtil.execute(this, cla, sqlText, params);
     }
 
     /**
@@ -906,14 +921,17 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return List  查询返回列表
      */
     @Override
-    public List<?> query(String sqlText, Object[] param, int currentPage, long totalCount) {
+    public List<?> query(String sqlText, Object[] param, int currentPage, long totalCount)
+    {
         return JdbcUtil.query(this,  sqlText, param, currentPage, totalCount);
     }
 
     @Override
-    public List<?> query(String sqlText, Object[] param, int currentPage, int totalCount) {
-        return JdbcUtil.query(this,  sqlText, param, currentPage, totalCount);
+    public List<?> query(String sqlText, Object[] param, int currentPage, long totalCount,boolean fixName)
+    {
+        return JdbcUtil.query(this,  sqlText, param, currentPage, totalCount,fixName);
     }
+
     //------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -923,14 +941,15 @@ public abstract class JdbcOperations implements SoberSupport {
      * @return 返回单一对象
      */
     @Override
-    public Object getUniqueResult(Class<?> cla, String sql, Object o) {
+    public <T> T getUniqueResult(Class<T> cla, String sql, Object o) {
         Map<String, Object> valueMap = ObjectUtil.getMap(o);
         TableModels soberTable = getSoberTable(cla);
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
-        return getUniqueResult(sql, valueMap);
+        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimaryKey());
+        return cla.cast(JdbcUtil.getUniqueResult(this, sql, valueMap));
     }
+
 
     /**
      * @param sql sql语句
@@ -939,15 +958,14 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public Object getUniqueResult(String sql, Object o) {
-        Map<String, Object> valueMap = null;
+        Map<String, Object>  valueMap = ObjectUtil.getMap(o);
         if (o != null) {
-            valueMap = ObjectUtil.getMap(o);
             TableModels soberTable = getSoberTable(o.getClass());
             valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
             valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-            valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
+            valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimaryKey());
         }
-        return getUniqueResult(sql, valueMap);
+        return JdbcUtil.getUniqueResult(this, sql, valueMap);
     }
 
     /**
@@ -956,7 +974,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public Object getUniqueResult(String sql) {
-        return getUniqueResult(sql, (Object) null);
+        return JdbcUtil.getUniqueResult(this, sql, new HashMap<>(0));
     }
 
     /**
@@ -966,7 +984,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public Object getUniqueResult(String sqlText, Object[] param) {
-        return JdbcUtil.getUniqueResult(this, getDialect(), sqlText, param);
+        return JdbcUtil.getUniqueResult(this, sqlText, param);
     }
 
     /**
@@ -978,7 +996,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public Object getUniqueResult(String sql, Map<String, Object> valueMap) {
-        return JdbcUtil.getUniqueResult(this, getDialect(), sql, valueMap);
+        return JdbcUtil.getUniqueResult(this, sql, valueMap);
     }
 
     /**
@@ -989,7 +1007,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public boolean deleteAll(Collection<?> collection) throws Exception {
-        return JdbcUtil.deleteAll(this, getDialect(), collection);
+        return JdbcUtil.deleteAll(this,  collection);
     }
 
     /**
@@ -1005,13 +1023,19 @@ public abstract class JdbcOperations implements SoberSupport {
         }
         TableModels soberTable = getSoberTable(cla);
         Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(Dialect.COLUMN_NAME, soberTable.getPrimary());
+        valueMap.put(Dialect.COLUMN_NAME, soberTable.getPrimaryKey());
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
         if (soberFactory.isUseCache() && soberTable.isUseCache()) {
             JSCacheManager.removeAll(cla);
         }
         return execute(getDialect().processTemplate(Dialect.SQL_DROP_TABLE, valueMap), null);
+    }
+
+
+    @Override
+    public boolean dropTable(String tableName) throws Exception {
+        return JdbcUtil.dropTable(this, tableName);
     }
 
     /**
@@ -1028,7 +1052,7 @@ public abstract class JdbcOperations implements SoberSupport {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.COLUMN_NAME, soberTable.getPrimary());
+        valueMap.put(Dialect.COLUMN_NAME, soberTable.getPrimaryKey());
         Object o = getUniqueResult(getDialect().processTemplate(Dialect.FUN_TABLE_EXISTS, valueMap));
         return o instanceof String && soberTable.getName().equalsIgnoreCase((String) o) || ObjectUtil.toBoolean(o);
     }
@@ -1043,7 +1067,7 @@ public abstract class JdbcOperations implements SoberSupport {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
+        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimaryKey());
         return ObjectUtil.toLong(getUniqueResult(getDialect().processTemplate(Dialect.TABLE_MAX_ID, valueMap)));
     }
 
@@ -1079,9 +1103,22 @@ public abstract class JdbcOperations implements SoberSupport {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
+        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimaryKey());
         Object o = getUniqueResult(getDialect().processTemplate(Dialect.SEQUENCE_NAME, valueMap));
-        return StringUtil.substringBetween((String) o, "'", "'");
+        if (o==null)
+        {
+            return null;
+        }
+
+        if (o instanceof String) {
+            String tmp = (String) o;
+            if (tmp.startsWith("'")&&tmp.endsWith("'"))
+            {
+                return StringUtil.substringBetween((String) o, "'", "'");
+            }
+            return tmp;
+        }
+        return  ObjectUtil.toString(o);
     }
 
     /**
@@ -1112,10 +1149,10 @@ public abstract class JdbcOperations implements SoberSupport {
         if (soberTable == null) {
             return false;
         }
-        Object key = BeanUtil.getFieldValue(obj, soberTable.getPrimary(), false);
-        SoberColumn soberColumn = soberTable.getColumn(soberTable.getPrimary());
+        Object key = BeanUtil.getFieldValue(obj, soberTable.getPrimaryKey(), false);
+        SoberColumn soberColumn = soberTable.getColumn(soberTable.getPrimaryKey());
         boolean isNum = ClassUtil.isNumberType(soberColumn.getClassType());
-        String sql = "UPDATE " + soberTable.getName() + " SET " + field + StringUtil.EQUAL + field + "+" + num + " WHERE " + soberTable.getPrimary() + StringUtil.EQUAL + (isNum ? key : StringUtil.quoteSql((String) key));
+        String sql = "UPDATE " + soberTable.getName() + " SET " + field + StringUtil.EQUAL + field + "+" + num + " WHERE " + soberTable.getPrimaryKey() + StringUtil.EQUAL + (isNum ? key : StringUtil.quoteSql((String) key));
         int x = update(sql);
         if (soberTable.isUseCache()) {
             evict(cla);
@@ -1280,7 +1317,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public boolean createIndex(String tableName, String name, String field) throws Exception {
-        return SoberUtil.createIndex(this, getDialect(), tableName, name, field);
+        return SoberUtil.createIndex(this, tableName, name, field);
     }
 
     /**
@@ -1386,7 +1423,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public void evictList(Class<?> cla) {
         if (soberFactory.isUseCache()) {
-            JSCacheManager.queryRemove(cla, cla.getSimpleName() + SoberUtil.CACHE_TREM_LIST + StringUtil.ASTERISK);
+            JSCacheManager.queryRemove(cla, cla.getSimpleName() + SoberUtil.CACHE_TERM_LIST + StringUtil.ASTERISK);
         }
     }
 
@@ -1398,7 +1435,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public void evictLoad(Class<?> cla) {
         if (soberFactory.isUseCache()) {
-            JSCacheManager.queryRemove(cla, cla.getSimpleName() + SoberUtil.CACHE_TREM_LOAD + StringUtil.ASTERISK);
+            JSCacheManager.queryRemove(cla, cla.getSimpleName() + SoberUtil.CACHE_TERM_LOAD + StringUtil.ASTERISK);
         }
     }
 
@@ -1413,7 +1450,7 @@ public abstract class JdbcOperations implements SoberSupport {
     public void evictLoad(Class<?> cla, String field, Serializable id) {
         if (soberFactory.isUseCache()) {
             String cacheKey = SoberUtil.getLoadKey(cla, field, id, true);
-            cacheKey = StringUtil.substringBefore(cacheKey, SoberUtil.CACHE_TREM_CHILD) + StringUtil.ASTERISK;
+            cacheKey = StringUtil.substringBefore(cacheKey, SoberUtil.CACHE_TERM_CHILD) + StringUtil.ASTERISK;
             JSCacheManager.queryRemove(cla, cacheKey);
         }
     }
@@ -1440,8 +1477,8 @@ public abstract class JdbcOperations implements SoberSupport {
         if (soberFactory.isUseCache()) {
             Class<?> cla = data.getClass();
             TableModels soberTable = getSoberTable(cla);
-            Object id = BeanUtil.getProperty(data, soberTable.getPrimary());
-            String cacheKey = SoberUtil.getLoadKey(cla, soberTable.getPrimary(), id, loadChild);
+            Object id = BeanUtil.getProperty(data, soberTable.getPrimaryKey());
+            String cacheKey = SoberUtil.getLoadKey(cla, soberTable.getPrimaryKey(), id, loadChild);
             JSCacheManager.put(cla, cacheKey, data);
         }
     }
@@ -1472,4 +1509,66 @@ public abstract class JdbcOperations implements SoberSupport {
     }
     //-----------------------------
 
+    @Override
+    public int updateErrorLinkDbTimes(){
+        return soberFactory.updateErrorLinkDbTimes();
+    }
+
+
+    /**
+     *
+     * @param cls table对象
+     * @return 创建临时表,用cls中的表结构描述
+     */
+    @Override
+    public TableModels createTempTable(Class<?> cls){
+        return createTempTable(cls,5);
+    }
+
+    /**
+     *
+     * @param cls table对象
+     * @param hour 临时表超时时间
+     * @return 创建临时表,用cls中的表结构描述
+     */
+    @Override
+    public TableModels createTempTable(Class<?> cls, int hour){
+        String tableName = JdbcUtil.buildTempTable(this,hour);
+        SoberTable tableModels = AnnotationUtil.getSoberTable(cls);
+        tableModels.setName(tableName);
+        tableModels.setCaption(tableModels.getCaption()+ JdbcUtil.TEMP_TABLE_END);
+        tableModels.setDatabaseName(getSoberFactory().getDatabaseName());
+        tableModels.setCreate(true);
+        return SoberUtil.createTableAndIndex(tableModels,this);
+    }
+
+    /**
+     *
+     * @return 创建一个临时表名
+     */
+    @Override
+    public String buildTempTable(){
+        return buildTempTable(5);
+    }
+
+    /**
+     *
+     * @param hour 临时表超时时间
+     * @return 创建一个临时表名
+     */
+    @Override
+    public String buildTempTable(int hour){
+        return JdbcUtil.buildTempTable(this,hour);
+    }
+
+    /**
+     *
+     * @param cls 内对象
+     * @return 判断内存中是否存在
+     */
+    @Override
+    public boolean containsModels(Class<?> cls)
+    {
+        return soberFactory.containsModels(cls);
+    }
 }

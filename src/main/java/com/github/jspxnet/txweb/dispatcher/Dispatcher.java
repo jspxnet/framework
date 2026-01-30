@@ -88,14 +88,6 @@ public final class Dispatcher implements Serializable {
         return DISPATCHER;
     }
 
-
-    /**
-     * 主要是防止关闭异常
-     */
-    static public void shutdown() {
-        ACTION_HANDLE_MAP.clear();
-    }
-
     public static void setRealPath(String realPath) {
         Dispatcher.realPath = realPath;
     }

@@ -369,6 +369,7 @@ public final class ParamUtil {
         }
 
         ActionContext actionContext = ThreadContextHolder.getContext();
+        Map<String, Object> valueMap = actionContext.getEnvironment();
         Object[] paramObj = new Object[pTypes.length];
         //i 表示第几个参数，下边完成参数组装
         Parameter[] parameters = exeMethod.getParameters();
@@ -389,13 +390,13 @@ public final class ParamUtil {
                                 paramObj[i] = BeanUtil.getTypeValue(paramsJson.get(paramName), pType);
                             }
                             if (ParamModeType.JsonMode.getValue() == param.modeType().getValue() && pType.equals(JSONObject.class)) {
-                                JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                JSONObject jsonObject = (JSONObject) valueMap.get(ActionEnv.Key_CallRocJsonData);
                                 if (jsonObject != null) {
                                     paramObj[i] = jsonObject;
                                 }
                             }
                             if (ParamModeType.SpringMode.getValue() == param.modeType().getValue()) {
-                                JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                JSONObject jsonObject = (JSONObject) valueMap.get(ActionEnv.Key_CallRocJsonData);
                                 if (jsonObject != null) {
                                     paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
                                 }
@@ -406,13 +407,13 @@ public final class ParamUtil {
                                 paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
                             }
                             if (ParamModeType.JsonMode.getValue() == param.modeType().getValue() && pType.equals(JSONObject.class)) {
-                                JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                JSONObject jsonObject = (JSONObject) valueMap.get(ActionEnv.Key_CallRocJsonData);
                                 if (jsonObject != null) {
                                     paramObj[i] = jsonObject;
                                 }
                             }
                             if (ParamModeType.SpringMode.getValue() == param.modeType().getValue()) {
-                                JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                                JSONObject jsonObject = (JSONObject) valueMap.get(ActionEnv.Key_CallRocJsonData);
                                 if (jsonObject != null) {
                                     paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
                                 }
@@ -536,6 +537,7 @@ public final class ParamUtil {
         }
 
         ActionContext actionContext = ThreadContextHolder.getContext();
+        Map<String, Object> actionValueMap = actionContext.getEnvironment();
         Object[] paramObj = new Object[pTypes.length];
         //i 表示第几个参数，下边完成参数组装
         Parameter[] parameters = exeMethod.getParameters();
@@ -552,7 +554,7 @@ public final class ParamUtil {
                     if (!ClassUtil.isStandardType(pType) && !ClassUtil.isArrayType(pType) && !ClassUtil.isCollection(pType)) {
                         if (ParamModeType.RocMode.getValue() == param.modeType().getValue())
                         {
-                            JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                            JSONObject jsonObject = (JSONObject) actionValueMap.get(ActionEnv.Key_CallRocJsonData);
                             boolean isRoc = isRocRequest(jsonObject);
                             if (isRoc) {
                                 paramObj[i] = action.getBean(ClassUtil.loadClass(pType.getTypeName()));
@@ -565,13 +567,13 @@ public final class ParamUtil {
                             }
                         }
                         if (ParamModeType.JsonMode.getValue() == param.modeType().getValue() && pType.equals(JSONObject.class)) {
-                            JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                            JSONObject jsonObject = (JSONObject) actionValueMap.get(ActionEnv.Key_CallRocJsonData);
                             if (jsonObject != null) {
                                 paramObj[i] = jsonObject;
                             }
                         }
                         if (ParamModeType.SpringMode.getValue() == param.modeType().getValue()) {
-                            JSONObject jsonObject = (JSONObject) action.getEnv().get(ActionEnv.Key_CallRocJsonData);
+                            JSONObject jsonObject = (JSONObject) actionValueMap.get(ActionEnv.Key_CallRocJsonData);
                             if (jsonObject != null) {
                                 paramObj[i] = jsonObject.parseObject(ClassUtil.loadClass(pType.getTypeName()));
                             } else {
@@ -611,7 +613,6 @@ public final class ParamUtil {
                         }
                     }
                 }
-
 
                 if (annotation instanceof PathVar) {
                     HttpServletRequest request = action.getRequest();

@@ -75,7 +75,7 @@ public class TemplateAction extends TemplateView {
             BeanUtil.setSimpleProperty(obj, "ip", getRemoteAddr());
         }
 
-        String idName = tableModels.getPrimary();
+        String idName = tableModels.getPrimaryKey();
         if (StringUtil.isNull(idName))
         {
             idName = "id";

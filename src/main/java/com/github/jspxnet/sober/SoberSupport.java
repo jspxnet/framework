@@ -15,8 +15,8 @@ import com.github.jspxnet.sober.config.SoberTable;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.exception.ValidException;
 import com.github.jspxnet.sober.table.SqlMapConf;
-import com.github.jspxnet.txweb.table.meta.BaseBillType;
-import com.github.jspxnet.txweb.table.meta.OperatePlug;
+import com.github.jspxnet.sober.table.meta.BaseBillType;
+import com.github.jspxnet.sober.table.meta.OperatePlug;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -50,6 +50,9 @@ public interface SoberSupport extends Serializable {
      * @param soberFactory 数据工厂
      */
     void setSoberFactory(SoberFactory soberFactory);
+
+    int getBatchRows();
+
     /**
      *
      * @return 得到数据工程对象
@@ -61,6 +64,14 @@ public interface SoberSupport extends Serializable {
      * @return 表结构模型
      */
     TableModels getSoberTable(Class<?> cla);
+
+    /**
+     *
+     * @param tableName 表明
+     * @return 表结构模型
+     */
+    SoberTable getSoberTable(String tableName);
+
     /**
      *
      * @param tableName  类
@@ -85,10 +96,9 @@ public interface SoberSupport extends Serializable {
     /**
      *
      * @param dto 是否包含DTO
-     * @param extend  0:所有;1:可扩展;2:不可扩展
      * @return  得到所有表结构的模型
      */
-    Map<String,TableModels> getAllTableModels(boolean dto,int extend);
+    Map<Long, TableModels> getAllTableModels(boolean dto);
 
     /**
      *
@@ -516,6 +526,9 @@ public interface SoberSupport extends Serializable {
      * @return 单一返回对象
      */
     Object getUniqueResult(String sql, Object[] params);
+
+    <T> T getUniqueResult(Class<T> cla, String sql, Object o);
+
     /**
      * @param sql sql语句
      * @param o   参数对象
@@ -523,15 +536,9 @@ public interface SoberSupport extends Serializable {
      */
     Object getUniqueResult(String sql, Object o);
 
-    List<?> query(String sqlText, Object[] param, int currentPage, int totalCount);
+    List<?> query(String sqlText, Object[] param, int currentPage, long totalCount, boolean fixName);
 
-    /**
-     * @param cla 类
-     * @param sql sql
-     * @param o   对象
-     * @return 返回单一对象
-     */
-    Object getUniqueResult(Class<?> cla, String sql, Object o);
+
     /**
      *  计算合计,这个标签会占用大量的CPU计算资源，谨慎使用
      * @param soberTable 结果关系表
@@ -681,6 +688,9 @@ public interface SoberSupport extends Serializable {
     int getExpressionCount(Class<?> aClass, String term);
 
     //--------------------
+
+    boolean dropTable(String tableName) throws Exception;
+
     /**
      * 表是否存在
      *
@@ -787,4 +797,16 @@ public interface SoberSupport extends Serializable {
     boolean isLock(Object obj) throws Exception;
 
     boolean unLock(Object obj);
+
+    int updateErrorLinkDbTimes();
+
+    TableModels createTempTable(Class<?> cls);
+
+    TableModels createTempTable(Class<?> cls, int hour);
+
+    String buildTempTable();
+
+    String buildTempTable(int hour);
+
+    boolean containsModels(Class<?> cls);
 }

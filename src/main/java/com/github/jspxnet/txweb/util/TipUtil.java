@@ -17,6 +17,7 @@ import java.util.List;
  */
 public final class TipUtil {
     public static final String PREFIX = "TIP_";
+    public static final int DEFAULT_TIME_LIVE = 12;
     private TipUtil() {
 
     }
@@ -35,6 +36,14 @@ public final class TipUtil {
         return id;
     }
 
+    /**
+     *
+     * @param messageId 消息id
+     * @param message 消息内容
+     * @param statusEnum 枚举
+     * @param percent 百分比
+     * @return 创建的默认对象
+     */
     public static TipDto createTipFactory(String messageId, String message,TipStatusEnumType statusEnum,float percent)
     {
         TipDto dto = new TipDto();
@@ -50,8 +59,10 @@ public final class TipUtil {
         dto.setSuccess(YesNoEnumType.YES.getValue());
         dto.setPercent(percent);
         dto.setMessage(message);
+        dto.setTimeToLive(DEFAULT_TIME_LIVE);
         return dto;
     }
+
 
     /**
      * 放入单个提示信息
@@ -65,7 +76,7 @@ public final class TipUtil {
             return;
         }
         String key = getKey(messageId);
-        JSCacheManager.put(TipDto.class,key,dto);
+        JSCacheManager.put(TipDto.class,key,dto,dto.getTimeToLive());
     }
 
     /**
@@ -101,7 +112,7 @@ public final class TipUtil {
         }
         dto.setSort(list.size()+1);
         list.add(dto);
-        JSCacheManager.put(TipDto.class,key,list);
+        JSCacheManager.put(TipDto.class,key,list,DEFAULT_TIME_LIVE);
     }
 
     /**
@@ -128,6 +139,7 @@ public final class TipUtil {
             dto.setStatus(TipStatusEnumType.UNKNOWN.getValue());
             dto.setSuccess(YesNoEnumType.NO.getValue());
             dto.setMessage(TipStatusEnumType.UNKNOWN.getName());
+            dto.setTimeToLive(DEFAULT_TIME_LIVE);
             return dto;
         }
         if (obj instanceof Collection)
@@ -156,6 +168,7 @@ public final class TipUtil {
             dto.setStatus(TipStatusEnumType.UNKNOWN.getValue());
             dto.setSuccess(YesNoEnumType.NO.getValue());
             dto.setMessage(TipStatusEnumType.UNKNOWN.getName());
+            dto.setTimeToLive(DEFAULT_TIME_LIVE);
             List<TipDto> list = new ArrayList<>();
             list.add(dto);
             return list;
@@ -167,5 +180,16 @@ public final class TipUtil {
             return list;
         }
         return  (List<TipDto>)obj;
+    }
+
+    /**
+     * 清理提示缓存
+     * @param messageId 消息id
+     * @return 清理是否成功
+     */
+    public static boolean clean(String messageId)
+    {
+        String key = getKey(messageId);
+        return JSCacheManager.remove(TipDto.class,key);
     }
 }

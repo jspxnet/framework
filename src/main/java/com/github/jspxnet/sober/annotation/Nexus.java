@@ -26,7 +26,10 @@ import java.lang.annotation.RetentionPolicy;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Nexus {
-
+    /**
+     * @return 映射关系
+     */
+    String caption() default StringUtil.empty;
     /**
      * @return 映射关系
      */
@@ -97,7 +100,7 @@ public @interface Nexus {
     boolean chain() default false;
 
     /**
-     * @return 关联的数据个数，0 为系统默认支持最大个数
+     * @return 关联的数据个数，0 为系统默认支持最大个数,行
      */
     String length() default "0";
 }

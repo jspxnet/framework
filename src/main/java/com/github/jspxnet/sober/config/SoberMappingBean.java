@@ -10,6 +10,7 @@
 package com.github.jspxnet.sober.config;
 
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.JspxNetApplication;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.cache.DefaultCache;
@@ -23,8 +24,9 @@ import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.DialectFactory;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
+import com.github.jspxnet.sober.enums.EntityLevelEnumType;
 import com.github.jspxnet.sober.model.container.PropertyContainer;
-import com.github.jspxnet.sober.table.SqlMapConf;
+import com.github.jspxnet.sober.table.*;
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
 import com.github.jspxnet.sober.transaction.JDBCTransaction;
 import com.github.jspxnet.sober.transaction.JTATransaction;
@@ -32,7 +34,6 @@ import com.github.jspxnet.sober.transaction.TransactionManager;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.LockUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
-import com.github.jspxnet.txweb.table.meta.TableMeta;
 import com.github.jspxnet.utils.*;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,10 +47,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -66,7 +64,8 @@ import java.util.Map;
 @Slf4j
 public class SoberMappingBean implements SoberFactory {
 
-
+    //有一种情况,应用先启动了,但是数据库还没有启动.这时候不能自动连接上去,设置这个变量检测数据库是否错误到一定的次数,自动重新连接数据库
+    private int errorLinkDbTimes = 0;
     //事务管理器
     private static final TransactionManager TRANSACTION_MANAGER = TransactionManager.getInstance();
     //初始化表 用于比较是否重复
@@ -75,11 +74,19 @@ public class SoberMappingBean implements SoberFactory {
     private static final Map<String, SQLRoom> SQL_MAP = new HashMap<>();
     //表结果映射
     private static final Map<Class<?>, TableModels> TABLE_MAP = new HashMap<>();
+
+    private static Boolean baseModelInit = false;
+
+
     //整合服务器JNDI接口
     @Setter
     private Context context = null;
     //一次最多查询行数，避免out memory 
     private int maxRows = 50000;
+
+    //批次保存一次保存多少行
+    private int batchRows = 500;
+
     //数据源
     private DataSource dataSource;
     //显示SQL
@@ -123,6 +130,17 @@ public class SoberMappingBean implements SoberFactory {
     }
 
     @Override
+    public int updateErrorLinkDbTimes()
+    {
+        errorLinkDbTimes++;
+        if (errorLinkDbTimes > 50) {
+            //重置连接
+            JspxNetApplication.restart();
+            errorLinkDbTimes = 0;
+        }
+        return errorLinkDbTimes;
+    }
+    @Override
     public boolean isUseCache() {
         if (TRANSACTION_MANAGER.containsKey(Integer.toString(hashCode()))) {
             return false;
@@ -163,6 +181,16 @@ public class SoberMappingBean implements SoberFactory {
     @Override
     public void setMaxRows(int maxRows) {
         this.maxRows = maxRows;
+    }
+
+    @Override
+    public int getBatchRows() {
+        return batchRows;
+    }
+
+    @Override
+    public void setBatchRows(int batchRows) {
+        this.batchRows = batchRows;
     }
 
     @Override
@@ -343,9 +371,10 @@ public class SoberMappingBean implements SoberFactory {
      * @param conn 链接
      */
     private void checkConnection(Connection conn) throws Exception {
-        log.info("Connection is " + conn);
+        log.info("Connection is {}}", conn);
         try {
             if (conn == null || conn.isClosed()) {
+                updateErrorLinkDbTimes();
                 log.error("database dataSource not get JDBC Connection，数据库配置错误");
                 throw new SQLException("database dataSource not get JDBC Connection,数据库配置错误");
             }
@@ -546,6 +575,19 @@ public class SoberMappingBean implements SoberFactory {
         }
     }
 
+    synchronized private static boolean initBaseModels(SoberSupport soberSupport)
+    {
+        for (Class<?> cls:SoberUtil.BASE_MODEL_LIST)
+        {
+             TableModels soberTable = SoberUtil.createTableAndIndex(cls, null, EntityLevelEnumType.MAIN.getValue(), soberSupport);
+             if (soberTable!=null)
+             {
+                 TABLE_MAP.put(cls, soberTable);
+             }
+        }
+        return true;
+    }
+
     /**
      * 得到表结构,如果数据库中不存在表，就创建表
      * 这里只放入基本的模型结构，不放入枚举字段数据
@@ -559,6 +601,16 @@ public class SoberMappingBean implements SoberFactory {
         if (cla.getName().equals(Map.class.getName())) {
             return null;
         }
+        if (Map.class.equals(cla)||List.class.equals(cla))
+        {
+            return null;
+        }
+        //-------------------------------初始化
+        if (!baseModelInit)
+        {
+            baseModelInit = initBaseModels(soberSupport);
+        }
+
         TableModels soberTable = TABLE_MAP.get(cla);
         if (soberTable != null) {
             if (soberTable.isEmpty())
@@ -579,34 +631,48 @@ public class SoberMappingBean implements SoberFactory {
         }
         LockUtil.lock(soberSupport, cla);
         try {
-            if (!INIT_TABLE_MAP.isEmpty()) {
-                //放入去初始化，完成后清空
-                SoberUtil.initTable(new ArrayList<>(INIT_TABLE_MAP.values()), soberSupport);
+            if (!SoberUtil.BASE_MODEL_LIST.contains(cla) &&!INIT_TABLE_MAP.isEmpty()) {
+                //放入去初始化，完成后清空， 是setMappingResources 方法放入的，用来初始化sql Map
+                SoberUtil.initSqlMapTable(new ArrayList<>(INIT_TABLE_MAP.values()), soberSupport);
                 INIT_TABLE_MAP.clear();
             }
 
-            soberTable = SoberUtil.createTableAndIndex(cla, null, soberSupport);
+            soberTable = SoberUtil.createTableAndIndex(cla, null,EntityLevelEnumType.MAIN.getValue(), soberSupport);
             if (soberTable != null) {
                 //放入扩展字段begin
                 List<SoberColumn> columnList = soberSupport.getTableColumns(soberTable.getName());
                 for (SoberColumn soberColumn : columnList) {
-                    if (StringUtil.isNullOrWhiteSpace(soberColumn.getName()))
+                    //先修复表名
+                    SoberNexus soberNexus =  soberColumn.getNexus();
+                    if (soberNexus != null) {
+                        soberColumn.setCaption(soberColumn.getCaption());
+                        soberColumn.setClassType(SoberNexus.class);
+                    }
+                    SoberCalcUnique calcUnique =  soberColumn.getCalcUnique();
+                    if (calcUnique != null) {
+                        soberColumn.setCaption(calcUnique.getCaption());
+                        soberColumn.setClassType(SoberCalcUnique.class);
+                    }
+
+                }
+               for (SoberColumn soberColumn : columnList) {
+                    if (StringUtil.isNullOrWhiteSpace(soberColumn.getField()))
                     {
                         continue;
                     }
-                    if (!soberTable.containsField(soberColumn.getName())) {
+                    if (!soberTable.containsField(soberColumn.getField())) {
                         soberTable.addColumns(soberColumn);
                     } else {
                         //放入不一致的数据
-                        SoberColumn oldSoberColumn = soberTable.getColumn(soberColumn.getName());
-                        if (oldSoberColumn == null || ObjectUtil.isEmpty(oldSoberColumn.getName())) {
+                        SoberColumn oldSoberColumn = soberTable.getColumn(soberColumn.getField());
+                        if (oldSoberColumn == null || ObjectUtil.isEmpty(oldSoberColumn.getField())) {
                             continue;
                         }
                         if (!StringUtil.isNullOrWhiteSpace(soberColumn.getCaption()))
                         {
                             oldSoberColumn.setCaption(soberColumn.getCaption());
                         }
-                        oldSoberColumn.setNotNull(soberColumn.isNotNull());
+                        oldSoberColumn.setNoNull(soberColumn.isNoNull());
                         if (StringUtil.isNullOrWhiteSpace(oldSoberColumn.getOption()))
                         {
                             oldSoberColumn.setOption(soberColumn.getOption());
@@ -621,26 +687,14 @@ public class SoberMappingBean implements SoberFactory {
                 soberTable.setCanExtend(PropertyContainer.class.isAssignableFrom(cla));
                 //放入扩展字段end
 
-
-                //这里跳过系统中默认的表
-                if (!SoberUtil.isJumpEnuTypeCheck(cla)) {
-                    //判断是否有配置好的枚举begin
-                    JdbcUtil.isConfFieldEnum(soberSupport, columnList);
-                    //判断是否有配置好的枚举end
-                }
-
                 //修复caption为空的情况 begin
                 String databaseName = soberSupport.getSoberFactory().getDatabaseName();
-
-                List<SoberColumn> columns = soberTable.getColumns();
-                for (SoberColumn soberColumn : columns) {
+                for (SoberColumn soberColumn : columnList) {
                     if (StringUtil.isNullOrWhiteSpace(soberColumn.getCaption())) {
                         soberColumn.setCaption(soberColumn.getName());
                     }
-                    if (StringUtil.isNullOrWhiteSpace(soberColumn.getDatabaseName()))
-                    {
-                        soberColumn.setDatabaseName(databaseName);
-                    }
+                    //修复库名
+                    soberColumn.setDatabaseName(databaseName);
                 }
                 //修复caption为空的情况 end
 
@@ -667,7 +721,7 @@ public class SoberMappingBean implements SoberFactory {
     @Override
     public TableModels getTableModels(String tableName, SoberSupport soberSupport) {
         if (TABLE_MAP.isEmpty()) {
-            getTableModels(TableMeta.class, soberSupport);
+            getTableModels(SoberTable.class, soberSupport);
         }
         for (TableModels tableModels : TABLE_MAP.values()) {
             if (tableModels.getName().equalsIgnoreCase(tableName)) {
@@ -675,6 +729,12 @@ public class SoberMappingBean implements SoberFactory {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean containsModels(Class<?> cls)
+    {
+        return TABLE_MAP.containsKey(cls);
     }
 
     @Override

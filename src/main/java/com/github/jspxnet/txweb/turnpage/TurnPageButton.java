@@ -46,7 +46,7 @@ public interface TurnPageButton {
 
     void setTotalPage(int totalPage);
 
-    int getTotalPage();
+    long getTotalPage();
 
 
     void setCurrentPath(String currentPath);

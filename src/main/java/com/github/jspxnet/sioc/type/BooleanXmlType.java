@@ -10,8 +10,6 @@
 package com.github.jspxnet.sioc.type;
 
 import com.github.jspxnet.utils.ObjectUtil;
-import com.github.jspxnet.utils.StringUtil;
-
 import java.lang.reflect.Type;
 
 /**

@@ -106,7 +106,7 @@ public class TemplateDAOImpl<T> extends JdbcOperations implements TemplateDAO<T>
             return false;
         }
         TableModels tableModels = getSoberTable(tableClass);
-        Field field = ClassUtil.getDeclaredField(tableClass, tableModels.getPrimary());
+        Field field = ClassUtil.getDeclaredField(tableClass, tableModels.getPrimaryKey());
         try {
             for (Serializable sid : ids) {
                 Serializable id =  BeanUtil.getTypeValue(sid, field.getType());
@@ -135,7 +135,7 @@ public class TemplateDAOImpl<T> extends JdbcOperations implements TemplateDAO<T>
             return false;
         }
         TableModels tableModels = getSoberTable(tableClass);
-        Field field = ClassUtil.getDeclaredField(tableClass, tableModels.getPrimary());
+        Field field = ClassUtil.getDeclaredField(tableClass, tableModels.getPrimaryKey());
         try {
             for (Serializable sid : ids) {
                 Serializable id = BeanUtil.getTypeValue(sid, field.getType());
@@ -163,7 +163,7 @@ public class TemplateDAOImpl<T> extends JdbcOperations implements TemplateDAO<T>
             return false;
         }
         TableModels tableModels = getSoberTable(tableClass);
-        Field field = ClassUtil.getDeclaredField(tableClass, tableModels.getPrimary());
+        Field field = ClassUtil.getDeclaredField(tableClass, tableModels.getPrimaryKey());
         try {
             for (Serializable sid : ids) {
                 Serializable id = BeanUtil.getTypeValue(sid, field.getType());

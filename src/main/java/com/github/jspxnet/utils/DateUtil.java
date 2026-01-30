@@ -57,11 +57,24 @@ public final  class DateUtil {
     final static public String EMPTY_DATE_STRING = "1800-01-01";
     public static final String ST_CN_FORMAT = "yyyy年MM月dd日 HH:mm";
 
+    private static final ThreadLocal<Calendar> threadLocal = new ThreadLocal<>();
+
     private DateUtil() {
 
     }
 
-
+    /**
+     *
+     * @return 解决线程安全问题
+     */
+    public static Calendar getThreadCalendar() {
+        Calendar cal = threadLocal.get();
+        if (cal == null) {
+            cal = Calendar.getInstance();
+            threadLocal.set(cal);
+        }
+        return cal;
+    }
     public static String getLinuxTime() {
         DateFormat format = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
         return format.format(new Date());
@@ -76,12 +89,12 @@ public final  class DateUtil {
      * @return Calendar  合并日期和时间
      */
     public static Calendar mergeDateTime(Date date, Time time) {
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = getThreadCalendar();
         if (date != null) {
             cal.setTime(date);
         }
         if (time != null) {
-            Calendar temp = Calendar.getInstance();
+            Calendar temp = getThreadCalendar();
             temp.setTime(time);
             cal.set(Calendar.HOUR_OF_DAY, temp.get(Calendar.HOUR_OF_DAY));
             cal.set(Calendar.MINUTE, temp.get(Calendar.MINUTE));
@@ -124,7 +137,7 @@ public final  class DateUtil {
      * @return 得到年
      */
     public static int getYear(Date date) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         if (date == null) {
             calendar.setTime(new Date());
         } else {
@@ -147,7 +160,7 @@ public final  class DateUtil {
      * @return 得到月
      */
     public static int getMonth(Date date) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         if (date == null) {
             date = new Date();
         }
@@ -159,7 +172,7 @@ public final  class DateUtil {
      * @return int   得到号数
      */
     public static int getDate() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         Date trialTime = new Date();
         calendar.setTime(trialTime);
         return calendar.get(Calendar.DATE);
@@ -170,14 +183,14 @@ public final  class DateUtil {
     }
 
     public static int getMinute() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         Date trialTime = new Date();
         calendar.setTime(trialTime);
         return calendar.get(Calendar.MINUTE);
     }
 
     public static int getSecond() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         Date trialTime = new Date();
         calendar.setTime(trialTime);
         return calendar.get(Calendar.SECOND);
@@ -197,7 +210,7 @@ public final  class DateUtil {
      * @return 得到月中的第几天
      */
     public static int getDAY_OF_MONTH(Date trialTime) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(trialTime);
         return calendar.get(Calendar.DAY_OF_MONTH);
     }
@@ -214,7 +227,7 @@ public final  class DateUtil {
      * @return 得到周中的第几天 7 为星期天
      */
     public static int getDAY_OF_WEEK(Date trialTime) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(trialTime);
         return calendar.get(Calendar.DAY_OF_WEEK) - 1;
     }
@@ -234,7 +247,7 @@ public final  class DateUtil {
      * @return int 得到早上下午
      */
     public static int getAM_PM(Date trialTime) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(trialTime);
         return calendar.get(Calendar.AM_PM);
     }
@@ -244,7 +257,7 @@ public final  class DateUtil {
      * @return 得到月分的最大天数
      */
     public static int getCountMonthDay(Date trialTime) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.clear();
         calendar.setTime(trialTime); //放入你的日期
         return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -319,7 +332,7 @@ public final  class DateUtil {
      * @return 得到某一年周的总数
      */
     public static int getMaxWeekNumOfYear(int year) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, 1);
         calendar.set(Calendar.DATE, 1);
@@ -337,7 +350,7 @@ public final  class DateUtil {
      * @return 得到一个月开始的时间日期
      */
     public static Date getStartMonthDate(Date trialTime) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(trialTime); //放入你的日期
         calendar.set(Calendar.DATE, calendar.getMinimum(Calendar.DATE));
         return getStartDateTime(calendar.getTime());
@@ -348,7 +361,7 @@ public final  class DateUtil {
      * @return 得到一个月结束的时间日期
      */
     public static Date getEndMonthDate(Date trialTime) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(trialTime); //放入你的日期
         calendar.set(Calendar.AM_PM, Calendar.PM);
         calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
@@ -360,7 +373,7 @@ public final  class DateUtil {
      * @return 得到一个年开始的时间日期
      */
     public static Date getStartYearDate(Date trialTime) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(trialTime); //放入你的日期
         calendar.set(Calendar.MONTH, 0);
         return getStartMonthDate(calendar.getTime());
@@ -372,7 +385,7 @@ public final  class DateUtil {
      * @return 得到一年结束的时间日期
      */
     public static Date getEndYearDate(Date trialTime) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(trialTime); //放入你的日期
         calendar.set(Calendar.MONTH, 11);
         return getEndMonthDate(calendar.getTime());
@@ -387,7 +400,7 @@ public final  class DateUtil {
      */
     public static Date[] getWeekStartAndEnd(int year, int week) {
         Date[] result = new Date[2];
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = getThreadCalendar();
         cal.setFirstDayOfWeek(Calendar.MONDAY);
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.WEEK_OF_YEAR, week);
@@ -460,7 +473,7 @@ public final  class DateUtil {
      * @return 得到当前季度开始日期和结束日期
      */
     public static Date[] getQuarterStartAndEnd(Date date)  {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(date);
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
@@ -505,7 +518,7 @@ public final  class DateUtil {
      * @return 日期
      */
     public static Date addYear(int move, Date date) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(date);
         calendar.add(Calendar.YEAR, move);
         return calendar.getTime();
@@ -517,7 +530,7 @@ public final  class DateUtil {
      * @return 得到变化年的月
      */
     public static Date addMonth(int move, Date date) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(date);
         calendar.add(Calendar.MONTH, move);
         return calendar.getTime();
@@ -537,7 +550,7 @@ public final  class DateUtil {
      * @return 添加日期
      */
     public static Date addDate(int tmp, Date theDate) {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(theDate);
         calendar.add(Calendar.DATE, tmp);
         return calendar.getTime();
@@ -551,7 +564,7 @@ public final  class DateUtil {
      */
     public static Date createDate(int yeas, int month, int date) {
 
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.set(Calendar.YEAR, yeas);
         calendar.set(Calendar.MONTH, month);
         calendar.set(Calendar.DATE, date);
@@ -566,7 +579,7 @@ public final  class DateUtil {
         if (date == null) {
             date = new Date();
         }
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(date);
         calendar.set(Calendar.AM_PM, 0);
         calendar.set(Calendar.HOUR, 0);
@@ -584,7 +597,7 @@ public final  class DateUtil {
         if (date == null) {
             date = new Date();
         }
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(getStartDateTime(date));
         calendar.set(Calendar.AM_PM, Calendar.PM);
         calendar.add(Calendar.HOUR, calendar.getActualMaximum(Calendar.HOUR));
@@ -633,7 +646,7 @@ public final  class DateUtil {
         if (date == null) {
             date = new Date();
         }
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getThreadCalendar();
         calendar.setTime(date);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
@@ -663,7 +676,7 @@ public final  class DateUtil {
      * @return 判断两个日期号数相同,同一天
      */
     public static boolean dayEquals(Date dt, Date dt1) {
-        Calendar c = Calendar.getInstance();
+        Calendar c = getThreadCalendar();
         c.setTime(dt);
         int year = c.get(1);
         int date = c.get(6);
@@ -773,7 +786,7 @@ public final  class DateUtil {
      * @return 返回小时
      */
     public static long compareHour(Date beginDate, Date endDate) {
-        Calendar beginYears = new GregorianCalendar();
+        Calendar beginYears = getThreadCalendar();
         beginYears.setTime(beginDate);
         long diffMillis = endDate.getTime() - beginYears.getTimeInMillis();
         return diffMillis / HOUR;
@@ -975,7 +988,7 @@ public final  class DateUtil {
                 minute = 0;
                 hour += 1;
             }
-            return "" + (hour < 10 ? ("0" + hour) : hour) + ":" + (minute < 10 ? ("0" + minute) : minute) + ":" + (second < 10 ? ("0" + second) : second);
+            return (hour < 10 ? ("0" + hour) : hour) + ":" + (minute < 10 ? ("0" + minute) : minute) + ":" + (second < 10 ? ("0" + second) : second);
         }
     }
 

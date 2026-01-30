@@ -864,27 +864,18 @@ public final class FileUtil {
 
         File file = new File(jarFile);
         try (JarInputStream zis = new JarInputStream(Files.newInputStream(file.toPath()))) {
-
             JarEntry e;
             while ((e = zis.getNextJarEntry()) != null) {
-                String str = e.getName();
                 if (e.isDirectory() && e.getName().contains(directory)) {
                     return true;
                 }
             }
             zis.closeEntry();
         } catch (Exception e) {
-            log.error(" file=" + fileName, e);
+            log.error("file={}",fileName, e);
         }
         return false;
     }
-
-    public static void main(String[] args) {
-        File f = new File("D:\\hyinter\\hyinter-1.0.0.jar!/template");
-        System.out.println("--------f.getPath()=" + f.getPath());
-        System.out.println(isDirectory(f.getPath()));
-    }
-
 
     /**
      * @param fileName 文件名
@@ -2587,4 +2578,13 @@ public final class FileUtil {
         }
         return result;
     }
+/*
+
+    public static void main(String[] args) {
+        File f = new File("D:\\hyinter\\hyinter-1.0.0.jar!/template");
+        System.out.println("--------f.getPath()=" + f.getPath());
+        System.out.println(isDirectory(f.getPath()));
+    }
+*/
+
 }

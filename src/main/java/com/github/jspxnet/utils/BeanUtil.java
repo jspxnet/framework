@@ -5,6 +5,7 @@ import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
+import com.github.jspxnet.sober.annotation.NullClass;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.model.container.PropertyContainer;
 import com.github.jspxnet.sober.util.AnnotationUtil;
@@ -12,7 +13,6 @@ import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.beans.BeanCopier;
 import net.sf.cglib.beans.BeanMap;
-
 import java.io.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
+
 
 
 /**
@@ -35,6 +36,36 @@ public final class BeanUtil {
 
     }
 
+    /**
+     *
+     * @param obj 对象
+     * @return 是否为空
+     */
+    public static boolean isNull(Object obj) {
+        if (obj == null)
+        {
+            return true;
+        }
+        if (obj instanceof String) {
+            return StringUtil.isNull((String) obj);
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue()==0;
+        }
+        if (obj instanceof Collection) {
+            return ((Collection<?>)obj).isEmpty();
+        }
+        if (obj instanceof JSONObject) {
+            return JSONObject.isNull(obj);
+        }
+        if (obj instanceof Map) {
+            return ((Map<?,?>)obj).isEmpty();
+        }
+        if (NullClass.class == obj) {
+            return true;
+        }
+        return false;
+    }
     /**
      * 设置属性,性能很差,但容错很好
      *
@@ -107,12 +138,12 @@ public final class BeanUtil {
         //map 的    if (!(bean instanceof PropertyContainer))
 
         if (object instanceof Map && !(object instanceof PropertyContainer)) {
-            Map map = (Map) object;
+            Map<String,Object> map = (Map<String,Object>) object;
             map.put(fieldName, obj);
             return;
         }
         if ((object instanceof List) && (obj instanceof List)) {
-            List list = (List) object;
+            List<?> list = (List<?>) object;
             list.addAll((List) obj);
             return;
         }
@@ -137,7 +168,6 @@ public final class BeanUtil {
             return;
         }
         Type aType = field.getType();
-
         Object pObject;
         try {
             field.setAccessible(true);
@@ -148,7 +178,7 @@ public final class BeanUtil {
                 field.set(object, pObject);
             }
         } catch (Exception e) {
-            log.error(object.getClass().getName() + StringUtil.DOT + fieldName + " setValue  type=" + aType + " value=" + obj, e);
+            log.error("{}",object.getClass().getName() + StringUtil.DOT + fieldName + " setValue  type=" + aType + " value=" + obj, e);
         }
     }
 
@@ -257,13 +287,13 @@ public final class BeanUtil {
             return list;
         }
         else if (ClassUtil.isArrayType(aType) && ((obj.getClass().isArray() || obj instanceof JSONArray))) {
-            Object[] vv;
+            Object[] vv = null;
             if (obj instanceof JSONArray) {
                 vv = ((JSONArray) obj).toArray();
-            } else {
+            } else if (obj instanceof Object[]) {
                 if (aType.equals(String[].class))
                 {
-                    vv = ArrayUtil.toStringArray((Object[])obj);
+                        vv = ArrayUtil.toStringArray((Object[])obj);
                 }
                 else
                 if (aType.equals(Integer[].class))
@@ -386,7 +416,7 @@ public final class BeanUtil {
             if (obj instanceof JSONObject) {
                 JSONObject jsonObject = (JSONObject) obj;
                 if (jsonObject.isEmpty()) {
-                    return "";
+                    return StringUtil.empty;
                 }
             }
             return obj;
@@ -461,10 +491,17 @@ public final class BeanUtil {
         }
         if (object instanceof  PropertyContainer)
         {
+            //这里会将数字类型转换为 字符串,得修正
             PropertyContainer container = (PropertyContainer)object;
             if (container.containsKey(name))
             {
-                return container.get(name);
+                Object result = container.get(name);
+                Field field = ClassUtil.getDeclaredField(object.getClass(),name);
+                if (field==null)
+                {
+                    return result;
+                }
+                return getTypeValueObject(result,field.getType());
             }
         }
         //数据库中进入的
@@ -472,6 +509,11 @@ public final class BeanUtil {
         {
             BeanMap beanMap = BeanMap.create(object);
             //代理方式都是小心的
+            for (Object key : beanMap.keySet()) {
+                if (name.equalsIgnoreCase((String) key)) {
+                    return beanMap.get(key);
+                }
+            }
             return beanMap.get(name);
         }
 
@@ -494,7 +536,7 @@ public final class BeanUtil {
             return null;
         }
         if (testMethod == null) {
-            log.error(object.getClass().getName() + " method not find " + name + ",找不到方法名");
+            log.error("{} method not find {},找不到方法名",object.getClass().getName(),name);
             return null;
         }
         try {
@@ -504,7 +546,7 @@ public final class BeanUtil {
                 return testMethod.invoke(object, parameter);
             }
         } catch (Throwable e) {
-            log.error(object.getClass().getName() + " getProperty=" + testMethod.getName() + "  parameter=" + Arrays.toString(parameter) + ",检查类中方法是否正常执行", e);
+            log.error("{} getProperty={}  parameter={},检查类中方法是否正常执行",object.getClass().getName(),testMethod.getName(),Arrays.toString(parameter), e);
         }
 
         return null;
@@ -550,7 +592,7 @@ public final class BeanUtil {
             Map map = (Map) object;
             if (cls==null)
             {
-                return (T)map.get(name);
+                return cls.cast(map.get(name));
             }
             return getTypeValue(map.get(name),cls);
 
@@ -599,27 +641,29 @@ public final class BeanUtil {
      * @param <D>    数据对象，赋给新的对象
      * @return 拷贝到新的对象
      */
-    @SuppressWarnings("unchecked")
     public static <T, D> T copy(D object, Class<T> cls) {
         if (null == cls || null == object) {
             return null;
         }
         if (ClassUtil.isStandardProperty(cls))
         {
-            return (T)object;
+            return cls.cast(object);
         }
         if (cls.equals(JSONObject.class)) {
-            return (T) new JSONObject(object);
+            return cls.cast(new JSONObject(object));
         }
         if (cls.equals(JSONArray.class)) {
-            return (T) new JSONArray(object);
+            return cls.cast(new JSONArray(object));
         }
         if (cls.equals(String.class)) {
-            return (T) ObjectUtil.toString(object);
+            return cls.cast(ObjectUtil.toString(object));
+        }
+        if (cls.equals(Boolean.class)) {
+            return cls.cast(ObjectUtil.toBoolean(object));
         }
         T result = null;
         try {
-            result = (T)ClassUtil.newInstance(cls.getName());
+            result = cls.cast(ClassUtil.newInstance(cls.getName()));
             if (cls.equals(object.getClass()))
             {
                 //相同类型,快速拷贝
@@ -719,14 +763,26 @@ public final class BeanUtil {
 
     public final static int[] STOP_MODIFIERS = {18, 25, 26, 28,128};
 
+
     /**
      * 拷贝属性, 后边的数据拷贝到前边
      *
      * @param getData  源bean
      * @param newData 得到属性的bean
      */
+    public static void copyFiledValue(Object getData,Object newData)
+    {
+        copyFiledValue(getData,newData,true);
+    }
+
+    /**
+     *
+     * @param getData 源bean
+     * @param newData 得到属性的bean
+     * @param over  是否覆盖,如果以前的值，数字为0，其他为空的情况才放入
+     */
     @SuppressWarnings("unchecked")
-    public static void copyFiledValue(Object getData,Object newData) {
+    public static void copyFiledValue(Object getData,Object newData,boolean over) {
 
         if (getData instanceof JSONObject) {
             getData = ((JSONObject) getData).toMap();
@@ -735,8 +791,30 @@ public final class BeanUtil {
         if (ClassUtil.isProxy(getData.getClass())) {
             getData = ReflectUtil.getValueMap(getData);
         }
+        //两个都是map对象
+        if (getData instanceof Map && newData instanceof Map) {
+            Map<String,Object> map = (Map) getData;
+            Map<String,Object> newMap = (Map) newData;
+            for (Object keyObj : map.keySet()) {
+                if (keyObj == null) {
+                    continue;
+                }
+                String key = ObjectUtil.toString(keyObj);
+                if (!over)
+                {
+                    Object checkValue = newMap.get(key);
+                    if (!isNull(checkValue))
+                    {
+                        continue;
+                    }
+                }
+                newMap.put(key,map.get(key));
+            }
+            return;
+        }
 
-        if (getData instanceof Map) {
+        //Map 对象拷贝到 实体
+        if (getData instanceof Map && !(newData instanceof Map)) {
             Map<String,Object> map = (Map) getData;
 
             Class<?> getClass = newData.getClass();
@@ -767,6 +845,18 @@ public final class BeanUtil {
                 }
                 if (field == null) {
                     continue;
+                }
+                if (!over)
+                {
+                    try {
+                        Object checkValue = field.get(newData);
+                        if (!isNull(checkValue))
+                        {
+                            continue;
+                        }
+                    } catch (IllegalAccessException e) {
+                       log.error(e.getLocalizedMessage());
+                    }
                 }
                 if (ArrayUtil.indexOf(STOP_MODIFIERS, field.getModifiers()) != -1) {
                     continue;
@@ -811,6 +901,19 @@ public final class BeanUtil {
                     continue;
                 }
                 if (field.getName().equals(setField.getName())) {
+                    if (!over)
+                    {
+                        try {
+                            field.setAccessible(true);
+                            Object checkValue = field.get(newData);
+                            if (!isNull(checkValue))
+                            {
+                                continue;
+                            }
+                        } catch (IllegalAccessException e) {
+                            log.error(e.getLocalizedMessage());
+                        }
+                    }
                     doFields.add(field.getName());
                     putFieldValue( field, setField, getData, newData);
                 }
@@ -823,6 +926,19 @@ public final class BeanUtil {
             }
             if (propertyContainer!=null && propertyContainer.containsKey(field.getName()))
             {
+                if (!over)
+                {
+                    try {
+                        field.setAccessible(true);
+                        Object checkValue = field.get(newData);
+                        if (!isNull(checkValue))
+                        {
+                            continue;
+                        }
+                    } catch (IllegalAccessException e) {
+                        log.error(e.getLocalizedMessage());
+                    }
+                }
                 putFieldValue( field, propertyContainer.get(field.getName()), newData);
 
             }
@@ -831,7 +947,7 @@ public final class BeanUtil {
 
     }
 
-    private static void putFieldValue(Field field,Object o,Object newData)
+    public static void putFieldValue(Field field,Object o,Object newData)
     {
         try {
             field.setAccessible(true);
@@ -848,7 +964,7 @@ public final class BeanUtil {
                 Object col =field.get(newData);
                 if ((col instanceof Collection)&& !ObjectUtil.isEmpty(col))
                 {
-                    Collection coll = (Collection)col;
+                    Collection<Object> coll = (Collection)col;
                     Object obj = coll.iterator().next();
                     if (obj!=null)
                     {
@@ -906,7 +1022,7 @@ public final class BeanUtil {
                 Object col =field.get(newData);
                 if ((col instanceof Collection)&& !ObjectUtil.isEmpty(col))
                 {
-                    Collection coll = (Collection)col;
+                    Collection<Object> coll = (Collection)col;
                     Object obj = coll.iterator().next();
                     if (obj!=null)
                     {
@@ -1106,7 +1222,7 @@ public final class BeanUtil {
      * @throws Exception 运行错误
      */
     public static Object invoke(Object object, String string, Object... args) throws Exception {
-        if (object == null || string == null) {
+        if (object == null || StringUtil.isNull(string)) {
             return null;
         }
         Method method = null;
@@ -1402,11 +1518,12 @@ public final class BeanUtil {
             for (int i=0;i<tmpList.size();i++)
             {
                 Object tmp = tmpList.get(i);
-                if (tmp instanceof  String)
+                if (tmp instanceof String )
                 {
                     tmpList.set(i,StringUtil.fullToHalf((String) tmp));
                 }
             }
+
         } else
         if (o instanceof Map)
          {
@@ -1487,6 +1604,4 @@ public final class BeanUtil {
             }
         }
     }
-
-
 }

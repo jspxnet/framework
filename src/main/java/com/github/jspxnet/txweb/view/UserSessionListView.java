@@ -9,7 +9,6 @@
  */
 package com.github.jspxnet.txweb.view;
 
-import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.enums.UserEnumType;
 import com.github.jspxnet.sioc.annotation.Ref;
@@ -17,14 +16,12 @@ import com.github.jspxnet.txweb.IRole;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
-import com.github.jspxnet.txweb.annotation.TurnPage;
 import com.github.jspxnet.txweb.dao.MemberDAO;
 import com.github.jspxnet.txweb.model.param.PageParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.table.UserSession;
 import com.github.jspxnet.utils.BeanUtil;
-import com.github.jspxnet.utils.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 

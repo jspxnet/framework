@@ -9,12 +9,10 @@
  */
 package com.github.jspxnet.sober;
 
-import com.github.jspxnet.sober.config.SoberCalcUnique;
 import com.github.jspxnet.sober.config.SoberColumn;
-import com.github.jspxnet.sober.config.SoberNexus;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,7 +24,7 @@ public interface TableModels extends Serializable {
 
     boolean isEmpty();
 
-    String getIndexConf();
+    String getIdx();
 
     String getName();
 
@@ -42,19 +40,15 @@ public interface TableModels extends Serializable {
 
     Class<?> getEntity();
 
-    String getPrimary();
+    String getPrimaryKey();
 
-    void setPrimary(String primary);
+    void setPrimaryKey(String primary);
 
     boolean isAutoId();
 
     String getIdType();
 
-    Map<String, SoberNexus> getNexusMap();
-
-    Map<String, SoberCalcUnique> getCalcUniqueMap();
-
-    long getLastDate();
+    Date getLastDate();
 
     boolean isSerial();
 
@@ -74,16 +68,12 @@ public interface TableModels extends Serializable {
 
     boolean containsField(String keys);
 
-    boolean equals(TableModels models);
-
     boolean isCanExtend();
 
     void setCanExtend(boolean canExtend);
 
     boolean isAutoCleanCache();
 
-    String getId();
+    long getId();
 
-
-    String getDynamicTableName(String name);
 }

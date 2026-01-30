@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.result;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.scriptmark.ScriptMark;
@@ -25,10 +26,8 @@ import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -46,7 +45,7 @@ import java.util.Map;
 public class FileSaveResult extends ResultSupport {
     private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
 
-    private static final String TEMPLATE_PATH = ENV_TEMPLATE.getString(Environment.templatePath);
+    private static final String TEMPLATE_PATH = EnvFactory.getTemplatePath();
     public static final String SAVE_FILE = "saveFile";
 
     static {
@@ -86,12 +85,11 @@ public class FileSaveResult extends ResultSupport {
             TXWebUtil.errorPrint(SAVE_FILE + ",保存文件路径没有定义", null,response, HttpStatusType.HTTP_status_404);
             return;
         }
-
+        Map<String, Object> valueMap = ThreadContextHolder.getContext().getEnvironment();
         File saveFileName = new File(action.getEnv(SAVE_FILE));
         //输出模板数据
         FileUtil.makeDirectory(saveFileName.getParent());
         Writer out = new OutputStreamWriter(Files.newOutputStream(saveFileName.toPath()), Dispatcher.getEncode());
-        Map<String, Object> valueMap = action.getEnv();
         initPageEnvironment(action, valueMap);
         try {
             scriptMark.process(out, valueMap);

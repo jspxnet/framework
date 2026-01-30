@@ -1,4 +1,4 @@
-package com.github.jspxnet.txweb.table.meta;
+package com.github.jspxnet.sober.table.meta;
 
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
@@ -13,6 +13,9 @@ public class ControlProperty implements Serializable {
     @Id
     @Column(caption = "ID", notNull = true)
     private long id;
+
+    @Column(caption = "表单Id", notNull = true)
+    private long formId;
 
     @Column(caption = "控件名称", length = 50, notNull = true)
     private String name = StringUtil.empty;

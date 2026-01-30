@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
  * User: chenYuan
  * date: 2004-7-19
  * Time: 21:54:27
- */
+ **/
 public final class ListUtil {
     private ListUtil() {
 
     }
-    public static final List<Object> EMPTY_LIST = new ArrayList<>(0);
+    public static final List<Object> EMPTY = new ArrayList<>(0);
     /**
      * @param list 列表
      * @param fen  分割
@@ -114,4 +114,43 @@ public final class ListUtil {
         return  list1.stream().filter(t-> !list2.contains(t)).collect(Collectors.toList());
     }
 
+    /**
+     * 起长的列表作为返回列表，并将短的数据放入长的里边
+     * @param list1 列表1
+     * @param list2  列表2
+     * @param over 是否覆盖 字段是否覆盖, 如果原对象有值将不覆盖
+     * @return 合并后的字段列表
+     * @param <T> 类型
+     */
+    public static <T> List<T> joinField(List<T> list1,List<T> list2,boolean over)
+    {
+        boolean zf = list1.size()>=list2.size();
+        List<T> mainList = zf?list1:list2;
+        List<T> childList = zf?list2:list1;
+        for (int i=0;i<list1.size()&&i<childList.size();i++) {
+            T main = mainList.get(i);
+            T child = childList.get(i);
+            BeanUtil.copyFiledValue(child,main,over);
+        }
+        return  mainList;
+    }
+
+    /**
+     *
+     * @param list 列表对象
+     * @param key key名
+     * @param value value名
+     * @return 将list对象列表中的属性值转换为map
+     */
+    public static Map<Object,Object> toMap(List<?> list,String key,String value)
+    {
+        Map<Object,Object> map = new HashMap<>();
+        for (Object o : list) {
+
+            Object vKey  = BeanUtil.getProperty(o,key);
+            Object vValue  = BeanUtil.getProperty(o,value);
+            map.put(vKey,vValue);
+        }
+        return map;
+    }
 }

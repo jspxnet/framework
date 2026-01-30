@@ -14,6 +14,7 @@ import com.github.jspxnet.boot.conf.VcsBootConfig;
 import com.github.jspxnet.boot.environment.JspxConfiguration;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.dblog.JspxLoggingEvent;
 import com.github.jspxnet.boot.environment.impl.LogBackConfigUtil;
 import com.github.jspxnet.cache.DefaultCache;
 import com.github.jspxnet.cache.JSCacheManager;
@@ -33,7 +34,6 @@ import com.github.jspxnet.sioc.scheduler.SchedulerTaskManager;
 import com.github.jspxnet.sober.util.SoberUtil;
 import com.github.jspxnet.txweb.config.DefaultConfiguration;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
-import com.github.jspxnet.txweb.dispatcher.Dispatcher;
 import com.github.jspxnet.txweb.evasive.EvasiveConfiguration;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
@@ -44,9 +44,6 @@ import java.io.File;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.Security;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -93,8 +90,8 @@ public class JspxCoreListener implements ServletContextListener {
         boolean isAndroid = SystemUtil.isAndroid();
         //开始不能调用时间,调用了时间设置不了时区
         copyright = Environment.frameworkName + " " + Environment.VERSION + " " + Environment.licenses + " Powered By chenYuan ";
-        log.info("-" + copyright + " start-" + startTimes++);
-        log.debug("提示:启动参数中加入jspx.env.active=dev,配置文件指向到jspx-dev.properties,这样可以缺环配置到dev模式");
+        log.info("-{} start-{}",copyright,startTimes++);
+
 
         //////初始化环境变量 begin
         try {
@@ -167,14 +164,15 @@ public class JspxCoreListener implements ServletContextListener {
         try {
             envTemplate.restorePlaceholder();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
 
         LogBackConfigUtil.createConfig();
         //////初始化环境变量 end
 
-        log.info("default Path=" + envTemplate.getString(Environment.defaultPath));
-        log.info("template Path=" + envTemplate.getString(Environment.templatePath));
+        log.info("default Path={}",EnvFactory.getDefaultPath());
+
+        log.info("template Path={}",EnvFactory.getTemplatePath());
 
         //////////////////////初始化脚本语言环境 begin
         Configurable templateConfigurable = TemplateConfigurable.getInstance();
@@ -199,18 +197,14 @@ public class JspxCoreListener implements ServletContextListener {
         EntryFactory beanFactory = (EntryFactory) com.github.jspxnet.boot.EnvFactory.getBeanFactory();
         beanFactory.setIocContext(iocContext);
 
-        //系统默认超时时间begin
-        System.setProperty("sun.net.client.defaultConnectTimeout", "5000");
-        System.setProperty("sun.net.client.defaultReadTimeout", "5000");
-        //系统默认超时时间end
 
         //jdk java.sdk.security 文件中添加配置        sdk.security.provider.11=org.bouncycastle.jce.provider.BouncyCastleProvider
         SystemUtil.encode = envTemplate.getString(Environment.systemEncode, SystemUtil.OS == SystemUtil.WINDOWS ? "GBK" : StandardCharsets.UTF_8.name());
         ////////////////////////AOP begin
         if (!isAndroid) {
-            log.info("repairEncode=" + envTemplate.getString(Environment.repairEncode));
-            log.info("httpServer=" + envTemplate.getString(Environment.httpServerName));
-            log.info("user.timezone=" + System.getProperty("user.timezone"));
+            log.debug("repairEncode={}",envTemplate.getString(Environment.repairEncode));
+            log.info("httpServer={}",envTemplate.getString(Environment.httpServerName));
+            log.info("user.timezone={}",System.getProperty("user.timezone"));
         }
         ////////////////////////AOP end
 
@@ -251,16 +245,19 @@ public class JspxCoreListener implements ServletContextListener {
             log.info("日志切换到数据库保存");
             LogBackConfigUtil.changeDbLogBackConfig();
         }
-        log.info("-" + copyright + " start completed " + (isAndroid ? "for Android" : " J2SDK"));
+
+
+        log.debug("提示:启动参数中加入jspx.env.active=dev,配置文件指向到jspx-dev.properties,这样可以缺环配置到dev模式");
+        log.info("-{} start completed {}",copyright,(isAndroid ? "for Android" : " J2SDK"));
         isRun = true;
+
+
     }
 
     @Override
     public void contextDestroyed(javax.servlet.ServletContextEvent servletContextEvent) {
-        log.info(Environment.frameworkName + " " + copyright + " shutdown start");
-        EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
-        boolean forceExit = envTemplate.getBoolean(Environment.forceExit);
-
+        //卸载了确保 contextInitialized 能够重新初始化
+        log.info("{} {} shutdown destroyed",Environment.frameworkName,copyright);
         //Evasive配置卸载begin
         EvasiveConfiguration.getInstance().shutdown();
         log.info("Evasive config clean");
@@ -281,51 +278,12 @@ public class JspxCoreListener implements ServletContextListener {
         log.info("JSCache shutdown");
         //关闭缓存和线程end
 
-        Dispatcher.shutdown();
-
-        //卸载jdbc驱动begin
-        Enumeration<Driver> drivers = DriverManager.getDrivers();
-        Driver d = null;
-        while (drivers.hasMoreElements()) {
-            try {
-                d = drivers.nextElement();
-                DriverManager.deregisterDriver(d);
-            } catch (SQLException ex) {
-                log.error(String.format("Error deregistering driver %s", d));
-            }
-        }
-        try {
-          ClassUtil.invokeStaticMethod("com.mysql.jdbc.AbandonedConnectionCleanupThread","uncheckedShutdown",null);
-        } catch (Exception e)
-        {
-            try {
-                ClassUtil.invokeStaticMethod("com.mysql.jdbc.AbandonedConnectionCleanupThread","shutdown",null);
-            } catch (Exception exception) {
-                //..
-            }
-            //...
-        }
-
         //定时任务
         SchedulerManager schedulerManager = SchedulerTaskManager.getInstance();
         schedulerManager.shutdown();
         log.info("scheduler shutdown");
-        //关闭定时器和其他线程end
-        try {
-            DaemonThreadFactory.shutdown();
-            log.info("Thread shutdown");
-        } catch (Exception exception) {
-            //...exception.printStackTrace();
-            if (forceExit)
-            {
-                System.exit(0);
-            }
-        }
-        if (forceExit)
-        {
-            System.exit(0);
-        }
+
         isRun = false;
-        log.info(Environment.frameworkName + " " + copyright + " dispatcher shutdown completed ");
+        log.info("{},{} dispatcher shutdown completed ",Environment.frameworkName,copyright);
      }
 }

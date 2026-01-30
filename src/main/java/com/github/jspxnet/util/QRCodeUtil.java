@@ -33,11 +33,11 @@ public final class QRCodeUtil {
     private static final String CHARSET = StandardCharsets.UTF_8.name();
     private static final String FORMAT_NAME = "jpg";
     // 二维码尺寸
-    private static final int QRCODE_SIZE = 344;
+    private static final int QRCODE_SIZE = 360;
     // LOGO宽度
-    private static final int WIDTH = 38;
+    private static final int WIDTH = 56;
     // LOGO高度
-    private static final int HEIGHT = 38;
+    private static final int HEIGHT = 56;
 
     private static final int secretKey = 269;
 
@@ -141,15 +141,14 @@ public final class QRCodeUtil {
      * @return 生成带Logo的二维码
      * @throws Exception 异常
      */
-    public static boolean encode(String content, String logoImgPath, String destPath, boolean needCompress, String imgFormat) throws Exception {
-        BufferedImage image = createImage(content, logoImgPath, needCompress);
+    public static boolean encode(String content, String logoImgPath, String destPath, boolean needCompress, String imgFormat,int size) throws Exception {
+        BufferedImage image = createImage(content, logoImgPath, needCompress,size);
         FileUtil.makeDirectory(destPath);
         if (StringUtil.isNull(imgFormat)) {
             imgFormat = FORMAT_NAME;
         }
         return ImageIO.write(image, imgFormat, new File(destPath));
     }
-
 
     /**
      * @param content  二维码内容
@@ -158,9 +157,20 @@ public final class QRCodeUtil {
      * @throws Exception 异常
      */
     public static boolean encode(String content, String destPath) throws Exception {
-        return encode(content, null, destPath, false, FORMAT_NAME);
+        return encode(content, destPath,  QRCODE_SIZE);
     }
 
+    /**
+     *
+     * @param content 二维码内容
+     * @param destPath 二维码输出路径
+     * @param size 宽
+     * @return 转换是否成功
+     * @throws Exception 异常
+     */
+    public static boolean encode(String content, String destPath,int size) throws Exception {
+        return  encode(content, null, destPath, false, FORMAT_NAME,size);
+    }
     /**
      * 生成带Logo的二维码，并输出到指定的输出流
      *
@@ -169,16 +179,18 @@ public final class QRCodeUtil {
      * @param output       输出流
      * @param needCompress 是否压缩Logo
      * @param imgFormat    图片格式
+     * @param size  图片宽度
      * @return 是否成功
      * @throws Exception 异常
      */
-    public static boolean encode(String content, String logoImgPath, OutputStream output, boolean needCompress, String imgFormat) throws Exception {
-        BufferedImage image = QRCodeUtil.createImage(content, logoImgPath, needCompress);
+    public static boolean encode(String content, String logoImgPath, OutputStream output, boolean needCompress, String imgFormat,int size) throws Exception {
+        BufferedImage image = QRCodeUtil.createImage(content, logoImgPath, needCompress,size);
         if (StringUtil.isNull(imgFormat)) {
             imgFormat = FORMAT_NAME;
         }
         return ImageIO.write(image, imgFormat, output);
     }
+
 
     /**
      * 简单方式直接生成，输出二维码
@@ -197,7 +209,6 @@ public final class QRCodeUtil {
         return ImageIO.write(image, imgFormat, output);
     }
 
-
     /**
      * @param content 二维码内容
      * @param output  输出流
@@ -205,7 +216,7 @@ public final class QRCodeUtil {
      * @throws Exception 异常
      */
     public static boolean encode(String content, OutputStream output) throws Exception {
-        return encode(content, null, output, false, FORMAT_NAME);
+        return encode(content, null, output, false, FORMAT_NAME,QRCODE_SIZE);
     }
 
     /**

@@ -1,5 +1,8 @@
 package com.github.jspxnet.txweb.dispatcher.handle;
 
+import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.security.utils.EncryptUtil;
@@ -31,8 +34,9 @@ import java.util.Map;
  */
 @Slf4j
 public class ActionHandle extends WebHandle {
+    final static protected EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
+    final static protected boolean DEBUG = ENV_TEMPLATE.getBoolean(Environment.DEBUG);
     final public static String NAME = "action";
-
     final public static String PAGE_KEY = ":page:";
 
     @Override
@@ -45,7 +49,7 @@ public class ActionHandle extends WebHandle {
             throw new Exception("actionConfig  is NULL :" + request.getRequestURI());
         }
 
-        if (actionConfig.isCache())
+        if (!DEBUG&&actionConfig.isCache())
         {
             //缓存中有数据就直接执行返回
             String key = actionConfig.getCacheName() + PAGE_KEY + EncryptUtil.getMd5(request.getRequestURL().toString()+ "?"+request.getQueryString() + ObjectUtil.toString(RequestUtil.getSortMap(request)));

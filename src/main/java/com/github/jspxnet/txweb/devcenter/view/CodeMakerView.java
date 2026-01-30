@@ -24,7 +24,7 @@ public class CodeMakerView extends ActionSupport {
     private CodeMaker codeMaker;
 
     @Operate(caption = "生成窗体", method = "builder")
-    public RocResponse<String> builder(@Param(caption = "模版页面", required = true) String templateName, @Param(caption = "模型ID",min = 2,max = 100, required = true) String modelId, @Param(caption = "跳过字段") List<String> jumpFields)
+    public RocResponse<String> builder(@Param(caption = "模版页面", required = true) String templateName, @Param(caption = "模型ID",min = 2,max = 100, required = true) long modelId, @Param(caption = "跳过字段") List<String> jumpFields)
     {
         return codeMaker.builderPage(templateName,modelId,jumpFields);
     }
@@ -53,9 +53,9 @@ public class CodeMakerView extends ActionSupport {
     }
 
     @Operate(caption = "实体列表", method = "list/table",post = false)
-    public RocResponse< List<TableModels>> getTableList(@Param(caption = "查询",max = 200)String find,@Param(caption = "是否包含DTO",value = "false") boolean dto,@Param(caption = "0:任意1:扩展;2:不可扩展",value = "0") int extend,@Param(caption = "页数",value = "1") int currentPage,@Param(caption = "页数",value = "12") int count)
+    public RocResponse< List<TableModels>> getTableList(@Param(caption = "查询",max = 200)String find,@Param(caption = "是否包含DTO",value = "false") boolean dto,@Param(caption = "页数",value = "1") int currentPage,@Param(caption = "页数",value = "12") int count)
     {
-        Map<String, TableModels>  map = codeMaker.getSoberTableList(dto,extend);
+        Map<Long, TableModels>  map = codeMaker.getSoberTableList(dto);
         int firstRow = currentPage * count - count;
         if (firstRow < 0) {
             firstRow = 1;

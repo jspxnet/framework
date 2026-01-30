@@ -85,7 +85,7 @@ public class GeneralDialect extends Dialect {
         {
             return "int(1)";
         }
-        if (soberColumn.getClassType()==String.class)
+        if (soberColumn.getClassType()==String.class|| soberColumn.getClassType()==String[].class || soberColumn.getClassType()==Class.class)
         {
             if (soberColumn.getLength()<512)
             {

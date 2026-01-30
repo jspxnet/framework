@@ -11,7 +11,7 @@ import com.github.jspxnet.txweb.devcenter.view.OperatePlugView;
 import com.github.jspxnet.txweb.model.param.component.TableModelOperatePlugParam;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.table.UserSession;
-import com.github.jspxnet.txweb.table.meta.OperatePlug;
+import com.github.jspxnet.sober.table.meta.OperatePlug;
 import com.github.jspxnet.utils.BeanUtil;
 import java.util.List;
 
@@ -26,13 +26,13 @@ public class OperatePlugAction extends OperatePlugView {
             return RocResponse.error(ErrorEnumType.NEED_LOGIN);
         }
         //先删除后在保存
-        genericDAO.delete(OperatePlug.class,"tableName",param.getTableName());
+
         UserSession userSession = getUserSession();
         List<OperatePlug> operatePlugList =  BeanUtil.copyList(param.getOperatePlugList(),OperatePlug.class);
         for (OperatePlug operatePlug:operatePlugList)
         {
+            genericDAO.delete(OperatePlug.class,"id",operatePlug.getId());
             operatePlug.setId(0);
-            operatePlug.setTableName(param.getTableName());
             operatePlug.setIp(getRemoteAddr());
             operatePlug.setPutName(userSession.getName());
             operatePlug.setPutUid(userSession.getUid());

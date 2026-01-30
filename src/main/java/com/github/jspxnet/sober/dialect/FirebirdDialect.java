@@ -35,7 +35,10 @@ public class FirebirdDialect extends Dialect {
                 " \nPRIMARY KEY (${" + KEY_PRIMARY_KEY + "})\n)");
 
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>blob sub_type 1<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default '${" + COLUMN_DEFAULT + "}'</#else></#if>");
-        //put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>blob sub_type 1<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default '${" + COLUMN_DEFAULT + "}'</#else></#if>");
+        put(String[].class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>blob sub_type 1<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default '${" + COLUMN_DEFAULT + "}'</#else></#if>");
+        put("java.lang.String[]", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>blob sub_type 1<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default '${" + COLUMN_DEFAULT + "}'</#else></#if>");
+        put("java.lang.Class", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255>blob sub_type 1<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default '${" + COLUMN_DEFAULT + "}'</#else></#if>");
+
         put(Boolean.class.getName(), "${" + COLUMN_NAME + "} smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=" + COLUMN_DEFAULT + "=='' >0<#else>1</#else></#if></#else></#if>");
         put(boolean.class.getName(), "${" + COLUMN_NAME + "} smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=" + COLUMN_DEFAULT + "=='' >0<#else>1</#else></#if></#else></#if>");
         put(Integer.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + KEY_FIELD_SERIAL + ">GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1 NO CACHE)</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else> default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#else></#if>");
@@ -86,7 +89,7 @@ public class FirebirdDialect extends Dialect {
         {
             return "smallint";
         }
-        if (soberColumn.getClassType()==String.class)
+        if (soberColumn.getClassType()==String.class|| soberColumn.getClassType()==String[].class || soberColumn.getClassType()==Class.class)
         {
             if (soberColumn.getLength()<2000)
             {

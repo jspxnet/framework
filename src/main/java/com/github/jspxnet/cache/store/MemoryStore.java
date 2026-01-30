@@ -61,7 +61,7 @@ public class MemoryStore extends Store implements IStore {
     @Override
     public boolean isLock(String key) {
         CacheEntry cacheEntry = get(key);
-        if (cacheEntry==null)
+        if (cacheEntry==null ||cacheEntry.isExpired())
         {
             return false;
         }

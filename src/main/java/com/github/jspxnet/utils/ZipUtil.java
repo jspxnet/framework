@@ -12,6 +12,10 @@ package com.github.jspxnet.utils;
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.*;
 
 
@@ -123,6 +127,88 @@ public final class ZipUtil {
             e.printStackTrace();
         }
         return StringUtil.empty;
+    }
+
+
+    /**
+     *        String fileName = "d:\\kdpan\\upload\\CLFBX2025110300009.zip";
+     *         List<File> list = unzip(fileName,"d:\\kdpan\\upload\\test");
+     *         for (File file : list) {
+     *             System.out.println(file.getAbsolutePath());
+     *         }
+     * 解压ZIP文件到指定目录
+     * @param zipFile ZIP文件路径
+     * @param outputDir 输出目录
+     * @return 解压的文件列表
+     */
+    public static List<File> unZip(String zipFile, String outputDir) {
+        List<File> fileList = new ArrayList<>();
+
+        try (ZipInputStream zin = new ZipInputStream(Files.newInputStream(Paths.get(zipFile)))) {
+            ZipEntry entry;
+            while ((entry = zin.getNextEntry()) != null) {
+                String fileName = entry.getName();
+                File file = new File(outputDir, fileName);
+
+                // 创建目录结构
+                if (entry.isDirectory()) {
+                    file.mkdirs();
+                    continue;
+                } else {
+                    file.getParentFile().mkdirs();
+                }
+
+                // 写入文件内容
+                try (BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file.toPath()))) {
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = zin.read(buffer)) > 0) {
+                        out.write(buffer, 0, length);
+                    }
+                }
+                fileList.add(file);
+                zin.closeEntry();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fileList;
+    }
+
+    /**
+     * 从输入流解压ZIP文件
+     * @param inputStream ZIP文件输入流
+     * @param outputDir 输出目录
+     * @return 解压的文件列表
+     */
+    public static List<File> unZip(InputStream inputStream, String outputDir) {
+        List<File> fileList = new ArrayList<>();
+
+        try (ZipInputStream zin = new ZipInputStream(inputStream)) {
+            ZipEntry entry;
+            while ((entry = zin.getNextEntry()) != null) {
+                String fileName = entry.getName();
+                File file = new File(outputDir, fileName);
+
+                if (entry.isDirectory()) {
+                    file.mkdirs();
+                } else {
+                    file.getParentFile().mkdirs();
+                    try (FileOutputStream out = new FileOutputStream(file)) {
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = zin.read(buffer)) > 0) {
+                            out.write(buffer, 0, length);
+                        }
+                    }
+                    fileList.add(file);
+                }
+                zin.closeEntry();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fileList;
     }
 
 }

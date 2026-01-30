@@ -175,7 +175,7 @@ public final class EntryFactory implements BeanFactory {
                     pValue = StringUtil.replace((String) pValue, Sioc.IocNamespace, lifecycleObject.getNamespace());
                 }
             }
-            BeanUtil.setSimpleProperty(result, name, pValue);
+             BeanUtil.setSimpleProperty(result, name, pValue);
             setRefField = ArrayUtil.add(setRefField,name);
         }
 
@@ -272,7 +272,7 @@ public final class EntryFactory implements BeanFactory {
 
                 if (ref.test()) {
                     if (!containsBean(beanId, mNamespace)) {
-                        log.info("sioc config error, no find name=" + ref.name() + " namespace=" + mNamespace + " ref=" + o.getClass().getName());
+                        log.info("{}","sioc config error, no find name=" + ref.name() + " namespace=" + mNamespace + " ref=" + o.getClass().getName());
                     } else {
                         field.setAccessible(true);
                         field.set(o, obj);
@@ -321,7 +321,7 @@ public final class EntryFactory implements BeanFactory {
                 }
             }
         }
-        return setRefField;
+         return setRefField;
     }
 
     private void setImportIoc(Class<?> superclass, Object o) {

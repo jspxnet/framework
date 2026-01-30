@@ -11,6 +11,7 @@ package com.github.jspxnet.txweb.view;
 
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.util.TomcatUtil;
@@ -74,18 +75,13 @@ public class SystemInfoView extends ActionSupport {
         result.put(Environment.defaultPath, envTemplate.getString(Environment.defaultPath));
         result.put(Environment.resPath, envTemplate.getString(Environment.resPath));
         result.put(Environment.encode, envTemplate.getString(Environment.encode));
-        result.put(Environment.defaultPath, envTemplate.getString(Environment.defaultPath));
-        result.put(Environment.resPath, envTemplate.getString(Environment.resPath));
-        result.put(Environment.encode, envTemplate.getString(Environment.encode));
         return result;
     }
 
 
     @Override
     public String execute() throws Exception {
-        super.getEnv().putAll(getSysInfoMap());
+        ThreadContextHolder.getContext().getEnvironment().putAll(getSysInfoMap());
         return SUCCESS;
     }
-
-
 }

@@ -9,15 +9,19 @@
  */
 package com.github.jspxnet.sober.config;
 
+import com.github.jspxnet.component.zhex.spell.ChineseUtil;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
-import com.github.jspxnet.sober.annotation.Column;
-import com.github.jspxnet.sober.annotation.Id;
-import com.github.jspxnet.sober.annotation.Table;
+import com.github.jspxnet.sober.annotation.*;
+import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.table.SoberFieldEnum;
+import com.github.jspxnet.sober.table.meta.FormControl;
+import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import lombok.Data;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -42,15 +46,19 @@ public class SoberColumn implements Serializable {
     private String tableName;
 
     @Column(caption = "字段名称",length = 100)
+    private String field = StringUtil.empty;
+
+
+    @Column(caption = "实体名称",length = 100)
     private String name = StringUtil.empty;
 
     //类型
     @JsonIgnore
-    //Column(caption = "类对象")
-    private Class<?> classType;
+    @Column(caption = "类对象",length = 100)
+    private Class<?> classType = String.class;
 
-    @Column(caption = "是否空")
-    private boolean notNull = false;
+    @Column(caption = "是否空",length = 10)
+    private boolean noNull = false;
 
     @Column(caption = "默认值",length = 1000)
     private String defaultValue = StringUtil.empty;
@@ -58,10 +66,15 @@ public class SoberColumn implements Serializable {
     @Column(caption = "描述",length = 200)
     private String caption = StringUtil.empty;
 
-    @Column(caption = "选项",length = 1000)
+    @Column(caption = "枚举类型",length = 200)
+    private String enumType = StringUtil.empty;
+
+    //option 是oracle 关键字, 以后少用，尽量使用 SoberFieldEnum
+    @Column(field = "opt", caption = "选项",length = 200)
     private String option = StringUtil.empty;
 
-    @Column(caption = "验证",length = 1000)
+    //以前是验证类型，现在取消改为数据库的数据类型
+    @Column(caption = "数据类型",length = 1000)
     private String dataType = StringUtil.empty;
 
     //和WebComponent 名称对应
@@ -71,9 +84,9 @@ public class SoberColumn implements Serializable {
     //添加的时候使用
     @JsonIgnore
     @Column(caption = "前一个字段",length = 100)
-    private String oldColumn = "";
+    private String oldColumn = StringUtil.empty;
 
-    @Column(caption = "长度")
+    @Column(field = "fieldLength", caption = "长度")
     private int length = 0;
 
     //true 的时候导出屏蔽
@@ -83,11 +96,28 @@ public class SoberColumn implements Serializable {
     @Column(caption = "不允许搜索")
     private boolean searchHidden = false;
 
-    @Column(caption = "配置的枚举")
-    private boolean isConfEnum = false;
+    @Column(caption = "配置的枚举", length = 250)
+    private SoberFieldEnum fieldEnum = null;
 
     @Column(caption = "自动ID")
     private boolean autoincrement = false;
+
+    @Nexus(mapping = MappingType.OneToOne, field = "field", targetField = "field",term = "tableName:eq[${tableName}];version:eq[${version}]",  targetEntity = SoberNexus.class, chain = true,save = true,update = true, delete = true)
+    private SoberNexus nexus = null;
+
+    @Nexus(mapping = MappingType.OneToOne, field = "field", targetField = "field",term = "tableName:eq[${tableName}];version:eq[${version}]", targetEntity = SoberCalcUnique.class, chain = true,save = true,update = true, delete = true)
+    private SoberCalcUnique calcUnique = null;
+
+
+    @Nexus(mapping = MappingType.OneToOne, field = "field", targetField = "field",targetEntity = FormControl.class, chain = true,save = true,update = true, delete = true)
+    private FormControl control = null;
+
+
+    @Column(caption = "排序")
+    private int sortType = 0;
+
+    @Column(caption = "版本号")
+    private int version = 0;
 
     @JsonField
     public String getTypeString() {
@@ -98,5 +128,112 @@ public class SoberColumn implements Serializable {
         return  "String";
     }
 
+    public String getField() {
+        if (StringUtil.isEmpty(field))
+        {
+            return name;
+        }
+        return field;
+    }
+
+    @JsonField
+    public String getBeanField(boolean camel) {
+
+        StringBuilder sb = new StringBuilder();
+        String typeStr = getTypeString();
+        if ("string".equalsIgnoreCase(typeStr))
+        {
+            if (length==0)
+            {
+                if (noNull)
+                {
+                    if (!StringUtil.isNull(option))
+                    {
+                        sb.append("@Column(caption = \"").append(caption).append("\",").append("noNull=").append(noNull).append(",option=\"").append(option).append("\"").append(",enumTypes=false").append(")").append("\r\n");
+                    } else {
+                        sb.append("@Column(caption = \"").append(caption).append("\",").append("noNull=").append(noNull).append(")").append("\r\n");
+                    }
+                } else
+                {
+                    if (!StringUtil.isNull(option))
+                    {
+                        sb.append("@Column(caption = \"").append(caption).append("\"").append(",option=\"").append(option).append("\"").append(")").append("\r\n");
+                    } else {
+                        sb.append("@Column(caption = \"").append(caption).append("\"").append(")").append("\r\n");
+                    }
+                }
+            }
+            else
+            {
+                if (noNull)
+                {
+                    if (!StringUtil.isNull(option))
+                    {
+                        sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(",noNull=").append(noNull).append(",option=\"").append(option).append("\"").append(")").append("\r\n");
+                    } else {
+                        sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(",noNull=").append(noNull).append(")").append("\r\n");
+                    }
+
+                } else {
+                    sb.append("@Column(caption = \"").append(caption).append("\", length=").append(length).append(")").append("\r\n");
+                }
+            }
+
+        } else {
+            if (noNull)
+            {
+                if (!StringUtil.isNull(option))
+                {
+                    sb.append("@Column(caption = \"").append(caption).append("\",").append("noNull=").append(noNull).append(",option=\"").append(option).append("\"").append(",enumTypes=false").append(")").append("\r\n");
+                } else {
+                    sb.append("@Column(caption = \"").append(caption).append("\",").append("noNull=").append(noNull).append(")").append("\r\n");
+                }
+            } else {
+                if (!StringUtil.isNull(option))
+                {
+                    sb.append("@Column(caption = \"").append(caption).append("\"").append(",option=\"").append(option).append("\"").append(")").append("\r\n");
+                } else {
+                    sb.append("@Column(caption = \"").append(caption).append("\"").append(")").append("\r\n");
+                }
+
+            }
+        }
+
+
+        String fieldName = camel?StringUtil.underlineToCamel(name):name;
+        String typeString = TypeUtil.CODE_TYPE_MAP.get(typeStr);
+        if (StringUtil.isNull(typeString))
+        {
+            typeString = typeStr;
+        }
+        if (camel&&StringUtil.isChinese(fieldName))
+        {
+            fieldName = StringUtil.uncapitalize(ChineseUtil.fullSpell(fieldName,StringUtil.empty));
+        }
+        if (ClassUtil.isNumberType(typeString)&&!"BigDecimal".equalsIgnoreCase(typeString))
+        {
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = 0;");
+        } else
+        if ("BigDecimal".equalsIgnoreCase(typeString))
+        {
+            typeString = "double";
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = 0;");
+        } else
+        if (typeString.equals(Date.class.getName()) || typeString.equals(Date.class.getSimpleName()) )
+        {
+            if (noNull)
+            {
+                sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = new Date();");
+            } else {
+                sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = null;");
+            }
+        }
+        else
+        {
+            typeString = "String";
+            sb.append("private ").append(typeString).append(" ").append(fieldName).append(" = StringUtil.empty;");
+        }
+        return sb.toString();
+    }
 
 }

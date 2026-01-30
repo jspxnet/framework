@@ -2,6 +2,7 @@ package com.github.jspxnet.txweb.context;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.json.JSONObject;
+import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ParamUtil;
@@ -11,7 +12,6 @@ import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
@@ -40,7 +40,7 @@ public class ActionContext implements Serializable {
     //action执行返回
     @Setter
     @Getter
-    private String actionResult;
+    private String actionResult = null;
     //执行方法,替代代理类里边的变量,这样更加安全
     @Getter
     private Method method = null;
@@ -75,15 +75,44 @@ public class ActionContext implements Serializable {
         return environment.get(key);
     }
 
+    public <T> T get(String key, Class<T> clazz) {
+        return clazz.cast(environment.get(key));
+    }
+
     public String getString(String key)
     {
-        return (String)environment.get(key);
+        return ObjectUtil.toString(environment.get(key));
     }
 
     public Object getOrDefault(String key,Object def)
     {
         return environment.getOrDefault(key,def);
     }
+
+    /**
+     *
+     * @return 得到 参数的hash，用来做等密校验，防止重复登录
+     */
+    public String getParamHash()
+    {
+        try {
+            String temp = RequestUtil.getReader(request);
+            if (temp==null)
+            {
+                return null;
+            }
+            if (method!=null)
+            {
+                temp = method.getName() + "_" + temp + "_" + temp.length();
+            } else {
+                temp = temp + "_" + temp.length();
+            }
+            return EncryptUtil.getMd5(temp);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 
 
     /**
@@ -206,10 +235,8 @@ public class ActionContext implements Serializable {
     /**
      * @return 是否有说明信息
      */
-    @SuppressWarnings("unchecked")
     public boolean hasActionMessage() {
-        List<String> list =  (List<String>)  environment.get(ActionEnv.Key_ActionMessages);
-        return !ObjectUtil.isEmpty(list);
+        return !ObjectUtil.isEmpty(environment.get(ActionEnv.Key_ActionMessages));
     }
 
 
@@ -218,7 +245,7 @@ public class ActionContext implements Serializable {
      * @return 得到请求参数
      */
     public JSONObject getJsonParams() {
-        JSONObject json = (JSONObject) environment.get(ActionEnv.Key_CallRocJsonData);
+        JSONObject json = get(ActionEnv.Key_CallRocJsonData, JSONObject.class);
         if (json==null)
         {
             return null;
@@ -251,7 +278,7 @@ public class ActionContext implements Serializable {
      */
     public JSONObject getCallJson()
     {
-        return (JSONObject) environment.get(ActionEnv.Key_CallRocJsonData);
+        return get(ActionEnv.Key_CallRocJsonData, JSONObject.class);
     }
 
 

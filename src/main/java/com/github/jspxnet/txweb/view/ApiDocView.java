@@ -18,7 +18,6 @@ import com.github.jspxnet.txweb.bundle.action.EditConfigAction;
 import com.github.jspxnet.txweb.bundle.action.EditLanguageAction;
 import com.github.jspxnet.txweb.config.ActionConfigBean;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
-import com.github.jspxnet.txweb.model.dto.SoberTableDto;
 import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.util.ApiDocUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
@@ -246,7 +245,7 @@ public class ApiDocView extends ActionSupport {
     }
 
     @Operate(caption = "字段文档", method = "/table/${id}", post = false)
-    public SoberTableDto getTable(@PathVar String id) throws Exception {
+    public SoberTable getTable(@PathVar String id) throws Exception {
         Map<String, ApiAction> fieldCache = (Map<String, ApiAction>) JSCacheManager.get(DefaultCache.class, String.format(API_FIELD_CACHE, getRootNamespace()));
         if (fieldCache == null || fieldCache.isEmpty()) {
             fielding();
@@ -258,8 +257,7 @@ public class ApiDocView extends ActionSupport {
 
         Class<?> builderClass = ClassUtil.loadClass(apiAction.getClassName());
         AssertException.isNull(builderClass,"不存在的表结构");
-        SoberTable soberTable = AnnotationUtil.getSoberTable(builderClass,0);
-        return BeanUtil.copy(soberTable,SoberTableDto.class);
+        return AnnotationUtil.getSoberTable(builderClass);
     }
 
 

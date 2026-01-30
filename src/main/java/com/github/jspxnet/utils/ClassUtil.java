@@ -55,6 +55,7 @@ public class ClassUtil {
     }
 
     public static boolean isNumberType(Type cla) {
+        if (cla==null) return false;
         return cla.equals(long.class) || cla.equals(Long.class) || cla.equals(int.class) || cla.equals(Integer.class) || cla.equals(Short.class) ||
                 cla.equals(float.class) || cla.equals(Float.class) || cla.equals(double.class) || cla.equals(Double.class) ||
                 cla.equals(BigDecimal.class);
@@ -65,12 +66,14 @@ public class ClassUtil {
     }
 
     public static boolean isStandardType(Type clazz) {
+        if (clazz==null) return false;
         return isNumberType(clazz) || clazz.equals(Byte.class) || clazz.equals(Character.class)
                 || clazz.equals(String.class) || clazz.equals(char.class) || clazz.equals(boolean.class) || clazz.equals(Boolean.class) ||
                 clazz.equals(Date.class) || clazz.equals(Timestamp.class)  || clazz.equals(Time.class) || clazz.equals(java.util.Locale.class);
     }
 
     public static boolean isStandardProperty(Class<?> clazz) {
+        if (clazz==null) return false;
         return clazz.isPrimitive() || isNumberProperty(clazz) || clazz.isAssignableFrom(Byte.class) || clazz.isAssignableFrom(Character.class)
                 || clazz.isAssignableFrom(String.class) || clazz.isAssignableFrom(char.class) || clazz.isAssignableFrom(Boolean.class) ||
                 clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(Timestamp.class) ||

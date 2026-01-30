@@ -13,6 +13,8 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.redisson.config.ConfigSupport;
+import org.redisson.connection.DnsAddressResolverGroupFactory;
+
 import java.io.File;
 import java.io.Serializable;
 
@@ -66,6 +68,7 @@ public class RedissonClientConfig implements Serializable {
         } else {
             redisConfig = Config.fromYAML(config);
         }
+
         //System.setProperty("java.net.preferIPv4Stack", "true");
         //System.setProperty("java.net.preferIPv6Addresses", "false");
 /*

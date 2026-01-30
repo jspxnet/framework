@@ -15,7 +15,6 @@ import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.security.symmetry.Encrypt;
 import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.txweb.dao.impl.GenericDAOImpl;
-import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.txweb.bundle.BundleProvider;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;

@@ -89,8 +89,8 @@ public class SQLRoom implements Serializable {
         try {
             list = xmlEngine.getTagNodes(sql);
         } catch (Exception e) {
-            log.error("sql map 配置中语法存在错误sql:{}",sql);
-            e.printStackTrace();
+            log.error("sql map 配置中语法存在错误sql:{}",sql,e);
+
         }
         if (list!=null)
         {

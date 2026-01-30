@@ -89,7 +89,7 @@ public class VoteTopic extends OperateTable {
     @Column(caption = "最后操作时间", notNull = true)
     private Date lastDate = new Date();
 
-    @Nexus(mapping = MappingType.OneToMany, field = "id", targetField = "topicId", orderBy = "${sort}", length = "1000", targetEntity = VoteItem.class, save = true, delete = true, update = true)
+    @Nexus(mapping = MappingType.OneToMany, field = "id", targetField = "topicId", orderBy = "${sort}",  length = "1000", targetEntity = VoteItem.class, save = true, delete = true, update = true)
     private List<VoteItem> voteItemList = new LinkedList<VoteItem>();
 
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")

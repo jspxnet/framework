@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.result;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.context.ActionContext;
@@ -74,8 +75,7 @@ public class HtmlImgResult extends ResultSupport {
         //如果使用cache 就使用uri
 
         String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath()); //为了防止特殊符号错误，转换为md5 格式
-        String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
-        CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), templatePath});
+        CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), EnvFactory.getTemplatePath()});
         ScriptMark scriptMark;
         try {
             scriptMark = new ScriptMarkEngine(cacheKey, fileSource, CONFIGURABLE);
@@ -93,7 +93,8 @@ public class HtmlImgResult extends ResultSupport {
 
         //输出模板数据
         Writer out = new StringWriter();
-        Map<String, Object> valueMap = action.getEnv();
+
+        Map<String, Object> valueMap = ThreadContextHolder.getContext().getEnvironment();
         initPageEnvironment(action, valueMap);
         scriptMark.process(out, valueMap);
         valueMap.clear();

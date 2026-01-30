@@ -72,7 +72,7 @@ public class MarkdownResult extends ResultSupport {
 
         TemplateConfigurable configurable = new TemplateConfigurable();
         String markdownTemplate = ENV_TEMPLATE.getString(Environment.markdownTemplate);
-        String templatePath = ENV_TEMPLATE.getString(Environment.templatePath);
+        String templatePath = EnvFactory.getTemplatePath();
         configurable.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
 
         //找到模版文件
@@ -116,7 +116,7 @@ public class MarkdownResult extends ResultSupport {
 
         //输出模板数据
 
-        Map<String, Object> valueMap = action.getEnv();
+        Map<String, Object> valueMap = ThreadContextHolder.getContext().getEnvironment();
         initPageEnvironment(action, valueMap);
         valueMap.put("title", action.getEnv(ActionEnv.Key_ActionName));
         valueMap.put("content", ScriptMarkUtil.getMarkdownHtml(mdFileSource.getSource()));

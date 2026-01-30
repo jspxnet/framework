@@ -43,6 +43,8 @@ import java.util.*;
 @Slf4j
 public final class AnnotationUtil {
 
+    private static CalcUnique calcUnique;
+
     private AnnotationUtil() {
 
     }
@@ -67,7 +69,7 @@ public final class AnnotationUtil {
             return;
         }
 
-        Field field = ClassUtil.getDeclaredField(object.getClass(), soberTable.getPrimary());
+        Field field = ClassUtil.getDeclaredField(object.getClass(), soberTable.getPrimaryKey());
         if (field == null) {
             return;
         }
@@ -81,7 +83,7 @@ public final class AnnotationUtil {
             return;
         }
 
-        Object maxId = jdbcOperations.getUniqueResult("SELECT max(" + soberTable.getPrimary() + ") FROM " + soberTable.getName());
+        Object maxId = jdbcOperations.getUniqueResult("SELECT max(" + soberTable.getPrimaryKey() + ") FROM " + soberTable.getName());
         long value = 0;
         if (maxId instanceof Number) {
             value = ((Number) maxId).longValue();
@@ -186,34 +188,96 @@ public final class AnnotationUtil {
      */
     public static List<SoberColumn> getColumnList(Class<?> cls) {
         List<SoberColumn> soberColumns = new LinkedList<>();
+        Table table = cls.getAnnotation(Table.class);
+        //Map<String, SoberNexus> soberNexusMap =  getSoberNexus(cls);
+        //Map<String, SoberCalcUnique> calcUniqueMap =  getSoberCalcUnique(cls);
         Field[] fields = ClassUtil.getDeclaredFields(cls);//字段
         for (Field field : fields) {
+            boolean save = false;
             Column column = field.getAnnotation(Column.class);
+            SoberColumn soberColumn = new SoberColumn();
+            soberColumn.setField(field.getName());
+            soberColumn.setName(field.getName());
+            soberColumn.setClassType(field.getType());
             if (column != null) {
-                SoberColumn soberColumn = new SoberColumn();
-                soberColumn.setName(field.getName());
-                soberColumn.setClassType(field.getType());
+                save = true;
+                soberColumn.setName(soberColumn.getName());
+                soberColumn.setField(column.field());
+                if (StringUtil.isNullOrWhiteSpace(soberColumn.getField()))
+                {
+                    soberColumn.setField(soberColumn.getName());
+                }
                 soberColumn.setCaption(column.caption());
                 soberColumn.setLength(column.length());
                 soberColumn.setDefaultValue(column.defaultValue());
-                soberColumn.setNotNull(column.notNull());
+                soberColumn.setNoNull(column.notNull());
                 soberColumn.setDataType(column.dataType());
                 soberColumn.setHidden(column.hidden());
                 soberColumn.setSearchHidden(column.searchHidden());
                 soberColumn.setInput(column.input());
+                soberColumn.setEnumType(column.enumType().getName());
+                soberColumn.setOption(column.option());
                 if (!NullClass.class.equals(column.enumType())) {
                     soberColumn.setOption(new JSONArray(column.enumType().getEnumConstants()).toString());
                 } else {
                     soberColumn.setOption(column.option());
                 }
-                soberColumns.add(soberColumn);
-                Table table = cls.getAnnotation(Table.class);
+
                 if (field.getType() == String.class && column.length() < 1 && table != null && table.create()) {
-                    log.error("class " + cls.getName() + " field " + field.getName() + " not column length,没有定义字段长度");
+                    log.error("class {} field {} not column length,没有定义字段长度",cls.getName(),field.getName());
                 }
                 if (table != null) {
                     soberColumn.setTableName(table.name());
                 }
+            }
+
+            //放入关联关系
+            Nexus nexus = field.getAnnotation(Nexus.class);
+            if (nexus != null) {
+                save = true;
+                SoberNexus soberNexus = new SoberNexus();
+                soberNexus.setTableName(table.name());
+                soberNexus.setCaption(nexus.caption());
+                soberNexus.setMapping(nexus.mapping());
+                //变量名
+                soberNexus.setName(field.getName());
+                //自己表的字段
+                soberNexus.setField(nexus.field());
+                //对应的字段
+                soberNexus.setTargetField(nexus.targetField());
+                soberNexus.setTargetEntity(nexus.targetEntity());
+                soberNexus.setOrderBy(nexus.orderBy());
+                soberNexus.setDelete(nexus.delete());
+                soberNexus.setUpdate(nexus.update());
+                soberNexus.setSave(nexus.save());
+                soberNexus.setChain(nexus.chain());
+                soberNexus.setWhere(nexus.where());
+                soberNexus.setTerm(nexus.term());
+                soberNexus.setLength(nexus.length());
+                soberColumn.setCaption(nexus.caption());
+                soberColumn.setNexus(soberNexus);
+            }
+
+
+            //放入计算表示
+            CalcUnique calcUnique = field.getAnnotation(CalcUnique.class);
+            if (calcUnique != null) {
+                save = true;
+                SoberCalcUnique soberCalcUnique = new SoberCalcUnique();
+                soberCalcUnique.setTableName(table.name());
+                soberCalcUnique.setField(field.getName());
+                soberCalcUnique.setCaption(calcUnique.caption());
+                soberCalcUnique.setSql(calcUnique.sql());
+                soberCalcUnique.setType(calcUnique.type());
+                soberCalcUnique.setParams(calcUnique.params());
+                soberCalcUnique.setEntity(calcUnique.entity());
+                soberColumn.setCalcUnique(soberCalcUnique);
+                soberColumn.setCaption(calcUnique.caption());
+            }
+
+            if (save)
+            {
+                soberColumns.add(soberColumn);
             }
         }
         return soberColumns;
@@ -224,14 +288,22 @@ public final class AnnotationUtil {
      * @return 得到映射关系
      */
     public static Map<String, SoberNexus> getSoberNexus(Class<?> cls) {
-        Map<String, SoberNexus> soberColumns = new LinkedHashMap<>();
+        Map<String, SoberNexus> soberColumns = new TreeMap<>();
         Field[] fields = ClassUtil.getDeclaredFields(cls);//字段
+
+        String tableName = getTableName(cls);
         for (Field field : fields) {
             Nexus nexus = field.getAnnotation(Nexus.class);
             if (nexus != null) {
                 SoberNexus soberNexus = new SoberNexus();
+                soberNexus.setTableName(tableName);
+                soberNexus.setCaption(nexus.caption());
                 soberNexus.setMapping(nexus.mapping());
+                //变量名
+                soberNexus.setName(field.getName());
+                //自己表的字段
                 soberNexus.setField(nexus.field());
+                //对应的字段
                 soberNexus.setTargetField(nexus.targetField());
                 soberNexus.setTargetEntity(nexus.targetEntity());
                 soberNexus.setOrderBy(nexus.orderBy());
@@ -253,23 +325,24 @@ public final class AnnotationUtil {
      * @param cls 类
      * @return 得到映射关系
      */
-    public static Map<String, SoberCalcUnique> getSoberCalcUnique(Class<?> cls) {
+/*    public static Map<String, SoberCalcUnique> getSoberCalcUnique(Class<?> cls) {
         Map<String, SoberCalcUnique> soberCalcUniques = new LinkedHashMap<>();
         Field[] fields = ClassUtil.getDeclaredFields(cls);//字段
         for (Field field : fields) {
             CalcUnique calcUnique = field.getAnnotation(CalcUnique.class);
             if (calcUnique != null) {
                 SoberCalcUnique soberCalcUnique = new SoberCalcUnique();
-                soberCalcUnique.setName(field.getName());
+                soberCalcUnique.setField(field.getName());
                 soberCalcUnique.setCaption(calcUnique.caption());
                 soberCalcUnique.setSql(calcUnique.sql());
-                soberCalcUnique.setValue(calcUnique.value());
+                soberCalcUnique.setType(calcUnique.type());
+                soberCalcUnique.setParams(calcUnique.params());
                 soberCalcUnique.setEntity(calcUnique.entity());
                 soberCalcUniques.put(field.getName(), soberCalcUnique);
             }
         }
         return soberCalcUniques;
-    }
+    }*/
 
     /**
      * 得到映射关系中的表名
@@ -336,11 +409,11 @@ public final class AnnotationUtil {
 
 
     /**
+     * 从注释里边得到 表模型
      * @param cls    实体对象
-     * @param extend 0:所有;1:可扩展;2:不可扩展
      * @return 生成 SoberTable
      */
-    public static SoberTable getSoberTable(Class<?> cls, int extend) {
+    public static SoberTable getSoberTable(Class<?> cls) {
         if (cls == null) {
             return null;
         }
@@ -351,39 +424,35 @@ public final class AnnotationUtil {
             return null;
         }
         soberTable.setName(table.name());  //得到数据库表名
-        soberTable.setTableCaption(table.caption());//表的别名
+        soberTable.setCaption(table.caption());//表的别名
         soberTable.setUseCache(table.cache()); //是否使用cache 默认使用
         //是否自动清理缓存
         soberTable.setAutoCleanCache(table.autoCleanCache());
         soberTable.setCreate(table.create());
+        soberTable.setIdx(table.idx());
         soberTable.setColumns(getColumnList(cls)); //数据库字段
-        soberTable.setCalcUniqueMap(getSoberCalcUnique(cls)); //单个计算
-        soberTable.setNexusMap(getSoberNexus(cls)); //映射关系
         Field[] fields = ClassUtil.getDeclaredFields(cls);//字段
         //找到ID
         for (Field field : fields) {
             Id id = field.getAnnotation(Id.class);
             if (id != null) {
-                soberTable.setPrimary(field.getName());
+                soberTable.setPrimaryKey(field.getName());
                 soberTable.setAutoId(id.auto());
                 soberTable.setIdType(id.type());
             }
         }
         soberTable.setCanExtend(PropertyContainer.class.isAssignableFrom(cls));
-        if (extend == 0) {
-            return soberTable;
-        }
-        if (extend == 1 && soberTable.isCanExtend()) {
-            return soberTable;
-        }
-        if (extend == 2 && !soberTable.isCanExtend()) {
-            return soberTable;
-        }
-        return null;
+        return soberTable;
     }
 
+    /**
+     *
+     * @param obj 对象
+     * @param orderBy 排序
+     * @return 得到关联对象查询的排序 sql
+     */
     static public String getNexusOrderBy(Object obj, String orderBy) {
-        if (obj == null || orderBy == null) {
+        if (obj == null || StringUtil.isNullOrWhiteSpace(orderBy)) {
             return StringUtil.empty;
         }
         String[] orderByVar = StringUtil.getFreeMarkerVar(orderBy);

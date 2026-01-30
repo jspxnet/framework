@@ -16,6 +16,7 @@ import com.github.jspxnet.sioc.annotation.Scheduled;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.DateUtil;
+import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +75,7 @@ public class JspxDataSource extends DriverManagerDataSource {
     private int maxPoolSize = 8;
     private transient ConnectionProxy[] connectionPool = new ConnectionProxy[maxPoolSize];
     private int maxConnectionTime = DateUtil.HOUR;  //1小时 超时关闭
-    private String checkSql = "SELECT 1";
+    private String checkSql = StringUtil.empty;
     private boolean mailTips = false;
     private int mailSendTimes = 0;
     private int minPoolSize = 3;
@@ -144,7 +145,7 @@ public class JspxDataSource extends DriverManagerDataSource {
             }
         } catch (SQLException e) {
             close();
-            log.error("连接发生异常,当前最大连接数为:" + maxPoolSize + "当前连接数:" + getPoolSize() + ",已经不能分配连接," + System.getProperty("user.dir"), e);
+            log.error("连接发生异常,当前最大连接数为,maxPoolSize:{},当前连接数:{},已经不能分配连接,user.dir={}",maxPoolSize,getPoolSize(),System.getProperty("user.dir"),e);
         }
         //留一个作为备用链接begin
         int outI = connectionPool.length - 1;
@@ -153,7 +154,7 @@ public class JspxDataSource extends DriverManagerDataSource {
         if (connectionPool[outI].open()) {
             return connectionPool[outI];
         }
-        log.error("连接发生异常,不能创建连接,请检查数据库连接配置是否正确:" + getJdbcUrl() + " " + System.getProperty("user.dir"));
+        log.error("连接发生异常,不能创建连接,请检查数据库连接配置是否正确:{},user.dir{}",getJdbcUrl(),System.getProperty("user.dir"));
         return null;
     }
 
@@ -200,7 +201,6 @@ public class JspxDataSource extends DriverManagerDataSource {
             connectionProxy.setMaxConnectionTime(maxConnectionTime);
             return connectionProxy;
         } catch (SQLException e) {
-            e.printStackTrace();
             if (mailTips && mailSendTimes < 3) {
                 SendEmailAdapter theMail = new SendEmailAdapter();
                 theMail.setSmtpHost(smtp);
@@ -213,6 +213,7 @@ public class JspxDataSource extends DriverManagerDataSource {
                 theMail.sendMail();
                 mailSendTimes++;
             }
+            e.printStackTrace();
         }
         return null;
     }

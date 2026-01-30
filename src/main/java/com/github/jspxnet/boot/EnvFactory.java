@@ -38,6 +38,8 @@ import java.io.File;
  */
 public class EnvFactory {
 
+    static String templatePath = null;
+
     private EnvFactory() {
 
     }
@@ -209,6 +211,31 @@ public class EnvFactory {
         String[]  findDirs = new String[]{templatePath,defaultPath, ENV_TEMPLATE.getString(Environment.resPath)};
         return FileUtil.scanFile(findDirs, loadFile);
     }
+
+    /**
+     * 这里为了优化速度
+     * @return 得到模板文件路径
+     */
+    static public String getTemplatePath()
+    {
+        if (!StringUtil.isBlank(templatePath))
+        {
+            return templatePath;
+        }
+        String path = ENV_TEMPLATE.getString(Environment.templatePath,"template");
+        if (FileUtil.isDirectory(path))
+        {
+            return path;
+        }
+        String defaultPath = jspxConfiguration.getDefaultPath();
+        return templatePath = new File(defaultPath,path).getPath();
+    }
+
+    static public String getDefaultPath()
+    {
+        return jspxConfiguration.getDefaultPath();
+    }
+
 
 /*    public static void main(String[] args) {
         JspxNetApplication.autoRun("D:/hyinter/hyinter-1.0.0.jar!/");

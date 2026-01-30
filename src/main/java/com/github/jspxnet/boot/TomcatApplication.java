@@ -189,6 +189,7 @@ public class TomcatApplication {
         protocol.setConnectionUploadTimeout(80000);
         protocol.setMinSpareThreads(5);
         protocol.setMaxQueueSize(threads * 70);
+        protocol.setAcceptCount(threads*25);
 
         //设置Host
         tomcat.setConnector(connector);

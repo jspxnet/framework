@@ -58,7 +58,7 @@ public class UploadFileJsonView extends ActionSupport {
     }
 
     /**
-     * @return //根目录URL，可以指定绝对路径，比如 http://www.yoursite.com/attached/
+     * @return //根目录URL，可以指定绝对路径，比如 {@code http://www.yoursite.com/attached/ }
      */
     public String getRootUrl() {
         return config.getString(Environment.rootUrl);

@@ -46,6 +46,6 @@ public class SearchScheme extends OperateTable {
     private int share = BoolEnumType.NO.getValue();
 
     //多个用分号分隔
-    @Column(caption = "共享用户")
+    @Column(caption = "共享用户", length = 250)
     private String shareUser = StringUtil.empty;
 }

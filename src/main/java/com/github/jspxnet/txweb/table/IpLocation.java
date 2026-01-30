@@ -47,4 +47,11 @@ public class IpLocation implements Serializable {
     @Column(caption = "城市", length = 100)
     private String city = StringUtil.empty;
 
+    @Override
+    public String toString()
+    {
+        return country + city;
+    }
+
+
 }

@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.utils;
 
+import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.util.StringMap;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
@@ -120,7 +121,7 @@ public final class StringUtil {
      * @param caption 字段名称
      * @return 修复名称字段中的特殊支付，确保sql能正常执行
      */
-    public static String filterFiledCaption(String caption) {
+    public static String fixFiledCaption(String caption) {
         String fieldCaption = StringUtil.fullToHalf(caption);
         for (String clean:captionFixChars)
         {
@@ -1860,6 +1861,9 @@ public final class StringUtil {
         if (str == null) {
             return false;
         }
+        if ("N".equalsIgnoreCase(str)||"false".equalsIgnoreCase(str)) {
+            return false;
+        }
         return ("TRUE".equalsIgnoreCase(str) || "YES".equalsIgnoreCase(str) || "on".equalsIgnoreCase(str) || "y".equalsIgnoreCase(str) || "T".equalsIgnoreCase(str) || "是".equalsIgnoreCase(str) || "ok".equalsIgnoreCase(str)) || (ValidUtil.isNumber(str) && toInt(str) > 0) || !(StringUtil.isNull(str) || ("FALSE".equalsIgnoreCase(str) || "no".equalsIgnoreCase(str) || "undefined".equalsIgnoreCase(str) || "f".equalsIgnoreCase(str) || (ValidUtil.isNumber(str)&&str.length()==1&& toInt(str) <= 0)));
     }
 
@@ -2016,10 +2020,16 @@ public final class StringUtil {
      * @return 转换后的日期
      */
     public static Date getDate(String date, Date defaultDate) {
-        if (StringUtil.isNull(date)) {
+        if (StringUtil.isNull(date)|| JSONObject.KEY_NULL_DATE_STR.equals(date)) {
             return defaultDate;
         }
         date = trim(fullToHalf(date));
+
+        if (ValidUtil.isNumber(date) && date.length()==13)
+        {
+            return new Date(toLong(date));
+        }
+
         String format = null;
         if (countMatches(date, "-") == 2 && countMatches(date, ":") == 2 && date.contains("T")) {
             //2014-06-25T05:01:04.595Z
@@ -2090,6 +2100,7 @@ public final class StringUtil {
         } else if (iLen == 12 && ValidUtil.isNumber(date)) {
             format = "yyyyMMddHHmm";
         }
+
         if (StringUtil.isNull(format)) {
             return defaultDate;
         }
@@ -2111,8 +2122,7 @@ public final class StringUtil {
         try {
             return dateFormat.parse(date);
         } catch (ParseException e) {
-            log.error(date + " getDate format " + dateFormatStr, e);
-
+            log.error("getDate {} format {}",date,dateFormatStr, e);
         }
         return null;
     }
@@ -2707,44 +2717,14 @@ public final class StringUtil {
         return filtered.toString();
     }
 
+
     public static String quoteSql(String input)
     {
-        if (input == null) {
-            return empty;
+        if (StringUtil.isNullOrWhiteSpace(input))
+        {
+            return "''";
         }
-        StringBuilder filtered = new StringBuilder(input.length() * 50);
-        filtered.append("'");
-        char prevChar = '\u0000';
-        char c;
-        for (int i = 0; i < input.length(); i++) {
-            c = input.charAt(i);
-            switch (c) {
-                case '\'':
-                    filtered.append("''");
-                    break;
-                case '\t':
-                    filtered.append("\\t");
-                    break;
-                case '\n':
-                    if (prevChar != '\r') {
-                        filtered.append("\\n");
-                    }
-                    break;
-                case '\r':
-                    filtered.append("\\n");
-                    break;
-                case '\f':
-                    filtered.append("\\f");
-                    break;
-                default:
-                    filtered.append(c);
-                    break;
-            }
-            prevChar = c;
-
-        }
-        filtered.append("'");
-        return filtered.toString();
+        return quote(input, false);
     }
 
     public static String escape(String src) {
@@ -3146,9 +3126,13 @@ public final class StringUtil {
      * @return 判断是否为json格式
      */
     public static boolean isJsonObject(String str) {
-        int a = StringUtil.countMatches(str, "\"");
-        int b = StringUtil.countMatches(str, "'");
         String t = trim(str);
+        if ("{}".equals(t))
+        {
+            return true;
+        }
+        int a = StringUtil.countMatches(t, "\"");
+        int b = StringUtil.countMatches(t, "'");
         return t.startsWith("{") && t.endsWith("}") && (a > 0 || b > 0) && t.contains(":");
     }
 
@@ -3313,6 +3297,31 @@ public final class StringUtil {
             result = sb.toString();
         }
         return result;
+    }
+    /**
+     *
+     * @param caption 字段名称
+     * @return 修复名称字段中的特殊支付，确保sql能正常执行
+     */
+    public static String filterFiledCaption(String caption) {
+        String fieldCaption = StringUtil.fullToHalf(caption);
+        for (String clean:captionFixChars)
+        {
+            fieldCaption = StringUtil.replace(fieldCaption,clean,"");
+        }
+        if (fieldCaption.contains("、"))
+        {
+            fieldCaption = StringUtil.substringAfter(fieldCaption,"、");
+        }
+        if (fieldCaption.length()>10)
+        {
+            fieldCaption = StringUtil.cut(fieldCaption,10,"");
+        }
+        if (!StringUtil.isChinese(fieldCaption))
+        {
+            fieldCaption = StringUtil.underlineToCamel(fieldCaption);
+        }
+        return StringUtil.replace(fieldCaption," ","");
     }
 
     //---------------------------------

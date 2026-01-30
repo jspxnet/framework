@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
  * date: 2020/12/27 0:09
  * description: 封装一下都起单元
  **/
-public class IoUtil {
+public final class IoUtil {
     public final static String[] WORD_FILE_TYPE =  new String[]{"doc","docx"};
     public final static String[] PDF_FILE_TYPE =  new String[]{"pdf"};
     private IoUtil()
@@ -80,6 +80,18 @@ public class IoUtil {
         return abstractRead.getContent();
     }
 
-
+    /**
+     *
+     * @param file 文件
+     * @param encode 编码
+     * @param text 文本
+     * @return 返回
+     */
+    public static boolean writeText(String file,String encode,String text)
+    {
+        AbstractWrite abstractWrite = new WriteFile();
+        abstractWrite.setEncode(encode);
+        return abstractWrite.setContent(text);
+    }
 
 }

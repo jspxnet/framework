@@ -13,6 +13,7 @@ package com.github.jspxnet.sober.dialect;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.boot.environment.Placeholder;
 import com.github.jspxnet.boot.EnvFactory;
+import com.github.jspxnet.sober.annotation.NullClass;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.util.DataMap;
 import com.github.jspxnet.utils.*;
@@ -135,6 +136,14 @@ public abstract class Dialect extends HashMap<String,String> {
 
     public static final String CHECK_SQL = "check_sql";
 
+    //查询关键字
+    public static final String PRIMARY_SQL = "primary_sql";
+
+    //查询表字段
+    public static final String COLUMN_LIST_SQL = "column_list_sql";
+
+    //得到所有表名列表
+    public static final String ALL_TABLES_SQL = "all_tables_sql";
 
 
     public Dialect() {
@@ -159,6 +168,11 @@ public abstract class Dialect extends HashMap<String,String> {
                 "  PRIMARY KEY  (${" + KEY_PRIMARY_KEY + "})\n)");
 
         put(String.class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255 >text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
+        put(String[].class.getName(), "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255 >text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
+        put("class java.lang.Class", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255 >text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
+        put("class java.lang.String", "${" + COLUMN_NAME + "} <#if where=" + COLUMN_LENGTH + "&gt;255 >text<#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default '${" + COLUMN_DEFAULT + "}'");
+
+
 
         put(Integer.class.getName(), "${" + COLUMN_NAME + "} integer <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
         put(Boolean.class.getName(), "${" + COLUMN_NAME + "} int(1) <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> default ${" + COLUMN_DEFAULT + "}");
@@ -236,7 +250,7 @@ public abstract class Dialect extends HashMap<String,String> {
         } catch (Throwable e) {
             log.error("sql:{},keys:{},Throwable:{}", sqlKey, get(sqlKey), e.getMessage());
             for (String key : valueMap.keySet()) {
-                log.error(key + StringUtil.EQUAL + valueMap.get(key));
+                log.error("key:{}{}{}",key,StringUtil.EQUAL,valueMap.get(key));
             }
         }
         return null;
@@ -318,6 +332,19 @@ public abstract class Dialect extends HashMap<String,String> {
             ps.setRef(parameterIndex, (Ref) obj);
             return;
         }
+        if (obj instanceof NullClass) {
+            ps.setString(parameterIndex,StringUtil.empty);
+            return;
+        }
+        if (obj instanceof Class) {
+            ps.setString(parameterIndex, ((Class<?>) obj).getTypeName());
+            return;
+        }
+        if (obj.getClass().isArray()) {
+            ps.setString(parameterIndex, obj.toString());
+            return;
+        }
+
         ps.setObject(parameterIndex, obj);
     }
 
@@ -391,7 +418,8 @@ public abstract class Dialect extends HashMap<String,String> {
             }
 
             ///////短字符串
-            if ("char".equals(typeName) || "nvarchar".equals(typeName) || "varchar".equals(typeName) || "varchar2".equals(typeName) || "tinyblob".equals(typeName)) {
+            if ("char".equals(typeName) || "nvarchar".equals(typeName) || "varchar".equals(typeName) || "varchar2".equals(typeName) || "tinyblob".equals(typeName)
+                    || "java.lang.String[]".equals(typeName) || "java.lang.Class".equals(typeName)) {
                 return rs.getString(index);
             }
 
@@ -513,7 +541,7 @@ public abstract class Dialect extends HashMap<String,String> {
         column.setLength(colSize);
         column.setCaption(rs.getValue("remarks"));
         column.setName(rs.getValue("columnName"));
-        column.setNotNull("NO".equalsIgnoreCase(rs.getValue("isNullable")) || rs.getInt("isNullable")==ResultSetMetaData.columnNoNulls);
+        column.setNoNull("NO".equalsIgnoreCase(rs.getValue("isNullable")) || rs.getInt("isNullable")==ResultSetMetaData.columnNoNulls);
         column.setDefaultValue(rs.getValue("columnDef"));
         column.setAutoincrement(ObjectUtil.toBoolean(rs.getValue("isAutoincrement")));
         String typeName = StringUtil.toLowerCase(rs.getValue("typeName"));

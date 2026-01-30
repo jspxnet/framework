@@ -310,7 +310,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 result = resultMap;
             }
         } catch (Exception e) {
-            log.error("table:" + soberTable + " sql:" + sqlText, e);
+            log.error("table:{};sql:{}" ,soberTable,sqlText, e);
         } finally {
             valueMap.clear();
             JdbcUtil.closeResultSet(resultSet);
@@ -353,8 +353,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_FIELD_NAME, soberTable.getPrimary());
-        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimary());
+        valueMap.put(Dialect.KEY_FIELD_NAME, soberTable.getPrimaryKey());
+        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimaryKey());
         valueMap.put(Dialect.KEY_TERM, termText.toString());
         int result;
         String sqlText = null;
@@ -462,7 +462,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 if (soberFactory.isUseCache()) {
                     //同时更新缓存
                     TableModels soberTable = soberFactory.getTableModels(o.getClass(), jdbcOperations);
-                    String cacheKey = SoberUtil.getLoadKey(o.getClass(), soberTable.getPrimary(), BeanUtil.getProperty(o, soberTable.getPrimary()), true);
+                    String cacheKey = SoberUtil.getLoadKey(o.getClass(), soberTable.getPrimaryKey(), BeanUtil.getProperty(o, soberTable.getPrimaryKey()), true);
                     JSCacheManager.remove(o.getClass(), cacheKey);
                 }
             }
@@ -585,13 +585,13 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 termKey.setLength(termKey.length() - 1);
             }
             cacheKey = SoberUtil.getListKey(cacheClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, loadChild);
-            resultList = (List<T>) JSCacheManager.get(cacheClass, cacheKey);
+            resultList = JSCacheManager.get(cacheClass, cacheKey,List.class);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
             }
         }
         //取出cache  end
-        resultList = new ArrayList<>();
+        resultList = new ArrayList<>(totalCount);
         try {
             conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
             sqlText = dialect.processTemplate(Dialect.SQL_CRITERIA_QUERY, valueMap);
@@ -636,8 +636,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 jdbcOperations.loadNexusList(cacheClass, resultList);
             }
         } catch (Exception e) {
-            log.info(sqlText, e);
-            throw new IllegalArgumentException("查询异常SQL:" + sqlText);
+            log.error("list error sql:{},error:{}",sqlText, e.getMessage());
+            //e.printStackTrace();
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -757,7 +757,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
 
             cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, false);
-            resultList = (List) JSCacheManager.get(criteriaClass, cacheKey);
+            resultList = JSCacheManager.get(criteriaClass, cacheKey,List.class);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
             }
@@ -791,7 +791,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 resultSet.absolute(iBegin);
             }
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-            resultList = new ArrayList<>();
+            resultList = new ArrayList<>(totalCount);
             while (resultSet.next()) {
                 Map<String, Object> beanMap = SoberUtil.getHashMap(resultSetMetaData, dialect, resultSet);
                 resultList.add(ReflectUtil.createDynamicBean(beanMap));
@@ -800,8 +800,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 }
             }
         } catch (Exception e) {
-            log.error(sqlText, e);
-            throw new IllegalArgumentException("查询异常:" + sqlText);
+            log.error("sql:{}",sqlText, e);
         } finally {
             JdbcUtil.closeResultSet(resultSet);
             JdbcUtil.closeStatement(statement);
@@ -894,7 +893,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
         if (!ArrayUtil.isEmpty(fields)) {
             for (SoberColumn column : soberTable.getColumns()) {
-                if (column.getName().equals(soberTable.getPrimary())) {
+                if (column.getName().equals(soberTable.getPrimaryKey())) {
                     continue;
                 }
                 if (ArrayUtil.inArray(fields, column.getName(), true)) {
@@ -904,7 +903,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
         } else {
             for (SoberColumn column : soberTable.getColumns()) {
-                if (column.getName().equals(soberTable.getPrimary())) {
+                if (column.getName().equals(soberTable.getPrimaryKey())) {
                     continue;
                 }
                 if (ClassUtil.isNumberProperty(column.getClassType())) {
@@ -1006,9 +1005,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 }
             }
         } catch (Exception e) {
-            log.error("table:" + soberTable + " sql:" + sqlText, e);
-            e.printStackTrace();
-            throw new IllegalArgumentException("table:" + soberTable + " sql:" + sqlText);
+            log.error("table:{},sql:{}",soberTable,sqlText, e);
+          //  e.printStackTrace();
         } finally {
             valueMap.clear();
             JdbcUtil.closeResultSet(resultSet);
@@ -1052,7 +1050,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         StringBuilder projectionTxt = new StringBuilder();
         if (!ArrayUtil.isEmpty(fields)) {
             for (SoberColumn column : soberTable.getColumns()) {
-                if (column.getName().equals(soberTable.getPrimary())) {
+                if (column.getName().equals(soberTable.getPrimaryKey())) {
                     continue;
                 }
                 if (ArrayUtil.inArray(fields, column.getName(), true)) {
@@ -1062,7 +1060,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
         } else {
             for (SoberColumn column : soberTable.getColumns()) {
-                if (column.getName().equals(soberTable.getPrimary())) {
+                if (column.getName().equals(soberTable.getPrimaryKey())) {
                     continue;
                 }
                 if (ClassUtil.isNumberProperty(column.getClassType())) {
@@ -1167,7 +1165,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
         } catch (Exception e) {
             log.error("table:" + soberTable + " sql:" + sqlText, e);
-            throw new IllegalArgumentException("table:" + soberTable + " sql:" + sqlText);
+           // throw new IllegalArgumentException("table:" + soberTable + " sql:" + sqlText);
         } finally {
             valueMap.clear();
             JdbcUtil.closeResultSet(resultSet);

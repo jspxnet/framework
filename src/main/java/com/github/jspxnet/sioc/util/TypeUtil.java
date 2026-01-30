@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Time;
 import java.util.*;
 
 /**
@@ -37,123 +38,140 @@ public final class TypeUtil {
     private TypeUtil() {
     }
 
-    final private static Map<String, TypeSerializer> TYPE_MAP = new HashMap<>();
+    final public static Map<String, TypeSerializer> BASE_TYPE_MAP = new HashMap<>();
+    final public static String TYPE_INT = "int";
+    final public static String TYPE_INTEGER = "integer";
+    final public static String TYPE_BigInteger = "BigInteger";
+    final public static String TYPE_LONG = "long";
+    final public static String TYPE_BOOL = "bool";
+    final public static String TYPE_BOOLEAN = "boolean";
+    final public static String TYPE_FLOAT = "float";
+    final public static String TYPE_BigDecimal = "BigDecimal";
+    final public static String TYPE_DATE = "date";
+    final public static String TYPE_DOUBLE = "double";
+    final public static String TYPE_STRING = "string";
+    final public static String TYPE_MAP = "map";
 
-    public static final String[] BASE_TYPE = {"int", "integer", "BigInteger", "long", "bool", "boolean", "float",  "BigDecimal", "date", "double", "string", "ref", "map"};
+
+
+    public static final String[] BASE_TYPE = {TYPE_INT, TYPE_INTEGER, TYPE_BigInteger, TYPE_LONG, TYPE_BOOL, TYPE_BOOLEAN, TYPE_FLOAT,TYPE_BigDecimal, TYPE_DATE,TYPE_DOUBLE,TYPE_STRING, "ref",TYPE_MAP};
 
 
     final public static Map<String,String> CODE_TYPE_MAP = new HashMap<>();
     static{
-        CODE_TYPE_MAP.put("int","int");
-        CODE_TYPE_MAP.put("integer","integer");
-        CODE_TYPE_MAP.put("BigInteger","BigInteger");
-        CODE_TYPE_MAP.put("long","long");
-        CODE_TYPE_MAP.put("bool","boolean");
-        CODE_TYPE_MAP.put("float","float");
-        CODE_TYPE_MAP.put("BigDecimal","BigDecimal");
-        CODE_TYPE_MAP.put("bigDecimal","BigDecimal");
-        CODE_TYPE_MAP.put("date","Date");
-        CODE_TYPE_MAP.put("double","double");
-        CODE_TYPE_MAP.put("string","String");
-        CODE_TYPE_MAP.put("map","Map");
+        CODE_TYPE_MAP.put(TYPE_INT,"int");
+        CODE_TYPE_MAP.put(TYPE_INTEGER,"int");
+        CODE_TYPE_MAP.put(TYPE_BigInteger,"long");
+        CODE_TYPE_MAP.put(TYPE_LONG,"long");
+        CODE_TYPE_MAP.put(TYPE_BOOL,"bool");
+        CODE_TYPE_MAP.put(TYPE_BOOLEAN,"bool");
+        CODE_TYPE_MAP.put(TYPE_FLOAT,"float");
+        CODE_TYPE_MAP.put(TYPE_BigDecimal,"double");
+        CODE_TYPE_MAP.put(TYPE_DATE,"Date");
+        CODE_TYPE_MAP.put(TYPE_DOUBLE,"double");
+        CODE_TYPE_MAP.put(TYPE_STRING,"String");
+        CODE_TYPE_MAP.put(TYPE_MAP,"Map");
     }
 
 
     static {
 
         TypeSerializer typeSerializer = new BooleanXmlType();
-        TYPE_MAP.put(boolean.class.getName(), typeSerializer);
-        TYPE_MAP.put(Boolean.class.getName(), typeSerializer);
-        TYPE_MAP.put("bool", typeSerializer);
-        TYPE_MAP.put("boolean", typeSerializer);
+        BASE_TYPE_MAP.put(boolean.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Boolean.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_BOOL, typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_BOOLEAN, typeSerializer);
 
         typeSerializer = new IntXmlType();
-        TYPE_MAP.put(int.class.getName(), typeSerializer);
-        TYPE_MAP.put(Integer.class.getName(), typeSerializer);
-        TYPE_MAP.put("int", typeSerializer);
+        BASE_TYPE_MAP.put(int.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Integer.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_INT, typeSerializer);
 
         typeSerializer = new BigIntegerXmlType();
-        TYPE_MAP.put(BigInteger.class.getName(), typeSerializer);
-        TYPE_MAP.put("BigInteger", typeSerializer);
+        BASE_TYPE_MAP.put(BigInteger.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_BigInteger, typeSerializer);
 
         typeSerializer = new LongXmlType();
-        TYPE_MAP.put(long.class.getName(), typeSerializer);
-        TYPE_MAP.put(Long.class.getName(), typeSerializer);
-        TYPE_MAP.put("long", typeSerializer);
+        BASE_TYPE_MAP.put(long.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Long.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_LONG, typeSerializer);
 
         typeSerializer = new FloatXmlType();
-        TYPE_MAP.put(float.class.getName(), typeSerializer);
-        TYPE_MAP.put(Float.class.getName(), typeSerializer);
-        TYPE_MAP.put("float", typeSerializer);
+        BASE_TYPE_MAP.put(float.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Float.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_FLOAT, typeSerializer);
 
         typeSerializer = new DoubleXmlType();
-        TYPE_MAP.put(Double.class.getName(), typeSerializer);
-        TYPE_MAP.put(Double.class.getName(), typeSerializer);
-        TYPE_MAP.put("double", typeSerializer);
+        BASE_TYPE_MAP.put(Double.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Double.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_DOUBLE, typeSerializer);
 
         typeSerializer = new BigDecimalXmlType();
-        TYPE_MAP.put(BigDecimal.class.getName(), typeSerializer);
-        TYPE_MAP.put("BigDecimal", typeSerializer);
+        BASE_TYPE_MAP.put(BigDecimal.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_BigDecimal, typeSerializer);
 
         typeSerializer = new StringXmlType();
-        TYPE_MAP.put(String.class.getName(), typeSerializer);
-        TYPE_MAP.put("String", typeSerializer);
+        BASE_TYPE_MAP.put(String.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_STRING, typeSerializer);
+        BASE_TYPE_MAP.put("String", typeSerializer);
 
         typeSerializer = new DateXmlType();
-        TYPE_MAP.put(Date.class.getName(), typeSerializer);
-        TYPE_MAP.put(java.sql.Date.class.getName(), typeSerializer);
-        TYPE_MAP.put("Date", typeSerializer);
-
-        typeSerializer = new DateXmlType();
-        TYPE_MAP.put(java.sql.Timestamp.class.getName(), typeSerializer);
-        TYPE_MAP.put("Date", typeSerializer);
+        BASE_TYPE_MAP.put(Date.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(java.sql.Date.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(TYPE_DATE, typeSerializer);
+        BASE_TYPE_MAP.put("Date", typeSerializer);
+        BASE_TYPE_MAP.put(java.sql.Timestamp.class.getName(), typeSerializer);
 
 
-        TYPE_MAP.put(Object[].class.getName(), new ArrayXmlType());
+        BASE_TYPE_MAP.put(Object[].class.getName(), new ArrayXmlType());
 
-        TYPE_MAP.put(int[].class.getName(), new IntArrayXmlType());
-        TYPE_MAP.put(Integer[].class.getName(), new IntegerArrayXmlType());
+        BASE_TYPE_MAP.put(int[].class.getName(), new IntArrayXmlType());
+        BASE_TYPE_MAP.put(Integer[].class.getName(), new IntegerArrayXmlType());
 
-        TYPE_MAP.put(String[].class.getName(), new StringArrayXmlType());
+        BASE_TYPE_MAP.put(String[].class.getName(), new StringArrayXmlType());
 
         typeSerializer = new LongArrayXmlType();
-        TYPE_MAP.put(long[].class.getName(), typeSerializer);
-        TYPE_MAP.put(Long[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(long[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Long[].class.getName(), typeSerializer);
 
         typeSerializer = new FloatArrayXmlType();
-        TYPE_MAP.put(float[].class.getName(), typeSerializer);
-        TYPE_MAP.put(Float[].class.getName(), typeSerializer);
-        TYPE_MAP.put("float[]", typeSerializer);
+        BASE_TYPE_MAP.put(float[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Float[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put("float[]", typeSerializer);
 
         typeSerializer = new DoubleArrayXmlType();
-        TYPE_MAP.put(double[].class.getName(), typeSerializer);
-        TYPE_MAP.put(double[].class.getName(), typeSerializer);
-        TYPE_MAP.put("double[]", typeSerializer);
+        BASE_TYPE_MAP.put(double[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(double[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put("double[]", typeSerializer);
 
         typeSerializer = new BooleanArrayXmlType();
-        TYPE_MAP.put(boolean[].class.getName(), typeSerializer);
-        TYPE_MAP.put(Boolean[].class.getName(), typeSerializer);
-        TYPE_MAP.put("Boolean[]", typeSerializer);
+        BASE_TYPE_MAP.put(boolean[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Boolean[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put("Boolean[]", typeSerializer);
+        BASE_TYPE_MAP.put("bool[]", typeSerializer);
 
         typeSerializer = new DoubleArrayXmlType();
-        TYPE_MAP.put(double[].class.getName(), typeSerializer);
-        TYPE_MAP.put(Double[].class.getName(), typeSerializer);
-        TYPE_MAP.put("Double[]", typeSerializer);
+        BASE_TYPE_MAP.put(double[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Double[].class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put("Double[]", typeSerializer);
+        BASE_TYPE_MAP.put("double[]", typeSerializer);
 
-        TYPE_MAP.put(Date[].class.getName(), new DateArrayXmlType());
-        TYPE_MAP.put("Date[]", typeSerializer);
+        BASE_TYPE_MAP.put(Date[].class.getName(), new DateArrayXmlType());
+        BASE_TYPE_MAP.put("Date[]", typeSerializer);
+        BASE_TYPE_MAP.put("date[]", typeSerializer);
 
         typeSerializer = new ListXmlType();
-        TYPE_MAP.put(List.class.getName(), typeSerializer);
-        TYPE_MAP.put(LinkedList.class.getName(), typeSerializer);
-        TYPE_MAP.put(ArrayList.class.getName(), typeSerializer);
-        TYPE_MAP.put("list", typeSerializer);
+        BASE_TYPE_MAP.put(List.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(LinkedList.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(ArrayList.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put("list", typeSerializer);
 
         typeSerializer = new MapXmlType();
-        TYPE_MAP.put(HashMap.class.getName(), typeSerializer);
-        TYPE_MAP.put(Hashtable.class.getName(), typeSerializer);
-        TYPE_MAP.put(LinkedHashMap.class.getName(), typeSerializer);
-        TYPE_MAP.put("map", typeSerializer);
+        BASE_TYPE_MAP.put(HashMap.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(Hashtable.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put(LinkedHashMap.class.getName(), typeSerializer);
+        BASE_TYPE_MAP.put("Map", typeSerializer);
+        BASE_TYPE_MAP.put("map", typeSerializer);
     }
 
     /**
@@ -205,10 +223,10 @@ public final class TypeUtil {
      * @return 转换得到java 类型
      */
     public static Type getJavaType(String typeString) {
-        TypeSerializer typeSerializer = TYPE_MAP.get(typeString);
+        TypeSerializer typeSerializer = BASE_TYPE_MAP.get(typeString);
         if (typeSerializer==null && CODE_TYPE_MAP.containsKey(typeString))
         {
-            typeSerializer = TYPE_MAP.get(CODE_TYPE_MAP.get(typeString));
+            typeSerializer = BASE_TYPE_MAP.get(CODE_TYPE_MAP.get(typeString));
         }
         if (typeSerializer!=null)
         {
@@ -235,7 +253,7 @@ public final class TypeUtil {
         if (object == null) {
             return StringUtil.empty;
         }
-        TypeSerializer typeSerializer = TYPE_MAP.get(object.getClass().getName());
+        TypeSerializer typeSerializer = BASE_TYPE_MAP.get(object.getClass().getName());
         if (typeSerializer == null) {
             typeSerializer = new BeanXmlType();
         }
@@ -263,11 +281,75 @@ public final class TypeUtil {
      * @return String   得到类型表示字符
      */
     public static String getTypeString(Class<?> cla) {
-        TypeSerializer typeSerializer = TYPE_MAP.get(cla.getName());
+        TypeSerializer typeSerializer = BASE_TYPE_MAP.get(cla.getName());
         if (typeSerializer == null) {
             typeSerializer = new BeanXmlType();
         }
         return typeSerializer.getTypeString();
+    }
+
+
+    public static Class<?> getDbTypeConvertString(String typeName) {
+
+        if (typeName==null)
+        {
+            return String.class;
+        }
+        typeName = typeName.toLowerCase();
+
+        if ("boolean".equalsIgnoreCase(typeName)||"bool".equalsIgnoreCase(typeName)) {
+            return boolean.class;
+        }
+
+        ///////大数值
+        if ("ROWID".equalsIgnoreCase(typeName)) {
+            return String.class;
+        }
+
+        //短断整型
+        if ( "short".equals(typeName) || "smallint".equals(typeName) || "int2".equals(typeName) || "tinyint".equals(typeName) || "fixed".equals(typeName) || "int".equals(typeName) || "integer".equals(typeName) || "int4".equals(typeName)) {
+            return Integer.class;
+        }
+
+        if ("number".equals(typeName)) {
+            return BigDecimal.class;
+        }
+        ///////长整型
+        if ("bigint".equals(typeName) || "int8".equals(typeName)) {
+            return Long.class;
+        }
+
+        ///////单精度
+        if ("money".equals(typeName) || "float".equals(typeName) || "real".equals(typeName) || "binary_float".equals(typeName)) {
+            return Float.class;
+        }
+
+        ///////大数值
+        if ("decimal".equals(typeName)) {
+            return BigDecimal.class;
+        }
+
+        ///////双精度
+        if ("double".equals(typeName) || "double precision".equals(typeName) || "binary_double".equals(typeName)|| typeName.contains("numer"))
+        {
+            return Double.class;
+        }
+        ///////日期
+        if ("date".equals(typeName)) {
+            return Date.class;
+        }
+
+        ///////日期时间
+        if (typeName.contains("timestamp") || "datetime".equals(typeName)) {
+            return Date.class;
+        }
+
+        ////////////时间
+        if (typeName.contains("time")) {
+            return Time.class;
+        }
+
+        return String.class;
     }
 
     /**
@@ -285,8 +367,10 @@ public final class TypeUtil {
         {
             types = StringUtil.substringAfterLast(type,StringUtil.DOT);
         }
-        for (TypeSerializer typeSerializer : TYPE_MAP.values()) {
-            if (typeSerializer.getTypeString().equalsIgnoreCase(types)) {
+
+        for (TypeSerializer typeSerializer : BASE_TYPE_MAP.values()) {
+
+            if (typeSerializer.getTypeString().equalsIgnoreCase(types)||typeSerializer.getJavaType().getTypeName().equalsIgnoreCase(types)) {
                 typeSerializer.setValue(object);
                 try {
                     return typeSerializer.getTypeObject();

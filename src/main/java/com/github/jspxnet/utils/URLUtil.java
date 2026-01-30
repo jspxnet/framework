@@ -10,7 +10,10 @@
 package com.github.jspxnet.utils;
 
 import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.util.StringMap;
+
 import java.io.File;
+import java.io.IOException;
 import java.net.*;
 import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
@@ -27,7 +30,28 @@ public final class URLUtil {
 
     }
 
-
+    /**
+     * 判断网速是否联通,不通就先不执行同步了
+     *
+     * @param url URL
+     * @return  是否联通,
+     */
+    public static boolean isConnect(String url) {
+        if (StringUtil.isEmpty(url)) return false;
+        try {
+            URL netUrl = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) netUrl.openConnection();
+            connection.setConnectTimeout(500); //连接主机超时时间ms
+            connection.setReadTimeout(500); //从主机读取数据超时时间ms
+            if (HttpURLConnection.HTTP_OK == connection.getResponseCode()) {
+                return true;
+            }
+        } catch (IOException e) {
+            //log.error("连接不通:{}", url);
+            return false;
+        }
+        return false;
+    }
     /**
      * 只转换中文部分
      *
@@ -148,6 +172,43 @@ public final class URLUtil {
             url = url.substring(0, w);
         }
         return url;
+    }
+
+    /**
+     *   String url = "https://udmp-bucket.pabos.com.cn/89220f87/UDMP-150a75a16e4dd35b40abba062a09a23632e5ac2fdc-89220f87-20251107052410-00000001/1?attname=1986665955446743040_20251107_2025110774272448.zip&e=1762501587&token=gnAje0HesKzYThkcUlxYMf9c-jvoLh6JLb6hhV1L:4UrIEUeCoA4FXQ3kzsIbTBO2XpM=";
+     *   String out1 = getQueryString(url);
+     *   attname=1986665955446743040_20251107_2025110774272448.zip&e=1762501587&token=gnAje0HesKzYThkcUlxYMf9c-jvoLh6JLb6hhV1L:4UrIEUeCoA4FXQ3kzsIbTBO2XpM=
+     * @param url url
+     * @return 得到QueryString
+     */
+    public static String getQueryString(String url) {
+        if (StringUtil.isEmpty(url)) {
+            return StringUtil.empty;
+        }
+        int w = url.indexOf("?");
+        if (w != -1) {
+            url = url.substring(w+1);
+        }
+        return url;
+    }
+
+    /**
+     * String url = "https://udmp-bucket.pabos.com.cn/89220f87/UDMP-150a75a16e4dd35b40abba062a09a23632e5ac2fdc-89220f87-20251107052410-00000001/1?attname=1986665955446743040_20251107_2025110774272448.zip&e=1762501587&token=gnAje0HesKzYThkcUlxYMf9c-jvoLh6JLb6hhV1L:4UrIEUeCoA4FXQ3kzsIbTBO2XpM=";
+     * String out1 =  getParam(url,"token");
+     * @param url url
+     * @param name 变量名称
+     * @return 得到参数值
+     */
+    public static String getParam(String url,String name) {
+        String param = getQueryString(url);
+        if (StringUtil.isEmpty(param)) {
+            return StringUtil.empty;
+        }
+        StringMap<String,String> valueMap = new StringMap<>();
+        valueMap.setKeySplit("=");
+        valueMap.setLineSplit("&");
+        valueMap.setString(param);
+        return valueMap.getString(name);
     }
 
     /**
@@ -473,10 +534,10 @@ public final class URLUtil {
         }
         return namespace;
     }
-   /* public static void main(String[] args) {
-        String str = "测试中文1%。此的AA";
-        String out1 = getUrlEncoder(str,"UTF8");
+
+    /*public static void main(String[] args) {
+        String url = "https://udmp-bucket.pabos.com.cn/89220f87/UDMP-150a75a16e4dd35b40abba062a09a23632e5ac2fdc-89220f87-20251107052410-00000001/1?attname=1986665955446743040_20251107_2025110774272448.zip&e=1762501587&token=gnAje0HesKzYThkcUlxYMf9c-jvoLh6JLb6hhV1L:4UrIEUeCoA4FXQ3kzsIbTBO2XpM=";
+        String out1 =  getParam(url,"token");
         System.out.println(out1);
-        System.out.println(getUrlDecoder(out1,"UTF8"));
     }*/
 }

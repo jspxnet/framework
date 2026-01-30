@@ -54,4 +54,10 @@ public @interface Table {
      * @return 是否创建库结构
      */
     boolean create() default true;
+
+    /**
+     *
+     * @return 表结构索引对象
+     */
+    String idx() default "";
 }

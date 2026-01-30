@@ -52,11 +52,7 @@ import java.util.Map;
  */
 @Slf4j
 public class TemplateResult extends ResultSupport {
-
-    private final static String DEFAULT_ENCODE = ENV_TEMPLATE.getString(Environment.encode, Environment.defaultEncode);
-    private final static String TEMPLATE_PATH = ENV_TEMPLATE.getString(Environment.templatePath);
     private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
-
     static {
         CONFIGURABLE.addAutoIncludes(ENV_TEMPLATE.getString(Environment.autoIncludes));
         CONFIGURABLE.put(ScriptmarkEnv.FixUndefined,ENV_TEMPLATE.getBoolean(Environment.templateFixUndefined));
@@ -126,13 +122,14 @@ public class TemplateResult extends ResultSupport {
             response.setHeader(ActionEnv.CONTENT_DISPOSITION, disposition);
         }
         //处理下载情况 end
+        Map<String, Object> valueMap = ThreadContextHolder.getContext().getEnvironment();
         //如果 resultConfig 里边有明确的返回，先使用明确的返回
         File f;
         if (getResultConfig() == null) {
             f = new File(action.getTemplatePath(), action.getTemplateFile());
         } else {
             //这里有个路径问题 /的就直接从根目录开始,有个目录拼接的过程
-            String confFile = EnvFactory.getPlaceholder().processTemplate(action.getEnv(), StringUtil.trim(getResultConfig().getValue()));
+            String confFile = EnvFactory.getPlaceholder().processTemplate(valueMap, StringUtil.trim(getResultConfig().getValue()));
             if (confFile.startsWith("/")) {
                 f = new File(Dispatcher.getRealPath(), confFile);
             } else {
@@ -164,7 +161,7 @@ public class TemplateResult extends ResultSupport {
         try {
             scriptMark = new ScriptMarkEngine(cacheKey, fileSource, CONFIGURABLE);
         } catch (Exception e) {
-            log.debug("template file not found:" + f.getAbsolutePath(), e);
+            log.debug("template file not found:{}", f.getAbsolutePath(), e);
             if (DEBUG) {
                 TXWebUtil.errorPrint("template file not found:" + action.getTemplateFile() + "\r\n" + e.getLocalizedMessage() + "\r\n提示:ROC API调用请使用ROC协议",
                         null,response, HttpStatusType.HTTP_status_404);
@@ -176,21 +173,21 @@ public class TemplateResult extends ResultSupport {
         scriptMark.setRootDirectory(Dispatcher.getRealPath());
         scriptMark.setCurrentPath(action.getTemplatePath());
         //输出模板数据
-        Map<String, Object> valueMap = action.getEnv();
         initPageEnvironment(action, valueMap);
 
         StringWriter out = new StringWriter();
         scriptMark.process(out, valueMap);
         //页面缓存支持begin
         ActionConfig actionConfig = actionInvocation.getActionConfig();
-        if (actionConfig!=null&&actionConfig.isCache())
+        if (!DEBUG&&actionConfig!=null&&actionConfig.isCache())
         {
 
             String key = actionConfig.getCacheName() + ActionHandle.PAGE_KEY + EncryptUtil.getMd5(request.getRequestURL().toString()+ "?"+request.getQueryString() + ObjectUtil.toString(RequestUtil.getSortMap(request)));
-            log.debug("put page cache url:{}",request.getRequestURL().toString()+ "?"+request.getQueryString() );
+            log.debug("put page cache url key:{}",key);
             if (!StringUtil.isEmpty(out.toString()))
             {
-                JSCacheManager.put(actionConfig.getCacheName(),key,out.toString());
+                int template_update_delay = ENV_TEMPLATE.getInt(ScriptmarkEnv.Template_update_delay,30);
+                JSCacheManager.put(actionConfig.getCacheName(),key,out.toString(),template_update_delay);
             }
         }
         //页面缓存支持end

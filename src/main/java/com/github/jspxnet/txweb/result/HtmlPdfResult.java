@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.txweb.result;
 
+import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.boot.sign.HttpStatusType;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.context.ActionContext;
@@ -56,7 +57,7 @@ import java.util.*;
 @Slf4j
 public class HtmlPdfResult extends ResultSupport {
     private final static TemplateConfigurable CONFIGURABLE = new TemplateConfigurable();
-    private static final String TEMPLATE_PATH = ENV_TEMPLATE.getString(Environment.templatePath);
+    private static final String TEMPLATE_PATH = EnvFactory.getTemplatePath();
     private static final String FONTS_PATH =  ENV_TEMPLATE.getString(Environment.fontsPath,"").endsWith("/")?ENV_TEMPLATE.getString(Environment.fontsPath):(ENV_TEMPLATE.getString(Environment.fontsPath)+"/");
 
     static {
@@ -80,7 +81,7 @@ public class HtmlPdfResult extends ResultSupport {
         //如果使用cache 就使用uri
 
         //为了防止特殊符号错误，转换为md5 格式, + 加长度避免 碰撞到以前
-        String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath() + "" + f.length());
+        String cacheKey = EncryptUtil.getMd5(f.getAbsolutePath() + StringUtil.empty + f.length());
         CONFIGURABLE.setSearchPath(new String[]{action.getTemplatePath(), Dispatcher.getRealPath(), TEMPLATE_PATH});
         ScriptMark scriptMark;
         try {
@@ -99,7 +100,7 @@ public class HtmlPdfResult extends ResultSupport {
 
         //输出模板数据
         Writer out = new StringWriter();
-        Map<String, Object> valueMap = action.getEnv();
+        Map<String, Object> valueMap = ThreadContextHolder.getContext().getEnvironment();
         initPageEnvironment(action, valueMap);
         scriptMark.process(out, valueMap);
         valueMap.clear();
@@ -125,12 +126,11 @@ public class HtmlPdfResult extends ResultSupport {
             renderer.createPDF(response.getOutputStream());
         } catch (Exception e) {
             if (DEBUG) {
-                log.debug("pdf create out", e);
                 TXWebUtil.errorPrint(StringUtil.toBrLine(e.getMessage()),null, response, HttpStatusType.HTTP_status_404);
             } else {
                 TXWebUtil.errorPrint("PDF输出失败",null, response, HttpStatusType.HTTP_status_404);
             }
-            e.printStackTrace();
+            log.error("pdf create out", e);
         } finally {
             if (outputStream != null) {
                 outputStream.flush();

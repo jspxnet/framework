@@ -41,6 +41,5 @@ public class JspxLoggingEvent implements Serializable {
     @Column(caption = "时间")
     private Date createDate = new Date();
 
-  //  {"threadName":"main","loggerName":"com.github.jspxnet.boot.JspxCoreListener","loggerContext":"ch.qos.logback.classic.LoggerContext[default]","loggerContextVO":{"name":"default","propertyMap":{},"birthTime":1654539343493},"message":"-jspx.net framework 6.64 AGPLv3 Powered By chenYuan  start completed  J2SDK","throwableProxy":null,"callerDataArray":null,"marker":null,"mdcPropertyMap":{},"timeStamp":1654539348833}
 
 }

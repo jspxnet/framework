@@ -84,7 +84,7 @@ public class TemplateConfigurable implements Configurable {
         String time_format = envTemplate.getString(Environment.TIME_FORMAT,DateUtil.TIME_FORMAT);
         hashMap.put(ScriptmarkEnv.TimeFormat, time_format);
 
-        int template_update_delay = envTemplate.getInt(ScriptmarkEnv.Template_update_delay,360);
+        int template_update_delay = envTemplate.getInt(ScriptmarkEnv.Template_update_delay,30);
         hashMap.put(ScriptmarkEnv.Template_update_delay, template_update_delay);
 
         int template_cache_size = envTemplate.getInt(ScriptmarkEnv.Template_cache_size,120);

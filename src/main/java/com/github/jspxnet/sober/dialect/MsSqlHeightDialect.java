@@ -47,7 +47,7 @@ public class MsSqlHeightDialect extends MsSqlDialect {
         {
             return sql + " offset " + begin + " rows fetch next " + length + " rows only";
         }
-        return sql + "order by " + soberTable.getPrimary() +" offset " + begin + " rows fetch next " + length + " rows only";
+        return sql + "order by " + soberTable.getPrimaryKey() +" offset " + begin + " rows fetch next " + length + " rows only";
     }
 
     @Override

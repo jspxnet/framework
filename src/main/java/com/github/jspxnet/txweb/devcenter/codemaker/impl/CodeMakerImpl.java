@@ -88,9 +88,9 @@ public class CodeMakerImpl implements CodeMaker {
      * @return 生成添加编辑窗体
      */
     @Override
-    public RocResponse<String> builderPage(String templateName, String modelId, List<String> jumpFields)
+    public RocResponse<String> builderPage(String templateName, long modelId, List<String> jumpFields)
     {
-        TableModels tableModels = genericDAO.getAllTableModels(true,0).get(modelId);
+        TableModels tableModels = genericDAO.getAllTableModels(true).get(modelId);
         UiTemplate template = getUiTemplateLastVersion(templateName);
         if (template==null||template.getId()<=0)
         {
@@ -226,12 +226,11 @@ public class CodeMakerImpl implements CodeMaker {
     /**
      *
      * @param dto 是否包含DTO 是否保护dto
-     * @param extend  0:所有;1:可扩展;2:不可扩展
      * @return 的大命名空间列表
      */
     @Override
-    public  Map<String, TableModels>  getSoberTableList(boolean dto,int extend) {
-        return genericDAO.getAllTableModels(dto,extend);
+    public  Map<Long, TableModels>  getSoberTableList(boolean dto) {
+        return genericDAO.getAllTableModels(dto);
     }
 
 

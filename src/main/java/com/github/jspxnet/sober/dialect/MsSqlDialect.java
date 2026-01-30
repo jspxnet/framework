@@ -54,6 +54,9 @@ public class MsSqlDialect extends Dialect {
         put(SQL_CRITERIA_QUERY, "SELECT top ${" + SQL_RESULT_END_ROW + "} * FROM ${" + KEY_TABLE_NAME + "} <#if where=" + KEY_TERM + "!=''>WHERE ${" + KEY_TERM + "}</#if><#if where=" + KEY_FIELD_GROUPBY + "!=''> GROUP BY ${" + KEY_FIELD_GROUPBY + "}</#if><#if where=" + KEY_FIELD_ORDERBY + "!=''> ORDER BY ${" + KEY_FIELD_ORDERBY + "}</#if>");
 
         put(String.class.getName(), "[${" + COLUMN_NAME + "}] <#if where=" + COLUMN_LENGTH + "&gt;1000>[ntext]<#else>nvarchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>NULL</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(String[].class.getName(), "[${" + COLUMN_NAME + "}] <#if where=" + COLUMN_LENGTH + "&gt;1000>[ntext]<#else>nvarchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>NULL</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put("java.lang.String[]", "[${" + COLUMN_NAME + "}] <#if where=" + COLUMN_LENGTH + "&gt;1000>[ntext]<#else>nvarchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>NULL</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put("java.lang.Class", "[${" + COLUMN_NAME + "}] <#if where=" + COLUMN_LENGTH + "&gt;1000>[ntext]<#else>nvarchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>NULL</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
 
         put(Boolean.class.getName(), "[${" + COLUMN_NAME + "}] smallint <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default ${" + COLUMN_DEFAULT + ".toInt()}</#if>");
 
@@ -101,6 +104,18 @@ GO
 */
         put(SQL_CREATE_TABLE_INDEX, "CREATE  <#if where=" + KEY_IS_UNIQUE + ">UNIQUE</#if> NONCLUSTERED INDEX  [${"+KEY_INDEX_NAME+"}] ON [dbo].[${" + KEY_TABLE_NAME + "}] (${"+KEY_INDEX_FIELD+"})");
 
+
+        //查询关键字
+        put(PRIMARY_SQL,"SELECT COLUMN_NAME AS name FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = UPPER('${" + KEY_TABLE_NAME + "}') AND CONSTRAINT_NAME LIKE 'PK%'");
+
+        //查询表字段
+        put(COLUMN_LIST_SQL, "SELECT a.name AS name,b.name AS dataType,a.length AS length,isnull(g.[value],'') AS caption,a.scale,a.isnullable AS notNull FROM syscolumns a\n" +
+                "LEFT JOIN systypes b ON a.xusertype=b.xusertype LEFT JOIN sys.extended_properties g ON a.id=g.major_id AND a.colid=g.minor_id\n" +
+                "WHERE a.id=object_id(UPPER('${" + KEY_TABLE_NAME + "}')) ORDER BY a.colorder");
+
+        //查看当前用户拥有的所有表及其拥有者
+        put(ALL_TABLES_SQL, "SELECT TABLE_NAME AS name FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG=UPPER('${"+KEY_DATABASE_NAME+"}')");
+
     }
 
     @Override
@@ -140,7 +155,7 @@ GO
         {
             return "smallint";
         }
-        if (soberColumn.getClassType()==String.class)
+        if (soberColumn.getClassType()==String.class|| soberColumn.getClassType()==String[].class || soberColumn.getClassType()==Class.class)
         {
             if (soberColumn.getLength()<512)
             {

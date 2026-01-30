@@ -41,6 +41,9 @@ public class MySQLDialect extends Dialect {
         put(SQL_UPDATE, "UPDATE ${" + KEY_TABLE_NAME + "} SET <#list field=" + KEY_FIELD_LIST + ">`${field}`=?<#if where=\"field_has_next\">,</#if></#list> WHERE ${" + KEY_FIELD_NAME + "}=<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>${" + KEY_FIELD_VALUE + "}<#if where=" + KEY_FIELD_NAME + FIELD_QUOTE + ">'</#if>");
 
         put(String.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "&gt;512\"><#if where=\"" + COLUMN_LENGTH + "&lt;30000\" >text<#else>mediumtext</#else></#if><#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put(String[].class.getName(), "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "&gt;512\"><#if where=\"" + COLUMN_LENGTH + "&lt;30000\" >text<#else>mediumtext</#else></#if><#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put("java.lang.String[]", "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "&gt;512\"><#if where=\"" + COLUMN_LENGTH + "&lt;30000\" >text<#else>mediumtext</#else></#if><#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
+        put("java.lang.Class", "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "&gt;512\"><#if where=\"" + COLUMN_LENGTH + "&lt;30000\" >text<#else>mediumtext</#else></#if><#else>varchar(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL</#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if> COMMENT '${" + COLUMN_CAPTION + "}'");
 
         put(Integer.class.getName(), "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "!=0&&"+ COLUMN_LENGTH +"&lt;4\">tinyint(${" + COLUMN_LENGTH + "})<#else>integer</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">0<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
         put("int", "`${" + COLUMN_NAME + "}` <#if where=\"" + COLUMN_LENGTH + "!=0&&"+ COLUMN_LENGTH +"&lt;4\">tinyint(${" + COLUMN_LENGTH + "})<#else>integer</#else></#if> <#if where=" + KEY_FIELD_SERIAL + ">AUTO_INCREMENT</#if> <#if where=" + COLUMN_NOT_NULL + ">NOT NULL<#else>  default <#if where=!" + COLUMN_DEFAULT + ">0<#else>'${" + COLUMN_DEFAULT + "}'</#else></#if></#else></#if> COMMENT '${" + COLUMN_CAPTION + "}'");
@@ -92,9 +95,19 @@ public class MySQLDialect extends Dialect {
         put(SQL_DROP_COLUMN, "ALTER TABLE `${" + KEY_TABLE_NAME + "}` DROP COLUMN `${" + COLUMN_NAME + "}`");
 
 
-        //ALTER TABLE table_name ADD COLUMN column_name VARCHAR(100) DEFAULT NULL COMMENT '新加字段' AFTER old_column;
+        //查询关键字
+        put(PRIMARY_SQL, "SELECT kcu.column_name AS name FROM information_schema.table_constraints tc\n" +
+                "JOIN information_schema.key_column_usage kcu  ON tc.constraint_name = kcu.constraint_name AND tc.table_name=kcu.table_name AND tc.table_schema=kcu.table_schema\n" +
+                "WHERE tc.constraint_type = 'PRIMARY KEY'  AND kcu.table_name=LOWER('${" + KEY_TABLE_NAME + "}') AND tc.table_schema=LOWER('${"+KEY_DATABASE_NAME+"}')");
 
-        //ALTER TABLE TABLE_NAME DROP COLUMN COLUMN_NAME
+        //查询表字段
+        put(COLUMN_LIST_SQL, "SELECT table_schema AS tableName,column_name AS name,data_type as dataType,character_maximum_length AS length,is_nullable AS notNull,column_comment AS caption\n" +
+                "FROM information_schema.columns \n" +
+                "WHERE  table_name=LOWER('${" + KEY_TABLE_NAME + "}') AND table_schema=LOWER('${"+KEY_DATABASE_NAME+"}') ORDER BY ordinal_position");
+
+        //查看当前用户拥有的所有表及其拥有者
+        put(ALL_TABLES_SQL, "SELECT table_name as name FROM information_schema.tables WHERE table_schema=LOWER('${"+KEY_DATABASE_NAME+"}')");
+
 
         /*
         判断没有才插入
@@ -141,7 +154,7 @@ public class MySQLDialect extends Dialect {
         {
             return "int(1)";
         }
-        if (soberColumn.getClassType()==String.class)
+        if (soberColumn.getClassType()==String.class|| soberColumn.getClassType()==String[].class || soberColumn.getClassType()==Class.class)
         {
             if (soberColumn.getLength()<512)
             {

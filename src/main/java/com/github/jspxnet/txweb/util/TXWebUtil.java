@@ -30,9 +30,9 @@ import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.BeanFactory;
 import com.github.jspxnet.sober.SoberSupport;
 import com.github.jspxnet.sober.annotation.NullClass;
-import com.github.jspxnet.txweb.table.meta.AbstractBillPlug;
-import com.github.jspxnet.txweb.table.meta.BillEvent;
-import com.github.jspxnet.txweb.table.meta.OperatePlug;
+import com.github.jspxnet.sober.table.meta.AbstractBillPlug;
+import com.github.jspxnet.sober.table.meta.BillEvent;
+import com.github.jspxnet.sober.table.meta.OperatePlug;
 import com.github.jspxnet.sober.exception.TransactionException;
 import com.github.jspxnet.txweb.Action;
 import com.github.jspxnet.txweb.ActionProxy;
@@ -57,7 +57,7 @@ import com.github.jspxnet.txweb.support.ActionSupport;
 import com.github.jspxnet.txweb.support.ApacheMultipartRequest;
 import com.github.jspxnet.txweb.support.MultipartRequest;
 import com.github.jspxnet.txweb.support.MultipartSupport;
-import com.github.jspxnet.txweb.table.meta.OperationResult;
+import com.github.jspxnet.sober.table.meta.OperationResult;
 import com.github.jspxnet.txweb.turnpage.TurnPageButton;
 import com.github.jspxnet.txweb.turnpage.impl.TurnPageButtonImpl;
 import com.github.jspxnet.upload.CosMultipartRequest;
@@ -90,7 +90,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public final class TXWebUtil {
 
-    public final static String REPEAT_VERIFY_KEY = "jspx:operate:repeat:verify:%s";
+    public final static String REPEAT_VERIFY_KEY = "operate:repeat:second:%s";
     public final static String AT = "@";
     //安全跳过,这些方法不接受请求发送的参数
     private final static String[] ACTION_SAFE_METHOD = new String[]{"setActionLogTitle", "setActionLogContent", "setActionResult", "isRepeatPost"};
@@ -1074,16 +1074,19 @@ public final class TXWebUtil {
         }
 
         //验证防止重复提交 begin
-        if (operate.repeat() > 0) {
-            String keyValue = EncryptUtil.getMd5(ClassUtil.getClass(action.getClass()).getName() + StringUtil.DOT + exeMethod.getName() + StringUtil.DOT + action.getUserSession().getId());
-            String key = String.format(REPEAT_VERIFY_KEY, keyValue);
-            if (JSCacheManager.isLock(key))
+        if (actionContext!=null&&operate.repeat() > 0) {
+            String keyValue = actionContext.getParamHash();
+            if (keyValue!=null)
             {
-                action.addFieldInfo(exeMethod.getName(), "不允许重复提交," + operate.repeat() + "秒后在来");
-                return false;
-            }
-            else {
-                JSCacheManager.lock(key,operate.repeat());
+                String key = String.format(REPEAT_VERIFY_KEY, keyValue);
+                if (JSCacheManager.isLock(key))
+                {
+                    action.addFieldInfo(exeMethod.getName(), "不允许重复提交," + operate.repeat() + "秒后在来");
+                    return false;
+                }
+                else {
+                    JSCacheManager.lock(key,operate.repeat());
+                }
             }
         }
         //验证防止重复提交 end
@@ -1158,17 +1161,12 @@ public final class TXWebUtil {
         if (status != null && status > 0 && status != 200) {
             response.setStatus(status);
         }
-        PrintWriter out;
-        try {
-            out = response.getWriter();
-            if (out!=null)
-            {
-                if (WebOutEnumType.JAVASCRIPT.getValue() == type) {
-                    out.print("document.write(" + StringUtil.toJavaScriptQuote(string) + ");");
-                } else if (string != null) {
-                    out.print(string);
-                    out.flush();
-                }
+        try (PrintWriter out = response.getWriter()){
+            if (WebOutEnumType.JAVASCRIPT.getValue() == type) {
+                out.print("document.write(" + StringUtil.toJavaScriptQuote(string) + ");");
+            } else if (string != null) {
+                out.print(string);
+                out.flush();
             }
         } catch (Exception e) {
             log.error("response writer is close,not out error", e);
@@ -1210,15 +1208,15 @@ public final class TXWebUtil {
         }
     }
 
-
     public static void errorPrint(String info, Map<String, String> fieldInfo, HttpServletResponse response, int status) {
         EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
         TemplateConfigurable configurable = new TemplateConfigurable();
         configurable.addAutoIncludes(envTemplate.getString(Environment.autoIncludes));
+        String templatePath = EnvFactory.getTemplatePath();
         AbstractSource fileSource = null;
-        File f = new File(envTemplate.getString(Environment.templatePath, new File(Dispatcher.getRealPath(), "template").getPath()), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+        File f = new File(templatePath, envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
         if (!f.isFile()) {
-            f = new File(new File(Dispatcher.getRealPath(), envTemplate.getString(Environment.templatePath, "template")).getPath(), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
+            f = new File(Dispatcher.getRealPath(), envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"));
         }
         if (f.isFile()) {
             fileSource = new FileSource(f, envTemplate.getString(Environment.errorInfoPageTemplate, "error.ftl"), envTemplate.getString(Environment.encode, Environment.defaultEncode));
@@ -1240,7 +1238,7 @@ public final class TXWebUtil {
             }
             return;
         }
-        configurable.setSearchPath(new String[]{envTemplate.getString(Environment.templatePath, "template"), Dispatcher.getRealPath()});
+        configurable.setSearchPath(new String[]{templatePath, Dispatcher.getRealPath()});
         ScriptMark scriptMark;
         try {
             scriptMark = new ScriptMarkEngine(EncryptUtil.getMd5(f.getPath()), fileSource, configurable);
@@ -1251,7 +1249,7 @@ public final class TXWebUtil {
         }
 
         scriptMark.setRootDirectory(Dispatcher.getRealPath());
-        scriptMark.setCurrentPath(envTemplate.getString(Environment.templatePath));
+        scriptMark.setCurrentPath(templatePath);
         //输出模板数据
         Map<String, Object> valueMap = TXWebUtil.createEnvironment();
         valueMap.put(Environment.message, info);

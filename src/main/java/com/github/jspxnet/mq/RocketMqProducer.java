@@ -1,12 +1,13 @@
 package com.github.jspxnet.mq;
 
 
+import com.github.jspxnet.boot.environment.Environment;
+import com.github.jspxnet.sioc.annotation.Bean;
 import com.github.jspxnet.sioc.annotation.Destroy;
 import com.github.jspxnet.sioc.annotation.Init;
 import com.github.jspxnet.utils.BeanUtil;
 import com.github.jspxnet.utils.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
-
 
 
 /**
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  **/
 
 @Slf4j
+@Bean(namespace = Environment.SERVICE, singleton = true)
 public class RocketMqProducer {
     private Object defaultMQProducer = null;
 
@@ -38,7 +40,6 @@ public class RocketMqProducer {
             }
             Thread.sleep(500);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("RocketMq 客户端启动失败", e);
         }
     }

@@ -7,6 +7,7 @@ import com.github.jspxnet.cache.IStore;
 import com.github.jspxnet.cache.container.CacheEntry;
 import com.github.jspxnet.cache.redis.RedissonClientConfig;
 import com.github.jspxnet.sioc.annotation.Init;
+import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -55,8 +56,10 @@ public class SingleRedissonStore extends Store implements IStore {
         }
         RMap<String, CacheEntry> rMap = redisson.getMap(cacheKey);
         rMap.put(entry.getKey(), entry);
+
+        int live = ArrayUtil.max(new int[]{entry.getLive(),getSecond()});
         if (getSecond() > 1) {
-            rMap.expire(Instant.now().plusSeconds(getSecond()));
+            rMap.expire(Instant.now().plusSeconds(live));
         }
     }
 

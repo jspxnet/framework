@@ -58,8 +58,8 @@ public class RequestWrapper extends HttpServletRequestWrapper {
             try {
                 paramValue = new String(body,encode);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
                 paramValue = new String(body,StandardCharsets.UTF_8);
+                e.printStackTrace();
             }
             if (!RequestUtil.isMultipart(this))
             {

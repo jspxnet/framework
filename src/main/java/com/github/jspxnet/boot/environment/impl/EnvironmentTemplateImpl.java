@@ -174,17 +174,19 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             }
             if (!FileUtil.isDirectory(tempDir)&&defaultPath!=null&&defaultPath.contains("classes")&&defaultPath.toLowerCase().contains("web-inf"))
             {
+                File tempFile = new File( new File(defaultPath).getPath(), "template/");
+                if (tempFile.isDirectory()) {
+                    VALUE_MAP.put(Environment.templatePath, tempFile.getPath());
+                }
                 tempDir = new File( new File(defaultPath).getPath(), "template/").getPath();
             }
-
-            if (!VALUE_MAP.containsKey(Environment.templatePath)) {
+            if (FileUtil.isDirectory(tempDir)) {
                 VALUE_MAP.put(Environment.templatePath, tempDir);
             }
             //loader路径
             //tempDir = webInfPath + "loader/";
             //FileUtil.makeDirectory(tempDir);
             //VALUE_MAP.put(Environment.loaderPath, tempDir);
-
 
             //本地数据库默认路径
             tempDir = webInfPath + "database/";
@@ -243,7 +245,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
     }
 
     private String getEncode() {
-
         String encode = (String) VALUE_MAP.get(Environment.encode);
         if (StringUtil.isNull(encode)) {
             encode = System.getProperty("file.encoding");
@@ -252,32 +253,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             return Environment.defaultEncode;
         }
         return encode;
-    }
-
-    private String getTimezone() {
-        return (String) VALUE_MAP.get(Environment.timezone);
-    }
-
-    private String getAwtToolkit() {
-        String awtToolkit = (String) VALUE_MAP.get("awt.toolkit");
-        if (awtToolkit == null || awtToolkit.isEmpty()) {
-            return System.getProperty("awt.toolkit");
-        }
-        return awtToolkit;
-    }
-
-    private Object getJava2dUsePlatformFont() {
-        if (VALUE_MAP.containsKey("java2d.font.usePlatformFont")) {
-            return VALUE_MAP.get("java2d.font.usePlatformFont");
-        }
-        return System.getProperty("java2d.font.usePlatformFont");
-    }
-
-    private Object getGraphicsEnv() {
-        if (VALUE_MAP.containsKey("java.awt.graphicsenv")) {
-            return VALUE_MAP.get("java.awt.graphicsenv");
-        }
-        return System.getProperty("java.awt.graphicsenv");
     }
 
     private String getLogPath(String logPath,String defaultPath) {
@@ -304,67 +279,22 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
             System.setProperty("file.encoding", getEncode());
         }
 
-        System.setProperty("javax.xml.soap.character-set-encoding", getEncode());
-        //awtToolkit
-        String awtToolkit = getAwtToolkit();
-        if (!StringUtil.isNull(awtToolkit)) {
-            System.setProperty("awt.toolkit", awtToolkit);
-        }
-        //java2dUsePlatformFont
-        String usePlatformFont = (String) getJava2dUsePlatformFont();
-        if (!StringUtil.isNull(usePlatformFont)) {
-            System.setProperty("java2d.font.usePlatformFont", usePlatformFont);
-        }
-        //graphicsenv
-        String getGraphicsenv = (String) getGraphicsEnv();
-        if (!StringUtil.isNull(getGraphicsenv)) {
-            System.setProperty("java.awt.graphicsenv", getGraphicsenv);
-        }
-
-        //设置时区
-        String timezone = getTimezone();
-        if (!StringUtil.isNull(timezone)) {
-            System.setProperty("user.timezone", timezone);
-        }
-
-        //系统密钥
-        if (VALUE_MAP.containsKey(Environment.secretKey)) {
-            System.setProperty(Environment.secretKey, (String) VALUE_MAP.get(Environment.secretKey));
-        }
-
-        //对称加密算法
-        if (VALUE_MAP.containsKey(Environment.symmetryAlgorithm)) {
-            System.setProperty(Environment.symmetryAlgorithm, (String) VALUE_MAP.get(Environment.symmetryAlgorithm));
-        }
-
-        //对称加密算法偏移量
-        if (VALUE_MAP.containsKey(Environment.cipherIv)) {
-            System.setProperty(Environment.cipherIv, (String) VALUE_MAP.get(Environment.cipherIv));
-        }
-
-        //非对称加密算法
-        if (VALUE_MAP.containsKey(Environment.asymmetricAlgorithm)) {
-            System.setProperty(Environment.asymmetricAlgorithm, (String) VALUE_MAP.get(Environment.asymmetricAlgorithm));
-        }
-
-        //非对称验证算法  如 SHA1WithRSA
-        if (VALUE_MAP.containsKey(Environment.signAlgorithm)) {
-            System.setProperty(Environment.signAlgorithm, (String) VALUE_MAP.get(Environment.signAlgorithm));
-        }
-
-        //验证加密算法 如md5
-        if (VALUE_MAP.containsKey(Environment.hashAlgorithm)) {
-            System.setProperty(Environment.hashAlgorithm, (String) VALUE_MAP.get(Environment.hashAlgorithm));
-        }
-
-
-        Enumeration<Object> enumeration = System.getProperties().keys();
-        while (enumeration.hasMoreElements()) {
-            String keys = (String) enumeration.nextElement();
-            if (keys == null) {
+        for (String key:VALUE_MAP.keySet())
+        {
+            if (StringUtil.isNull(key))
+            {
                 continue;
             }
-            VALUE_MAP.put(keys, System.getProperty(keys, StringUtil.empty));
+            if (key.startsWith(Environment.JVM))
+            {
+                String jvmKey = key.substring(Environment.JVM.length());
+                String value = (String) VALUE_MAP.get(key);
+                if (StringUtil.isNull(value)) {
+                    continue;
+                }
+                System.setProperty(jvmKey, value);
+                log.debug("配置系统属性{}:{}", key, value);
+            }
         }
 
 
@@ -379,25 +309,6 @@ public class EnvironmentTemplateImpl implements EnvironmentTemplate {
                 VALUE_MAP.put(Environment.httpServerName, Environment.webServerResin);
             }
         }
-        //监测当前的web 服务器 end
-        try {
-            Class<?> cls = Class.forName("org.apache.xerces.parsers.SAXParser");
-            System.setProperty("org.xml.sax.driver", cls.getName());
-        } catch (Exception e) {
-            try {
-                Class<?> cls = Class.forName("com.sun.org.apache.xerces.internal.parsers.SAXParser");
-                System.setProperty("org.xml.sax.driver", cls.getName());
-            } catch (Exception e2) {
-                log.info("com.sun.xml.internal.stream.XMLInputFactoryImpl " + e.getLocalizedMessage());
-            }
-        }
-        try {
-            Class<?> cls = Class.forName("com.sun.xml.internal.stream.XMLInputFactoryImpl");
-            System.setProperty("javax.xml.stream.XMLInputFactory", cls.getName());
-        } catch (Exception e2) {
-            log.info("com.sun.xml.internal.stream.XMLInputFactoryImpl " + e2.getLocalizedMessage());
-        }
-
         LogBackConfigUtil.createConfig();
     }
 

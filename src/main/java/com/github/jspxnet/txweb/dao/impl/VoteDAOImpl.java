@@ -217,7 +217,7 @@ public class VoteDAOImpl extends JdbcOperations implements VoteDAO {
         if (ArrayUtil.isEmpty(voteIds)) {
             return false;
         }
-        InExpression inExpression = new InExpression(getSoberTable(VoteItem.class).getPrimary(), voteIds);
+        InExpression inExpression = new InExpression(getSoberTable(VoteItem.class).getPrimaryKey(), voteIds);
         String sql = "UPDATE " + getSoberTable(VoteItem.class).getName() + " SET votePoint=votePoint+1 WHERE " + inExpression.toSqlString(getSoberTable(VoteItem.class), getSoberFactory().getDatabaseType());
         return update(sql, inExpression.getParameter(getSoberTable(VoteItem.class)))>=0;
     }

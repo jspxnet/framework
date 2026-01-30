@@ -11,6 +11,7 @@ package com.github.jspxnet.txweb.view;
 import com.github.jspxnet.cache.ValidateCodeCache;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.annotation.Ref;
+import com.github.jspxnet.txweb.IUserSession;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.support.ActionSupport;
@@ -118,6 +119,12 @@ public class ValidateExpImgView extends ActionSupport {
         PhotoString validateCode = new PhotoString(width, height, new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(bgColor, "#", "")), 16)), StringUtil.isNull(color) ? null : new Color(Integer.parseInt(StringUtil.trim(StringUtil.replace(color, "#", "")), 16)), viewCode);
         if (session != null) {
             validateCodeCache.addImgCode(EncryptUtil.getMd5(session.getId()), NumberUtil.toString(C));
+        } else {
+            IUserSession userSession = getUserSession();
+            if (userSession!=null)
+            {
+                validateCodeCache.addImgCode(EncryptUtil.getMd5(userSession.getId()), NumberUtil.toString(C));
+            }
         }
         if (!response.isCommitted())
         {

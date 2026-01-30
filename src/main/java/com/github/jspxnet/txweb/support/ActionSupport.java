@@ -34,8 +34,8 @@ import com.github.jspxnet.txweb.util.ParamUtil;
 import com.github.jspxnet.txweb.util.RequestUtil;
 import com.github.jspxnet.txweb.util.TXWebUtil;
 import com.github.jspxnet.utils.*;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -97,12 +97,9 @@ public abstract class ActionSupport implements Action {
     //采用方法注入目的是让外部可以重载
 
     //设置为false表示不使用模板
+    @Setter
     @Ref(name = Environment.language, test = true)
     protected Bundle language;
-
-    public void setLanguage(Bundle language) {
-        this.language = language;
-    }
 
     protected Bundle config;
     @Ref(name = Environment.config, test = true)
@@ -251,7 +248,7 @@ public abstract class ActionSupport implements Action {
         {
             return null;
         }
-        return (T)actionContext.get(keys);
+        return t.cast(actionContext.get(keys));
     }
 
     /**
@@ -460,6 +457,7 @@ public abstract class ActionSupport implements Action {
         }
         return actionContext.getRequest().getSession(false);
     }
+
 
     @Override
     public HttpServletRequest getRequest() {

@@ -4248,6 +4248,10 @@ public final class ArrayUtil {
     }
 
     public static int sum(int[] array) {
+        if (array==null || array.length==0)
+        {
+            return 0;
+        }
         int result = 0;
         for (int anArray : array) {
             result = result + anArray;

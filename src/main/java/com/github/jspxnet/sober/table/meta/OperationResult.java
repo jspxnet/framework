@@ -1,4 +1,4 @@
-package com.github.jspxnet.txweb.table.meta;
+package com.github.jspxnet.sober.table.meta;
 
 import com.github.jspxnet.enums.YesNoEnumType;
 import lombok.Data;

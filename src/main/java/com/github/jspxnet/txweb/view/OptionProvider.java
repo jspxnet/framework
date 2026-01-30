@@ -48,7 +48,7 @@ public class OptionProvider implements Option {
         {
             return null;
         }
-        return JdbcUtil.getOptionBundleList((JdbcOperations)optionDAO,groupCode,namespace);
+        return JdbcUtil.getOptionBundleList(optionDAO,groupCode,namespace);
     }
 
     /**

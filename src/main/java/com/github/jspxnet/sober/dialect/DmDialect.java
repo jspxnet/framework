@@ -60,6 +60,11 @@ public class DmDialect extends Dialect {
         put(Boolean.class.getName(), "\"${" + COLUMN_NAME + "}\" number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         put(boolean.class.getName(), "\"${" + COLUMN_NAME + "}\" number(1) default <#if where=!" + COLUMN_DEFAULT + " >0<#else>1</#else></#if>");
         put(String.class.getName(), "\"${" + COLUMN_NAME + "}\" <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put(String[].class.getName(), "\"${" + COLUMN_NAME + "}\" <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put("java.lang.String[]", "\"${" + COLUMN_NAME + "}\" <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+        put("java.lang.Class", "\"${" + COLUMN_NAME + "}\" <#if where=" + COLUMN_LENGTH + "&gt;4000>long<#else>varchar2(${" + COLUMN_LENGTH + "})</#else></#if> <#if where=" + COLUMN_DEFAULT + ">default '${" + COLUMN_DEFAULT + "}'</#if>");
+
+
         put(Integer.class.getName(), "\"${" + COLUMN_NAME + "}\" NUMBER(10) <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
         put("int", "\"${" + COLUMN_NAME + "}\" <#if where=" + KEY_FIELD_SERIAL + ">SERIAL<#else>NUMBER(10)</#else></#if> <#if where=!" + KEY_FIELD_SERIAL + " >default <#if where=!" + COLUMN_DEFAULT + " >0<#else>${" + COLUMN_DEFAULT + "}</#else></#if></#if>");
 
@@ -78,6 +83,17 @@ public class DmDialect extends Dialect {
         put(char.class.getName(), "\"${" + COLUMN_NAME + "}\" char(2) NOT NULL default ''");
         put(SQL_DROP_TABLE, "DROP TABLE  \"${"+ KEY_DATABASE_NAME +"}\".\"${" + KEY_TABLE_NAME + "}\"");
         put(FUN_TABLE_EXISTS, "SELECT COUNT(1)  FROM all_tables WHERE OWNER='${"+KEY_DATABASE_NAME+"}' AND TABLE_NAME='${" + KEY_TABLE_NAME + "}'");
+
+        //查询关键字
+        put(PRIMARY_SQL, "SELECT tm1.column_name as name FROm user_cons_columns tm1 \n" +
+                "LEFT JOIN all_constraints tm2 ON tm1.owner=tm2.owner AND tm1.table_name=tm2.table_name AND tm1.constraint_name=tm2.constraint_name \n" +
+                "WHERE  tm1.owner=UPPER('${"+KEY_DATABASE_NAME+"}') AND tm1.table_name=UPPER('${" + KEY_TABLE_NAME + "}') AND tm2.constraint_type='P'");
+
+        //查询表字段
+        put(COLUMN_LIST_SQL, "SELECT table_name AS tableName,column_name AS name,data_type as dataType,data_length AS length,NULLABLE AS notNull FROM user_tab_columns WHERE table_name=UPPER('${" + KEY_TABLE_NAME + "}') ORDER BY column_id ");
+
+        //查看当前用户拥有的所有表及其拥有者
+        put(ALL_TABLES_SQL, "SELECT table_name as tableName FROM all_tables WHERE owner=USER");
     }
 
     @Override
@@ -112,7 +128,7 @@ public class DmDialect extends Dialect {
         {
             return "number(1)";
         }
-        if (soberColumn.getClassType()==String.class)
+        if (soberColumn.getClassType()==String.class|| soberColumn.getClassType()==String[].class || soberColumn.getClassType()==Class.class)
         {
             if (soberColumn.getLength()<2000)
             {

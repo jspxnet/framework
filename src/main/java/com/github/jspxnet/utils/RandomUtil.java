@@ -307,7 +307,7 @@ public final  class RandomUtil {
         BigDecimal var1 = new BigDecimal(hashCodeV + cw);
         BigDecimal var2 = new BigDecimal(Math.abs(System.currentTimeMillis() - DateUtil.empty.getTime()) + "");
         BigDecimal var3 = var1.add(var2);
-        String str = NumberUtil.getRadix(ipStart + var3.toString(), 10, 36);
+        String str = NumberUtil.getRadix(ipStart + var3, 10, 36);
         return NumberUtil.getKeepLength((getRandomAlphanumeric(length - str.length()) + str).toLowerCase(), length);
     }
 

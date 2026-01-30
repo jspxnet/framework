@@ -29,7 +29,7 @@ public class DataCallView extends ActionSupport {
 
     @Operate(caption = "数据列表", method = "list/page")
     public RocResponse<List<?>> getListPage(@Param(caption = "翻页参数") GenericPageParam pageParam) {
-        TableModels tableModels = genericDAO.getAllTableModels(true,0).get(pageParam.getModelId());
+        TableModels tableModels = genericDAO.getAllTableModels(true).get(pageParam.getModelId());
         AssertException.isNull(tableModels, "不存在的模型对象");
         long totalCount = genericDAO.getCount(tableModels.getEntity(), pageParam);
         if (totalCount <= 0) {
@@ -40,7 +40,7 @@ public class DataCallView extends ActionSupport {
 
     @Operate(caption = "得到详细", method = "detail/${modelId}/${id}")
     public RocResponse<?> detail(@PathVar(caption = "modelId") String modelId, @PathVar(caption = "id") Long id) {
-        TableModels tableModels = genericDAO.getAllTableModels(true,0).get(modelId);
+        TableModels tableModels = genericDAO.getAllTableModels(true).get(modelId);
         AssertException.isNull(tableModels, "不存在的模型对象");
         return RocResponse.success(genericDAO.load(tableModels.getEntity(), id));
     }

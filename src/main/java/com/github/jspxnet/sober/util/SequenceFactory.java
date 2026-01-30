@@ -95,7 +95,7 @@ public class SequenceFactory {
         }
         long keyValue  = generate(tableSequences.getName());
         TableModels sequencesTable = jdbcOperations.getSoberTable(Sequences.class);
-        String sql = "UPDATE " + sequencesTable.getName() + " SET keyValue="+keyValue+" WHERE " + sequencesTable.getPrimary() + StringUtil.EQUAL + StringUtil.quoteSql(tableSequences.getName());
+        String sql = "UPDATE " + sequencesTable.getName() + " SET keyValue="+keyValue+" WHERE " + sequencesTable.getPrimaryKey() + StringUtil.EQUAL + StringUtil.quoteSql(tableSequences.getName());
         jdbcOperations.update(sql);
         return tableSequences.getNextKey(keyValue);
     }
@@ -194,7 +194,7 @@ public class SequenceFactory {
         }
         long keyValue  = generate(tableSequences.getName());
         TableModels sequencesTable = jdbcOperations.getSoberTable(Sequences.class);
-        String sql = "UPDATE " + sequencesTable.getName() + " SET keyValue="+keyValue+" WHERE " + sequencesTable.getPrimary() + StringUtil.EQUAL + StringUtil.quoteSql(tableSequences.getName());
+        String sql = "UPDATE " + sequencesTable.getName() + " SET keyValue="+keyValue+" WHERE " + sequencesTable.getPrimaryKey() + StringUtil.EQUAL + StringUtil.quoteSql(tableSequences.getName());
         jdbcOperations.update(sql);
         return tableSequences.getNextKey(keyValue);
     }

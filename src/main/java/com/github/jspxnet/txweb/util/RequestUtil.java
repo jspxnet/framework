@@ -741,7 +741,7 @@ public class RequestUtil {
         }
         T result = null;
         try {
-            result = (T) ClassUtil.newInstance(cla.getName());
+            result = cla.cast(ClassUtil.newInstance(cla.getName()));
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (Exception e) {

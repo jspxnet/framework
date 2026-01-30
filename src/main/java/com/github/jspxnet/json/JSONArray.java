@@ -329,6 +329,10 @@ public class JSONArray extends LinkedList<Object> {
      */
     public JSONObject getJSONObject(int index) throws JSONException {
         Object o = get(index);
+        if (o instanceof String && StringUtil.isJsonObject((String)o))
+        {
+            return new JSONObject((String)o);
+        }
         if (o instanceof JSONObject) {
             return (JSONObject) o;
         }
@@ -336,7 +340,7 @@ public class JSONArray extends LinkedList<Object> {
             com.alibaba.fastjson.JSONObject fj = (com.alibaba.fastjson.JSONObject)o;
             return new JSONObject(fj.toJSONString());
         }
-        return null;
+        return new JSONObject(o);
     }
 
 

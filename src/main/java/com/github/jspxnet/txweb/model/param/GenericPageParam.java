@@ -9,6 +9,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class GenericPageParam extends PageParam {
 
-    @Param(caption = "模型ID",required = true,level = SafetyEnumType.MIDDLE,max = 200,min = 20)
-    private String modelId;
+    @Param(caption = "模型ID",required = true,level = SafetyEnumType.MIDDLE)
+    private long modelId;
 }

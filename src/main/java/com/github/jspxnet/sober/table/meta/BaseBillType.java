@@ -1,4 +1,4 @@
-package com.github.jspxnet.txweb.table.meta;
+package com.github.jspxnet.sober.table.meta;
 
 import com.github.jspxnet.enums.BoolEnumType;
 import com.github.jspxnet.enums.YesNoEnumType;
@@ -17,7 +17,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "jspx_base_bill_type",caption = "基础单据类型",cache = false)
+@Table(name = "jspx_bill_type",caption = "基础单据类型",cache = false)
 public class BaseBillType extends OperateTable {
     @Id
     @Column(caption = "id", notNull = true)
@@ -85,7 +85,6 @@ public class BaseBillType extends OperateTable {
 
     @Column(caption = "导出每批数量",notNull = true,defaultValue = "5000")
     private int exportCount = 5000;
-
 
     @Column(caption = "单据默认状态", length = 2,enumType = DocumentStatusEnumType.class,notNull = true)
     protected int defDocumentStatus = DocumentStatusEnumType.A.getValue();

@@ -173,7 +173,6 @@ public final class SystemUtil {
 
     public static String cmd(String shell) throws IOException, InterruptedException {
 
-
         StringBuilder showInfo = new StringBuilder();
         Process p = null;
         try {
@@ -245,7 +244,26 @@ public final class SystemUtil {
         }
     }
 
+    /**
+     *
+     * @return 这里得加到杀毒软件白名单，不然会被拦截
+     */
     public static String reboot()  {
+        try {
+            Process process = Runtime.getRuntime().exec("shutdown -r -t 0");
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("重启命令已成功发送");
+            } else {
+                return nirCmdReboot();
+            }
+        } catch (Exception e) {
+            return nirCmdReboot();
+        }
+        return nirCmdReboot();
+    }
+
+    public static String nirCmdReboot()  {
         StringBuilder showInfo = new StringBuilder();
         Process process = null;
         try {
@@ -376,14 +394,16 @@ public final class SystemUtil {
         }
    }
 
-/*
+
 
    public static void main(String[] args) {
         System.out.println(getCPUSerial());
         System.out.println(getSystemGuid());
         System.out.println(SYSTEM_GUID );
+        reboot();
+
    }
-*/
+
 
 
 }

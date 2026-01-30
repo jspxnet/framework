@@ -5,14 +5,14 @@ import com.github.jspxnet.boot.res.LanguageRes;
 import com.github.jspxnet.enums.ErrorEnumType;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.sioc.annotation.Bean;
+import com.github.jspxnet.sober.table.meta.FormMetaTable;
 import com.github.jspxnet.txweb.annotation.HttpMethod;
 import com.github.jspxnet.txweb.annotation.Operate;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.devcenter.view.TableMetaView;
 import com.github.jspxnet.txweb.enums.SafetyEnumType;
 import com.github.jspxnet.txweb.result.RocResponse;
-import com.github.jspxnet.txweb.table.meta.ControlBase;
-import com.github.jspxnet.txweb.table.meta.TableMeta;
+import com.github.jspxnet.sober.table.meta.ControlBase;
 import com.github.jspxnet.utils.StringUtil;
 
 //devcenter/meta/save/viewscript
@@ -68,11 +68,12 @@ public class TableMetaAction extends TableMetaView {
             return RocResponse.error(ErrorEnumType.WARN.getValue(),"tableName不能为空,数据对象名称");
         }
 
-        TableMeta tableMeta = genericDAO.get(TableMeta.class,"tableName",tableName,false);
+        FormMetaTable tableMeta = genericDAO.get(FormMetaTable.class,"tableName",tableName,false);
         if (tableMeta==null)
         {
             //默认构建一个空的
-            tableMeta = create(tableName);
+            FormMetaTable formMetaTable = new FormMetaTable();
+            formMetaTable.setEntity(create(tableName));
         }
         tableMeta.setViewScript(json.toString());
         json.clear();
@@ -99,7 +100,7 @@ public class TableMetaAction extends TableMetaView {
     @Override
     public String execute() throws Exception {
         if (isMethodInvoked()) {
-            genericDAO.evict(TableMeta.class);
+            genericDAO.evict(FormMetaTable.class);
         }
         return super.execute();
     }

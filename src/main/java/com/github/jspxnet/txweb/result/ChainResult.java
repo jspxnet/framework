@@ -15,6 +15,7 @@ import com.github.jspxnet.txweb.ActionInvocation;
 import com.github.jspxnet.txweb.WebConfigManager;
 import com.github.jspxnet.txweb.config.ActionConfig;
 import com.github.jspxnet.txweb.config.TxWebConfigManager;
+import com.github.jspxnet.txweb.context.ThreadContextHolder;
 import com.github.jspxnet.txweb.dispatcher.handle.ActionHandle;
 import com.github.jspxnet.txweb.env.ActionEnv;
 import com.github.jspxnet.txweb.proxy.DefaultActionInvocation;
@@ -23,6 +24,8 @@ import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.URLUtil;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -60,13 +63,14 @@ public class ChainResult extends RedirectResult {
 
         //设置新的action环境变量,避免死循环 begin
         action.setResult(null);
-        action.getEnv().remove("submit");
-        action.getEnv().remove("method");
+        Map<String, Object> valueMap = ThreadContextHolder.getContext().getEnvironment();
+        valueMap.remove("submit");
+        valueMap.remove("method");
 
         //设置新的action环境变量,避免死循环 end
         ActionInvocation chainActionInvocation = null;
         try {
-            chainActionInvocation = new DefaultActionInvocation(actionConfig, action.getEnv(), ActionHandle.NAME, null, action.getRequest(), action.getResponse(),false);
+            chainActionInvocation = new DefaultActionInvocation(actionConfig, valueMap, ActionHandle.NAME, null, action.getRequest(), action.getResponse(),false);
             chainActionInvocation.initAction();
             if (action.getClass().getName().equals(chainActionInvocation.getActionProxy().getAction().getClass().getName())) {
                 int times = ObjectUtil.toInt(chainActionInvocation.getActionProxy().getAction().getEnv(CHAIN_INVOKE_TIMES));

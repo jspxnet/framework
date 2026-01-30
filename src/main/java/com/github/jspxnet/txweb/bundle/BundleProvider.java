@@ -12,10 +12,10 @@ package com.github.jspxnet.txweb.bundle;
 import com.github.jspxnet.io.StringOutputStream;
 import com.github.jspxnet.json.JSONException;
 import com.github.jspxnet.scriptmark.util.ScriptConverter;
+import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.txweb.bundle.table.BundleTable;
 import com.github.jspxnet.txweb.env.TXWeb;
-import com.github.jspxnet.txweb.model.dto.SoberColumnDto;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.SystemUtil;
 import com.github.jspxnet.utils.StringUtil;
@@ -139,14 +139,14 @@ public abstract class BundleProvider implements Bundle, Serializable {
     }
 
     @Override
-    public SoberColumnDto getSoberColumn(final String keys)
+    public SoberColumn getSoberColumn(final String keys)
     {
         BundleTable bundleTable = getBundleTable(keys);
         if (bundleTable==null)
         {
             return null;
         }
-        SoberColumnDto dto = new SoberColumnDto();
+        SoberColumn dto = new SoberColumn();
         dto.setName(bundleTable.getIdx());
         dto.setCaption(bundleTable.getCaption());
         dto.setDefaultValue(bundleTable.getContext());
@@ -159,12 +159,12 @@ public abstract class BundleProvider implements Bundle, Serializable {
     }
 
     @Override
-    public List<SoberColumnDto> getColumnList()
+    public List<SoberColumn> getColumnList()
     {
         List<BundleTable> bundleTableList = getList();
-        List<SoberColumnDto> result = new ArrayList<>();
+        List<SoberColumn> result = new ArrayList<>();
         for (BundleTable bundleTable : bundleTableList) {
-            SoberColumnDto countColumnDto = getSoberColumn(bundleTable.getIdx());
+            SoberColumn countColumnDto = getSoberColumn(bundleTable.getIdx());
             if (countColumnDto==null)
             {
                 continue;

@@ -14,7 +14,9 @@ public interface CodeMaker {
      * @param jumpFields 跳过字段
      * @return 生成添加编辑窗体
      */
-    RocResponse<String> builderPage(String templateName, String modelId, List<String> jumpFields);
+
+    RocResponse<String> builderPage(String templateName, long modelId, List<String> jumpFields);
+
     /**
      *
      * @param tableModels 数据模型
@@ -31,8 +33,7 @@ public interface CodeMaker {
     /**
      *
      * @param dto 是否包含DTO 是否保护dto
-     * @param extend  0:所有;1:可扩展;2:不可扩展
      * @return 的大命名空间列表
      */
-    Map<String, TableModels>   getSoberTableList(boolean dto,int extend);
+    Map<Long, TableModels>  getSoberTableList(boolean dto);
 }

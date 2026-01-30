@@ -20,6 +20,7 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.boot.environment.EnvironmentTemplate;
 import com.github.jspxnet.boot.environment.dblog.JspxDBAppender;
 import com.github.jspxnet.io.IoUtil;
+import com.github.jspxnet.io.StringInputStream;
 import com.github.jspxnet.utils.FileUtil;
 import com.github.jspxnet.utils.StringUtil;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,9 @@ import org.apache.logging.log4j.core.config.xml.XmlConfigurationFactory;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -49,6 +52,7 @@ public class LogBackConfigUtil {
         {
             return;
         }
+
         ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
         if (loggerFactory instanceof ch.qos.logback.classic.LoggerContext)
         {
@@ -68,7 +72,6 @@ public class LogBackConfigUtil {
 
     public static void createLogBackConfig(LoggerContext lc)
     {
-
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
         boolean isDefaultConfig = false;
@@ -114,7 +117,15 @@ public class LogBackConfigUtil {
         String confTxt = isDefaultConfig?EnvFactory.getPlaceholder().processTemplate(valueMap,defaultConfigTxt):defaultConfigTxt;
         if (!StringUtil.isEmpty(confTxt))
         {
-            org.xml.sax.InputSource inputSource = new InputSource(new StringReader(confTxt));
+            // 禁用外部实体
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            try {
+                factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+                factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            InputSource inputSource = new InputSource(new StringReader(confTxt));
             try {
                 lc.reset();
                 configurator.doConfigure(inputSource);
@@ -238,7 +249,7 @@ public class LogBackConfigUtil {
             // 转换配置流为配置源
             ConfigurationSource configurationSource = null;
             try {
-                configurationSource = new ConfigurationSource(new ByteArrayInputStream(confTxt.getBytes()));
+                configurationSource = new ConfigurationSource(new StringInputStream(confTxt, StandardCharsets.UTF_8.name()));
                 // 获取日志环境
                 org.apache.logging.log4j.spi.LoggerContext ctx =  LogManager.getContext(false);
                 // 生成新的配置

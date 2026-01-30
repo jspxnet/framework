@@ -11,7 +11,7 @@ import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.txweb.dao.GenericDAO;
 import com.github.jspxnet.txweb.result.RocResponse;
 import com.github.jspxnet.txweb.support.ActionSupport;
-import com.github.jspxnet.txweb.table.meta.OperatePlug;
+import com.github.jspxnet.sober.table.meta.OperatePlug;
 import com.github.jspxnet.utils.ClassUtil;
 
 import java.util.HashMap;

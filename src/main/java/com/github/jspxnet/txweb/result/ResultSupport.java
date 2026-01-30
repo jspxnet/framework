@@ -51,6 +51,8 @@ import java.util.Map;
 public abstract class ResultSupport implements Result {
     final static protected EnvironmentTemplate ENV_TEMPLATE = EnvFactory.getEnvironmentTemplate();
     final static protected boolean DEBUG = ENV_TEMPLATE.getBoolean(Environment.DEBUG);
+    final protected  static String TEMPLATE_PATH = EnvFactory.getTemplatePath();
+    final protected static String DEFAULT_ENCODE = ENV_TEMPLATE.getString(Environment.encode, Environment.defaultEncode);
     //json 无对应返回标识
     private static final String KEY_GRID = "grid";
     static final String KEY_ROC_XML = "xml"; //xml 需要设置 json 为默认
@@ -110,7 +112,7 @@ public abstract class ResultSupport implements Result {
         if (location.contains("${") && location.contains("}")) {
             EnvironmentTemplate envTemplate = EnvFactory.getEnvironmentTemplate();
             Map<String, Object> valueMap = new HashMap<>(envTemplate.getVariableMap());
-            valueMap.putAll(action.getEnv());
+            valueMap.putAll(ThreadContextHolder.getContext().getEnvironment());
             valueMap.put("action", action);
             Placeholder placeholder = EnvFactory.getPlaceholder();
             try {

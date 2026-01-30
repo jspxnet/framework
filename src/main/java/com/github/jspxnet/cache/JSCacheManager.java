@@ -194,12 +194,24 @@ public class JSCacheManager implements CacheManager {
             cache.setName(cacheName);
         }
         CacheEntry cacheEntry = cache.get(key);
-        if (cacheEntry == null) {
+        if (cacheEntry == null || cacheEntry.isExpired()) {
             return null;
         }
         return cacheEntry.getValue();
     }
 
+
+    /**
+     *
+     * @param tClass 内存类型
+     * @param key key
+     * @param cls 泛型支持
+     * @return 得到缓存对象
+     * @param <T> 泛型支持
+     */
+    static public <T>  T get(Class<?> tClass, String key,Class<T> cls) {
+        return (T)get(tClass.getName(), key);
+    }
     /**
      *
      * @param tClass  内存类型

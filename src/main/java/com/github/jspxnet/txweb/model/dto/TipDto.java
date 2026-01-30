@@ -39,4 +39,8 @@ public class TipDto implements Serializable {
 
     @Column(caption = "序号")
     private int sort = 0;
+
+    //单位秒
+    @Column(caption = "超时")
+    private int timeToLive = 0;
 }

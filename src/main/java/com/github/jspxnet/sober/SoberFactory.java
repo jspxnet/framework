@@ -29,6 +29,10 @@ public interface SoberFactory extends Serializable {
 
     void setMaxRows(int maxRows);
 
+    int getBatchRows();
+
+    void setBatchRows(int batchRows);
+
     boolean isShowSql();
 
     void setShowSql(boolean showsql);
@@ -108,9 +112,12 @@ public interface SoberFactory extends Serializable {
      */
     TableModels getTableModels(String tableName, SoberSupport soberSupport);
 
+    boolean containsModels(Class<?> cls);
+
     void evictTableModels(Class<?> cla);
 
     void clear();
+
 
     /**
      * @return 事务超时
@@ -126,6 +133,8 @@ public interface SoberFactory extends Serializable {
      * @return 得到默认缓存名称
      */
     String getCacheName();
+
+    int updateErrorLinkDbTimes();
 
     /**
      * @return 是否使用缓存

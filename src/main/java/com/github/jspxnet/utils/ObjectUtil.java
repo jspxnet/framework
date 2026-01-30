@@ -507,7 +507,7 @@ public final class ObjectUtil {
         if (o instanceof Class) {
             return new HashMap<>(0);
         }
-        if (o instanceof AbstractMap) {
+        if (o instanceof Map) {
             return (Map<String, Object>) o;
         }
         Map<String, Object> valueMap = new TreeMap<>();
