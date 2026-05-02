@@ -146,6 +146,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public String getLocaleName() {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return "127.0.0.1";
+        }
         return RequestUtil.getLocale(actionContext.getRequest());
     }
 
@@ -163,6 +167,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public String getRootNamespace() {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return StringUtil.empty;
+        }
         return URLUtil.getRootNamespace(actionContext.getNamespace());
     }
 
@@ -170,6 +178,10 @@ public abstract class ActionSupport implements Action {
     public boolean isComponent()
     {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return false;
+        }
         Map<String, Object> actionEnv = actionContext.getComponentEnvironment(this.getClass(),this.hashCode());
         return ActionEnv.COMPONENT_MODEL.equalsIgnoreCase((String)actionEnv.get(ActionEnv.ACTION_RUN_MODEL));
     }
@@ -196,7 +208,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public void put(String key, Object obj) {
         ActionContext actionContext = ThreadContextHolder.getContext();
-        actionContext.put(key, obj);
+        if (actionContext!=null)
+        {
+            actionContext.put(key, obj);
+        }
     }
 
     /**
@@ -207,6 +222,10 @@ public abstract class ActionSupport implements Action {
     @Override
     public boolean containsKey(String key) {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            return false;
+        }
         return actionContext.containsKey(key);
     }
 
@@ -1027,6 +1046,16 @@ public abstract class ActionSupport implements Action {
 
     public IRole getRole() {
         ActionContext actionContext = ThreadContextHolder.getContext();
+        if (actionContext==null)
+        {
+            //返回游客角色
+            Role guestRole = new Role();
+            guestRole.setId(config.getString(Environment.guestRole));
+            guestRole.setName(language.getLang(Environment.guestName));
+            guestRole.setUserType(UserEnumType.NONE.getValue());
+            guestRole.setNamespace(getRootNamespace());
+            return guestRole;
+        }
         UserSession userSession = onlineManager.getUserSession(actionContext);
         IRole role = userSession.getRole(getRootNamespace(),getString(ActionEnv.KEY_organizeId,
                 (String)actionContext.getOrDefault(ActionEnv.KEY_organizeId,StringUtil.empty),true));

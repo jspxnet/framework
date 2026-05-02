@@ -1,20 +1,37 @@
 package com.github.jspxnet.utils;
 
+/*
+ * Created by IntelliJ IDEA.
+ * author chenYuan (mail:39793751@qq.com)
+ * date: 2007-1-7
+ * Time: 19:04:35
+ * com.jspx.jspx.test.utils.BeanUtil
+ */
 import com.github.jspxnet.json.GsonUtil;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.security.utils.EncryptUtil;
 import com.github.jspxnet.sioc.util.TypeUtil;
+import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.NullClass;
+import com.github.jspxnet.sober.config.SoberCalcUnique;
 import com.github.jspxnet.sober.config.SoberColumn;
+import com.github.jspxnet.sober.config.SoberNexus;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.sober.model.container.PropertyContainer;
+import com.github.jspxnet.sober.table.meta.BaseEntity;
 import com.github.jspxnet.sober.util.AnnotationUtil;
+import com.github.jspxnet.sober.util.SoberUtil;
 import com.google.gson.Gson;
+import javassist.*;
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.beans.BeanCopier;
 import net.sf.cglib.beans.BeanMap;
 import java.io.*;
 import java.lang.reflect.*;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
@@ -23,18 +40,18 @@ import java.util.*;
 
 
 
-/**
- * Created by IntelliJ IDEA.
- * author chenYuan (mail:39793751@qq.com)
- * date: 2007-1-7
- * Time: 19:04:35
- * com.jspx.jspx.test.utils.BeanUtil
- */
 @Slf4j
 public final class BeanUtil {
+    private static final int MODIFIER_STATIC_FINAL = Modifier.STATIC | Modifier.FINAL;
+    private static final int MODIFIER_PRIVATE_STATIC_FINAL = Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL;
+
     private BeanUtil() {
 
     }
+
+    public final static String JAVASSIST_ENTITY_START = "$Javassist.";
+
+    public final static String CGLIB_ENTITY_KEY = "$$BeanGeneratorByCGLIB$$";
 
     /**
      *
@@ -61,10 +78,7 @@ public final class BeanUtil {
         if (obj instanceof Map) {
             return ((Map<?,?>)obj).isEmpty();
         }
-        if (NullClass.class == obj) {
-            return true;
-        }
-        return false;
+        return NullClass.class == obj;
     }
     /**
      * 设置属性,性能很差,但容错很好
@@ -81,8 +95,13 @@ public final class BeanUtil {
         if (!StringUtil.hasLength(methodName)) {
             return;
         }
-        //map 的
+        if (isDynamicEntity(object.getClass()))
+        {
+            setPropertyValue(object, methodName, obj);
+            return;
+        }
 
+        //map 的
         if (object instanceof Map && !(object instanceof PropertyContainer)) {
             Map<String,Object> map = (Map<String,Object>) object;
             map.put(methodName, obj);
@@ -118,15 +137,49 @@ public final class BeanUtil {
             Object[] pObject = new Object[1];
             try {
                 pObject[0] = getTypeValue(obj, aType);
+                //method.invoke(object, pObject); 这条兼容性不好
                 (new java.beans.Expression(object, methodName, pObject)).execute();
             } catch (Exception e) {
-                log.error(object.getClass().getName() + StringUtil.DOT + methodName + " setProperty  type=" + aType + " value=" + obj, e);
+                log.error("class:{},setProperty  type={},value={}", object.getClass().getName() + StringUtil.DOT + methodName, aType,obj, e);
             }
         } else
         {
             BeanUtil.setFieldValue(object, methodName, obj);
         }
+    }
 
+
+    /**
+     * 不对外
+     * @param dynamicObject cglib创建的动态对象
+     * @param propertyName 属性名称
+     * @param value 值
+     */
+     private static void setPropertyValue(Object dynamicObject, String propertyName, Object value) {
+        try {
+            String setterMethodName;
+
+            if (propertyName.startsWith("set"))
+            {
+                setterMethodName = propertyName;
+            }
+            else {
+                setterMethodName = "set" + StringUtil.capitalize(propertyName);
+            }
+            Method[] methods = dynamicObject.getClass().getMethods();
+            // 找到匹配的 setter 方法
+            for (Method method : methods) {
+                if (method.getName().equals(setterMethodName)&& method.getParameterCount() == 1) {
+                    Class<?> paramType = method.getParameterTypes()[0];
+                    // 如果参数类型不匹配，尝试转换值
+                    Object convertedValue = TypeUtil.getTypeValue(paramType.getTypeName(),value);
+                    method.invoke(dynamicObject, convertedValue);
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            log.error("dynamicObject:{} ,设置属性 {} , 时出错: {}",dynamicObject, propertyName,e.getMessage());
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -134,7 +187,12 @@ public final class BeanUtil {
         if (object == null || !StringUtil.hasLength(fieldName)) {
             return;
         }
-
+        //判断是不是代理对象
+        if (object.getClass().getName().contains(CGLIB_ENTITY_KEY))
+        {
+            setPropertyValue(object, fieldName, obj);
+            return;
+        }
         //map 的    if (!(bean instanceof PropertyContainer))
 
         if (object instanceof Map && !(object instanceof PropertyContainer)) {
@@ -164,7 +222,9 @@ public final class BeanUtil {
             log.debug(object.getClass() + " set field {} not find", fieldName);
             return;
         }
-        if (Modifier.isFinal(field.getModifiers()) || field.getModifiers() == 26 || field.getModifiers() == 18) {
+        //FINAL + STATIC + PRIVATE = 26
+        // field.getModifiers() == 26 || field.getModifiers() == 18
+        if (Modifier.isFinal(field.getModifiers()) || field.getModifiers() == MODIFIER_STATIC_FINAL || field.getModifiers() == MODIFIER_PRIVATE_STATIC_FINAL ){
             return;
         }
         Type aType = field.getType();
@@ -235,11 +295,20 @@ public final class BeanUtil {
             return ObjectUtil.toInt(array.get(0));
         }
         //如果是泛型
+
+        if (aType instanceof ParameterizedType && aType.getTypeName().equals("java.lang.Class<?>") && obj instanceof String) {
+            String className = (String) obj;
+            try {
+                return TypeUtil.getJavaType(className);
+            } catch (Exception e) {
+                log.error("getTypeValueObject getTypeValue type:{},className:{} ",obj,className, e);
+            }
+        }
         if (aType instanceof ParameterizedType && obj instanceof JSONArray)
         {
-            ParameterizedType ptype = (ParameterizedType)aType;
-            Type rawType = ptype.getRawType();
-            Type type = ptype.getActualTypeArguments()[0];
+            ParameterizedType pType = (ParameterizedType)aType;
+            Type rawType = pType.getRawType();
+            Type type = pType.getActualTypeArguments()[0];
             if (rawType.getTypeName().contains("java.util.List")||rawType.getTypeName().contains(".Collection"))
             {
                 try {
@@ -375,9 +444,15 @@ public final class BeanUtil {
                 {
                     return new String[0];
                 }
-                String[] vv = new String[1];
-                vv[0] = obj+"";
-                return vv;
+                //这里加入格式识别
+                if (StringUtil.isJsonArray(String.valueOf(obj)))
+                {
+                    return new JSONArray(obj).toArray(new String[0]);
+                } else {
+                    String[] vv = new String[1];
+                    vv[0] = String.valueOf(obj);
+                    return vv;
+                }
             } else {
                 if (StringUtil.empty.equals(obj) || "[]".equals(obj))
                 {
@@ -1604,4 +1679,279 @@ public final class BeanUtil {
             }
         }
     }
+
+    /**
+     *
+     * @param cls 类对象
+     * @return 是否为动态实体bean
+     */
+    public static boolean isDynamicEntity(Class<?> cls)
+    {
+        if (cls.getGenericSuperclass().equals(BaseEntity.class)) {
+            return true;
+        }
+        return (cls.getName().startsWith(JAVASSIST_ENTITY_START)||cls.getName().contains(CGLIB_ENTITY_KEY));
+    }
+    /**
+     * 使用 Javassist 创建动态 JavaBean
+     * @param tableModels 实体模型
+     * @return 创建动态 JavaBean ，已经有的基础java bean实体就直接创建自生，不用动态方式。
+     */
+    public static Object createDynamicEntityFromTableModels(TableModels tableModels) {
+        if (tableModels.getEntity()!=null&&(SoberUtil.BASE_MODEL_LIST.contains(tableModels.getEntity()) || !BeanUtil.isDynamicEntity(tableModels.getEntity())))
+        {
+            //如果已经定义了实体对象的，使用实体对象返回
+            try {
+                return tableModels.getEntity().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        //没有定义实体对象的使用动态对象返回
+        try {
+            ClassPool pool = ClassPool.getDefault();
+            String className = JAVASSIST_ENTITY_START + tableModels.getName() + StringUtil.DOT +  UUID.randomUUID().toString().replace("-", StringUtil.empty);;
+            CtClass cc = pool.makeClass(className);
+            cc.setSuperclass(pool.get(BaseEntity.class.getName()));
+
+            ConstPool constPool = cc.getClassFile().getConstPool();
+            // 创建注解属性
+            javassist.bytecode.AnnotationsAttribute attrTable = new javassist.bytecode.AnnotationsAttribute(constPool, javassist.bytecode.AnnotationsAttribute.visibleTag);
+
+            //放入 begin
+            //创建@Table注解
+            Annotation tableAnnotation = new Annotation(com.github.jspxnet.sober.annotation.Table.class.getName(), constPool);
+            tableAnnotation.addMemberValue("name", new StringMemberValue(tableModels.getName(), constPool));
+            tableAnnotation.addMemberValue("caption", new StringMemberValue(tableModels.getCaption(), constPool));
+            tableAnnotation.addMemberValue("useCache", new javassist.bytecode.annotation.BooleanMemberValue(tableModels.isUseCache(), constPool));
+            tableAnnotation.addMemberValue("autoCleanCache", new javassist.bytecode.annotation.BooleanMemberValue(tableModels.isAutoCleanCache(), constPool));
+            tableAnnotation.addMemberValue("create", new javassist.bytecode.annotation.BooleanMemberValue(tableModels.isCreate(), constPool));
+            tableAnnotation.addMemberValue("idx", new StringMemberValue(tableModels.getIdx(), constPool));
+
+            // 将注解添加到属性中
+            attrTable.addAnnotation(tableAnnotation);
+            cc.getClassFile().addAttribute(attrTable);
+            //放入 end
+
+            // 根据 tableModels 添加属性
+            for (SoberColumn column : tableModels.getColumns()) {
+                String fieldName = column.getName();
+                if (fieldName == null || fieldName.trim().isEmpty()) {
+                    fieldName = column.getField(); // 如果没有name，则使用field
+                }
+
+
+                Class<?> propertyType = column.getClassType();
+                if (propertyType == null) {
+                    System.err.println("未知的 column.getClassType() is null ");
+                    continue;
+                }
+                // 确保字段名是有效的Java标识符
+                //fieldName = fieldName.replaceAll("[^a-zA-Z0-9_]", "_");
+                // 添加私有字段
+                CtField field = new CtField(pool.get(propertyType.getName()), fieldName, cc);
+                field.setModifiers(javassist.Modifier.PRIVATE);
+                SoberNexus soberNexus = column.getNexus();
+                SoberCalcUnique soberCalcUnique = column.getCalcUnique();
+
+                if (soberNexus != null) {
+                    //关联关系字段
+                    javassist.bytecode.AnnotationsAttribute nexusAttr = new javassist.bytecode.AnnotationsAttribute(constPool,javassist.bytecode.AnnotationsAttribute.visibleTag);
+                    javassist.bytecode.annotation.Annotation nexusAnnot = new javassist.bytecode.annotation.Annotation(com.github.jspxnet.sober.annotation.Nexus.class.getName(),constPool);
+
+                    //描述
+                    nexusAnnot.addMemberValue("caption", new javassist.bytecode.annotation.StringMemberValue(soberNexus.getCaption(), constPool));
+
+                    //映射关系
+                    EnumMemberValue enumMemberValue = new EnumMemberValue(constPool);
+                    enumMemberValue.setType(MappingEnumType.class.getName());
+                    enumMemberValue.setValue(soberNexus.getMapping());
+
+                    nexusAnnot.addMemberValue("mapping", enumMemberValue);
+                    //nexusAnnot.addMemberValue("mapping", new javassist.bytecode.annotation.StringMemberValue(soberNexus.getMapping(), constPool));
+
+
+                    //自己表的字段
+                    nexusAnnot.addMemberValue("field", new javassist.bytecode.annotation.StringMemberValue(soberNexus.getField(), constPool));
+
+                    //对应的数据字段
+                    nexusAnnot.addMemberValue("targetField", new javassist.bytecode.annotation.StringMemberValue(soberNexus.getTargetField(), constPool));
+
+                    //对应的类
+                    nexusAnnot.addMemberValue("targetEntity", new javassist.bytecode.annotation.ClassMemberValue(soberNexus.getTargetEntity().getName(), constPool));
+
+                    //默认条件
+                    nexusAnnot.addMemberValue("term", new javassist.bytecode.annotation.StringMemberValue(soberNexus.getTerm(), constPool));
+
+                    //映射条件
+                    nexusAnnot.addMemberValue("where", new javassist.bytecode.annotation.StringMemberValue(soberNexus.getWhere(), constPool));
+
+                    //排序
+                    nexusAnnot.addMemberValue("orderBy", new javassist.bytecode.annotation.StringMemberValue(soberNexus.getOrderBy(), constPool));
+
+                    //关联删除
+                    nexusAnnot.addMemberValue("delete", new javassist.bytecode.annotation.BooleanMemberValue(soberNexus.isDelete(), constPool));
+
+                    //关联更新
+                    nexusAnnot.addMemberValue("update", new javassist.bytecode.annotation.BooleanMemberValue(soberNexus.isUpdate(), constPool));
+
+                    //关联保存
+                    nexusAnnot.addMemberValue("save", new javassist.bytecode.annotation.BooleanMemberValue(soberNexus.isSave(), constPool));
+
+
+                    //多层关联
+                    nexusAnnot.addMemberValue("chain", new javassist.bytecode.annotation.BooleanMemberValue(soberNexus.isChain(), constPool));
+
+                    //多层关联
+                    nexusAnnot.addMemberValue("length", new javassist.bytecode.annotation.StringMemberValue(soberNexus.getLength(), constPool));
+
+                    nexusAttr.addAnnotation(nexusAnnot);
+                    field.getFieldInfo().addAttribute(nexusAttr);
+
+                } else if (soberCalcUnique != null) {
+                    //计算关系字段
+
+                    javassist.bytecode.AnnotationsAttribute calcUniqueAttr = new javassist.bytecode.AnnotationsAttribute(constPool,
+                            javassist.bytecode.AnnotationsAttribute.visibleTag);
+                    javassist.bytecode.annotation.Annotation calcUniqueAnnot = new javassist.bytecode.annotation.Annotation(com.github.jspxnet.sober.annotation.CalcUnique.class.getName(),
+                            constPool);
+
+                    //Calc sql eg: select count() from ${entity1}
+                    calcUniqueAnnot.addMemberValue("sql", new javassist.bytecode.annotation.StringMemberValue(soberCalcUnique.getSql(), constPool));
+
+                    //实体对象 begin
+                    String[] entityArray =  soberCalcUnique.getEntity();
+                    if (!ObjectUtil.isEmpty(entityArray))
+                    {
+                        int i=0;
+                        MemberValue[] values = new MemberValue[entityArray.length];
+                        for (String entity : entityArray) {
+                            MemberValue memberValue = new javassist.bytecode.annotation.StringMemberValue(entity, constPool);
+                            values[i] = memberValue;
+                            i++;
+                        }
+                        // 创建ArrayMemberValue
+                        ArrayMemberValue arrayMemberValue = new ArrayMemberValue(constPool);
+                        arrayMemberValue.setValue(values);
+                        calcUniqueAnnot.addMemberValue("entity", new javassist.bytecode.annotation.ArrayMemberValue(arrayMemberValue, constPool));
+                    }
+                    //实体对象 end
+
+                    //返回类型
+                    calcUniqueAnnot.addMemberValue("type", new javassist.bytecode.annotation.StringMemberValue(soberCalcUnique.getType(), constPool));
+                    //参数 begin
+                    ////是优化参数,不用全部带入,没有全部带入
+                    String[] paramArray =  soberCalcUnique.getParams();
+                    if (!ObjectUtil.isEmpty(paramArray))
+                    {
+                        int i=0;
+                        MemberValue[] values = new MemberValue[paramArray.length];
+                        for (String param : paramArray) {
+                            MemberValue memberValue = new javassist.bytecode.annotation.StringMemberValue(param, constPool);
+                            values[i] = memberValue;
+                            i++;
+                        }
+                        // 创建ArrayMemberValue
+                        ArrayMemberValue arrayMemberValue = new ArrayMemberValue(constPool);
+                        arrayMemberValue.setValue(values);
+                        calcUniqueAnnot.addMemberValue("params", new javassist.bytecode.annotation.ArrayMemberValue(arrayMemberValue, constPool));
+                    }
+
+                    //参数 end
+
+                    calcUniqueAttr.addAnnotation(calcUniqueAnnot);
+                    field.getFieldInfo().addAttribute(calcUniqueAttr);
+                } else {
+
+                    // 添加字段注解（如果有的话）
+                    // 创建注解实例并设置属性
+                    javassist.bytecode.AnnotationsAttribute attr = new javassist.bytecode.AnnotationsAttribute(constPool,
+                            javassist.bytecode.AnnotationsAttribute.visibleTag);
+                    javassist.bytecode.annotation.Annotation annot = new javassist.bytecode.annotation.Annotation(com.github.jspxnet.sober.annotation.Column.class.getName(),
+                            constPool);
+
+                    // 设置注解属性
+                    //字段名
+                    if (column.getField() != null) {
+                        annot.addMemberValue("field", new javassist.bytecode.annotation.StringMemberValue(column.getField(), constPool));
+                    }
+                    //验证表达式 待用
+                    if (column.getDataType() != null) {
+                        annot.addMemberValue("dataType", new javassist.bytecode.annotation.StringMemberValue(column.getDataType(), constPool));
+                    }
+                    annot.addMemberValue("name", new javassist.bytecode.annotation.StringMemberValue(column.getName(), constPool));
+
+                    //字段文字说明
+                    if (column.getCaption() != null) {
+                        annot.addMemberValue("caption", new javassist.bytecode.annotation.StringMemberValue(column.getCaption(), constPool));
+                    }
+                    //长度, 映射到数据库
+                    if (column.getLength() > 0) {
+                        annot.addMemberValue("length", new javassist.bytecode.annotation.IntegerMemberValue(constPool,column.getLength()));
+                    }
+
+                    annot.addMemberValue("name", new javassist.bytecode.annotation.StringMemberValue(column.getName(), constPool));
+
+                    //字段是否可以为空
+                    annot.addMemberValue("notNull", new javassist.bytecode.annotation.BooleanMemberValue(column.isNoNull(), constPool));
+
+                    //选择范围
+                    annot.addMemberValue("option", new javassist.bytecode.annotation.StringMemberValue(column.getOption(), constPool));
+
+                    //枚举方式
+                    if (column.getEnumType() != null) {
+                        annot.addMemberValue("enumType", new javassist.bytecode.annotation.ClassMemberValue(column.getEnumType(), constPool));
+                    }
+
+                    //转json的时候是否显示枚举
+                    annot.addMemberValue("showEnum", new javassist.bytecode.annotation.BooleanMemberValue(column.isShowEnum(), constPool));
+
+                    //转json的时候是否显示枚举
+                    annot.addMemberValue("defaultValue", new javassist.bytecode.annotation.StringMemberValue(column.getDefaultValue(), constPool));
+
+                    //输入框类型
+                    annot.addMemberValue("input", new javassist.bytecode.annotation.StringMemberValue(column.getInput(), constPool));
+
+                    //在导出的时候是否隐藏
+                    annot.addMemberValue("hidden", new javassist.bytecode.annotation.BooleanMemberValue(column.isHidden(), constPool));
+
+                    //在导出的时候是否隐藏
+                    annot.addMemberValue("searchHidden", new javassist.bytecode.annotation.BooleanMemberValue(column.isSearchHidden(), constPool));
+
+                    attr.addAnnotation(annot);
+                    field.getFieldInfo().addAttribute(attr);
+
+                }
+
+
+                cc.addField(field);
+                if (Boolean.class.equals(column.getClassType())) {
+                    // 添加 getter 方法
+                    String getterName = "is" + StringUtil.capitalize(fieldName);
+                    CtMethod getter = CtNewMethod.getter(getterName, field);
+                    cc.addMethod(getter);
+
+                }
+                // 添加 getter 方法
+                String getterName = "get" + StringUtil.capitalize(fieldName);
+                CtMethod getter = CtNewMethod.getter(getterName, field);
+                cc.addMethod(getter);
+
+                // 添加 setter 方法
+                String setterName = "set" + StringUtil.capitalize(fieldName);
+                CtMethod setter = CtNewMethod.setter(setterName, field);
+                cc.addMethod(setter);
+            }
+
+            // 生成并实例化类
+            Class<?> clazz = cc.toClass();
+            Object dynamicObject = clazz.newInstance();
+            BeanUtil.setSimpleProperty(dynamicObject, "tableModels", tableModels);
+            return dynamicObject;
+        } catch (Exception e) {
+            log.error("createDynamicEntityFromTableModels error tableModels：{}",ObjectUtil.toString(tableModels,4),e);
+            return null;
+        }
+    }
+
 }

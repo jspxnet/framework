@@ -42,7 +42,7 @@ import java.util.Map;
 public class CriteriaImpl<T> implements Criteria, Serializable {
 
     //当前处理类
-    final private Class<T> criteriaClass;
+    private TableModels soberTable = null;
     //数据源工厂
     final private SoberFactory soberFactory;
     //表达式列表
@@ -61,7 +61,15 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     private Projection projection = null;
 
     public CriteriaImpl(Class<T> criteriaClass, JdbcOperations jdbcOperations) {
-        this.criteriaClass = criteriaClass;
+        soberTable = jdbcOperations.getSoberTable(criteriaClass);
+        this.jdbcOperations = jdbcOperations;
+        this.soberFactory = jdbcOperations.getSoberFactory();
+        this.totalCount = jdbcOperations.getMaxRows();
+
+    }
+
+    public CriteriaImpl(TableModels soberTable, JdbcOperations jdbcOperations) {
+        this.soberTable = soberTable;
         this.jdbcOperations = jdbcOperations;
         this.soberFactory = jdbcOperations.getSoberFactory();
         this.totalCount = jdbcOperations.getMaxRows();
@@ -72,8 +80,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      * @return 查询器
      */
     @Override
-    public Class<T> getCriteriaClass() {
-        return criteriaClass;
+    public TableModels getCriteriaClass() {
+        return soberTable;
     }
 
     /**
@@ -153,11 +161,11 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     public T objectUniqueResult(boolean loadChild) {
         setCurrentPage(1);
         setTotalCount(1);
-        List<T> list = list(loadChild);
+        List<Object> list = list(loadChild);
         if (ObjectUtil.isEmpty(list)) {
             return null;
         }
-        return list.get(0);
+        return (T)list.get(0);
     }
 
     @Override
@@ -197,7 +205,6 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         if (projection == null) {
             return null;
         }
-        TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
         String databaseType = soberFactory.getDatabaseType();
         if (soberTable == null) {
             return null;
@@ -266,8 +273,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                     termKey.append(ObjectUtil.toString(po));
                 }
             }
-            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), 1, 1, false);
-            result = JSCacheManager.get(criteriaClass, cacheKey);
+            cacheKey = SoberUtil.getListKey(soberTable.getCacheName(), StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), 1, 1, false);
+            result = JSCacheManager.get(soberTable.getCacheName(), cacheKey);
             if (result != null) {
                 return result;
             }
@@ -320,7 +327,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
         //放入cache
         if (soberFactory.isUseCache() && soberTable.isUseCache()) {
-            JSCacheManager.put(criteriaClass, cacheKey, result);
+            JSCacheManager.put(soberTable.getCacheName(), cacheKey, result);
         }
         return result;
     }
@@ -331,7 +338,6 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      * @return boolean 是否成功
      */
     private int delete() {
-        TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
         String databaseType = soberFactory.getDatabaseType();
         Dialect dialect = soberFactory.getDialect();
         StringBuilder termText = new StringBuilder();
@@ -366,7 +372,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
             if (soberFactory.isUseCache()) {
                 //同时更新缓存
-                JSCacheManager.remove(criteriaClass, getDeleteListCacheKey());
+                JSCacheManager.remove(soberTable.getCacheName(), getDeleteListCacheKey());
             }
             return result;
         } catch (Exception e) {
@@ -383,9 +389,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      */
     @Override
     public int update(Map<String, Object> updateMap) {
-        TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
         if (soberTable == null) {
-            log.error("no fond sober Config : {}", criteriaClass.getName());
+            log.error("no fond sober Config : {}", soberTable.getName());
             return -1;
         }
         Dialect dialect = soberFactory.getDialect();
@@ -432,7 +437,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (soberTable.isAutoCleanCache() && soberTable.getEntity() != null) {
                 jdbcOperations.evict(soberTable.getEntity());
             } else {
-                jdbcOperations.evict(criteriaClass);
+                jdbcOperations.evict(soberTable.getCacheName());
             }
         } catch (Exception e) {
             log.error("update updateMap:{}", updateMap, e);
@@ -452,8 +457,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     public int delete(boolean delChild) {
         int result = 0;
         if (delChild) {
-            List<T> list = list(true);
-            for (T o : list) {
+            List<Object> list = list(true);
+            for (Object o : list) {
                 if (o == null) {
                     continue;
                 }
@@ -461,7 +466,6 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 //删除 缓存
                 if (soberFactory.isUseCache()) {
                     //同时更新缓存
-                    TableModels soberTable = soberFactory.getTableModels(o.getClass(), jdbcOperations);
                     String cacheKey = SoberUtil.getLoadKey(o.getClass(), soberTable.getPrimaryKey(), BeanUtil.getProperty(o, soberTable.getPrimaryKey()), true);
                     JSCacheManager.remove(o.getClass(), cacheKey);
                 }
@@ -483,12 +487,11 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      * @return List 返回列表
      */
     @Override
-    public List<T> list(boolean loadChild) {
-        final Class<T> cacheClass = criteriaClass;
-        TableModels soberTable = soberFactory.getTableModels(cacheClass, jdbcOperations);
+    public <T> List<T> list(boolean loadChild)
+    {
         if (soberTable == null) {
-            log.error("no fond sober Config :" + cacheClass.getName());
-            return new ArrayList<T>(0);
+            log.debug("no fond sober Config");
+            return new ArrayList<>(0);
         }
 
         Dialect dialect = soberFactory.getDialect();
@@ -498,7 +501,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         Object[] objectArray = null;
         for (int i = 0; i < criterionEntries.size(); i++) {
             CriterionEntry criterionEntry = criterionEntries.get(i);
-            if (!(criterionEntry.getCriterion() instanceof LogicalExpression) && !SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
+            if (!(criterionEntry.getCriterion() instanceof LogicalExpression)
+                    && !SoberUtil.containsField(soberTable, criterionEntry.getCriterion().getFields())) {
                 errorInfo = ObjectUtil.toString(criterionEntry.getCriterion().getFields());
                 continue;
             }
@@ -512,8 +516,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
         }
         if (StringUtil.trim(termText.toString()).endsWith(" AND")) {
-            log.error("SQL存在错误,检查字段名称是否匹配:{}", errorInfo);
-            return new ArrayList<T>(0);
+            log.info("List SQL存在错误,检查字段名称是否匹配:{}", errorInfo);
+            return new ArrayList<>(0);
         }
         StringBuilder groupText = new StringBuilder();
         for (int i = 0; i < groupList.size(); i++) {
@@ -584,8 +588,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             if (termKey.toString().endsWith("_")) {
                 termKey.setLength(termKey.length() - 1);
             }
-            cacheKey = SoberUtil.getListKey(cacheClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, loadChild);
-            resultList = JSCacheManager.get(cacheClass, cacheKey,List.class);
+            cacheKey = SoberUtil.getListKey(soberTable.getCacheName(), StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, loadChild);
+            resultList = JSCacheManager.get(soberTable.getCacheName(), cacheKey,List.class);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
             }
@@ -625,15 +629,17 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
 
             while (resultSet.next()) {
-                T tempObj = jdbcOperations.loadColumnsValue(cacheClass, resultSet);
+                Object tempObj = JdbcUtil.loadColumnsValue(jdbcOperations,soberTable, resultSet);
                 jdbcOperations.calcUnique(soberTable, tempObj);
-                resultList.add(tempObj);
+
+
+                resultList.add((T)tempObj);
                 if (resultList.size() >= totalCount) {
                     break;
                 }
             }
             if (loadChild) {
-                jdbcOperations.loadNexusList(cacheClass, resultList);
+                jdbcOperations.loadNexusList(soberTable, resultList);
             }
         } catch (Exception e) {
             log.error("list error sql:{},error:{}",sqlText, e.getMessage());
@@ -646,16 +652,15 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         }
         //放入cache
         if (soberFactory.isUseCache() && soberTable.isUseCache()) {
-            JSCacheManager.put(cacheClass, cacheKey, resultList);
+            JSCacheManager.put(soberTable.getCacheName(), cacheKey, resultList);
         }
         return resultList;
     }
 
     @Override
-    public List<Object> groupList() {
-        TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
+    public <T> List<T> groupList() {
         if (soberTable == null) {
-            log.error("no fond sober Config :" + criteriaClass.getName());
+            log.error("no fond sober Config");
         }
         Dialect dialect = soberFactory.getDialect();
         String databaseType = soberFactory.getDatabaseType();
@@ -723,7 +728,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         valueMap.put(Dialect.SQL_RESULT_BEGIN_ROW, iBegin);
         valueMap.put(Dialect.SQL_RESULT_END_ROW, iEnd);
 
-        List<Object> resultList = null;
+        List<T> resultList = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         Connection conn = null;
@@ -756,8 +761,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                 termKey.setLength(termKey.length() - 1);
             }
 
-            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, false);
-            resultList = JSCacheManager.get(criteriaClass, cacheKey,List.class);
+            cacheKey = SoberUtil.getListKey(soberTable.getCacheName(), StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), orderText.toString(), iBegin, iEnd, false);
+            resultList = JSCacheManager.get(soberTable.getCacheName(), cacheKey,List.class);
             if (!ObjectUtil.isEmpty(resultList)) {
                 return resultList;
             }
@@ -776,9 +781,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             }
-
             JdbcUtil.setFetchSize(statement, iEnd);
-
             statement.setMaxRows(iEnd);
             if (objectArray != null) {
                 for (int i = 0; i < objectArray.length; i++) {
@@ -793,8 +796,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             resultList = new ArrayList<>(totalCount);
             while (resultSet.next()) {
-                Map<String, Object> beanMap = SoberUtil.getHashMap(resultSetMetaData, dialect, resultSet);
-                resultList.add(ReflectUtil.createDynamicBean(beanMap));
+                Object obj = BeanUtil.createDynamicEntityFromTableModels(soberTable);
+                resultList.add((T)obj);
                 if (resultList.size() >= totalCount) {
                     break;
                 }
@@ -810,7 +813,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
         //放入cache
         if (soberFactory.isUseCache() && soberTable.isUseCache() && !resultList.isEmpty()) {
-            JSCacheManager.put(criteriaClass, cacheKey, resultList);
+            JSCacheManager.put(soberTable.getCacheName(), cacheKey, resultList);
         }
         return resultList;
     }
@@ -827,9 +830,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      */
     @Override
     public String getDeleteListCacheKey() {
-        TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
         if (soberTable == null) {
-            log.error("no fond sober Config :" + criteriaClass.getName());
+            log.error("no fond sober Config ");
             return StringUtil.empty;
         }
 
@@ -867,11 +869,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     /**
      * 对一个类对象求合计并返回
      *
-     * @param <T> 类型
      * @return 类实体对象
      */
     @Override
-    public <T> T autoSum() {
+    public Object autoSum() {
         return autoSum(null);
     }
 
@@ -879,12 +880,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      * 对一个类对象求合计并返回
      *
      * @param fields 需要求和的字段
-     * @param <T>    类型
      * @return 类实体对象
      */
     @Override
-    public <T> T autoSum(String[] fields) {
-        TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
+    public Object autoSum(String[] fields) {
         String databaseName = soberFactory.getDatabaseName();
         if (soberTable == null) {
             return null;
@@ -935,7 +934,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             }
         }
         if (StringUtil.trim(termText.toString()).endsWith(" AND")) {
-            log.error("SQL 存在错误,检查字段名称是否匹配:{}", errorInfo);
+            log.info("SQL 存在错误,检查字段名称是否匹配:{}", errorInfo);
             return null;
         }
 
@@ -946,7 +945,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         valueMap.put(Dialect.KEY_FIELD_GROUPBY, false);
         valueMap.put(Dialect.KEY_FIELD_ORDERBY, false);
 
-        T result = null;
+        Object result = null;
         //取出cache  begin
         String cacheKey = null;
         if (soberFactory.isUseCache() && soberTable.isUseCache()) {
@@ -957,8 +956,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                     termKey.append(ObjectUtil.toString(po));
                 }
             }
-            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), StringUtil.empty, 1, 1, false);
-            result = (T) JSCacheManager.get(criteriaClass, cacheKey);
+            cacheKey = SoberUtil.getListKey(soberTable.getCacheName(), StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), StringUtil.empty, 1, 1, false);
+            result =  JSCacheManager.get(soberTable.getCacheName(), cacheKey);
             if (result != null) {
                 return result;
             }
@@ -992,14 +991,15 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
 
             ResultSetMetaData metaData = resultSet.getMetaData();
             if (resultSet.next()) {
-                result = (T) ClassUtil.newInstance(criteriaClass.getName());
+
+                result = BeanUtil.createDynamicEntityFromTableModels(soberTable);;
                 for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
                     String dbFiled = metaData.getColumnLabel(i);
                     SoberColumn soberColumn = soberTable.getColumn(dbFiled);
                     if (soberColumn != null) {
                         Object obj = dialect.getResultSetValue(resultSet, i);
                         BeanUtil.setFieldValue(result, soberColumn.getName(), obj);
-                    } else if (ClassUtil.getDeclaredField(criteriaClass, dbFiled) != null) {
+                    } else if (soberTable.containsField(dbFiled)) {
                         BeanUtil.setFieldValue(result, dbFiled, dialect.getResultSetValue(resultSet, i));
                     }
                 }
@@ -1015,7 +1015,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         }
         //放入cache
         if (soberFactory.isUseCache() && soberTable.isUseCache()) {
-            JSCacheManager.put(criteriaClass, cacheKey, result);
+            JSCacheManager.put(soberTable.getCacheName(), cacheKey, result);
         }
         return result;
 
@@ -1024,11 +1024,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
     /**
      * 对一个类对象里边的数字求平均数,在保存到对象返回
      *
-     * @param <T> 类型
      * @return 类实体对象
      */
     @Override
-    public <T> T autoAvg() {
+    public Object autoAvg() {
         return autoAvg(null);
     }
 
@@ -1037,12 +1036,10 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
      * 对一个类对象里边的数字求平均数,在保存到对象返回
      *
      * @param fields 字段
-     * @param <T>    类型
      * @return 类实体对象
      */
     @Override
-    public <T> T autoAvg(String[] fields) {
-        TableModels soberTable = soberFactory.getTableModels(criteriaClass, jdbcOperations);
+    public Object autoAvg(String[] fields) {
         String databaseName = soberFactory.getDatabaseName();
         if (soberTable == null) {
             return null;
@@ -1103,7 +1100,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         valueMap.put(Dialect.KEY_FIELD_GROUPBY, false);
         valueMap.put(Dialect.KEY_FIELD_ORDERBY, false);
 
-        T result = null;
+        Object result = null;
 
         //取出cache  begin
         String cacheKey = null;
@@ -1115,8 +1112,8 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
                     termKey.append(ObjectUtil.toString(po));
                 }
             }
-            cacheKey = SoberUtil.getListKey(criteriaClass, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), StringUtil.empty, 1, 1, false);
-            result = (T) JSCacheManager.get(criteriaClass, cacheKey);
+            cacheKey = SoberUtil.getListKey(soberTable.getCacheName(), StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), StringUtil.empty, 1, 1, false);
+            result = JSCacheManager.get(soberTable.getCacheName(), cacheKey);
             if (result != null) {
                 return result;
             }
@@ -1151,14 +1148,14 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
             resultSet = statement.executeQuery();
             ResultSetMetaData metaData = resultSet.getMetaData();
             if (resultSet.next()) {
-                result = (T) ClassUtil.newInstance(criteriaClass.getName());
+                result = BeanUtil.createDynamicEntityFromTableModels(soberTable);
                 for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
                     String dbFiled = metaData.getColumnLabel(i);
                     SoberColumn soberColumn = soberTable.getColumn(dbFiled);
                     if (soberColumn != null) {
                         Object obj = dialect.getResultSetValue(resultSet, i);
                         BeanUtil.setFieldValue(result, soberColumn.getName(), obj);
-                    } else if (ClassUtil.getDeclaredField(criteriaClass, dbFiled) != null) {
+                    } else if (soberTable.containsField(dbFiled)) {
                         BeanUtil.setFieldValue(result, dbFiled, dialect.getResultSetValue(resultSet, i));
                     }
                 }
@@ -1174,7 +1171,7 @@ public class CriteriaImpl<T> implements Criteria, Serializable {
         }
         //放入cache
         if (soberFactory.isUseCache() && soberTable.isUseCache()) {
-            JSCacheManager.put(criteriaClass, cacheKey, result);
+            JSCacheManager.put(soberTable.getCacheName(), cacheKey, result);
         }
         return result;
     }

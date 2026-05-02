@@ -40,7 +40,7 @@ public class RedissonClientConfig implements Serializable {
 
     public static Config getRedisConfig(String config) throws Exception {
         if (StringUtil.isNull(config) && StringUtil.isNull(config)) {
-            log.error("not config Redis cache link, 没有正确配置Redis 链接");
+            log.info("not config Redis cache link, 没有正确配置Redis 链接");
             return null;
         }
         config = StringUtil.trim(config);

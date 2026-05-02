@@ -257,7 +257,35 @@ public final class JxlsUtil {
         }
     }
 
+    /**
+     *
+     * @param in 输入流
+     * @param sheetIndex 第几个 sheet
+     * @param startRow 开始行
+     * @param startCol 开始列
+     * @param cla 类对象
+     * @return  完整的将excle 读出来
+     * @param <T> 类对象
+     * @throws Exception 异常
+     */
     public static <T> List<T> getMap(InputStream in,int sheetIndex, int startRow, int startCol, Class<T> cla) throws Exception
+    {
+        return getMap( in, sheetIndex,  startRow,  startCol, false,cla);
+    }
+
+    /**
+     *
+     * @param in 输入流
+     * @param sheetIndex 第几个 sheet
+     * @param startRow 开始行
+     * @param startCol 开始列
+     * @param trim 去掉空格
+     * @param cla 类对象
+     * @return  完整的将excle 读出来
+     * @param <T> 类对象
+     * @throws Exception 异常
+     */
+    public static <T> List<T> getMap(InputStream in,int sheetIndex, int startRow, int startCol,boolean trim, Class<T> cla) throws Exception
     {
         List<T> list = new ArrayList<>();
         try {
@@ -338,7 +366,7 @@ public final class JxlsUtil {
                     {
                         continue;
                     }
-                    Object cellValue = null;
+                    String cellValue = null;
 
                     short format = cell.getCellStyle().getDataFormat();
                     // 判断excel单元格内容的格式，并对其进行转换，以便插入数据库
@@ -372,11 +400,21 @@ public final class JxlsUtil {
                         else {
                             cellValue = cell.getStringCellValue();
                         }
+
+                        if (trim)
+                        {
+                            //去掉空格，如果为null 返回 ‘’
+                            if (cellValue==null)
+                            {
+                                cellValue = StringUtil.empty;
+                            }
+                            cellValue = cellValue.trim();
+                        }
+
                     } catch (Exception e)
                     {
-                        log.error(headMap.get(j) +",取值错误,不要使用引用方式的值",e);
+                        log.error("{},取值错误,{},不要使用引用方式的值",headMap.get(j),cell,e);
                     }
-
                     String filedName = headMap.get(j);
                     if (filedName!=null)
                     {
@@ -446,6 +484,7 @@ public final class JxlsUtil {
 
 
 
+
     /**
      *
      * @param in 输入流
@@ -457,6 +496,22 @@ public final class JxlsUtil {
      */
     public static List<Map<Integer,Object>> getMap(InputStream in,int sheetIndex, int startRow, int startCol) throws Exception
     {
+        return getMap( in, sheetIndex,  startRow,  startCol,false);
+    }
+
+    /**
+     *
+     * @param in 输入流
+     * @param sheetIndex 第几个 sheet
+     * @param startRow 开始行
+     * @param startCol 开始列
+     * @param trim 去掉空格
+     * @return 完整的将excle 读出来
+     * @throws Exception 异常
+     */
+    public static List<Map<Integer,Object>> getMap(InputStream in,int sheetIndex, int startRow, int startCol,boolean trim) throws Exception
+    {
+
         List<Map<Integer,Object>> result = new ArrayList<>();
         try {
             Workbook workbook = WorkbookFactory.create(in);
@@ -476,7 +531,7 @@ public final class JxlsUtil {
                     {
                         continue;
                     }
-                    Object cellValue = null;
+                    String cellValue = null;
 
                     short format = cell.getCellStyle().getDataFormat();
                     // 判断excel单元格内容的格式，并对其进行转换，以便插入数据库
@@ -510,10 +565,20 @@ public final class JxlsUtil {
                         else {
                             cellValue = cell.getStringCellValue();
                         }
+                        if (trim)
+                        {
+                            //去掉空格，如果为null 返回 ‘’
+                            if (cellValue==null)
+                            {
+                                cellValue = StringUtil.empty;
+                            }
+                            cellValue = cellValue.trim();
+                        }
                         valueMap.put(j,cellValue);
+
                     } catch (Exception e)
                     {
-                       e.printStackTrace();
+                        log.error("excel getMap cell:{}",cell,e);
                     }
                 }
                 result.add(valueMap);

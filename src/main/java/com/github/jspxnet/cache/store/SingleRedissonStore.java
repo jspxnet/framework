@@ -132,8 +132,16 @@ public class SingleRedissonStore extends Store implements IStore {
     @Override
     public boolean lock(String key, int timeToLive) {
         RLock lock = redisson.getLock(key);
-        lock.lock(timeToLive, TimeUnit.SECONDS);
-        return lock.isLocked();
+        if (lock==null)
+        {
+            return false;
+        }
+        try {
+            return lock.tryLock(timeToLive, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.error(e.getMessage());
+        }
+        return false;
     }
 
     /**
@@ -163,7 +171,9 @@ public class SingleRedissonStore extends Store implements IStore {
         {
             return true;
         }
-        lock.unlock();
+        if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+            lock.unlock();
+        }
         return lock.isLocked();
     }
 

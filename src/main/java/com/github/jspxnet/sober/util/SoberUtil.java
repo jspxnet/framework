@@ -22,6 +22,7 @@ import com.github.jspxnet.boot.EnvFactory;
 import com.github.jspxnet.cache.JSCacheManager;
 import com.github.jspxnet.enums.YesNoEnumType;
 import com.github.jspxnet.io.jar.ClassScannerUtils;
+import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.scriptmark.XmlEngine;
 import com.github.jspxnet.scriptmark.core.TagNode;
 import com.github.jspxnet.scriptmark.parse.XmlEngineImpl;
@@ -32,8 +33,9 @@ import com.github.jspxnet.sioc.config.ConfigureContext;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import com.github.jspxnet.sober.*;
 import com.github.jspxnet.sober.annotation.*;
-import com.github.jspxnet.sober.enums.EntityLevelEnumType;
+import com.github.jspxnet.sober.enums.*;
 import com.github.jspxnet.sober.table.*;
+import com.github.jspxnet.txweb.bundle.table.BundleTable;
 import com.github.jspxnet.txweb.table.*;
 import com.github.jspxnet.sober.table.meta.OperatePlug;
 import com.github.jspxnet.sober.config.*;
@@ -43,20 +45,14 @@ import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.dao.SqlMapConfDAO;
 import com.github.jspxnet.sober.dao.impl.SqlMapConfDAOImpl;
 import com.github.jspxnet.sober.dialect.Dialect;
-import com.github.jspxnet.sober.enums.DatabaseEnumType;
-import com.github.jspxnet.sober.enums.ExecuteEnumType;
-import com.github.jspxnet.sober.enums.QueryModelEnumType;
 import com.github.jspxnet.sober.proxy.DefaultSqlMapInvocation;
 import com.github.jspxnet.sober.proxy.InterceptorProxy;
 import com.github.jspxnet.txweb.turnpage.TurnPageButton;
 import com.github.jspxnet.txweb.turnpage.impl.TurnPageButtonImpl;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.jasper.security.SecurityUtil;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.security.Security;
 import java.sql.*;
 import java.util.*;
 
@@ -79,9 +75,7 @@ public final class SoberUtil {
     final public static String CACHE_TERM_CHILD = ":c:";
     final public static String CACHE_TERM_EQUALS = ":e:";
     public final static List<Class<?>> BASE_MODEL_LIST = Arrays.asList(LockTable.class,Sequences.class,SoberTable.class,
-            SoberColumn.class,SoberNexus.class, SoberCalcUnique.class, SqlMapConf.class,SoberFieldEnum.class,
-            OptionBundle.class);
-
+            SoberColumn.class,SoberNexus.class, SoberCalcUnique.class, SqlMapConf.class,SoberFieldEnum.class, BundleTable.class,OptionBundle.class);
 
     final private static LinkedList<String> snapshotIdList = new LinkedList<>();
     static
@@ -179,6 +173,7 @@ public final class SoberUtil {
 
 
     /**
+     * 是验证
      * @param soberTable 表对象
      * @param fields     字段
      * @return 字段安全检测 true 表示继续运行，false 表示过滤这个字段条件，应为这个字段不存在
@@ -189,7 +184,6 @@ public final class SoberUtil {
         }
         for (String field : fields) {
             if (!soberTable.containsField(field)) {
-                log.debug(soberTable.getName() + "  " + soberTable.getCaption() + " field:" + field);
                 return false;
             }
         }
@@ -204,7 +198,7 @@ public final class SoberUtil {
      * @return 返回缓存key
      */
     public static String getLoadKey(Class<?> aClass, Serializable field, Object find, boolean loadChild) {
-        return aClass.getSimpleName() + CACHE_TERM_LOAD +
+        return aClass.getName() + CACHE_TERM_LOAD +
                 //满足redis 规范
                 field + CACHE_TERM_EQUALS + find + CACHE_TERM_CHILD + aClass.getName().length() + ":" + BooleanUtil.toInt(loadChild);
     }
@@ -216,7 +210,7 @@ public final class SoberUtil {
      * @return 返回缓存key
      */
     public static String getLoadKey(Class<?> aClass, Serializable field, Object find) {
-        return aClass.getSimpleName() + CACHE_TERM_LOAD +
+        return aClass.getName() + CACHE_TERM_LOAD +
                 //满足redis 规范
                 field + CACHE_TERM_EQUALS + find + CACHE_TERM_CHILD + aClass.getName().length() + ":" + ".*";
     }
@@ -236,8 +230,28 @@ public final class SoberUtil {
         if (ck != null && ck.length() > 2) {
             ck = ck.substring(0, 2);
         }
-        String sb = aClass.getSimpleName() + CACHE_TERM_LIST +
+        String sb = aClass.getName() + CACHE_TERM_LIST +
                 ck + EncryptUtil.getMd5(term) + "_T_" + term2 + CACHE_TERM_CHILD + aClass.getName().length() + ":" + "_L" + begin + "_" + end +"_"+ BooleanUtil.toInt(loadChild);
+        return StringUtil.replace(sb, " ", "");
+    }
+
+    /**
+     * @param className    类对象
+     * @param term      条件
+     * @param term2      排序,sql 方式，放入字段hash
+     * @param begin     开始行
+     * @param end       结束行
+     * @param loadChild 载入子对象
+     * @return 返回缓存key
+     */
+    public static String getListKey(String className, String term, String term2, int begin, int end, boolean loadChild) {
+        //满足redis 规范
+        String ck = term;
+        if (ck != null && ck.length() > 2) {
+            ck = ck.substring(0, 2);
+        }
+        String sb = className + CACHE_TERM_LIST +
+                ck + EncryptUtil.getMd5(term) + "_T_" + term2 + CACHE_TERM_CHILD + className.length() + ":" + "_L" + begin + "_" + end +"_"+ BooleanUtil.toInt(loadChild);
         return StringUtil.replace(sb, " ", "");
     }
 
@@ -587,7 +601,9 @@ public final class SoberUtil {
         SoberTable soberTable = null;
         if (!SoberUtil.BASE_MODEL_LIST.contains(cla))
         {
-            soberTable = soberSupport.createCriteria(SoberTable.class).add(Expression.eq("entityClass",cla.getName())).addOrder(Order.desc("version")).objectUniqueResult(true);
+            soberTable = soberSupport.createCriteria(SoberTable.class).add(Expression.eq("name",cla.getName()))
+                    .addOrder(Order.desc("version")).objectUniqueResult(true);
+            //System.out.println("-----------"+cla+"=" + ObjectUtil.toString(soberTable, 4));
         }
         if (soberTable == null||soberTable.getId()<=0) {
             soberTable = AnnotationUtil.getSoberTable(cla);
@@ -598,11 +614,12 @@ public final class SoberUtil {
         if (StringUtil.isEmpty(soberTable.getDatabaseName())) {
             soberTable.setDatabaseName(soberSupport.getSoberFactory().getDatabaseName());
         }
+        Dialect dialect = soberSupport.getSoberFactory().getDialect();
         DatabaseEnumType[] oracleDatabaseEnumType = new DatabaseEnumType[]{DatabaseEnumType.ORACLE, DatabaseEnumType.DB2, DatabaseEnumType.DM, DatabaseEnumType.MSSQL};
         String sql = null;
         try {
             if (soberTable.isCreate() && !soberSupport.tableExists(soberTable)) {
-                sql = getCreateTableSql(soberSupport.getSoberFactory().getDialect(), soberTable);
+                sql = getCreateTableSql(dialect, soberTable);
                 //oracle只能一个; 一个; 的执行
                 if (DatabaseEnumType.inArray(oracleDatabaseEnumType, soberSupport.getSoberFactory().getDatabaseType())) {
                     String[] sqlLines = StringUtil.split(sql, StringUtil.SEMICOLON + StringUtil.CRLF);
@@ -622,13 +639,13 @@ public final class SoberUtil {
                         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimaryKey());
 
                         //除非
-                        String haveSeqSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_HAVE_SEQ, valueMap);
+                        String haveSeqSql = dialect.processTemplate(Dialect.ORACLE_HAVE_SEQ, valueMap);
                         Object obj = soberSupport.getUniqueResult(haveSeqSql);
                         if (ObjectUtil.toInt(obj) <= 0) {
-                            String seqSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_CREATE_SEQUENCE, valueMap);
+                            String seqSql = dialect.processTemplate(Dialect.ORACLE_CREATE_SEQUENCE, valueMap);
                             soberSupport.execute(seqSql);
                         }
-                        String tigSql = soberSupport.getSoberFactory().getDialect().processTemplate(Dialect.ORACLE_CREATE_SEQ_TIGGER, valueMap);
+                        String tigSql = dialect.processTemplate(Dialect.ORACLE_CREATE_SEQ_TIGGER, valueMap);
                         log.info("sql:{}", tigSql);
                         soberSupport.execute(tigSql);
                     }
@@ -833,7 +850,7 @@ public final class SoberUtil {
             }
         }
         if (sqlMapConf == null) {
-            log.info("ERROR SQL map not config SQL id:{},namespace:{}", exeName, namespace);
+            log.error("ERROR SQL map not config SQL id:{},namespace:{}", exeName, namespace);
             throw new Exception("ERROR SQL map not config SQL:" + exeName + ",namespace:" + namespace);
         }
         if (StringUtil.isNull(sqlMapConf.getNamespace())) {
@@ -1045,17 +1062,16 @@ public final class SoberUtil {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(), "'", ""));
+        valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(), "'", StringUtil.empty));
 
         /////////先创建每一个字段
         String[] columns = null;
         for (SoberColumn soberColumn : soberTable.getColumns()) {
 
-            if (StringUtil.isNullOrWhiteSpace(soberColumn.getName()) || soberColumn.getNexus() != null || soberColumn.getCalcUnique() !=null)
+            if (StringUtil.isNullOrWhiteSpace(soberColumn.getField()) || soberColumn.getNexus() != null || soberColumn.getCalcUnique() !=null)
             {
                 continue;
             }
-
             valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
             if (soberColumn.getName().equalsIgnoreCase(soberTable.getPrimaryKey())) {
                 valueMap.put(Dialect.KEY_FIELD_SERIAL, soberTable.isSerial());
@@ -1118,7 +1134,7 @@ public final class SoberUtil {
         /////////在总体的生成SQL begin
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
-        valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(), "'", ""));
+        valueMap.put(Dialect.KEY_TABLE_CAPTION, StringUtil.replace(soberTable.getCaption(), "'", StringUtil.empty));
         valueMap.put(Dialect.KEY_COLUMN_LIST, columns);
         valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimaryKey());
         valueMap.put(Dialect.KEY_FIELD_SERIAL, soberTable.isSerial());
@@ -1322,13 +1338,17 @@ public final class SoberUtil {
     /**
      * 清理重复的快照数据
      * 只对本类生成的快照有效
-     * @param toOperations 数据库
+     * @param soberSupport 数据库
      * @param tableName 表名
      * @return 返回更新结果
      * @throws Exception 异常
      */
-    public static int cleanSnapshot(SoberSupport toOperations,String tableName) throws Exception {
+    public static int cleanSnapshot(SoberSupport soberSupport,String tableName) throws Exception {
         final String sql = "DELETE FROM "+tableName+" WHERE "+SNAPSHOT_FIELD_CURRENT_TIME_MILLIS+" NOT IN (SELECT max("+SNAPSHOT_FIELD_CURRENT_TIME_MILLIS+") FROM "+tableName+" GROUP BY "+SNAPSHOT_FIELD_DATE_STR+")";
-        return toOperations.update(sql);
+        return soberSupport.update(sql);
     }
+
+
+
+
 }

@@ -116,32 +116,27 @@ public final class StringUtil {
     {
 
     }
-    /**
-     *
-     * @param caption 字段名称
-     * @return 修复名称字段中的特殊支付，确保sql能正常执行
-     */
-    public static String fixFiledCaption(String caption) {
-        String fieldCaption = StringUtil.fullToHalf(caption);
-        for (String clean:captionFixChars)
-        {
-            fieldCaption = StringUtil.replace(fieldCaption,clean,"");
-        }
-        if (fieldCaption.contains("、"))
-        {
-            fieldCaption = StringUtil.substringAfter(fieldCaption,"、");
-        }
-        if (fieldCaption.length()>10)
-        {
-            fieldCaption = StringUtil.cut(fieldCaption,10,"");
-        }
-        if (!StringUtil.isChinese(fieldCaption))
-        {
-            fieldCaption = StringUtil.underlineToCamel(fieldCaption);
-        }
-        return StringUtil.replace(fieldCaption," ","");
-    }
 
+    /**
+     * 过滤字符串中的特殊字符，只保留字母、数字和中文
+     *
+     * @param str 待过滤的字符串
+     * @return 过滤后的字符串
+     */
+    public static String filterSpecialCharacters(String str) {
+        if (str==null)
+        {
+            return empty;
+        }
+        // 定义正则表达式，匹配所有非字母、数字和中文字符
+        String regEx = "[^a-zA-Z0-9\\u4E00-\\u9FA5]";
+        // 编译正则表达式
+        Pattern pattern = Pattern.compile(regEx);
+        // 创建匹配器
+        Matcher matcher = pattern.matcher(str);
+        // 替换所有匹配的字符为空字符串
+        return matcher.replaceAll(empty).trim();
+    }
 
     /**
      *
@@ -651,8 +646,8 @@ public final class StringUtil {
         }
         int replLength = searchString.length();
         int increase = replacement.length() - replLength;
-        increase = (increase < 0 ? 0 : increase);
-        increase *= (max < 0 ? 16 : (max > 64 ? 64 : max));
+        increase = (Math.max(increase, 0));
+        increase *= (max < 0 ? 16 : (Math.min(max, 64)));
         StringBuilder buf = new StringBuilder(text.length() + increase);
         while (end != -1) {
             buf.append(text, start, end).append(replacement);
@@ -1020,7 +1015,7 @@ public final class StringUtil {
      * @return UTF编码专字符串
      */
     public static String UTFToString(String str) {
-        if (!str.contains("\\u")) {
+        if (str == null || !str.contains("\\u")) {
             return StringUtil.empty;
         }
         StringBuilder sb = new StringBuilder();
@@ -1130,7 +1125,7 @@ public final class StringUtil {
             return empty;
         }
         if (source.contains("?")) {
-            source = substringAfter(source, "?");
+            source = substringBefore(source, "?");
         }
         String[] ls = split(source, "/");
         if (ls.length == 0) {
@@ -3112,13 +3107,14 @@ public final class StringUtil {
     /**
      * 判断是否为json数组
      *
-     * @param str 字符串
+     * @param txt 字符串
      * @return 判断是否为json数组
      */
-    public static boolean isJsonArray(String str) {
+    public static boolean isJsonArray(String txt) {
+        String str = StringUtil.trim(txt);
         int a = StringUtil.countMatches(str, "\"");
         int b = StringUtil.countMatches(str, "'");
-        return str.startsWith("[") && str.endsWith("]") && (a > 0 || b > 0);
+        return str.startsWith("[") && str.endsWith("]") && (a >= 0 || b >= 0);
     }
 
     /**
@@ -3522,6 +3518,36 @@ public final class StringUtil {
             }
         }
         return result;
+    }
+
+
+    public static String createBeanFields(JSONObject json)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (String key:json.keys())
+        {
+            Object obj = json.get(key);
+            if (obj instanceof Date)
+            {
+                sb.append("@Column(caption = \"").append(key).append("\")\r\nprivate Date ").append(key).append("=new Date();").append("\r\n");
+            }else if (obj instanceof Boolean)
+            {
+                sb.append("@Column(caption = \"").append(key).append("\")\r\nprivate Boolean ").append(key).append("= false;").append("\r\n");
+            } else if (obj instanceof Number)
+            {
+                sb.append("@Column(caption = \"").append(key).append("\")\r\nprivate double ").append(key).append("=0;").append("\r\n");
+            } else {
+                sb.append("@Column(caption = \"").append(key).append("\", length = 100)\r\nprivate String ").append(key).append("= StringUtil.empty;").append("\r\n");
+            }
+
+        }
+        return sb.toString();
+    }
+
+    public static void main(String[] args) {
+        String testStr = "、Hello!@#World$%(1)";
+        System.out.println("原始字符串: " + testStr);
+        System.out.println("过滤后字符串: " + filterSpecialCharacters(testStr));
     }
 
 }

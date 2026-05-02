@@ -25,12 +25,12 @@ import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.DialectFactory;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
 import com.github.jspxnet.sober.enums.EntityLevelEnumType;
-import com.github.jspxnet.sober.model.container.PropertyContainer;
 import com.github.jspxnet.sober.table.*;
 import com.github.jspxnet.sober.transaction.AbstractTransaction;
 import com.github.jspxnet.sober.transaction.JDBCTransaction;
 import com.github.jspxnet.sober.transaction.JTATransaction;
 import com.github.jspxnet.sober.transaction.TransactionManager;
+import com.github.jspxnet.sober.util.AnnotationUtil;
 import com.github.jspxnet.sober.util.JdbcUtil;
 import com.github.jspxnet.sober.util.LockUtil;
 import com.github.jspxnet.sober.util.SoberUtil;
@@ -640,22 +640,33 @@ public class SoberMappingBean implements SoberFactory {
             soberTable = SoberUtil.createTableAndIndex(cla, null,EntityLevelEnumType.MAIN.getValue(), soberSupport);
             if (soberTable != null) {
                 //放入扩展字段begin
-                List<SoberColumn> columnList = soberSupport.getTableColumns(soberTable.getName());
+                //这里是从数据库直接取，实体名称并不正确
+                //这里是从注释标签中得到
+                List<SoberColumn> columnList = soberTable.getColumns();
+                //当注释标签中没有，就使用数据库结构
+                if (ObjectUtil.isEmpty(columnList))
+                {
+                    //这里是从数据库里边直接取，实体名称并不正确
+                    columnList = soberSupport.getTableColumns(soberTable.getName());
+                    soberTable.setColumns(columnList);
+                }
+                //这里是从注释标签中得到
                 for (SoberColumn soberColumn : columnList) {
                     //先修复表名
                     SoberNexus soberNexus =  soberColumn.getNexus();
                     if (soberNexus != null) {
+                        soberColumn.setTableName(soberTable.getName());
                         soberColumn.setCaption(soberColumn.getCaption());
                         soberColumn.setClassType(SoberNexus.class);
                     }
                     SoberCalcUnique calcUnique =  soberColumn.getCalcUnique();
                     if (calcUnique != null) {
+                        soberColumn.setTableName(soberTable.getName());
                         soberColumn.setCaption(calcUnique.getCaption());
                         soberColumn.setClassType(SoberCalcUnique.class);
                     }
-
                 }
-               for (SoberColumn soberColumn : columnList) {
+                for (SoberColumn soberColumn : columnList) {
                     if (StringUtil.isNullOrWhiteSpace(soberColumn.getField()))
                     {
                         continue;
@@ -684,9 +695,8 @@ public class SoberMappingBean implements SoberFactory {
                         oldSoberColumn.setDefaultValue(soberColumn.getDefaultValue());
                     }
                 }
-                soberTable.setCanExtend(PropertyContainer.class.isAssignableFrom(cla));
+                //soberTable.setCanExtend(PropertyContainer.class.isAssignableFrom(cla));
                 //放入扩展字段end
-
                 //修复caption为空的情况 begin
                 String databaseName = soberSupport.getSoberFactory().getDatabaseName();
                 for (SoberColumn soberColumn : columnList) {
@@ -696,7 +706,6 @@ public class SoberMappingBean implements SoberFactory {
                     //修复库名
                     soberColumn.setDatabaseName(databaseName);
                 }
-                //修复caption为空的情况 end
 
                 TABLE_MAP.put(cla, soberTable);
             }

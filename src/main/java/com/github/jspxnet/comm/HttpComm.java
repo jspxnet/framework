@@ -28,7 +28,7 @@ public abstract class HttpComm extends Observable implements SerialPortEventList
     public String name = StringUtil.empty;
     protected String portName = StringUtil.empty;
     protected String encoding = StandardCharsets.UTF_8.name();
-    protected String urlTemplate = " http://utf8.sms.webchinese.cn";
+//    protected String urlTemplate = " http://utf8.sms.webchinese.cn";
     private final Map<String, Object> params = new HashMap<String, Object>();
     private final String response = StringUtil.empty;
     private SerialConfig settings = new SerialConfig();

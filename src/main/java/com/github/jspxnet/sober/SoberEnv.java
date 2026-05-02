@@ -35,4 +35,6 @@ public class SoberEnv {
 
     final public static String NOT_TRANSACTION = "-1";
 
+    //动态实体模型变量名
+    final public static String TABLE_MODELS_KEY = "tableModels";
 }

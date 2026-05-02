@@ -76,4 +76,16 @@ public interface TableModels extends Serializable {
 
     long getId();
 
+    String getCacheName();
+
+    int getVersion();
+
+    int getEntityLevel();
+
+    void setEntityLevel(int entityLevel);
+
+
+
+    String getParentName();
+
 }

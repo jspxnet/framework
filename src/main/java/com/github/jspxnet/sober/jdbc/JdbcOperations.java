@@ -334,6 +334,8 @@ public abstract class JdbcOperations implements SoberSupport {
         return JdbcUtil.loadColumnsValue(this, tClass, resultSet);
     }
 
+
+
     /**
      * 计算合计,这个标签会占用大量的CPU计算资源，谨慎使用
      *
@@ -481,7 +483,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public <T> List<T> load(Class<T> aClass, Collection<?> values, boolean loadChild) {
         //载入一个ID列表
-        TableModels soberTable = getSoberTable(aClass);
+        TableModels soberTable = JdbcUtil.getObjectModels(this,aClass);
         String field = soberTable.getPrimaryKey();
         Criteria criteria = createCriteria(aClass);
         criteria = criteria.add(Expression.in(field, values));
@@ -535,11 +537,11 @@ public abstract class JdbcOperations implements SoberSupport {
         criteria = criteria.add(Expression.eq("tableName", tableName));
         criteria = criteria.add(Expression.eq("defType", BoolEnumType.YES.getValue()));
         criteria = criteria.setCurrentPage(1).setTotalCount(1);
-        List<BaseBillType> list = criteria.list(false);
+        List<Object> list = criteria.list(false);
         if (ObjectUtil.isEmpty(list)) {
             return null;
         }
-        return list.get(0);
+        return (BaseBillType)list.get(0);
     }
 
     /**
@@ -573,8 +575,19 @@ public abstract class JdbcOperations implements SoberSupport {
      * @throws Exception 异常
      */
     @Override
-    public int save(Object object, final boolean child) throws Exception {
+    public int save(Object object, boolean child) throws Exception {
         return JdbcUtil.save(this, object, child);
+    }
+
+    /**
+     *
+     * @param soberTable 模型
+     * @return 保存模型数量
+     * @throws Exception 异常
+     */
+    @Override
+    public int saveModel(TableModels soberTable) throws Exception {
+        return JdbcUtil.saveModel(this, soberTable);
     }
 
     /**
@@ -603,7 +616,7 @@ public abstract class JdbcOperations implements SoberSupport {
         int result = 0;
         for (Object obj : collection) {
             if (soberTable == null) {
-                soberTable = getSoberTable(obj.getClass());
+                soberTable = JdbcUtil.getObjectModels(this,obj);
             }
             //////////配置验证才能够保存 begin
             if (soberFactory.isValid()) {
@@ -667,6 +680,19 @@ public abstract class JdbcOperations implements SoberSupport {
     }
 
     /**
+     * @param soberTable   模型
+     * @param ids      id 列表
+     * @param delChild 删除关联
+     * @return 删除
+     */
+    @Override
+    public int delete(TableModels soberTable, Object[] ids, boolean delChild) {
+        if (ids == null) {
+            return -2;
+        }
+       return createCriteria(soberTable).add(Expression.in(soberTable.getPrimaryKey(), ids)).delete(delChild);
+    }
+    /**
      * 删除对象
      *
      * @param o 对象
@@ -680,7 +706,7 @@ public abstract class JdbcOperations implements SoberSupport {
         if (ClassUtil.isStandardProperty(o.getClass())) {
             log.debug("delete 参数错误，必须传入对象{}", o);
         }
-        TableModels soberTable = getSoberTable(o.getClass());
+        TableModels soberTable = JdbcUtil.getObjectModels(this,o);
         Object key = BeanUtil.getProperty(o, soberTable.getPrimaryKey());
         return delete(o.getClass(), soberTable.getPrimaryKey(), (Serializable) key);
     }
@@ -694,7 +720,27 @@ public abstract class JdbcOperations implements SoberSupport {
     public int delete(Class<?> aClass, Serializable serializable) {
         return delete(aClass, getSoberTable(aClass).getPrimaryKey(), serializable);
     }
+    /**
+     * @param soberTable   模型
+     * @param serializable id
+     * @return 删除对象
+     */
+    @Override
+    public int delete(TableModels soberTable, Serializable serializable) {
+        return JdbcUtil.delete(this,soberTable,serializable);
+    }
 
+    /**
+     *
+     * @param soberTable  模型
+     * @param serializable id
+     * @param delChild 是否删除映射对象
+     * @return 删除条数
+     */
+    @Override
+    public int delete(TableModels soberTable, Serializable serializable,boolean delChild) {
+        return JdbcUtil.delete(this, soberTable, soberTable.getPrimaryKey(), serializable,null, delChild);
+    }
     /**
      * 根据字段删除一个对象,或一组对象,快速删除
      *
@@ -706,7 +752,6 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public int delete(Class<?> aClass, String field, Serializable serializable) {
         return JdbcUtil.delete(this, aClass, field, serializable);
-
     }
 
     /**
@@ -715,7 +760,7 @@ public abstract class JdbcOperations implements SoberSupport {
      * @param aClass       删除的类
      * @param serializable 值
      * @param delChild     是否删除映射对象
-     * @return boolean 是否成功
+     * @return 删除条数
      */
     @Override
     public int delete(Class<?> aClass, Serializable serializable, boolean delChild) {
@@ -766,7 +811,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int update(Object object) throws Exception {
-        return JdbcUtil.update(this, getDialect(), object);
+        return JdbcUtil.update(this, object);
     }
 
     /**
@@ -878,7 +923,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public int saveOrUpdate(Object object) throws Exception {
-        return JdbcUtil.saveOrUpdate(this, getDialect(), object);
+        return JdbcUtil.saveOrUpdate(this, object);
     }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -1191,7 +1236,7 @@ public abstract class JdbcOperations implements SoberSupport {
      */
     @Override
     public List<?> prepareQuery(String sqlText, Object[] param) {
-        return JdbcUtil.prepareQuery(this, getDialect(), sqlText, param);
+        return JdbcUtil.prepareQuery(this,sqlText, param);
     }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -1262,6 +1307,11 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public Criteria createCriteria(Class<?> cla) {
         return new CriteriaImpl(cla, this);
+    }
+
+    @Override
+    public Criteria createCriteria(TableModels tableModels) {
+        return new CriteriaImpl(tableModels, this);
     }
 
     //-----------------------------------------------------------------
@@ -1411,10 +1461,20 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public void evict(Class<?> cla) {
         if (soberFactory.isUseCache()) {
-            JSCacheManager.queryRemove(cla, cla.getSimpleName() + StringUtil.ASTERISK);
+            JSCacheManager.queryRemove(cla, StringUtil.ASTERISK);
         }
     }
 
+    /**
+     *
+     * @param cacheName 缓存明
+     */
+    @Override
+    public void evict(String cacheName) {
+        if (soberFactory.isUseCache()) {
+            JSCacheManager.queryRemove(cacheName, StringUtil.ASTERISK);
+        }
+    }
     /**
      * 清除缓存 中list 相关数据
      *
@@ -1423,7 +1483,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public void evictList(Class<?> cla) {
         if (soberFactory.isUseCache()) {
-            JSCacheManager.queryRemove(cla, cla.getSimpleName() + SoberUtil.CACHE_TERM_LIST + StringUtil.ASTERISK);
+            JSCacheManager.queryRemove(cla, cla.getName() + SoberUtil.CACHE_TERM_LIST + StringUtil.ASTERISK);
         }
     }
 
@@ -1435,7 +1495,7 @@ public abstract class JdbcOperations implements SoberSupport {
     @Override
     public void evictLoad(Class<?> cla) {
         if (soberFactory.isUseCache()) {
-            JSCacheManager.queryRemove(cla, cla.getSimpleName() + SoberUtil.CACHE_TERM_LOAD + StringUtil.ASTERISK);
+            JSCacheManager.queryRemove(cla, cla.getName() + SoberUtil.CACHE_TERM_LOAD + StringUtil.ASTERISK);
         }
     }
 

@@ -341,10 +341,9 @@ public abstract class Dialect extends HashMap<String,String> {
             return;
         }
         if (obj.getClass().isArray()) {
-            ps.setString(parameterIndex, obj.toString());
+            ps.setString(parameterIndex, ObjectUtil.toString(obj));
             return;
         }
-
         ps.setObject(parameterIndex, obj);
     }
 

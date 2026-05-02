@@ -248,12 +248,10 @@ public class PostgreSQLDialect extends Dialect {
                 try {
                     return StringUtil.getDate(new String(t));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage());
                 }
             }
-
         }
-
 
         ///////日期时间java.sql.Timestamp
         if (typeName.contains("timestamp") || "datetime".equals(typeName)) {
@@ -297,9 +295,8 @@ public class PostgreSQLDialect extends Dialect {
                 while ((i = reader.read(buf)) != -1) {
                     out.write(buf, 0, i);
                 }
-
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             } finally {
                 try {
                     out.close();

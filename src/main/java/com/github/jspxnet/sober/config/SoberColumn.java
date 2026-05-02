@@ -4,7 +4,7 @@
  * @Mail:39793751@qq.com
   * author: chenYuan , 陈原
  * @License: Jspx.net Framework Code is open source (LGPL)，Jspx.net Framework 使用LGPL 开源授权协议发布。
- * @jvm:jdk1.6+  x86/amd64
+ * @jvm:jdk1.8+  x86/amd64
  *
  */
 package com.github.jspxnet.sober.config;
@@ -13,7 +13,7 @@ import com.github.jspxnet.component.zhex.spell.ChineseUtil;
 import com.github.jspxnet.json.JsonField;
 import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.annotation.*;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.sober.table.SoberFieldEnum;
 import com.github.jspxnet.sober.table.meta.FormControl;
 import com.github.jspxnet.utils.ClassUtil;
@@ -31,7 +31,7 @@ import java.util.Date;
  * 字段属性
  */
 @Data
-@Table(name = "jspx_sober_column",caption = "字段关系")
+@Table(name = "jspx_sober_column",caption = "字段关系",idx = "jspx_sober_column_idx(databaseName,name,field,version)")
 public class SoberColumn implements Serializable {
 
     @Id
@@ -60,8 +60,11 @@ public class SoberColumn implements Serializable {
     @Column(caption = "是否空",length = 10)
     private boolean noNull = false;
 
-    @Column(caption = "默认值",length = 1000)
+    @Column(caption = "配置默认值",length = 1000)
     private String defaultValue = StringUtil.empty;
+
+    @Column(caption = "字段初始值",length = 200)
+    private Object initValue = null;
 
     @Column(caption = "描述",length = 200)
     private String caption = StringUtil.empty;
@@ -102,16 +105,22 @@ public class SoberColumn implements Serializable {
     @Column(caption = "自动ID")
     private boolean autoincrement = false;
 
-    @Nexus(mapping = MappingType.OneToOne, field = "field", targetField = "field",term = "tableName:eq[${tableName}];version:eq[${version}]",  targetEntity = SoberNexus.class, chain = true,save = true,update = true, delete = true)
+
+    @Column(caption = "是否显示枚举")
+    private boolean showEnum = false;
+
+    @Nexus(mapping = MappingEnumType.OneToOne, field = "field", targetField = "field",term = "tableName:eq[${tableName}];version:eq[${version}]",  targetEntity = SoberNexus.class, chain = true,save = true,update = true, delete = true)
     private SoberNexus nexus = null;
 
-    @Nexus(mapping = MappingType.OneToOne, field = "field", targetField = "field",term = "tableName:eq[${tableName}];version:eq[${version}]", targetEntity = SoberCalcUnique.class, chain = true,save = true,update = true, delete = true)
+    @Nexus(mapping = MappingEnumType.OneToOne, field = "field", targetField = "field",term = "tableName:eq[${tableName}];version:eq[${version}]", targetEntity = SoberCalcUnique.class, chain = true,save = true,update = true, delete = true)
     private SoberCalcUnique calcUnique = null;
 
 
-    @Nexus(mapping = MappingType.OneToOne, field = "field", targetField = "field",targetEntity = FormControl.class, chain = true,save = true,update = true, delete = true)
+/*
+    @Nexus(mapping = MappingEnumType.OneToOne, field = "field", targetField = "field",targetEntity = FormControl.class, chain = true,save = true,update = true, delete = true)
     private FormControl control = null;
 
+*/
 
     @Column(caption = "排序")
     private int sortType = 0;

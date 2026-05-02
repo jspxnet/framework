@@ -62,7 +62,7 @@ public class SoberNexus implements Serializable {
     private Class<?> targetEntity;
 
     @Column(caption = "实体对象", length = 200)
-    private String entityClass;
+    private String entityClass = StringUtil.empty;
 
     @Column(caption = "条件", length = 200)
     private String term = StringUtil.empty;
@@ -70,17 +70,17 @@ public class SoberNexus implements Serializable {
     @Column(caption = "排序", length = 200)
     private String orderBy = StringUtil.empty;
 
-    @Column(caption = "关联删除")
-    private boolean isDelete;
+    @Column(caption = "关联删除",notNull = true)
+    private boolean isDelete = false;
 
     @Column(caption = "关联保存",notNull = true)
     private boolean isSave = true;
 
-    @Column(caption = "关联更新")
-    private boolean isUpdate;
+    @Column(caption = "关联更新" ,notNull = true)
+    private boolean isUpdate  = true;
 
-    @Column(caption = "关联更新")
-    private boolean chain;
+    @Column(caption = "级联更新" ,notNull = true)
+    private boolean chain = true;
 
     @Column(field="filter", caption = "查询条件", length = 200)
     private String where = StringUtil.empty;

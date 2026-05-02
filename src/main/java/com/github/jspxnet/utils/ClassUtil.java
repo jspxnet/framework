@@ -416,13 +416,30 @@ public class ClassUtil {
      */
     public static Field[] getDeclaredFields(Class<?> cls) {
         Class<?> superclass =  ClassUtil.getClass(cls);
+        List<String> fieldNameList = new ArrayList<>();
         Field[] result = null;
         while (!(superclass == null || superclass.equals(Object.class) || superclass.equals(Serializable.class)  || superclass.isInterface() || superclass.equals(DataMap.class)
                 || superclass.getName().contains("net.sf.cglib.empty.Object")  || superclass.getName().contains("com.seeyon.ctp.common.po.BasePO"))) {
             Field[] fields = superclass.getDeclaredFields();
-            result = addFieldArray(result, fields);
+
+            Field[] notRepFields = null;
+            //这里有重载的关系，名称有了的就不要再次添加了
+            for (Field field:fields)
+            {
+                String key = field.getName() + "_" + field.getType().getName();
+                if (!fieldNameList.contains(key)) {
+                    fieldNameList.add(field.getName() + "_" + field.getType().getName());
+                    notRepFields = ArrayUtil.add(notRepFields,field);
+                }
+            }
+
+            if (!ObjectUtil.isEmpty(notRepFields))
+            {
+                result = addFieldArray(result, notRepFields);
+            }
             superclass = superclass.getSuperclass();
         }
+        fieldNameList.clear();
         return result;
     }
 

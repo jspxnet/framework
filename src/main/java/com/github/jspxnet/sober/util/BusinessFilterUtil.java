@@ -81,7 +81,7 @@ public final class BusinessFilterUtil {
         AbstractBillObject billObject = ((AbstractBillObject) object);
         if (StringUtil.isNull(billObject.getBillNo())&&DocumentStatusEnumType.Z.getValue()!=billObject.getDocumentStatus())
         {
-            String tableName = "";
+            String tableName = StringUtil.empty;
             TableModels tableModels = billObject.getTableModels();
             if (tableModels==null || StringUtil.isNull(tableModels.getName()))
             {

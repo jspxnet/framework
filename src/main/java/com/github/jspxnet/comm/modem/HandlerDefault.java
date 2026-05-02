@@ -19,7 +19,7 @@ public class HandlerDefault extends SerialComm {
             writeCSQ();
             Thread.sleep(getSettings().AT_WAIT);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

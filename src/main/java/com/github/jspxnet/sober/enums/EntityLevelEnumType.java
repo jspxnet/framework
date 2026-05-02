@@ -7,12 +7,12 @@ public enum EntityLevelEnumType implements EnumType {
     //主表
     MAIN(0, "main"),
     //子表
-    SUB(1, "sub"),
+    SUB(1, "sub");
     
     //孙表
-    SON(2, "son"),
+    //SON(2, "son"),
     //后边的使用数字直接表示
-    LEVEL(3, "LEVEL");
+    //LEVEL(3, "LEVEL");
     final private int value;
     final private String name;
 

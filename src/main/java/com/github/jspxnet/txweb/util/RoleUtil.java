@@ -1,6 +1,5 @@
 package com.github.jspxnet.txweb.util;
 
-import com.github.jspxnet.enums.AuditEnumType;
 import com.github.jspxnet.enums.CongealEnumType;
 import com.github.jspxnet.txweb.table.Role;
 import com.github.jspxnet.utils.ArrayUtil;
@@ -15,7 +14,6 @@ import java.util.Map;
 
 /**
  * Created by jspx.net
- *
  * author: chenYuan
  * date: 2020/5/28 21:59
  * description: 用户多角色合并Role

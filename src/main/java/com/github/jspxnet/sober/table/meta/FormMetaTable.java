@@ -5,7 +5,7 @@ import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Nexus;
 import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.config.SoberTable;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,7 +34,7 @@ public class FormMetaTable extends BaseBillType {
     private String title = StringUtil.empty;
 
     //主表,只有一个，实体里边可以嵌套树结构表
-    @Nexus(mapping = MappingType.OneToOne, field = "name", targetField = "tableName",term = "entityType:eq[main]", targetEntity = SoberTable.class, chain = true,update = true, delete = true)
+    @Nexus(mapping = MappingEnumType.OneToOne, field = "name", targetField = "tableName",term = "entityType:eq[main]", targetEntity = SoberTable.class, chain = true,update = true, delete = true)
     private SoberTable entity = new SoberTable();
 
     @Column(caption = "布局", length = 1000)
@@ -56,15 +56,15 @@ public class FormMetaTable extends BaseBillType {
     protected ControlBase controlBase = new ControlBase();
 
     //表单属性
-    @Nexus(mapping = MappingType.OneToMany, field = "id", targetField = "formId", targetEntity = ControlProperty.class,chain = true,save = true, delete = true,update = true)
+    @Nexus(mapping = MappingEnumType.OneToMany, field = "id", targetField = "formId", targetEntity = ControlProperty.class,chain = true,save = true, delete = true,update = true)
     private List<ControlProperty> propertyList = new ArrayList<>();
 
     //插件列表
-    @Nexus(mapping = MappingType.OneToMany, field = "id", targetField = "formId", targetEntity = OperatePlug.class)
+    @Nexus(mapping = MappingEnumType.OneToMany, field = "id", targetField = "formId", targetEntity = OperatePlug.class)
     private List<OperatePlug> operatePlugList = new LinkedList<>();
 
     //控件配置
-    @Nexus(mapping = MappingType.OneToMany, field = "id", targetField = "formId", targetEntity = FormControl.class)
+    @Nexus(mapping = MappingEnumType.OneToMany, field = "id", targetField = "formId", targetEntity = FormControl.class)
     private List<FormControl> controlList = new LinkedList<>();
 
 

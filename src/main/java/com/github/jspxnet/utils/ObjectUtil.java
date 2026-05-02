@@ -164,19 +164,19 @@ public final class ObjectUtil {
                 return 0;
             }
         }
-        if (obj.getClass().isAssignableFrom(Integer.class)) {
+        if (obj instanceof Integer) {
             return ((Integer) obj);
         }
-        if (obj.getClass().isAssignableFrom(Long.class)) {
-            return ((Long) obj).intValue();
+        if (obj instanceof Long) {
+            return  ((Long) obj).intValue();
         }
-        if (obj.getClass().isAssignableFrom(Double.class)) {
+        if (obj instanceof Double) {
             return ((Double) obj).intValue();
         }
-        if (obj.getClass().isAssignableFrom(Float.class)) {
+        if (obj instanceof Float) {
             return ((Float) obj).intValue();
         }
-        if (obj.getClass().isAssignableFrom(BigDecimal.class)) {
+        if (obj instanceof BigDecimal) {
             return ((BigDecimal) obj).intValue();
         }
         return StringUtil.toInt(obj.toString());
@@ -190,19 +190,19 @@ public final class ObjectUtil {
         if (obj == null) {
             return 0;
         }
-        if (obj.getClass().isAssignableFrom(Long.class)) {
+        if (obj instanceof Long) {
             return ((Long) obj);
         }
-        if (obj.getClass().isAssignableFrom(Double.class)) {
+        if (obj instanceof Double) {
             return ((Double) obj).longValue();
         }
-        if (obj.getClass().isAssignableFrom(Integer.class)) {
+        if (obj instanceof Integer) {
             return ((Integer) obj).longValue();
         }
-        if (obj.getClass().isAssignableFrom(BigDecimal.class)) {
+        if (obj instanceof BigDecimal) {
             return ((BigDecimal) obj).longValue();
         }
-        if (obj.getClass().isAssignableFrom(Date.class)) {
+        if (obj instanceof Date) {
             Date d = (Date) obj;
             return d.getTime();
         }
@@ -217,19 +217,19 @@ public final class ObjectUtil {
         if (obj == null) {
             return 0;
         }
-        if (obj.getClass().isAssignableFrom(Float.class)) {
+        if (obj instanceof Float) {
             return ((Float) obj);
         }
-        if (obj.getClass().isAssignableFrom(Double.class)) {
+        if (obj instanceof Double) {
             return ((Double) obj).floatValue();
         }
-        if (obj.getClass().isAssignableFrom(Long.class)) {
+        if (obj instanceof Long) {
             return ((Long) obj).floatValue();
         }
-        if (obj.getClass().isAssignableFrom(Integer.class)) {
+        if (obj instanceof Integer) {
             return ((Integer) obj).floatValue();
         }
-        if (obj.getClass().isAssignableFrom(BigDecimal.class)) {
+        if (obj instanceof BigDecimal) {
             return ((BigDecimal) obj).floatValue();
         }
         return StringUtil.toFloat(obj.toString());
@@ -243,16 +243,16 @@ public final class ObjectUtil {
         if (obj == null) {
             return 0;
         }
-        if (obj.getClass().isAssignableFrom(Long.class)) {
+        if (obj instanceof Long) {
             return ((Long) obj).doubleValue();
         }
-        if (obj.getClass().isAssignableFrom(Integer.class)) {
+        if (obj instanceof Integer) {
             return ((Integer) obj).doubleValue();
         }
-        if (obj.getClass().isAssignableFrom(Float.class)) {
+        if (obj instanceof Float) {
             return ((Float) obj).doubleValue();
         }
-        if (obj.getClass().isAssignableFrom(BigDecimal.class)) {
+        if (obj instanceof BigDecimal) {
             return ((BigDecimal) obj).doubleValue();
         }
         return StringUtil.toDouble(obj.toString());
@@ -262,13 +262,13 @@ public final class ObjectUtil {
         if (obj == null) {
             return null;
         }
-        if (obj.getClass().isAssignableFrom(Date.class)) {
+        if (obj instanceof Date) {
             return (Date) obj;
         }
-        if (obj.getClass().isAssignableFrom(Long.class)) {
+        if (obj instanceof Long) {
             return new Date(((Long) obj));
         }
-        if (obj.getClass().isAssignableFrom(java.sql.Date.class)) {
+        if (obj instanceof java.sql.Date) {
             return new Date(((java.sql.Date) obj).getTime());
         }
         try {
@@ -283,13 +283,13 @@ public final class ObjectUtil {
         if (obj == null) {
             return new java.sql.Date(DateUtil.empty.getTime());
         }
-        if (obj.getClass().isAssignableFrom(java.sql.Date.class)) {
+        if (obj instanceof java.sql.Date) {
             return ((java.sql.Date) obj);
         }
-        if (obj.getClass().isAssignableFrom(Long.class)) {
+        if (obj instanceof Long) {
             return new java.sql.Date(((Long) obj));
         }
-        if (obj.getClass().isAssignableFrom(Date.class)) {
+        if (obj instanceof Date) {
             return new java.sql.Date(((Date) obj).getTime());
         }
         try {
@@ -306,13 +306,13 @@ public final class ObjectUtil {
             return new java.sql.Timestamp(DateUtil.empty.getTime());
         }
 
-        if (obj.getClass().isAssignableFrom(java.sql.Timestamp.class)) {
+        if (obj instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) obj);
         }
-        if (obj.getClass().isAssignableFrom(Long.class)) {
+        if (obj instanceof Long) {
             return new java.sql.Timestamp(((Long) obj));
         }
-        if (obj.getClass().isAssignableFrom(Date.class)) {
+        if (obj instanceof Date) {
             return new java.sql.Timestamp(((Date) obj).getTime());
         }
         try {
@@ -328,14 +328,14 @@ public final class ObjectUtil {
         if (obj == null) {
             return new java.sql.Time(DateUtil.empty.getTime());
         }
-        if (obj.getClass().isAssignableFrom(java.sql.Time.class)) {
+        if (obj instanceof java.sql.Time) {
             return ((java.sql.Time) obj);
         }
 
-        if (obj.getClass().isAssignableFrom(Long.class)) {
+        if (obj instanceof Long) {
             return new java.sql.Time(((Long) obj));
         }
-        if (obj.getClass().isAssignableFrom(Date.class)) {
+        if (obj instanceof Date) {
             return new java.sql.Time(((Date) obj).getTime());
         }
         try {

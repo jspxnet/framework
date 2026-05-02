@@ -89,6 +89,10 @@ public class JSCacheManager implements CacheManager {
 
     @Override
     public boolean containsKey(String key) {
+        if (caches==null)
+        {
+            return false;
+        }
         for (Cache cache : caches) {
             if (cache==null)
             {
@@ -211,6 +215,10 @@ public class JSCacheManager implements CacheManager {
      */
     static public <T>  T get(Class<?> tClass, String key,Class<T> cls) {
         return (T)get(tClass.getName(), key);
+    }
+
+    static public <T>  T get(String cacheName, String key,Class<T> cls) {
+        return (T)get(cacheName, key);
     }
     /**
      *
@@ -354,6 +362,25 @@ public class JSCacheManager implements CacheManager {
     }
 
     /**
+     *
+     * @param cacheName 缓存名称
+     * @param keys 删除KEY
+     * @return 删除
+     */
+    static public boolean remove(String cacheName, String... keys) {
+        Cache cache = CACHE_MANAGER.getCache(cacheName);
+        if (cache == null) {
+            return false;
+        }
+        for (String key : keys) {
+            if (key == null) {
+                continue;
+            }
+            cache.remove(key);
+        }
+        return true;
+    }
+    /**
      * 删除 所有
      *
      * @param cacheName 缓存名称
@@ -370,19 +397,19 @@ public class JSCacheManager implements CacheManager {
         removeAll(cls.getName());
     }
 
-    static public void queryRemove(Class<?> cls, String trem) {
+    static public void queryRemove(Class<?> cls, String term) {
         if (cls == null) {
             return;
         }
-        queryRemove(cls.getName(), trem);
+        queryRemove(cls.getName(), term);
     }
 
-    static public void queryRemove(String cacheName, String trem) {
+    static public void queryRemove(String cacheName, String term) {
         Cache cache = CACHE_MANAGER.getCache(cacheName);
         if (cache == null) {
             return;
         }
-        if (StringUtil.ASTERISK.equals(trem)) {
+        if (StringUtil.ASTERISK.equals(term)) {
             removeAll(cacheName);
             return;
         }
@@ -390,7 +417,8 @@ public class JSCacheManager implements CacheManager {
         Set<String> set = cache.getKeys();
         if (set != null) {
             for (String key : set) {
-                if (key != null && StringUtil.getPatternFind(key, trem)) {
+                System.out.println("key=" + key + ", value=" + cache.get(key));
+                if (key != null && StringUtil.getPatternFind(key, term)) {
                     cache.remove(key);
                 }
             }

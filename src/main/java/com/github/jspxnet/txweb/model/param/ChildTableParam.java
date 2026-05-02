@@ -2,7 +2,7 @@ package com.github.jspxnet.txweb.model.param;
 
 import com.github.jspxnet.sober.annotation.Nexus;
 import com.github.jspxnet.sober.config.SoberColumn;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.txweb.annotation.Param;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
@@ -21,6 +21,6 @@ public class ChildTableParam implements Serializable {
     @Param(caption = "表名描述",min = 0,max = 100)
     private String caption = StringUtil.empty;
 
-    @Nexus(mapping = MappingType.OneToMany, field = "tableName", targetField = "tableName", targetEntity = SoberColumn.class)
+    @Nexus(mapping = MappingEnumType.OneToMany, field = "tableName", targetField = "tableName", targetEntity = SoberColumn.class)
     private List<SoberColumn> columns = new LinkedList<>();
 }

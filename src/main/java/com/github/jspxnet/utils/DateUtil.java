@@ -272,7 +272,7 @@ public final  class DateUtil {
         c.setFirstDayOfWeek(Calendar.MONDAY);
         c.setTime(date);
         c.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek()); // Monday
-        c.set(Calendar.HOUR, 0);
+        c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
         return c.getTime();
@@ -334,13 +334,15 @@ public final  class DateUtil {
     public static int getMaxWeekNumOfYear(int year) {
         Calendar calendar = getThreadCalendar();
         calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.MONTH, 1);
+        calendar.set(Calendar.MONTH, Calendar.JANUARY);
         calendar.set(Calendar.DATE, 1);
-        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         long begin = calendar.getTime().getTime();
         calendar.set(Calendar.YEAR, year + 1);
+        calendar.set(Calendar.MONTH, Calendar.JANUARY);
+        calendar.set(Calendar.DATE, 1);
         begin = calendar.getTime().getTime() - begin;
         return (int) NumberUtil.getRound((float) begin / WEEK, 0);
     }
@@ -581,8 +583,7 @@ public final  class DateUtil {
         }
         Calendar calendar = getThreadCalendar();
         calendar.setTime(date);
-        calendar.set(Calendar.AM_PM, 0);
-        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         return calendar.getTime();
@@ -599,10 +600,9 @@ public final  class DateUtil {
         }
         Calendar calendar = getThreadCalendar();
         calendar.setTime(getStartDateTime(date));
-        calendar.set(Calendar.AM_PM, Calendar.PM);
-        calendar.add(Calendar.HOUR, calendar.getActualMaximum(Calendar.HOUR));
-        calendar.set(Calendar.MINUTE, calendar.getMaximum(Calendar.MINUTE));
-        calendar.set(Calendar.SECOND, calendar.getMaximum(Calendar.SECOND));
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
         return calendar.getTime();
     }
 

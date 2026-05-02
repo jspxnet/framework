@@ -50,7 +50,7 @@ public class DynamicCompile {
      * @param code     java代码
      * @return 是否生成成功
      */
-    public boolean compile(String path, String fileName, String code) {
+    public static boolean compile(String path, String fileName, String code) {
         // 开始编译
         JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
         JavaFileObject fileObject = new JavaStringObject(fileName, code);
@@ -67,7 +67,7 @@ public class DynamicCompile {
      * @return 返回值
      * @throws Exception 异常
      */
-    public Object invokeStatic(String className, String method, Object[] args) throws Exception {
+    public static Object invokeStatic(String className, String method, Object[] args) throws Exception {
         Class<?> class1 = ClassUtil.loadClass(className);
         Method callMethod = class1.getDeclaredMethod(method, String[].class);
         return callMethod.invoke(class1.newInstance(), args);

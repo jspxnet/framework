@@ -19,7 +19,7 @@ import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Nexus;
 import com.github.jspxnet.sober.annotation.Table;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.sober.table.OperateTable;
 import com.github.jspxnet.txweb.IMember;
 import com.github.jspxnet.txweb.IRole;
@@ -282,7 +282,7 @@ public class Member extends OperateTable implements IMember {
     @Column(caption = "来源分享id")
     private long linkId = 0;
 
-    @Nexus(mapping = MappingType.OneToMany, field = "id", targetField = "uid", targetEntity = MemberRole.class, chain = true, delete = false)
+    @Nexus(mapping = MappingEnumType.OneToMany, field = "id", targetField = "uid", targetEntity = MemberRole.class, chain = true, delete = false)
     private List<MemberRole> memberRoles = new ArrayList<>();
 
 

@@ -43,7 +43,6 @@ import java.util.*;
 @Slf4j
 public final class AnnotationUtil {
 
-    private static CalcUnique calcUnique;
 
     private AnnotationUtil() {
 
@@ -189,20 +188,17 @@ public final class AnnotationUtil {
     public static List<SoberColumn> getColumnList(Class<?> cls) {
         List<SoberColumn> soberColumns = new LinkedList<>();
         Table table = cls.getAnnotation(Table.class);
-        //Map<String, SoberNexus> soberNexusMap =  getSoberNexus(cls);
-        //Map<String, SoberCalcUnique> calcUniqueMap =  getSoberCalcUnique(cls);
         Field[] fields = ClassUtil.getDeclaredFields(cls);//字段
         for (Field field : fields) {
             boolean save = false;
             Column column = field.getAnnotation(Column.class);
             SoberColumn soberColumn = new SoberColumn();
-            soberColumn.setField(field.getName());
-            soberColumn.setName(field.getName());
+
             soberColumn.setClassType(field.getType());
             if (column != null) {
                 save = true;
-                soberColumn.setName(soberColumn.getName());
                 soberColumn.setField(column.field());
+                soberColumn.setName(field.getName());
                 if (StringUtil.isNullOrWhiteSpace(soberColumn.getField()))
                 {
                     soberColumn.setField(soberColumn.getName());
@@ -215,7 +211,14 @@ public final class AnnotationUtil {
                 soberColumn.setHidden(column.hidden());
                 soberColumn.setSearchHidden(column.searchHidden());
                 soberColumn.setInput(column.input());
-                soberColumn.setEnumType(column.enumType().getName());
+
+
+                if (column.enumType().equals(NullClass.class))
+                {
+                    soberColumn.setEnumType(null);
+                } else {
+                    soberColumn.setEnumType(column.enumType().getName());
+                }
                 soberColumn.setOption(column.option());
                 if (!NullClass.class.equals(column.enumType())) {
                     soberColumn.setOption(new JSONArray(column.enumType().getEnumConstants()).toString());
@@ -238,11 +241,13 @@ public final class AnnotationUtil {
                 SoberNexus soberNexus = new SoberNexus();
                 soberNexus.setTableName(table.name());
                 soberNexus.setCaption(nexus.caption());
-                soberNexus.setMapping(nexus.mapping());
+                soberNexus.setMapping(nexus.mapping().getName());
                 //变量名
-                soberNexus.setName(field.getName());
+                //soberNexus.setName(field.getName());
                 //自己表的字段
                 soberNexus.setField(nexus.field());
+                //实体名称
+                soberNexus.setName(field.getName());
                 //对应的字段
                 soberNexus.setTargetField(nexus.targetField());
                 soberNexus.setTargetEntity(nexus.targetEntity());
@@ -275,6 +280,15 @@ public final class AnnotationUtil {
                 soberColumn.setCaption(calcUnique.caption());
             }
 
+            if (StringUtil.isNullOrWhiteSpace(soberColumn.getField()))
+            {
+                soberColumn.setField(field.getName());
+            }
+
+            if (StringUtil.isNullOrWhiteSpace(soberColumn.getName()))
+            {
+                soberColumn.setName(field.getName());
+            }
             if (save)
             {
                 soberColumns.add(soberColumn);
@@ -298,7 +312,7 @@ public final class AnnotationUtil {
                 SoberNexus soberNexus = new SoberNexus();
                 soberNexus.setTableName(tableName);
                 soberNexus.setCaption(nexus.caption());
-                soberNexus.setMapping(nexus.mapping());
+                soberNexus.setMapping(nexus.mapping().getName());
                 //变量名
                 soberNexus.setName(field.getName());
                 //自己表的字段
@@ -543,7 +557,7 @@ public final class AnnotationUtil {
             if (column == null) {
                 continue;
             }
-            if (!column.enumTypes()) {
+            if (!column.showEnum()) {
                 continue;
             }
             if (StringUtil.isNull(column.option()) && column.enumType() == NullClass.class) {

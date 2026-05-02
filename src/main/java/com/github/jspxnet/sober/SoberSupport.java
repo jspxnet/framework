@@ -237,6 +237,15 @@ public interface SoberSupport extends Serializable {
      * @throws Exception 异常
      */
     int save(Object object, boolean child) throws Exception;
+
+    /**
+     *
+     * @param soberTable 模型
+     * @return 保存模型数量
+     * @throws Exception 异常
+     */
+    int saveModel(TableModels soberTable) throws Exception;
+
     /**
      * @param collection 保存一个列表
      * @return 返回保持数量
@@ -254,12 +263,19 @@ public interface SoberSupport extends Serializable {
     int save(Collection<?> collection, boolean child) throws Exception;
 
     /**
-     *
-     * @param collection  批量快速保持 集合
-     * @return 更新数量,如果错误 返回 负数
+     * @param collection 批量快速保持 集合
+     * @return 更新数量, 如果错误 返回 负数
      * @throws Exception 异常
      */
     int batchSave(Collection<?> collection) throws Exception;
+    /**
+     *
+     * @param soberTable 模型
+     * @param ids 数组
+     * @param delChild 子对象
+     * @return 行数
+     */
+    int delete(TableModels soberTable, Object[] ids, boolean delChild);
 
     /**
      * 删除对象
@@ -274,6 +290,22 @@ public interface SoberSupport extends Serializable {
      * @return 删除对象
      */
     int delete(Class<?> aClass, Serializable serializable);
+    /**
+     * @param soberTable   模型
+     * @param serializable id
+     * @return 删除对象
+     */
+    int delete(TableModels soberTable, Serializable serializable);
+
+    /**
+     *
+     * @param soberTable  模型
+     * @param serializable id
+     * @param delChild 是否删除映射对象
+     * @return 删除条数
+     */
+    int delete(TableModels soberTable, Serializable serializable, boolean delChild);
+
     /**
      * 更具字段删除一个对象,或一组对象
      *
@@ -555,6 +587,9 @@ public interface SoberSupport extends Serializable {
     Criteria createCriteria(Class<?> cla);
 
     //-----------------------------------------------------------------
+
+    Criteria createCriteria(TableModels tableModels);
+
     /**
      * 添加字段
      * @param cls 实体类
@@ -755,6 +790,9 @@ public interface SoberSupport extends Serializable {
      * @param cla 类
      */
     void evict(Class<?> cla);
+
+    void evict(String cacheName);
+
     /**
      * 清除缓存 中list 相关数据
      *

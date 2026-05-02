@@ -12,7 +12,7 @@ package com.github.jspxnet.component.postalcode;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Nexus;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class AreaCity implements Serializable {
     private int isDirectly = 0;
 
     //子地区集
-    @Nexus(mapping = MappingType.OneToMany, field = "id", targetField = "parentAreaId", targetEntity = AreaCity.class)
+    @Nexus(mapping = MappingEnumType.OneToMany, field = "id", targetField = "parentAreaId", targetEntity = AreaCity.class)
     private List<AreaCity> childAreas = new ArrayList<AreaCity>();
 
     @Column(caption = "父ID", length = 50, notNull = true)

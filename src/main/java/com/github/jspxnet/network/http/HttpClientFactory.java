@@ -10,8 +10,8 @@ import java.util.Map;
 public abstract class HttpClientFactory {
     public static final String HTTPS = "https";
     public static final String HTTP = "http";
-    static private final Map<String, String> ROC_HEADERS = new HashMap<>();
-    static private final Map<String, String> ROC_SECRET_HEADERS = new HashMap<>();
+    static public final Map<String, String> ROC_HEADERS = new HashMap<>();
+    static public final Map<String, String> ROC_SECRET_HEADERS = new HashMap<>();
 
     static {
         ROC_HEADERS.put("Charset", StandardCharsets.UTF_8.name());

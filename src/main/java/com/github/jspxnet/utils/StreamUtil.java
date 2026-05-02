@@ -11,6 +11,8 @@ package com.github.jspxnet.utils;
 
 import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.io.StringOutputStream;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 
 /**
@@ -21,6 +23,7 @@ import java.io.*;
  * 流处理单元
  */
 
+@Slf4j
 public class StreamUtil {
     private StreamUtil() {
 
@@ -69,11 +72,18 @@ public class StreamUtil {
                 event.setFullSize(fullSize);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("copy stream error", e);
             return false;
         } finally {
-            in.close();
-            out.close();
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } finally {
+                if (out != null) {
+                    out.close();
+                }
+            }
         }
         return true;
     }
@@ -106,9 +116,11 @@ public class StreamUtil {
                 event.setFullSize(fullSize);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("copy stream error", e);
         } finally {
-            in.close();
+            if (in != null) {
+                in.close();
+            }
         }
         return data;
     }

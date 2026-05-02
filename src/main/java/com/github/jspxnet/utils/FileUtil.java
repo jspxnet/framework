@@ -1193,7 +1193,6 @@ public final class FileUtil {
             buffer.flip();
             outC.write(buffer);
             buffer.clear();
-            fis.close();
             return os.toByteArray();
         } catch (IOException e) {
             log.error("readFileByte", e);

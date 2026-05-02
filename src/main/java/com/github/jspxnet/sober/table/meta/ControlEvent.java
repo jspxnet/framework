@@ -28,5 +28,5 @@ public class ControlEvent implements Serializable {
     private String template = StringUtil.empty;
 
     @Column(caption = "说明", length = 250)
-    private String desc = StringUtil.empty;
+    private String describe = StringUtil.empty;
 }

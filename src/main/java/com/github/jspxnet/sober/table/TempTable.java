@@ -1,7 +1,6 @@
 package com.github.jspxnet.sober.table;
 
 import com.github.jspxnet.sober.annotation.Column;
-import com.github.jspxnet.sober.annotation.IDType;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Table;
 import lombok.Data;

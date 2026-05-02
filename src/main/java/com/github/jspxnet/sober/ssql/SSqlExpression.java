@@ -10,15 +10,15 @@
 package com.github.jspxnet.sober.ssql;
 
 
+import com.github.jspxnet.sober.TableModels;
+import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.utils.StringUtil;
-import com.github.jspxnet.utils.ClassUtil;
 import com.github.jspxnet.utils.ArrayUtil;
 import com.github.jspxnet.sober.criteria.projection.Criterion;
 import com.github.jspxnet.sober.criteria.expression.Expression;
 import com.github.jspxnet.sober.criteria.Order;
 import com.github.jspxnet.sober.Criteria;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -62,10 +62,10 @@ public final class SSqlExpression {
      * OR 条件表达式
      *
      * @param term          条件
-     * @param methodsNameMa 方法
+     * @param tableModels 方法
      * @return Criterion
      */
-    public static Criterion getOrExpression(String term, Map<String, Class<?>> methodsNameMa) {
+    public static Criterion getOrExpression(String term, TableModels tableModels) {
         if (term == null) {
             return null;
         }
@@ -81,18 +81,21 @@ public final class SSqlExpression {
         String second = StringUtil.substringAfter(term, "/").trim();
         Criterion criterion1;
         String field = StringUtil.substringBefore(frist, ":");
+
         if (frist.toUpperCase().startsWith("O") || frist.toUpperCase().startsWith("OR")) {
-            criterion1 = getOrExpression(frist, methodsNameMa);
+            criterion1 = getOrExpression(frist, tableModels);
         } else {
-            criterion1 = getExpression(frist, methodsNameMa.get(field));
+            SoberColumn soberColumn = tableModels.getColumn(field);
+            criterion1 = getExpression(frist, soberColumn.getClassType());
         }
 
         field = StringUtil.substringBefore(second, ":");
         Criterion criterion2;
         if (second.toUpperCase().startsWith("O") || second.toUpperCase().startsWith("OR")) {
-            criterion2 = getOrExpression(second, methodsNameMa);
+            criterion2 = getOrExpression(second, tableModels);
         } else {
-            criterion2 = getExpression(second, methodsNameMa.get(field));
+            SoberColumn soberColumn = tableModels.getColumn(field);
+            criterion2 = getExpression(second, soberColumn.getClassType());
         }
         return Expression.or(criterion1, criterion2);
     }
@@ -217,7 +220,9 @@ public final class SSqlExpression {
         if (StringUtil.isNull(queryTerm) || queryTerm.length() < 3) {
             return criteria;
         }
-        Map<String, Class<?>> methodsNameMap = ClassUtil.getMethodsNameAndType(criteria.getCriteriaClass(), ClassUtil.METHOD_NAME_SET);
+        TableModels tableModels = criteria.getCriteriaClass();
+
+        //Map<String, Class<?>> methodsNameMap = ClassUtil.getMethodsNameAndType(, ClassUtil.METHOD_NAME_SET);
         if (queryTerm.startsWith(StringUtil.SEMICOLON)) {
             queryTerm = queryTerm.substring(1);
         }
@@ -225,13 +230,14 @@ public final class SSqlExpression {
         queryTerm = queryTerm.trim();
         if (!queryTerm.contains(StringUtil.SEMICOLON)) {
             String field = StringUtil.substringBefore(queryTerm, ":");
-            if (methodsNameMap.containsKey(field)) {
-                Criterion criterionTmp = getExpression(queryTerm, methodsNameMap.get(field));
+            if (tableModels.containsField(field)) {
+                SoberColumn soberColumn = tableModels.getColumn(field);
+                Criterion criterionTmp = getExpression(queryTerm, soberColumn.getClassType());
                 if (criterionTmp != null) {
                     return criteria.add(criterionTmp);
                 }
             } else if (queryTerm.toUpperCase().startsWith("O") || queryTerm.toUpperCase().startsWith("OR")) {
-                Criterion criterionTmp = getOrExpression(queryTerm, methodsNameMap);
+                     Criterion criterionTmp = getOrExpression(queryTerm, tableModels);
                 if (criterionTmp != null) {
                     return criteria.add(criterionTmp);
                 }
@@ -248,13 +254,14 @@ public final class SSqlExpression {
         for (String termData : termArray) {
             termData = termData.trim();
             String field = StringUtil.substringBefore(termData, ":");
-            if (methodsNameMap.containsKey(field)) {
-                Criterion criterion = getExpression(termData, methodsNameMap.get(field));
+            if (tableModels.containsField(field)) {
+                SoberColumn soberColumn = tableModels.getColumn(field);
+                Criterion criterion = getExpression(termData, soberColumn.getClassType());
                 if (criterion != null) {
                     criteria = criteria.add(criterion);
                 }
             } else if (termData.toUpperCase().startsWith("O[") || termData.toUpperCase().startsWith("OR[")) {
-                Criterion criterionTmp = getOrExpression(termData, methodsNameMap);
+                Criterion criterionTmp = getOrExpression(termData, tableModels);
                 if (criterionTmp != null) {
                     return criteria.add(criterionTmp);
                 }

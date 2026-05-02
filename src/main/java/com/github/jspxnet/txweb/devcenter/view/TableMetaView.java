@@ -57,7 +57,6 @@ public class TableMetaView extends ActionSupport {
         tableMeta.setName(tableModels.getName());
         tableMeta.setCaption(tableModels.getCaption());
         tableMeta.setEntityLevel(EntityLevelEnumType.MAIN.getValue());
-        tableMeta.setEntityClass(tableModels.getEntity().getName());
         tableMeta.setPrimaryKey(tableModels.getPrimaryKey());
         List<SoberColumn> webColumns = BeanUtil.copyList(tableModels.getColumns(),SoberColumn.class);
         tableMeta.setColumns(webColumns);

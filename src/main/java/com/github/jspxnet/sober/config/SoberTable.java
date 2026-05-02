@@ -10,11 +10,10 @@
 package com.github.jspxnet.sober.config;
 
 import com.github.jspxnet.json.JsonField;
-import com.github.jspxnet.json.JsonIgnore;
 import com.github.jspxnet.sober.TableModels;
 import com.github.jspxnet.sober.annotation.*;
 import com.github.jspxnet.sober.enums.EntityLevelEnumType;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.utils.ObjectUtil;
 import com.github.jspxnet.utils.StringUtil;
 import com.github.jspxnet.utils.ArrayUtil;
@@ -37,7 +36,7 @@ import java.util.*;
  *
  */
 @Data
-@Table(name = "jspx_sober_table", caption = "动态表信息",idx = "jspx_sober_name_unique_idx(name)")
+@Table(name = "jspx_sober_table", caption = "动态表信息",idx = "jspx_sober_unique_idx(databaseName,name,version)")
 public class SoberTable implements TableModels {
     @Id
     @Column(caption = "ID", notNull = true)
@@ -78,7 +77,8 @@ public class SoberTable implements TableModels {
     private boolean autoCleanCache = false;
 
     //实体,具体的类
-    @JsonIgnore
+    //@JsonIgnore
+    @Column(field = "entityClass", caption = "实体对象",length = 100, notNull = true)
     private Class<?> entity;
 
     //关键字名
@@ -95,20 +95,16 @@ public class SoberTable implements TableModels {
     private String idType = IDType.serial;
     //映射对应关系
 
-    @Nexus(caption = "映射对应关系", mapping = MappingType.OneToMany, field = "name", targetField = "tableName",term = "version:eq[${version}]",  targetEntity = SoberColumn.class,save = true, chain = true,update = true, delete = true)
+    @Nexus(caption = "映射对应关系", mapping = MappingEnumType.OneToMany, field = "name", targetField = "tableName",term = "version:eq[${version}]",  targetEntity = SoberColumn.class,save = true, chain = true,update = true, delete = true)
     private List<SoberColumn> columns = new LinkedList<>();
 
     //可扩展,系统是否锁定
     @Column(caption = "可扩展", notNull = true)
     private boolean canExtend = false;
 
-    //绑定 类对象
-    @Column(caption = "实体对象", length = 200)
-    private String entityClass;
-
-    //以此来表示继承关系
-    @Column(caption = "父对象")
-    private long parentId;
+    //以此来表示继承关系,用表名比较好维护
+    @Column(caption = "父对象",length = 60)
+    private String parentName = StringUtil.empty;
 
     //最后访问时间
     @Column(caption = "最后修改时间")
@@ -298,6 +294,16 @@ public class SoberTable implements TableModels {
     @Override
     public boolean isAutoCleanCache() {
         return autoCleanCache;
+    }
+
+    @Override
+    public String getCacheName()
+    {
+        if (entity!=null)
+        {
+            return entity.getName();
+        }
+        return null;
     }
 
 

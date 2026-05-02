@@ -33,6 +33,6 @@ public class ControlProperty implements Serializable {
     private String propertyDef = StringUtil.empty;
 
     @Column(caption = "说明", length = 250)
-    private String desc = StringUtil.empty;
+    private String describe = StringUtil.empty;
 
 }

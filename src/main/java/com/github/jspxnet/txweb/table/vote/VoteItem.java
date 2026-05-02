@@ -12,7 +12,7 @@ package com.github.jspxnet.txweb.table.vote;
 import com.github.jspxnet.sober.annotation.*;
 import com.github.jspxnet.sober.table.OperateTable;
 import com.github.jspxnet.utils.NumberUtil;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.utils.RandomUtil;
 import com.github.jspxnet.utils.StringUtil;
 import java.math.BigDecimal;
@@ -37,7 +37,7 @@ public class VoteItem extends OperateTable {
     @Column(caption = "投票主题的ID", length = 32, notNull = true)
     private String topicId = StringUtil.empty;
 
-    @Nexus(mapping = MappingType.ManyToOne, field = "topicId", targetField = "id", targetEntity = VoteTopic.class)
+    @Nexus(mapping = MappingEnumType.ManyToOne, field = "topicId", targetField = "id", targetEntity = VoteTopic.class)
     private VoteTopic voteTopic;
 
     @Column(caption = "投票选项说明", length = 100, notNull = true)

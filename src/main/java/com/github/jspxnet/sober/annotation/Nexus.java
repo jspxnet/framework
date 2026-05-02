@@ -9,6 +9,7 @@
  */
 package com.github.jspxnet.sober.annotation;
 
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.utils.StringUtil;
 
 import java.lang.annotation.Target;
@@ -27,13 +28,13 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Nexus {
     /**
-     * @return 映射关系
+     * @return 描述
      */
     String caption() default StringUtil.empty;
     /**
      * @return 映射关系
      */
-    String mapping();
+    MappingEnumType mapping();
 
     /**
      * 自己表的字段
@@ -90,7 +91,7 @@ public @interface Nexus {
     boolean update() default false;
 
     /**
-     * @return 关联保持，这里是基础，只有这里开启，save(obj,true) 才有效
+     * @return 关联保存，这里是基础，只有这里开启，save(obj,true) 才有效
      */
     boolean save() default false;
 

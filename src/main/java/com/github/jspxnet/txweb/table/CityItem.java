@@ -9,7 +9,7 @@
  */
 package com.github.jspxnet.txweb.table;
 
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.sober.annotation.*;
 import com.github.jspxnet.sober.table.OperateTable;
 
@@ -86,7 +86,7 @@ public class CityItem extends OperateTable {
     @Column(caption = "命名空间", length = 50, dataType = "isLengthBetween(1,50)")
     private String namespace = StringUtil.empty;
 
-    @Nexus(mapping = MappingType.OneToMany, field = "id", targetField = "parentId", targetEntity = CityItem.class)
+    @Nexus(mapping = MappingEnumType.OneToMany, field = "id", targetField = "parentId", targetEntity = CityItem.class)
     private List<CityItem> childList = new ArrayList<CityItem>();
 
     public String getId() {

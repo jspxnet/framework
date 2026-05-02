@@ -10,11 +10,9 @@
 package com.github.jspxnet.utils;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static java.lang.System.arraycopy;
 
@@ -582,6 +580,17 @@ public final class ArrayUtil {
             return array;
         }
         Class<?>[] newArray = (Class<?>[]) copyArrayGrow1(array, Class.class);
+        newArray[newArray.length - 1] = element;
+        return newArray;
+    }
+
+    public static Field[] add(Field[] array, Field element) {
+        if (array == null) {
+            array = new Field[1];
+            array[0] = element;
+            return array;
+        }
+        Field[] newArray = (Field[]) copyArrayGrow1(array, Class.class);
         newArray[newArray.length - 1] = element;
         return newArray;
     }
@@ -2789,9 +2798,7 @@ public final class ArrayUtil {
      */
     public static boolean[] getInitBooleanArray(int length, boolean value) {
         boolean[] indexes = new boolean[length];
-        for (int i = 0; i < length; i++) {
-            indexes[i] = value;
-        }
+        Arrays.fill(indexes, value);
         return indexes;
     }
 
@@ -2805,14 +2812,14 @@ public final class ArrayUtil {
      */
     public static int indexOf(Object[] objects, Object object) {
         if (objects == null) {
-            return -1;
+            return INDEX_NOT_FOUND;
         }
         for (int i = 0; i < objects.length; i++) {
-            if (objects[i].equals(object)) {
+            if (objects[i]!=null&&objects[i].equals(object)) {
                 return i;
             }
         }
-        return -1;
+        return INDEX_NOT_FOUND;
     }
 
 
@@ -2851,9 +2858,9 @@ public final class ArrayUtil {
      */
     public static int[] insertValueToArray(int[] array, int index, int value) {
         if (array == null) {
-            int[] resultarray = new int[index + 1];
-            resultarray[index] = value;
-            return resultarray;
+            int[] resultArray = new int[index + 1];
+            resultArray[index] = value;
+            return resultArray;
         }
         int length = array.length - 1;
         System.arraycopy(array, index, array, index + 1, length - index);
@@ -3092,9 +3099,6 @@ public final class ArrayUtil {
     public static void replace(String[] array, String arrayFen, String replace) {
         for (int i = array.length - 1; i > 0; i--) {
             String[] rep = StringUtil.split(array[i - 1], arrayFen);
-            if (rep.length <= 0) {
-                continue;
-            }
             for (String aRep : rep) {
                 if (array[i] == null) {
                     continue;

@@ -3,7 +3,7 @@ package com.github.jspxnet.sober.table.meta;
 import com.github.jspxnet.enums.ControlTypeEnumType;
 import com.github.jspxnet.enums.PlatformEnumType;
 import com.github.jspxnet.sober.annotation.*;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 import java.io.Serializable;
@@ -32,17 +32,17 @@ public class ControlBase implements Serializable {
 
     //它类似于传统html中的div，用于包裹各种元素内容。如果使用vue则需注意，包裹文字应该使用text组件。
     @Column(caption = "控件使用说明", length = 20000)
-    private String desc = StringUtil.empty;
+    private String describe = StringUtil.empty;
 
     @Column(caption = "控件例子", length = 20000)
     private String demo = StringUtil.empty;
 
     //属性列表
-    @Nexus(mapping = MappingType.OneToMany, field = "name", targetField = "name", targetEntity = ControlProperty.class,chain = true,save = true, delete = true,update = true)
+    @Nexus(mapping = MappingEnumType.OneToMany, field = "name", targetField = "name", targetEntity = ControlProperty.class,chain = true,save = true, delete = true,update = true)
     private List<ControlProperty> propertyList = new ArrayList<>();
 
     //事件列表
-    @Nexus(mapping = MappingType.OneToMany, field = "name", targetField = "name", targetEntity = ControlEvent.class,chain = true,save = true, delete = true,update = true)
+    @Nexus(mapping = MappingEnumType.OneToMany, field = "name", targetField = "name", targetEntity = ControlEvent.class,chain = true,save = true, delete = true,update = true)
     private List<ControlEvent> eventList = new ArrayList<>();
 
     //用于控制权限,是否可用

@@ -88,7 +88,7 @@ public class UserSession implements IUserSession {
     private boolean guest;
 
     @JsonIgnore
-    private List<Role> roleList = new ArrayList<>();
+    private List<Role> roleList = new ArrayList<>(0);
 
 
     public UserSession() {

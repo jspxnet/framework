@@ -81,15 +81,14 @@ final public class NumberUtil {
         //中文金额单位下标
         int ChineseUnitIndex = 0;
         try {
-            if (bigMoneyNumber.intValue() == 0) {
+            if (BigDecimal.ZERO.equals(bigMoneyNumber)) {
                 return "零圆整";
             }
-            //处理小数部分，四舍五入
-            double doubMoneyNumber = Math.round(bigMoneyNumber.doubleValue() * 100);
             //是否负数
-            boolean bNegative = doubMoneyNumber < 0;
-            //取绝对值
-            doubMoneyNumber = Math.abs(doubMoneyNumber);
+            boolean bNegative = bigMoneyNumber.compareTo(BigDecimal.ZERO) < 0;
+            //处理小数部分，四舍五入
+            double doubMoneyNumber = Math.abs(bigMoneyNumber.doubleValue()) * 100;
+            doubMoneyNumber = Math.round(doubMoneyNumber);
             //循环处理转换操作
             while (doubMoneyNumber > 0) {
                 //整的处理(无小数位)
@@ -249,15 +248,14 @@ final public class NumberUtil {
         //中文金额单位下标
         int ChineseUnitIndex = 0;
         try {
-            if (bigdMoneyNumber.intValue() == 0) {
+            if (bigdMoneyNumber.compareTo(BigDecimal.ZERO) == 0) {
                 return "零";
             }
-            //处理小数部分，四舍五入
-            double doubMoneyNumber = Math.round(bigdMoneyNumber.doubleValue() * 100);
             //是否负数
-            boolean bNegative = doubMoneyNumber < 0;
-            //取绝对值
-            doubMoneyNumber = Math.abs(doubMoneyNumber);
+            boolean bNegative = bigdMoneyNumber.compareTo(BigDecimal.ZERO) < 0;
+            //处理小数部分，四舍五入
+            double doubMoneyNumber = Math.abs(bigdMoneyNumber.doubleValue()) * 100;
+            doubMoneyNumber = Math.round(doubMoneyNumber);
             //循环处理转换操作
             while (doubMoneyNumber > 0) {
                 //整的处理(无小数位)

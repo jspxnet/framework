@@ -4,7 +4,7 @@ import com.github.jspxnet.sober.annotation.Column;
 import com.github.jspxnet.sober.annotation.Id;
 import com.github.jspxnet.sober.annotation.Nexus;
 import com.github.jspxnet.sober.annotation.Table;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.utils.StringUtil;
 import lombok.Data;
 
@@ -40,7 +40,7 @@ public class FormulaTable implements Serializable {
     private String calcCode= "default";
 
     //default:默认从 cache表起数据,acsColSum:热网的一列合计;sql:是用sql起数据
-    @Nexus(mapping = MappingType.OneToOne, field = "calcCode", targetField = "code", targetEntity = FormulaCalcType.class)
+    @Nexus(mapping = MappingEnumType.OneToOne, field = "calcCode", targetField = "code", targetEntity = FormulaCalcType.class)
     private FormulaCalcType calcType = new FormulaCalcType();
 
     @Column(caption = "公式", length = 1000,notNull = true)

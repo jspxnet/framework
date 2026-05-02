@@ -22,6 +22,7 @@ import com.github.jspxnet.scriptmark.core.script.TemplateScriptEngine;
 import com.github.jspxnet.sioc.util.TypeUtil;
 import com.github.jspxnet.sober.*;
 import com.github.jspxnet.sober.annotation.IDType;
+import com.github.jspxnet.sober.annotation.Table;
 import com.github.jspxnet.sober.config.SoberCalcUnique;
 import com.github.jspxnet.sober.config.SoberColumn;
 import com.github.jspxnet.sober.config.SoberNexus;
@@ -32,7 +33,8 @@ import com.github.jspxnet.sober.dialect.Dialect;
 import com.github.jspxnet.sober.dialect.GeneralDialect;
 import com.github.jspxnet.sober.dialect.OracleDialect;
 import com.github.jspxnet.sober.enums.DatabaseEnumType;
-import com.github.jspxnet.sober.enums.MappingType;
+import com.github.jspxnet.sober.enums.EntityLevelEnumType;
+import com.github.jspxnet.sober.enums.MappingEnumType;
 import com.github.jspxnet.sober.exception.ValidException;
 import com.github.jspxnet.sober.model.container.PropertyContainer;
 import com.github.jspxnet.sober.proxy.InterceptorProxy;
@@ -40,6 +42,7 @@ import com.github.jspxnet.sober.ssql.SSqlExpression;
 import com.github.jspxnet.sober.table.SoberFieldEnum;
 import com.github.jspxnet.sober.table.SqlMapConf;
 import com.github.jspxnet.sober.table.TempTable;
+import com.github.jspxnet.sober.table.meta.BaseEntity;
 import com.github.jspxnet.txweb.model.dto.TipDto;
 import com.github.jspxnet.txweb.table.OptionBundle;
 import com.github.jspxnet.txweb.turnpage.TurnPageButton;
@@ -47,6 +50,7 @@ import com.github.jspxnet.txweb.turnpage.impl.TurnPageButtonImpl;
 import com.github.jspxnet.util.FieldWordUtil;
 import com.github.jspxnet.utils.*;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -68,7 +72,7 @@ public final class JdbcUtil {
     //临时表前缀
     final static public String TEMP_TABLE_START = "jtmp_";
 
-    final static public  String TEMP_TABLE_END = "_tmp";
+    final static public String TEMP_TABLE_END = "_tmp";
 
     private JdbcUtil() {
 
@@ -188,9 +192,9 @@ public final class JdbcUtil {
             return true;
         }
         for (Object column : soberColumns) {
-            String name = (String)BeanUtil.getProperty(column,"name");
-            if (name!=null&&name.equalsIgnoreCase(field)) {
-                Class<?> classType = (Class<?>) BeanUtil.getProperty(column,"classType");
+            String name = (String) BeanUtil.getProperty(column, "name");
+            if (name != null && name.equalsIgnoreCase(field)) {
+                Class<?> classType = (Class<?>) BeanUtil.getProperty(column, "classType");
                 return !ClassUtil.isNumberType(classType) && !classType.getTypeName().contains("bool") && !classType.getTypeName().contains("int") && !classType.getTypeName().contains("long");
             }
         }
@@ -338,7 +342,7 @@ public final class JdbcUtil {
                     result.put(field, value);
                 }
             }
-            return (T)result;
+            return (T) result;
         }
 
         T result = cla.newInstance();
@@ -353,7 +357,7 @@ public final class JdbcUtil {
             try {
                 value = dialect.getResultSetValue(rs, propertyName);
             } catch (Exception e) {
-                log.error("错误的字段 getResultSetValue:{}",propertyName, e);
+                log.error("错误的字段 getResultSetValue:{}", propertyName, e);
             }
             BeanUtil.setFieldValue(result, field.getName(), value);
         }
@@ -365,7 +369,7 @@ public final class JdbcUtil {
      * 将表对象转换为实体对象，用于辅助代码
      *
      * @param soberSupport jdbc 操作对象
-     * @param table          表名
+     * @param table        表名
      * @return 字段列表
      */
     @SuppressWarnings("unchecked")
@@ -412,8 +416,8 @@ public final class JdbcUtil {
 
     /**
      * @param soberSupport jdbc 操作对象
-     * @param sql            sql查询
-     * @param fixFieldName   修复字段明
+     * @param sql          sql查询
+     * @param fixFieldName 修复字段明
      * @return 通过sql得到数据结构
      */
     public static List<SoberColumn> getSqlColumns(SoberSupport soberSupport, String sql, boolean fixFieldName) {
@@ -435,8 +439,8 @@ public final class JdbcUtil {
 
     /**
      * @param soberSupport 数据操作
-     * @param sql            sql
-     * @param fixFieldName   修复字段名称
+     * @param sql          sql
+     * @param fixFieldName 修复字段名称
      * @return 通过sql得到表结构
      */
     public static SoberTable getSoberTable(SoberSupport soberSupport, String sql, boolean fixFieldName) {
@@ -453,8 +457,8 @@ public final class JdbcUtil {
             List<SoberColumn> columnList = getSoberColumnList(conn, sql, fixFieldName);
             if (!columnList.isEmpty()) {
                 SoberColumn soberColumn = columnList.get(0);
-                DatabaseMetaData dbmd = conn.getMetaData();
-                ResultSet primaryKeys = dbmd.getPrimaryKeys(null, null, soberColumn.getTableName());
+                DatabaseMetaData meta = conn.getMetaData();
+                ResultSet primaryKeys = meta.getPrimaryKeys(null, null, soberColumn.getTableName());
                 List<String> primaryKeyColumns = new ArrayList<>();
                 // 遍历主键信息
                 while (primaryKeys.next()) {
@@ -630,10 +634,6 @@ public final class JdbcUtil {
 
 
     public static String getTableName(SoberSupport soberSupport, Class<?> cla) {
-
-
-
-
         TableModels tableModels = soberSupport.getSoberFactory().getTableModels(cla, soberSupport);
         if (tableModels != null) {
             return tableModels.getName();
@@ -657,6 +657,33 @@ public final class JdbcUtil {
         return AnnotationUtil.getTableName(cla);
     }
 
+    public static Object loadColumnsValue(SoberSupport soberSupport, TableModels soberTable, ResultSet resultSet) throws Exception {
+        Dialect dialect = soberSupport.getDialect();
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        Object result = BeanUtil.createDynamicEntityFromTableModels(soberTable);
+        int count = metaData.getColumnCount();
+        //count 里边的数据有可能会出现重复，这里需要排除重复的字段名称
+        Map<String, Integer> fieldNameList = new HashMap<>();
+        for (int i = 1; i <= count; i++) {
+            String field = metaData.getColumnLabel(i);
+            if (field != null && !fieldNameList.containsKey(field)) {
+                fieldNameList.put(field, i);
+            }
+        }
+        for (String dbFiled : fieldNameList.keySet()) {
+            int row = fieldNameList.get(dbFiled);
+            SoberColumn soberColumn = soberTable.getColumn(dbFiled);
+            Object obj = dialect.getResultSetValue(resultSet, row);
+            if (soberColumn != null) {
+                BeanUtil.setSimpleProperty(result, soberColumn.getName(), obj);
+            } else if (soberTable.containsField(dbFiled)) {
+                BeanUtil.setFieldValue(result, dbFiled, obj);
+            }
+        }
+        return result;
+    }
+
+
     public static <T> T loadColumnsValue(SoberSupport soberSupport, Class<T> tClass, ResultSet resultSet) throws Exception {
         Dialect dialect = soberSupport.getDialect();
         T result;
@@ -664,8 +691,7 @@ public final class JdbcUtil {
                 && (Map.class.isAssignableFrom(tClass) || HashMap.class.isAssignableFrom(tClass) || List.class.isAssignableFrom(tClass))) {
             //载入表结构定义
             ResultSetMetaData metaData = resultSet.getMetaData();
-            if (metaData==null)
-            {
+            if (metaData == null) {
                 soberSupport.updateErrorLinkDbTimes();
                 return null;
             }
@@ -680,7 +706,7 @@ public final class JdbcUtil {
             result = tClass.cast(beanMap);
         } else {
             //载入查询数据
-            TableModels soberTable = soberSupport.getSoberTable(tClass);
+            TableModels soberTable = getObjectModels(soberSupport, tClass);
             result = tClass.newInstance();
             ResultSetMetaData metaData = resultSet.getMetaData();
 
@@ -717,7 +743,7 @@ public final class JdbcUtil {
         }
 
         try {
-            List<SoberColumn>  soberColumns  = soberTable.getColumns();
+            List<SoberColumn> soberColumns = soberTable.getColumns();
             for (SoberColumn soberColumn : soberColumns) {
                 SoberNexus soberNexus = soberColumn.getNexus();
                 if (soberNexus == null) {
@@ -725,7 +751,7 @@ public final class JdbcUtil {
                 }
 
                 Placeholder placeholder = EnvFactory.getPlaceholder();
-                if ((MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping()) || MappingType.ManyToOne.equalsIgnoreCase(soberNexus.getMapping()))
+                if ((MappingEnumType.OneToOne.getName().equalsIgnoreCase(soberNexus.getMapping()) || MappingEnumType.ManyToOne.getName().equalsIgnoreCase(soberNexus.getMapping()))
                         && (StringUtil.isNull(soberNexus.getWhere()) || !StringUtil.isNull(soberNexus.getWhere()) && ObjectUtil.toBoolean(placeholder.processTemplate(ObjectUtil.getMap(result), soberNexus.getWhere())))) {
 
                     Object findValue = BeanUtil.getProperty(result, soberNexus.getField());
@@ -746,7 +772,7 @@ public final class JdbcUtil {
                         }
                         BeanUtil.setSimpleProperty(result, soberColumn.getName(), chainObj);
                     }
-                } else if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
+                } else if (MappingEnumType.OneToMany.getName().equalsIgnoreCase(soberNexus.getMapping())) {
                     //对应id对象
                     Object findValue = BeanUtil.getProperty(result, soberNexus.getField());
                     //条件 term 已经放入变量
@@ -776,7 +802,7 @@ public final class JdbcUtil {
 
 
         } catch (Exception e) {
-            log.error("载入关系表错误{},对象{},message:{}", result,soberTable.toString(),e.getMessage());
+            log.error("载入关系表错误{},对象{},message:{}", result, soberTable.toString(), e.getMessage());
         }
     }
 
@@ -807,8 +833,8 @@ public final class JdbcUtil {
 
     /**
      * @param soberSupport jdbc操作类
-     * @param soberTable     数据模型
-     * @param inObj          进入对象
+     * @param soberTable   数据模型
+     * @param inObj        进入对象
      * @return 计算结果
      */
     public static Object calcUnique(SoberSupport soberSupport, TableModels soberTable, Object inObj) {
@@ -822,7 +848,7 @@ public final class JdbcUtil {
             obj = new JSONObject((String) inObj).parseObject(soberTable.getEntity());
         }
         ////////////////////////////CalcUnique
-        List<SoberColumn> soberColumns =  soberTable.getColumns();
+        List<SoberColumn> soberColumns = soberTable.getColumns();
         for (SoberColumn soberColumn : soberColumns) {
             SoberCalcUnique soberCalcUnique = soberColumn.getCalcUnique();
             if (soberCalcUnique == null) {
@@ -834,14 +860,12 @@ public final class JdbcUtil {
                 int i = 0;
                 for (String aClassArray : classArray) {
                     i++;
-                    if (StringUtil.isNullOrWhiteSpace(aClassArray))
-                    {
+                    if (StringUtil.isNullOrWhiteSpace(aClassArray)) {
                         continue;
                     }
                     String tableName = StringUtil.empty;
-                    if (aClassArray.contains(StringUtil.DOT))
-                    {
-                        tableName =  StringUtil.substringAfter(StringUtil.DOT,aClassArray);
+                    if (aClassArray.contains(StringUtil.DOT)) {
+                        tableName = StringUtil.substringAfter(StringUtil.DOT, aClassArray);
                         tableName = StringUtil.uncapitalize(tableName);
                     } else {
                         tableName = StringUtil.uncapitalize(aClassArray);
@@ -853,17 +877,17 @@ public final class JdbcUtil {
             }
             String sqlText = dialect.processSql(soberCalcUnique.getSql(), valueMap);
             try {
-                Map<String,Object> dataMap = new HashMap<>();
+                Map<String, Object> dataMap = new HashMap<>();
                 if (!ArrayUtil.isEmpty(soberCalcUnique.getParams())) {
                     for (String key : soberCalcUnique.getParams()) {
-                        dataMap.put(key,BeanUtil.getProperty(obj, key));
+                        dataMap.put(key, BeanUtil.getProperty(obj, key));
                     }
                 } else {
                     dataMap = ObjectUtil.getMap(obj);
                 }
-                BeanUtil.setSimpleProperty(obj, soberColumn.getName(), getUniqueResult(soberSupport,sqlText,dataMap));
+                BeanUtil.setSimpleProperty(obj, soberColumn.getName(), getUniqueResult(soberSupport, sqlText, dataMap));
             } catch (Exception e) {
-                log.error("soberTable.getName()={},sqlText:{}",soberTable.getName(),sqlText, e);
+                log.error("soberTable.getName()={},sqlText:{}", soberTable.getName(), sqlText, e);
             }
 
         }
@@ -879,14 +903,14 @@ public final class JdbcUtil {
 
     /**
      * 单个对象查询返回
+     *
      * @param soberSupport jdbc操作类
-     * @param sql            sql
-     * @param valueMap       map参数
+     * @param sql          sql
+     * @param valueMap     map参数
      * @return Object
      */
     public static Object getUniqueResult(SoberSupport soberSupport, String sql, Map<String, Object> valueMap) {
-        if (valueMap==null)
-        {
+        if (valueMap == null) {
             valueMap = new HashMap<>(0);
         }
         Connection conn = null;
@@ -908,7 +932,7 @@ public final class JdbcUtil {
                 return dialect.getResultSetValue(resultSet, 1);
             }
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("SQL:{}", sqlText, e);
         } finally {
             closeResultSet(resultSet);
             closeStatement(statement);
@@ -919,11 +943,11 @@ public final class JdbcUtil {
 
     /**
      * @param soberSupport jdbc操作类
-     * @param sqlText        sql语句
-     * @param param          参数数组
+     * @param sqlText      sql语句
+     * @param param        参数数组
      * @return 单一返回对象
      */
-    public static Object getUniqueResult(SoberSupport soberSupport,  String sqlText, Object[] param) {
+    public static Object getUniqueResult(SoberSupport soberSupport, String sqlText, Object[] param) {
         Object result = null;
         Connection conn = null;
         ResultSet resultSet = null;
@@ -949,7 +973,7 @@ public final class JdbcUtil {
                 result = resultSet.getObject(1);
             }
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("SQL:{}", sqlText, e);
         } finally {
             closeResultSet(resultSet);
             closeStatement(statement);
@@ -959,15 +983,15 @@ public final class JdbcUtil {
     }
 
     /**
-     * @param jdbcOperations jdbc操作类
-     * @param aClass         类
-     * @param field          字段
-     * @param serializable   调整
-     * @param loadChild      载入子类
-     * @param <T>            类型
+     * @param soberSupport jdbc操作类
+     * @param aClass       类
+     * @param field        字段
+     * @param serializable 调整
+     * @param loadChild    载入子类
+     * @param <T>          类型
      * @return 载入对象
      */
-    public static <T> T load(SoberSupport jdbcOperations, Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild) {
+    public static <T> T load(SoberSupport soberSupport, Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild) {
         if (aClass == null) {
             return null;
         }
@@ -981,20 +1005,20 @@ public final class JdbcUtil {
             }
         }
         //安全防范，如果有  or and where 这种关键字的，直接返回 空
-        TableModels soberTable = jdbcOperations.getSoberTable(aClass);
+        TableModels soberTable = getObjectModels(soberSupport, aClass);
         if (field == null) {
             field = soberTable.getPrimaryKey();
         }
 
         if (!StringUtil.hasLength((String) field)) {
-            log.error("{} SQL Primary is NULL,配置表没设置ID",aClass);
+            log.error("{} SQL Primary is NULL,配置表没设置ID", aClass);
             return null;
         }
 
         Object result;
         //取出cache
         String cacheKey = null;
-        boolean useCache = jdbcOperations.getSoberFactory().isUseCache() && soberTable.isUseCache();
+        boolean useCache = soberSupport.getSoberFactory().isUseCache() && soberTable.isUseCache();
         if (useCache) {
             cacheKey = SoberUtil.getLoadKey(aClass, field, serializable, loadChild);
             result = JSCacheManager.get(aClass, cacheKey);
@@ -1003,7 +1027,7 @@ public final class JdbcUtil {
             }
         }
 
-        result = get(jdbcOperations, aClass, field, serializable, loadChild);
+        result = get(soberSupport, aClass, field, serializable, loadChild);
         //放入cache
         if (useCache && result != null) {
             JSCacheManager.put(aClass, cacheKey, result);
@@ -1012,7 +1036,8 @@ public final class JdbcUtil {
             try {
                 return aClass.newInstance();
             } catch (Exception e) {
-                log.error("{} newInstance error",aClass,e);            }
+                log.error("{} newInstance error", aClass, e);
+            }
         }
         return aClass.cast(result);
     }
@@ -1021,21 +1046,21 @@ public final class JdbcUtil {
      * 载入映射对象
      *
      * @param soberSupport jdbc操作类
-     * @param soberTable     mapping
-     * @param list           list
+     * @param soberTable   mapping
+     * @param list         list
      */
     public static void loadNexusList(SoberSupport soberSupport, TableModels soberTable, List<?> list) {
         if (ObjectUtil.isEmpty(list)) {
             return;
         }
         Placeholder placeholder = EnvFactory.getPlaceholder();
-        List<SoberColumn>  soberColumns  = soberTable.getColumns();
+        List<SoberColumn> soberColumns = soberTable.getColumns();
         for (SoberColumn soberColumn : soberColumns) {
             SoberNexus soberNexus = soberColumn.getNexus();
             if (soberNexus == null) {
                 continue;
             }
-            if ((MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping()) || MappingType.ManyToOne.equalsIgnoreCase(soberNexus.getMapping()))
+            if ((MappingEnumType.OneToOne.equals(MappingEnumType.find(soberNexus.getMapping())) || MappingEnumType.ManyToOne.equals(MappingEnumType.find(soberNexus.getMapping())))
                     && (StringUtil.isNull(soberNexus.getWhere()) || !StringUtil.isNull(soberNexus.getWhere())
                     && ObjectUtil.toBoolean(placeholder.processTemplate(ObjectUtil.getMap(list.get(0)), soberNexus.getWhere())))) {
                 List<Object> idList = BeanUtil.copyFieldList(list, soberNexus.getField());
@@ -1083,7 +1108,7 @@ public final class JdbcUtil {
                         }
                     }
                 }
-            } else if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
+            } else if (MappingEnumType.OneToMany.equals(MappingEnumType.find(soberNexus.getMapping()))) {
                 List<Object> idList = BeanUtil.copyFieldList(list, soberNexus.getField());
                 for (Object obj : list) {
                     Criteria criteria = soberSupport.createCriteria(soberNexus.getTargetEntity());
@@ -1121,13 +1146,13 @@ public final class JdbcUtil {
      * 使用jdbc完成,比较浪费资源
      *
      * @param soberSupport jdbc操作类
-     * @param cla            类型
-     * @param sql            sql
-     * @param param          参数
-     * @param currentPage    页数
-     * @param totalCount     每页行数
-     * @param loadChild      载入子对象
-     * @param <T>            类型
+     * @param cla          类型
+     * @param sql          sql
+     * @param param        参数
+     * @param currentPage  页数
+     * @param totalCount   每页行数
+     * @param loadChild    载入子对象
+     * @param <T>          类型
      * @return 查询返回列表
      */
     public static <T> List<T> query(SoberSupport soberSupport, Class<T> cla, String sql, Object[] param, int currentPage, int totalCount, boolean loadChild) {
@@ -1147,7 +1172,7 @@ public final class JdbcUtil {
             iBegin = 0;
         }
 
-        TableModels soberTable = soberSupport.getSoberTable(cla);
+        TableModels soberTable = getObjectModels(soberSupport, cla);
         if (soberTable == null) {
             try {
                 throw new Exception("此方法不支持Map返回");
@@ -1235,14 +1260,14 @@ public final class JdbcUtil {
     /**
      * 验证数据对象
      *
-     * @param jdbcOperations jdbc操作类
-     * @param obj            对象
+     * @param soberSupport jdbc操作类
+     * @param obj          对象
      * @throws Exception 异常
      */
-    public static void validator(SoberSupport jdbcOperations, Object obj) throws Exception {
+    public static void validator(SoberSupport soberSupport, Object obj) throws Exception {
         Map<String, String> result = new HashMap<>();
         ScriptRunner scriptRunner = new TemplateScriptEngine();
-        TableModels soberTable = jdbcOperations.getSoberTable(obj.getClass());
+        TableModels soberTable = getObjectModels(soberSupport, obj);
         try {
             for (SoberColumn soberColumn : soberTable.getColumns()) {
                 if (!soberColumn.isNoNull()) {
@@ -1293,13 +1318,12 @@ public final class JdbcUtil {
      * 根据字段删除一个对象,或一组对象,快速删除
      *
      * @param soberSupport jdbc操作类
-     * @param aClass         类
-     * @param field          字段
-     * @param serializable   字段值
-     * @return 是否成功
+     * @param soberTable   模型
+     * @param field        字段
+     * @param serializable 字段值
+     * @return 删除记录数量
      */
-    public static int delete(SoberSupport soberSupport, Class<?> aClass, String field, Serializable serializable) {
-        TableModels soberTable = soberSupport.getSoberTable(aClass);
+    public static int delete(SoberSupport soberSupport, TableModels soberTable, String field, Serializable serializable) {
         if (soberTable == null) {
             return -2;
         }
@@ -1317,19 +1341,51 @@ public final class JdbcUtil {
         try {
             int x = soberSupport.update(sqlText);
             if (x >= 0 && soberTable.isAutoCleanCache()) {
-                soberSupport.evict(aClass);
+                soberSupport.evict(soberTable.getEntity());
             }
             return x;
         } catch (Exception e) {
-            log.error("delete aClass={},field={},serializable={}", aClass, field, serializable);
+            log.error("delete aClass={},field={},serializable={}", soberTable.getEntity(), field, serializable, e);
         }
         return -2;
     }
 
     /**
+     * 根据字段删除一个对象,或一组对象,快速删除
+     *
      * @param soberSupport jdbc操作类
-     * @param sqlText        使用sql直接更新,参数 ？ 的jdbc原生形式
-     * @param params         参数
+     * @param soberTable   模型
+     * @param serializable 字段值
+     * @return 删除记录数量
+     */
+    public static int delete(SoberSupport soberSupport, TableModels soberTable, Serializable serializable) {
+        return delete(soberSupport, soberTable, soberTable.getPrimaryKey(), serializable);
+    }
+
+    /**
+     * 根据字段删除一个对象,或一组对象,快速删除
+     *
+     * @param soberSupport jdbc操作类
+     * @param aClass       类
+     * @param field        字段
+     * @param serializable 字段值
+     * @return 删除记录数量
+     */
+    public static int delete(SoberSupport soberSupport, Class<?> aClass, String field, Serializable serializable) {
+        TableModels soberTable = getObjectModels(soberSupport, aClass);
+        if (soberTable == null) {
+            return -2;
+        }
+        if (!soberTable.containsField(field)) {
+            return -1;
+        }
+        return delete(soberSupport, soberTable, field, serializable);
+    }
+
+    /**
+     * @param soberSupport jdbc操作类
+     * @param sqlText      使用sql直接更新,参数 ？ 的jdbc原生形式
+     * @param params       参数
      * @return 更新数量
      * @throws Exception 异常
      */
@@ -1357,7 +1413,7 @@ public final class JdbcUtil {
             }
             result = statement.executeUpdate();
         } catch (Exception e) {
-            log.error("update sql={},params=", sqlText, e);
+            log.error("update sql={},params={}", sqlText, params, e);
             throw e;
         } finally {
             closeStatement(statement);
@@ -1371,24 +1427,23 @@ public final class JdbcUtil {
      * 删除一堆对象
      *
      * @param soberSupport jdbc操作类
-     * @param collection     删除列表
+     * @param collection   删除列表
      * @return 是否成功删除
      * @throws Exception 异常
      */
-    public static boolean deleteAll(SoberSupport soberSupport,  Collection<?> collection) throws Exception {
+    public static boolean deleteAll(SoberSupport soberSupport, Collection<?> collection) throws Exception {
         if (ObjectUtil.isEmpty(collection)) {
             return true;
         }
         Dialect dialect = soberSupport.getDialect();
         PreparedStatement statement = null;
         Connection conn = null;
-        ResultSet resultSet = null;
         TableModels soberTable = null;
         List<Object> deleteId = new ArrayList<>();
         int i = 0;
         for (Object object : collection) {
             if (i == 0) {
-                soberTable = soberSupport.getSoberTable(object.getClass());
+                soberTable = getObjectModels(soberSupport, object);
                 if (soberTable == null) {
                     return false;
                 }
@@ -1428,11 +1483,10 @@ public final class JdbcUtil {
             }
             return x;
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("DELETE SQL:{}", sqlText, e);
             throw e;
         } finally {
             valueMap.clear();
-            closeResultSet(resultSet);
             closeStatement(statement);
             closeConnection(conn);
         }
@@ -1441,16 +1495,16 @@ public final class JdbcUtil {
     /**
      * 级联方式删除对象,只删除一层
      *
-     * @param jdbcOperations jdbc操作对象
-     * @param aClass         删除对象
-     * @param field          删除字段
-     * @param serializable   字段值
-     * @param term           条件
-     * @param delChild       删除子映射对象
+     * @param soberSupport jdbc操作对象
+     * @param aClass       删除对象
+     * @param field        删除字段
+     * @param serializable 字段值
+     * @param term         条件
+     * @param delChild     删除子映射对象
      * @return 删除数量
      */
-    public static int delete(SoberSupport jdbcOperations, Class<?> aClass, String field, Serializable serializable, String term, boolean delChild) {
-        Criteria criteria = jdbcOperations.createCriteria(aClass);
+    public static int delete(SoberSupport soberSupport, Class<?> aClass, String field, Serializable serializable, String term, boolean delChild) {
+        Criteria criteria = soberSupport.createCriteria(aClass);
         if (serializable.getClass().isArray()) {
             int length = java.lang.reflect.Array.getLength(serializable);
             Object[] params = new Object[length];
@@ -1465,7 +1519,7 @@ public final class JdbcUtil {
             try {
                 criteria = SSqlExpression.getTermExpression(criteria, term);
             } catch (Exception e) {
-                log.error("delete:" + criteria.toString(), e);
+                log.error("delete term {}", criteria.toString(), e);
             }
         }
         return criteria.delete(delChild);
@@ -1473,21 +1527,51 @@ public final class JdbcUtil {
 
     /**
      * @param soberSupport jdbc操作对象
-     * @param aClass         class 类对象
-     * @param field          字段
-     * @param serializable   id
-     * @param loadChild      载入子对象
-     * @param <T>            类型
+     * @param tableModels  模型
+     * @param field        删除字段
+     * @param serializable 字段值
+     * @param term         条件
+     * @param delChild     删除子映射对象
+     * @return 删除数量
+     */
+    public static int delete(SoberSupport soberSupport, TableModels tableModels, String field, Serializable serializable, String term, boolean delChild) {
+        Criteria criteria = soberSupport.createCriteria(tableModels);
+        if (serializable.getClass().isArray()) {
+            int length = java.lang.reflect.Array.getLength(serializable);
+            Object[] params = new Object[length];
+            for (int i = 0; i < length; i++) {
+                params[i] = java.lang.reflect.Array.get(serializable, i);
+            }
+            criteria = criteria.add(Expression.in(field, params));
+        } else {
+            criteria = criteria.add(Expression.eq(field, serializable));
+        }
+        if (!StringUtil.isNull(term)) {
+            try {
+                criteria = SSqlExpression.getTermExpression(criteria, term);
+            } catch (Exception e) {
+                log.error("delete term {}", criteria.toString(), e);
+            }
+        }
+        return criteria.delete(delChild);
+    }
+
+    /**
+     * @param soberSupport jdbc操作对象
+     * @param aClass       class 类对象
+     * @param field        字段
+     * @param serializable id
+     * @param loadChild    载入子对象
+     * @param <T>          类型
      * @return query a object 返回对象
      */
     public static <T> T get(SoberSupport soberSupport, Class<T> aClass, Serializable field, Serializable serializable, boolean loadChild) {
-        TableModels soberTable = soberSupport.getSoberTable(aClass);
+        TableModels soberTable = getObjectModels(soberSupport, aClass);
         if (field == null) {
             field = soberTable.getPrimaryKey();
         }
-
         if (!StringUtil.hasLength((String) field)) {
-            log.info("{} SQL Primary is NULL,配置表没设置ID",aClass);
+            log.info("{} SQL Primary is NULL,配置表没设置ID", aClass);
             return null;
         }
 
@@ -1531,13 +1615,11 @@ public final class JdbcUtil {
                 //载入计算数据
                 result = calcUnique(soberSupport, soberTable, result);
             }
-        } catch (NullPointerException nex)
-        {
+        } catch (NullPointerException nex) {
             //数据库没有得到连接
             soberSupport.updateErrorLinkDbTimes();
-        }
-        catch (Exception e) {
-            log.error("sql:{}",sqlText, e);
+        } catch (Exception e) {
+            log.error("sql:{}", sqlText, e);
         } finally {
             closeResultSet(resultSet);
             closeStatement(preparedStatement);
@@ -1550,26 +1632,27 @@ public final class JdbcUtil {
     /**
      * 查询返回封装好的列表
      *
-     * @param jdbcOperations jdbc操作对象
-     * @param cla            要封装返回的对象
-     * @param sql            SQL
-     * @param param          参数
-     * @param <T>            类型
+     * @param soberSupport jdbc操作对象
+     * @param cla          要封装返回的对象
+     * @param sql          SQL
+     * @param param        参数
+     * @param <T>          类型
      * @return 封装好的查询对象
      */
-    public static <T> List<T> query(SoberSupport jdbcOperations, Class<T> cla, String sql, Object[] param) {
+    public static <T> List<T> query(SoberSupport soberSupport, Class<T> cla, String sql, Object[] param) {
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
 
         List<T> result = null;
         //取出cache  begin
-        SoberFactory soberFactory = jdbcOperations.getSoberFactory();
-        Dialect dialect = jdbcOperations.getDialect();
+        SoberFactory soberFactory = soberSupport.getSoberFactory();
+        Dialect dialect = soberSupport.getDialect();
+
         TableModels soberTable = null;
         String cacheKey = null;
         if (!cla.getName().equals(Map.class.getName())) {
-            soberTable = soberFactory.getTableModels(cla, jdbcOperations);
+            soberTable = getObjectModels(soberSupport, cla);
             if (soberTable != null && soberFactory.isUseCache() && soberTable.isUseCache()) {
                 StringBuilder termKey = new StringBuilder();
                 termKey.append(sql);
@@ -1579,7 +1662,7 @@ public final class JdbcUtil {
                         termKey.append(ObjectUtil.toString(po));
                     }
                 }
-                cacheKey = SoberUtil.getListKey(cla, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), StringUtil.empty, 1, jdbcOperations.getMaxRows(), false);
+                cacheKey = SoberUtil.getListKey(cla, StringUtil.replace(termKey.toString(), StringUtil.EQUAL, "_"), StringUtil.empty, 1, soberSupport.getMaxRows(), false);
                 result = (List<T>) JSCacheManager.get(cla, cacheKey);
                 if (!ObjectUtil.isEmpty(result)) {
                     return result;
@@ -1590,8 +1673,8 @@ public final class JdbcUtil {
         result = new ArrayList<>();
         //取出cache  end
         try {
-            conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
-            jdbcOperations.debugPrint(sql);
+            conn = soberSupport.getConnection(SoberEnv.READ_ONLY);
+            soberSupport.debugPrint(sql);
             if (!dialect.supportsConcurReadOnly()) {
                 statement = conn.prepareStatement(sql);
             } else {
@@ -1599,7 +1682,7 @@ public final class JdbcUtil {
             }
             if (param != null) {
                 for (int i = 0; i < param.length; i++) {
-                    jdbcOperations.debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
+                    soberSupport.debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
                     dialect.setPreparedStatementValue(statement, i + 1, param[i]);
                 }
             }
@@ -1608,14 +1691,14 @@ public final class JdbcUtil {
             while (resultSet.next()) {
                 T resultObject;
                 if (soberTable != null) {
-                    resultObject = loadColumnsValue(jdbcOperations, cla, resultSet);
+                    resultObject = loadColumnsValue(soberSupport, cla, resultSet);
                 } else {
                     resultObject = getBean(resultSet, cla, dialect);
                 }
                 result.add(resultObject);
             }
         } catch (Exception e) {
-            log.error("SQL:{}",sql, e);
+            log.error("SQL:{}", sql, e);
         } finally {
             closeResultSet(resultSet);
             closeStatement(statement);
@@ -1637,21 +1720,20 @@ public final class JdbcUtil {
      * @return List  查询返回列表
      */
     public static List<?> query(SoberSupport jdbcOperations, String sqlText, Object[] param, int currentPage, long totalCount) {
-        return query(jdbcOperations, sqlText, param, currentPage,  totalCount,true);
+        return query(jdbcOperations, sqlText, param, currentPage, totalCount, true);
     }
 
 
     /**
-     *
      * @param soberSupport jdbc操作对象
-     * @param sqlText sql
-     * @param param 参数数组
-     * @param currentPage 页数
-     * @param totalCount 返回行数
-     * @param fixName 是否修复命名到 驼峰方式
+     * @param sqlText      sql
+     * @param param        参数数组
+     * @param currentPage  页数
+     * @param totalCount   返回行数
+     * @param fixName      是否修复命名到 驼峰方式
      * @return 查询返回列表
      */
-     public static List<?> query(SoberSupport soberSupport, String sqlText, Object[] param, int currentPage, long totalCount,boolean fixName) {
+    public static List<?> query(SoberSupport soberSupport, String sqlText, Object[] param, int currentPage, long totalCount, boolean fixName) {
 
         if (totalCount > soberSupport.getMaxRows()) {
             totalCount = soberSupport.getMaxRows();
@@ -1678,8 +1760,8 @@ public final class JdbcUtil {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             }
 
-            setFetchSize(statement, (int)iEnd);
-            statement.setMaxRows((int)iEnd);
+            setFetchSize(statement, (int) iEnd);
+            statement.setMaxRows((int) iEnd);
 
             if (param != null) {
                 for (int i = 0; i < param.length; i++) {
@@ -1689,14 +1771,13 @@ public final class JdbcUtil {
             }
 
             resultSet = statement.executeQuery();
-            if (iBegin == 0 || resultSet.absolute((int)iBegin)) {
+            if (iBegin == 0 || resultSet.absolute((int) iBegin)) {
                 ResultSetMetaData metaData = resultSet.getMetaData();
                 while (resultSet.next()) {
                     Map<String, Object> beanMap = new HashMap<>();
                     for (int n = 1; n <= metaData.getColumnCount(); n++) {
                         String field = metaData.getColumnLabel(n);
-                        if (fixName)
-                        {
+                        if (fixName) {
                             field = StringUtil.underlineToCamel(field);
                         }
                         if (!beanMap.containsKey(field)) {
@@ -1711,7 +1792,7 @@ public final class JdbcUtil {
                 }
             }
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("SQL:{}", sqlText, e);
         } finally {
             closeResultSet(resultSet);
             closeStatement(statement);
@@ -1722,8 +1803,8 @@ public final class JdbcUtil {
 
     /**
      * @param soberSupport jdbc操作对象
-     * @param object         查询对象
-     * @param updateFiled    更新一个字段
+     * @param object       查询对象
+     * @param updateFiled  更新一个字段
      * @return 指定更新字段, 特殊不验证了
      * @throws Exception 异常
      */
@@ -1736,7 +1817,7 @@ public final class JdbcUtil {
         }
 
         Dialect dialect = soberSupport.getDialect();
-        TableModels soberTable = soberSupport.getSoberTable(object.getClass());
+        TableModels soberTable = getObjectModels(soberSupport, object);
         SoberFactory soberFactory = soberSupport.getSoberFactory();
         Connection conn = null;
         PreparedStatement statement = null;
@@ -1788,30 +1869,29 @@ public final class JdbcUtil {
 
 
     /**
-     * @param jdbcOperations jdbc操作对象
-     * @param dialect        sql适配器
-     * @param object         对象
+     * @param soberSupport jdbc操作对象
+     * @param object       对象
      * @return 是否成功
      * @throws Exception 异常
      */
-    public static int update(SoberSupport jdbcOperations, Dialect dialect, Object object) throws Exception {
+    public static int update(SoberSupport soberSupport, Object object) throws Exception {
         if (object == null) {
             return -2;
         }
         //////////配置验证才能够保存 begin
-        SoberFactory soberFactory = jdbcOperations.getSoberFactory();
+        SoberFactory soberFactory = soberSupport.getSoberFactory();
         if (soberFactory.isValid()) {
-            validator(jdbcOperations, object);
+            validator(soberSupport, object);
         }
-        //////////配置验证才能够保存 end                ;
-        TableModels soberTable = jdbcOperations.getSoberTable(object.getClass());
+        //////////配置验证才能够保存 end
+        TableModels soberTable = getObjectModels(soberSupport, object);
         if (soberTable == null) {
             return -2;
         }
         if (!soberTable.isCreate()) {
             throw new Exception("注释标签配置为不可建表对象，不允许保存" + object.getClass());
         }
-        BusinessFilterUtil.updateFilter(jdbcOperations, object);
+        BusinessFilterUtil.updateFilter(soberSupport, object);
         Connection conn = null;
         PreparedStatement statement = null;
         String[] fieldArray = soberTable.getFieldArray();
@@ -1837,22 +1917,22 @@ public final class JdbcUtil {
 
         int result;
         String sqlText = StringUtil.empty;
+        Dialect dialect = soberSupport.getDialect();
         try {
-            conn = jdbcOperations.getConnection(SoberEnv.READ_WRITE);
+            conn = soberSupport.getConnection(SoberEnv.READ_WRITE);
             sqlText = dialect.processTemplate(Dialect.SQL_UPDATE, valueMap);
-            jdbcOperations.debugPrint(sqlText);
+            soberSupport.debugPrint(sqlText);
             if (!dialect.supportsConcurReadOnly()) {
                 statement = conn.prepareStatement(sqlText);
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             }
-
-            setPreparedStatementValueList(jdbcOperations, dialect, statement, fieldArray, object);
+            setPreparedStatementValueList(soberSupport, dialect, statement, fieldArray, object);
             result = statement.executeUpdate();
 
             ///////////////////处理关联对象begin
 
-            List<SoberColumn>  soberColumns  = soberTable.getColumns();
+            List<SoberColumn> soberColumns = soberTable.getColumns();
             for (SoberColumn soberColumn : soberColumns) {
                 SoberNexus soberNexus = soberColumn.getNexus();
                 if (soberNexus == null) {
@@ -1861,37 +1941,37 @@ public final class JdbcUtil {
                 if (!soberNexus.isUpdate()) {
                     continue;
                 }
-                if (MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping())) {
+                if (MappingEnumType.OneToOne.getName().equalsIgnoreCase(soberNexus.getMapping())) {
                     Object findValue = BeanUtil.getProperty(object, soberNexus.getField());
                     if (findValue == null) {
                         continue;
                     }
-                    jdbcOperations.delete(soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) findValue);
+                    soberSupport.delete(soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) findValue);
                     Object saveObj = BeanUtil.getProperty(object, soberColumn.getName());
                     if (saveObj != null) {
-                        result = result + jdbcOperations.save(saveObj);
+                        result = result + soberSupport.save(saveObj);
                     }
                 }
-                if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
+                if (MappingEnumType.OneToMany.getName().equalsIgnoreCase(soberNexus.getMapping())) {
                     Object findValue = BeanUtil.getProperty(object, soberNexus.getField());
                     if (findValue == null) {
                         continue;
                     }
-                    Criteria criteria = jdbcOperations.createCriteria(soberNexus.getTargetEntity()).add(Expression.eq(soberNexus.getTargetField(), findValue));
+                    Criteria criteria = soberSupport.createCriteria(soberNexus.getTargetEntity()).add(Expression.eq(soberNexus.getTargetField(), findValue));
                     SSqlExpression.getTermExpression(criteria, soberNexus.getTerm()).delete(false);
                     Collection<?> saveObjList = (Collection<?>) BeanUtil.getProperty(object, soberColumn.getName());
                     if (saveObjList != null && !saveObjList.isEmpty()) {
                         for (Object child : saveObjList) {
                             BeanUtil.setSimpleProperty(child, soberNexus.getTargetField(), findValue);
                         }
-                        result = result + jdbcOperations.save(saveObjList);
-                        jdbcOperations.evict(soberNexus.getTargetEntity());
+                        result = result + soberSupport.save(saveObjList);
+                        soberSupport.evict(soberNexus.getTargetEntity());
                     }
                 }
             }
             ///////////////////处理关联对象end
             if (soberTable.isAutoCleanCache() && soberTable.getEntity() != null) {
-                jdbcOperations.evict(soberTable.getEntity());
+                soberSupport.evict(soberTable.getEntity());
             }
         } catch (Exception e) {
             log.error(sqlText, e);
@@ -1907,28 +1987,27 @@ public final class JdbcUtil {
     /**
      * 先判断是否存在,存在就使用更新,否则增加
      *
-     * @param jdbcOperations jdbc操作对象
-     * @param dialect        sql适配器
-     * @param object         对象
+     * @param soberSupport jdbc操作对象
+     * @param object       对象
      * @return 保存是否成功
      * @throws Exception 异常
      */
-    public static int saveOrUpdate(SoberSupport jdbcOperations, Dialect dialect, Object object) throws Exception {
+    public static int saveOrUpdate(SoberSupport soberSupport, Object object) throws Exception {
         if (object == null) {
             return -2;
         }
 
         if (object instanceof Collection) {
-            return saveOrUpdateAll(jdbcOperations, (Collection<?>) object);
+            return saveOrUpdateAll(soberSupport, (Collection<?>) object);
         }
-        SoberFactory soberFactory = jdbcOperations.getSoberFactory();
+        SoberFactory soberFactory = soberSupport.getSoberFactory();
         //////////配置验证才能够保存 begin
         if (soberFactory.isValid()) {
-            validator(jdbcOperations, object);
+            validator(soberSupport, object);
         }
         //////////配置验证才能够保存 end
 
-        TableModels soberTable = jdbcOperations.getSoberTable(object.getClass());
+        TableModels soberTable = getObjectModels(soberSupport, object);
         if (!soberTable.isCreate()) {
             throw new Exception("注释标签配置为不可建表对象，不允许保存" + object.getClass());
         }
@@ -1939,6 +2018,7 @@ public final class JdbcUtil {
         if (fieldArray == null || fieldArray.length < 1) {
             return -2;
         }
+        Dialect dialect = soberSupport.getDialect();
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
@@ -1949,7 +2029,7 @@ public final class JdbcUtil {
         valueMap.put(Dialect.KEY_FIELD_VALUE, BeanUtil.getProperty(object, soberTable.getPrimaryKey()));
         if (valueMap.get(Dialect.KEY_FIELD_VALUE) == null) {
             if (dialect.isSupportsGetGeneratedKeys() && soberTable.isAutoId() && soberTable.isSerial()) {
-                return jdbcOperations.save(object);
+                return soberSupport.save(object);
             } else {
                 throw new SQLException("SQL Primary is NULL");
             }
@@ -1957,40 +2037,40 @@ public final class JdbcUtil {
         String sqlText = StringUtil.empty;
         Connection conn = null;
         try {
-            conn = jdbcOperations.getConnection(SoberEnv.READ_WRITE);
+            conn = soberSupport.getConnection(SoberEnv.READ_WRITE);
             sqlText = dialect.processTemplate(Dialect.SQL_HAVE, valueMap);
             if (!dialect.supportsConcurReadOnly()) {
                 statement = conn.prepareStatement(sqlText);
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             }
-            jdbcOperations.debugPrint(sqlText);
+            soberSupport.debugPrint(sqlText);
             resultSet = statement.executeQuery();
             if (resultSet.next() && resultSet.getInt(1) > 0) {
                 fieldArray = ArrayUtil.delete(fieldArray, soberTable.getPrimaryKey(), true);
                 valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
                 valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
                 sqlText = dialect.processTemplate(Dialect.SQL_UPDATE, valueMap);
-                jdbcOperations.debugPrint(sqlText);
+                soberSupport.debugPrint(sqlText);
                 statement = conn.prepareStatement(sqlText);
-                setPreparedStatementValueList(jdbcOperations, dialect, statement, fieldArray, object);
+                setPreparedStatementValueList(soberSupport, dialect, statement, fieldArray, object);
             } else {
                 sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
-                jdbcOperations.debugPrint(sqlText);
+                soberSupport.debugPrint(sqlText);
                 if (!dialect.supportsConcurReadOnly()) {
                     statement = conn.prepareStatement(sqlText);
                 } else {
                     statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 }
-                setPreparedStatementValueList(jdbcOperations, dialect, statement, fieldArray, object);
+                setPreparedStatementValueList(soberSupport, dialect, statement, fieldArray, object);
             }
             int x = statement.executeUpdate();
             if (soberTable.isAutoCleanCache() && soberTable.getEntity() != null) {
-                jdbcOperations.evict(soberTable.getEntity());
+                soberSupport.evict(soberTable.getEntity());
             }
             return x;
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("SQL:{}", sqlText, e);
             throw e;
         } finally {
             valueMap.clear();
@@ -2004,29 +2084,27 @@ public final class JdbcUtil {
     /**
      * 先判断是否存在,存在就使用更新,否则增加 ,处理一个队
      *
-     * @param jdbcOperations jdbc操作对象
-     * @param collection     更新对象列表
+     * @param soberSupport jdbc操作对象
+     * @param collection   更新对象列表
      * @return int 返回是否成功
      * @throws Exception 异常
      */
-    public static int saveOrUpdateAll(SoberSupport jdbcOperations, Collection<?> collection) throws Exception {
+    public static int saveOrUpdateAll(SoberSupport soberSupport, Collection<?> collection) throws Exception {
         if (ObjectUtil.isEmpty(collection)) {
             return -2;
         }
 
-        SoberFactory soberFactory = jdbcOperations.getSoberFactory();
-        Dialect dialect = soberFactory.getDialect();
-
         Connection conn = null;
         PreparedStatement statement = null;
-        ResultSet resultSet = null;
+        SoberFactory soberFactory = soberSupport.getSoberFactory();
+        Dialect dialect = soberFactory.getDialect();
         TableModels soberTable = null;
         List<Object> deleteId = new ArrayList<>();
         //得到类型
         int i = 0;
         for (Object object : collection) {
             if (i == 0) {
-                soberTable = jdbcOperations.getSoberTable(object.getClass());
+                soberTable = getObjectModels(soberSupport, object);
                 if (soberTable == null) {
                     log.error("识别不到表结构模型:{}", collection.iterator().next());
                     return -2;
@@ -2040,7 +2118,7 @@ public final class JdbcUtil {
             //////////配置验证才能够保存 begin
 
             if (soberFactory.isValid()) {
-                validator(jdbcOperations, object);
+                validator(soberSupport, object);
             }
             ////////////配置验证才能够保存 end
 
@@ -2062,12 +2140,12 @@ public final class JdbcUtil {
         int result = 0;
         String sqlText = StringUtil.empty;
         try {
-            conn = jdbcOperations.getConnection(SoberEnv.READ_WRITE);
+            conn = soberSupport.getConnection(SoberEnv.READ_WRITE);
 
             //////////////删除 begin
             valueMap.put(Dialect.KEY_FIELD_VALUE, deleteId);
             sqlText = dialect.processTemplate(Dialect.SQL_DELETE_IN, valueMap);
-            jdbcOperations.debugPrint(sqlText);
+            soberSupport.debugPrint(sqlText);
             if (!dialect.supportsConcurReadOnly()) {
                 conn.prepareStatement(sqlText).execute();
             } else {
@@ -2076,14 +2154,14 @@ public final class JdbcUtil {
             //////////////删除 end
 
             sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
-            jdbcOperations.debugPrint(sqlText);
+            soberSupport.debugPrint(sqlText);
             if (!dialect.supportsConcurReadOnly()) {
                 statement = conn.prepareStatement(sqlText);
             } else {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             }
             for (Object object : collection) {
-                setPreparedStatementValueList(jdbcOperations, dialect, statement, fieldArray, object);
+                setPreparedStatementValueList(soberSupport, dialect, statement, fieldArray, object);
                 int temp = statement.executeUpdate();
                 if (temp < 1) {
                     throw new SQLException(sqlText + " object:" + MapUtil.toString(ObjectUtil.getMap(object)));
@@ -2094,34 +2172,34 @@ public final class JdbcUtil {
             }
 
             if (soberTable.isAutoCleanCache() && soberTable.getEntity() != null) {
-                jdbcOperations.evict(soberTable.getEntity());
+                soberSupport.evict(soberTable.getEntity());
             }
             return result;
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("SQL:{}", sqlText, e);
             throw e;
         } finally {
             valueMap.clear();
-            closeResultSet(resultSet);
             closeStatement(statement);
             closeConnection(conn);
 
         }
     }
 
+
     /**
      * @param soberSupport jdbc操作对象
-     * @param object         保存对象
-     * @param child          保持子对象
+     * @param object       保存对象
+     * @param child        保持子对象
      * @return 保存一个对象
      * @throws Exception 异常
      */
-    public static int save(SoberSupport soberSupport, Object object, final boolean child) throws Exception {
+    public static int save(SoberSupport soberSupport, Object object, boolean child) throws Exception {
         if (object == null) {
             return -2;
         }
         if (object instanceof Collection) {
-            return soberSupport.save((Collection<?>) object,child);
+            return soberSupport.save((Collection<?>) object, child);
         }
 
         SoberFactory soberFactory = soberSupport.getSoberFactory();
@@ -2130,9 +2208,8 @@ public final class JdbcUtil {
             validator(soberSupport, object);
         }
         //////////配置验证才能够保存 end
+        TableModels soberTable = getObjectModels(soberSupport, object);
 
-        Dialect dialect = soberSupport.getDialect();
-        TableModels soberTable = soberSupport.getSoberTable(object.getClass());
         if (soberTable == null) {
             log.error("先确保数据库jdbc连接正常, @Table 标签没有配置:{}", object.getClass());
             throw new Exception("先确保数据库jdbc连接正常, @Table 标签没有配置");
@@ -2145,6 +2222,7 @@ public final class JdbcUtil {
         BusinessFilterUtil.saveFilter(soberSupport, object);
         //业务逻辑过滤处理end
 
+        Dialect dialect = soberSupport.getDialect();
         Object idValue = BeanUtil.getFieldValue(object, soberTable.getPrimaryKey(), false);
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
@@ -2182,12 +2260,13 @@ public final class JdbcUtil {
                 statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             }
             soberSupport.debugPrint(sqlText);
+            //这里需要处理字段和实体名称的对应关系
+
             for (int i = 0; i < fieldArray.length; i++) {
 
                 SoberColumn soberColumn = soberTable.getColumn(fieldArray[i]);
                 Object value = BeanUtil.getProperty(object, soberColumn.getName());
-
-                if (value == null && soberColumn != null) {
+                if (value == null) {
                     //放入默认数据 begin
                     if (!StringUtil.isNull(soberColumn.getDefaultValue())) {
                         value = soberColumn.getDefaultValue();
@@ -2195,11 +2274,7 @@ public final class JdbcUtil {
                     //放入默认数据 end
                 }
                 soberSupport.debugPrint("prepared[" + (i + 1) + "]=" + value);
-                if (soberColumn != null) {
-                    dialect.setPreparedStatementValue(statement, i + 1, BeanUtil.getTypeValue(value, soberColumn.getClassType()));
-                } else {
-                    dialect.setPreparedStatementValue(statement, i + 1, value);
-                }
+                dialect.setPreparedStatementValue(statement, i + 1, BeanUtil.getTypeValue(value, soberColumn.getClassType()));
             }
             int result = statement.executeUpdate();
             if (result < 1) {
@@ -2213,7 +2288,7 @@ public final class JdbcUtil {
                 closeResultSet(rs);
             }
             if (child) {
-                List<SoberColumn>  soberColumns  = soberTable.getColumns();
+                List<SoberColumn> soberColumns = soberTable.getColumns();
                 for (SoberColumn soberColumn : soberColumns) {
                     SoberNexus soberNexus = soberColumn.getNexus();
                     if (soberNexus == null) {
@@ -2223,8 +2298,8 @@ public final class JdbcUtil {
                         continue;
                     }
 
-
-                    if (MappingType.OneToOne.equalsIgnoreCase(soberNexus.getMapping())) {
+                    //有实体对象，保存实体对象结构
+                    if (MappingEnumType.OneToOne.getName().equalsIgnoreCase(soberNexus.getMapping())) {
                         Object oneToOneObject = BeanUtil.getProperty(object, soberNexus.getName());
                         if (oneToOneObject == null) {
                             continue;
@@ -2236,7 +2311,7 @@ public final class JdbcUtil {
                         }
                         result = result + soberSupport.save(oneToOneObject, soberNexus.isChain());
                     }
-                    if (MappingType.OneToMany.equalsIgnoreCase(soberNexus.getMapping())) {
+                    if (MappingEnumType.OneToMany.getName().equalsIgnoreCase(soberNexus.getMapping())) {
                         Collection<?> oneToMayObjects = (Collection<?>) BeanUtil.getProperty(object, soberNexus.getName());
                         if (oneToMayObjects == null || oneToMayObjects.isEmpty()) {
                             continue;
@@ -2255,6 +2330,7 @@ public final class JdbcUtil {
                         result = result + oneToMayObjects.size();
                         oneToMayObjects.clear();
                     }
+
                 }
                 //save
                 /////////////////////////////保存关联对象end
@@ -2286,22 +2362,210 @@ public final class JdbcUtil {
         }
     }
 
+
+    /**
+     * @param soberSupport jdbc对象
+     * @param soberTable   模型
+     * @return 保存模型的数量
+     * @throws Exception
+     */
+    public static int saveModel(SoberSupport soberSupport, TableModels soberTable) throws Exception {
+        int result = -2;
+        if (soberTable == null) {
+            return result;
+        }
+        SoberFactory soberFactory = soberSupport.getSoberFactory();
+        //////////配置验证才能够保存 begin
+        if (soberFactory.isValid()) {
+            validator(soberSupport, soberTable);
+        }
+        //////////配置验证才能够保存 end
+
+        if (!soberTable.isCreate()) {
+            throw new Exception("注释标签配置为不可建表对象，不允许保存" + soberTable.getClass());
+        }
+
+        List<Class<?>> cleanList = new ArrayList<>();
+        //模型层次问题放到 初始的时候解决，这里直接保存
+        //因为设置有唯一关键字，重复的模型不允许保存
+        result = saveSoberTable(soberSupport, soberTable);
+        cleanList.add(soberTable.getEntity());
+        try {
+            List<SoberColumn> soberColumns = soberTable.getColumns();
+            for (SoberColumn soberColumn : soberColumns) {
+                SoberNexus soberNexus = soberColumn.getNexus();
+                if (soberNexus != null) {
+                    //只有传入的是模型才创建子模型对象 begin
+                    //自定义的实体类型，这里保存进去
+                    TableModels childSoberTable = soberSupport.getSoberTable(soberNexus.getTargetEntity());
+                    if (childSoberTable != null) {
+                        SoberTable checkSoberTable = soberSupport.createCriteria(SoberTable.class)
+                                .add(Expression.eq("name", childSoberTable.getName())).add(Expression.eq("version", childSoberTable.getVersion())).addOrder(Order.desc("version"))
+                                .objectUniqueResult(false);
+                        if (checkSoberTable == null || checkSoberTable.getId() == 0) {
+                            childSoberTable.setEntityLevel(EntityLevelEnumType.SUB.getValue());
+                            result = result + saveSoberTable(soberSupport, childSoberTable);
+                            if (checkSoberTable!=null && checkSoberTable.getEntity()!=null)
+                            {
+                                cleanList.add(checkSoberTable.getEntity());
+                            }
+                        }
+                    }
+                    //只有传入的是模型才创建子模型对象 end
+                }
+            }
+
+            soberSupport.evict(SoberTable.class);
+            if (soberTable.getEntity() != null && !cleanList.isEmpty()) {
+                for (Class<?> cls : cleanList) {
+                    if (cls==null || ClassUtil.isStandardProperty(cls)) {
+                        continue;
+                    }
+                    soberSupport.evict(cls);
+                }
+            }
+            cleanList.clear();
+            return result;
+        } catch (Exception e) {
+            log.error("saveModel soberTable：{},error:{}", soberTable, e.getMessage());
+        }
+        return -2;
+    }
+
+
+    private static int saveSoberTable(SoberSupport soberSupport, TableModels soberTable) {
+        if (soberTable == null) {
+            return -2;
+        }
+
+        Table table = AnnotationUtil.getTable(SoberTable.class);
+        Dialect dialect = soberSupport.getDialect();
+        long idValue = soberTable.getId();
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberSupport.getSoberFactory().getDatabaseName());
+        valueMap.put(Dialect.KEY_TABLE_NAME, table.name());
+        SoberTable saveSoberTable = BeanUtil.copy(soberTable, SoberTable.class);
+        String sqlText = StringUtil.empty;
+        Connection conn = null;
+        PreparedStatement statement = null;
+
+        try {
+            saveSoberTable.setEntity(SoberTable.class);
+            //这里使用简单的方式得到 SoberTable.class 字段，不需要复杂的修复
+            List<SoberColumn> columnList = AnnotationUtil.getColumnList(SoberTable.class);
+
+            //排除关联的字段不保存
+            List<SoberColumn> saveColumnList = new ArrayList<>(columnList.size());
+            for (SoberColumn column : columnList) {
+                if (StringUtil.isNullOrWhiteSpace(column.getName()))
+                {
+                    continue;
+                }
+                saveColumnList.add(column);
+            }
+            saveSoberTable.setColumns(saveColumnList);
+
+            //判断是否支持自动生成ID，如果支持，字段中就不包含id字段，否则包含id字段,先自动生成ID
+            String[] fieldArray;
+            if (!soberTable.isAutoId() && dialect.isSupportsSavePoints() && (0 == ObjectUtil.toLong(idValue))) {
+                fieldArray = saveSoberTable.getFieldArray();
+            } else {
+                //不用支持ID字段，就自动生成ID字段
+                AnnotationUtil.autoSetId(soberTable, soberTable.getPrimaryKey(), soberSupport);
+                fieldArray = saveSoberTable.getFullFieldArray();
+            }
+            if (fieldArray == null || fieldArray.length < 1) {
+                return -2;
+            }
+
+            valueMap.put(Dialect.KEY_FIELD_LIST, fieldArray);
+            valueMap.put(Dialect.KEY_FIELD_COUNT, fieldArray.length);
+            sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
+
+            conn = soberSupport.getConnection(SoberEnv.READ_WRITE);
+            if (StringUtil.isNull(sqlText)) {
+                //不破坏连接属性
+                return -2;
+            }
+            if (!soberTable.isAutoId() && dialect.isSupportsSavePoints() && soberTable.isSerial()) {
+                statement = conn.prepareStatement(sqlText, Statement.RETURN_GENERATED_KEYS);
+            } else {
+                statement = conn.prepareStatement(sqlText, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            }
+            soberSupport.debugPrint(sqlText);
+            //这里需要处理字段和实体名称的对应关系
+
+            for (int i = 0; i < fieldArray.length; i++) {
+                SoberColumn soberColumn = saveSoberTable.getColumn(fieldArray[i]);
+
+                Object value = BeanUtil.getProperty(saveSoberTable, soberColumn.getName());
+                if (value == null) {
+                    //放入默认数据 begin
+                    if (!StringUtil.isNull(soberColumn.getDefaultValue())) {
+                        value = soberColumn.getDefaultValue();
+                    }
+                    //放入默认数据 end
+                }
+                soberSupport.debugPrint("prepared[" + (i + 1) + "]=" + value);
+                dialect.setPreparedStatementValue(statement, i + 1, BeanUtil.getTypeValue(value, soberColumn.getClassType()));
+            }
+            int result = statement.executeUpdate();
+            if (result < 1) {
+                return result;
+            }
+            if (!soberTable.isAutoId() && dialect.isSupportsGetGeneratedKeys() && soberTable.isSerial()) {
+                ResultSet rs = statement.getGeneratedKeys();
+                if (rs.next()) {
+                    BeanUtil.setSimpleProperty(soberTable, soberTable.getPrimaryKey(), dialect.getResultSetValue(rs, 1));
+                }
+                closeResultSet(rs);
+            }
+
+            List<SoberColumn> columns = soberTable.getColumns();
+
+            //保存关联关系 begin
+            for (SoberColumn soberColumn : columns) {
+                SoberNexus soberNexus =  soberColumn.getNexus();
+                if (soberNexus != null) {
+                    TableModels sunSoberTable = soberSupport.getSoberTable(soberNexus.getTargetEntity());
+                    if (sunSoberTable!=null)
+                    {
+                        sunSoberTable.setEntityLevel(soberTable.getEntityLevel()+1);
+                    }
+                    result = result + saveSoberTable(soberSupport,sunSoberTable);
+
+                    result = result + save(soberSupport, soberNexus, false);
+                }
+                SoberCalcUnique calcUnique =  soberColumn.getCalcUnique();
+                if (calcUnique != null) {
+                    result = result + save(soberSupport, calcUnique, false);
+                }
+            }
+            //保存关联关系 end
+            return result +  save(soberSupport, columns, false);
+        } catch (Exception e) {
+            log.error("saveSoberTable error", e);
+        }
+        return -2;
+    }
+
     /**
      * 发现oracle jdbc8 23 版本批量保存有bug
-     * @param jdbcOperations jdbc操作对象
-     * @param collection     批量快速保存 集合
+     *
+     * @param soberSupport jdbc操作对象
+     * @param collection   批量快速保存 集合
      * @return 更新数量, 如果错误 返回 负数
      * @throws Exception 异常
      */
-    public static int batchSave(SoberSupport jdbcOperations, Collection<?> collection) throws Exception {
+    public static int batchSave(SoberSupport soberSupport, Collection<?> collection) throws Exception {
         if (collection == null || collection.isEmpty()) {
             return -2;
         }
         //批量保存数量
-        final int LIMIT = jdbcOperations.getBatchRows();
-        Dialect dialect = jdbcOperations.getDialect();
+        final int LIMIT = soberSupport.getBatchRows();
+        Dialect dialect = soberSupport.getDialect();
         Object checkObj = collection.iterator().next();
-        TableModels soberTable = jdbcOperations.getSoberTable(checkObj.getClass());
+        TableModels soberTable = getObjectModels(soberSupport, checkObj);
         if (!soberTable.isCreate()) {
             throw new Exception("注释标签配置为不可建表对象，不允许保存" + checkObj.getClass());
         }
@@ -2311,7 +2575,7 @@ public final class JdbcUtil {
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
 
-        SoberFactory soberFactory = jdbcOperations.getSoberFactory();
+        SoberFactory soberFactory = soberSupport.getSoberFactory();
 
         String[] fieldArray;
         if (!soberTable.isAutoId() && dialect.isSupportsGetGeneratedKeys() && (idValue == null || 0 == ObjectUtil.toLong(idValue))) {
@@ -2319,7 +2583,7 @@ public final class JdbcUtil {
         } else {
             //不用支持ID字段，就自动生成ID字段
             for (Object object : collection) {
-                AnnotationUtil.autoSetId(object, soberTable.getPrimaryKey(), jdbcOperations);
+                AnnotationUtil.autoSetId(object, soberTable.getPrimaryKey(), soberSupport);
             }
             fieldArray = soberTable.getFullFieldArray();
         }
@@ -2332,13 +2596,13 @@ public final class JdbcUtil {
 
         int result = 0;
         String sqlText = StringUtil.empty;
-        Connection conn = jdbcOperations.getConnection(SoberEnv.WRITE_ONLY);
+        Connection conn = soberSupport.getConnection(SoberEnv.WRITE_ONLY);
         boolean oldAutoCommit = conn.getAutoCommit();
         try {
             //先自动生成ID
             conn.setAutoCommit(false);
             sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
-            jdbcOperations.debugPrint(sqlText);
+            soberSupport.debugPrint(sqlText);
             if (!soberTable.isAutoId() && dialect.isSupportsGetGeneratedKeys() && soberTable.isSerial()) {
                 statement = conn.prepareStatement(sqlText, Statement.RETURN_GENERATED_KEYS);
             } else {
@@ -2349,12 +2613,12 @@ public final class JdbcUtil {
                 cm++;
                 //////////配置验证才能够保存 begin
                 if (soberFactory.isValid()) {
-                    validator(jdbcOperations, object);
+                    validator(soberSupport, object);
                 }
                 //////////配置验证才能够保存 end
 
                 for (int i = 0; i < fieldArray.length; i++) {
-                    jdbcOperations.debugPrint("prepared[" + (i + 1) + "]=" + BeanUtil.getProperty(object, fieldArray[i]));
+                    soberSupport.debugPrint("prepared[" + (i + 1) + "]=" + BeanUtil.getProperty(object, fieldArray[i]));
                     dialect.setPreparedStatementValue(statement, i + 1, BeanUtil.getProperty(object, fieldArray[i]));
                 }
                 statement.addBatch();
@@ -2368,7 +2632,7 @@ public final class JdbcUtil {
                 conn.commit();
             }
             if (soberTable.isAutoCleanCache() && soberTable.getEntity() != null) {
-                jdbcOperations.evict(soberTable.getEntity());
+                soberSupport.evict(soberTable.getEntity());
             }
         } catch (Exception e) {
             log.error("ERROR SQL:{},Error:{}", sqlText, e.getMessage());
@@ -2430,8 +2694,7 @@ public final class JdbcUtil {
             conn.setAutoCommit(false);
             sqlText = dialect.processTemplate(Dialect.SQL_INSERT, valueMap);
             jdbcOperations.debugPrint(sqlText);
-            if (StringUtil.isNullOrWhiteSpace(sqlText))
-            {
+            if (StringUtil.isNullOrWhiteSpace(sqlText)) {
                 throw new Exception("SQL为空");
             }
             if (!soberTable.isAutoId() && dialect.isSupportsGetGeneratedKeys() && soberTable.isSerial()) {
@@ -2459,7 +2722,7 @@ public final class JdbcUtil {
                 conn.commit();
             }
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("SQL:{}", sqlText, e);
             throw e;
         } finally {
             conn.setAutoCommit(oldAutoCommit);
@@ -2520,7 +2783,7 @@ public final class JdbcUtil {
             }
 
         } catch (Exception e) {
-            log.error("ERROR SQL:{}" ,sqlText, e);
+            log.error("ERROR SQL:{}", sqlText, e);
         } finally {
             closeStatement(statement);
             closeConnection(conn);
@@ -2541,11 +2804,12 @@ public final class JdbcUtil {
         if (StringUtil.isEmpty(StringUtil.trim(template))) {
             return new int[0];
         }
-        Dialect dialect = jdbcOperations.getDialect();
+
         int[] result = null;
         String sqlText = null;
         Connection conn = jdbcOperations.getConnection(SoberEnv.WRITE_ONLY);
         Statement statement = conn.createStatement();
+        Dialect dialect = jdbcOperations.getDialect();
         try {
             int cm = 0;
             for (Object object : paramList) {
@@ -2570,7 +2834,7 @@ public final class JdbcUtil {
             }
 
         } catch (Exception e) {
-            log.error("ERROR SQL:{}" ,sqlText, e);
+            log.error("ERROR SQL:{}", sqlText, e);
         } finally {
             closeStatement(statement);
             closeConnection(conn);
@@ -2581,15 +2845,14 @@ public final class JdbcUtil {
     /**
      * 删除映射关系的对象 ManyToOne 关系不删除
      *
-     * @param jdbcOperations jdbc操作类
-     * @param o              对象
+     * @param soberSupport jdbc操作类
+     * @param o            对象
      * @return boolean 是否成功
      */
-    public static int deleteNexus(SoberSupport jdbcOperations, Object o) {
+    public static int deleteNexus(SoberSupport soberSupport, Object o) {
         int result = 0;
-        TableModels soberTable = jdbcOperations.getSoberTable(o.getClass());
-
-        List<SoberColumn>  soberColumns  = soberTable.getColumns();
+        TableModels soberTable = getObjectModels(soberSupport, o);
+        List<SoberColumn> soberColumns = soberTable.getColumns();
         for (SoberColumn soberColumn : soberColumns) {
             SoberNexus soberNexus = soberColumn.getNexus();
             if (soberNexus == null) {
@@ -2598,7 +2861,7 @@ public final class JdbcUtil {
             if (!soberNexus.isDelete()) {
                 continue;
             }
-            if (!MappingType.ManyToOne.equalsIgnoreCase(soberNexus.getMapping())) {
+            if (!MappingEnumType.ManyToOne.getName().equalsIgnoreCase(soberNexus.getMapping())) {
                 Object selfValue;
                 try {
                     selfValue = BeanUtil.getProperty(o, soberNexus.getField());
@@ -2606,15 +2869,15 @@ public final class JdbcUtil {
                         continue;
                     }
                 } catch (Exception e) {
-                    log.error("映射关系错误:{}  方法:{},不存在",o.getClass().getName(),soberNexus.getField(),e);
+                    log.error("映射关系错误:{} 方法:{},不存在", o.getClass().getName(), soberNexus.getField(), e);
                     return -2;
                 }
                 String term = AnnotationUtil.getNexusTerm(o, soberNexus.getTerm());
-                result = result + delete(jdbcOperations, soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) selfValue, term, soberNexus.isChain());
+                result = result + delete(soberSupport, soberNexus.getTargetEntity(), soberNexus.getTargetField(), (Serializable) selfValue, term, soberNexus.isChain());
             }
         }
         if (soberTable.isAutoCleanCache() && soberTable.getEntity() != null) {
-            jdbcOperations.evict(soberTable.getEntity());
+            soberSupport.evict(soberTable.getEntity());
         }
         return result;
     }
@@ -2623,16 +2886,43 @@ public final class JdbcUtil {
      * 执行一个sql
      *
      * @param soberSupport jdbc操作类
-     * @param cla            类 对映配置中的map命名空间
-     * @param sqlText        sql
-     * @param params         支持类型 Object[] or HashMap  String,Object,这里是留给参数对象的,所以params没有类型
+     * @param cla          类 对映配置中的map命名空间
+     * @param sqlText      sql
+     * @param params       支持类型 Object[] or HashMap  String,Object,这里是留给参数对象的,所以params没有类型
      * @return 执行情况
      * @throws Exception 异常
      */
-    public static boolean execute(SoberSupport soberSupport,  Class<?> cla, String sqlText, Object params) throws Exception {
+    public static boolean execute(SoberSupport soberSupport, Class<?> cla, String sqlText, Object params) throws Exception {
         Object[] args = null;
         Map<String, Object> valueMap = null;
         TableModels soberTable = soberSupport.getSoberTable(cla);
+        if (params instanceof Map) {
+            valueMap = (Map<String, Object>) params;
+        } else if (params instanceof Collection) {
+            Collection coll = (Collection) params;
+            args = coll.toArray();
+        }
+        if (valueMap == null) {
+            valueMap = new HashMap<>();
+        }
+        valueMap.put(Dialect.KEY_DATABASE_NAME, soberTable.getDatabaseName());
+        valueMap.put(Dialect.KEY_TABLE_NAME, soberTable.getName());
+        valueMap.put(Dialect.KEY_PRIMARY_KEY, soberTable.getPrimaryKey());
+        assert params instanceof Object[];
+        return execute(soberSupport, soberSupport.getDialect().processSql(sqlText, valueMap), args);
+    }
+
+    /**
+     * @param soberSupport jdbc操作类
+     * @param soberTable   数据模型
+     * @param sqlText      sql
+     * @param params       支持类型 Object[] or HashMap  String,Object,这里是留给参数对象的,所以params没有类型
+     * @return 执行情况
+     * @throws Exception 异常
+     */
+    public static boolean execute(SoberSupport soberSupport, TableModels soberTable, String sqlText, Object params) throws Exception {
+        Object[] args = null;
+        Map<String, Object> valueMap = null;
         if (params instanceof Map) {
             valueMap = (Map<String, Object>) params;
         } else if (params instanceof Collection) {
@@ -2684,7 +2974,7 @@ public final class JdbcUtil {
                 }
                 return true;
             } catch (Exception e) {
-                log.error("SQL:{}",sqlText, e);
+                log.error("SQL:{}", sqlText, e);
                 throw e;
             } finally {
                 closeStatement(statement);
@@ -2712,7 +3002,7 @@ public final class JdbcUtil {
                 }
                 return true;
             } catch (Exception e) {
-                log.error("SQL:{}",sqlText, e);
+                log.error("SQL:{}", sqlText, e);
                 throw e;
             } finally {
                 closeStatement(statement);
@@ -2741,24 +3031,24 @@ public final class JdbcUtil {
     }
 
     /**
-     * @param jdbcOperations jdbc操作类
-     * @param dialect        sql适配器
-     * @param sqlText        sql
-     * @param param          参数
+     * @param soberSupport jdbc操作类
+     * @param sqlText      sql
+     * @param param        参数
      * @return 返回动态封装的对象列表
      */
-    public static List<?> prepareQuery(SoberSupport jdbcOperations, Dialect dialect, String sqlText, Object[] param) {
+    public static List<?> prepareQuery(SoberSupport soberSupport, String sqlText, Object[] param) {
         List<Object> result = new ArrayList<>();
         Connection conn = null;
         CallableStatement statement = null;
         ResultSet resultSet = null;
+        Dialect dialect = soberSupport.getDialect();
         try {
-            conn = jdbcOperations.getConnection(SoberEnv.READ_ONLY);
-            jdbcOperations.debugPrint(sqlText);
+            conn = soberSupport.getConnection(SoberEnv.READ_ONLY);
+            soberSupport.debugPrint(sqlText);
             statement = conn.prepareCall(sqlText);
             if (!ArrayUtil.isEmpty(param)) {
                 for (int i = 0; i < param.length; i++) {
-                    jdbcOperations.debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
+                    soberSupport.debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
                     dialect.setPreparedStatementValue(statement, i + 1, param[i]);
                 }
             }
@@ -2777,7 +3067,7 @@ public final class JdbcUtil {
                 result.add(ReflectUtil.createDynamicBean(beanMap));
             }
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("SQL:{}", sqlText, e);
         } finally {
             closeResultSet(resultSet);
             closeStatement(statement);
@@ -2807,7 +3097,7 @@ public final class JdbcUtil {
             }
             return statement.executeUpdate();
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("SQL:{}", sqlText, e);
             return -2;
         } finally {
             closeStatement(statement);
@@ -2816,27 +3106,27 @@ public final class JdbcUtil {
     }
 
     /**
-     * @param jdbcOperations jdbc操作类
-     * @param sqlText        sql
-     * @param param          参数
+     * @param soberSupport jdbc操作类
+     * @param sqlText      sql
+     * @param param        参数
      * @return 执行是否成功
      * @throws Exception 异常
      */
-    public static boolean prepareExecute(SoberSupport jdbcOperations, String sqlText, Object[] param) throws Exception {
+    public static boolean prepareExecute(SoberSupport soberSupport, String sqlText, Object[] param) throws Exception {
         Connection conn = null;
         CallableStatement statement = null;
-        Dialect dialect = jdbcOperations.getSoberFactory().getDialect();
+        Dialect dialect = soberSupport.getDialect();
         try {
-            conn = jdbcOperations.getConnection(SoberEnv.READ_WRITE);
+            conn = soberSupport.getConnection(SoberEnv.READ_WRITE);
             statement = conn.prepareCall(sqlText);
-            jdbcOperations.debugPrint(sqlText);
+            soberSupport.debugPrint(sqlText);
             for (int i = 0; i < param.length; i++) {
-                jdbcOperations.debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
+                soberSupport.debugPrint("prepared[" + (i + 1) + "]=" + param[i]);
                 dialect.setPreparedStatementValue(statement, i + 1, param[i]);
             }
             return statement.execute();
         } catch (Exception e) {
-            log.error("SQL:{}",sqlText, e);
+            log.error("SQL:{}", sqlText, e);
             throw e;
         } finally {
             closeStatement(statement);
@@ -2949,7 +3239,6 @@ public final class JdbcUtil {
     }
 
     /**
-     *
      * @param soberSupport 数据库对象
      * @return 查询得到用户建的所有表结构
      */
@@ -2964,9 +3253,8 @@ public final class JdbcUtil {
     }
 
     /**
-     *
      * @param soberSupport 数据库对象
-     * @param tableName 表明
+     * @param tableName    表明
      * @return 得到表的字段列表
      */
     public static List<SoberColumn> getBaseColumns(SoberSupport soberSupport, String tableName) {
@@ -2976,7 +3264,7 @@ public final class JdbcUtil {
         valueMap.put(Dialect.KEY_DATABASE_NAME, databaseName);
         valueMap.put(Dialect.KEY_TABLE_NAME, tableName);
         String sqlText = dialect.processTemplate(Dialect.COLUMN_LIST_SQL, valueMap);
-        List<?> result = query(soberSupport,  sqlText, null, 1, soberSupport.getMaxRows());
+        List<?> result = query(soberSupport, sqlText, null, 1, soberSupport.getMaxRows());
         List<SoberColumn> columnList = BeanUtil.copyList(result, SoberColumn.class);
         for (SoberColumn column : columnList) {
             if (StringUtil.isNullOrWhiteSpace(column.getDatabaseName())) {
@@ -2993,8 +3281,9 @@ public final class JdbcUtil {
 
     /**
      * 数据库里边直接取
+     *
      * @param soberSupport 数据库对象
-     * @param tableName 表明
+     * @param tableName    表明
      * @return 得到表的关键字
      */
     public static String getPrimary(SoberSupport soberSupport, String tableName) {
@@ -3004,24 +3293,25 @@ public final class JdbcUtil {
         valueMap.put(Dialect.KEY_DATABASE_NAME, databaseName);
         valueMap.put(Dialect.KEY_TABLE_NAME, tableName);
         String sqlText = dialect.processTemplate(Dialect.PRIMARY_SQL, valueMap);
-        List<?> result = query(soberSupport,  sqlText, null, 1, 2);
+        List<?> result = query(soberSupport, sqlText, null, 1, 2);
         for (Object column : result) {
-            return (String)BeanUtil.getProperty(column,"name");
+            return (String) BeanUtil.getProperty(column, "name");
         }
         return null;
     }
 
     /**
      * 涵盖了上边几个函数的组合
+     *
      * @param soberSupport 数据库对象
-     * @param tableName 表明
+     * @param tableName    表明
      * @return 表结构对象
      */
     public static SoberTable getBaseSoberTable(SoberSupport soberSupport, String tableName) {
         String databaseName = soberSupport.getSoberFactory().getDatabaseName();
         SoberTable dto = new SoberTable();
-        List<SoberColumn> list = getBaseColumns(soberSupport,tableName);
-        String primary = getPrimary(soberSupport,tableName);
+        List<SoberColumn> list = getBaseColumns(soberSupport, tableName);
+        String primary = getPrimary(soberSupport, tableName);
         dto.setPrimaryKey(primary);
         dto.setColumns(list);
         dto.setDatabaseName(databaseName);
@@ -3030,19 +3320,16 @@ public final class JdbcUtil {
 
 
     /**
-     *
      * @param soberSupport 数据库对象
-     * @param tableName 表明
-     * @param oldStr 原字段
-     * @param newStr 新字段
+     * @param tableName    表明
+     * @param oldStr       原字段
+     * @param newStr       新字段
      * @return 替换后的日志信息
      */
-    public static List<TipDto> tableReplace(SoberSupport soberSupport,String tableName,String oldStr,String newStr)
-    {
+    public static List<TipDto> tableReplace(SoberSupport soberSupport, String tableName, String oldStr, String newStr) {
         List<TipDto> result = new ArrayList<>();
-        SoberTable soberTableDto =  getBaseSoberTable(soberSupport,tableName);
-        if (StringUtil.isNullOrWhiteSpace(soberTableDto.getPrimaryKey()) || soberTableDto.getColumns().isEmpty())
-        {
+        SoberTable soberTableDto = getBaseSoberTable(soberSupport, tableName);
+        if (StringUtil.isNullOrWhiteSpace(soberTableDto.getPrimaryKey()) || soberTableDto.getColumns().isEmpty()) {
             //不满足条件的表结构直接跳出
             return result;
         }
@@ -3063,8 +3350,7 @@ public final class JdbcUtil {
 
         StringBuilder termText = new StringBuilder();
         for (SoberColumn column : columns) {
-            if (!"String".equalsIgnoreCase(column.getTypeString())||StringUtil.isNullOrWhiteSpace(column.getName()))
-            {
+            if (!"String".equalsIgnoreCase(column.getTypeString()) || StringUtil.isNullOrWhiteSpace(column.getName())) {
                 continue;
             }
             if (column.getDataType() != null && (column.getDataType().contains("lob")
@@ -3075,60 +3361,50 @@ public final class JdbcUtil {
                     || "date".equalsIgnoreCase(column.getDataType())
                     || "datetime".equalsIgnoreCase(column.getDataType())
                     || "LONG".equalsIgnoreCase(column.getDataType()))
-                    )
-            {
+            ) {
 
                 //特殊的类型直接跳过  XMLTYPE
                 continue;
             }
-             if (column.getDataType()!=null&&column.getDataType().toLowerCase().contains("xmltype"))
-             {
-                 //特殊的类型直接跳过  XMLTYPE
-                 continue;
-             }
+            if (column.getDataType() != null && column.getDataType().toLowerCase().contains("xmltype")) {
+                //特殊的类型直接跳过  XMLTYPE
+                continue;
+            }
 
             StringBuilder term = new StringBuilder();
-            if (isMySql)
-            {
+            if (isMySql) {
                 term.append("`").append(column.getName()).append("`");
-            } else if (isMsSql)
-            {
+            } else if (isMsSql) {
                 term.append("[").append(column.getName()).append("]");
-            } else if (isOracle || isPg || isDm)
-            {
+            } else if (isOracle || isPg || isDm) {
                 term.append("\"").append(column.getName()).append("\"");
-            }
-            else {
+            } else {
                 term.append(column.getName());
             }
 
-            if (isPg)
-            {
+            if (isPg) {
                 term.append(" ILIKE ");
             } else {
                 term.append(" LIKE ");
             }
-            term.append(StringUtil.quote("%"+oldStr + "%",false));
+            term.append(StringUtil.quote("%" + oldStr + "%", false));
             termText.append(term).append(" OR ");
         }
-        if (termText.toString().isEmpty())
-        {
+        if (termText.toString().isEmpty()) {
             //没有合适的字段可以查询
             return result;
 
         } else {
-            if (termText.toString().endsWith(" OR "))
-            {
-                termText.setLength(termText.length()-" OR ".length());
+            if (termText.toString().endsWith(" OR ")) {
+                termText.setLength(termText.length() - " OR ".length());
             }
         }
         sqlText.append(termText);
         countText.append(termText);
 
         //分批处理
-        long totalCount = ObjectUtil.toLong(getUniqueResult(soberSupport,countText.toString(),new HashMap<>(0)));
-        if (totalCount==0)
-        {     //不满足条件的表结构直接跳出
+        long totalCount = ObjectUtil.toLong(getUniqueResult(soberSupport, countText.toString(), new HashMap<>(0)));
+        if (totalCount == 0) {     //不满足条件的表结构直接跳出
             return result;
         }
         int currentPage = 1;
@@ -3140,30 +3416,26 @@ public final class JdbcUtil {
         long totalPage = turnPageButton.getTotalPage();
 
         //引号
-        boolean isQuote = isQuote(columns,primary);
+        boolean isQuote = isQuote(columns, primary);
 
         int i = 0;
-        for (int page = 1; page <= totalPage; page++ )
-        {
-            List<?> list = soberSupport.query(sqlText.toString(),null,page,count,false);
+        for (int page = 1; page <= totalPage; page++) {
+            List<?> list = soberSupport.query(sqlText.toString(), null, page, count, false);
             for (Object obj : list) {
-                Object primaryValue = BeanUtil.getProperty(obj,primary);
-                if (primaryValue==null ||(primaryValue instanceof String && StringUtil.isNullOrWhiteSpace((String)primaryValue) ))
-                {
+                Object primaryValue = BeanUtil.getProperty(obj, primary);
+                if (primaryValue == null || (primaryValue instanceof String && StringUtil.isNullOrWhiteSpace((String) primaryValue))) {
                     continue;
                 }
                 //是否加引号
-                if (isQuote )
-                {
-                    primaryValue = StringUtil.quoteSql((String)primaryValue);
+                if (isQuote) {
+                    primaryValue = StringUtil.quoteSql((String) primaryValue);
                 }
                 for (SoberColumn column : columns) {
                     System.out.println(ObjectUtil.toString(column));
                     if (!"String".equalsIgnoreCase(column.getTypeString()) || StringUtil.isNullOrWhiteSpace(column.getName())) {
                         continue;
                     }
-                    if (primary.equalsIgnoreCase(column.getName()))
-                    {
+                    if (primary.equalsIgnoreCase(column.getName())) {
                         //关键字段跳过
                         continue;
                     }
@@ -3173,35 +3445,33 @@ public final class JdbcUtil {
                             || "image".equalsIgnoreCase(column.getDataType())
                             || "XMLTYPE".equalsIgnoreCase(column.getDataType())
                             || "timestamp".equalsIgnoreCase(column.getDataType()))
-                            || "LONG".equalsIgnoreCase(column.getDataType()))
-                    {
+                            || "LONG".equalsIgnoreCase(column.getDataType())) {
                         //特殊的类型直接跳过
                         continue;
                     }
-                    String value = (String)BeanUtil.getProperty(obj,column.getName());
+                    String value = (String) BeanUtil.getProperty(obj, column.getName());
                     if (StringUtil.isNullOrWhiteSpace(value)) {
                         //字段值是空的
                         continue;
                     }
-                    if (StringUtil.indexIgnoreCaseOf(value,oldStr)==-1)
-                    {
+                    if (StringUtil.indexIgnoreCaseOf(value, oldStr) == -1) {
                         //这个字段没有
                         continue;
                     }
-                    String newValue = StringUtil.replaceIgnoreCase(value,oldStr,newStr);
-                    String updateSql = "UPDATE "+tableName +" SET "+column.getName()+"="+StringUtil.quote(newValue)+" WHERE "+primary+"=" + primaryValue;
+                    String newValue = StringUtil.replaceIgnoreCase(value, oldStr, newStr);
+                    String updateSql = "UPDATE " + tableName + " SET " + column.getName() + "=" + StringUtil.quote(newValue) + " WHERE " + primary + "=" + primaryValue;
                     TipDto dto = new TipDto();
                     dto.setSort(++i);
                     try {
-                       int x = soberSupport.update(updateSql);
-                       dto.setStatus(200);
-                       dto.setMessage("表明:" + tableName + ";原值:" + value + ";sql["+updateSql+"]");
-                       dto.setSuccess(x>=0?1:0);
-                       result.add(dto);
+                        int x = soberSupport.update(updateSql);
+                        dto.setStatus(200);
+                        dto.setMessage("表明:" + tableName + ";原值:" + value + ";sql[" + updateSql + "]");
+                        dto.setSuccess(x >= 0 ? 1 : 0);
+                        result.add(dto);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                         dto.setStatus(ErrorEnumType.UNKNOWN.getValue());
-                        dto.setMessage("表明:" + tableName + ";原值:" + value + ";sql["+updateSql+"];error["+e.getMessage()+"]");
+                        dto.setMessage("表明:" + tableName + ";原值:" + value + ";sql[" + updateSql + "];error[" + e.getMessage() + "]");
                         dto.setSuccess(YesNoEnumType.NO.getValue());
                         result.add(dto);
                     }
@@ -3212,88 +3482,87 @@ public final class JdbcUtil {
     }
 
     /**
-     * 替换数据库中全部的表里边的字段
+     * 替换数据库中全部的表里边的字段,一般为了数据库脱敏，或者批量修改数据库中的值
+     * 高危操作,注意备份
+     *
      * @param soberSupport 数据库对象
-     * @param oldStr 原字段
-     * @param newStr 新字段
+     * @param oldStr       原字段
+     * @param newStr       新字段
      * @return 替换后的日志信息
-     * */
-    public static  Map<String, List<TipDto> > allTableReplace(SoberSupport soberSupport,String oldStr,String newStr)
-    {
-        Map<String, List<TipDto> > result = new HashMap<>();
+     */
+    public static Map<String, List<TipDto>> allTableReplace(SoberSupport soberSupport, String oldStr, String newStr) {
+        Map<String, List<TipDto>> result = new HashMap<>();
         List<String> allTables = getUserTables(soberSupport);
         float bl = 0;
         int bfb = 0;
-        for (String tableName:allTables)
-        {
-            List<TipDto> tipList = tableReplace( soberSupport, tableName, oldStr, newStr);
-            bfb ++;
-            bl = (float) bfb /allTables.size();
-            bl = NumberUtil.getRound(bl,2);
-            if (!tipList.isEmpty())
-            {
-                for (TipDto tipDto:tipList)
-                {
+        for (String tableName : allTables) {
+            List<TipDto> tipList = tableReplace(soberSupport, tableName, oldStr, newStr);
+            bfb++;
+            bl = (float) bfb / allTables.size();
+            bl = NumberUtil.getRound(bl, 2);
+            if (!tipList.isEmpty()) {
+                for (TipDto tipDto : tipList) {
                     tipDto.setPercent(bl);
                 }
-                result.put(tableName,tipList);
+                result.put(tableName, tipList);
             }
         }
         return result;
     }
 
     /**
+     * 删除表
      *
      * @param soberSupport 数据库对象
-     * @param tableName 删除表名
+     * @param tableName    删除表名
      * @return 是否成功
      * @throws Exception 异常
      */
-    public static boolean dropTable(SoberSupport soberSupport,String tableName) throws Exception {
-        if (StringUtil.isNull(tableName))
-        {
+    public static boolean dropTable(SoberSupport soberSupport, String tableName) throws Exception {
+        if (StringUtil.isNull(tableName)) {
             return false;
         }
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberSupport.getSoberFactory().getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, tableName);
         Dialect dialect = soberSupport.getDialect();
-        return execute(soberSupport,dialect.processTemplate(Dialect.SQL_DROP_TABLE, valueMap), null);
+        return execute(soberSupport, dialect.processTemplate(Dialect.SQL_DROP_TABLE, valueMap), null);
     }
 
     /**
+     * 删除临时表
      *
      * @param soberSupport 数据库对象
-     * @param tempTable 临时表对象
+     * @param tempTable    临时表对象
      * @return 是否成功
      * @throws Exception 异常
      */
-    public static boolean dropTmpTable(SoberSupport soberSupport,TempTable tempTable) throws Exception {
-        if (tempTable==null||tempTable.getId()==0)
-        {
+    public static boolean dropTmpTable(SoberSupport soberSupport, TempTable tempTable) throws Exception {
+        if (tempTable == null || tempTable.getId() == 0) {
             return false;
         }
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(Dialect.KEY_DATABASE_NAME, soberSupport.getSoberFactory().getDatabaseName());
         valueMap.put(Dialect.KEY_TABLE_NAME, tempTable.getTableName());
         Dialect dialect = soberSupport.getDialect();
-        return execute(soberSupport,dialect.processTemplate(Dialect.SQL_DROP_TABLE, valueMap), null);
+        return execute(soberSupport, dialect.processTemplate(Dialect.SQL_DROP_TABLE, valueMap), null);
     }
 
     /**
+     * 创建临时表
      *
      * @param soberSupport 数据库对象
-     * @param hour 保留小时
+     * @param hour         保留小时
      * @return 返回 表名称
      */
-    public static String buildTempTable(SoberSupport soberSupport,int hour) {
+    public static String buildTempTable(SoberSupport soberSupport, int hour) {
         String tableName = TEMP_TABLE_START + RandomUtil.getRandomGUID(14);
         TempTable tempTable = new TempTable();
         tempTable.setTableName(tableName);
         tempTable.setHour(hour);
         try {
             List<TempTable> deleteList = deleteTempTable(soberSupport);
-            log.debug("删除临时表:{}",ObjectUtil.toString(deleteList));
+            log.debug("删除临时表:{}", ObjectUtil.toString(deleteList));
             soberSupport.save(tempTable);
             deleteList.clear();
         } catch (Exception e) {
@@ -3303,19 +3572,19 @@ public final class JdbcUtil {
     }
 
     /**
+     * 删除超时临时表
+     *
      * @param soberSupport 数据库对象
      * @return 被删除的对象
      */
-    public static List<TempTable> deleteTempTable(SoberSupport soberSupport)  {
-        List<TempTable> list = soberSupport.createCriteria(TempTable.class).setCurrentPage(1).setTotalCount(100) .list(false);
+    public static List<TempTable> deleteTempTable(SoberSupport soberSupport) {
+        List<TempTable> list = soberSupport.createCriteria(TempTable.class).setCurrentPage(1).setTotalCount(100).list(false);
         List<TempTable> result = new ArrayList<>(list.size());
         Date curDate = new Date();
-        for (TempTable tempTable:list)
-        {
-            if (DateUtil.compareHour(tempTable.getCreateDate(),curDate)>tempTable.getHour())
-            {
+        for (TempTable tempTable : list) {
+            if (DateUtil.compareHour(tempTable.getCreateDate(), curDate) > tempTable.getHour()) {
                 try {
-                    dropTmpTable(soberSupport,tempTable);
+                    dropTmpTable(soberSupport, tempTable);
                     soberSupport.delete(tempTable);
                     result.add(tempTable);
                 } catch (Exception e) {
@@ -3325,5 +3594,26 @@ public final class JdbcUtil {
             }
         }
         return result;
+    }
+
+    /**
+     * @param soberSupport 数据库对象
+     * @param object       实体对象
+     * @return 得到模型结构
+     */
+    public static TableModels getObjectModels(SoberSupport soberSupport, Object object) {
+        if (object instanceof TableModels) {
+            return (TableModels) object;
+        }
+        TableModels soberTable = null;
+        if (object.getClass().getGenericSuperclass().equals(BaseEntity.class)) {
+            soberTable = (TableModels) BeanUtil.getProperty(object, SoberEnv.TABLE_MODELS_KEY);
+        } else if (object instanceof Class) {
+            soberTable = soberSupport.getSoberTable((Class<?>) object);
+            ;
+        } else {
+            soberTable = soberSupport.getSoberTable(object.getClass());
+        }
+        return soberTable;
     }
 }

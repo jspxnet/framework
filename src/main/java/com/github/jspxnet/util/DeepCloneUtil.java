@@ -66,6 +66,7 @@ public class DeepCloneUtil {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T cloneArray(T array) {
         int length = Array.getLength(array);
         Class<?> componentType = array.getClass().getComponentType();
@@ -80,9 +81,10 @@ public class DeepCloneUtil {
                 Array.set(newArray, i, deepClone(Array.get(array, i)));
             }
         }
-        return (T) newArray;
+        return  (T) newArray;
     }
 
+    @SuppressWarnings("unchecked")
     private static <E> Collection<E> cloneCollection(Collection<E> collection) {
         Collection<E> newCollection;
         try {
@@ -100,6 +102,7 @@ public class DeepCloneUtil {
         return newCollection;
     }
 
+    @SuppressWarnings("unchecked")
     private static <K, V> Map<K, V> cloneMap(Map<K, V> map) {
         Map<K, V> newMap;
         try {

@@ -10,6 +10,7 @@
 package com.github.jspxnet.sober.annotation;
 
 import com.github.jspxnet.sioc.util.TypeUtil;
+import com.github.jspxnet.utils.ArrayUtil;
 
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
@@ -22,6 +23,9 @@ import java.lang.annotation.RetentionPolicy;
  * date: 2007-7-30
  * Time: 18:25:50
  * uniqueObject
+ *
+ * com.github.jspxnet.sober.annotation.CalcUnique
+ * CalcUnique(caption = "统计用户数量", sql = "SELECT count(1) FROM ${follow} WHERE followType=0 AND nodeId=? AND putUid=?", entity = {Follow.class}, value = {"name", "putUid"})
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -38,16 +42,16 @@ public @interface CalcUnique {
     /**
      * 载入表名,例如 select * from ${entity2} as a,${entity2} as b
      * load entity database table name load eg: select * from ${entity1} as a,${entity2} as b
-     *
+     * 动态对象就是表名
      * @return 实体对象
      */
-    String[] entity();
+    String[] entity() ;
 
-
+    //返回类型
     String type() default  TypeUtil.TYPE_STRING;
 
 
-    //是优化参数,不用全部带入,没入全部带入
+    //是优化参数,不用全部带入,没有全部带入
     String[] params();
 
 }

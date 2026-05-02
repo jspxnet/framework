@@ -58,7 +58,7 @@ public @interface Column {
      *
      * @return 转json的时候是否显示枚举
      */
-    boolean enumTypes() default true;
+    boolean showEnum() default false;
 
 
 

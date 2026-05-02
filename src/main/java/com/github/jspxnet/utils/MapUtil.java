@@ -14,6 +14,8 @@ import com.github.jspxnet.boot.environment.Environment;
 import com.github.jspxnet.json.JSONArray;
 import com.github.jspxnet.json.JSONObject;
 import com.github.jspxnet.util.StringMap;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +27,7 @@ import java.util.*;
  * date: 2004-7-19
  * Time: 21:48:44
  */
+@Slf4j
 public final class MapUtil {
     private MapUtil() {
 
@@ -160,12 +163,14 @@ public final class MapUtil {
         for (String s : key) {
             sb.append(s).append(StringUtil.EQUAL).append(map.get(s)).append(StringUtil.AND);
         }
-        sb = new StringBuilder(sb.substring(0, sb.length() - 1));
+        if (sb.length() > 0) {
+            sb = new StringBuilder(sb.substring(0, sb.length() - 1));
+        }
         // 将得到的字符串进行处理得到目标格式的字符串
         try {
             sb = new StringBuilder(URLEncoder.encode(sb.toString(), StandardCharsets.UTF_8.name()));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error("phpKSort encode error", e);
         }// 使用常见的UTF-8编码
         return sb.toString().replace("%3D", StringUtil.EQUAL).replace("%26", StringUtil.AND);
     }
@@ -189,7 +194,7 @@ public final class MapUtil {
                 }
             }
         }
-        if (StringUtil.AND.equals(prestr.substring(prestr.length() - 1))) {
+        if (prestr.length() > 0 && StringUtil.AND.equals(prestr.substring(prestr.length() - 1))) {
             prestr = new StringBuilder(prestr.substring(0, prestr.length() - 1));
         }
         return prestr.toString();
@@ -205,16 +210,12 @@ public final class MapUtil {
                 String key = keys.get(i);
                 if (!ObjectUtil.isEmpty(params.get(key))) {
                     String value = params.get(key).toString();
-                    if (i == keys.size() - 1) {
-                        prestr.append(key).append(StringUtil.EQUAL).append(value);
-                    } else {
-                        prestr.append(key).append(StringUtil.EQUAL).append(value).append(StringUtil.AND);
-                    }
+                    prestr.append(key).append(StringUtil.EQUAL).append(value).append(StringUtil.AND);
                 }
             }
         }
 
-        if (prestr.toString().endsWith(StringUtil.AND)) {
+        if (prestr.length() > 0 && prestr.toString().endsWith(StringUtil.AND)) {
             prestr = new StringBuilder(prestr.substring(0, prestr.length() - 1));
         }
 

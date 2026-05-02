@@ -200,7 +200,7 @@ public final  class ImageUtil {
             encoder.encode(bi);
             out.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("saveJpeg error", e);
         }
         return true;
     }
@@ -211,17 +211,19 @@ public final  class ImageUtil {
      * @return boolean
      */
     static private boolean savePng(String fileName, Image image) throws IOException {
-        FileOutputStream outfile = new FileOutputStream(fileName);
-        byte[] bytes;
-        PngEncoder png = new PngEncoder(image);
-        png.setCompressionLevel(1);
-        png.setEncodeAlpha(true);
-        bytes = png.pngEncode();
-        if (bytes != null) {
-            outfile.write(bytes);
+        try (FileOutputStream outfile = new FileOutputStream(fileName))
+        {
+            PngEncoder png = new PngEncoder(image);
+            png.setCompressionLevel(1);
+            png.setEncodeAlpha(true);
+            byte[]  bytes = png.pngEncode();
+            if (bytes != null) {
+                outfile.write(bytes);
+            }
+        } catch (Exception e) {
+            log.error("savePng error", e);
         }
-        outfile.flush();
-        outfile.close();
+        
         return true;
     }
 
@@ -232,11 +234,11 @@ public final  class ImageUtil {
      */
     static private boolean saveGif(String fileName, Image image) throws AWTException, IOException {
         // Save the image in GIF with Acme GifEncoder
-        OutputStream out = new FileOutputStream(fileName);
-        GIFEncoder gif = new GIFEncoder(image);
-
-        gif.Write(out);
-        out.close();
+        try (OutputStream out = new FileOutputStream(fileName))
+        {
+            GIFEncoder gif = new GIFEncoder(image);
+            gif.Write(out);
+        }
         return true;
     }
 
@@ -275,7 +277,7 @@ public final  class ImageUtil {
             try {
                 e.addFrame(ImageIO.read(new File(imageFilePath)));
             } catch (IOException e1) {
-                e1.printStackTrace();
+                log.error("addFrame error for: " + imageFilePath, e1);
             }
         }
         e.finish();
@@ -415,7 +417,7 @@ public final  class ImageUtil {
             g.dispose();
             return ImageIO.write(tag, fileType, outputStream);// 输出到文件流
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("scale", e);
             return false;
         } finally {
             try {
@@ -426,7 +428,7 @@ public final  class ImageUtil {
                     outputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("scale", e);
             }
         }
     }
@@ -444,7 +446,7 @@ public final  class ImageUtil {
             BufferedImage src = ImageIO.read(inputStream); // 读入文件
             return thumbnail(src, outputStream, fileType, targetW, targetH);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("thumbnail", e);
             return false;
         } finally {
             try {
@@ -455,7 +457,7 @@ public final  class ImageUtil {
                     outputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("thumbnail", e);
             }
         }
     }
@@ -480,7 +482,7 @@ public final  class ImageUtil {
                 return ImageIO.write(image, fileType, outputStream);// 输出到文件流
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("thumbnail", e);
             return false;
         } finally {
             try {
@@ -488,7 +490,7 @@ public final  class ImageUtil {
                     outputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("thumbnail", e);
             }
         }
     }
@@ -589,7 +591,7 @@ public final  class ImageUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("cuts", e);
         } finally {
             try {
                 if (inputStream != null) {
@@ -599,7 +601,7 @@ public final  class ImageUtil {
                     outputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("cuts", e);
             }
         }
     }
@@ -643,7 +645,7 @@ public final  class ImageUtil {
                     outputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("cut image error", e);
             }
         }
     }
@@ -697,7 +699,7 @@ public final  class ImageUtil {
                     outputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("cut image error", e);
             }
         }
     }
@@ -712,7 +714,7 @@ public final  class ImageUtil {
             ColorConvertOp op = new ColorConvertOp(cs, null);
             return op.filter(src, null);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("gray image error", e);
             return null;
         }
     }
@@ -751,7 +753,7 @@ public final  class ImageUtil {
                     outputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("cut image error", e);
             }
         }
 
@@ -847,7 +849,7 @@ public final  class ImageUtil {
             BufferedImage subImage = addColorToImage(image, rgb, jump);
             return ImageIO.write(subImage, fileType, outputStream);
         } catch (IOException e) {
-            log.error("cut image error", e);
+            log.error("addColorToImage error", e);
             return false;
         } finally {
             try {
@@ -858,7 +860,7 @@ public final  class ImageUtil {
                     outputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("addColorToImage error", e);
             }
         }
 
@@ -906,7 +908,7 @@ public final  class ImageUtil {
             g.dispose();
             return bufImg;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("rectangle error", e);
         }
         return null;
     }
@@ -1167,7 +1169,7 @@ public final  class ImageUtil {
             BufferedImage img = rotate(image, degree);
             return ImageIO.write(img, fileType, outputStream);
         } catch (IOException e) {
-            log.error("cut image error", e);
+            log.error("rotate error", e);
             return false;
         } finally {
             try {
@@ -1177,8 +1179,9 @@ public final  class ImageUtil {
                 if (outputStream != null) {
                     outputStream.close();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e){
+                log.error("rotate error", e);
+
             }
         }
     }

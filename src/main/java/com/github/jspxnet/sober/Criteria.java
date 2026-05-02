@@ -57,11 +57,13 @@ public interface Criteria extends Serializable {
 
     Criteria setTotalCount(Integer totalCount);
 
+    TableModels getCriteriaClass();
+
     Criteria setCurrentPage(Integer currentPage);
 
     <T> List<T> list(boolean loadChild);
 
-    List<Object> groupList();
+    <T> List<T> groupList();
 
     Object uniqueResult();
 
@@ -102,7 +104,7 @@ public interface Criteria extends Serializable {
      * @param <T> 类型
      * @return 类对象
      */
-    <T> Class<T> getCriteriaClass();
+    //<T> Class<T> getCriteriaClass();
 
     /**
      *
@@ -112,17 +114,15 @@ public interface Criteria extends Serializable {
 
     /**
      * 对一个类对象求合计并返回
-     * @param <T> 类型
      * @return 类实体对象
      */
-    <T> T autoSum();
+    Object autoSum();
     /**
      * 对一个类对象求合计并返回
      * @param fields 需要求和的字段
-     * @param <T> 类型
      * @return 类实体对象
      */
-    <T> T autoSum(String[] fields);
+    Object autoSum(String[] fields);
 
     /**
      * 对一个类对象里边的数字求平均数,在保存到对象返回
@@ -133,8 +133,7 @@ public interface Criteria extends Serializable {
     /**
      * 对一个类对象里边的数字求平均数,在保存到对象返回
      * @param fields 字段
-     * @param <T> 类型
      * @return 类实体对象
      */
-    <T> T autoAvg(String[] fields);
+    Object autoAvg(String[] fields);
 }
